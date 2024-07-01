@@ -38,7 +38,7 @@ class SqlAlchemyQueryStore(Store):
         store_name=None,
     ) -> None:
         if not sa:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "sqlalchemy module not found, but is required for " "SqlAlchemyQueryStore"
             )
         super().__init__(
@@ -107,7 +107,7 @@ class SqlAlchemyQueryStore(Store):
             query = result.get("query")
             return_type = result.get("return_type", "list")
             if return_type not in ["list", "scalar"]:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "The return_type of a SqlAlchemyQueryStore query must be one of either 'list' "
                     "or 'scalar'"
                 )

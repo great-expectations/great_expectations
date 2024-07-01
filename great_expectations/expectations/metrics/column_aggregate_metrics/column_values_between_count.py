@@ -43,10 +43,10 @@ class ColumnValuesBetweenCount(MetricProvider):
         strict_min = metric_value_kwargs.get("strict_min")
         strict_max = metric_value_kwargs.get("strict_max")
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")  # noqa: TRY003
 
         (
             df,
@@ -79,7 +79,7 @@ class ColumnValuesBetweenCount(MetricProvider):
             else:
                 series = min_value <= val
         else:
-            raise ValueError("unable to parse domain and value kwargs")
+            raise ValueError("unable to parse domain and value kwargs")  # noqa: TRY003
 
         return np.count_nonzero(series)
 
@@ -97,10 +97,10 @@ class ColumnValuesBetweenCount(MetricProvider):
         strict_min = metric_value_kwargs.get("strict_min")
         strict_max = metric_value_kwargs.get("strict_max")
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")  # noqa: TRY003
 
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
         dialect_name = execution_engine.engine.dialect.name.lower()
 
         if (
@@ -196,10 +196,10 @@ class ColumnValuesBetweenCount(MetricProvider):
         strict_min = metric_value_kwargs.get("strict_min")
         strict_max = metric_value_kwargs.get("strict_max")
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")  # noqa: TRY003
 
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         (
             df,
@@ -211,10 +211,10 @@ class ColumnValuesBetweenCount(MetricProvider):
         column = df[accessor_domain_kwargs["column"]]
 
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")  # noqa: TRY003
 
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         if min_value is None:
             if strict_max:

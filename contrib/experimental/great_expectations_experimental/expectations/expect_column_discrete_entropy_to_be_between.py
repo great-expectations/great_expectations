@@ -16,7 +16,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -110,9 +110,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
             {"table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs)}
         )
 
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine) or isinstance(
-            execution_engine, SparkDFExecutionEngine
-        ):
+        if isinstance(execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(
                 "column_values.nonnull.count", metric.metric_domain_kwargs
             )
@@ -278,7 +276,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -287,9 +285,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

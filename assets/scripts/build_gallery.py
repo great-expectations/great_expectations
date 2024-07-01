@@ -12,11 +12,12 @@ import traceback
 from glob import glob
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
-from typing import Dict, Final, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Final, List, Optional, Tuple
 
 import click
-import pkg_resources
+import pkg_resources  # noqa: TID251 # TODO: switch to importlib.metadata or importlib.resources
 
+import great_expectations as gx
 from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_diagnostics.expectation_doctor import (
     ExpectationDoctor,
@@ -24,11 +25,13 @@ from great_expectations.core.expectation_diagnostics.expectation_doctor import (
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 from great_expectations.exceptions.exceptions import ExpectationNotFoundError
 from great_expectations.expectations.expectation import Expectation
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
@@ -108,7 +111,7 @@ def execute_shell_command(command: str) -> int:
         exception_message += (
             f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
         )
-        logger.error(exception_message)
+        logger.error(exception_message)  # noqa: TRY400
 
     return status_code
 
@@ -296,7 +299,7 @@ def get_expectation_instances(expectations_info):  # noqa: C901 - too complex
             try:
                 importlib.import_module(*import_module_args)
             except (ModuleNotFoundError, ImportError, Exception):
-                logger.error(f"Failed to load expectation_name: {expectation_name}")
+                logger.error(f"Failed to load expectation_name: {expectation_name}")  # noqa: TRY400
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
                     f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
@@ -311,7 +314,7 @@ def get_expectation_instances(expectations_info):  # noqa: C901 - too complex
             expectation = create_expectation_instance(expectation_class)
             expectation_instances[expectation_name] = expectation
         except ExpectationNotFoundError:
-            logger.error(
+            logger.error(  # noqa: TRY400
                 f"Failed to get Expectation implementation from registry: {expectation_name}"
             )
             print(traceback.format_exc())
@@ -348,7 +351,7 @@ def create_expectation_instance(expectation_class: type[Expectation]) -> Expecta
         ).resolve()
         found = next(_TEST_DEFS_DIR.rglob(f"**/{expectation_class.expectation_type}.json"), None)
         if not found:
-            raise Exception(
+            raise Exception(  # noqa: TRY002, TRY003
                 f"No JSON test case found for Expectation {expectation_class.expectation_type}, cannot build gallery example."
             )
         with open(found) as fp:
@@ -362,9 +365,9 @@ def get_success_test_case(tests: list[dict]) -> dict:
     try:
         return next(test["in"] for test in tests if test["out"]["success"] is True)
     except StopIteration:
-        raise ValueError("Error: Expectation test case has no valid success case.")
+        raise ValueError("Error: Expectation test case has no valid success case.")  # noqa: TRY003
     except IndexError:
-        raise ValueError("Error: Expectation test case is malformed.")
+        raise ValueError("Error: Expectation test case is malformed.")  # noqa: TRY003
 
 
 def combine_backend_results(  # noqa: C901 - too complex
@@ -399,7 +402,7 @@ def combine_backend_results(  # noqa: C901 - too complex
             try:
                 diagnostic_object = diagnostic_objects[expectation_name]
             except KeyError:
-                logger.error(f"No diagnostic obj for {expectation_name}")
+                logger.error(f"No diagnostic obj for {expectation_name}")  # noqa: TRY400
                 bad_key_names.append(expectation_name)
                 continue
             expectation_instance = expectation_instances[expectation_name]
@@ -411,7 +414,7 @@ def combine_backend_results(  # noqa: C901 - too complex
                     ]
                 ]
             except KeyError:
-                logger.error(f"No backend_test_result_counts for {expectation_name}")
+                logger.error(f"No backend_test_result_counts for {expectation_name}")  # noqa: TRY400
                 bad_key_names.append(expectation_name)
                 continue
             maturity_checklist_object = expectation_instance._get_maturity_checklist(
@@ -578,7 +581,7 @@ def build_gallery(  # noqa: C901 - 17
                 expectation_docstrings.write("\n" + "." * 80 + "\n\n")
                 expectation_docstrings.write(f"{diagnostics['description']['docstring']}\n")
         except Exception:
-            logger.error(f"Failed to run diagnostics for: {expectation_name}")
+            logger.error(f"Failed to run diagnostics for: {expectation_name}")  # noqa: TRY400
             print(traceback.format_exc())
             expectation_tracebacks.write(
                 f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
@@ -610,7 +613,7 @@ def build_gallery(  # noqa: C901 - 17
                     }
 
             except TypeError:
-                logger.error(f"Failed to create JSON for: {expectation_name}")
+                logger.error(f"Failed to create JSON for: {expectation_name}")  # noqa: TRY400
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
                     f"\n\n----------------\n[JSON write fail] {expectation_name} ({expectations_info[expectation_name]['package']})\n"
@@ -707,7 +710,7 @@ def _disable_progress_bars() -> Tuple[str, FileDataContext]:
         os.path.sep, "tmp", f"gx-context-{os.getpid()}"
     )
     os.makedirs(context_dir)  # noqa: PTH103
-    context = FileDataContext.create(context_dir)
+    context = gx.get_context(mode="file", context_root_dir=context_dir)
     context.variables.progress_bars = {
         "globally": False,
         "metric_calculations": False,

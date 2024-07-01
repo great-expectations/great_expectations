@@ -52,10 +52,10 @@ class ColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(ColumnMap
             predict_options={"show_confidences": True},
         )
 
-        if data_label.upper() in labeler.label_mapping.keys():
+        if data_label.upper() in labeler.label_mapping:
             data_label_ind = labeler.label_mapping[data_label.upper()]
         else:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 """
                 The only values acceptable for the data label parameter are as follows:
                 ['PAD', 'UNKNOWN', 'ADDRESS', 'BAN', 'CREDIT_CARD', 'DATE', 'TIME', 'DATETIME',\

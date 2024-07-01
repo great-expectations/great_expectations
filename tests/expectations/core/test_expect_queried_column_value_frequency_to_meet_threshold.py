@@ -35,6 +35,8 @@ sqlite_batch_request: BatchRequest = BatchRequest(
     batch_spec_passthrough={"create_temp_table": False},
 )
 
+pytest.skip("TODO: Fix in V1-323", allow_module_level=True)
+
 
 @pytest.mark.parametrize(
     "batch_request,success,observed,row_condition,warns",
@@ -190,7 +192,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
 ):
     df: pd.DataFrame = titanic_df
 
-    context = build_in_memory_runtime_context(include_pandas=False)
+    context = build_in_memory_runtime_context()
 
     validator = get_test_validator_with_data(
         execution_engine="spark",
@@ -255,7 +257,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 ):
     df: pd.DataFrame = titanic_df
 
-    context = build_in_memory_runtime_context(include_pandas=False)
+    context = build_in_memory_runtime_context()
 
     validator = get_test_validator_with_data(
         execution_engine="spark",

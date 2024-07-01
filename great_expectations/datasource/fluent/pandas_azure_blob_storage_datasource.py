@@ -13,7 +13,7 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
@@ -21,9 +21,7 @@ from great_expectations.datasource.fluent.pandas_datasource import PandasDatasou
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.azure import BlobServiceClient
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
+    from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +68,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             conn_str: str | None = azure_options.get("conn_str")
             account_url: str | None = azure_options.get("account_url")
             if not bool(conn_str) ^ bool(account_url):
-                raise PandasAzureBlobStorageDatasourceError(
+                raise PandasAzureBlobStorageDatasourceError(  # noqa: TRY003
                     "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"  # noqa: E501
                 )
 
@@ -91,18 +89,18 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                         azure_client = azure.BlobServiceClient(**azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.  # noqa: E501
-                    raise PandasAzureBlobStorageDatasourceError(
+                    raise PandasAzureBlobStorageDatasourceError(  # noqa: TRY003
                         f'Due to exception: "{e!s}", "azure_client" could not be created.'
                     ) from e
             else:
-                raise PandasAzureBlobStorageDatasourceError(
+                raise PandasAzureBlobStorageDatasourceError(  # noqa: TRY003
                     'Unable to create "PandasAzureBlobStorageDatasource" due to missing azure.storage.blob dependency.'  # noqa: E501
                 )
 
             self._azure_client = azure_client
 
         if not azure_client:
-            raise PandasAzureBlobStorageDatasourceError("Failed to return `azure_client`")
+            raise PandasAzureBlobStorageDatasourceError("Failed to return `azure_client`")  # noqa: TRY003
 
         return azure_client
 
@@ -119,7 +117,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         try:
             _ = self._get_azure_client()
         except Exception as e:
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
@@ -131,7 +129,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: FileDataAsset,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
@@ -140,17 +138,16 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     ) -> None:
         """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
         if kwargs:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
         if abs_container is _MISSING:
-            raise TypeError(f"'{data_asset.name}' is missing required argument 'abs_container'")
+            raise TypeError(f"'{data_asset.name}' is missing required argument 'abs_container'")  # noqa: TRY003
 
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             azure_client=self._get_azure_client(),
-            batching_regex=data_asset.batching_regex,
             account_name=self._account_name,
             container=abs_container,
             name_starts_with=abs_name_starts_with,
@@ -163,7 +160,6 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
                 account_name=self._account_name,
                 container=abs_container,
                 name_starts_with=abs_name_starts_with,

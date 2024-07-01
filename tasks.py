@@ -11,9 +11,11 @@ To show task help page `invoke <NAME> --help`
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 import pathlib
+import pkgutil
 import shutil
 import sys
 from collections.abc import Generator, Mapping, Sequence
@@ -68,7 +70,7 @@ def sort(
 ):
     """Sort module imports."""
     if ruff and isort:
-        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
+        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)  # noqa: TRY003
     if not isort:
         cmds = [
             "ruff",
@@ -89,15 +91,16 @@ def sort(
 
 
 @invoke.task(
+    aliases=("fmt",),
     help={
         "check": _CHECK_HELP_DESC,
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
         "sort": "Disable import sorting. Runs by default.",
         "pty": _PTY_HELP_DESC,
-    }
+    },
 )
-def fmt(
+def format(
     ctx: Context,
     path: str = ".",
     sort_: bool = True,
@@ -124,6 +127,7 @@ def fmt(
         "path": _PATH_HELP_DESC,
         "fmt": "Disable formatting. Runs by default.",
         "fix": "Attempt to automatically fix lint violations.",
+        "unsafe-fixes": "Enable potentially unsafe fixes.",
         "watch": "Run in watch mode by re-running whenever files change.",
         "pty": _PTY_HELP_DESC,
     }
@@ -133,27 +137,35 @@ def lint(
     path: str = ".",
     fmt_: bool = True,
     fix: bool = False,
+    unsafe_fixes: bool = False,
     watch: bool = False,
     pty: bool = True,
 ):
     """Run formatter (ruff format) and linter (ruff)"""
     if fmt_:
-        fmt(ctx, path, check=not fix, pty=pty)
+        format(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
     cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
+    if unsafe_fixes:
+        cmds.append("--unsafe-fixes")
     if watch:
         cmds.append("--watch")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
-@invoke.task(help={"path": _PATH_HELP_DESC})
-def fix(ctx: Context, path: str = "."):
-    """Automatically fix all possible code issues."""
-    lint(ctx, path=path, fix=True)
-    fmt(ctx, path=path, sort_=True)
+@invoke.task(help={"path": _PATH_HELP_DESC, "safe-only": "Only apply 'safe' fixes."})
+def fix(ctx: Context, path: str = ".", safe_only: bool = False):
+    """
+    Automatically fix all possible code issues.
+    Applies unsafe fixes by default.
+    https://docs.astral.sh/ruff/linter/#fix-safety
+    """
+    unsafe_fixes = not safe_only
+    lint(ctx, path=path, fmt_=False, fix=True, unsafe_fixes=unsafe_fixes)
+    format(ctx, path=path, check=False, sort_=False)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
@@ -324,7 +336,9 @@ def type_check(  # noqa: C901, PLR0912
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
+UNIT_TEST_DEFAULT_TIMEOUT: float = (
+    2.0  # TODO: revert the timeout back to 1.5 or lower after resolving arc issues
+)
 
 
 @invoke.task(
@@ -474,7 +488,7 @@ def docker(
 @invoke.task(
     aliases=("schema", "schemas"),
     help={
-        "sync": "Update the json schemas at `great_expectations/datasource/fluent/schemas`",
+        "sync": "Update the json schemas",
         "indent": "Indent size for nested json objects. Default: 4",
         "clean": "Delete all schema files and sub directories."
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
@@ -496,36 +510,45 @@ def type_schema(  # noqa: C901 - too complex
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
         BatchRequest,
+        DataAsset,
         Datasource,
     )
     from great_expectations.datasource.fluent.sources import (
         _iter_all_registered_types,
     )
+    from great_expectations.expectations import core
 
-    schema_dir_root: Final[pathlib.Path] = GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
+    data_source_schema_dir_root: Final[pathlib.Path] = (
+        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
+    )
+    expectation_schema_dir_root: Final[pathlib.Path] = (
+        GX_PACKAGE_DIR / "expectations" / "core" / "schemas"
+    )
     if clean:
-        file_count = len(list(schema_dir_root.glob("**/*.json")))
-        print(f"🗑️ removing schema directory and contents - {file_count} .json files")
-        shutil.rmtree(schema_dir_root)
+        shutil.rmtree(data_source_schema_dir_root)
+        shutil.rmtree(expectation_schema_dir_root)
 
-    schema_dir_root.mkdir(exist_ok=True)
+    data_source_schema_dir_root.mkdir(exist_ok=True)
+    expectation_schema_dir_root.mkdir(exist_ok=True)
 
-    datasource_dir: pathlib.Path = schema_dir_root
+    datasource_dir: pathlib.Path = data_source_schema_dir_root
+    expectation_dir: pathlib.Path = expectation_schema_dir_root
 
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    name_model = [
+    name_model: list[tuple[str, type[Datasource | BatchRequest | DataAsset]]] = [
         ("BatchRequest", BatchRequest),
         (Datasource.__name__, Datasource),
         *_iter_all_registered_types(),
     ]
 
+    # handle data sources
     for name, model in name_model:
         if issubclass(model, Datasource):
-            datasource_dir = schema_dir_root.joinpath(model.__name__)
+            datasource_dir = data_source_schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)
-            schema_dir = schema_dir_root
+            schema_dir = data_source_schema_dir_root
             print("-" * shutil.get_terminal_size()[0])
         else:
             schema_dir = datasource_dir
@@ -537,7 +560,7 @@ def type_schema(  # noqa: C901 - too complex
 
         if (
             datasource_dir.name.startswith("Pandas")
-            and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            and pandas.__version__ != _PANDAS_SCHEMA_VERSION
         ):
             print(
                 f"🙈  {name} - was generated with pandas"
@@ -558,6 +581,65 @@ def type_schema(  # noqa: C901 - too complex
             print(f"🔃  {name} - {schema_path.name} schema updated")
         except TypeError as err:
             print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
+
+    # handle expectations
+    supported_expectations = [
+        core.ExpectColumnValuesToBeNull,
+        core.ExpectColumnValuesToNotBeNull,
+        core.ExpectColumnValuesToBeUnique,
+        core.ExpectColumnValuesToBeInSet,
+        core.ExpectColumnMaxToBeBetween,
+        core.ExpectColumnMeanToBeBetween,
+        core.ExpectColumnMedianToBeBetween,
+        core.ExpectColumnMinToBeBetween,
+        core.ExpectColumnValuesToBeInTypeList,
+        core.ExpectColumnValuesToBeOfType,
+        core.ExpectTableColumnsToMatchOrderedList,
+        core.ExpectTableRowCountToBeBetween,
+        core.ExpectTableRowCountToEqual,
+        core.ExpectColumnPairValuesToBeEqual,
+        core.ExpectMulticolumnSumToEqual,
+        core.ExpectCompoundColumnsToBeUnique,
+        core.ExpectSelectColumnValuesToBeUniqueWithinRecord,
+        core.ExpectColumnPairValuesAToBeGreaterThanB,
+        core.ExpectColumnToExist,
+        core.ExpectTableColumnCountToEqual,
+        core.ExpectTableColumnsToMatchSet,
+        core.ExpectTableColumnCountToBeBetween,
+        core.ExpectTableRowCountToEqualOtherTable,
+        core.ExpectColumnPairValuesToBeInSet,
+        core.ExpectColumnProportionOfUniqueValuesToBeBetween,
+        core.ExpectColumnUniqueValueCountToBeBetween,
+        core.ExpectColumnDistinctValuesToBeInSet,
+        core.ExpectColumnDistinctValuesToContainSet,
+        core.ExpectColumnDistinctValuesToEqualSet,
+        core.ExpectColumnMostCommonValueToBeInSet,
+        core.ExpectColumnStdevToBeBetween,
+        core.ExpectColumnSumToBeBetween,
+        core.ExpectColumnKLDivergenceToBeLessThan,
+        core.ExpectColumnQuantileValuesToBeBetween,
+        core.ExpectColumnValueLengthsToBeBetween,
+        core.ExpectColumnValueLengthsToEqual,
+        core.ExpectColumnValueZScoresToBeLessThan,
+        core.ExpectColumnValuesToBeBetween,
+        core.ExpectColumnValuesToMatchLikePattern,
+        core.ExpectColumnValuesToMatchLikePatternList,
+        core.ExpectColumnValuesToMatchRegex,
+        core.ExpectColumnValuesToMatchRegexList,
+        core.ExpectColumnValuesToNotBeInSet,
+        core.ExpectColumnValuesToNotBeNull,
+        core.ExpectColumnValuesToNotMatchLikePattern,
+        core.ExpectColumnValuesToNotMatchLikePatternList,
+        core.ExpectColumnValuesToNotMatchRegex,
+        core.ExpectColumnValuesToNotMatchRegexList,
+    ]
+    for x in supported_expectations:
+        schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
+        json_str = x.schema_json(indent=indent) + "\n"  # type: ignore[attr-defined] # FIXME low priority
+        if sync:
+            schema_path.write_text(json_str)
+            print(f"🔃  {x.__name__}.json updated")
+
     raise invoke.Exit(code=0)
 
 
@@ -694,9 +776,9 @@ def link_checker(ctx: Context, skip_external: bool = True):
     """Checks the Docusaurus docs for broken links"""
     import docs.checks.docs_link_checker as checker
 
-    path: str = "docs/docusaurus/docs"
-    docs_root: str = "docs/docusaurus/docs"
-    static_root: str = "docs/docusaurus/static"
+    path = pathlib.Path("docs/docusaurus/docs")
+    docs_root = pathlib.Path("docs/docusaurus/docs")
+    static_root = pathlib.Path("docs/docusaurus/static")
     site_prefix: str = "docs"
     static_prefix: str = "static"
 
@@ -721,7 +803,7 @@ def show_automerges(ctx: Context):
     url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
     response = requests.get(
         url,
-        params={
+        params={  # type: ignore[arg-type]
             "state": "open",
             "sort": "updated",
             "direction": "desc",
@@ -888,7 +970,7 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield "project"
         yield "sqlite"
     else:
-        raise ValueError(f"Unable to tokenize marker string: {marker_string}")
+        raise ValueError(f"Unable to tokenize marker string: {marker_string}")  # noqa: TRY003
 
 
 def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependencies]:
@@ -907,7 +989,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",  # noqa: E501
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud, etc. Can be specified multiple times.",  # noqa: E501
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
@@ -992,10 +1074,14 @@ def docs_snippet_tests(
 
 
 @invoke.task(
-    help={"pty": _PTY_HELP_DESC, "reports": "Generate coverage reports to be uploaded to codecov"},
+    help={
+        "pty": _PTY_HELP_DESC,
+        "reports": "Generate coverage reports to be uploaded to codecov",
+        "W": "Warnings control",
+    },
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(
+def ci_tests(  # noqa: C901 - too complex (9)
     ctx: Context,
     marker: str,
     up_services: bool = False,
@@ -1005,6 +1091,7 @@ def ci_tests(
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
     xdist: bool = False,
+    W: str | None = None,
     pty: bool = True,
 ):
     """
@@ -1024,7 +1111,7 @@ def ci_tests(
     pytest_options = [f"--durations={slowest}", "-rEf"]
 
     if xdist:
-        pytest_options.append("-n auto")
+        pytest_options.append("-n 4")
 
     if timeout != 0:
         pytest_options.append(f"--timeout={timeout}")
@@ -1034,6 +1121,10 @@ def ci_tests(
 
     if verbose:
         pytest_options.append("-vv")
+
+    if W:
+        # https://docs.python.org/3/library/warnings.html#describing-warning-filters
+        pytest_options.append(f"-W={W}")
 
     for test_deps in _get_marker_dependencies(marker):
         if restart_services or up_services:
@@ -1090,13 +1181,11 @@ def service(
         for service_name in service_names:
             cmds = []
 
-            if (
-                service_name == "mercury" and os.environ.get("CI") != "true"  # noqa: TID251
-            ):
+            if service_name == "mercury" and os.environ.get("CI") != "true":
                 cmds.extend(
                     [
                         "FORCE_NO_ALIAS=true",
-                        "assumego",
+                        "assume",
                         "dev",
                         "--exec",
                         "'aws ecr get-login-password --region us-east-1'",
@@ -1151,3 +1240,15 @@ def service(
         ctx.run("sleep 15")
     else:
         print("  No matching services to start")
+
+
+@invoke.task()
+def print_public_api(ctx: Context):
+    """Prints to STDOUT all of our public api."""
+    # Walk the GX package to make sure we import all submodules to ensure we
+    # retrieve all things decorated with our public api decorator.
+    import great_expectations
+
+    for module_info in pkgutil.walk_packages(["great_expectations"], prefix="great_expectations."):
+        importlib.import_module(module_info.name)
+    print(great_expectations._docs_decorators.public_api_introspector)

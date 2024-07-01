@@ -63,8 +63,6 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
     from datetime import datetime
 
     # Replace <YOUR_ACCESS_TOKEN> and <YOUR_CLOUD_ORGANIZATION_ID> with your credentials.
-    # To get your user access token and organization ID, see:
-    # (https://docs.greatexpectations.io/docs/cloud/try_gx_cloud#get-your-user-access-token-and-organization-id).
 
     GX_CLOUD_ACCESS_TOKEN = "<YOUR_ACCESS_TOKEN>"
     GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"

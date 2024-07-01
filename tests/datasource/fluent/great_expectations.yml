@@ -198,7 +198,7 @@ fluent_datasources:
           abs_container: "this_is_always_required"
   my_snowflake_ds:
     type: snowflake
-    connection_string: "snowflake://user_login_name:password@account_identifier"
+    connection_string: "snowflake://user_login_name:password@account_identifier/database/public?warehouse=wh&role=role"
     assets:
       my_table_asset_wo_partitioners:
         id: d8b22f50-d3f9-4d04-9b4c-cfed86b157ff

@@ -18,7 +18,7 @@ This guide will walk you through the process of creating your own custom `BatchE
 ## Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `BatchExpectations` always start with `expect_table_`. 
-For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
+For more on Expectation naming conventions, see the [Expectations section](/oss/contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
@@ -29,14 +29,13 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [BatchExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/batch_expectation_template.py).
-Download the file, place it in the appropriate directory, and rename it to the appropriate name.
+Download the custom [BatchExpectation template](batch_expectation_template.py) and then run the following code to rename it and save it to a directory:
 
 ```bash 
 cp batch_expectation_template.py /SOME_DIRECTORY/expect_batch_columns_to_be_unique.py
 ```
 
-### Storing Expectation files
+### Store Expectation files
 
 During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
 
@@ -309,5 +308,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](/oss/contributing/contributing_maturity.md#expectation-contributions) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_batch_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py)
+- [expect_batch_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/docs/docusaurus/versioned_docs/version-0.18/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py#L4)
 :::

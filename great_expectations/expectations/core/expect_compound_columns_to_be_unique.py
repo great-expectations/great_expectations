@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -27,20 +28,42 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the compound columns to be unique."
+COLUMN_LIST_DESCRIPTION = "Set of columns to be checked."
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Cardinality"]
+
 
 class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
-    """Expect the compound columns to be unique.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_compound_columns_to_be_unique is a \
     [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
 
-    Args:
-        column_list (tuple or list): Set of columns to be checked
+    Multicolumn Map Expectations are evaluated for a set of columns and ask a yes/no question about the row-wise relationship between those columns.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer.
+    If the percentage is high enough, the Expectation considers that data valid.
 
-    Keyword Args:
-        ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
+    Args:
+        column_list (tuple or list): {COLUMN_LIST_DESCRIPTION}
 
     Other Parameters:
+        ignore_row_if (str): \
+            "all_values_are_missing", "any_value_is_missing", "never" \
+            If specified, sets the condition on which a given row is to be ignored. Default "never".
+        mostly (None or a float between 0 and 1): \
+            {MOSTLY_DESCRIPTION} \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -55,12 +78,100 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        {DATA_QUALITY_ISSUES[0]}
+
+    Example Data:
+                test 	test2   test3   test4
+            0 	1       1       4       1
+            1 	2       1       7       1
+            2 	4   	1       -3      1
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectCompoundColumnsToBeUnique(
+                    column_list=["test", "test2", "test3"],
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  }},
+                  "meta": {{}},
+                  "success": true
+                }}
+
+        Failing Case:
+            Input:
+                ExpectCompoundColumnsToBeUnique(
+                    column_list=["test2", "test4"],
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 3,
+                    "unexpected_percent": 100.0,
+                    "partial_unexpected_list": [
+                      {{
+                        "test2": 1,
+                        "test4": 1
+                      }},
+                      {{
+                        "test2": 1,
+                        "test4": 1
+                      }},
+                      {{
+                        "test2": 1,
+                        "test4": 1
+                      }}
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 100.0,
+                    "unexpected_percent_nonmissing": 100.0
+                  }},
+                  "meta": {{}},
+                  "success": false
+                }}
     """  # noqa: E501
 
-    column_list: Union[tuple, list]
+    column_list: Sequence[str]
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": [
             "core expectation",
@@ -73,9 +184,41 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "compound_columns.unique"
     args_keys = ("column_list",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectCompoundColumnsToBeUnique]
+        ) -> None:
+            MulticolumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(
@@ -120,7 +263,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

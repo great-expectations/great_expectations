@@ -49,24 +49,28 @@ Typical usage example:
   These utilities can also be used in tests to determine if there has been a
   change to our public API.
 """
+
 from __future__ import annotations
 
 import ast
-import glob
 import logging
 import operator
 import pathlib
 import re
 import sys
 from dataclasses import dataclass
-from typing import List, Set, Union, cast
+from typing import TYPE_CHECKING, List, Set, Union, cast
 
-from docs.sphinx_api_docs_source.include_exclude_definition import (
-    IncludeExcludeDefinition,
+from docs.sphinx_api_docs_source import (
+    public_api_excludes,
+    public_api_includes,
+    public_api_missing_threshold,
 )
-from docs.sphinx_api_docs_source import public_api_excludes
-from docs.sphinx_api_docs_source import public_api_includes
-from docs.sphinx_api_docs_source import public_api_missing_threshold
+
+if TYPE_CHECKING:
+    from docs.sphinx_api_docs_source.include_exclude_definition import (
+        IncludeExcludeDefinition,
+    )
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -188,7 +192,7 @@ class DocsExampleParser:
         names = []
         for import_ in imports:
             if not isinstance(import_, (ast.Import, ast.ImportFrom)):
-                raise TypeError(
+                raise TypeError(  # noqa: TRY003
                     f"`imports` should only contain ast.Import, ast.ImportFrom types, you provided {type(import_)}"
                 )
 
@@ -253,10 +257,10 @@ class CodeParser:
         self, file_contents: FileContents
     ) -> Set[str]:
         """Get string names of all classes, methods and functions in a single FileContents."""
-        definitions: Set[
-            Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]
-        ] = self._get_all_entity_definitions_from_file_contents(
-            file_contents=file_contents
+        definitions: Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]] = (
+            self._get_all_entity_definitions_from_file_contents(
+                file_contents=file_contents
+            )
         )
 
         return {definition.name for definition in definitions}
@@ -370,7 +374,7 @@ def parse_docs_contents_for_class_names(file_contents: Set[FileContents]) -> Set
     SqlAlchemyExecutionEngine in the below example:
 
     name: my_datasource_name
-    class_name: Datasource
+    class_name: Something
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
 
@@ -513,7 +517,7 @@ class PublicAPIChecker:
 
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
-                return f"{str(flatten_attr(node.value))}.{node.attr}"
+                return f"{flatten_attr(node.value)!s}.{node.attr}"
             elif isinstance(node, ast.Name):
                 return str(node.id)
             else:
@@ -538,7 +542,7 @@ class CodeReferenceFilter:
     DEFAULT_INCLUDES = public_api_includes.DEFAULT_INCLUDES
     DEFAULT_EXCLUDES = public_api_excludes.DEFAULT_EXCLUDES
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         repo_root: pathlib.Path,
         docs_example_parser: DocsExampleParser,
@@ -598,10 +602,10 @@ class CodeReferenceFilter:
         usages_in_docs_examples_and_docs_content: Set[str] = (
             self._docs_examples_usages() | self.references_from_docs_content
         )
-        gx_definitions_used_in_docs_examples: Set[
-            Definition
-        ] = self._filter_gx_definitions_from_docs_examples(
-            gx_usages_in_docs_examples=usages_in_docs_examples_and_docs_content
+        gx_definitions_used_in_docs_examples: Set[Definition] = (
+            self._filter_gx_definitions_from_docs_examples(
+                gx_usages_in_docs_examples=usages_in_docs_examples_and_docs_content
+            )
         )
         non_private_definitions: Set[Definition] = self._filter_private_entities(
             definitions=gx_definitions_used_in_docs_examples
@@ -609,10 +613,10 @@ class CodeReferenceFilter:
         included_definitions: Set[Definition] = self._filter_or_include(
             definitions=non_private_definitions
         )
-        definitions_not_marked_public_api: Set[
-            Definition
-        ] = self._filter_for_definitions_not_marked_public_api(
-            definitions=included_definitions
+        definitions_not_marked_public_api: Set[Definition] = (
+            self._filter_for_definitions_not_marked_public_api(
+                definitions=included_definitions
+            )
         )
 
         return definitions_not_marked_public_api
@@ -623,9 +627,9 @@ class CodeReferenceFilter:
 
             (e.g. filter out print() or other python or 3rd party classes/methods).
         """
-        doc_example_usages: Set[
-            str
-        ] = self.docs_example_parser.get_names_from_usage_in_docs_examples()
+        doc_example_usages: Set[str] = (
+            self.docs_example_parser.get_names_from_usage_in_docs_examples()
+        )
         gx_code_definitions = self.code_parser.get_all_class_method_and_function_names()
 
         doc_example_usages_of_gx_code = doc_example_usages.intersection(
@@ -728,7 +732,10 @@ class CodeReferenceFilter:
         """Check whether a definition (filepath / name combo) is excluded."""
         definitions_excluded = [d for d in self.excludes if d.name and d.filepath]
         for definition_excluded in definitions_excluded:
-            filepath_excluded = self._repo_relative_filepath_comparison(definition.filepath, definition_excluded.filepath)  # type: ignore[arg-type]
+            filepath_excluded = self._repo_relative_filepath_comparison(
+                definition.filepath,
+                definition_excluded.filepath,  # type: ignore[arg-type]
+            )
             name_excluded = definition.name == definition_excluded.name
             if filepath_excluded and name_excluded:
                 return True
@@ -743,7 +750,10 @@ class CodeReferenceFilter:
         """Check whether a definition (filepath / name combo) is included."""
         definitions_included = [d for d in self.includes if d.name and d.filepath]
         for definition_included in definitions_included:
-            filepath_included = self._repo_relative_filepath_comparison(definition.filepath, definition_included.filepath)  # type: ignore[arg-type]
+            filepath_included = self._repo_relative_filepath_comparison(
+                definition.filepath,
+                definition_included.filepath,  # type: ignore[arg-type]
+            )
             name_included = definition.name == definition_included.name
             if filepath_included and name_included:
                 return True
@@ -829,24 +839,24 @@ def _repo_root() -> pathlib.Path:
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "docs" / "docusaurus" / "docs"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return {pathlib.Path(p) for p in paths}
+    paths = base_directory.rglob("*.py")
+    return set(paths)
 
 
 def _default_code_absolute_paths() -> Set[pathlib.Path]:
     """All Great Expectations modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return {pathlib.Path(p) for p in paths}
+    paths = base_directory.rglob("**/*.py")
+    return set(paths)
 
 
 def _default_docs_absolute_paths() -> Set[pathlib.Path]:
     """All Great Expectations modules related to the main library."""
     base_directory = _repo_root() / "docs"
-    paths = []
+    paths: list[pathlib.Path] = []
     for extension in ("md", "mdx", "yml", "yaml"):
-        paths.extend(glob.glob(f"{base_directory}/**/*.{extension}", recursive=True))
-    return {pathlib.Path(p) for p in paths}
+        paths.extend(base_directory.rglob(f"**/*.{extension}"))
+    return set(paths)
 
 
 def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:

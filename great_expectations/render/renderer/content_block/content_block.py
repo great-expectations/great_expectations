@@ -129,7 +129,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         data_docs_exception_message
                         + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                     )
-                    logger.error(exception_message)
+                    logger.error(exception_message)  # noqa: TRY400
 
                     if isinstance(obj_, ExpectationValidationResult):
                         content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
@@ -214,7 +214,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(  # noqa: C901, PLR0912, PLR0913
+    def _render_other(  # noqa: C901, PLR0913
         cls,
         render_object: Any,
         exception_list_content_block: bool,
@@ -244,7 +244,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                logger.error(exception_message)  # noqa: TRY400
 
                 if isinstance(render_object, ExpectationValidationResult):
                     content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
@@ -296,7 +296,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         expectation = configuration.to_domain_obj()
         description = expectation.description
         if not description:
-            raise ValueError("Cannot render an expectation with no description.")
+            raise ValueError("Cannot render an expectation with no description.")  # noqa: TRY003
         # If we wish to support $VAR substitution, we should use RenderedStringTemplateContent with params  # noqa: E501
         return [
             RenderedMarkdownContent(

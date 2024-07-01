@@ -1,12 +1,16 @@
 ---
 title: About Great Expectations
 ---
+import GxData from '../_core_components/_data.jsx'
+import PythonVersion from '../_core_components/_python_version.md'
+import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
-Great Expectations (GX) is the leading tool for validating and documenting your data.  GX 1.0 is the open source Python library that supports this tool.  With GX 1.0 you can further customize, automate, and expand on GX's processes to suite your specialized use cases.
+Great Expectations (GX) is the leading tool for validating and documenting your data. {GxData.product_name} is the open source Python library that supports this tool.  With
+{GxData.product_name} you can further customize, automate, and expand on GX's processes to suite your specialized use cases.
 
 Software developers have long known that automated testing is essential for managing complex codebases. GX brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 
-## Why use Great Expectations?
+## Why use GX?
 
 With GX, you can assert what you expect from the data you load and transform, and catch data issues quickly – Expectations are basically unit tests for your data. Not only that, but GX also creates data documentation and data quality reports from those Expectations. Data science and data engineering teams use GX to:
 
@@ -16,7 +20,7 @@ With GX, you can assert what you expect from the data you load and transform, an
 - Streamline knowledge capture from subject-matter experts and make implicit knowledge explicit.
 - Develop rich, shared documentation of their data.
 
-To learn more about how data teams are using GX, see [Case studies from Great Expectations](https://greatexpectations.io/case-studies/).
+To learn more about how data teams are using GX, see [GX case studies](https://greatexpectations.io/case-studies/).
 
 ## Key Features
 
@@ -52,7 +56,7 @@ GX currently supports native execution of Expectations against various Data Sour
 
 GX is highly configurable. It allows you to store all relevant metadata, such as the Expectations and Validation Results in file systems, database backends, as well as cloud storage such as S3 and Google Cloud Storage, by configuring metadata Stores.
 
-## What does Great Expectations NOT do?
+## What does GX NOT do?
 
 GX is NOT a pipeline execution framework.
 
@@ -62,27 +66,10 @@ GX is NOT a data versioning tool.
 
 GX does not store data itself. Instead, it deals in metadata about data: Expectations, Validation Results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/), [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
 
-GX currently works best in a Python environment.
+GX is NOT an independent executable.
 
-GX is Python-based. You can invoke it from the command line without using a Python programming environment, but if you’re working in another ecosystem, other tools might be a better choice. If you’re running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr)  as an alternative. Within the TensorFlow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as GX.
+{GxData.product_name} is a Python library.  To use GX, you will need an installation of <PythonVersion/>.  Ideally, you will also configure a Python virtual environment to in which you can install and run GX.  Guidance on setting up your Python environment and installing the GX Python library is provided under [Set up a GX environment](/core/installation_and_setup/installation_and_setup.md) in the GX docs.
 
-## Community Resources
+## GX Cloud
 
-GX is committed to supporting and growing the GX community. It’s not enough to build a great tool. GX wants to build a great community as well.
-
-Open source doesn’t always have the best reputation for being friendly and welcoming, and that makes us sad. Everyone belongs in open source, and GX is dedicated to making you feel welcome.
-
-### Contact Great Expectations
-Join the GX [public Slack channel](https://greatexpectations.io/slack). Before you post for the first time, review the [Slack Guidelines](https://discourse.greatexpectations.io/t/slack-guidelines/1195).
-
-### Ask a question
-Slack is good for that, too: [join Slack](https://greatexpectations.io/slack) and read [How to write a good question in Slack](https://github.com/great-expectations/great_expectations/discussions/4951). You can also use [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions/4951).
-
-### File a bug report or feature request
-If you have bugfix or feature request, see [upvote an existing issue](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new).
-
-### Contribute code or documentation
-To make a contribution to GX, see [Contribute](/core/contribute/contribute.md).
-
-### Not interested in managing your own configuration or infrastructure? 
-Learn more about GX Cloud, a fully managed SaaS offering. Sign up for [the weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to preview the latest features and participate in the private Alpha program!
+<GxCloudAdvert/>

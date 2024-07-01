@@ -106,10 +106,10 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             runtime_configuration=None,
             **kwargs,
         ):
-            eval_param_value_dict = kwargs.get("evaluation_parameters", None)
-            # loading into evaluation parameters to be passed onto prescriptive renderer
+            eval_param_value_dict = kwargs.get("suite_parameters", None)
+            # loading into suite parameters to be passed onto prescriptive renderer
             if eval_param_value_dict is not None:
-                runtime_configuration["evaluation_parameters"] = eval_param_value_dict
+                runtime_configuration["suite_parameters"] = eval_param_value_dict
 
             expectation = result.expectation_config
             expectation_string_cell = expectation_string_fn(
@@ -150,7 +150,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                logger.error(exception_message)  # noqa: TRY400
             try:
                 unexpected_table_renderer = get_renderer_impl(
                     object_name=expectation_type,
@@ -167,7 +167,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                logger.error(exception_message)  # noqa: TRY400
             try:
                 observed_value_renderer = get_renderer_impl(
                     object_name=expectation_type,
@@ -186,7 +186,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                logger.error(exception_message)  # noqa: TRY400
 
             # If the expectation has some unexpected values...:
             if unexpected_statement:

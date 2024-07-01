@@ -96,12 +96,12 @@ Secrets store substitution uses keywords and retrieves secrets from the secrets 
 
     ```python 
     # We can use a single connection string
-    pg_datasource = context.sources.add_or_update_sql(
+    pg_datasource = context.data_sources.add_or_update_sql(
         name="my_postgres_db", connection_string="${my_aws_creds}"
     )
 
     # Or each component of the connection string separately
-    pg_datasource = context.sources.add_or_update_sql(
+    pg_datasource = context.data_sources.add_or_update_sql(
         name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
     )
     ```
@@ -146,12 +146,12 @@ Secrets store substitution uses keywords and retrieves secrets from the secrets 
 
     ```python 
     # We can use a single connection string 
-    pg_datasource = context.sources.add_or_update_sql(
+    pg_datasource = context.data_sources.add_or_update_sql(
         name="my_postgres_db", connection_string="${my_gcp_creds}"
     )
 
     # Or each component of the connection string separately
-    pg_datasource = context.sources.add_or_update_sql(
+    pg_datasource = context.data_sources.add_or_update_sql(
         name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
     )
     ```
@@ -196,12 +196,12 @@ Secrets store substitution uses keywords and retrieves secrets from the secrets 
 
     ```python 
     # We can use a single connection string
-    pg_datasource = context.sources.add_or_update_sql(
+    pg_datasource = context.data_sources.add_or_update_sql(
         name="my_postgres_db", connection_string="${my_azure_creds}"
     )
 
     # Or each component of the connection string separately
-    pg_datasource = context.sources.add_or_update_sql(
+    pg_datasource = context.data_sources.add_or_update_sql(
         name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
     )
     ```

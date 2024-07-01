@@ -1,4 +1,3 @@
-import re
 from logging import Logger
 from typing import Literal, Optional, Union
 
@@ -8,7 +7,8 @@ from great_expectations.compatibility.pyspark import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import SparkFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
@@ -19,9 +19,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
 )
 
 logger: Logger
@@ -35,7 +32,6 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0)

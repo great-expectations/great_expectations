@@ -43,7 +43,6 @@ from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import (
     MetricComputationConfiguration,
     PartitionDomainKwargs,
@@ -54,6 +53,7 @@ from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_pa
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -226,7 +226,7 @@ def _dialect_requires_persisted_connection(
         Boolean indicating whether the dialect requires a persisted connection.
     """
     if sum(bool(x) for x in [connection_string, credentials, url is not None]) != 1:
-        raise ValueError("Exactly one of connection_string, credentials, url must be specified")
+        raise ValueError("Exactly one of connection_string, credentials, url must be specified")  # noqa: TRY003
     return_val = False
     if connection_string is not None:
         str_to_check = connection_string
@@ -474,7 +474,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             else:
                 self.engine = sa.create_engine(url, **kwargs)
         else:
-            raise InvalidConfigError(
+            raise InvalidConfigError(  # noqa: TRY003
                 "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
             )
 
@@ -576,7 +576,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         message="Decryption of key failed, was the passphrase incorrect?",
                     ) from e
                 else:
-                    raise e
+                    raise e  # noqa: TRY201
         pkb = p_key.private_bytes(
             encoding=serialization.Encoding.DER,
             format=serialization.PrivateFormat.PKCS8,
@@ -612,7 +612,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if self.batch_manager.active_batch_data:
                 data_object = cast(SqlAlchemyBatchData, self.batch_manager.active_batch_data)
             else:
-                raise GreatExpectationsError(
+                raise GreatExpectationsError(  # noqa: TRY003
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:  # noqa: PLR5501
@@ -621,7 +621,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     SqlAlchemyBatchData, self.batch_manager.batch_data_cache[batch_id]
                 )
             else:
-                raise GreatExpectationsError(f"Unable to find batch with batch_id {batch_id}")
+                raise GreatExpectationsError(f"Unable to find batch with batch_id {batch_id}")  # noqa: TRY003
 
         selectable: sqlalchemy.Selectable
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
@@ -637,7 +637,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             else:
                 selectable = data_object.selectable
         elif "query" in domain_kwargs:
-            raise ValueError("query is not currently supported by SqlAlchemyExecutionEngine")
+            raise ValueError("query is not currently supported by SqlAlchemyExecutionEngine")  # noqa: TRY003
         else:
             selectable = data_object.selectable
 
@@ -656,7 +656,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 parsed_condition = parse_condition_to_sqlalchemy(domain_kwargs["row_condition"])
                 selectable = sa.select(sa.text("*")).select_from(selectable).where(parsed_condition)
             else:
-                raise GreatExpectationsError(
+                raise GreatExpectationsError(  # noqa: TRY003
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."  # noqa: E501
                 )
 
@@ -680,7 +680,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 .where(parse_condition_to_sqlalchemy(filter_condition.condition))
             )
         elif len(filter_conditions) > 1:
-            raise GreatExpectationsError(
+            raise GreatExpectationsError(  # noqa: TRY003
                 "SqlAlchemyExecutionEngine currently only supports a single filter condition."
             )
 
@@ -734,7 +734,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             else:  # noqa: PLR5501
                 if ignore_row_if != "neither":
-                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')  # noqa: TRY003
 
             return selectable
 
@@ -781,7 +781,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             else:  # noqa: PLR5501
                 if ignore_row_if != "never":
-                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')  # noqa: TRY003
 
             return selectable
 
@@ -846,7 +846,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         accessor_domain_kwargs: dict = {}
 
         if "column" not in compute_domain_kwargs:
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "Column not provided in compute_domain_kwargs"
             )
 
@@ -885,7 +885,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         accessor_domain_kwargs: dict = {}
 
         if not ("column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs):
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "column_A or column_B not found within compute_domain_kwargs"
             )
 
@@ -928,12 +928,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         accessor_domain_kwargs: dict = {}
 
         if "column_list" not in domain_kwargs:
-            raise GreatExpectationsError("column_list not found within domain_kwargs")
+            raise GreatExpectationsError("column_list not found within domain_kwargs")  # noqa: TRY003
 
         column_list = compute_domain_kwargs.pop("column_list")
 
         if len(column_list) < 2:  # noqa: PLR2004
-            raise GreatExpectationsError("column_list must contain at least 2 columns")
+            raise GreatExpectationsError("column_list must contain at least 2 columns")  # noqa: TRY003
 
         # Checking if case-sensitive and using appropriate name
         if cast(SqlAlchemyBatchData, self.batch_manager.active_batch_data).use_quoted_name:
@@ -1041,7 +1041,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 exception_message += (
                     f'{type(oe).__name__}: "{oe!s}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                logger.error(exception_message)  # noqa: TRY400
                 raise ExecutionEngineError(message=exception_message)
 
             assert len(res) == 1, "all bundle-computed metrics must be single-value statistics"
@@ -1143,7 +1143,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(self, batch_spec: BatchSpec) -> sqlalchemy.Selectable:
         if batch_spec.get("query") is not None and batch_spec.get("sampling_method") is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "Sampling is not supported on query data. "
                 "It is currently only supported on table data."
             )
@@ -1201,7 +1201,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             selectable = sa.table(table_name, schema=batch_spec.get("schema_name", None))
         else:
             if not isinstance(query, str):
-                raise ValueError(f"SQL query should be a str but got {query}")
+                raise ValueError(f"SQL query should be a str but got {query}")  # noqa: TRY003
             # Query is a valid SELECT query that begins with r"\w+select\w"
             selectable = sa.select(
                 sa.text(query.lstrip()[6:].strip().rstrip(";").rstrip())
@@ -1214,13 +1214,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self, batch_spec: BatchSpec
     ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
         if not isinstance(batch_spec, (SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec)):
-            raise InvalidBatchSpecError(
+            raise InvalidBatchSpecError(  # noqa: TRY003
                 f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
         RuntimeQueryBatchSpec (illegal type "{type(batch_spec)!s}" was received).
                         """  # noqa: E501
             )
         if sum(1 if x else 0 for x in [batch_spec.get("query"), batch_spec.get("table_name")]) != 1:
-            raise InvalidBatchSpecError(
+            raise InvalidBatchSpecError(  # noqa: TRY003
                 "SqlAlchemyExecutionEngine only accepts a batch_spec where exactly 1 of "
                 "'query' or 'table_name' is specified. "
                 f"table_name={batch_spec.get('table_name')}, query={batch_spec.get('query')}"

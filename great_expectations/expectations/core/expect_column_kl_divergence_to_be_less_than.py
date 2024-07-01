@@ -2,24 +2,25 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 import altair as alt
 import numpy as np
 import pandas as pd
 from scipy import stats
 
-from great_expectations.compatibility.pydantic import Field
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.compatibility import pydantic
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
@@ -63,9 +64,54 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column "
+    "with respect to the partition object to be lower than the provided threshold."
+)
+PARTITION_OBJECT_DESCRIPTION = "The expected partition object."
+
+THRESHOLD_DESCRIPTION = (
+    "The maximum KL divergence to for which to return success=True. If KL divergence is larger"
+    "than the provided threshold, the test will return success=False."
+)
+INTERNAL_WEIGHT_HOLDOUT_DESCRIPTION = (
+    "The amount of weight to split uniformly among zero-weighted partition bins. "
+    "internal_weight_holdout provides a mechanisms to make the test less strict by "
+    "assigning positive weights to values observed in the data for which "
+    "the partition explicitly expected zero weight."
+)
+TAIL_WEIGHT_HOLDOUT_DESCRIPTION = (
+    "The amount of weight to add to the tails of the histogram."
+    "Tail weight holdout is split evenly between (-Infinity, min(partition_object['bins'])) "
+    "and (max(partition_object['bins']), +Infinity). "
+    "tail_weight_holdout provides a mechanism to make the test less strict by assigning positive "
+    "weights to values observed in the data that are not present in the partition. "
+    "With no tail_weight_holdout, any value observed outside "
+    "the provided partition_object will cause KL divergence to rise to +Infinity. Defaults to 0."
+)
+BUCKETIZE_DATA_DESCRIPTION = (
+    "If True, then continuous data will be bucketized before evaluation. Setting "
+    "this parameter to false allows evaluation of KL divergence with a None partition object for "
+    "profiling against discrete data."
+)
+MIN_VALUE_DESCRIPTION = "The minimum value for the column."
+MAX_VALUE_DESCRIPTION = "The maximum value for the column."
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Distribution"]
+
 
 class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
-    """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold.
+    __docs__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger \
     the difference between the two distributions. A relative entropy of zero indicates that the data are \
@@ -78,33 +124,28 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     expect_column_kl_divergence_to_be_less_than is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
+    Column Aggregate Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
+    If that Metric meets the conditions you set, the Expectation considers that data valid.
+
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         partition_object (dict or None): \
-            The expected partition object (see [partition_object](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects)).
+            {PARTITION_OBJECT_DESCRIPTION} See [partition_object](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects).
         threshold (float or None): \
-            The maximum KL divergence to for which to return success=True. If KL divergence is larger than the \
-            provided threshold, the test will return success=False.
-
-    Keyword Args:
+            {THRESHOLD_DESCRIPTION}
         internal_weight_holdout (float between 0 and 1 or None): \
-            The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout \
-            provides a mechanisms to make the test less strict by assigning positive weights to values \
-            observed in \
-            the data for which the partition explicitly expected zero weight. With no internal_weight_holdout, \
-            any value observed in such a region will cause KL divergence to rise to +Infinity. Defaults to 0.
+            {INTERNAL_WEIGHT_HOLDOUT_DESCRIPTION} With no internal_weight_holdout, any value observed in
+            such a region will cause KL divergence to rise to +Infinity. Defaults to 0.
         tail_weight_holdout (float between 0 and 1 or None): \
-            The amount of weight to add to the tails of the histogram. Tail weight holdout is split evenly \
-            between (-Infinity, min(partition_object['bins'])) and (max(partition_object['bins']), +Infinity). \
-            tail_weight_holdout provides a mechanism to make the test less strict by assigning positive \
-            weights to \
-            values observed in the data that are not present in the partition. With no tail_weight_holdout, \
-            any value observed outside the provided partition_object will cause KL divergence to rise to +Infinity. \
-            Defaults to 0.
-        bucketize_data (boolean): If True, then continuous data will be bucketized before evaluation. Setting \
-            this parameter to false allows evaluation of KL divergence with a None partition object for \
-            profiling against discrete data.
+           {TAIL_WEIGHT_HOLDOUT_DESCRIPTION}
+        bucketize_data (boolean): \
+            {BUCKETIZE_DATA_DESCRIPTION}
+        min_value (float or None): \
+            {MIN_VALUE_DESCRIPTION}
+        max_value (float or None): \
+            {MAX_VALUE_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -155,15 +196,147 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed \
         value will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json \
         parsers to crash when encountered. The python None token will be serialized to null in json.
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        {DATA_QUALITY_ISSUES[0]}
+
+    Example Data:
+                test
+            0 	"A"
+            1 	"A"
+            2 	"A"
+            3   "A"
+            4   "A"
+            5   "B"
+            6   "B"
+            7   "B"
+            8   "C"
+            9   "C"
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnKLDivergenceToBeLessThan(
+                    column="test",
+                    partition_object={{"weights": [0.5, 0.3, 0.2], "values": ["A", "B", "C"]}},
+                    threshold=0.1
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "observed_value": 0.0,
+                    "details": {{
+                      "observed_partition": {{
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      }},
+                      "expected_partition": {{
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      }}
+                    }}
+                  }},
+                  "meta": {{}},
+                  "success": true
+                }}
+
+        Failing Case:
+            Input:
+                ExpectColumnKLDivergenceToBeLessThan(
+                    column="test",
+                    partition_object={{"weights": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333], "values": ["A", "B", "C"]}},
+                    threshold=0.01
+                )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "observed_value": 0.06895927460353621,
+                    "details": {{
+                      "observed_partition": {{
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      }},
+                      "expected_partition": {{
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.3333333333333333,
+                          0.3333333333333333,
+                          0.3333333333333333
+                        ]
+                      }}
+                    }}
+                  }},
+                  "meta": {{}},
+                  "success": false
+                }}
     """  # noqa: E501
 
-    partition_object: Union[dict, None]
-    threshold: Union[float, None]
-    internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
-    tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
-    bucketize_data: bool = True
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    partition_object: Union[dict, None] = pydantic.Field(description=PARTITION_OBJECT_DESCRIPTION)
+    threshold: Union[float, None] = pydantic.Field(description=THRESHOLD_DESCRIPTION)
+    internal_weight_holdout: Union[float, None] = pydantic.Field(
+        default=0, ge=0, le=1, description=INTERNAL_WEIGHT_HOLDOUT_DESCRIPTION
+    )
+    tail_weight_holdout: Union[float, None] = pydantic.Field(
+        default=0, ge=0, le=1, description=TAIL_WEIGHT_HOLDOUT_DESCRIPTION
+    )
+    bucketize_data: bool = pydantic.Field(True, description=BUCKETIZE_DATA_DESCRIPTION)
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MAX_VALUE_DESCRIPTION
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -179,6 +352,8 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
+    _library_metadata = library_metadata
+
     success_keys = (
         "partition_object",
         "threshold",
@@ -191,6 +366,37 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         "partition_object",
         "threshold",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnKLDivergenceToBeLessThan]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     def get_validation_dependencies(
         self,
@@ -311,7 +517,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 bins is None
             ):  # if the user did not supply a partition_object, so we just computed it
                 if not is_valid_partition_object(partition_object):
-                    raise ValueError("Invalid partition_object provided")
+                    raise ValueError("Invalid partition_object provided")  # noqa: TRY003
                 bins = partition_object["bins"]
 
             hist_metric_configuration = MetricConfiguration(
@@ -397,34 +603,34 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 }
 
         if not is_valid_partition_object(partition_object):
-            raise ValueError("Invalid partition object.")
+            raise ValueError("Invalid partition object.")  # noqa: TRY003
 
         if threshold is not None and ((not isinstance(threshold, (int, float))) or (threshold < 0)):
-            raise ValueError("Threshold must be specified, greater than or equal to zero.")
+            raise ValueError("Threshold must be specified, greater than or equal to zero.")  # noqa: TRY003
 
         if (
             (not isinstance(tail_weight_holdout, (int, float)))
             or (tail_weight_holdout < 0)
             or (tail_weight_holdout > 1)
         ):
-            raise ValueError("tail_weight_holdout must be between zero and one.")
+            raise ValueError("tail_weight_holdout must be between zero and one.")  # noqa: TRY003
 
         if (
             (not isinstance(internal_weight_holdout, (int, float)))
             or (internal_weight_holdout < 0)
             or (internal_weight_holdout > 1)
         ):
-            raise ValueError("internal_weight_holdout must be between zero and one.")
+            raise ValueError("internal_weight_holdout must be between zero and one.")  # noqa: TRY003
 
         if tail_weight_holdout != 0 and "tail_weights" in partition_object:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "tail_weight_holdout must be 0 when using tail_weights in partition object"
             )
 
         # TODO: add checks for duplicate values in is_valid_categorical_partition_object
         if is_valid_categorical_partition_object(partition_object):
             if internal_weight_holdout > 0:
-                raise ValueError("Internal weight holdout cannot be used for discrete data.")
+                raise ValueError("Internal weight holdout cannot be used for discrete data.")  # noqa: TRY003
 
             # Data are expected to be discrete, use value_counts
             observed_weights = (
@@ -485,7 +691,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         else:
             # Data are expected to be continuous; discretize first
             if bucketize_data is False:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "KL Divergence cannot be computed with a continuous partition object and the bucketize_data "  # noqa: E501
                     "parameter set to false."
                 )
@@ -524,11 +730,11 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 partition_object["bins"][-1]
             ) == np.inf:
                 if tail_weight_holdout > 0:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "tail_weight_holdout cannot be used for partitions with infinite endpoints."
                     )
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
@@ -553,7 +759,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
             elif partition_object["bins"][0] == -np.inf:
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
@@ -586,7 +792,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
             elif partition_object["bins"][-1] == np.inf:
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
@@ -895,9 +1101,11 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
             return {
                 "content_block_type": "table",
                 "header": header,
-                "header_row": ["Interval", "Fraction"]
-                if partition_object.get("bins")
-                else ["Value", "Fraction"],
+                "header_row": (
+                    ["Interval", "Fraction"]
+                    if partition_object.get("bins")
+                    else ["Value", "Fraction"]
+                ),
                 "table": table_rows,
                 "styling": {
                     "classes": ["table-responsive"],
@@ -923,9 +1131,11 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         else:
             return {
                 "content_block_type": "table",
-                "header_row": ["Interval", "Fraction"]
-                if partition_object.get("bins")
-                else ["Value", "Fraction"],
+                "header_row": (
+                    ["Interval", "Fraction"]
+                    if partition_object.get("bins")
+                    else ["Value", "Fraction"]
+                ),
                 "table": table_rows,
                 "styling": {
                     "classes": ["table-responsive"],
@@ -1051,7 +1261,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_summary(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -1113,7 +1323,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -1122,9 +1332,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -1187,9 +1395,9 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         header_params_with_json_schema = {
             "observed_value": {
                 "schema": {"type": "string"},
-                "value": str(observed_value)
-                if observed_value
-                else "None (-infinity, infinity, or NaN)",
+                "value": (
+                    str(observed_value) if observed_value else "None (-infinity, infinity, or NaN)"
+                ),
             }
         }
 
@@ -1319,9 +1527,11 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 "string_template": {
                     "template": "KL Divergence: $observed_value",
                     "params": {
-                        "observed_value": str(observed_value)
-                        if observed_value
-                        else "None (-infinity, infinity, or NaN)",
+                        "observed_value": (
+                            str(observed_value)
+                            if observed_value
+                            else "None (-infinity, infinity, or NaN)"
+                        ),
                     },
                     "styling": {"classes": ["mb-2"]},
                 },

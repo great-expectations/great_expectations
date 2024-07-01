@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import uuid
 from typing import Optional
 from unittest import mock
 
@@ -8,12 +9,12 @@ import boto3
 import pyparsing as pp
 import pytest
 from moto import mock_s3
+from pytest_mock import MockerFixture
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -28,7 +29,6 @@ from great_expectations.data_context.store import (
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -43,87 +43,6 @@ from great_expectations.util import (
 from tests import test_utils
 
 yaml = YAMLHandler()
-
-
-@pytest.fixture()
-def basic_data_context_config_for_validation_operator():
-    return DataContextConfig(
-        config_version=2,
-        plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        expectations_store_name="expectations_store",
-        datasources={},
-        stores={
-            "expectations_store": {"class_name": "ExpectationsStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
-            "metrics_store": {"class_name": "MetricStore"},
-        },
-        validations_store_name="validation_result_store",
-        data_docs_sites={},
-        validation_operators={
-            "store_val_res_and_extract_eval_params": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-            "errors_and_warnings_validation_operator": {
-                "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-
-@pytest.fixture
-def validation_operators_data_context(
-    basic_data_context_config_for_validation_operator, filesystem_csv_4
-):
-    data_context = get_context(basic_data_context_config_for_validation_operator)
-
-    data_context.add_datasource(
-        "my_datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_4),
-            }
-        },
-    )
-    data_context.add_expectation_suite("f1.foo")
-
-    df = data_context._get_batch_v2(
-        batch_kwargs=data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
-        expectation_suite_name="f1.foo",
-    )
-    df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
-    failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-    df.expect_column_values_to_not_be_null(column="y")
-    warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-    failure_expectations.name = "f1.failure"
-    data_context.add_expectation_suite(expectation_suite=failure_expectations)
-    warning_expectations.name = "f1.warning"
-    data_context.add_expectation_suite(expectation_suite=warning_expectations)
-
-    return data_context
 
 
 @pytest.fixture()
@@ -177,7 +96,7 @@ def check_store_backend_store_backend_id_functionality(
     if store_backend_id:
         assert store_backend.store_backend_id == store_backend_id
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(store_backend.store_backend_id)
+    assert isinstance(store_backend.store_backend_id, uuid.UUID)
     # Check in file stores that the actual file exists
     assert store_backend.has_key(key=(".ge_store_backend_id",))
 
@@ -319,7 +238,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
         project=project,
         base_public_path=base_public_path,
     )
-    store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+    store_error_uuid = uuid.UUID("00000000-0000-0000-0000-00000000e003")
     assert gcs_store_backend_with_base_public_path.store_backend_id == store_error_uuid
 
 
@@ -477,6 +396,29 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
 
 
 @pytest.mark.filesystem
+def test_TupleFilesystemStoreBackend_get_all(tmp_path_factory):
+    path = "dummy_str"
+    full_test_dir = tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir")
+    project_path = str(full_test_dir)
+
+    my_store = TupleFilesystemStoreBackend(
+        root_directory=project_path,
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
+        filepath_template="my_file_{0}",
+    )
+
+    value_a = "aaa"
+    value_b = "bbb"
+
+    my_store.set(("AAA",), value_a)
+    my_store.set(("BBB",), value_b)
+
+    all_values = my_store.get_all()
+
+    assert sorted(all_values) == [value_a, value_b]
+
+
+@pytest.mark.filesystem
 def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
     tmp_path_factory,
 ):
@@ -627,6 +569,28 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     my_new_store.set(("BBB",), "bbb", content_type="text/html; charset=utf-8")
 
     assert my_new_store.get_public_url_for_key(("BBB",)) == "http://www.test.com/my_file_BBB"
+
+
+@mock_s3
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_get_all(aws_credentials):
+    bucket = "leakybucket"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    my_store = TupleS3StoreBackend(filepath_template="my_file_{0}", bucket=bucket)
+
+    val_a = "aaa"
+    val_b = "bbb"
+
+    my_store.set(("AAA",), val_a, content_type="text/html; charset=utf-8")
+    my_store.set(("BBB",), val_b, content_type="text/html; charset=utf-8")
+
+    result = my_store.get_all()
+
+    assert sorted(result) == [val_a, val_b]
 
 
 @mock_s3
@@ -912,7 +876,7 @@ def test_TupleGCSStoreBackend_base_public_path():
             ("BBB",), b"bbb", content_encoding=None, content_type="image/png"
         )
 
-    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
+    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())  # noqa: DTZ003
     key = ValidationResultIdentifier(
         ExpectationSuiteIdentifier(name="my_suite_name"),
         run_id,
@@ -1029,7 +993,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
         with pytest.raises(InvalidKeyError):
             my_store.get(("non_existent_key",))
 
-    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
+    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())  # noqa: DTZ003
     key = ValidationResultIdentifier(
         ExpectationSuiteIdentifier(name="my_suite_name"),
         run_id,
@@ -1043,6 +1007,69 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
         == "https://storage.googleapis.com/leakybucket"
         + f"/this_is_a_test_prefix/my_suite_name/my_run_id/{run_time_string}/my_batch_id"
     )
+
+
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google.cloud"),
+    reason="google is not installed",
+)
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
+@pytest.mark.big
+def test_TupleGCSStoreBackend_get_all(mocker: MockerFixture):
+    # Note: it would be nice to inject the gcs client so we could pass in the mock.
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+    project = "dummy-project"
+    base_public_path = "http://www.test.com/"
+    val_a = "aaa"
+    val_b = "bbb"
+
+    # setup mocks
+    from great_expectations.compatibility import google
+
+    def _create_mock_blob(name: str):
+        output = mocker.Mock()
+        output.name = name
+        return output
+
+    def mock_get_blob(gcs_object_key):
+        """Test double for bucket::get_blob."""
+        key_to_return_val = {
+            f"{prefix}/blob_a": val_a,
+            f"{prefix}/blob_b": val_b,
+        }
+        return mocker.Mock(
+            download_as_bytes=mocker.Mock(
+                return_value=key_to_return_val[gcs_object_key].encode("utf-8")
+            )
+        )
+
+    mock_gcs_client = mocker.MagicMock(spec=google.storage.Client)
+    mock_gcs_client.list_blobs.return_value = [
+        _create_mock_blob(name=f"{prefix}/{StoreBackend.STORE_BACKEND_ID_KEY[0]}"),
+        _create_mock_blob(name=f"{prefix}/blob_a"),
+        _create_mock_blob(name=f"{prefix}/blob_b"),
+    ]
+
+    mock_gcs_client.bucket.return_value = mocker.Mock(
+        get_blob=mocker.Mock(side_effect=mock_get_blob)
+    )
+
+    with mocker.patch("google.cloud.storage.Client", return_value=mock_gcs_client):
+        my_store = TupleGCSStoreBackend(
+            filepath_template=None,
+            bucket=bucket,
+            prefix=prefix,
+            project=project,
+            base_public_path=base_public_path,
+        )
+
+        result = my_store.get_all()
+
+        assert sorted(result) == [val_a, val_b]
 
 
 @pytest.mark.unit
@@ -1156,6 +1183,61 @@ def test_TupleAzureBlobStoreBackend_account_url():
             mock_azure_credential.assert_called_once()
 
 
+@pytest.mark.unit
+def test_TupleAzureBlobStoreBackend_get_all(mocker: MockerFixture):
+    pytest.importorskip("azure.storage.blob")
+    pytest.importorskip("azure.identity")
+    """
+    What does this test test and why?
+    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
+    and assert that the store backend makes the right calls for set, get, and list.
+    """
+    credential = "this_is_a_test_credential_string"
+    account_url = "this_is_a_test_account_url"
+    prefix = "this_is_a_test_prefix"
+    suffix = ".json"
+    container = "dummy-container"
+    val_a = "aaa"
+    val_b = "bbb"
+    key_a = f"{prefix}/foo.json"
+    key_b = f"{prefix}/bar.json"
+
+    def _create_mock_blob(name: str):
+        output = mocker.Mock()
+        output.name = name
+        return output
+
+    def mock_get_blob(object_key):
+        """Test double for BlobServiceClient::download_blob."""
+        key_to_return_val = {
+            key_a: val_a,
+            key_b: val_b,
+        }
+        return mocker.Mock(
+            readall=mocker.Mock(return_value=key_to_return_val[object_key].encode("utf-8"))
+        )
+
+    my_store = TupleAzureBlobStoreBackend(
+        credential=credential,
+        account_url=account_url,
+        prefix=prefix,
+        filepath_suffix=suffix,
+        container=container,
+    )
+
+    with mock.patch("great_expectations.compatibility.azure.BlobServiceClient", autospec=True):
+        mock_container_client = my_store._container_client
+        mock_container_client.list_blobs.return_value = [
+            _create_mock_blob(key_a),
+            _create_mock_blob(key_b),
+        ]
+        mock_container_client.download_blob.side_effect = mock_get_blob
+
+        result = my_store.get_all()
+
+        assert sorted(result) == [val_a, val_b]
+
+
 @mock_s3
 @pytest.mark.slow  # 14.36s
 @pytest.mark.aws_deps
@@ -1257,22 +1339,19 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         resource_type=DataContextVariableSchema.ALL_VARIABLES,
     )
     assert sorted(inline_store_backend.list_keys()) == [
-        ("anonymous_usage_statistics",),
+        ("analytics_enabled",),
         ("checkpoint_store_name",),
         ("config_variables_file_path",),
         ("config_version",),
+        ("data_context_id",),
         ("data_docs_sites",),
-        ("datasources",),
-        ("evaluation_parameter_store_name",),
         ("expectations_store_name",),
         ("fluent_datasources",),
-        ("include_rendered_content",),
         ("plugins_directory",),
-        ("profiler_store_name",),
         ("progress_bars",),
         ("stores",),
-        ("validation_operators",),
-        ("validations_store_name",),
+        ("suite_parameter_store_name",),
+        ("validation_results_store_name",),
     ]
 
     # test .move
@@ -1326,78 +1405,33 @@ def test_InlineStoreBackend(empty_data_context) -> None:
 
 
 @pytest.mark.filesystem
-def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
-    path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
-        empty_data_context.root_directory, empty_data_context.GX_YML
-    )
-
-    # 1. Set simple string config value and confirm it persists in the GX.yml
-
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.CONFIG_VERSION,
-    )
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["config_version"] == 3.0
-
-    new_config_version: float = 5.0
-    key = DataContextVariableKey()
-    tuple_ = key.to_tuple()
-
-    inline_store_backend.set(tuple_, new_config_version)
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["config_version"] == new_config_version
-
-    # 2. Set nested dictionary config value and confirm it persists in the GX.yml
-
+def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
     inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.DATASOURCES,
+        resource_type=DataContextVariableSchema.FLUENT_DATASOURCES,
     )
 
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
+    datasource_config_a = empty_data_context.data_sources.add_pandas(name="a")
+    datasource_config_b = empty_data_context.data_sources.add_pandas(name="b")
 
-    assert config_commented_map_from_yaml["datasources"] == {}
+    inline_store_backend.set(DataContextVariableKey("a").to_tuple(), datasource_config_a)
+    inline_store_backend.set(DataContextVariableKey("b").to_tuple(), datasource_config_b)
 
-    datasource_config_string: str = """
-        class_name: Datasource
+    all_of_em = inline_store_backend.get_all()
 
-        execution_engine:
-            class_name: PandasExecutionEngine
+    assert all_of_em == [datasource_config_a, datasource_config_b]
 
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: my/base/dir/
-                glob_directive: "*.csv"
 
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-        """
-    datasource_config: dict = yaml.load(datasource_config_string)
-
-    key = DataContextVariableKey(
-        resource_name="my_datasource",
+@pytest.mark.filesystem
+def test_InlineStoreBackend_get_all_invalid_resource_type(empty_data_context) -> None:
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.ALL_VARIABLES,
     )
-    tuple_ = key.to_tuple()
 
-    inline_store_backend.set(tuple_, datasource_config)
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    datasources: dict = config_commented_map_from_yaml["datasources"]
-    assert len(datasources) == 1
-    assert datasources["my_datasource"] == datasource_config
+    expected_error = "Unsupported resource type: data_context_variables"
+    with pytest.raises(StoreBackendError, match=expected_error):
+        inline_store_backend.get_all()
 
 
 @pytest.mark.unit

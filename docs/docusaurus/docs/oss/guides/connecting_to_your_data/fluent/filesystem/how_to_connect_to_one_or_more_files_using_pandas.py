@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_one_or_more_files_using_pandas" tests/integration/test_script_runner.py
 ```
 """
+
 import pathlib
 
 import great_expectations as gx
@@ -29,7 +30,7 @@ path_to_folder_containing_csv_files = str(
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource">
-datasource = context.sources.add_pandas_filesystem(
+datasource = context.data_sources.add_pandas_filesystem(
     name=datasource_name, base_directory=path_to_folder_containing_csv_files
 )
 # </snippet>

@@ -1,6 +1,6 @@
 {
     "title": "TextAsset",
-    "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
     "type": "object",
     "properties": {
         "name": {
@@ -36,14 +36,8 @@
             "title": "Batch Definitions",
             "type": "array",
             "items": {
-                "$ref": "#/definitions/BatchDefinition"
+                "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
             }
-        },
-        "batching_regex": {
-            "title": "Batching Regex",
-            "default": ".*",
-            "type": "string",
-            "format": "regex"
         },
         "connect_options": {
             "title": "Connect Options",
@@ -127,232 +121,111 @@
                 "key"
             ]
         },
-        "PartitionerColumnValue": {
-            "title": "PartitionerColumnValue",
-            "description": "--Public API--",
+        "FileNamePartitionerYearly": {
+            "title": "FileNamePartitionerYearly",
             "type": "object",
             "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
                 },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_column_value",
-                    "enum": [
-                        "partition_on_column_value"
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year"
                     ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ]
-        },
-        "PartitionerMultiColumnValue": {
-            "title": "PartitionerMultiColumnValue",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "column_names": {
-                    "title": "Column Names",
                     "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_multi_column_values",
-                    "enum": [
-                        "partition_on_multi_column_values"
-                    ],
-                    "type": "string"
+                    "items": {}
                 }
             },
             "required": [
-                "column_names"
+                "regex"
             ]
         },
-        "PartitionerDividedInteger": {
-            "title": "PartitionerDividedInteger",
-            "description": "--Public API--",
+        "FileNamePartitionerMonthly": {
+            "title": "FileNamePartitionerMonthly",
             "type": "object",
             "properties": {
-                "divisor": {
-                    "title": "Divisor",
-                    "type": "integer"
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
                 },
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_divided_integer",
-                    "enum": [
-                        "partition_on_divided_integer"
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year",
+                        "month"
                     ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "divisor",
-                "column_name"
-            ]
-        },
-        "PartitionerModInteger": {
-            "title": "PartitionerModInteger",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "mod": {
-                    "title": "Mod",
-                    "type": "integer"
-                },
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_mod_integer",
-                    "enum": [
-                        "partition_on_mod_integer"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "mod",
-                "column_name"
-            ]
-        },
-        "PartitionerYear": {
-            "title": "PartitionerYear",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year",
-                    "enum": [
-                        "partition_on_year"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ]
-        },
-        "PartitionerYearAndMonth": {
-            "title": "PartitionerYearAndMonth",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year_and_month",
-                    "enum": [
-                        "partition_on_year_and_month"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ]
-        },
-        "PartitionerYearAndMonthAndDay": {
-            "title": "PartitionerYearAndMonthAndDay",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year_and_month_and_day",
-                    "enum": [
-                        "partition_on_year_and_month_and_day"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ]
-        },
-        "PartitionerDatetimePart": {
-            "title": "PartitionerDatetimePart",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "datetime_parts": {
-                    "title": "Datetime Parts",
                     "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_date_parts",
-                    "enum": [
-                        "partition_on_date_parts"
-                    ],
-                    "type": "string"
+                    "items": {}
                 }
             },
             "required": [
-                "datetime_parts",
-                "column_name"
+                "regex"
             ]
         },
-        "PartitionerConvertedDatetime": {
-            "title": "PartitionerConvertedDatetime",
-            "description": "--Public API--",
+        "FileNamePartitionerDaily": {
+            "title": "FileNamePartitionerDaily",
             "type": "object",
             "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
                 },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_converted_datetime",
-                    "enum": [
-                        "partition_on_converted_datetime"
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year",
+                        "month",
+                        "day"
                     ],
-                    "type": "string"
-                },
-                "date_format_string": {
-                    "title": "Date Format String",
-                    "type": "string"
+                    "type": "array",
+                    "items": {}
                 }
             },
             "required": [
-                "column_name",
-                "date_format_string"
+                "regex"
             ]
         },
-        "BatchDefinition": {
-            "title": "BatchDefinition",
+        "FileNamePartitionerPath": {
+            "title": "FileNamePartitionerPath",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__": {
+            "title": "BatchDefinition[Union[FileNamePartitionerYearly, FileNamePartitionerMonthly, FileNamePartitionerDaily, FileNamePartitionerPath]]",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
@@ -368,31 +241,16 @@
                     "title": "Partitioner",
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/PartitionerColumnValue"
+                            "$ref": "#/definitions/FileNamePartitionerYearly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerMultiColumnValue"
+                            "$ref": "#/definitions/FileNamePartitionerMonthly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerDividedInteger"
+                            "$ref": "#/definitions/FileNamePartitionerDaily"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerDatetimePart"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerConvertedDatetime"
+                            "$ref": "#/definitions/FileNamePartitionerPath"
                         }
                     ]
                 }

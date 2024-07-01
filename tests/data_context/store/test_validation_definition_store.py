@@ -57,8 +57,8 @@ def validation_definition(
 ) -> ValidationDefinition:
     context = in_memory_runtime_context
     batch_definition = (
-        context.sources.add_pandas("my_datasource")
-        .add_csv_asset("my_asset", "data.csv")
+        context.data_sources.add_pandas("my_datasource")
+        .add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
         .add_batch_definition("my_batch_definition")
     )
     return ValidationDefinition(
@@ -142,8 +142,8 @@ def test_get_key(request, store_fixture: str):
 @pytest.mark.cloud
 def test_get_key_cloud(cloud_backed_store: ValidationDefinitionStore):
     key = cloud_backed_store.get_key(name="my_validation")
-    assert key.resource_type == GXCloudRESTResource.VALIDATION_DEFINITION
-    assert key.resource_name == "my_validation"
+    assert key.resource_type == GXCloudRESTResource.VALIDATION_DEFINITION  # type: ignore[union-attr]
+    assert key.resource_name == "my_validation"  # type: ignore[union-attr]
 
 
 _VALIDATION_ID = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"

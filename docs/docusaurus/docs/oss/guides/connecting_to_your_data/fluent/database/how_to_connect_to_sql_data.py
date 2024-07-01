@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_sql_data" tests/integration/test_script_runner.py
 ```
 """
+
 import pathlib
 
 import great_expectations as gx
@@ -41,7 +42,7 @@ connection_string = f"sqlite:///{sqlite_database_path}"
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py add_sql">
-datasource = context.sources.add_sql(
+datasource = context.data_sources.add_sql(
     name="my_datasource", connection_string=connection_string
 )
 # </snippet>

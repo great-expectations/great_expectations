@@ -70,7 +70,7 @@ IGNORED_VIOLATIONS = [
 def check_dependencies(*deps: str) -> None:
     for dep in deps:
         if not shutil.which(dep):
-            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")
+            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")  # noqa: TRY002, TRY003
 
 
 def get_test_files(target_dir: pathlib.Path) -> Set[str]:
@@ -98,7 +98,7 @@ def get_test_files(target_dir: pathlib.Path) -> Set[str]:
         )
         return {s.strip("/") for s in res_test_files.stdout.splitlines()}
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
+        raise RuntimeError(  # noqa: TRY003
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         ) from e
 
@@ -154,7 +154,7 @@ def get_test_files_in_test_suite(target_dir: pathlib.Path) -> Set[str]:
         )
         return {s.strip() for s in res_test_files_with_fixture_definitions.stdout.splitlines()}
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
+        raise RuntimeError(  # noqa: TRY003
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         ) from e
 

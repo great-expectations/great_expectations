@@ -12,7 +12,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
-from tests import test_utils
 
 
 @pytest.mark.filesystem
@@ -123,7 +122,7 @@ def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     # Check that store_backend_id exists can be read
     assert in_memory_expectations_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
+    assert isinstance(in_memory_expectations_store.store_backend_id, UUID)
 
 
 @pytest.mark.filesystem
@@ -179,53 +178,60 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
     assert gen_directory_tree_str(project_path) == initialized_directory_tree_with_store_backend_id
 
 
-@pytest.mark.cloud
+def _create_suite_config(name: str, id: str, expectations: list[dict] | None = None) -> dict:
+    return {
+        "id": id,
+        "name": name,
+        "expectations": expectations or [],
+        "meta": {},
+        "notes": None,
+    }
+
+
+_SUITE_CONFIG = _create_suite_config("my_suite", "03d61d4e-003f-48e7-a3b2-f9f842384da3")
+_SUITE_CONFIG_WITH_EXPECTATIONS = _create_suite_config(
+    "my_suite_with_expectations",
+    "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+    [
+        {
+            "type": "expect_column_to_exist",
+            "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
+            "kwargs": {"column": "infinities"},
+            "meta": {},
+            "expectation_context": None,
+            "rendered_content": [],
+        }
+    ],
+)
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "response_json, expected, error_type",
     [
         pytest.param(
-            {
-                "data": {
-                    "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                    "attributes": {
-                        "suite": {
-                            "expectation_suite_name": "my_suite",
-                        },
-                    },
-                }
-            },
-            {
-                "expectation_suite_name": "my_suite",
-                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-            },
+            {"data": _SUITE_CONFIG},
+            _SUITE_CONFIG,
             None,
             id="single_config",
         ),
         pytest.param({"data": []}, None, ValueError, id="empty_payload"),
         pytest.param(
-            {
-                "data": [
-                    {
-                        "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                        "attributes": {
-                            "suite": {
-                                "expectation_suite_name": "my_suite",
-                            },
-                        },
-                    }
-                ]
-            },
-            {
-                "expectation_suite_name": "my_suite",
-                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-            },
+            {"data": [_SUITE_CONFIG]},
+            _SUITE_CONFIG,
             None,
             id="single_config_in_list",
+        ),
+        pytest.param(
+            {"data": _SUITE_CONFIG_WITH_EXPECTATIONS},
+            _SUITE_CONFIG_WITH_EXPECTATIONS,
+            None,
+            id="null_result_format",
         ),
     ],
 )
 def test_gx_cloud_response_json_to_object_dict(
-    response_json: dict, expected: dict | None, error_type: Exception | None
+    response_json: dict, expected: dict | None, error_type: type[Exception] | None
 ) -> None:
     if error_type:
         with pytest.raises(error_type):
@@ -233,6 +239,21 @@ def test_gx_cloud_response_json_to_object_dict(
     else:
         actual = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
         assert actual == expected
+
+
+@pytest.mark.unit
+def test_gx_cloud_response_json_to_object_collection():
+    response_json = {
+        "data": [
+            _SUITE_CONFIG,
+            _SUITE_CONFIG_WITH_EXPECTATIONS,
+        ]
+    }
+
+    result = ExpectationsStore.gx_cloud_response_json_to_object_collection(response_json)
+
+    expected = [_SUITE_CONFIG, _SUITE_CONFIG_WITH_EXPECTATIONS]
+    assert result == expected
 
 
 @pytest.mark.unit
@@ -475,3 +496,27 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert suite == updated_suite
     assert len(updated_suite.expectations) == 1
+
+
+@pytest.mark.cloud
+def test_update_cloud_suite(empty_cloud_data_context):
+    # Arrange
+    context = empty_cloud_data_context
+    store = context.expectations_store
+    existing_expectation = gxe.ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    suite_name = "test-suite"
+    updated_suite_name = "test-suite-22"
+    suite = ExpectationSuite(suite_name, expectations=[existing_expectation.configuration])
+    context.suites.add(suite)
+
+    # act
+    suite.name = updated_suite_name
+    store.update(key=store.get_key(name=suite_name, id=suite.id), value=suite)
+
+    # assert
+    updated_suite_dict = store.get(key=store.get_key(name=updated_suite_name, id=suite.id))
+    assert updated_suite_dict["name"] == updated_suite_name

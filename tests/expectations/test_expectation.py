@@ -77,7 +77,7 @@ def fake_expectation_config(
     Helper method to generate of ExpectationConfiguration objects for tests.
     """
     return ExpectationConfiguration(
-        expectation_type=expectation_type,
+        type=expectation_type,
         kwargs=config_kwargs,
     )
 
@@ -88,7 +88,7 @@ def fake_expectation_config(
     [
         (
             FakeMulticolumnExpectation,
-            fake_expectation_config("fake_multicolumn_expectation", {"column_list": []}),
+            fake_expectation_config("fake_multicolumn_expectation", {"column_list": ["column_2"]}),
         ),
         (
             FakeColumnMapExpectation,
@@ -122,7 +122,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
                 (
                     FakeMulticolumnExpectation,
                     fake_expectation_config(
-                        "fake_multicolumn_expectation", {"column_list": [], "mostly": x}
+                        "fake_multicolumn_expectation", {"column_list": ["column_2"], "mostly": x}
                     ),
                 )
                 for x in [0, 0.5, 1]
@@ -222,7 +222,7 @@ def test_expectation_configuration_property():
     expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     assert expectation.configuration == ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
+        type="expect_column_max_to_be_between",
         kwargs={
             "column": "foo",
             "min_value": 0,
@@ -238,13 +238,11 @@ def test_expectation_configuration_property_recognizes_state_changes():
     expectation.column = "bar"
     expectation.min_value = 5
     expectation.max_value = 15
-    expectation.mostly = 0.95
 
     assert expectation.configuration == ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
+        type="expect_column_max_to_be_between",
         kwargs={
             "column": "bar",
-            "mostly": 0.95,
             "min_value": 5,
             "max_value": 15,
         },
@@ -287,7 +285,7 @@ def sqlite_datasource(
 ) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_sqlite_datasource"
-    return context.sources.add_sqlite(
+    return context.data_sources.add_sqlite(
         datasource_name, connection_string=f"sqlite:///{taxi_db_path}"
     )
 
@@ -366,47 +364,47 @@ def test_unexpected_rows_expectation_validate(
     assert unexpected_rows == expected_unexpected_rows
 
 
-class TestEvaluationParameterOptions:
-    """Tests around the evaluation_parameter_options property of Expectations.
+class TestSuiteParameterOptions:
+    """Tests around the suite_parameter_options property of Expectations.
 
     Note: evaluation_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
     """  # noqa: E501
 
-    EVALUATION_PARAMETER_MIN = "my_min"
-    EVALUATION_PARAMETER_MAX = "my_max"
-    EVALUATION_PARAMETER_VALUE = "my_value"
+    SUITE_PARAMETER_MIN = "my_min"
+    SUITE_PARAMETER_MAX = "my_max"
+    SUITE_PARAMETER_VALUE = "my_value"
 
     @pytest.mark.unit
     def test_expectation_without_evaluation_parameter(self):
         expectation = gxe.ExpectColumnValuesToBeBetween(column="foo", min_value=0, max_value=10)
-        assert expectation.evaluation_parameter_options == tuple()
+        assert expectation.suite_parameter_options == tuple()
 
     @pytest.mark.unit
     def test_expectation_with_evaluation_parameter(self):
         expectation = gxe.ExpectColumnValuesToBeBetween(
             column="foo",
             min_value=0,
-            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
+            max_value={"$PARAMETER": self.SUITE_PARAMETER_MAX},
         )
-        assert expectation.evaluation_parameter_options == (self.EVALUATION_PARAMETER_MAX,)
+        assert expectation.suite_parameter_options == (self.SUITE_PARAMETER_MAX,)
 
     @pytest.mark.unit
-    def test_expectation_with_multiple_evaluation_parameters(self):
+    def test_expectation_with_multiple_suite_parameters(self):
         expectation = gxe.ExpectColumnValuesToBeBetween(
             column="foo",
-            min_value={"$PARAMETER": self.EVALUATION_PARAMETER_MIN},
-            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
+            min_value={"$PARAMETER": self.SUITE_PARAMETER_MIN},
+            max_value={"$PARAMETER": self.SUITE_PARAMETER_MAX},
         )
-        assert expectation.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_MAX,
-            self.EVALUATION_PARAMETER_MIN,
+        assert expectation.suite_parameter_options == (
+            self.SUITE_PARAMETER_MAX,
+            self.SUITE_PARAMETER_MIN,
         )
 
     @pytest.mark.unit
-    def test_expectation_with_duplicate_evaluation_parameters(self):
+    def test_expectation_with_duplicate_suite_parameters(self):
         expectation = gxe.ExpectColumnValuesToBeBetween(
             column="foo",
-            min_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},
-            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},
+            min_value={"$PARAMETER": self.SUITE_PARAMETER_VALUE},
+            max_value={"$PARAMETER": self.SUITE_PARAMETER_VALUE},
         )
-        assert expectation.evaluation_parameter_options == (self.EVALUATION_PARAMETER_VALUE,)
+        assert expectation.suite_parameter_options == (self.SUITE_PARAMETER_VALUE,)

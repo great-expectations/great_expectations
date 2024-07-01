@@ -21,7 +21,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, name: str) -> None:
         super().__init__()
         if not isinstance(name, str):
-            raise gx_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(  # noqa: TRY003
                 f"name must be a string, not {type(name).__name__}"
             )
         self._name = name
@@ -172,7 +172,7 @@ class ValidationResultIdentifier(DataContextKey):
         elif isinstance(batch_kwargs, dict):
             batch_identifier = IDDict(batch_kwargs).to_id()
         else:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "Unable to construct ValidationResultIdentifier from provided object."
             )
         return cls(
@@ -284,21 +284,10 @@ class ValidationMetricIdentifier(MetricIdentifier):
             + [self.metric_name, self.metric_kwargs_id or "__"]
         )
 
-    def to_evaluation_parameter_urn(self):
-        if self._metric_kwargs_id is None:
-            return "urn:great_expectations:validations:" + ":".join(
-                list(self.expectation_suite_identifier.to_fixed_length_tuple()) + [self.metric_name]
-            )
-        else:
-            return "urn:great_expectations:validations:" + ":".join(
-                list(self.expectation_suite_identifier.to_fixed_length_tuple())
-                + [self.metric_name, self._metric_kwargs_id]
-            )
-
     @classmethod
     def from_tuple(cls, tuple_):
         if len(tuple_) < 6:  # noqa: PLR2004
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "ValidationMetricIdentifier tuple must have at least six components."
             )
         if tuple_[2] == "__":
@@ -317,7 +306,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         if len(tuple_) != 6:  # noqa: PLR2004
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "ValidationMetricIdentifier fixed length tuple must have exactly six " "components."
             )
         if tuple_[2] == "__":
@@ -436,7 +425,7 @@ class SiteSectionIdentifier(DataContextKey):
                     **resource_identifier
                 )
         else:
-            raise gx_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(  # noqa: TRY003
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"  # noqa: E501
             )
 
@@ -467,7 +456,7 @@ class SiteSectionIdentifier(DataContextKey):
                 resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:]),
             )
         else:
-            raise gx_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(  # noqa: TRY003
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"  # noqa: E501
             )
 
@@ -476,7 +465,7 @@ class ConfigurationIdentifier(DataContextKey):
     def __init__(self, configuration_key: str) -> None:
         super().__init__()
         if not isinstance(configuration_key, str):
-            raise gx_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(  # noqa: TRY003
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"
             )
         self._configuration_key = configuration_key

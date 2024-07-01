@@ -36,7 +36,7 @@ from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
-from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
+from great_expectations.datasource.fluent import BatchParameters, BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -64,12 +64,13 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypeAlias
 
-    from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.batch_definition import BatchDefinition
+    from great_expectations.core.partitioners import ColumnPartitioner
 
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
 
@@ -115,8 +116,8 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     def test_connection(self) -> None: ...
 
     @override
-    def get_batch_request_options_keys(
-        self, partitioner: Optional[Partitioner] = None
+    def get_batch_parameters_keys(
+        self, partitioner: Optional[ColumnPartitioner] = None
     ) -> Tuple[str, ...]:
         return tuple()
 
@@ -170,13 +171,12 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         return batch_list
 
-    @public_api
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -190,17 +190,17 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             get_batch_list_from_batch_request method.
         """  # noqa: E501
         if options:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "options is not currently supported for this DataAssets and must be None or {}."
             )
 
         if batch_slice is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "batch_slice is not currently supported and must be None for this DataAsset."
             )
 
         if partitioner is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
 
@@ -208,6 +208,13 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options={},
+        )
+
+    @public_api
+    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
         )
 
     @override
@@ -222,13 +229,13 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             and batch_request.data_asset_name == self.name
             and not batch_request.options
         ):
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
                 batch_slice=batch_request._batch_slice_input,
             )
-            raise gx_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "BatchRequest should have form:\n"
                 f"{pf(expect_batch_request_form.dict())}\n"
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
@@ -361,7 +368,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     @pydantic.validator("dataframe")
     def _validate_dataframe(cls, dataframe: pd.DataFrame) -> pd.DataFrame:
         if not isinstance(dataframe, pd.DataFrame):
-            raise ValueError("dataframe must be of type pandas.DataFrame")
+            raise ValueError("dataframe must be of type pandas.DataFrame")  # noqa: TRY003, TRY004
         return dataframe
 
     @override
@@ -375,7 +382,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
-    @public_api
     # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>  # noqa: E501
     @new_argument(
         argument_name="dataframe",
@@ -386,9 +392,9 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     def build_batch_request(  # type: ignore[override]
         self,
         dataframe: Optional[pd.DataFrame] = None,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -403,17 +409,17 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             get_batch_list_from_batch_request method.
         """  # noqa: E501
         if options:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "options is not currently supported for this DataAssets and must be None or {}."
             )
 
         if batch_slice is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "batch_slice is not currently supported and must be None for this DataAsset."
             )
 
         if partitioner is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
 
@@ -423,7 +429,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             df = dataframe  # type: ignore[assignment]
 
         if df is None:
-            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
+            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")  # noqa: TRY003
 
         self.dataframe = df
 
@@ -630,7 +636,7 @@ class PandasDatasource(_PandasDatasource):
     @staticmethod
     def _validate_asset_name(asset_name: Optional[str] = None) -> str:
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
-            raise PandasDatasourceError(
+            raise PandasDatasourceError(  # noqa: TRY003
                 f"""An asset_name of {DEFAULT_PANDAS_DATA_ASSET_NAME} cannot be passed because it is a reserved name."""  # noqa: E501
             )
         if not asset_name:
@@ -641,7 +647,7 @@ class PandasDatasource(_PandasDatasource):
         batch_request: BatchRequest
         if isinstance(asset, DataFrameAsset):
             if not isinstance(dataframe, pd.DataFrame):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'  # noqa: E501
                 )
 

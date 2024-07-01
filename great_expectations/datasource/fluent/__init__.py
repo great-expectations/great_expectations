@@ -8,6 +8,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Sorter,
     BatchMetadata,
     GxDatasourceWarning,
+    GxContextWarning,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.invalid_datasource import (
@@ -25,7 +26,7 @@ BatchDefinition.update_forward_refs(DataAsset=DataAsset)
 
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
-    BatchRequestOptions,
+    BatchParameters,
 )
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,

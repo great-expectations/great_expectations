@@ -117,7 +117,7 @@ class DictDot:
                 new_dict[key] = value.value
 
             # ...and when DictDots and Enums are nested one layer deeper in lists or tuples
-            if isinstance(value, list) or isinstance(value, tuple):  # noqa: PLR1701
+            if isinstance(value, (list, tuple)):
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
@@ -148,7 +148,7 @@ class DictDot:
             if isinstance(value, Enum):
                 new_dict[key] = value.value
 
-            if isinstance(value, list) or isinstance(value, tuple):  # noqa: PLR1701
+            if isinstance(value, (list, tuple)):
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
                     if isinstance(value, pydantic.BaseModel):
@@ -183,7 +183,7 @@ class DictDot:
             exclude_keys = set()
 
         if include_keys & exclude_keys:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "Common keys between sets of include_keys and exclude_keys filtering directives are illegal."  # noqa: E501
             )
 
@@ -213,7 +213,7 @@ class DictDot:
                     try:
                         _ = self[f"_{name}"]
                     except AttributeError:
-                        raise ValueError(
+                        raise ValueError(  # noqa: TRY003
                             f'Property "{name}", marked for {purpose} on object "{type(self)!s}", does not exist.'  # noqa: E501
                         )
 

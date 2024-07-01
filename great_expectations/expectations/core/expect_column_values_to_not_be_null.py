@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_function_types import (
@@ -9,10 +9,14 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     parse_result_format,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -41,9 +45,23 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the column values to not be null."
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Missingness"]
+
 
 class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
-    """Expect the column values to not be null.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an
     np.NaN in pandas. Empty strings don't count as null unless they have been coerced to a null type.
@@ -51,16 +69,18 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     expect_column_values_to_not_be_null is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
+    Column Map Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column and ask a yes/no question for every row in that column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+
     Args:
         column (str): \
-            The column name.
-
-    Keyword Args:
-        mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
-            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+            {COLUMN_DESCRIPTION}
 
     Other Parameters:
+        mostly (None or a float between 0 and 1): \
+            {MOSTLY_DESCRIPTION} \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -78,21 +98,124 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        {DATA_QUALITY_ISSUES[0]}
+
+    Example Data:
+                test 	test2
+            0 	NaN     "A"
+            1 	True    NaN
+            2 	False   NaN
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnValuesToNotBeNull(
+                    column="test",
+                    mostly=0.66
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 1,
+                    "unexpected_percent": 33.33333333333333,
+                    "partial_unexpected_list": [
+                      null
+                    ]
+                  }},
+                  "meta": {{}},
+                  "success": true
+                }}
+
+        Failing Case:
+            Input:
+                ExpectColumnValuesToNotBeNull(
+                    column="test2"
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 2,
+                    "unexpected_percent": 66.66666666666666,
+                    "partial_unexpected_list": [
+                      null,
+                      null
+                    ]
+                  }},
+                  "meta": {{}},
+                  "success": false
+                }}
     """  # noqa: E501
 
-    library_metadata: ClassVar[dict] = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
+        "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric: ClassVar[str] = "column_values.nonnull"
     args_keys: ClassVar[Tuple[str, ...]] = ("column",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotBeNull]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @override
@@ -127,7 +250,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     @classmethod
     @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -136,9 +259,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         **kwargs,
     ) -> list[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,  # type: ignore[union-attr] # FIXME: could be None

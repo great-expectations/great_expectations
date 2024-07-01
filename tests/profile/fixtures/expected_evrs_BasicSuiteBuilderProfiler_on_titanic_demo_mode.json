@@ -1,5 +1,5 @@
 {
-  "evaluation_parameters": {},
+  "suite_parameters": {},
   "statistics": {
     "evaluated_expectations": 32,
     "successful_expectations": 30,

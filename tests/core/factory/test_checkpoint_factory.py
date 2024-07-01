@@ -1,77 +1,53 @@
+from unittest import mock
+
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations import set_context
+from great_expectations.analytics.events import CheckpointCreatedEvent, CheckpointDeletedEvent
 from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.data_context.store.checkpoint_store import CheckpointStore
+from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context.store.checkpoint_store import (
+    CheckpointStore,
+)
 from great_expectations.exceptions import DataContextError
 
 
-@pytest.fixture
-def checkpoint_dict():
-    return {
-        "name": "oss_test_checkpoint",
-        "expectation_suite_name": "oss_test_expectation_checkpoint",
-        "validations": [
-            {
-                "name": None,
-                "id": None,
-                "expectation_checkpoint_name": "taxi.demo_pass",
-                "expectation_checkpoint_id": None,
-                "batch_request": None,
-            },
-        ],
-        "action_list": [
-            {
-                "action": {"class_name": "StoreValidationResultAction"},
-                "name": "store_validation_result",
-            },
-        ],
-    }
-
-
-def _assert_checkpoint_equality(actual: Checkpoint, expected: Checkpoint):
-    # Checkpoint equality is currently defined as equality of the config
-    # TODO: We should change this to a more robust comparison (instead of memory addresses)
-    actual_config = actual.config.to_json_dict()
-    expected_config = expected.config.to_json_dict()
-    assert actual_config == expected_config
-
-
 @pytest.mark.unit
-def test_checkpoint_factory_get_uses_store_get(checkpoint_dict: dict, mocker: MockerFixture):
+def test_checkpoint_factory_get_uses_store_get(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    store.get.return_value = checkpoint_dict
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
+    checkpoint = Checkpoint(
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
+    )
+    store.get.return_value = checkpoint
+    factory = CheckpointFactory(store=store)
 
     # Act
     result = factory.get(name=name)
 
     # Assert
     store.get.assert_called_once_with(key=key)
-    _assert_checkpoint_equality(actual=result, expected=Checkpoint(**checkpoint_dict))
+
+    assert result == checkpoint
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_raises_error_on_missing_key(
-    checkpoint_dict: dict, mocker: MockerFixture
-):
+def test_checkpoint_factory_get_raises_error_on_missing_key(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
-    store.get.return_value = checkpoint_dict
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
+    checkpoint = Checkpoint(
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
+    )
+    store.get.return_value = checkpoint
+    factory = CheckpointFactory(store=store)
 
     # Act
     with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
@@ -88,18 +64,18 @@ def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
     key = store.get_key.return_value
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
-    checkpoint = Checkpoint(name=name)
-    config = checkpoint.get_config()
-    store.get.return_value = config
+    store.get.return_value = None
+    factory = CheckpointFactory(store=store)
+    checkpoint = Checkpoint(
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
+    )
+    store.get.return_value = checkpoint
 
     # Act
     factory.add(checkpoint=checkpoint)
 
     # Assert
-    store.add.assert_called_once_with(key=key, value=config)
+    store.add.assert_called_once_with(key=key, value=checkpoint.dict())
 
 
 @pytest.mark.unit
@@ -108,10 +84,10 @@ def test_checkpoint_factory_add_raises_for_duplicate_key(mocker: MockerFixture):
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
-    checkpoint = Checkpoint(name=name)
+    factory = CheckpointFactory(store=store)
+    checkpoint = Checkpoint(
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
+    )
 
     # Act
     with pytest.raises(
@@ -128,16 +104,16 @@ def test_checkpoint_factory_add_raises_for_duplicate_key(mocker: MockerFixture):
 def test_checkpoint_factory_delete_uses_store_remove_key(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
-    store = mocker.MagicMock(spec=CheckpointStore)
+    store = mocker.Mock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
-    checkpoint = Checkpoint(name=name)
+    checkpoint = mocker.Mock(spec=Checkpoint, id=None)
+    checkpoint.name = name
+    store.get.return_value = checkpoint
+    factory = CheckpointFactory(store=store)
 
     # Act
-    factory.delete(checkpoint=checkpoint)
+    factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_called_once_with(
@@ -151,17 +127,14 @@ def test_checkpoint_factory_delete_raises_for_missing_checkpoint(mocker: MockerF
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
-    checkpoint = Checkpoint(name=name)
+    factory = CheckpointFactory(store=store)
 
     # Act
     with pytest.raises(
         DataContextError,
         match=f"Cannot delete Checkpoint with name {name} because it cannot be found.",
     ):
-        factory.delete(checkpoint=checkpoint)
+        factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_not_called()
@@ -190,7 +163,17 @@ def test_checkpoint_factory_add_success_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_add_success(context):
     # Arrange
     name = "test-checkpoint"
-    checkpoint = Checkpoint(name=name)
+    ds = context.data_sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")
+    batch_def = asset.add_batch_definition("my_batch_definition")
+    suite = ExpectationSuite(name="my_suite")
+
+    checkpoint = Checkpoint(
+        name=name,
+        validation_definitions=[
+            ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+        ],
+    )
     with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
         context.checkpoints.get(name)
 
@@ -198,9 +181,7 @@ def _test_checkpoint_factory_add_success(context):
     created_checkpoint = context.checkpoints.add(checkpoint=checkpoint)
 
     # Assert
-    _assert_checkpoint_equality(
-        actual=created_checkpoint, expected=context.checkpoints.get(name=name)
-    )
+    assert created_checkpoint == context.checkpoints.get(name=name)
 
 
 @pytest.mark.filesystem
@@ -216,11 +197,22 @@ def test_checkpoint_factory_delete_success_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_delete_success(context):
     # Arrange
     name = "test-checkpoint"
-    checkpoint = Checkpoint(name=name)
-    checkpoint = context.checkpoints.add(checkpoint=checkpoint)
+    ds = context.data_sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")
+    batch_def = asset.add_batch_definition("my_batch_definition")
+    suite = ExpectationSuite(name="my_suite")
+
+    context.checkpoints.add(
+        checkpoint=Checkpoint(
+            name=name,
+            validation_definitions=[
+                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+            ],
+        )
+    )
 
     # Act
-    context.checkpoints.delete(checkpoint)
+    context.checkpoints.delete(name)
 
     # Assert
     with pytest.raises(
@@ -230,6 +222,113 @@ def _test_checkpoint_factory_delete_success(context):
         context.checkpoints.get(name)
 
 
+@pytest.mark.parametrize(
+    "context_fixture_name",
+    [
+        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.unit),
+        pytest.param("in_memory_runtime_context", id="ephemeral", marks=pytest.mark.unit),
+        pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
+    ],
+)
+def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.FixtureRequest):
+    context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
+
+    # Arrange
+    ds = context.data_sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
+    batch_def = asset.add_batch_definition("my_batch_definition")
+    suite = ExpectationSuite(name="my_suite")
+
+    checkpoint_a = context.checkpoints.add(
+        Checkpoint(
+            name="a",
+            validation_definitions=[
+                ValidationDefinition(name="val def a", data=batch_def, suite=suite)
+            ],
+        )
+    )
+    checkpoint_b = context.checkpoints.add(
+        Checkpoint(
+            name="b",
+            validation_definitions=[
+                ValidationDefinition(name="val def b", data=batch_def, suite=suite)
+            ],
+        )
+    )
+
+    # Act
+    result = context.checkpoints.all()
+    result = sorted(result, key=lambda x: x.name)
+
+    # Assert
+    assert [r.name for r in result] == [checkpoint_a.name, checkpoint_b.name]
+    assert result == [checkpoint_a, checkpoint_b]
+
+
 class TestCheckpointFactoryAnalytics:
-    # TODO: Write tests once analytics are in place
-    pass
+    @pytest.mark.filesystem
+    def test_checkpoint_factory_add_emits_event_filesystem(self, empty_data_context):
+        self._test_checkpoint_factory_add_emits_event(empty_data_context)
+
+    @pytest.mark.cloud
+    def test_checkpoint_factory_add_emits_event_cloud(self, empty_cloud_context_fluent):
+        self._test_checkpoint_factory_add_emits_event(empty_cloud_context_fluent)
+
+    def _test_checkpoint_factory_add_emits_event(self, context):
+        # Arrange
+        name = "test-checkpoint"
+        ds = context.data_sources.add_pandas("my_datasource")
+        asset = ds.add_csv_asset("my_asset", "data.csv")
+        batch_def = asset.add_batch_definition("my_batch_definition")
+        suite = ExpectationSuite(name="my_suite")
+
+        checkpoint = Checkpoint(
+            name=name,
+            validation_definitions=[
+                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+            ],
+        )
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.factory.checkpoint_factory.submit_event", autospec=True
+        ) as mock_submit:
+            _ = context.checkpoints.add(checkpoint=checkpoint)
+
+        # Assert
+        mock_submit.assert_called_once_with(event=CheckpointCreatedEvent(checkpoint_id=mock.ANY))
+
+    @pytest.mark.filesystem
+    def test_checkpoint_factory_delete_emits_event_filesystem(self, empty_data_context):
+        self._test_checkpoint_factory_delete_emits_event(empty_data_context)
+
+    @pytest.mark.cloud
+    def test_checkpoint_factory_delete_emits_event_cloud(self, empty_cloud_context_fluent):
+        self._test_checkpoint_factory_delete_emits_event(empty_cloud_context_fluent)
+
+    def _test_checkpoint_factory_delete_emits_event(self, context):
+        # Arrange
+        name = "test-checkpoint"
+        ds = context.data_sources.add_pandas("my_datasource")
+        asset = ds.add_csv_asset("my_asset", "data.csv")
+        batch_def = asset.add_batch_definition("my_batch_definition")
+        suite = ExpectationSuite(name="my_suite")
+
+        checkpoint = Checkpoint(
+            name=name,
+            validation_definitions=[
+                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+            ],
+        )
+        checkpoint = context.checkpoints.add(checkpoint=checkpoint)
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.factory.checkpoint_factory.submit_event", autospec=True
+        ) as mock_submit:
+            context.checkpoints.delete(name=name)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=CheckpointDeletedEvent(checkpoint_id=checkpoint.id)
+        )

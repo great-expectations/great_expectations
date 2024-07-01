@@ -59,15 +59,7 @@ assert d
 
 some_yaml_contents = \"\"\"
 name: {datasource_name}
-class_name: Datasource
-execution_engine:
-  class_name: SqlAlchemyExecutionEngine
-  credentials:
-    host: {host}
-    port: '{port}'
-    username: {username}
-    password: {password}
-    database: {database}
+class_name: Something
 \"\"\"
 
 """  # noqa: E501
@@ -150,15 +142,7 @@ Some yaml:
 
 yaml_contents = \"\"\"
 name: {datasource_name}
-class_name: Datasource
-execution_engine:
-  class_name: SqlAlchemyExecutionEngine
-  credentials:
-    host: {host}
-    port: '{port}'
-    username: {username}
-    password: {password}
-    database: {database}
+class_name: Something
 \"\"\"
 
 End of content.
@@ -256,8 +240,7 @@ class TestDocExampleParser:
             "example_public_classmethod",
             "example_public_staticmethod",
             "example_staticmethod",
-            "Datasource",
-            "SqlAlchemyExecutionEngine",
+            "Something",
         }
 
 
@@ -324,7 +307,7 @@ def test_parse_docs_contents_for_class_names(
 ):
     assert parse_docs_contents_for_class_names(
         file_contents={sample_markdown_doc_with_yaml_file_contents}
-    ) == {"Datasource", "SqlAlchemyExecutionEngine"}
+    ) == {"Something"}
 
 
 def test_get_shortest_dotted_path(monkeypatch):
@@ -350,7 +333,7 @@ def test_get_shortest_dotted_path(monkeypatch):
     # This is the shortest path
     assert (
         get_shortest_dotted_path(definition=definition, repo_root_path=repo_root)
-        == "great_expectations.core.ExpectationSuite"
+        == "great_expectations.ExpectationSuite"
     )
 
 
@@ -374,7 +357,7 @@ def test__get_import_names(various_imports: str):
 
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
-            import_names.extend(_get_import_names(node))
+            import_names.extend(_get_import_names(node))  # type: ignore[arg-type]
 
     assert import_names == [
         "some_module",
@@ -420,11 +403,7 @@ class TestPublicAPIChecker:
         """Helper function to find class and function definitions from ast tree for tests."""
         definitions = []
         for node in ast.walk(tree):
-            if (
-                isinstance(node, ast.ClassDef)  # noqa: PLR1701
-                or isinstance(node, ast.FunctionDef)
-                or isinstance(node, ast.AsyncFunctionDef)
-            ):
+            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
                 definitions.append(node)
 
         return definitions

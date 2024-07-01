@@ -1,15 +1,14 @@
 # This must have all the required keys and an invalid one
 this_is_a_wildly_invalid_top_level_key: "stuff"
 
-config_version: 2
+config_version: 4
 plugins_directory: "foo"
 expectations_store_name: expectations_store
-validations_store_name: "foo"
-evaluation_parameter_store_name: "baz"
-datasources: "1"
+validation_results_store_name: "foo"
+suite_parameter_store_name: "baz"
 stores:
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/

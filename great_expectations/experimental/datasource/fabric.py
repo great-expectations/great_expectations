@@ -58,6 +58,7 @@ class _PowerBIAsset(DataAsset):
 
     _reader_method: ClassVar[FabricReaderMethods]
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_definitions",
         "batch_metadata",
         "name",
         "order_by",
@@ -156,13 +157,13 @@ class _PowerBIAsset(DataAsset):
             and batch_request.data_asset_name == self.name
             and not batch_request.options
         ):
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
                 batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined] # private attr does exist
             )
-            raise gx_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "BatchRequest should have form:\n"
                 f"{pf(expect_batch_request_form.dict())}\n"
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
@@ -265,12 +266,12 @@ class FabricPowerBIDatasource(Datasource):
             TestConnectionError: If the connection test fails.
         """
         if not self._running_on_fabric():
-            raise TestConnectionError("Must be running Microsoft Fabric to use this datasource")
+            raise TestConnectionError("Must be running Microsoft Fabric to use this datasource")  # noqa: TRY003
 
         try:
             from sempy import fabric  # noqa: F401 # test if fabric is installed
         except Exception as import_err:
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 "Could not import `sempy.fabric`\npip install semantic-link-sempy"
             ) from import_err
 

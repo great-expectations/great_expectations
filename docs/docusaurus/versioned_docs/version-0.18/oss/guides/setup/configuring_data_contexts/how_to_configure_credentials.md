@@ -87,11 +87,7 @@ Configure your Great Expectations project to substitute variables from the AWS S
 
 ## Prerequisites
 
-<Prerequisites>
-
 - An AWS Secrets Manager instance. See [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html).
-
-</Prerequisites>
 
 :::warning
 
@@ -167,11 +163,7 @@ Configure your Great Expectations project to substitute variables from the GCP S
 
 ## Prerequisites
 
-<Prerequisites>
-
 - Configured a secret manager and secrets in the cloud with [GCP Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart)
-
-</Prerequisites>
 
 :::warning
 
@@ -240,12 +232,8 @@ Configure your Great Expectations project to substitute variables from the Azure
 
 ## Prerequisites
 
-<Prerequisites>
-
 - [Set up a working deployment of Great Expectations](/oss/guides/setup/setup_overview.md)
 - Configured a secret manager and secrets in the cloud with [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
-
-</Prerequisites>
 
 :::warning
 

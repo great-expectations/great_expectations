@@ -70,7 +70,7 @@ class _ConfigurationProvider(_AbstractConfigurationProvider):
         """
         type_ = type(provider)
         if type_ in self._providers:
-            raise ValueError(f"Provider of type {type_} has already been registered!")
+            raise ValueError(f"Provider of type {type_} has already been registered!")  # noqa: TRY003
         self._providers[type_] = provider
 
     def get_provider(
@@ -196,9 +196,6 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
         cloud_values: Dict[str, str] = {
             GXCloudEnvironmentVariable.BASE_URL: base_url,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
-            # <GX_RENAME> Deprecated as of 0.15.37
-            GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,
-            GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
         }
 
         # organization_id is nullable so we conditionally include it in the output
@@ -206,8 +203,6 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
             cloud_values.update(
                 {
                     GXCloudEnvironmentVariable.ORGANIZATION_ID: organization_id,
-                    # <GX_RENAME> Deprecated as of 0.15.37
-                    GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: organization_id,
                 }
             )
 

@@ -1,6 +1,6 @@
 adr-tools-python==1.0.3
 invoke>=2.0.0
-mypy==1.7.1
+mypy==1.10
 pre-commit>=2.21.0
-ruff==0.3.0
+ruff==0.4.8
 tomli>=2.0.1

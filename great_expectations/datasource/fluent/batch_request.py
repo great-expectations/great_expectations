@@ -6,12 +6,12 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generic,
     Mapping,
     Optional,
     Union,
 )
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, StrictStr
 from great_expectations.compatibility.pydantic import json as pydantic_json
@@ -21,10 +21,10 @@ from great_expectations.compatibility.pydantic import (
 
 # default_ref_template
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.batch_definition import PartitionerT
 
 # moving this import into TYPE_CHECKING requires forward refs to be updated.
-from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
-from great_expectations.datasource.data_connector.batch_filter import (
+from great_expectations.datasource.fluent.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
 )
@@ -36,18 +36,17 @@ if TYPE_CHECKING:
     AbstractSetIntStr = AbstractSet[Union[int, str]]
 
 
-# BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
+# BatchParameters is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants as returned. The keys represent dimensions one can filter the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
 # will capture all data along this dimension. For example, if we have a year and month
-# partitioner, and we want to query all months in the year 2020, the batch request options
+# partitioner, and we want to query all months in the year 2020, the batch parameters
 # would look like:
 #   options = { "year": 2020 }
-BatchRequestOptions: TypeAlias = Dict[StrictStr, Any]
+BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
 
-@public_api
-class BatchRequest(pydantic.BaseModel):
+class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
     """A BatchRequest is the way to specify which data Great Expectations will validate.
 
     A Batch Request is provided to a Data Asset in order to create one or more Batches.
@@ -57,7 +56,7 @@ class BatchRequest(pydantic.BaseModel):
         data_asset_name: The name of the Data Asset used to connect to the data.
         options: A dict that can be used to filter the batch groups associated with the Data Asset.
             The dict structure depends on the asset type. The available keys for dict can be obtained by
-            calling DataAsset.get_batch_request_options_keys(...).
+            calling DataAsset.get_batch_parameters_keys(...).
         batch_slice: A python slice that can be used to filter the sorted batches by index.
             e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
@@ -75,7 +74,7 @@ class BatchRequest(pydantic.BaseModel):
         allow_mutation=False,
         description="The name of the Data Asset used to connect to the data.",
     )
-    options: BatchRequestOptions = Field(
+    options: BatchParameters = Field(
         default_factory=dict,
         allow_mutation=True,
         description=(
@@ -83,7 +82,7 @@ class BatchRequest(pydantic.BaseModel):
             "The structure and types depends on the asset type."
         ),
     )
-    partitioner: Optional[Partitioner] = None
+    partitioner: Optional[PartitionerT] = None
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )
@@ -100,7 +99,6 @@ class BatchRequest(pydantic.BaseModel):
         """A built-in slice that can be used to filter a list of batches by index."""
         return parse_batch_slice(batch_slice=self._batch_slice_input)
 
-    @public_api
     def update_batch_slice(self, value: Optional[BatchSlice] = None) -> None:
         """Updates the batch_slice on this BatchRequest.
 
@@ -113,7 +111,7 @@ class BatchRequest(pydantic.BaseModel):
         try:
             parse_batch_slice(batch_slice=value)
         except (TypeError, ValueError) as e:
-            raise ValueError(f"Failed to parse BatchSlice to slice: {e}")
+            raise ValueError(f"Failed to parse BatchSlice to slice: {e}")  # noqa: TRY003
         self._batch_slice_input = value
 
     class Config:
@@ -129,16 +127,15 @@ class BatchRequest(pydantic.BaseModel):
             getattr(self, method)(val)
 
     @pydantic.validator("options", pre=True)
-    def _validate_options(cls, options) -> BatchRequestOptions:
+    def _validate_options(cls, options) -> BatchParameters:
         if options is None:
             return {}
         if not isinstance(options, dict):
-            raise TypeError("BatchRequestOptions must take the form of a dictionary.")
+            raise TypeError("BatchParameters must take the form of a dictionary.")  # noqa: TRY003
         if any(not isinstance(key, str) for key in options):
-            raise TypeError("BatchRequestOptions keys must all be strings.")
+            raise TypeError("BatchParameters keys must all be strings.")  # noqa: TRY003
         return options
 
-    @public_api
     @override
     def json(  # noqa: PLR0913
         self,
@@ -171,7 +168,6 @@ class BatchRequest(pydantic.BaseModel):
             **dumps_kwargs,
         )
 
-    @public_api
     @override
     def dict(  # noqa: PLR0913
         self,

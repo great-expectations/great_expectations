@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_a_sql_table" tests/integration/test_script_runner.py
 ```
 """
+
 import pathlib
 import warnings
 
@@ -33,7 +34,7 @@ connection_string = f"sqlite:///{sqlite_database_path}"
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=GxDatasourceWarning)
-    datasource = context.sources.add_sql(
+    datasource = context.data_sources.add_sql(
         name="my_datasource", connection_string=connection_string
     )
 

@@ -47,9 +47,9 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
         units = kwargs.get("units")
 
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")  # noqa: TRY003
 
         if geocoder not in ["nominatim", "pickpoint", "openmapquest"]:
             raise NotImplementedError("The geocoder is not implemented for this method.")
@@ -61,11 +61,11 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
                 query_params = dict(exactly_one=True, geometry="wkt")
                 location = cls.geocode(geocoder, geocoder_config, place, query_params)
             except Exception:
-                raise Exception(
+                raise Exception(  # noqa: TRY002, TRY003
                     "Geocoding configuration and query failed to produce a valid result."
                 )
         else:
-            raise Exception(
+            raise Exception(  # noqa: TRY002, TRY003
                 "A valid geocoder must be provided for this method. See GeoPy for reference."
             )
 
@@ -92,7 +92,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
         points_test = points_test.apply(lambda x: lonlat(geos.get_x(x), geos.get_y(x)))
 
         if location is None:
-            raise Exception("Geocoding failed to return a result.")
+            raise Exception("Geocoding failed to return a result.")  # noqa: TRY002, TRY003
         else:
             point_ref = lonlat(location.longitude, location.latitude)
 

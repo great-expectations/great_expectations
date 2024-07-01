@@ -11,18 +11,14 @@ from great_expectations.core import (
     ExpectationValidationResult,
     IDDict,
 )
-from great_expectations.core.batch import Batch, BatchRequest, LegacyBatchDefinition
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.batch import Batch, LegacyBatchDefinition
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import Datasource
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -40,6 +36,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     MapMetricProvider,
 )
+from great_expectations.util import convert_to_json_serializable
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -184,51 +181,16 @@ def _expecation_configuration_to_validation_result_sql(
         connection_string=connection_string,
         create_temp_table=False,
     )
-    execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        assets={
-            "my_asset": {
-                "table_name": "animal_names",
-            },
-        },
+    datasource = context.data_sources.add_sqlite(
+        "my_test_datasource", connection_string=connection_string
     )
-
-    context.datasources["my_test_datasource"] = Datasource(
-        name="my_test_datasource",
-        execution_engine=execution_engine.config,
-        data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "animal_names",
-                    },
-                },
-            },
-        },
-    )
-
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="my_asset",
-        )
-    )
-    assert len(batch_definition_list) == 1
-    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=batch_definition_list[0]
-    )
-    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
-    batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
+    asset = datasource.add_table_asset("my_asset", table_name="animal_names")
+    batch_definition = asset.add_batch_definition_whole_table("all of it")
     validator = Validator(
         execution_engine=engine,
         data_context=context,
         batches=[
-            batch,
+            batch_definition.get_batch(),
         ],
     )
     result = expectation.validate_(validator)
@@ -395,7 +357,7 @@ def test_pandas_unexpected_rows_basic_result_format(
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "mostly": 0.9,
@@ -434,7 +396,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "mostly": 0.9,
@@ -474,7 +436,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "mostly": 0.9,
@@ -519,7 +481,7 @@ def test_pandas_unexpected_rows_complete_result_format(
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -566,7 +528,7 @@ def test_expectation_configuration_has_result_format(
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -595,7 +557,7 @@ def test_pandas_default_complete_result_format(
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -636,7 +598,7 @@ def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -690,7 +652,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
     expected_evr_without_unexpected_rows,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -714,7 +676,7 @@ def test_pandas_specify_not_include_unexpected_rows(
     expected_evr_without_unexpected_rows,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -735,7 +697,7 @@ def test_pandas_specify_not_include_unexpected_rows(
 @pytest.mark.unit
 def test_include_unexpected_rows_without_explicit_result_format_raises_error():
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -756,7 +718,7 @@ def test_spark_single_column_complete_result_format(
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -812,7 +774,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -884,7 +846,7 @@ def test_spark_single_column_summary_result_format(
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -937,7 +899,7 @@ def test_spark_single_column_basic_result_format(
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -986,7 +948,7 @@ def test_sqlite_single_column_complete_result_format(
     sqlite_table_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -1028,7 +990,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
     sqlite_table_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -1083,7 +1045,7 @@ def test_sqlite_single_column_summary_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -1118,7 +1080,7 @@ def test_sqlite_single_column_basic_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],

@@ -78,7 +78,7 @@ def quote_str(unquoted_identifier: str, dialect: GXSqlDialect) -> str:
     """Quote a string using the specified dialect's quote character."""
     quote_char = DIALECT_IDENTIFIER_QUOTE_STRINGS[dialect]
     if unquoted_identifier.startswith(quote_char) or unquoted_identifier.endswith(quote_char):
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             f"Identifier {unquoted_identifier} already uses quote character {quote_char}"
         )
     return f"{quote_char}{unquoted_identifier}{quote_char}"

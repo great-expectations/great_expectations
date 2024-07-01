@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Final, Iterator
 
 import pytest
 
@@ -11,8 +11,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
@@ -24,13 +23,21 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import Validator
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
+RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
+
 
 @pytest.fixture(scope="module")
 def connection_string() -> str:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci"
+        return (
+            "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci"
+            f"/{RANDOM_SCHEMA}?warehouse=ci&role=ci"
+        )
     elif os.getenv("SNOWFLAKE_USER") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return "snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
+        return (
+            "snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB"
+            f"/{RANDOM_SCHEMA}?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
+        )
     else:
         pytest.skip("no snowflake credentials")
 
@@ -44,7 +51,7 @@ def datasource(
     """Test Adding and Updating the Datasource associated with this module.
     Note: There is no need to test Get or Delete Datasource.
     Those assertions can be found in the datasource_name fixture."""
-    datasource = context.sources.add_snowflake(
+    datasource = context.data_sources.add_snowflake(
         name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
@@ -52,7 +59,7 @@ def datasource(
     updated_connection_string = f"{connection_string}&foo=bar"
 
     datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
-    datasource = context.sources.add_or_update_snowflake(datasource=datasource)
+    datasource = context.data_sources.add_or_update_snowflake(datasource=datasource)
     assert (
         datasource.connection_string == updated_connection_string
     ), "The datasource was not updated in the previous method call."
@@ -67,7 +74,7 @@ def datasource(
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    datasource = context.sources.add_or_update_snowflake(**datasource_dict)
+    datasource = context.data_sources.add_or_update_snowflake(**datasource_dict)
     assert (
         datasource.connection_string == updated_connection_string
     ), "The datasource was not updated in the previous method call."
@@ -90,16 +97,15 @@ def table_asset(
     asset_name: str,
     table_factory: TableFactory,
 ) -> TableAsset:
-    schema_name = f"i{uuid.uuid4().hex}"
     table_name = f"i{uuid.uuid4().hex}"
     table_factory(
         gx_engine=datasource.get_execution_engine(),
         table_names={table_name},
-        schema_name=schema_name,
+        schema_name=RANDOM_SCHEMA,
     )
     return datasource.add_table_asset(
         name=asset_name,
-        schema_name=schema_name,
+        schema_name=RANDOM_SCHEMA,
         table_name=table_name,
     )
 
@@ -139,7 +145,7 @@ def expectation_suite(
     Those assertions can be found in the expectation_suite fixture."""
     expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_be_null",
+            type="expect_column_values_to_not_be_null",
             kwargs={
                 "column": "name",
                 "mostly": 1,

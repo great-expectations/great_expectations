@@ -6,12 +6,12 @@ For detailed information on QueryExpectations, please see:
 
 from typing import ClassVar, List, Tuple, Union
 
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
+from great_expectations.util import convert_to_json_serializable
 
 
 class ExpectQueriedTableRowCountToBe(QueryExpectation):

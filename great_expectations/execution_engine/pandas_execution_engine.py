@@ -196,7 +196,7 @@ class PandasExecutionEngine(ExecutionEngine):
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
         elif not isinstance(batch_data, PandasBatchData):
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"  # noqa: E501
             )
 
@@ -220,7 +220,7 @@ class PandasExecutionEngine(ExecutionEngine):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
-                raise gx_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                     f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.  Please check your config.
 """  # noqa: E501
                 )
@@ -230,7 +230,7 @@ class PandasExecutionEngine(ExecutionEngine):
             elif isinstance(batch_spec.batch_data, PandasBatchData):
                 df = batch_spec.batch_data.dataframe
             else:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."  # noqa: E501
                 )
 
@@ -245,7 +245,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 reader_options: dict = batch_spec.reader_options or {}
                 path: str = batch_spec.path
                 s3_url = S3Url(path)
-                if "compression" not in reader_options.keys():
+                if "compression" not in reader_options:
                     inferred_compression_param = sniff_s3_compression(s3_url)
                     if inferred_compression_param is not None:
                         reader_options["compression"] = inferred_compression_param
@@ -255,7 +255,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 aws.exceptions.ParamValidationError,
                 aws.exceptions.ClientError,
             ) as error:
-                raise gx_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                     f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""  # noqa: E501
                 )
             logger.debug(f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}")
@@ -269,7 +269,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 self._instantiate_azure_client()
             # if we were not able to instantiate Azure client, then raise error
             if self._azure is None:
-                raise gx_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                     """PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""  # noqa: E501
                 )
@@ -295,7 +295,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 self._instantiate_gcs_client()
             # if we were not able to instantiate GCS client, then raise error
             if self._gcs is None:
-                raise gx_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                     """PandasExecutionEngine has been passed a GCSBatchSpec,
                         but the ExecutionEngine does not have an GCS client configured. Please check your config."""  # noqa: E501
                 )
@@ -308,7 +308,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 gcs_blob = gcs_bucket.blob(gcs_url.blob)
                 logger.debug(f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}")
             except google.GoogleAPIError as error:
-                raise gx_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                     f"""PandasExecutionEngine encountered the following error while trying to read data from GCS \
 Bucket: {error}"""  # noqa: E501
                 )
@@ -334,7 +334,7 @@ Bucket: {error}"""  # noqa: E501
             )
             if isinstance(reader_fn_result, list):
                 if len(reader_fn_result) > 1:
-                    raise gx_exceptions.ExecutionEngineError(
+                    raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                         "Pandas reader method must return a single DataFrame, "
                         f'but "{reader_method}" returned {len(reader_fn_result)} DataFrames.'
                     )
@@ -348,7 +348,7 @@ Bucket: {error}"""  # noqa: E501
             df = reader_fn(**batch_spec.reader_options)
 
         else:
-            raise gx_exceptions.BatchSpecError(
+            raise gx_exceptions.BatchSpecError(  # noqa: TRY003
                 f"""batch_spec must be of type RuntimeDataBatchSpec, PandasBatchSpec, PathBatchSpec, S3BatchSpec, AzureBatchSpec or FabricBatchSpec \
 not {batch_spec.__class__.__name__}"""  # noqa: E501
             )
@@ -390,7 +390,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
         """  # noqa: E501
         # Changed to is None because was breaking prior
         if self.batch_manager.active_batch_data is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
@@ -430,7 +430,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
             return {"reader_method": "read_sas"}
 
         else:
-            raise gx_exceptions.ExecutionEngineError(
+            raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                 f'Unable to determine reader method from path: "{path}".'
             )
 
@@ -457,7 +457,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
 
         """  # noqa: E501
         if reader_method is None and path is None:
-            raise gx_exceptions.ExecutionEngineError(
+            raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
@@ -475,7 +475,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
                 reader_fn = partial(reader_fn, **reader_options)
             return reader_fn
         except AttributeError:
-            raise gx_exceptions.ExecutionEngineError(
+            raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
@@ -500,7 +500,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
         """  # noqa: E501
         table = domain_kwargs.get("table", None)
         if table:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "PandasExecutionEngine does not currently support multiple named tables."
             )
 
@@ -510,7 +510,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
             if self.batch_manager.active_batch_data_id is not None:
                 data = cast(PandasBatchData, self.batch_manager.active_batch_data).dataframe
             else:
-                raise gx_exceptions.ValidationError(
+                raise gx_exceptions.ValidationError(  # noqa: TRY003
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:  # noqa: PLR5501
@@ -519,7 +519,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
                     PandasBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
             else:
-                raise gx_exceptions.ValidationError(
+                raise gx_exceptions.ValidationError(  # noqa: TRY003
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
@@ -530,7 +530,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
 
             # Ensuring proper condition parser has been provided
             if condition_parser not in ["python", "pandas"]:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "condition_parser is required when setting a row_condition,"
                     " and must be 'python' or 'pandas'"
                 )
@@ -566,7 +566,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
                 )
             else:  # noqa: PLR5501
                 if ignore_row_if != "neither":
-                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')  # noqa: TRY003
 
             return data
 
@@ -588,7 +588,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
                 )
             else:  # noqa: PLR5501
                 if ignore_row_if != "never":
-                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')  # noqa: TRY003
 
             return data
 
@@ -625,7 +625,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
         """  # noqa: E501
         table: str = domain_kwargs.get("table", None)
         if table:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "PandasExecutionEngine does not currently support multiple named tables."
             )
 

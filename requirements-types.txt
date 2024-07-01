@@ -4,10 +4,13 @@
 --requirement reqs/requirements-dev-contrib.txt
 --requirement reqs/requirements-dev-cloud.txt
 --requirement reqs/requirements-dev-sqlalchemy.txt
+--requirement docs/sphinx_api_docs_source/requirements-dev-api-docs.txt
 # typing stubs
 pandas-stubs
+types-beautifulsoup4
 types-colorama
 types-decorator
+types-html5lib
 types-jsonschema
 types-openpyxl
 types-protobuf

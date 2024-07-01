@@ -10,36 +10,6 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 @pytest.mark.unit
-def test_render():
-    # noinspection PyUnusedLocal
-    with pytest.raises(NotImplementedError):
-        Renderer().render(**{})
-
-    # noinspection PyUnusedLocal
-    with pytest.raises(TypeError):
-        # noinspection PyArgumentList
-        Renderer().render({})
-
-    # noinspection PyUnusedLocal
-    with pytest.raises(TypeError):
-        # noinspection PyArgumentList
-        Renderer().render("wowza")
-
-
-# TODO: Implement this test thoughtfully
-# def test__id_from_configuration():
-#     Renderer()._id_from_configuration(expectation_type, expectation_kwargs, data_asset_name=None)
-
-# TODO: Implement this test thoughtfully
-# def test__get_expectation_type():
-#     Renderer()._get_expectation_type(ge_object)
-
-# TODO: Implement this test thoughtfully
-# def test__find_ge_object_type():
-#     Renderer()._find_ge_object_type(ge_object)
-
-
-@pytest.mark.unit
 def test__find_evr_by_type(titanic_profiled_evrs_1):
     # TODO: _find_all_evrs_by_type should accept an ValidationResultSuite, not ValidationResultSuite.results  # noqa: E501
     found_evr = Renderer()._find_evr_by_type(
@@ -75,7 +45,7 @@ def test__find_evr_by_type(titanic_profiled_evrs_1):
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_distinct_values_to_be_in_set",
+            type="expect_column_distinct_values_to_be_in_set",
             kwargs={"column": "PClass", "value_set": None, "result_format": "SUMMARY"},
         ),
     )

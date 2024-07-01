@@ -145,7 +145,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
                 metric_series = column_lengths >= min_value
 
         else:
-            raise ValueError("Invalid configuration")
+            raise ValueError("Invalid configuration")  # noqa: TRY003
 
         return metric_series
 
@@ -165,18 +165,18 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         )
 
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         # Assert that min_value and max_value are integers
         try:
             if min_value is not None and not float(min_value).is_integer():
-                raise ValueError("min_value and max_value must be integers")
+                raise ValueError("min_value and max_value must be integers")  # noqa: TRY003, TRY301
 
             if max_value is not None and not float(max_value).is_integer():
-                raise ValueError("min_value and max_value must be integers")
+                raise ValueError("min_value and max_value must be integers")  # noqa: TRY003, TRY301
 
         except ValueError:
-            raise ValueError("min_value and max_value must be integers")
+            raise ValueError("min_value and max_value must be integers")  # noqa: TRY003
 
         if min_value is not None and max_value is not None:
             return sa.and_(
@@ -206,18 +206,18 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         )
 
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         # Assert that min_value and max_value are integers
         try:
             if min_value is not None and not float(min_value).is_integer():
-                raise ValueError("min_value and max_value must be integers")
+                raise ValueError("min_value and max_value must be integers")  # noqa: TRY003, TRY301
 
             if max_value is not None and not float(max_value).is_integer():
-                raise ValueError("min_value and max_value must be integers")
+                raise ValueError("min_value and max_value must be integers")  # noqa: TRY003, TRY301
 
         except ValueError:
-            raise ValueError("min_value and max_value must be integers")
+            raise ValueError("min_value and max_value must be integers")  # noqa: TRY003
 
         if min_value is not None and max_value is not None:
             return (column_lengths >= min_value) & (column_lengths <= max_value)

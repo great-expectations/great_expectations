@@ -1,13 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.compatibility import pydantic
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -30,9 +35,16 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings that match a given regular expression."
+)
+REGEX_DESCRIPTION = "The regular expression the column entries should match."
+DATA_QUALITY_ISSUES = ["Pattern Matching"]
+SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
+
 
 class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
-    """Expect the column entries to be strings that match a given regular expression.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     Valid matches can be found \
     anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
@@ -41,18 +53,20 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
     expect_column_values_to_match_regex is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
+    Column Map Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column and ask a yes/no question for every row in that column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         regex (str): \
-            The regular expression the column entries should match.
-
-    Keyword Args:
-        mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
-            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+            {REGEX_DESCRIPTION}
 
     Other Parameters:
+        mostly (None or a float between 0 and 1): \
+            {MOSTLY_DESCRIPTION} \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -76,11 +90,89 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        {DATA_QUALITY_ISSUES[0]}
+
+    Example Data:
+                test 	test2
+            0 	"aaa"   "bcc"
+            1 	"abb"   "bdd"
+            2 	"acc"   "abc"
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnValuesToMatchRegex(
+                    column="test",
+                    regex="^a.*",
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  }},
+                  "meta": {{}},
+                  "success": true
+                }}
+
+        Failing Case:
+            Input:
+                ExpectColumnValuesToMatchRegex(
+                    column="test2",
+                    regex="^a.*",
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 2,
+                    "unexpected_percent": 66.66666666666666,
+                    "partial_unexpected_list": [
+                      "bcc",
+                      "bdd"
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 66.66666666666666,
+                    "unexpected_percent_nonmissing": 66.66666666666666
+                  }},
+                  "meta": {{}},
+                  "success": false
+                }}
     """  # noqa: E501
 
-    regex: Union[str, EvaluationParameterDict] = "(?s).*"
+    regex: Union[str, SuiteParameterDict] = pydantic.Field(
+        default="(?s).*", description=REGEX_DESCRIPTION
+    )
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
@@ -90,6 +182,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.match_regex"
     success_keys = (
@@ -100,6 +193,37 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "column",
         "regex",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToMatchRegex]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.QUESTION)
@@ -157,7 +281,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -166,9 +290,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

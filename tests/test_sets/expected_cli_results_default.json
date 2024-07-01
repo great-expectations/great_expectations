@@ -7,7 +7,7 @@
   "results": [
     {
       "expectation_config": {
-        "expectation_type": "expect_column_to_exist",
+        "type": "expect_column_to_exist",
         "kwargs": {
           "column": "Name",
           "result_format": "SUMMARY"
@@ -20,7 +20,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_match_regex",
+        "type": "expect_column_values_to_match_regex",
         "kwargs": {
           "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
           "column": "Name",
@@ -28,9 +28,6 @@
           "mostly": 0.95
         }
       },
-      "exception_info": {"exception_message": null,
-         "exception_traceback": null,
-         "raised_exception": false},
       "success": true,
       "exception_info": {"exception_message": null,
                "exception_traceback": null,
@@ -70,7 +67,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_to_exist",
+        "type": "expect_column_to_exist",
         "kwargs": {
           "column": "PClass",
           "result_format": "SUMMARY"
@@ -83,7 +80,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
           "column": "PClass",
           "value_set": [
@@ -121,7 +118,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_to_exist",
+        "type": "expect_column_to_exist",
         "kwargs": {
           "column": "Age",
           "result_format": "SUMMARY"
@@ -134,7 +131,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_mean_to_be_between",
+        "type": "expect_column_mean_to_be_between",
         "kwargs": {
           "column": "Age",
           "max_value": 40,
@@ -155,7 +152,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_between",
+        "type": "expect_column_values_to_be_between",
         "kwargs": {
           "column": "Age",
           "max_value": 80,
@@ -181,7 +178,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_to_exist",
+        "type": "expect_column_to_exist",
         "kwargs": {
           "column": "Sex",
           "result_format": "SUMMARY"
@@ -194,7 +191,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_to_exist",
+        "type": "expect_column_to_exist",
         "kwargs": {
           "column": "Survived",
           "result_format": "SUMMARY"
@@ -207,7 +204,7 @@
     },
     {
       "expectation_config": {
-        "expectation_type": "expect_column_to_exist",
+        "type": "expect_column_to_exist",
         "kwargs": {
           "column": "SexCode",
           "result_format": "SUMMARY"
@@ -220,11 +217,12 @@
     }
   ],
   "success": false,
+  "suite_name": "default",
   "statistics": {
     "evaluated_expectations": 10,
     "successful_expectations": 9,
     "unsuccessful_expectations": 1,
     "success_percent": 90.0
   },
-  "evaluation_parameters": {}
+  "suite_parameters": {}
 }

@@ -9,15 +9,9 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
-from great_expectations.data_context import get_context
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    FilesystemStoreBackendDefaults,
-)
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -456,7 +450,7 @@ def test_get_compute_domain_with_row_condition(
 
     # Ensuring compute kwargs have not been modified
     assert (
-        "row_condition" in compute_kwargs.keys()
+        "row_condition" in compute_kwargs
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {}
 
@@ -481,7 +475,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(
     assert data.collect() == expected_df.collect()
 
     # Ensuring compute kwargs have not been modified
-    assert "row_condition" in compute_kwargs.keys()
+    assert "row_condition" in compute_kwargs
     assert accessor_kwargs == {}
 
 
@@ -622,9 +616,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
 def dataframes_equal(first_table, second_table):
     if first_table.schema != second_table.schema:
         return False
-    if first_table.collect() != second_table.collect():
-        return False
-    return True
+    return not first_table.collect() != second_table.collect()
 
 
 # Ensuring that, given aggregate metrics, they can be properly bundled together
@@ -727,7 +719,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         "metric_partial_fn": desired_aggregate_fn_metric_4,
         "table.columns": table_columns_metric,
     }
-    start = datetime.datetime.now()
+    start = datetime.datetime.now()  # noqa: DTZ005
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
     results = engine.resolve_metrics(
@@ -740,7 +732,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metrics=metrics,
     )
     metrics.update(results)
-    end = datetime.datetime.now()
+    end = datetime.datetime.now()  # noqa: DTZ005
     print(end - start)
     assert metrics[desired_metric_1.id] == 3
     assert metrics[desired_metric_2.id] == 1
@@ -944,7 +936,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session)
 
     # Ensuring compute kwargs have not been modified
     assert (
-        "row_condition" in compute_kwargs.keys()
+        "row_condition" in compute_kwargs
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {"column": "b"}, "Accessor kwargs have been modified"
 
@@ -1128,84 +1120,3 @@ def test_schema_properly_added(spark_session):
     )
     df = engine.dataframe
     assert df.schema == schema
-
-
-@pytest.mark.spark
-def test_explicit_string_identifiers_should_work_with_validator(spark_session):
-    """
-    Integration test taken from: https://github.com/great-expectations/great_expectations/issues/7628
-    Ensures that the expectations can be used with a string identifier, resolves to the correct column
-    in SQL and a result is returned.
-    """  # noqa: E501
-    metastore_dir = "/tmp/great_expectations_v3"
-
-    data_context_config = DataContextConfig(
-        store_backend_defaults=FilesystemStoreBackendDefaults(root_directory=metastore_dir),
-    )
-    context = get_context(project_config=data_context_config)
-    batch_identifiers = [
-        "customer",
-    ]
-    my_spark_datasource_config = {
-        "name": "test_dataset",
-        "class_name": "Datasource",
-        "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-        "data_connectors": {
-            "runtimedataconnector_test_dataset": {
-                "module_name": "great_expectations.datasource.data_connector",
-                "class_name": "RuntimeDataConnector",
-                "batch_identifiers": batch_identifiers,
-            }
-        },
-    }
-
-    context.add_datasource(**my_spark_datasource_config)
-
-    data2 = [
-        ("James", 100),
-        ("Michael", 101),
-        ("Robert", 102),
-        ("Maria", 103),
-        ("Jen", 104),
-    ]
-
-    schema = pyspark.types.StructType(
-        [
-            pyspark.types.StructField("customer", pyspark.types.StringType(), True),
-            pyspark.types.StructField("order number", pyspark.types.IntegerType(), True),
-        ]
-    )
-    df = spark_session.createDataFrame(data=data2, schema=schema)
-
-    batch_request = RuntimeBatchRequest(
-        datasource_name="test_dataset",
-        data_connector_name="runtimedataconnector_test_dataset",
-        data_asset_name="test_dataset",
-        batch_identifiers={
-            "customer": "test",
-        },
-        runtime_parameters={"batch_data": df},  # Your dataframe goes here
-    )
-
-    context.add_or_update_expectation_suite(expectation_suite_name="test_ge_unique_record")
-
-    validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name="test_ge_unique_record",
-    )
-
-    col_name = "`order number`"
-    result = validator.expect_column_values_to_be_unique(column=col_name)
-
-    assert result["success"]
-    assert result["expectation_config"]["kwargs"]["column"] == col_name
-    assert result["result"] == {
-        "element_count": 5,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": [],
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_percent_total": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-    }

@@ -1,3 +1,3 @@
 ## 🚧 **Under construction** 🚧
 
-**Updates for this page are still in progress.**
+**Updates for this page are in progress.**

@@ -16,7 +16,7 @@ from typing import List
 def check_dependencies(*deps: str) -> None:
     for dep in deps:
         if not shutil.which(dep):
-            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")
+            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")  # noqa: TRY002, TRY003
 
 
 def run_docusaurus_build(target_dir: str) -> None:
@@ -45,7 +45,7 @@ def run_grep(target_dir: str) -> List[str]:
             text=True,
         )
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}")
+        raise RuntimeError(f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}")  # noqa: TRY003
     return res.stdout.splitlines()
 
 

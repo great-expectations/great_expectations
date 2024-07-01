@@ -137,16 +137,7 @@ class SiteBuilder:
         self.cloud_mode = cloud_mode
         self.ge_cloud_mode = cloud_mode
 
-        usage_statistics_config = data_context.anonymous_usage_statistics
-        data_context_id = None
-        if (
-            usage_statistics_config
-            and usage_statistics_config.enabled
-            and usage_statistics_config.data_context_id
-        ):
-            data_context_id = usage_statistics_config.data_context_id
-
-        self.data_context_id = data_context_id
+        self.data_context_id = data_context.variables.data_context_id
 
         # set custom_styles_directory if present
         custom_styles_directory = None
@@ -193,13 +184,13 @@ class SiteBuilder:
             },
             "validations": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name": data_context.validations_store_name,
+                "source_store_name": data_context.validation_results_store_name,
                 "renderer": {"class_name": "ValidationResultsPageRenderer"},
                 "validation_results_limit": site_index_builder.get("validation_results_limit"),
             },
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name": data_context.validations_store_name,
+                "source_store_name": data_context.validation_results_store_name,
                 "renderer": {"class_name": "ProfilingResultsPageRenderer"},
             },
         }
@@ -375,7 +366,7 @@ class DefaultSiteSectionBuilder:
         self.cloud_mode = cloud_mode
         self.ge_cloud_mode = cloud_mode
         if renderer is None:
-            raise exceptions.InvalidConfigError(
+            raise exceptions.InvalidConfigError(  # noqa: TRY003
                 "SiteSectionBuilder requires a renderer configuration " "with a class_name key."
             )
         module_name = renderer.get("module_name") or "great_expectations.render.renderer"
@@ -493,7 +484,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_message += (
                     f'{type(e).__name__}: "{e!s}".  ' f'Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                logger.error(exception_message)  # noqa: TRY400
 
 
 class DefaultSiteIndexBuilder:
@@ -761,7 +752,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message)
+            logger.error(exception_message)  # noqa: TRY400
 
         return self.target_store.write_index_page(viewable_content), index_links_dict
 
@@ -861,7 +852,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_identifier=profiling_result_key.batch_identifier,
                         expectation_suite_name=profiling_result_key.expectation_suite_identifier.name,
                         run_id=profiling_result_key.run_id,
-                        validations_store_name=self.source_stores.get("profiling"),
+                        validation_results_store_name=self.source_stores.get("profiling"),
                     )
 
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
@@ -916,7 +907,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_identifier=validation_result_key.batch_identifier,
                         expectation_suite_name=validation_result_key.expectation_suite_identifier.name,
                         run_id=validation_result_key.run_id,
-                        validations_store_name=self.source_stores.get("validations"),
+                        validation_results_store_name=self.source_stores.get("validations"),
                     )
 
                     validation_success = validation.success

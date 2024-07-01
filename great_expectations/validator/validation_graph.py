@@ -302,15 +302,15 @@ class ValidationGraph:
                             failed_metric_info[failed_metric.id]["exception_info"] = exception_info
 
                 else:
-                    raise err
+                    raise err  # noqa: TRY201
             except Exception as e:
                 if catch_exceptions:
-                    logger.error(
+                    logger.error(  # noqa: TRY400
                         f"""Caught exception {e!s} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""  # noqa: E501
                     )
                     done = True
                 else:
-                    raise e
+                    raise e  # noqa: TRY201
 
             if (len(ready_metrics) + len(needed_metrics) == 0) or (
                 len(ready_metrics) == len(aborted_metrics_info)
@@ -372,12 +372,12 @@ class ExpectationValidationGraph:
         graph: ValidationGraph,
     ) -> None:
         if configuration is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 """Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object."""  # noqa: E501
             )
 
         if graph is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 """Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object."""  # noqa: E501
             )
 

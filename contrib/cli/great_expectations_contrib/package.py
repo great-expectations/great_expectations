@@ -271,9 +271,9 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
 
         # A sanity check in case the user modifies the Cookiecutter template in unexpected ways
         if len(packages) == 0:
-            raise FileNotFoundError("Could not find a user-defined package")
+            raise FileNotFoundError("Could not find a user-defined package")  # noqa: TRY003
         elif len(packages) > 1:
-            raise ValueError("Found more than one user-defined package")
+            raise ValueError("Found more than one user-defined package")  # noqa: TRY003
 
         return packages[0]
 
@@ -285,7 +285,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         try:
             expectations_module = importlib.import_module(f"{package}.expectations")
             return expectations_module
-        except ModuleNotFoundError:
+        except ModuleNotFoundError:  # noqa: TRY302
             raise
 
     @staticmethod

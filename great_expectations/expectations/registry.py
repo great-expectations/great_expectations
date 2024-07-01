@@ -314,7 +314,7 @@ def get_metric_provider(
         metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
-        raise gx_exceptions.MetricProviderError(
+        raise gx_exceptions.MetricProviderError(  # noqa: TRY003
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
@@ -329,7 +329,7 @@ def get_metric_function_type(
         ]
         return getattr(provider_fn, "metric_fn_type", None)
     except KeyError:
-        raise gx_exceptions.MetricProviderError(
+        raise gx_exceptions.MetricProviderError(  # noqa: TRY003
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
@@ -342,7 +342,7 @@ def get_metric_kwargs(
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:
-            raise gx_exceptions.MetricProviderError(f"No definition found for {metric_name}")
+            raise gx_exceptions.MetricProviderError(f"No definition found for {metric_name}")  # noqa: TRY003
         default_kwarg_values = metric_definition["default_kwarg_values"]
         metric_kwargs = {
             "metric_domain_keys": metric_definition["metric_domain_keys"],
@@ -377,7 +377,7 @@ def get_metric_kwargs(
             metric_kwargs["metric_value_kwargs"] = metric_value_kwargs
         return metric_kwargs
     except KeyError:
-        raise gx_exceptions.MetricProviderError(f"Incomplete definition found for {metric_name}")
+        raise gx_exceptions.MetricProviderError(f"Incomplete definition found for {metric_name}")  # noqa: TRY003
 
 
 def get_domain_metrics_dict_by_name(
@@ -393,7 +393,7 @@ def get_domain_metrics_dict_by_name(
 def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
     expectation: Type[Expectation] | None = _registered_expectations.get(expectation_name)
     if not expectation:
-        raise gx_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
+        raise gx_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")  # noqa: TRY003
 
     return expectation
 
@@ -406,9 +406,11 @@ def list_registered_expectation_implementations(
         expectation_name,
         expectation_implementation,
     ) in _registered_expectations.items():
-        if expectation_root is None:
-            registered_expectation_implementations.append(expectation_name)
-        elif expectation_root and issubclass(expectation_implementation, expectation_root):
+        if (
+            expectation_root is None
+            or expectation_root
+            and issubclass(expectation_implementation, expectation_root)
+        ):
             registered_expectation_implementations.append(expectation_name)
 
     return registered_expectation_implementations

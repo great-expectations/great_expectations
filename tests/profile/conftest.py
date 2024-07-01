@@ -14,8 +14,6 @@ from great_expectations.data_context.util import file_relative_path
 
 @pytest.fixture
 def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -75,8 +73,10 @@ def get_set_of_columns_and_expectations_from_suite(
         A tuple containing a set of columns and a set of expectations found in a suite
     """
     columns: Set[str] = {
-        i.kwargs.get("column") for i in suite.expectation_configurations if i.kwargs.get("column")
+        i.kwargs.get("column")  # type: ignore[misc]
+        for i in suite.expectation_configurations
+        if i.kwargs.get("column")
     }
-    expectations: Set[str] = {i.expectation_type for i in suite.expectation_configurations}
+    expectations: Set[str] = {i.type for i in suite.expectation_configurations}
 
     return columns, expectations

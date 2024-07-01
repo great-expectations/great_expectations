@@ -15,7 +15,6 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
-    expectationSuiteSchema,
 )
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
@@ -28,17 +27,16 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource.new_datasource import (
-    BaseDatasource as LegacyDatasource,
-)
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.data_context.store.validations_store import ValidationsStore
-    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+    from great_expectations.data_context.store.validation_results_store import (
+        ValidationResultsStore,
+    )
+    from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
@@ -94,13 +92,13 @@ class ValidationDefinition(BaseModel):
     data: BatchDefinition = Field(..., allow_mutation=False)
     suite: ExpectationSuite = Field(..., allow_mutation=False)
     id: Union[str, None] = None
-    _validation_results_store: ValidationsStore = PrivateAttr()
+    _validation_results_store: ValidationResultsStore = PrivateAttr()
 
     def __init__(self, **data: Any):
         super().__init__(**data)
 
         # TODO: Migrate this to model_post_init when we get to pydantic 2
-        self._validation_results_store = project_manager.get_validations_store()
+        self._validation_results_store = project_manager.get_validation_results_store()
 
     @property
     def batch_definition(self) -> BatchDefinition:
@@ -121,7 +119,7 @@ class ValidationDefinition(BaseModel):
             return cls._decode_suite(v)
         elif isinstance(v, ExpectationSuite):
             return v
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Suite must be a dictionary (if being deserialized) or an ExpectationSuite object."
         )
 
@@ -132,7 +130,7 @@ class ValidationDefinition(BaseModel):
             return cls._decode_data(v)
         elif isinstance(v, BatchDefinition):
             return v
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Data must be a dictionary (if being deserialized) or a BatchDefinition object."
         )
 
@@ -142,7 +140,7 @@ class ValidationDefinition(BaseModel):
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
         except ValidationError as e:
-            raise ValueError("Serialized suite did not contain expected identifiers") from e
+            raise ValueError("Serialized suite did not contain expected identifiers") from e  # noqa: TRY003
 
         name = suite_identifiers.name
         id = suite_identifiers.id
@@ -151,11 +149,11 @@ class ValidationDefinition(BaseModel):
         key = expectation_store.get_key(name=name, id=id)
 
         try:
-            config = expectation_store.get(key)
+            config: dict = expectation_store.get(key)
         except gx_exceptions.InvalidKeyError as e:
-            raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e
+            raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e  # noqa: TRY003
 
-        return ExpectationSuite(**expectationSuiteSchema.load(config))
+        return ExpectationSuite(**config)
 
     @classmethod
     def _decode_data(cls, data_dict: dict) -> BatchDefinition:
@@ -163,7 +161,7 @@ class ValidationDefinition(BaseModel):
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
         except ValidationError as e:
-            raise ValueError("Serialized data did not contain expected identifiers") from e
+            raise ValueError("Serialized data did not contain expected identifiers") from e  # noqa: TRY003
 
         ds_name = data_identifiers.datasource.name
         asset_name = data_identifiers.asset.name
@@ -173,23 +171,19 @@ class ValidationDefinition(BaseModel):
         try:
             ds = datasource_dict[ds_name]
         except KeyError as e:
-            raise ValueError(f"Could not find datasource named '{ds_name}'.") from e
-
-        # Should never be raised but necessary for type checking until we delete non-FDS support.
-        if isinstance(ds, LegacyDatasource):
-            raise ValueError("Legacy datasources are not supported.")
+            raise ValueError(f"Could not find datasource named '{ds_name}'.") from e  # noqa: TRY003
 
         try:
             asset = ds.get_asset(asset_name)
         except LookupError as e:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Could not find asset named '{asset_name}' within '{ds_name}' datasource."
             ) from e
 
         try:
             batch_definition = asset.get_batch_definition(batch_definition_name)
         except KeyError as e:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."  # noqa: E501
             ) from e
 
@@ -199,21 +193,33 @@ class ValidationDefinition(BaseModel):
     def run(
         self,
         *,
-        batch_parameters: Optional[BatchRequestOptions] = None,
-        evaluation_parameters: Optional[dict[str, Any]] = None,
-        result_format: ResultFormat = ResultFormat.SUMMARY,
+        batch_parameters: Optional[BatchParameters] = None,
+        suite_parameters: Optional[dict[str, Any]] = None,
+        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
+        run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
+        if not self.id:
+            self._add_to_store()
+
         validator = Validator(
             batch_definition=self.batch_definition,
-            batch_request_options=batch_parameters,
+            batch_parameters=batch_parameters,
             result_format=result_format,
         )
-        results = validator.validate_expectation_suite(self.suite, evaluation_parameters)
+        results = validator.validate_expectation_suite(self.suite, suite_parameters)
+        results.meta["validation_id"] = self.id
+
+        # NOTE: We should promote this to a top-level field of the result.
+        #       Meta should be reserved for user-defined information.
+        if run_id:
+            results.meta["run_id"] = run_id
 
         (
             expectation_suite_identifier,
             validation_result_id,
-        ) = self._get_expectation_suite_and_validation_result_ids(validator)
+        ) = self._get_expectation_suite_and_validation_result_ids(
+            validator=validator, run_id=run_id
+        )
 
         ref = self._validation_results_store.store_validation_results(
             suite_validation_result=results,
@@ -231,6 +237,7 @@ class ValidationDefinition(BaseModel):
     def _get_expectation_suite_and_validation_result_ids(
         self,
         validator: Validator,
+        run_id: RunIdentifier | None = None,
     ) -> (
         tuple[GXCloudIdentifier, GXCloudIdentifier]
         | tuple[ExpectationSuiteIdentifier, ValidationResultIdentifier]
@@ -247,8 +254,9 @@ class ValidationDefinition(BaseModel):
             )
             return expectation_suite_identifier, validation_result_id
         else:
-            run_time = datetime.datetime.now(tz=datetime.timezone.utc)
-            run_id = RunIdentifier(run_time=run_time)
+            run_id = run_id or RunIdentifier(
+                run_time=datetime.datetime.now(tz=datetime.timezone.utc)
+            )
             expectation_suite_identifier = ExpectationSuiteIdentifier(name=self.suite.name)
             validation_result_id = ValidationResultIdentifier(
                 batch_identifier=validator.active_batch_id,
@@ -269,3 +277,25 @@ class ValidationDefinition(BaseModel):
         self.suite.identifier_bundle()
 
         return _IdentifierBundle(name=self.name, id=self.id)
+
+    @public_api
+    def save(self) -> None:
+        from great_expectations import project_manager
+
+        store = project_manager.get_validation_definition_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.update(key=key, value=self)
+
+    def _add_to_store(self) -> None:
+        """This is used to persist a validation_definition before we run it.
+
+        We need to persist a validation_definition before it can be run. If user calls runs but
+        hasn't persisted it we add it for them."""
+
+        from great_expectations import project_manager
+
+        store = project_manager.get_validation_definition_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.add(key=key, value=self)

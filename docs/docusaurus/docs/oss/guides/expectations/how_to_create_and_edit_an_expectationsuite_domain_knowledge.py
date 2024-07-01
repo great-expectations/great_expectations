@@ -2,6 +2,7 @@ import pathlib
 import tempfile
 
 import great_expectations as gx
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -22,7 +23,7 @@ context = gx.get_context(project_root_dir=full_path_to_project_directory)
 
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite">
-suite = context.add_expectation_suite(expectation_suite_name="my_suite")
+suite = context.suites.add(ExpectationSuite(name="my_suite"))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1">
@@ -33,7 +34,7 @@ from great_expectations.expectations.expectation_configuration import (
 # Create an Expectation
 expectation_configuration_1 = ExpectationConfiguration(
     # Name of expectation type being added
-    expectation_type="expect_table_columns_to_match_ordered_list",
+    type="expect_table_columns_to_match_ordered_list",
     # These are the arguments of the expectation
     # The keys allowed in the dictionary are Parameters and
     # Keyword Arguments of this Expectation Type
@@ -65,7 +66,7 @@ suite.add_expectation_configuration(
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_2">
 expectation_configuration_2 = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_be_in_set",
+    type="expect_column_values_to_be_in_set",
     kwargs={
         "column": "transaction_type",
         "value_set": ["purchase", "refund", "upgrade"],
@@ -79,7 +80,7 @@ suite.add_expectation_configuration(
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_3">
 expectation_configuration_3 = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_not_be_null",
+    type="expect_column_values_to_not_be_null",
     kwargs={
         "column": "account_id",
         "mostly": 1.0,
@@ -98,7 +99,7 @@ suite.add_expectation_configuration(
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_4">
 expectation_configuration_4 = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_not_be_null",
+    type="expect_column_values_to_not_be_null",
     kwargs={
         "column": "user_id",
         "mostly": 0.75,

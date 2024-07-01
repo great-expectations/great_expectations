@@ -1,11 +1,12 @@
 import great_expectations as gx
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 
 context = gx.get_context()
 
-datasource = context.sources.add_pandas_filesystem(
+datasource = context.data_sources.add_pandas_filesystem(
     name="example_datasource", base_directory="./data"
 )
 
@@ -14,12 +15,10 @@ MY_BATCHING_REGEX = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.c
 asset = datasource.add_csv_asset("asset", batching_regex=MY_BATCHING_REGEX)
 
 ec = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_not_be_null",
+    type="expect_column_values_to_not_be_null",
     kwargs={"column": "passenger_count"},
 )
-suite = context.add_expectation_suite(
-    expectation_suite_name="example_suite", expectations=[ec]
-)
+suite = context.suites.add(ExpectationSuite(name="example_suite", expectations=[ec]))
 
 # <snippet name="docs/docusaurus/docs/oss/guides/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py build_a_batch_request_with_multiple_batches">
 batch_request = asset.build_batch_request()

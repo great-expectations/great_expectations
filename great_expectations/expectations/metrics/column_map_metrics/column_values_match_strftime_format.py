@@ -25,7 +25,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
                 datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
-                raise TypeError(
+                raise TypeError(  # noqa: TRY003
                     "Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."  # noqa: E501
                 )
             except ValueError:
@@ -43,7 +43,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
                 strftime_format,
             )
         except ValueError as e:
-            raise ValueError(f"Unable to use provided strftime_format: {e!s}")
+            raise ValueError(f"Unable to use provided strftime_format: {e!s}")  # noqa: TRY003
 
         def is_parseable_by_format(val):
             if val is None:
@@ -52,7 +52,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
                 datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
-                raise TypeError(
+                raise TypeError(  # noqa: TRY003
                     "Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."  # noqa: E501
                 )
             except ValueError:

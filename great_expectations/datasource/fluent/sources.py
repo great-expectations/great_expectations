@@ -116,7 +116,7 @@ class _SourceFactories:
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
         ds_type_name = _get_field_details(ds_type, "type").default_value
         if not ds_type_name:
-            raise TypeRegistrationError(
+            raise TypeRegistrationError(  # noqa: TRY003
                 f"`{ds_type.__name__}` is missing a `type` attribute with an assigned string value"
             )
 
@@ -142,7 +142,7 @@ class _SourceFactories:
         The method name is pulled from the `Datasource.type` attribute.
         """
         if ds_type in datasource_type_lookup:
-            raise TypeRegistrationError(
+            raise TypeRegistrationError(  # noqa: TRY003
                 f"'{ds_type_name}' is already a registered typed and there can only be 1 type "
                 "for a given name."
             )
@@ -213,7 +213,7 @@ class _SourceFactories:
         crud_method_info.__name__ = crud_fn_name
         crud_method_info.__doc__ = crud_fn_doc
         if crud_fn_name in cls.__crud_registry:
-            raise TypeRegistrationError(
+            raise TypeRegistrationError(  # noqa: TRY003
                 f"'`sources.{crud_fn_name}()` already exists",
             )
         logger.debug(f"Registering data_context.source.{crud_fn_name}()")
@@ -238,7 +238,7 @@ class _SourceFactories:
             try:
                 asset_type_name = _get_field_details(t, "type").default_value
                 if asset_type_name is None:
-                    raise TypeError(
+                    raise TypeError(  # noqa: TRY003, TRY301
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
@@ -246,7 +246,7 @@ class _SourceFactories:
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
-                raise TypeRegistrationError(
+                raise TypeRegistrationError(  # noqa: TRY003
                     f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",  # noqa: E501
                 ) from bad_field_exc
 
@@ -337,14 +337,16 @@ class _SourceFactories:
         existing_datasource = datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if not existing_datasource:
-            return self._data_context.sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
+            return self._data_context.data_sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if isinstance(existing_datasource, PandasDatasource):
             return existing_datasource
 
-        raise DefaultPandasDatasourceError(
-            f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '  # noqa: E501
-            "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."  # noqa: E501
+        raise DefaultPandasDatasourceError(  # noqa: TRY003
+            "Another non-pandas datasource already exists "
+            f'with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
+            "Please rename this datasources if you wish "
+            "to use the pandas_default `PandasDatasource`."
         )
 
     @property
@@ -358,10 +360,10 @@ class _SourceFactories:
             current_datasource = self._data_context.get_datasource(name)
         except ValueError as e:
             if raise_if_none:
-                raise ValueError(f"There is no datasource {name} in the data context.") from e
+                raise ValueError(f"There is no datasource {name} in the data context.") from e  # noqa: TRY003
             current_datasource = None
         if current_datasource and not isinstance(current_datasource, datasource_type):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Trying to update datasource {name} but it is not the correct type. "
                 f"Expected {datasource_type.__name__} but got {type(current_datasource).__name__}"
             )
@@ -378,16 +380,16 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None
         if name_or_datasource and isinstance(name_or_datasource, Datasource):
             if len(kwargs) != 0:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     f"The datasource must be the sole argument. We also received: {kwargs}"
                 )
             datasource = name_or_datasource
         elif name_or_datasource is None and "datasource" in kwargs:
             if len(kwargs) != 1:
-                raise ValueError(f"The datasource must be the sole argument. We received: {kwargs}")
+                raise ValueError(f"The datasource must be the sole argument. We received: {kwargs}")  # noqa: TRY003
             datasource = kwargs["datasource"]
         if datasource and not isinstance(datasource, datasource_type):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Trying to modify datasource {datasource.name} but it is not the correct type. "
                 f"Expected {datasource_type} but got {type(datasource)}"
             )
@@ -424,7 +426,7 @@ class _SourceFactories:
             name_or_datasource and isinstance(name_or_datasource, str) and "name" not in "kwargs"  # noqa: PLR0133
         ) or (name_or_datasource is None and "name" in kwargs and isinstance(kwargs["name"], str)):
             return None
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "A datasource object or a name string must be present. The datasource or "
             "name can be passed in as the first and only positional argument or can be"
             "can be passed in as keyword arguments. The arguments we received were: "
@@ -610,11 +612,11 @@ class _SourceFactories:
                 )
                 return self.create_delete_crud_method(datasource_type, docstring)
             else:
-                raise TypeRegistrationError(
+                raise TypeRegistrationError(  # noqa: TRY003
                     f"Unknown crud method registered for {attr_name} with type {crud_method_type}"
                 )
         except KeyError as e:
-            raise AttributeError(f"No crud method '{attr_name}' in {self.factories}") from e
+            raise AttributeError(f"No crud method '{attr_name}' in {self.factories}") from e  # noqa: TRY003
 
     @override
     def __dir__(self) -> List[str]:

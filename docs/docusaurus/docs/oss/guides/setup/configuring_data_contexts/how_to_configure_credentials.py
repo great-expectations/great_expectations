@@ -40,9 +40,9 @@ env_vars = []
 
 # set environment variables using os.environ()
 os.environ["MY_DB_PW"] = "password"
-os.environ[
-    "POSTGRES_CONNECTION_STRING"
-] = "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"
+os.environ["POSTGRES_CONNECTION_STRING"] = (
+    "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"
+)
 
 # get context and set config variables in config_variables.yml
 context = gx.get_context()
@@ -59,13 +59,13 @@ with open(context_config_variables_file_path, "w+") as f:
 
 # <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string">
 # The password can be added as an environment variable
-pg_datasource = context.sources.add_or_update_postgres(
+pg_datasource = context.data_sources.add_or_update_postgres(
     name="my_postgres_db",
     connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
 )
 
 # Alternately, the full connection string can be added as an environment variable
-pg_datasource = context.sources.add_or_update_postgres(
+pg_datasource = context.data_sources.add_or_update_postgres(
     name="my_postgres_db", connection_string="${POSTGRES_CONNECTION_STRING}"
 )
 # </snippet>
@@ -95,7 +95,7 @@ assert context.list_datasources() == [
 
 # <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml">
 # Variables in config_variables.yml can be referenced in the connection string
-pg_datasource = context.sources.add_or_update_postgres(
+pg_datasource = context.data_sources.add_or_update_postgres(
     name="my_postgres_db", connection_string="${my_postgres_db_yaml_creds}"
 )
 # </snippet>

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, List
 import pip
 from great_expectations_contrib.commands import read_package_from_file, sync_package
 
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations_contrib.package import (
@@ -68,7 +68,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
                 f"Successfully serialized {package.package_name} to dict and appended to manifest list"  # noqa: E501
             )
         except Exception as e:
-            logger.error(f"Something went wrong when syncing {path} and serializing to dict: {e}")
+            logger.error(f"Something went wrong when syncing {path} and serializing to dict: {e}")  # noqa: TRY400
         finally:
             # Always ensure we revert back to the project root
             os.chdir(root)

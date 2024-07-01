@@ -17,6 +17,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
+from great_expectations.exceptions.exceptions import DataContextRequiredError
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +34,11 @@ if TYPE_CHECKING:
         FileDataContext,
     )
     from great_expectations.data_context.store import (
-        CheckpointStore,
-        EvaluationParameterStore,
         ExpectationsStore,
-        ValidationsStore,
+        SuiteParameterStore,
+        ValidationResultsStore,
     )
+    from great_expectations.data_context.store.checkpoint_store import CheckpointStore
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
@@ -82,16 +83,13 @@ class ProjectManager:
         )
         return self.__project
 
-    def set_project(self, project: AbstractDataContext) -> None:
+    def set_project(self, project: AbstractDataContext | None) -> None:
         self.__project = project
 
     @property
     def _project(self) -> AbstractDataContext:
         if not self.__project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."  # noqa: E501
-            )
+            raise DataContextRequiredError()
         return self.__project
 
     def get_expectations_store(self) -> ExpectationsStore:
@@ -100,14 +98,14 @@ class ProjectManager:
     def get_checkpoints_store(self) -> CheckpointStore:
         return self._project.checkpoint_store
 
-    def get_validations_store(self) -> ValidationsStore:
-        return self._project.validations_store
+    def get_validation_results_store(self) -> ValidationResultsStore:
+        return self._project.validation_results_store
 
     def get_validation_definition_store(self) -> ValidationDefinitionStore:
         return self._project.validation_definition_store
 
-    def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
-        return self._project.evaluation_parameter_store
+    def get_suite_parameters_store(self) -> SuiteParameterStore:
+        return self._project.suite_parameter_store
 
     def get_datasources(self) -> DatasourceDict:
         return self._project.datasources
@@ -196,7 +194,7 @@ class ProjectManager:
         try:
             kwargs = param_lookup[mode]
         except KeyError:
-            raise ValueError(f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud.")
+            raise ValueError(f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud.")  # noqa: TRY003
 
         from great_expectations.data_context.data_context import (
             AbstractDataContext,
@@ -232,7 +230,7 @@ class ProjectManager:
         if not isinstance(context, expected_type):
             # example I want an ephemeral context but the presence of a GX_CLOUD env var gives me a cloud context  # noqa: E501
             # this kind of thing should not be possible but there may be some edge cases
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003, TRY004
                 f"Provided mode {mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."  # noqa: E501
             )
 
@@ -329,7 +327,7 @@ class ProjectManager:
             )
 
         if cloud_mode and not config_available:
-            raise GXCloudConfigurationError(
+            raise GXCloudConfigurationError(  # noqa: TRY003
                 "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"  # noqa: E501
             )
 

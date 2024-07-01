@@ -18,7 +18,7 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationConfiguration,
     InvalidExpectationConfigurationError,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -231,7 +231,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             assert (
                 center_point is not None and range is not None
             ), "center_point and range must be specified"
-            assert (isinstance(center_point, tuple) or isinstance(center_point, list)) and all(
+            assert (isinstance(center_point, (tuple, list))) and all(
                 isinstance(n, float) for n in center_point
             ), "center_point must be a tuple or list of lat/lon floats"
             assert (center_point[0] >= -90 and center_point[0] <= 90) and (
@@ -421,7 +421,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
@@ -440,9 +440,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

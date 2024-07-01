@@ -1,6 +1,5 @@
 from typing import Optional, Union
 
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -12,6 +11,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+from great_expectations.util import convert_to_json_serializable
 
 
 class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
@@ -94,7 +94,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
         try:
             num_of_inconsistent_rows = list(metrics.get("query.template_values")[0].values())[0]
         except IndexError:
-            raise IndexError("Invalid index - query.template_values has no [0] index]")
+            raise IndexError("Invalid index - query.template_values has no [0] index]")  # noqa: TRY003
 
         is_success = not num_of_inconsistent_rows or num_of_inconsistent_rows == 0
 

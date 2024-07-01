@@ -9,26 +9,18 @@ import SetupAndInstallGx from '../../components/setup/link_lists/_setup_and_inst
 import DataContextInitializeInstantiateSave from '../../components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 import TechnicalTag from '../../reference/learn/term_tags/_tag.mdx';
 
-Use this quickstart to install GX, connect to sample data, build your first Expectation, validate data, and review the validation results. This is a great place to start if you're new to GX and aren't sure if it's the right solution for you or your organization. If you're using Databricks or SQL to store data, see [Get Started with GX and Databricks](./getting_started/how_to_use_great_expectations_in_databricks.md) or [Get Started with GX and SQL](./getting_started/how_to_use_great_expectations_with_sql.md).
-
-:::note Great Expectations Cloud
-
-You can use this quickstart with the open source Python version of GX or with Great Expectations Cloud.
-
-If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, [**sign up for the Beta program**](https://greatexpectations.io/cloud).
-
-:::
+Use this quickstart to install GX OSS, connect to sample data, build your first Expectation, validate data, and review the validation results. This is a great place to start if you're new to GX OSS and aren't sure if it's the right solution for you or your organization. If you're using Databricks or SQL to store data, see [Get Started with GX and Databricks](/oss/get_started/get_started_with_gx_and_databricks.md) or [Get Started with GX and SQL](/oss/get_started/get_started_with_gx_and_sql.md).
 
 :::info Windows Support
 
-Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
+Windows support for the open source Python version of GX OSS is currently unavailable. If you’re using GX OSS in a Windows environment, you might experience errors or performance issues.
 
 :::
 
 
 ## Data validation workflow
 
-The following diagram illustrates the end-to-end GX data validation workflow that you'll implement with this quickstart. Click a workflow step to view the related content.
+The following diagram illustrates the end-to-end GX OSS data validation workflow that you'll implement with this quickstart. Click a workflow step to view the related content.
 
 ```mermaid
 flowchart LR
@@ -65,7 +57,7 @@ click 7 "#validate-data"
 - An internet browser
 
 
-## Install GX
+## Install GX OSS
 
 1. Run the following command in an empty base directory inside a Python virtual environment:
 
@@ -105,6 +97,8 @@ click 7 "#validate-data"
 
   The second <TechnicalTag tag="expectation" text="Expectation"/> uses explicit kwargs along with the `passenger_count` column.
 
+  The basic workflow when creating an Expectation Suite is to populate it with Expectations that accurately describe the state of the associated data.  Therefore, when an Expectation Suite is saved failed Expectations are not kept by default.  However, the `discard_failed_expectations` parameter of `save_expectation_suite(...)` can be used to override this behavior if you have created Expectations that describe the ideal state of your data rather than its current state.  
+
 ## Validate data
 
 1. Run the following command to define a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and examine the data to determine if it matches the defined <TechnicalTag tag="expectation" text="Expectations"/>:
@@ -123,8 +117,6 @@ click 7 "#validate-data"
     ```
 
 ## Related documentation
-
-If you're ready to continue your GX journey, the following topics can help you implement a solution for your specific environment and business requirements:
 
 - [Install GX in a specific environment with support for a specific Data Source](/oss/guides/setup/installation/install_gx.md).
 - [Initialize, instantiate, and save a Data Context](/oss/guides/setup/configure_data_contexts_lp.md).

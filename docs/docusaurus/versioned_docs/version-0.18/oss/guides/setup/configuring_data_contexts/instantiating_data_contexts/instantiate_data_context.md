@@ -12,6 +12,7 @@ import Prerequisites from '../../../../../components/_prerequisites.jsx'
 import GxImport from '../../../../../components/setup/python_environment/_gx_import.md'
 import DataContextVerifyContents from '../../../../../components/setup/data_context/_data_context_verify_contents.md'
 import AdmonitionConvertToFileContext from '../../../../../components/setup/data_context/_admonition_convert_to_file_context.md'
+import ConnectingToDataFluently from '../../../../../components/connect_to_data/link_lists/_connecting_to_data_fluently.md';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 

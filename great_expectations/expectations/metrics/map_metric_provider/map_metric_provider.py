@@ -119,7 +119,7 @@ class MapMetricProvider(MetricProvider):
 
             engine = candidate_metric_fn.metric_engine
             if not issubclass(engine, ExecutionEngine):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "Metric functions must be defined with an ExecutionEngine as part of registration."  # noqa: E501
                 )
 
@@ -129,7 +129,7 @@ class MapMetricProvider(MetricProvider):
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
             ]:
                 if not hasattr(cls, "condition_metric_name"):
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         """A "MapMetricProvider" must have a "condition_metric_name" to have a decorated \
 "column_condition_partial" method."""  # noqa: E501
                     )
@@ -526,7 +526,7 @@ class MapMetricProvider(MetricProvider):
                 MetricPartialFunctionTypes.WINDOW_FN,
             ]:
                 if not hasattr(cls, "function_metric_name"):
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         """A "MapMetricProvider" must have a "function_metric_name" to have a decorated \
 "column_function_partial" method."""  # noqa: E501
                     )

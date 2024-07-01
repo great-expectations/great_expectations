@@ -1,410 +1,123 @@
 module.exports = {
   gx_core: [
     {
+      type: 'category',
+      label: 'Introduction to Great Expectations',
+      link: {type: 'doc', id: 'core/introduction/introduction'},
+      items: [
+        {
+          type: 'doc',
+          id: 'core/introduction/about_gx',
+          label: 'About GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/gx_overview',
+          label: 'GX overview'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/try_gx',
+          label: 'Try GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/community_resources',
+          label: 'Community resources'
+        },
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Set up a GX environment',
+      link: {type: 'doc', id: 'core/set_up_a_gx_environment/set_up_a_gx_environment'},
+      items: [
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/install_python',
+          label: 'Install Python'
+        },
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/install_gx',
+          label: 'Install GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/install_additional_dependencies',
+          label: 'Install additional dependencies'
+        },
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/create_a_data_context',
+          label: 'Create a Data Context'
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Connect to data',
+      link: {type: 'doc', id: 'core/connect_to_data/connect_to_data'},
+      items: [
+          {
+            type: 'doc',
+            id: 'core/connect_to_data/sql_data/sql_data',
+            label: 'Connect to data using SQL'
+          },
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Define Expectations',
+      link: { type: 'doc', id: 'core/define_expectations/define_expectations' },
+      items: [
+        {
+          type: 'doc',
+          id: 'core/define_expectations/create_an_expectation',
+          label: 'Create an Expectation'
+        },
+        {
+          type: 'doc',
+          id: 'core/define_expectations/test_an_expectation',
+          label: 'Test an Expectation'
+        },
+        {
+          type: 'doc',
+          id: 'core/define_expectations/organize_expectation_suites',
+          label: 'Organize Expectations into an Expectation Suite'
+        },
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Run Validations',
+      link: {type: 'doc', id: 'core/run_validations/run_validations'},
+      items: [
+        {type: 'doc', id: 'core/run_validations/create_a_validation_definition'},
+        {type: 'doc', id: 'core/run_validations/run_a_validation_definition'},
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Trigger actions based on results',
+      link: {type: 'doc', id: 'core/trigger_actions_based_on_results/trigger_actions_based_on_results'},
+      items: [
+        {type: 'doc', id: 'core/trigger_actions_based_on_results/create_a_checkpoint_with_actions'},
+        {type: 'doc', id: 'core/trigger_actions_based_on_results/choose_a_result_format/choose_a_result_format'},
+        {type: 'doc', id: 'core/trigger_actions_based_on_results/run_a_checkpoint'},
+      ]
+    },
+    {
       type: 'doc',
-      id: 'core/introduction/about_gx',
-      label: 'About GX'
+      id: 'oss/changelog',
+      label: 'Changelog'
     },
-    {
-      type: 'doc',
-      id: 'core/introduction/try_gx',
-      label: '🚧 Try GX'
-    },
-    {
-      type: 'category',
-      label: 'Install and manage GX 1.0',
-      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
-      items: [
-        {
-          type: 'doc',
-          id: 'core/installation_and_setup/install_gx',
-          label: 'Install GX 1.0'
-        },
-        {
-          type: 'category',
-          label: 'Install additional dependencies',
-          link: {type: 'doc', id: 'core/installation_and_setup/additional_dependencies/additional_dependencies'},
-          items: [
-            {
-              type: 'link',
-              label: 'Amazon S3',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=amazon',
-            },
-            {
-              type: 'link',
-              label: 'Microsoft Azure Blob Storage',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=azure',
-            },
-            {
-              type: 'link',
-              label: 'Google Cloud Storage',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=gcs',
-            },
-            {
-              type: 'link',
-              label: 'SQL databases',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=sql',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Manage Data Contexts',
-          link: {type: 'doc', id: 'core/installation_and_setup/manage_data_contexts'},
-          items: [
-            {
-              type: 'link',
-              label: 'Request a Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#request-a-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Initialize a new Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#initialize-a-new-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Connect to an existing Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#connect-to-an-existing-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Export an Ephemeral Data Context to a new File Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#export-an-ephemeral-data-context-to-a-new-file-data-context',
-            },
-            {
-              type: 'link',
-              label: 'View a Data Context configuration',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view-a-data-context-configuration',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Manage credentials',
-          link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
-          items: [
-            {
-              type: 'link',
-              label: 'Environment variables',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#environment-variables',
-            },
-            {
-              type: 'link',
-              label: 'YAML file',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#yaml-file',
-            },
-            {
-              type: 'link',
-              label: 'Secrets manager',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#secrets-manager',
-            },
-          ]
-        },
-        {
-          type: 'doc',
-          id: 'core/installation_and_setup/manage_metadata_stores',
-          label: '🚧 Manage Metadata Stores'
-        },
-        {
-          type: 'doc',
-          id: 'core/installation_and_setup/manage_data_docs',
-          label: '🚧 Manage Data Docs'
-        },
-      ]
-    },
-    {
-      type: 'category',
-      label: '🚧 Manage and access data',
-      link: {type: 'doc', id: 'core/manage_and_access_data/manage_and_access_data'},
-      items: [
-        {
-          type: 'category',
-          label: 'Connect to and request data',
-          link: {type: 'doc', id: 'core/manage_and_access_data/connect_to_data/connect_to_data'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/file_system/file_system',
-              label: '🚧 Connect to file system data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/in_memory/in_memory',
-              label: '🚧 Connect to in memory data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/sql/sql',
-              label: '🚧 Connect to SQL database data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/request_data',
-              label: '🚧 Request data'
-            },
-          ]
-        },
-
-        {
-          type: 'category',
-          label: '🚧 Manage Data Sources',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_data_sources/manage_data_sources'},
-          items: [
-            {
-              type: 'link',
-              label: '🚧 List available Data Sources',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#list-available-data-sources',
-            },
-            {
-              type: 'link',
-              label: '🚧 Get an existing Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#get-an-existing-data-source',
-            },
-            {
-              type: 'link',
-              label: '🚧 Delete a Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#delete-a-data-source',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: '🚧 Manage Data Assets',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_data_assets'},
-          items: [
-            {
-              type: 'link',
-              label: '🚧 List all Data Assets in a Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#list-all-data-assets-in-a-data-source',
-            },
-            {
-              type: 'link',
-              label: '🚧 Get an existing Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#get-an-existing-data-asset',
-            },
-            {
-              type: 'link',
-              label: '🚧 Add a Partitioner to a Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#add-a-partitioner-to-a-data-asset',
-            },
-            {
-              type: 'link',
-              label: '🚧 Delete a Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#delete-a-data-asset',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: '🚧 Manage Batch Requests',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_batch_requests'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Retrieve all Batches from a Data Asset'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Retrieve specific Batches from a Data Asset'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Iterate retrieved Batches'
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: '🚧 Manage Batches',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_batches'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: '🚧 View a sample of the data in a Batch'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: '🚧 Validate a Batch against an Expectation'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: '🚧 Validate a Batch against an Expectation Suite'
-            },
-            <!--TODO: Validation is being moved into the Batch object, are there other API changes? -->
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: '🚧 Get the Batch Request for a given Batch'
-            },
-          ]
-        },
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Create Expectations',
-      link: { type: 'doc', id: 'core/create_expectations/create_expectations' },
-      items: [
-        // 'oss/guides/expectations/create_expectations_overview',
-        {
-          type: 'category',
-          label: 'Manage Expectations',
-          link: { type: 'doc', id: 'core/create_expectations/expectations/manage_expectations' },
-          items: [
-            {
-              type: 'link',
-              label: 'Create an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#create-an-expectation',
-            },
-            {
-              type: 'link',
-              label: 'Test an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#test-an-expectation',
-            },
-            {
-              type: 'link',
-              label: 'Modify an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#modify-an-expectation',
-            },
-            {
-              type: 'link',
-              label: 'Customize an Expectation Class',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#customize-an-expectation-class',
-            },
-          ]
-        },
-      {
-          type: 'category',
-          label: 'Manage Expectation Suites',
-          link: { type: 'doc', id: 'core/create_expectations/expectation_suites/manage_expectation_suites' },
-          items: [
-            {
-              type: 'link',
-              label: 'Create an Expectation Suite',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Get an existing Expectation Suite',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Rename an Expectation Suite',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#rename-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Delete an Expectation Suite',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Add Expectations',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#add-expectations-to-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Get an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#get-an-expectation-from-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Edit a single Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#edit-a-single-expectation-in-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Edit multiple Expectations',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#edit-multiple-expectations-in-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Delete an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-from-an-expectation-suite',
-            },
-          ]
-        },
-        // {
-        //   type: 'category',
-        //   label: 'Data Assistants',
-        //   link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
-        //   items: [
-        //     'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
-        //   ]
-        // },
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Validate data',
-      link: {type: 'doc', id: 'core/validate_data/validate_data'},
-      items: [
-        {
-          type: 'category',
-          label: 'Manage Validation Definitions',
-          link: { type: 'doc', id: 'core/validate_data/validation_definitions/manage_validation_definitions' },
-          items: [
-            {
-              type: 'link',
-              label: 'Create a Validation Definition',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#create-a-validation-definition',
-            },
-            {
-              type: 'link',
-              label: 'List available Validation Definitions',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#list-available-validation-definitions',
-            },
-            {
-              type: 'link',
-              label: 'Get a Validation Definition by name',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#get-a-validation-definition-by-name',
-            },
-            {
-              type: 'link',
-              label: 'Get Validation Definitions by attributes',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#get-validation-definitions-by-attributes',
-            },
-            {
-              type: 'link',
-              label: 'Delete a Validation Definition',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#delete-a-validation-definition',
-            },
-            {
-              type: 'link',
-              label: 'Duplicate a Validation Definition',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#duplicate-a-validation-definition',
-            },
-            {
-              type: 'link',
-              label: 'Run a Validation Definition',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#run-a-validation-definition',
-            },
-          ]
-        },
-        {
-          type: 'doc',
-          id: 'core/validate_data/checkpoints/manage_checkpoints',
-          label: 'Manage Checkpoints'
-        },
-      ]
-    }
-    <!--TODO: Validate Data -->
-      <!-- TODO: Manage Validators -->
-      <!-- TODO: Manage Checkpoints -->
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
         {
           type: 'category',
-          label: 'About GX Cloud',
+          label: 'GX Cloud deployment patterns and architecture',
           link: { type: 'doc', id: 'cloud/about_gx' },
           items: [
             {
@@ -439,7 +152,7 @@ module.exports = {
             },
           ]
         },
-        { type: 'doc', id: 'cloud/try_gx_cloud' },
+        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',
@@ -591,8 +304,8 @@ module.exports = {
             },
             {
               "type": "link",
-              "label": "Add a Validation and an Expectation Suite to a Checkpoint",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-and-an-expectation-suite-to-a-checkpoint"
+              "label": "Add a Validation to a Checkpoint",
+              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-to-a-checkpoint"
             },
             {
               type: 'link',
@@ -613,6 +326,28 @@ module.exports = {
               type: 'link',
               label: 'Delete a Checkpoint',
               href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage alerts',
+          link: { type: 'doc', id: 'cloud/alerts/manage_alerts' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#add-a-slack-alert',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#edit-a-slack-alert',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#delete-a-slack-alert',
             },
           ]
         },
@@ -671,8 +406,15 @@ module.exports = {
     },
   ],
   learn: [
-      'reference/learn/conceptual_guides/expectation_classes',
-      'reference/learn/conceptual_guides/metricproviders',
+    {
+      type: 'category',
+      label: 'Data quality use cases',
+      link: { type: 'doc', id: 'reference/learn/data_quality_use_cases/dq_use_cases_lp' },
+      items: [
+        'reference/learn/data_quality_use_cases/schema',
+        'reference/learn/data_quality_use_cases/missingness'
+      ]
+    },
       'reference/learn/usage_statistics',
       'reference/learn/glossary'
   ],

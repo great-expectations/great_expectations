@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from itertools import zip_longest
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.compatibility import pydantic
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -28,15 +29,34 @@ if TYPE_CHECKING:
     )
 
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to exactly match a specified list."
+COLUMN_LIST_DESCRIPTION = "The column names, in the correct order."
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Schema"]
+
+
 class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
-    """Expect the columns to exactly match a specified list.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_table_columns_to_match_ordered_list is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
+    BatchExpectations are one of the most common types of Expectation.
+    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
+
     Args:
         column_list (list of str): \
-            The column names, in the correct order.
+            {COLUMN_LIST_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -53,20 +73,108 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        {DATA_QUALITY_ISSUES[0]}
+
+    Example Data:
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectTableColumnsToMatchOrderedList(
+                    column_list=["test", "test2"]
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "observed_value": [
+                      "test",
+                      "test2"
+                    ]
+                  }},
+                  "meta": {{}},
+                  "success": true
+                }}
+
+        Failing Case:
+            Input:
+                ExpectTableColumnsToMatchOrderedList(
+                    column_list=["test2", "test", "test3"]
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "observed_value": [
+                      "Unnamed: 0",
+                      "test",
+                      "test2"
+                    ],
+                    "details": {{
+                      "mismatched": [
+                        {{
+                          "Expected Column Position": 1,
+                          "Expected": "test2",
+                          "Found": "test"
+                        }},
+                        {{
+                          "Expected Column Position": 2,
+                          "Expected": "test",
+                          "Found": "test2"
+                        }},
+                        {{
+                          "Expected Column Position": 3,
+                          "Expected": "test3",
+                          "Found": null
+                        }}
+                      ]
+                    }}
+                  }},
+                  "meta": {{}},
+                  "success": false
+                }}
     """  # noqa: E501
 
-    column_list: Union[list, set, EvaluationParameterDict, None]
+    column_list: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
+        description=COLUMN_LIST_DESCRIPTION
+    )
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
+        "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     metric_dependencies = ("table.columns",)
     success_keys = ("column_list",)
@@ -77,6 +185,37 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         "condition_parser",
     )
     args_keys = ("column_list",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchOrderedList]
+        ) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(
@@ -111,7 +250,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -120,7 +259,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        _ = False if runtime_configuration.get("include_column_name") is False else True
+        _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
 

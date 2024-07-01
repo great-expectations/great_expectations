@@ -40,7 +40,7 @@ datasource_name = "my_datasource"
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py datasource">
-datasource = context.sources.add_sqlite(
+datasource = context.data_sources.add_sqlite(
     name=datasource_name, connection_string=my_connection_string
 )
 # </snippet>

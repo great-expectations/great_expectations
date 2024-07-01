@@ -1,15 +1,5 @@
-datasources:
-  edw:
-    type: sqlalchemy
-    batch_kwargs_generators:
-      default:
-        type: queries
-    data_asset_type:
-      class_name: SqlAlchemyDataset
-    profile: edw
-
 plugins_directory: plugins/
-validations_stores:
+validation_results_stores:
   remote:
     type: s3
     bucket: sch-internal-ge-validation-data
@@ -21,7 +11,7 @@ data_docs:
       site_store:
         type: filesystem
         base_directory: uncommitted/documentation/local_site
-      validations_store:
+      validation_results_store:
         type: filesystem
         base_directory: uncommitted/validations/
         run_name_filter:

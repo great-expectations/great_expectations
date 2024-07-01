@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from typing import Dict, Tuple
 
 import pandas as pd
 import pytest
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchData, BatchMarkers
@@ -31,6 +34,7 @@ def test_execution_engine():
     """
 
     class TestExecutionEngine(ExecutionEngine):
+        @override
         def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
             raise NotImplementedError
 

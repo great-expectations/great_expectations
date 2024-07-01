@@ -13,7 +13,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -40,16 +40,16 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
         try:
             xmlschema_doc = etree.fromstring(xml_schema)
             xmlschema = etree.XMLSchema(xmlschema_doc)
-        except etree.ParseError:
+        except etree.ParseError:  # noqa: TRY302
             raise
-        except:
+        except:  # noqa: TRY302
             raise
 
         def matches_xml_schema(val):
             try:
                 xml_doc = etree.fromstring(val)
                 return xmlschema(xml_doc)
-            except:
+            except:  # noqa: TRY302
                 raise
 
         return column.map(matches_xml_schema)
@@ -59,9 +59,9 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
         try:
             xmlschema_doc = etree.fromstring(xml_schema)
             xmlschema = etree.XMLSchema(xmlschema_doc)
-        except etree.ParseError:
+        except etree.ParseError:  # noqa: TRY302
             raise
-        except:
+        except:  # noqa: TRY302
             raise
 
         def matches_xml_schema(val):
@@ -70,7 +70,7 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
             try:
                 xml_doc = etree.fromstring(val)
                 return xmlschema(xml_doc)
-            except:
+            except:  # noqa: TRY302
                 raise
 
         matches_xml_schema_udf = F.udf(matches_xml_schema, pyspark.types.BooleanType())
@@ -143,7 +143,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -152,9 +152,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

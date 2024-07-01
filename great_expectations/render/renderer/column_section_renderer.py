@@ -51,7 +51,7 @@ class ColumnSectionRenderer(Renderer):
             elif isinstance(candidate_object, ExpectationValidationResult):
                 return candidate_object.expectation_config.kwargs["column"]
             else:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "Provide a column section renderer an expectation, list of expectations, evr, or list of evrs."  # noqa: E501
                 )
         except KeyError:
@@ -117,7 +117,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_message += (
                     f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                logger.error(exception_message)  # noqa: TRY400
 
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
@@ -426,20 +426,20 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return validation_results, new_block
 
-    def _render_table(self, validation_results, evaluation_parameters=None):
+    def _render_table(self, validation_results, suite_parameters=None):
         new_block = self._table_renderer.render(
             validation_results,
             include_column_name=False,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
         )
         return [], new_block
 
-    def render(self, validation_results, evaluation_parameters=None):
+    def render(self, validation_results, suite_parameters=None):
         column = self._get_column_name(validation_results)
         content_blocks = []
         remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
-        remaining_evrs, content_block = self._render_table(remaining_evrs, evaluation_parameters)
+        remaining_evrs, content_block = self._render_table(remaining_evrs, suite_parameters)
         content_blocks.append(content_block)
         return RenderedSectionContent(**{"section_name": column, "content_blocks": content_blocks})
 

@@ -1,58 +1,64 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
+
+from great_expectations.compatibility.typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
-from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
 
 
 class OpsgenieRenderer(Renderer):
-    def render(
-        self,
-        validation_result=None,
-        data_docs_pages=None,
-        notify_with=None,
-    ):
-        summary_text = "No validation occurred. Please ensure you passed a validation_result."
-        status = "Failed ❌"
+    @override
+    def render(self, checkpoint_result: CheckpointResult):
+        text_blocks: list[str] = []
+        for run_result in checkpoint_result.run_results.values():
+            text_block = self._render_validation_result(result=run_result)
+            text_blocks.append(text_block)
 
-        if validation_result:
-            expectation_suite_name = validation_result.meta.get(
-                "expectation_suite_name", "__no_expectation_suite_name__"
-            )
+        return self._concatenate_text_blocks(
+            checkpoint_result=checkpoint_result, text_blocks=text_blocks
+        )
 
-            if "batch_kwargs" in validation_result.meta:
-                data_asset_name = validation_result.meta["batch_kwargs"].get(
-                    "data_asset_name", "__no_data_asset_name__"
-                )
-            elif "active_batch_definition" in validation_result.meta:
-                data_asset_name = (
-                    validation_result.meta["active_batch_definition"].data_asset_name
-                    if validation_result.meta["active_batch_definition"].data_asset_name
-                    else "__no_data_asset_name__"
-                )
-            else:
-                data_asset_name = "__no_data_asset_name__"
+    def _render_validation_result(self, result: ExpectationSuiteValidationResult) -> str:
+        suite_name = result.suite_name
+        data_asset_name = result.asset_name or "__no_data_asset_name__"
+        n_checks_succeeded = result.statistics["successful_expectations"]
+        n_checks = result.statistics["evaluated_expectations"]
+        run_id = result.meta.get("run_id", "__no_run_id__")
+        batch_id = result.batch_id or "__no_batch_id__"
+        check_details_text = f"{n_checks_succeeded} of {n_checks} expectations were met"
 
-            n_checks_succeeded = validation_result.statistics["successful_expectations"]
-            n_checks = validation_result.statistics["evaluated_expectations"]
-            run_id = validation_result.meta.get("run_id", "__no_run_id__")
-            batch_id = BatchKwargs(validation_result.meta.get("batch_kwargs", {})).to_id()
-            check_details_text = f"{n_checks_succeeded} of {n_checks} expectations were met"
+        if result.success:
+            status = "Success 🎉"
+        else:
+            status = "Failed ❌"
 
-            if validation_result.success:
-                status = "Success 🎉"
-
-            summary_text = f"""Batch Validation Status: {status}
-Expectation suite name: {expectation_suite_name}
-Data asset name: {data_asset_name}
+        return f"""Batch Validation Status: {status}
+Expectation Suite Name: {suite_name}
+Data Asset Name: {data_asset_name}
 Run ID: {run_id}
 Batch ID: {batch_id}
 Summary: {check_details_text}"""
 
-        return summary_text
+    def _concatenate_text_blocks(
+        self, checkpoint_result: CheckpointResult, text_blocks: list[str]
+    ) -> str:
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+        success = checkpoint_result.success
+        run_id = checkpoint_result.run_id.run_time
+
+        title = f"Checkpoint: {checkpoint_name} - Run ID: {run_id}"
+        status = "Status: Failed ❌" if not success else "Status: Success 🎉"
+        return f"{title}\n{status}\n\n" + "\n\n".join(text_blocks)
 
     def _custom_blocks(self, evr):
         return None

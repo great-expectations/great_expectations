@@ -38,9 +38,9 @@ PHRASES = [
     Phrase(("datasource",), ()),
     Phrase(
         ("evaluation parameter",),
-        ("evaluation parameter store", "evaluation parameters store"),
+        ("evaluation parameter store", "suite parameters store"),
     ),
-    Phrase(("evaluation parameter store", "evaluation parameters store"), ()),
+    Phrase(("evaluation parameter store", "suite parameters store"), ()),
     Phrase(("execution engine",), ()),
     Phrase(
         ("expectation",),
@@ -125,10 +125,7 @@ def remove_but_not_in(line_working_contents, phrase):
 
 
 def phrase_in_line(line_working_contents, phrase):
-    for possible_phrase in phrase.one_of_these:
-        if possible_phrase in line_working_contents:
-            return True
-    return False
+    return any(possible_phrase in line_working_contents for possible_phrase in phrase.one_of_these)
 
 
 def phrase_is_tagged_in_line(line_working_contents, phrase):
@@ -174,7 +171,7 @@ def phrase_is_tagged_in_generic_tag(line_working_contents, phrase):
     return is_tagged, is_present
 
 
-def scan_file(file_path, phrases):  # noqa: C901, PLR0915
+def scan_file(file_path, phrases):  # noqa: C901, PLR0912, PLR0915
     output = [file_path]
     with open(file_path) as active_file:
         for phrase in phrases:

@@ -13,6 +13,8 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -22,7 +24,6 @@ from great_expectations.execution_engine import (
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.compatibility import pyspark, sqlalchemy
-    from great_expectations.core import ExpectationSuite
     from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.validator.validator import Validator
 
@@ -52,7 +53,7 @@ def datasource_name(
     try:
         _ = context.get_datasource(datasource_name=datasource_name)
     except ValueError:
-        _ = context.sources.add_pandas(name=datasource_name)
+        _ = context.data_sources.add_pandas(name=datasource_name)
         context.get_datasource(datasource_name=datasource_name)
     context.delete_datasource(datasource_name=datasource_name)
     with pytest.raises(ValueError):
@@ -64,15 +65,12 @@ def expectation_suite(
     context: CloudDataContext,
 ) -> Iterator[ExpectationSuite]:
     expectation_suite_name = f"es_{uuid.uuid4().hex}"
-    expectation_suite = context.add_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-    )
+    expectation_suite = context.suites.add(ExpectationSuite(name=expectation_suite_name))
     assert len(expectation_suite.expectations) == 0
     yield expectation_suite
-    expectation_suite = context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
+    expectation_suite = context.suites.get(name=expectation_suite_name)
     assert len(expectation_suite.expectations) > 0
-    _ = context.suites.get(name=expectation_suite_name)
-    context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.suites.delete(expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
         _ = context.suites.get(name=expectation_suite_name)
 
@@ -103,34 +101,12 @@ def checkpoint(
     expectation_suite: ExpectationSuite,
 ) -> Iterator[Checkpoint]:
     checkpoint_name = f"{batch_request.data_asset_name} | {expectation_suite.name}"
-    _ = context.add_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            },
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            },
-        ],
-    )
-    _ = context.add_or_update_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            }
-        ],
-    )
-    checkpoint = context.checkpoints.get(name=checkpoint_name)
-    assert (
-        len(checkpoint.validations) == 1
-    ), "Checkpoint was not updated in the previous method call."
+
+    validation_definitions: list[ValidationDefinition] = []
+    checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=validation_definitions)
+    checkpoint = context.checkpoints.add(checkpoint=checkpoint)
     yield checkpoint
-    context.checkpoints.delete(checkpoint)
+    context.checkpoints.delete(name=checkpoint_name)
 
     with pytest.raises(gx_exceptions.DataContextError):
         context.checkpoints.get(name=checkpoint_name)

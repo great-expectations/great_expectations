@@ -5,6 +5,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py imports">
 import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 # </snippet>
 
@@ -29,7 +30,7 @@ fs = FakeFilesystem()
 fs.add_real_directory(source_path=data_directory, target_path=base_directory)
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py add datasource">
-dbfs_datasource = context.sources.add_or_update_spark_dbfs(
+dbfs_datasource = context.data_sources.add_or_update_spark_dbfs(
     name="my_spark_dbfs_datasource",
     base_directory=base_directory,
 )
@@ -37,7 +38,7 @@ dbfs_datasource = context.sources.add_or_update_spark_dbfs(
 
 # unable to successfully mock dbfs, so using filesystem for tests
 context.delete_datasource(datasource_name="my_spark_dbfs_datasource")
-dbfs_datasource = context.sources.add_or_update_spark_filesystem(
+dbfs_datasource = context.data_sources.add_or_update_spark_filesystem(
     name="my_spark_dbfs_datasource",
     base_directory=data_directory,
 )
@@ -64,7 +65,7 @@ batch_request = csv_asset.build_batch_request()
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py get validator">
 expectation_suite_name = "insert_your_expectation_suite_name_here"
-context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.suites.add(ExpectationSuite(name=expectation_suite_name))
 validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name=expectation_suite_name,

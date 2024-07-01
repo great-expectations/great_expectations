@@ -63,8 +63,6 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
     from datetime import datetime
 
     # Replace <YOUR_ACCESS_TOKEN> and <YOUR_CLOUD_ORGANIZATION_ID> with your credentials.
-    # To get your user access token and organization ID, see:
-    # (https://docs.greatexpectations.io/docs/cloud/try_gx_cloud#get-your-user-access-token-and-organization-id).
 
     GX_CLOUD_ACCESS_TOKEN = "<YOUR_ACCESS_TOKEN>"
     GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"
@@ -74,7 +72,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
     def run_gx_airflow():
 
         context = gx.get_context()
-        checkpoint = context.checkpoints.get(name = CHECKPOINT_NAME)
+        checkpoint = context.get_legacy_checkpoint(name=CHECKPOINT_NAME)
         checkpoint.run()
 
     default_args = {

@@ -153,7 +153,7 @@ class PandasDataSampler(DataSampler):
             hash_func = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):
             raise (
-                gx_exceptions.ExecutionEngineError(
+                gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                     f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
                        Reference to {hash_function_name} cannot be found."""  # noqa: E501
                 )

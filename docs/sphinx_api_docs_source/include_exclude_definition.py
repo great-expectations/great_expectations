@@ -26,8 +26,8 @@ class IncludeExcludeDefinition:
 
     def __post_init__(self):
         if self.name and not self.filepath:
-            raise ValueError("You must provide a filepath if also providing a name.")
+            raise ValueError("You must provide a filepath if also providing a name.")  # noqa: TRY003
         if not self.name and not self.filepath:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "You must provide at least a filepath or filepath and name."
             )

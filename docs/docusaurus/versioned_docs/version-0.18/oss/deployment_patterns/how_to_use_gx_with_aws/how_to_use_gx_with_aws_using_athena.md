@@ -257,15 +257,11 @@ context = FileDataContext.create(project_root_dir=path_to_empty_folder)
 
 2. <ConnectionStringAthena />
 
-3. <ConfigureYourDatasource />
-
-    To configure a SQL Data Source, see [Connect to a SQL database Data Source](/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
+3. To configure a SQL Data Source, see [Connect to a SQL database Data Source](/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
 
 4. <TestAthenaDatasource />
 
 ## Create Expectations
-
-<PrepareABatchRequestAndValidatorForCreatingExpectations />
 
 <CreateExpectationsInteractively />
 

@@ -56,12 +56,12 @@ class QueryTemplateValues(QueryMetricProvider):
         )
 
         if not isinstance(query, str):
-            raise TypeError("Query must be supplied as a string")
+            raise TypeError("Query must be supplied as a string")  # noqa: TRY003
 
         template_dict = metric_value_kwargs.get("template_dict")
 
         if not isinstance(template_dict, dict):
-            raise TypeError("template_dict supplied by the expectation must be a dict")
+            raise TypeError("template_dict supplied by the expectation must be a dict")  # noqa: TRY003
 
         if isinstance(selectable, sa.Table):
             query = cls.get_query(query, template_dict, selectable)
@@ -91,7 +91,7 @@ class QueryTemplateValues(QueryMetricProvider):
             if hasattr(e, "_query_id"):
                 # query_id removed because it duplicates the validation_results
                 e._query_id = None
-            raise e
+            raise e  # noqa: TRY201
 
         return [element._asdict() for element in result]
 
@@ -114,9 +114,9 @@ class QueryTemplateValues(QueryMetricProvider):
         df.createOrReplaceTempView("tmp_view")
         template_dict = metric_value_kwargs.get("template_dict")
         if not isinstance(query, str):
-            raise TypeError("template_dict supplied by the expectation must be a dict")
+            raise TypeError("template_dict supplied by the expectation must be a dict")  # noqa: TRY003
         if not isinstance(template_dict, dict):
-            raise TypeError("template_dict supplied by the expectation must be a dict")
+            raise TypeError("template_dict supplied by the expectation must be a dict")  # noqa: TRY003
 
         query = query.format(**template_dict, batch="tmp_view")
 

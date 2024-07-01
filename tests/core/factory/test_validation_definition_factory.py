@@ -1,8 +1,15 @@
 import json
+import pathlib
+from unittest import mock
 
 import pytest
 from pytest_mock import MockerFixture
 
+import great_expectations.expectations as gxe
+from great_expectations.analytics.events import (
+    ValidationDefinitionCreatedEvent,
+    ValidationDefinitionDeletedEvent,
+)
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.validation_definition_factory import (
@@ -157,7 +164,7 @@ def test_validation_definition_factory_delete_uses_store_remove_key(
     factory = ValidationDefinitionFactory(store=store)
 
     # Act
-    factory.delete(validation=validation_definition)
+    factory.delete(name="my_validation_def")
 
     # Assert
     store.remove_key.assert_called_once_with(
@@ -181,7 +188,7 @@ def test_validation_definition_factory_delete_raises_for_missing_validation(
         DataContextError,
         match=f"Cannot delete ValidationDefinition with name {name} because it cannot be found.",
     ):
-        factory.delete(validation=validation_definition)
+        factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_not_called()
@@ -298,7 +305,8 @@ def _test_validation_definition_factory_delete_success(
         validation_definition = context.validation_definitions.add(validation=validation_definition)
 
     # Act
-    context.validation_definitions.delete(validation_definition)
+    with mocker.patch.object(ValidationDefinition, "parse_raw", return_value=validation_definition):
+        context.validation_definitions.delete(name=name)
 
     # Assert
     with pytest.raises(
@@ -308,6 +316,156 @@ def _test_validation_definition_factory_delete_success(
         context.validation_definitions.get(name)
 
 
+@pytest.mark.parametrize(
+    "context_fixture_name",
+    [
+        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.cloud),
+        pytest.param("in_memory_runtime_context", id="ephemeral", marks=pytest.mark.big),
+        pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
+    ],
+)
+def test_validation_definition_factory_all(
+    context_fixture_name: str, request: pytest.FixtureRequest
+):
+    context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
+
+    # Arrange
+    ds = context.data_sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
+    suite = ExpectationSuite(name="my_suite")
+    validation_definition_a = ValidationDefinition(
+        name="validation definition a",
+        data=asset.add_batch_definition("a"),
+        suite=suite,
+    )
+    validation_definition_b = ValidationDefinition(
+        name="validation definition b",
+        data=asset.add_batch_definition("b"),
+        suite=suite,
+    )
+
+    context.validation_definitions.add(validation=validation_definition_a)
+    context.validation_definitions.add(validation=validation_definition_b)
+
+    # Act
+    result = context.validation_definitions.all()
+    result = sorted(result, key=lambda x: x.name)
+
+    # Assert
+    assert [r.name for r in result] == [validation_definition_a.name, validation_definition_b.name]
+    assert result == [validation_definition_a, validation_definition_b]
+
+
+@pytest.mark.filesystem
+def test_validation_definition_factory_round_trip(
+    empty_data_context: FileDataContext,
+    validation_definition: ValidationDefinition,
+):
+    # Arrange
+    context = empty_data_context
+
+    ds = context.data_sources.add_pandas("my_ds")
+    csv_path = pathlib.Path(
+        __file__, "..", "..", "..", "test_sets", "quickstart", "yellow_tripdata_sample_2022-01.csv"
+    ).resolve()
+    assert csv_path.exists()
+    asset = ds.add_csv_asset("my_asset", filepath_or_buffer=csv_path)
+
+    batch_definition = asset.add_batch_definition("my_batch_def")
+    suite = ExpectationSuite(
+        name="my_suite",
+        expectations=[
+            gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=10),
+            gxe.ExpectColumnMeanToBeBetween(
+                column="passenger_count",
+                min_value=0,
+                max_value=1,
+            ),
+        ],
+    )
+
+    # Act
+    validation_definition = ValidationDefinition(
+        name="my_validation_def", data=batch_definition, suite=suite
+    )
+    persisted_validation_definition = context.validation_definitions.add(
+        validation=validation_definition
+    )
+    retrieved_validation_definition = context.validation_definitions.get(
+        name=validation_definition.name
+    )
+
+    # Assert
+    # Suite equality is a bit finnicky, so we just check the JSON representation
+    assert persisted_validation_definition.json() == retrieved_validation_definition.json()
+
+
 class TestValidationDefinitionFactoryAnalytics:
-    # TODO: Write tests once analytics are in place
-    pass
+    @pytest.mark.filesystem
+    def test_validation_definition_factory_add_emits_event_filesystem(self, empty_data_context):
+        self._test_validation_definition_factory_add_emits_event(empty_data_context)
+
+    @pytest.mark.cloud
+    def test_validation_definition_factory_add_emits_event_cloud(self, empty_cloud_context_fluent):
+        self._test_validation_definition_factory_add_emits_event(empty_cloud_context_fluent)
+
+    def _test_validation_definition_factory_add_emits_event(self, context):
+        # Arrange
+        ds = context.data_sources.add_pandas("my_datasource")
+        asset = ds.add_csv_asset("my_asset", "data.csv")
+        batch_def = asset.add_batch_definition("my_batch_definition")
+        suite = ExpectationSuite(name="my_suite")
+
+        validation_definition = ValidationDefinition(
+            name="validation_def", data=batch_def, suite=suite
+        )
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.factory.validation_definition_factory.submit_event",
+            autospec=True,
+        ) as mock_submit:
+            _ = context.validation_definitions.add(validation=validation_definition)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=ValidationDefinitionCreatedEvent(
+                validation_definition_id=validation_definition.id
+            )
+        )
+
+    @pytest.mark.filesystem
+    def test_validation_definition_factory_delete_emits_event_filesystem(self, empty_data_context):
+        self._test_validation_definition_factory_delete_emits_event(empty_data_context)
+
+    @pytest.mark.cloud
+    def test_validation_definition_factory_delete_emits_event_cloud(
+        self, empty_cloud_context_fluent
+    ):
+        self._test_validation_definition_factory_delete_emits_event(empty_cloud_context_fluent)
+
+    def _test_validation_definition_factory_delete_emits_event(self, context):
+        # Arrange
+        ds = context.data_sources.add_pandas("my_datasource")
+        asset = ds.add_csv_asset("my_asset", "data.csv")
+        batch_def = asset.add_batch_definition("my_batch_definition")
+        suite = ExpectationSuite(name="my_suite")
+
+        name = "validation_def"
+        validation_definition = context.validation_definitions.add(
+            validation=ValidationDefinition(name=name, data=batch_def, suite=suite)
+        )
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.factory.validation_definition_factory.submit_event",
+            autospec=True,
+        ) as mock_submit:
+            context.validation_definitions.delete(name=name)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=ValidationDefinitionDeletedEvent(
+                validation_definition_id=validation_definition.id
+            )
+        )

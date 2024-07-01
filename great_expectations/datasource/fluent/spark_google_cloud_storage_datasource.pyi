@@ -1,4 +1,3 @@
-import re
 from logging import Logger
 from typing import Any, ClassVar, Literal, Optional, Type
 
@@ -7,14 +6,12 @@ from great_expectations.datasource.fluent import BatchMetadata, _SparkFilePathDa
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
 )
 
 logger: Logger
@@ -36,7 +33,6 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,

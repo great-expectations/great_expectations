@@ -20,7 +20,7 @@ import great_expectations as gx
 context = gx.get_context()
 
 # data_directory is the full path to a directory containing csv files
-context.sources.add_pandas_filesystem(
+context.data_sources.add_pandas_filesystem(
     name="my_datasource", base_directory=data_directory
 )
 
@@ -41,12 +41,7 @@ my_asset = my_datasource.add_csv_asset(
 )
 # </snippet>
 
-# Python
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py add_sorters">
-my_asset = my_asset.add_sorters(["+year", "-month"])
-# </snippet>
-
-assert my_asset.get_batch_request_options_keys() == ("year", "month", "path")
+assert my_asset.get_batch_parameters_keys() == ("year", "month", "path")
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_batch_list">

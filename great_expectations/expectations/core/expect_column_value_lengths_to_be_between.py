@@ -1,17 +1,22 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import (
     root_validator,
 )
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import (
     LegacyRendererType,
@@ -47,28 +52,56 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings with length between "
+    "a minimum value and a maximum value (inclusive)."
+)
+MIN_VALUE_DESCRIPTION = "The minimum value for a column entry length."
+MAX_VALUE_DESCRIPTION = "The maximum value for a column entry length."
+STRICT_MIN_DESCRIPTION = "If True, values must be strictly larger than min_value."
+STRICT_MAX_DESCRIPTION = "If True, values must be strictly smaller than max_value."
+DATA_QUALITY_ISSUES = ["Numerical Data"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+
+
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
-    """Expect the column entries to be strings with length between a minimum value and a maximum value (inclusive).
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
     expect_column_value_lengths_to_be_between is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
+    Column Map Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column and ask a yes/no question for every row in that column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         min_value (int or None): \
-            The minimum value for a column entry length.
+            {MIN_VALUE_DESCRIPTION}
         max_value (int or None): \
-            The maximum value for a column entry length.
-
-    Keyword Args:
-        mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
-            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+            {MAX_VALUE_DESCRIPTION}
+        strict_min (boolean): \
+            {STRICT_MIN_DESCRIPTION} Default=False
+        strict_max (boolean): \
+            {STRICT_MAX_DESCRIPTION} Default=False
 
     Other Parameters:
+        mostly (None or a float between 0 and 1): \
+            {MOSTLY_DESCRIPTION} \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -93,15 +126,104 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        {DATA_QUALITY_ISSUES[0]}
+
+    Example Data:
+                test 	test2
+            0 	"12345" "A"
+            1 	"abcde" "13579"
+            2 	"1b3d5" "24680"
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnValueLengthsToBeBetween(
+                    column="test2",
+                    min_value=1,
+                    max_value=5
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  }},
+                  "meta": {{}},
+                  "success": true
+                }}
+
+        Failing Case:
+            Input:
+                ExpectColumnValueLengthsToBeBetween(
+                    column="test",
+                    min_value=5,
+                    max_value=5,
+                    strict_min=True,
+                    strict_max=True
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 3,
+                    "unexpected_percent": 100.0,
+                    "partial_unexpected_list": [
+                        "12345",
+                        "abcde",
+                        "1b3d5"
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 100.0,
+                    "unexpected_percent_nonmissing": 100.0
+                  }},
+                  "meta": {{}},
+                  "success": false
+                }}
     """  # noqa: E501
 
-    min_value: Union[int, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, EvaluationParameterDict, datetime, None] = None
-    strict_min: bool = False
-    strict_max: bool = False
+    min_value: Union[int, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[int, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MAX_VALUE_DESCRIPTION
+    )
+    strict_min: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)
+    strict_max: bool = pydantic.Field(default=False, description=STRICT_MAX_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -109,6 +231,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.value_length.between"
     success_keys = (
@@ -125,12 +248,43 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "max_value",
     )
 
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValueLengthsToBeBetween]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
+
     @root_validator
     def _validate_min_or_max_set(cls, values):
         min_value = values.get("min_value")
         max_value = values.get("max_value")
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
         return values
 
     @classmethod
@@ -196,7 +350,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(  # noqa: C901 - too complex
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -215,9 +369,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

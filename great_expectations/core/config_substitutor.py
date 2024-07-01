@@ -63,7 +63,7 @@ class _ConfigurationSubstitutor:
         if isinstance(data, BaseYamlConfig):
             data = (data.__class__.get_schema_class())().dump(data)
 
-        if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
+        if isinstance(data, (dict, OrderedDict)):
             return {
                 k: self.substitute_all_config_variables(v, replace_variables_dict)
                 for k, v in data.items()
@@ -127,7 +127,7 @@ class _ConfigurationSubstitutor:
                     return config_variable_value
                 template_str = template_str.replace(m.group(), config_variable_value)
             else:
-                raise gx_exceptions.MissingConfigVariableError(
+                raise gx_exceptions.MissingConfigVariableError(  # noqa: TRY003
                     f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
     Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
     See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials""",  # noqa: E501
@@ -207,12 +207,12 @@ class _ConfigurationSubstitutor:
                 "boto3 is not installed, please install great_expectations with aws_secrets extra > "  # noqa: E501
                 "pip install great_expectations[aws_secrets]"
             )
-            raise ImportError("Could not import boto3")
+            raise ImportError("Could not import boto3")  # noqa: TRY003
 
         matches = regex.match(value)
 
         if not matches:
-            raise ValueError(f"Could not match the value with regex {regex}")
+            raise ValueError(f"Could not match the value with regex {regex}")  # noqa: TRY003
 
         region_name = matches.group(1)
         secret_name = matches.group(3)
@@ -272,12 +272,12 @@ class _ConfigurationSubstitutor:
                 "boto3 is not installed, please install great_expectations with aws_secrets extra > "  # noqa: E501
                 "pip install great_expectations[aws_secrets]"
             )
-            raise ImportError("Could not import boto3")
+            raise ImportError("Could not import boto3")  # noqa: TRY003
 
         matches = regex.match(value)
 
         if not matches:
-            raise ValueError(f"Could not match the value with regex {regex}")
+            raise ValueError(f"Could not match the value with regex {regex}")  # noqa: TRY003
 
         region_name = matches.group(1)
         secret_name = matches.group(3)
@@ -331,13 +331,13 @@ class _ConfigurationSubstitutor:
                 "secretmanager is not installed, please install great_expectations with gcp extra > "  # noqa: E501
                 "pip install great_expectations[gcp]"
             )
-            raise ImportError("Could not import secretmanager from google.cloud")
+            raise ImportError("Could not import secretmanager from google.cloud")  # noqa: TRY003
 
         client = google.secretmanager.SecretManagerServiceClient()
         matches = regex.match(value)
 
         if not matches:
-            raise ValueError(f"Could not match the value with regex {regex}")
+            raise ValueError(f"Could not match the value with regex {regex}")  # noqa: TRY003
 
         project_id = matches.group(1)
         secret_id = matches.group(2)
@@ -384,11 +384,11 @@ class _ConfigurationSubstitutor:
                 "SecretClient is not installed, please install great_expectations with azure_secrets extra > "  # noqa: E501
                 "pip install great_expectations[azure_secrets]"
             )
-            raise ImportError("Could not import SecretClient from azure.keyvault.secrets")
+            raise ImportError("Could not import SecretClient from azure.keyvault.secrets")  # noqa: TRY003
         matches = regex.match(value)
 
         if not matches:
-            raise ValueError(f"Could not match the value with regex {regex}")
+            raise ValueError(f"Could not match the value with regex {regex}")  # noqa: TRY003
 
         keyvault_uri = matches.group(1)
         secret_name = matches.group(2)

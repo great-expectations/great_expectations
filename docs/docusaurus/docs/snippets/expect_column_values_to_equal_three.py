@@ -12,7 +12,7 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationValidationResult,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -59,7 +59,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
         domain_type=MetricDomainTypes.COLUMN,
     )
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs,
@@ -70,7 +70,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         # </snippet>
         # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_selectable">
         (
-            selectable,
+            selectable,  # noqa: F841 # unused variable
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
@@ -176,7 +176,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     success_keys = ("mostly",)
 
     @renderer(renderer_type="renderer.diagnostic.observed_value")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _diagnostic_observed_value_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
@@ -206,7 +206,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
             return "--"
 
     @renderer(renderer_type="renderer.diagnostic.unexpected_statement")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _diagnostic_unexpected_statement_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
@@ -230,7 +230,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
                     "string_template": {
                         "template": exception_message_template_str,
                         "params": {
-                            "expectation_type": result.expectation_config.expectation_type,
+                            "expectation_type": result.expectation_config.type,
                             "exception_message": result.exception_info[
                                 "exception_message"
                             ],
@@ -307,8 +307,8 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
             ]
 
     @renderer(renderer_type="renderer.diagnostic.unexpected_table")
-    @render_evaluation_parameter_string
-    def _diagnostic_unexpected_table_renderer(  # noqa: PLR0912 # too complex
+    @render_suite_parameter_string
+    def _diagnostic_unexpected_table_renderer(  # noqa: C901, PLR0912
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,

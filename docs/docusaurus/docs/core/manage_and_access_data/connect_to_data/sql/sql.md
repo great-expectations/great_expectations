@@ -24,6 +24,11 @@ import SnowflakeDataSource from './_snowflake/_add_data_source.md'
 import SnowflakeDataAsset from './_snowflake/_add_data_asset.md'
 import SnowflakeNextSteps from './_snowflake/_next_steps.md'
 
+import SqlitePrerequisites from './_sqlite/_prerequisites.md'
+import SqliteDataSource from './_sqlite/_add_data_source.md'
+import SqliteDataAsset from './_sqlite/_add_data_asset.md'
+import SqliteNextSteps from './_sqlite/_next_steps.md'
+
 import UnspecifiedPrerequisites from './_unspecified/_prerequisites.md'
 import UnspecifiedDataSource from './_unspecified/_add_data_source.md'
 import UnspecifiedDataAsset from './_unspecified/_add_data_asset.md'

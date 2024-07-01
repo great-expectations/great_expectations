@@ -6,6 +6,9 @@ name: ci
 #   2. Every 3 hours
 #   3. When we push a tag with a semver pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
 
+env:
+  ECR_PULL_THROUGH_REPOSITORY_URL: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/
+
 on:
   merge_group:
   pull_request:
@@ -55,9 +58,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -99,6 +102,7 @@ jobs:
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
+      AWS_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       # aws-redshift
       REDSHIFT_USERNAME: ${{secrets.REDSHIFT_USERNAME}}
@@ -120,13 +124,17 @@ jobs:
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
       - name: Run docs_snippet_checker
         run: |
           yarn install
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
@@ -149,7 +157,7 @@ jobs:
           ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -159,6 +167,13 @@ jobs:
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.doc-step }}'
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: "258143015559"
+
       - name: Run the tests
         run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose  --reports
 
@@ -171,19 +186,21 @@ jobs:
           flags: ${{ matrix.doc-step }}
 
   unit-tests:
+    env:
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache-dependency-path: |
@@ -194,7 +211,8 @@ jobs:
         run: pip install . -c constraints-dev.txt -r reqs/requirements-dev-test.txt
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5 --reports
+        # TODO: revert the timeout back to 1.5 or lower after resolving arc issues
+        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=2.0 --reports
 
       # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
@@ -207,12 +225,15 @@ jobs:
   doc-checks:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -249,9 +270,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -280,6 +301,7 @@ jobs:
       AUTH0_MERCURY_API_CLIENT_SECRET: ${{secrets.AUTH0_MERCURY_API_CLIENT_SECRET}}
       GX_CLOUD_ORGANIZATION_ID: ${{secrets.MERCURY_ORGANIZATION_ID}}
       GX_CLOUD_ACCESS_TOKEN: ${{secrets.MERCURY_ACCESS_TOKEN}}
+      LD_SDK_KEY: ${{secrets.LD_SDK_KEY}}
       PACT_DO_NOT_TRACK: true
       SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
       SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
@@ -288,10 +310,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache-dependency-path: |
@@ -325,7 +347,7 @@ jobs:
 
       - name: Run the tests
         run:
-          invoke ci-tests 'cloud' --up-services --verbose  --reports
+          invoke ci-tests 'cloud' --up-services --verbose  --reports -W default::great_expectations.datasource.fluent.GxInvalidDatasourceWarning
 
           # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
@@ -339,6 +361,7 @@ jobs:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
@@ -355,8 +378,12 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
       SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
-    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: enterprise-arc
     strategy:
+      fail-fast: false
       matrix:
         markers:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
@@ -370,22 +397,30 @@ jobs:
           - snowflake
           - spark
           - trino
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
           # prevents this https://github.com/rhysd/actionlint/issues/237
           - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.9' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.10' }}
+          - python-version: ${{ github.event_name == 'merge_group' && '3.11' }}
+          - python-version: "3.12" # need sqlalchemy 2.0 support
+            markers: snowflake
+          - python-version: "3.12" # clickhouse/pyathena need dependency update
+            markers: athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
+          - python-version: "3.12" # numpy related issue
+            markers: databricks
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -397,6 +432,16 @@ jobs:
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
+
+      - name: Configure ECR AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::258143015559:role/github-amazonec2containerregistryreadonly
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose  --reports
@@ -415,9 +460,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -433,9 +478,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9"
           cache: "pip"
@@ -451,9 +496,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
@@ -469,9 +514,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
@@ -481,7 +526,9 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
-  pydantic-v1:
+  py312-min-versions:
+    env:
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -491,6 +538,24 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/py312-min-install.txt -r reqs/requirements-dev-test.txt
+      - name: Run the tests
+        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
+
+  pydantic-v1:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
           python-version: "3.8"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
@@ -499,14 +564,34 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
+  numpy-2:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: "pip"
+          cache-dependency-path: reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install . -r reqs/requirements-dev-test.txt
+      - name: Install numpy 2
+        run: pip install --pre "numpy>1.9999999999999"
+      - name: Run the tests
+        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
+
   airflow-min-versions:
     needs: [unit-tests, static-analysis]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -529,9 +614,9 @@ jobs:
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -555,6 +640,7 @@ jobs:
         py39-min-versions,
         py310-min-versions,
         py311-min-versions,
+        py312-min-versions,
         pydantic-v1,
         airflow-min-versions,
         import_gx,
@@ -570,7 +656,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Set up Python 3.8
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
       - name: Update pip
@@ -603,6 +689,7 @@ jobs:
         py39-min-versions,
         py310-min-versions,
         py311-min-versions,
+        py312-min-versions,
         pydantic-v1,
         airflow-min-versions,
         import_gx,

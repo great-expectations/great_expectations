@@ -37,7 +37,8 @@ def submit(event: Event) -> None:
         pass
 
 
-def init(
+def init(  # noqa: PLR0913
+    enable: bool,
     user_id: Optional[UUID] = None,
     data_context_id: Optional[UUID] = None,
     organization_id: Optional[UUID] = None,
@@ -56,8 +57,8 @@ def init(
         conf["oss_id"] = oss_id
     update_config(config=Config(cloud_mode=cloud_mode, **conf))
 
-    posthog.disabled = not ENV_CONFIG.posthog_enabled
-    if ENV_CONFIG.posthog_enabled:
+    posthog.disabled = not enable
+    if enable:
         posthog.debug = ENV_CONFIG.posthog_debug
         posthog.project_api_key = ENV_CONFIG.posthog_project_api_key
         posthog.host = ENV_CONFIG.posthog_host

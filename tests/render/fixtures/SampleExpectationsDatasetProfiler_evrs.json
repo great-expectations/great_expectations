@@ -1,5 +1,5 @@
 {
-  "evaluation_parameters": {},
+  "suite_parameters": {},
   "success": false,
   "meta": {
     "great_expectations_version": "0.9.11+17.g1ca85e52.dirty",

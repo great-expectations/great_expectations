@@ -58,7 +58,7 @@ expectation_configuration_1 = ExpectationConfiguration(
     },
 )
 # Add the Expectation to the suite
-suite.add_expectation_configuration(
+suite.add_expectation(
     expectation_configuration=expectation_configuration_1
 )
 # </snippet>
@@ -72,7 +72,7 @@ expectation_configuration_2 = ExpectationConfiguration(
     },
     # Note optional comments omitted
 )
-suite.add_expectation_configuration(
+suite.add_expectation(
     expectation_configuration=expectation_configuration_2
 )
 # </snippet>
@@ -91,7 +91,7 @@ expectation_configuration_3 = ExpectationConfiguration(
         }
     },
 )
-suite.add_expectation_configuration(
+suite.add_expectation(
     expectation_configuration=expectation_configuration_3
 )
 # </snippet>
@@ -110,7 +110,7 @@ expectation_configuration_4 = ExpectationConfiguration(
         }
     },
 )
-suite.add_expectation_configuration(
+suite.add_expectation(
     expectation_configuration=expectation_configuration_4
 )
 # </snippet>

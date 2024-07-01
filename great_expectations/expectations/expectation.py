@@ -35,12 +35,8 @@ from typing_extensions import ParamSpec, dataclass_transform
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import Field, ModelMetaclass
+from great_expectations.compatibility.pydantic import Field, ModelMetaclass, StrictStr
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (
-    get_evaluation_parameter_key,
-    is_evaluation_parameter,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -49,6 +45,10 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.suite_parameters import (
+    get_suite_parameter_key,
+    is_suite_parameter,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -57,6 +57,14 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_A_DESCRIPTION,
+    COLUMN_B_DESCRIPTION,
+    COLUMN_DESCRIPTION,
+)
+from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
+    Mostly,
 )
 from great_expectations.expectations.registry import (
     get_metric_kwargs,
@@ -105,22 +113,21 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
 P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 
 
-def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
-    """Decorator for Expectation classes that renders evaluation parameters as strings.
+def render_suite_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
+    """Decorator for Expectation classes that renders suite parameters as strings.
 
-    allows Expectations that use Evaluation Parameters to render the values
-    of the Evaluation Parameters along with the rest of the output.
+    allows Expectations that use Suite Parameters to render the values
+    of the Suite Parameters along with the rest of the output.
 
     Args:
         render_func: The render method of the Expectation class.
 
     Raises:
-        GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
+        GreatExpectationsError: If runtime_configuration with suite_parameters is not provided.
     """
 
     def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:  # noqa: C901 - too complex
@@ -131,18 +138,18 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for value in kwargs_dict.values():
-                if is_evaluation_parameter(value):
-                    key = get_evaluation_parameter_key(value)
+                if is_suite_parameter(value):
+                    key = get_suite_parameter_key(value)
                     current_expectation_params.append(key)
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration  # noqa: E501
-        # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support  # noqa: E501
+        # isinstance check should be removed upon implementation of RenderedAtomicContent suite parameter support  # noqa: E501
         if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")  # type: ignore[assignment] # could be object?
             if runtime_configuration:
-                eval_params = runtime_configuration.get("evaluation_parameters", {})
+                eval_params = runtime_configuration.get("suite_parameters", {})
                 styling = runtime_configuration.get("styling")
                 for key, val in eval_params.items():
                     for param in current_expectation_params:
@@ -163,9 +170,9 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
                             )
                             rendered_string_template.append(rendered_content)
             else:
-                raise GreatExpectationsError(
-                    f"""GX was not able to render the value of evaluation parameters.
-                        Expectation {render_func} had evaluation parameters set, but they were not passed in."""  # noqa: E501
+                raise GreatExpectationsError(  # noqa: TRY003
+                    f"""GX was not able to render the value of suite parameters.
+                        Expectation {render_func} had suite parameters set, but they were not passed in."""  # noqa: E501
                 )
         return rendered_string_template
 
@@ -183,7 +190,7 @@ def param_method(param_name: str) -> Callable:
     """  # noqa: E501
     if not param_name:
         # If param_name was passed as an empty string
-        raise RendererConfigurationError(
+        raise RendererConfigurationError(  # noqa: TRY003
             "Method decorated with @param_method must be passed an existing param_name."
         )
 
@@ -196,7 +203,7 @@ def param_method(param_name: str) -> Callable:
                 return_type: Type = param_func.__annotations__["return"]
             except KeyError:
                 method_name: str = getattr(param_func, "__name__", repr(param_func))
-                raise RendererConfigurationError(
+                raise RendererConfigurationError(  # noqa: TRY003
                     "Methods decorated with @param_method must have an annotated return "
                     f"type, but method {method_name} does not."
                 )
@@ -210,7 +217,7 @@ def param_method(param_name: str) -> Callable:
                     else:
                         return_obj = None
             else:
-                raise RendererConfigurationError(
+                raise RendererConfigurationError(  # noqa: TRY003
                     f"RendererConfiguration.param does not have a param called {param_name}. "
                     f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
                 )
@@ -277,11 +284,51 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
+    @staticmethod
+    def _format_title(schema_title: str):
+        # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
+        split_between_caps_and_nums = (
+            "".join([" " + c if (c.isdigit() or c == c.upper()) else c for c in schema_title])
+            .lstrip()
+            .split(" ")
+        )
+        join_multi_caps_and_nums: list[str] = []
+        for idx, token in enumerate(split_between_caps_and_nums):
+            if idx > 0:
+                consecutive_caps = (
+                    token.upper() == token
+                    and split_between_caps_and_nums[idx - 1].upper()
+                    == split_between_caps_and_nums[idx - 1]
+                )
+                consecutive_digits = (
+                    token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
+                )
+                if (
+                    len(token) == 1
+                    and len(split_between_caps_and_nums[idx - 1]) == 1
+                    and (consecutive_caps or consecutive_digits)
+                ):
+                    join_multi_caps_and_nums[-1] = join_multi_caps_and_nums[-1] + token
+                else:
+                    join_multi_caps_and_nums.append(token)
+            else:
+                join_multi_caps_and_nums.append(token)
+
+        return " ".join(join_multi_caps_and_nums)
+
     class Config:
         arbitrary_types_allowed = True
         smart_union = True
         extra = pydantic.Extra.forbid
         json_encoders = {RenderedAtomicContent: lambda data: data.to_json_dict()}
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+            schema["title"] = model._format_title(schema_title=schema.get("title", ""))
+            schema["properties"]["metadata"] = {
+                "type": "object",
+                "properties": {},
+            }
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
@@ -311,7 +358,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @pydantic.validator("result_format")
     def _validate_result_format(cls, result_format: ResultFormat | dict) -> ResultFormat | dict:
         if isinstance(result_format, dict) and "result_format" not in result_format:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "If configuring result format with a dictionary, the key 'result_format' must be present."  # noqa: E501
             )
         return result_format
@@ -327,7 +374,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def save(self):
         """Save the current state of this Expectation."""
         if not self._save_callback:
-            raise RuntimeError(
+            raise RuntimeError(  # noqa: TRY003
                 "Expectation must be added to ExpectationSuite before it can be saved."
             )
         updated_self = self._save_callback(self)
@@ -338,7 +385,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         expectation_type: str = camel_to_snake(cls.__name__)
 
         for candidate_renderer_fn_name in dir(cls):
-            attr_obj: Callable = getattr(cls, candidate_renderer_fn_name)
+            attr_obj: Callable | None = getattr(cls, candidate_renderer_fn_name, None)
+            # attrs are not guaranteed to exist https://docs.python.org/3.10/library/functions.html#dir
+            if attr_obj is None:
+                continue
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
             register_renderer(object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj)
@@ -414,7 +464,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         elif renderer_configuration.expectation_type:
             template_str = "$expectation_type"
         else:
-            raise ValueError("RendererConfiguration does not contain an expectation_type.")
+            raise ValueError("RendererConfiguration does not contain an expectation_type.")  # noqa: TRY003
 
         add_param_args = (
             (
@@ -465,7 +515,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_summary(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -707,7 +757,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             )
 
             if result.expectation_config is not None:
-                expectation_type = result.expectation_config.expectation_type
+                expectation_type = result.expectation_config.type
             else:
                 expectation_type = None
 
@@ -1061,7 +1111,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                 evr = ExpectationValidationResult(**raw_response)
                 evr.expectation_config = configuration
             else:
-                raise GreatExpectationsError("Unable to build EVR")
+                raise GreatExpectationsError("Unable to build EVR")  # noqa: TRY003
         else:
             raw_response_dict: dict = raw_response.to_json_dict()
             evr = ExpectationValidationResult(**raw_response_dict)
@@ -1099,7 +1149,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         }
         missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
-            raise InvalidExpectationKwargsError(f"Missing domain kwargs: {list(missing_kwargs)}")
+            raise InvalidExpectationKwargsError(f"Missing domain kwargs: {list(missing_kwargs)}")  # noqa: TRY003
         return domain_kwargs
 
     def _get_success_kwargs(self) -> Dict[str, Any]:
@@ -1160,7 +1210,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1170,7 +1220,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Args:
             validator: A Validator object that can be used to create Expectations, validate Expectations,
                 and get Metrics for Expectations.
-            evaluation_parameters: Dictionary of dynamic values used during Validation of an Expectation.
+            suite_parameters: Dictionary of dynamic values used during Validation of an Expectation.
             interactive_evaluation: Setting the interactive_evaluation flag on a DataAsset
                 make it possible to declare expectations and store expectations without
                 immediately evaluating them.
@@ -1187,8 +1237,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
         self._warn_if_result_format_config_in_expectation_configuration(configuration=configuration)
 
-        configuration.process_evaluation_parameters(
-            evaluation_parameters, interactive_evaluation, data_context
+        configuration.process_suite_parameters(
+            suite_parameters, interactive_evaluation, data_context
         )
         expectation_validation_result_list: list[ExpectationValidationResult] = (
             validator.graph_validate(
@@ -1199,17 +1249,17 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return expectation_validation_result_list[0]
 
     @property
-    def evaluation_parameter_options(self) -> tuple[str, ...]:
-        """EvaluationParameter options for this Expectation.
+    def suite_parameter_options(self) -> tuple[str, ...]:
+        """SuiteParameter options for this Expectation.
 
         Returns:
-            tuple[str, ...]: The keys of the evaluation parameters used in this Expectation at runtime.
-        """  # noqa: E501
+            tuple[str, ...]: The keys of the suite parameters used in this Expectation at runtime.
+        """
         output: set[str] = set()
         as_dict = self.dict(exclude_defaults=True)
         for value in as_dict.values():
-            if is_evaluation_parameter(value):
-                output.add(get_evaluation_parameter_key(value))
+            if is_suite_parameter(value):
+                output.add(get_suite_parameter_key(value))
         return tuple(sorted(output))
 
     @property
@@ -1220,7 +1270,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         id = kwargs.pop("id", None)
         rendered_content = kwargs.pop("rendered_content", None)
         return ExpectationConfiguration(
-            expectation_type=camel_to_snake(self.__class__.__name__),
+            type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
             meta=meta,
             notes=notes,
@@ -1350,7 +1400,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         if not param_prefix:
-            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")
+            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")  # noqa: TRY003
 
         @param_method(param_name=array_param_name)
         def _add_params(
@@ -1381,7 +1431,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> str:
         if not param_prefix:
-            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")
+            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")  # noqa: TRY003
 
         @param_method(param_name=array_param_name)
         def _get_string(renderer_configuration: RendererConfiguration) -> str:
@@ -1456,7 +1506,6 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: float = Field(default=1.0, ge=0.0, le=1.0)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1467,6 +1516,21 @@ class BatchExpectation(Expectation, ABC):
     metric_dependencies: ClassVar[Tuple[str, ...]] = ()
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.TABLE
     args_keys: ClassVar[Tuple[str, ...]] = ()
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[BatchExpectation]) -> None:
+            Expectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Batch",
+                    }
+                }
+            )
 
     @override
     def get_validation_dependencies(
@@ -1524,7 +1588,7 @@ class BatchExpectation(Expectation, ABC):
                 try:
                     min_value = parse(min_value)
                 except TypeError:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"""Could not parse "min_value" of {min_value} (of type "{type(min_value)!s}) into datetime \
 representation."""  # noqa: E501
                     )
@@ -1533,7 +1597,7 @@ representation."""  # noqa: E501
                 try:
                     max_value = parse(max_value)
                 except TypeError:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"""Could not parse "max_value" of {max_value} (of type "{type(max_value)!s}) into datetime \
 representation."""  # noqa: E501
                     )
@@ -1543,7 +1607,7 @@ representation."""  # noqa: E501
                 try:
                     metric_value = parse(metric_value)
                 except TypeError:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"""Could not parse "metric_value" of {metric_value} (of type "{type(metric_value)!s}) into datetime \
 representation."""  # noqa: E501
                     )
@@ -1596,7 +1660,7 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
     def _validate_query(cls, query: str) -> str:
         parsed_fields = [f[1] for f in Formatter().parse(query)]
         if "batch" not in parsed_fields:
-            raise ValueError("Query must contain {batch} parameter.")
+            raise ValueError("Query must contain {batch} parameter.")  # noqa: TRY003
 
         return query
 
@@ -1684,7 +1748,7 @@ class QueryExpectation(BatchExpectation, ABC):
             raise InvalidExpectationConfigurationError(str(e))
         try:
             if not isinstance(query, str):
-                raise TypeError(f"'query' must be a string, but your query is type: {type(query)}")
+                raise TypeError(f"'query' must be a string, but your query is type: {type(query)}")  # noqa: TRY003, TRY301
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
@@ -1732,10 +1796,31 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: str
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
 
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
-    domain_type = MetricDomainTypes.COLUMN
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnAggregateExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Aggregate",
+                    }
+                }
+            )
 
 
 class ColumnMapExpectation(BatchExpectation, ABC):
@@ -1761,7 +1846,8 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: str
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
+    mostly: Mostly = 1.0
 
     catch_exceptions: bool = True
 
@@ -1775,6 +1861,21 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     )
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Map",
+                    }
+                }
+            )
 
     @classmethod
     @override
@@ -2010,8 +2111,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_A: str
-    column_B: str
+    column_A: StrictStr = Field(min_length=1, description=COLUMN_A_DESCRIPTION)
+    column_B: StrictStr = Field(min_length=1, description=COLUMN_B_DESCRIPTION)
+    mostly: Mostly = 1.0
 
     catch_exceptions: bool = True
 
@@ -2024,8 +2126,23 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         "row_condition",
         "condition_parser",
     )
-    domain_type = MetricDomainTypes.COLUMN_PAIR
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN_PAIR
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnPairMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Pair Map",
+                    }
+                }
+            )
 
     @classmethod
     @override
@@ -2249,7 +2366,8 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_list: List[str]
+    column_list: List[StrictStr]
+    mostly: Mostly = 1.0
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"
@@ -2265,8 +2383,23 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         "condition_parser",
         "ignore_row_if",
     )
-    domain_type = MetricDomainTypes.MULTICOLUMN
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.MULTICOLUMN
     success_keys = ("mostly",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[MulticolumnMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Multicolumn Map",
+                    }
+                }
+            )
 
     @classmethod
     @override
@@ -2552,6 +2685,11 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         return_obj["result"]["unexpected_percent_nonmissing"] = unexpected_percent_nonmissing
 
     if result_format["include_unexpected_rows"]:
+        if unexpected_rows is not None:
+            if isinstance(unexpected_rows, pd.DataFrame):
+                unexpected_rows = unexpected_rows.head(result_format["partial_unexpected_count"])
+            elif isinstance(unexpected_rows, list):
+                unexpected_rows = unexpected_rows[: result_format["partial_unexpected_count"]]
         return_obj["result"].update(
             {
                 "unexpected_rows": unexpected_rows,
@@ -2575,7 +2713,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     # Try to return the most common values, if possible.
     partial_unexpected_count: Optional[int] = result_format.get("partial_unexpected_count")
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
-    if partial_unexpected_count is not None and 0 < partial_unexpected_count:
+    if partial_unexpected_count is not None and partial_unexpected_count > 0:
         try:
             if not exclude_unexpected_values:
                 partial_unexpected_counts = [
@@ -2616,7 +2754,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if result_format["result_format"] == ResultFormat.COMPLETE:
         return return_obj
 
-    raise ValueError(f"Unknown result_format {result_format['result_format']}.")
+    raise ValueError(f"Unknown result_format {result_format['result_format']}.")  # noqa: TRY003
 
 
 def _validate_dependencies_against_available_metrics(
@@ -2634,7 +2772,7 @@ def _validate_dependencies_against_available_metrics(
     """  # noqa: E501
     for metric_config in validation_dependencies:
         if metric_config.id not in metrics:
-            raise InvalidExpectationConfigurationError(
+            raise InvalidExpectationConfigurationError(  # noqa: TRY003
                 f"Metric {metric_config.id} is not available for validation of configuration. Please check your configuration."  # noqa: E501
             )
 

@@ -61,7 +61,7 @@ def num_to_str(  # noqa: C901
     try:
         d = local_context.create_decimal(s)
     except decimal.InvalidOperation:
-        raise TypeError(f"num_to_str received an invalid value: {f} of type {type(f).__name__}.")
+        raise TypeError(f"num_to_str received an invalid value: {f} of type {type(f).__name__}.")  # noqa: TRY003
     if no_scientific:
         result = format(d, "f")
     elif use_locale:
@@ -74,7 +74,7 @@ def num_to_str(  # noqa: C901
         result = f"≈{result}"
     decimal_char = locale.localeconv().get("decimal_point")
     if not isinstance(decimal_char, str):
-        raise TypeError(
+        raise TypeError(  # noqa: TRY003
             f"Expected str but got {decimal_char} which is type {type(decimal_char).__name__}."
         )
     if "e" not in result and "E" not in result and decimal_char in result:
@@ -101,7 +101,7 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
     if type(resource_key) == ValidationResultIdentifier:
         run_name = resource_key.run_id.run_name
     else:
-        raise TypeError(
+        raise TypeError(  # noqa: TRY003
             "run_name_filter filtering is only implemented for ValidationResultResources."
         )
 
@@ -118,7 +118,7 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         if run_name is None:
             return False
         regex_match = re.search(regex, run_name)
-        return False if regex_match is None else True
+        return regex_match is not None
 
 
 @public_api
@@ -338,7 +338,7 @@ def build_count_and_index_table(  # noqa: C901
         partial_unexpected_counts=partial_unexpected_counts,
     )
     if unexpected_index_df.empty:
-        raise RenderingError(
+        raise RenderingError(  # noqa: TRY003
             "GX ran into an issue while building count and index table for rendering. Please check your configuration."  # noqa: E501
         )
 
@@ -422,7 +422,7 @@ def _convert_unexpected_indices_to_df(
                 set(first_unexpected_index.keys()).difference(set(unexpected_index_column_names))
             )
         else:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"Expected dict but got {unexpected_index_list[0]} which is type {type(unexpected_index_list[0]).__name__}."  # noqa: E501
             )
     elif unexpected_list:

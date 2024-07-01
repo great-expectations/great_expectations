@@ -35,14 +35,14 @@ http://old.docs.greatexpectations.io/* http://648b46c2ec119e00089c4318--niobium-
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_the_cli.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_the_cli.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
-/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_expectations_that_span_multiple_batches_using_suite_parameters.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_expectations_that_span_multiple_batches_using_suite_parameters.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_spark.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_spark.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_parameterized_expectations_super_fast.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_parameterized_expectations_super_fast.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_contribute_a_new_expectation_to_great_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_contribute_a_new_expectation_to_great_expectations.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_pandas.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_pandas.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_sqlalchemy.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_sqlalchemy.html
-/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_dynamically_load_evaluation_parameters_from_a_database.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_dynamically_load_evaluation_parameters_from_a_database.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_dynamically_load_suite_parameters_from_a_database.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_dynamically_load_suite_parameters_from_a_database.html
 /en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
 /en/latest/guides/how_to_guides/configuring_data_contexts.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts.html
 /en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql.html
@@ -147,7 +147,7 @@ http://old.docs.greatexpectations.io/* http://648b46c2ec119e00089c4318--niobium-
 /en/latest/releasing/docker_release_process.html https://legacy.docs.greatexpectations.io/en/latest/releasing/docker_release_process.html
 /en/latest/reference/spare_parts.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts.html
 /en/latest/reference/conditional_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/conditional_expectations.html
-/en/latest/reference/core_concepts/evaluation_parameters.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
+/en/latest/reference/core_concepts/suite_parameters.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/suite_parameters.html
 /en/latest/reference/core_concepts/execution_engine.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/execution_engine.html
 /en/latest/reference/core_concepts/conditional_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/conditional_expectations.html
 /en/latest/reference/core_concepts/data_context.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html
@@ -207,7 +207,7 @@ http://old.docs.greatexpectations.io/* http://648b46c2ec119e00089c4318--niobium-
 /docs/guides/expectations/how_to_create_and_edit_expectations_in_bulk https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file
 
 # Redirects for deprecated workflows and codepaths
-/docs/reference/evaluation_parameters/ https://docs.greatexpectations.io/docs/terms/evaluation_parameter
+/docs/reference/suite_parameters/ https://docs.greatexpectations.io/docs/terms/evaluation_parameter
 /docs/guides/validation/advanced/how_to_implement_custom_notifications https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions
 /docs/guides/expectations/creating_custom_expectations/how_to_create_custom_metrics https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
 /docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
@@ -398,7 +398,6 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/reference/expectations/implemented_expectations/ https://greatexpectations.io/expectations.html
 /docs/reference/expectations/implemented_expectations/ https://greatexpectations.io/expectations.html
 /docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers /docs/guides/expectations/expectations_lp
-/docs/terms/profiler /docs/terms/data_assistant
 
 # Redirects for removed index pages and new landing pages
 
@@ -438,6 +437,8 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/cloud/quickstarts/airflow_quickstart /docs/cloud/connect/connect_airflow
 /docs/cloud/quickstarts/python_quickstart /docs/cloud/connect/connect_python
 /docs/cloud/set_up_gx_cloud#* /docs/cloud/try_gx_cloud#:splat
+/docs/cloud/try_gx_cloud /docs/cloud/deploy_gx_agent
+/versioned_docs/version-0.18/cloud/try_gx_cloud /versioned_docs/version-0.18/cloud/tdeploy_gx_agent
 
 # Broken link redirect
 
@@ -459,6 +460,6 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 # TODO: Revise/replace/redirect these files:
   # /docs/oss/contributing/contributing_maturity
   # /docs/oss/guides/expectations/creating_custom_expectations/how_to_use_custom_expectations
-  # /docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters
-  # /docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database
+  # /docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_suite_parameters
+  # /docs/oss/guides/expectations/advanced/how_to_dynamically_load_suite_parameters_from_a_database
   # /docs/oss/guides/expectations/advanced/identify_failed_rows_expectations

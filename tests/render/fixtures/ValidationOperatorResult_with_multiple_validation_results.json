@@ -9,6 +9,7 @@
           "success_percent": 81.81818181818183
         },
         "success": false,
+        "suite_name": "basic.warning",
         "meta": {
           "great_expectations.__version__": "0.11.8+4.g4ab34df3.dirty",
           "expectation_suite_name": "basic.warning",
@@ -28,7 +29,7 @@
           "batch_parameters": null,
           "validation_time": "20200727T171932.962507Z"
         },
-        "evaluation_parameters": {},
+        "suite_parameters": {},
         "results": [
           {
             "expectation_config": {
@@ -391,6 +392,7 @@
           "success_percent": 81.81818181818183
         },
         "success": false,
+        "suite_name": "basic.warning",
         "meta": {
           "great_expectations.__version__": "0.11.8+4.g4ab34df3.dirty",
           "expectation_suite_name": "basic.warning",
@@ -410,7 +412,7 @@
           "batch_parameters": null,
           "validation_time": "20200727T171932.962507Z"
         },
-        "evaluation_parameters": {},
+        "suite_parameters": {},
         "results": [
           {
             "expectation_config": {
@@ -789,5 +791,5 @@
     }
   },
   "success": false,
-  "evaluation_parameters": null
+  "suite_parameters": null
 }

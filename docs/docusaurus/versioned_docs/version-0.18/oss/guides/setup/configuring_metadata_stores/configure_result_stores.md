@@ -70,16 +70,12 @@ Use the information provided here to configure a new storage location for Valida
 
 ### Prerequisites
 
-<Prerequisites>
-
 - [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - [A Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
 - An Azure Blob container. If you want to [host and share Data Docs on Azure Blob Storage](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md), you can set this up first and then use the ``$web`` existing container to store your <TechnicalTag tag="expectation" text="Expectations" />.
 - A prefix (folder) to store Validation Results. You don't need to create the folder, the prefix is just part of the Blob name.
-
-</Prerequisites>
 
 ### Configure the ``config_variables.yml`` file with your Azure Storage credentials
 
@@ -166,15 +162,11 @@ To view all the code used in this topic, see [how_to_configure_a_validation_resu
 
 ### Prerequisites
 
-<Prerequisites>
-
 - [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - [A Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Validation Results.
-
-</Prerequisites>
 
 ### Configure your GCP credentials
 
@@ -234,14 +226,10 @@ Use the information provided here to configure a new storage location for Valida
 
 ### Prerequisites
 
-<Prerequisites>
-
 - [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - [An Expectation Suite ](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - [A Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - A new storage location to store Validation Results. This can be a local path, or a path to a secure network filesystem.
-
-</Prerequisites>
 
 ### Create a new folder for Validation Results
 
@@ -299,14 +287,10 @@ Use the information provided here to configure Great Expectations to store Valid
 
 ### Prerequisites
 
-<Prerequisites>
-
 - [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - [A Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - [A PostgreSQL database](https://www.postgresql.org/) with appropriate credentials.
-
-</Prerequisites>
 
 ### Configure the ``config_variables.yml`` file with your database credentials
 

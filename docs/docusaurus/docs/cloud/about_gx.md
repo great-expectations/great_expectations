@@ -1,26 +1,20 @@
 ---
-sidebar_label: 'About GX Cloud'
-title: 'About GX Cloud'
-description: Learn more about the features and benefits of GX Cloud.
+sidebar_label: 'GX Cloud deployment patterns and architecture'
+title: 'GX Cloud deployment patterns and architecture'
+description: Learn more about GX Cloud deployment patterns and architecture.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-GX Cloud builds on the innovative features of GX open source software (OSS). Its easy-to-use web interface lets you quickly validate your data without creating and running complex Python code. With GX Cloud you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.
+GX Cloud simplifies data quality management and monitoring. Its easy-to-use web interface lets you quickly validate your data without provisioning and maintaining complex infrastructure. With GX Cloud, you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.
 
-While it is possible to design and deploy a functioning data quality ecosystem with GX OSS, GX Cloud simplifies infrastructure and deployment significantly. With GX Cloud, you'll save time, money, and effort implementing your data quality management and monitoring solution.
-
-Here are just a few of the benefits you'll get with GX Cloud:
+GX Cloud includes the following features and functionality:
 
 - It's web-based and browser- and platform-independent.
 
-- A hosted environment and intuitive interface makes it faster to set up and run your data Validations.
+- An intuitive interface makes it faster to set up and run your data Validations.
 
-- Features such as Validation run histories, Data Asset metrics, and more.
-
-- No more need to create, run, and maintain complex code for your data queries.
-
-- No more need to host GX OSS Data Docs. GX Cloud takes care of hosting and allows your organization to focus on managing and monitoring data.
+- Validation run histories, Data Asset metrics, and more.
 
 - Hosted backend storage for GX deployments. With GX OSS, you need to set up and maintain a collection of required backend stores, including stores for your GX component configurations, data quality metadata, and data validation history. GX Cloud removes the need to deploy and maintain this additional internal infrastructure&mdash;with GX Cloud, your backend stores are fully-managed.
 
@@ -52,39 +46,30 @@ The GX Agent is an intermediary between GX Cloud and your organization's data st
 
 The GX Agent is typically deployed in your organization's deployment environment, for example, in a development, staging, or production cloud services environment. The GX Agent serves all GX Cloud users within your organization. It can be run as part of your development or production workflows. See [Connect GX Cloud](./connect/connect_lp.md) for setup instructions.
 
+### GX Agent versioning
+
+GX uses a date-based versioning format for its weekly GX Agent Docker image releases. For example, `YYYYMMMDD.#` for stable releases or `YYYYMMDD.#.dev#` for pre-releases. GX uses the `stable` and `dev` Docker image tags to identify the release type. The `stable` tag indicates the image is fully tested and ready for use. The `dev` tag indicates a pre-release image. This documentation assumes you're using the latest `stable` GX Agent Docker image.
+
 
 ## GX Cloud deployment patterns
 
-GX Cloud deployments can be tailored to meet your specific business requirements. To determine which deployment pattern and GX architectural components are most suitable for your organization, determine how your data is accessed and how users interact with GX Cloud.
-
-The following table shows the connection options.
-
-| Deployment pattern | Environment | GX Agent | GX OSS client |
-| :-- | :-- | :--: | :--: |
-| Org-hosted | Deployment | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | |
-| Self-hosted | Local | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | |
-| Orchestrated | Deployment or local | | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> |
-
-The following table shows how users can access GX Cloud.
-
-| Access method | GX Cloud | GX OSS client |
-| :-- | :--: | :--: |
-| UI | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | |
-| Python API | | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div>  |
-| UI and Python API | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> | <div align="center"><img alt="Yes" src="/img/simple_orange_circle.svg"/></div> |
+GX Cloud deployments can be tailored to meet your specific business requirements. How your data is accessed and how you want your users to interact with GX Cloud determine which deployment pattern and GX architectural components are suitable for your organization.
 
 
 ### Org-hosted deployment pattern
-In an org-hosted deployment, you run the GX Agent in your organization's deployment environment, for example, development or production. The GX Agent is an intermediary between GX Cloud and your organization's deployment environment data stores. Organization users can interact with GX Cloud using the web UI, the GX OSS client, or both.
+
+In an org-hosted deployment, you run the GX Agent in your organization's deployment environment. The GX Agent is an intermediary between GX Cloud and your organization's deployment environment data stores. Organization users can interact with GX Cloud using the web UI, the GX OSS client, or both.
 
 ![GX Cloud org-hosted deployment](./architecture_deployment_images/org_hosted_deployment.png)
 
 ### Self-hosted deployment pattern
+
 In a self-hosted deployment, you use Docker to run the GX Agent in your local environment. The GX Agent is an intermediary between GX Cloud and your local data stores. You can interact with GX Cloud using the web UI, the GX OSS client, or both.
 
 ![GX Cloud self-hosted deployment](./architecture_deployment_images/self_hosted_deployment.png)
 
 ### Orchestrated deployment pattern
+
 In an orchestrated deployment pattern, you use an orchestrator to integrate GX Cloud into your existing data pipeline. You use the GX OSS client to access your organization's data stores and to store job results in GX Cloud. Users can interact with GX Cloud using the web UI, the GX OSS client, or both.
 
 ![GX Cloud orchestrated deployment](./architecture_deployment_images/orchestrated_deployment.png)
@@ -107,7 +92,7 @@ The following table lists the sequence of tasks that you complete in a typical G
 
 | Task                                     | Description                                                        |
 |------------------------------------------|--------------------------------------------------------------------|
-|[Connect GX Cloud](./connect/connect_lp.md) | Set up your deployment environment to get the most out of GX Cloud. Do it once, and you don't need to do it again. If you're not ready to use GX Cloud in your deployment environment, see [Try GX Cloud](./try_gx_cloud.md).                                   | 
+| [Deploy the GX Agent](./deploy_gx_agent.md) | Deploy the GX Agent to use GX Cloud features and functionality.                                   | 
 | [Create a Data Asset](./data_assets/manage_data_assets.md#create-a-data-asset) | The Data Asset contains the data you want to examine and validate, and the Data Source is where the Data Asset is located. | 
 | [Invite users](./users/manage_users.md#invite-a-user)    | Invite users to your GX Cloud organization.                       |
 | [Create an Expectation](./expectations/manage_expectations.md)    | Define verifiable assertions about your data.                       |  

@@ -20,11 +20,7 @@ from great_expectations.core.batch import (  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    ensure_json_serializable,
-    in_jupyter_notebook,
-)
+from great_expectations.core.util import in_jupyter_notebook
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render import (
@@ -35,6 +31,10 @@ from great_expectations.render import (
     RenderedAtomicContentSchema,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    ensure_json_serializable,  # noqa: TID251
+)
 
 if TYPE_CHECKING:
     from great_expectations.expectations.expectation_configuration import (
@@ -293,9 +293,7 @@ class ExpectationValidationResult(SerializableDictDot):
             or result["unexpected_percent_nonmissing"] > 100  # noqa: PLR2004
         ):
             return False
-        if result.get("missing_count") and result["missing_count"] < 0:
-            return False
-        return True
+        return not (result.get("missing_count") and result["missing_count"] < 0)
 
     @public_api
     @override
@@ -324,7 +322,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):  # noqa: C901 - too complex
         if not self.expectation_config:
-            raise gx_exceptions.UnavailableMetricError(
+            raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
                 "No ExpectationConfig found in this ExpectationValidationResult. Unable to "
                 "return a metric."
             )
@@ -332,7 +330,7 @@ class ExpectationValidationResult(SerializableDictDot):
         metric_name_parts = metric_name.split(".")
         metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
-        if metric_name_parts[0] == self.expectation_config.expectation_type:
+        if metric_name_parts[0] == self.expectation_config.type:
             curr_metric_kwargs = get_metric_kwargs_id(metric_kwargs=self.expectation_config.kwargs)
             if metric_kwargs_id != curr_metric_kwargs:
                 raise gx_exceptions.UnavailableMetricError(
@@ -342,14 +340,14 @@ class ExpectationValidationResult(SerializableDictDot):
                     )
                 )
             if len(metric_name_parts) < 2:  # noqa: PLR2004
-                raise gx_exceptions.UnavailableMetricError(
+                raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
                     "Expectation-defined metrics must include a requested metric."
                 )
             elif len(metric_name_parts) == 2:  # noqa: PLR2004
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
-                    raise gx_exceptions.UnavailableMetricError(
+                    raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
                         "Metric name must have more than two parts for keys other than " "success."
                     )
             elif metric_name_parts[1] == "result":
@@ -359,15 +357,15 @@ class ExpectationValidationResult(SerializableDictDot):
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
-                    raise gx_exceptions.UnavailableMetricError(
+                    raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
                         f"Unable to get metric {metric_name} -- KeyError in "
                         "ExpectationValidationResult."
                     )
-        raise gx_exceptions.UnavailableMetricError(f"Unrecognized metric name {metric_name}")
+        raise gx_exceptions.UnavailableMetricError(f"Unrecognized metric name {metric_name}")  # noqa: TRY003
 
     def describe_dict(self) -> dict:
         if self.expectation_config:
-            expectation_type = self.expectation_config.expectation_type
+            expectation_type = self.expectation_config.type
             kwargs = self.expectation_config.kwargs
         else:
             expectation_type = None
@@ -500,40 +498,43 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     Args:
         success: Boolean indicating the success or failure of this collection of results, or None.
         results: List of ExpectationValidationResults, or None.
-        evaluation_parameters: Dict of Evaluation Parameters used to produce these results, or None.
+        suite_parameters: Dict of Suite Parameters used to produce these results, or None.
         statistics: Dict of values describing the results.
         meta: Instance of ExpectationSuiteValidationResult, a Dict of meta values, or None.
-
+        batch_id: A unique identifier for the batch of data that was validated.
+        result_url: A URL where the results are stored.
     """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
-        success: Optional[bool] = None,
-        results: Optional[list] = None,
-        evaluation_parameters: Optional[dict] = None,
+        success: bool,
+        results: list[ExpectationValidationResult],
+        suite_name: str,
+        suite_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
-        meta: Optional[ExpectationSuiteValidationResult | dict] = None,
+        meta: Optional[ExpectationSuiteValidationResultMeta | dict] = None,
         batch_id: Optional[str] = None,
         result_url: Optional[str] = None,
         id: Optional[str] = None,
     ) -> None:
         self.success = success
-        if results is None:
-            results = []
         self.results = results
-        if evaluation_parameters is None:
-            evaluation_parameters = {}
-        self.evaluation_parameters = evaluation_parameters
-        if statistics is None:
-            statistics = {}
-        self.statistics = statistics
-        if meta is None:
-            meta = {}
+        self.suite_name = suite_name
+        self.suite_parameters = suite_parameters or {}
+        self.statistics = statistics or {}
+        meta = meta or {}
         ensure_json_serializable(meta)  # We require meta information to be serializable.
         self.meta = meta
         self.batch_id = batch_id
         self.result_url = result_url
+        self.id = id
         self._metrics: dict = {}
+
+    @property
+    def asset_name(self) -> str | None:
+        if "active_batch_definition" in self.meta:
+            return self.meta["active_batch_definition"].data_asset_name
+        return None
 
     def __eq__(self, other):
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
@@ -544,7 +545,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             (
                 self.success == other.success,
                 self.results == other.results,
-                self.evaluation_parameters == other.evaluation_parameters,
+                self.suite_parameters == other.suite_parameters,
                 self.statistics == other.statistics,
                 self.meta == other.meta,
             )
@@ -566,9 +567,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         myself = deepcopy(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed  # noqa: E501
         # schemas to get serialization all-the-way down via dump
-        myself["evaluation_parameters"] = convert_to_json_serializable(
-            myself["evaluation_parameters"]
-        )
+        myself["suite_parameters"] = convert_to_json_serializable(myself["suite_parameters"])
         myself["statistics"] = convert_to_json_serializable(myself["statistics"])
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         myself["results"] = [convert_to_json_serializable(result) for result in myself["results"]]
@@ -585,7 +584,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             if len(metric_name_parts) == 2:  # noqa: PLR2004
                 return self.statistics.get(metric_name_parts[1])
             else:
-                raise gx_exceptions.UnavailableMetricError(f"Unrecognized metric {metric_name}")
+                raise gx_exceptions.UnavailableMetricError(f"Unrecognized metric {metric_name}")  # noqa: TRY003
 
         # Expose expectation-defined metrics
         elif metric_name_parts[0].lower().startswith("expect_"):
@@ -595,7 +594,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             else:
                 for result in self.results:
                     try:
-                        if metric_name_parts[0] == result.expectation_config.expectation_type:
+                        if metric_name_parts[0] == result.expectation_config.type:
                             metric_value = result.get_metric(metric_name, **kwargs)
                             break
                     except gx_exceptions.UnavailableMetricError:
@@ -604,7 +603,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                     self._metrics[(metric_name, metric_kwargs_id)] = metric_value
                     return metric_value
 
-        raise gx_exceptions.UnavailableMetricError(
+        raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
             f"Metric {metric_name} with metric_kwargs_id {metric_kwargs_id} is not available."
         )
 
@@ -613,7 +612,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     ) -> ExpectationSuiteValidationResult:
         validation_results = [result for result in self.results if not result.success]
 
-        successful_expectations = sum(exp.success for exp in validation_results)
+        successful_expectations = sum(exp.success or False for exp in validation_results)
         evaluated_expectations = len(validation_results)
         unsuccessful_expectations = evaluated_expectations - successful_expectations
         success = successful_expectations == evaluated_expectations
@@ -632,7 +631,8 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         return ExpectationSuiteValidationResult(
             success=success,
             results=validation_results,
-            evaluation_parameters=self.evaluation_parameters,
+            suite_name=self.suite_name,
+            suite_parameters=self.suite_parameters,
             statistics=statistics,
             meta=self.meta,
         )
@@ -654,11 +654,11 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 class ExpectationSuiteValidationResultSchema(Schema):
     success = fields.Bool()
     results = fields.List(fields.Nested(ExpectationValidationResultSchema))
-    evaluation_parameters = fields.Dict()
+    suite_name = fields.String(required=True, allow_none=False)
+    suite_parameters = fields.Dict()
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
     id = fields.UUID(required=False, allow_none=True)
-    checkpoint_name = fields.String(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump

@@ -39,12 +39,12 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         **kwargs,
     ):
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         temp_column = column
 
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")  # noqa: TRY003
 
         # Use a vectorized approach for native numpy dtypes
         if column.dtype in [int, float]:
@@ -74,7 +74,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 if (isinstance(val, str) != isinstance(min_value, str)) or (
                     isinstance(val, str) != isinstance(max_value, str)
                 ):
-                    raise TypeError(
+                    raise TypeError(  # noqa: TRY003
                         "Column values, min_value, and max_value must either be None or of the same type."  # noqa: E501
                     )
 
@@ -93,7 +93,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 # Type of column values is either string or specific rich type (or "None").  In all cases, type of  # noqa: E501
                 # column must match type of constant being compared to column value (otherwise, error is raised).  # noqa: E501
                 if isinstance(val, str) != isinstance(max_value, str):
-                    raise TypeError(
+                    raise TypeError(  # noqa: TRY003
                         "Column values, min_value, and max_value must either be None or of the same type."  # noqa: E501
                     )
 
@@ -106,7 +106,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 # Type of column values is either string or specific rich type (or "None").  In all cases, type of  # noqa: E501
                 # column must match type of constant being compared to column value (otherwise, error is raised).  # noqa: E501
                 if isinstance(val, str) != isinstance(min_value, str):
-                    raise TypeError(
+                    raise TypeError(  # noqa: TRY003
                         "Column values, min_value, and max_value must either be None or of the same type."  # noqa: E501
                     )
 
@@ -130,7 +130,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         strict_max: bool,
     ):
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         if min_value is None:
             if strict_max:
@@ -164,10 +164,10 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         **kwargs,
     ):
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")  # noqa: TRY003
 
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         if min_value is None:
             if strict_max:
@@ -216,10 +216,10 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         **kwargs,
     ):
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError("min_value cannot be greater than max_value")
+            raise ValueError("min_value cannot be greater than max_value")  # noqa: TRY003
 
         if min_value is None and max_value is None:
-            raise ValueError("min_value and max_value cannot both be None")
+            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         if min_value is None:
             if strict_max:

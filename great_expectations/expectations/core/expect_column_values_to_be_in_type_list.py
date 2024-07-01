@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
 from packaging import version
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import pydantic, pyspark
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
-    EvaluationParameterDict,
+from great_expectations.core.suite_parameters import (  # noqa: TCH001
+    SuiteParameterDict,
 )
 from great_expectations.expectations.core.expect_column_values_to_be_of_type import (
     _get_dialect_type_module,
@@ -19,8 +19,9 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -55,35 +56,55 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values from a specified type list."
+TYPE_LIST_DESCRIPTION = """
+    A list of strings representing the data type that each column should have as entries. \
+    Valid types are defined by the current backend implementation and are dynamically loaded.
+    """
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MSSQL",
+    "Trino",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Schema"]
+
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
-    """Expect a column to contain values from a specified type list.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_be_in_type_list is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
-    for typed-column backends, and also for PandasDataset where the column dtype provides an \
+    for typed-column backends, and also for Pandas Datasources where the column dtype provides an \
     unambiguous constraints (any dtype except 'object').
 
-    For PandasDataset columns with dtype of 'object' expect_column_values_to_be_in_type_list will \
+    For Pandas columns with dtype of 'object' expect_column_values_to_be_in_type_list will \
     independently check each row's type.
+
+    Column Map Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column and ask a yes/no question for every row in that column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         type_list (list[str] or None): \
-            A list of strings representing the data type that each column should have as entries. Valid types are \
-            defined by the current backend implementation and are dynamically loaded. For example, valid types for \
-            PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
-            whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
-            'StringType', 'BooleanType' and other pyspark-defined type names.
-
-    Keyword Args:
-        mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
-            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+            {TYPE_LIST_DESCRIPTION}
+            For example, valid types for Pandas Datasources include any numpy dtype values \
+            (such as 'int64') or native python types (such as 'int'), whereas valid types for a \
+            SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for \
+            Spark Datasources include 'StringType', 'BooleanType' and other pyspark-defined type names.
 
     Other Parameters:
+        mostly (None or a float between 0 and 1): \
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -101,13 +122,95 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     See also:
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        {DATA_QUALITY_ISSUES[0]}
+
+    Example Data:
+                test 	test2
+            0 	"12345" 1
+            1 	"abcde" 2
+            2 	"1b3d5" 3
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnValuesToBeInTypeList(
+                    column="test2",
+                    type_list=["NUMBER", "STRING"]
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  }},
+                  "meta": {{}},
+                  "success": true
+                }}
+
+        Failing Case:
+            Input:
+                ExpectColumnValuesToBeInTypeList(
+                    column="test",
+                    type_list=["NUMBER", "DOUBLE"]
+            )
+
+            Output:
+                {{
+                  "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  }},
+                  "result": {{
+                    "element_count": 3,
+                    "unexpected_count": 3,
+                    "unexpected_percent": 100.0,
+                    "partial_unexpected_list": [
+                        "12345",
+                        "abcde",
+                        "1b3d5"
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 100.0,
+                    "unexpected_percent_nonmissing": 100.0
+                  }},
+                  "meta": {{}},
+                  "success": false
+                }}
     """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
-    type_list: Union[List[str], EvaluationParameterDict, None]
+    type_list: Union[List[str], SuiteParameterDict, None] = pydantic.Field(
+        description=TYPE_LIST_DESCRIPTION
+    )
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -115,6 +218,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.in_type_list"
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -131,6 +235,37 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "column",
         "type_list",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInTypeList]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @override
@@ -186,7 +321,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     @classmethod
     @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -195,9 +330,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs if configuration else {},
@@ -393,7 +526,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
-                raise ValueError("No recognized spark types in expected_types_list")
+                raise ValueError("No recognized spark types in expected_types_list")  # noqa: TRY003
             success = isinstance(actual_column_type, tuple(types))
         return {
             "success": success,

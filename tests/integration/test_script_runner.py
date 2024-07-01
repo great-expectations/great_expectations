@@ -17,6 +17,9 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from flaky import flaky
 
+from docs.docusaurus.docs.components.examples_under_test import (
+    docs_tests,
+)
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -89,61 +92,6 @@ def delay_rerun(*args):
 # to be populated by the smaller lists below
 docs_test_matrix: List[IntegrationTestFixture] = []
 
-core_tests = [
-    # Expectation example scripts
-    IntegrationTestFixture(
-        name="create_an_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectations/_examples/create_an_expectation.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="edit_an_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectations/_examples/edit_an_expectation.py",
-        backend_dependencies=[],
-    ),
-    # Expectation Suite example scripts
-    IntegrationTestFixture(
-        name="add_expectations_to_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/add_expectations_to_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="create_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/create_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="delete_an_expectation_in_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/delete_an_expectation_in_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="delete_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/delete_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="edit_a_single_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/edit_a_single_expectation.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="edit_all_expectations_in_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/edit_all_expectations_in_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="get_a_specific_expectation_from_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="get_an_existing_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/get_an_existing_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-]
-
 local_tests = [
     # IntegrationTestFixture(
     #     name="how_to_add_validations_data_or_suites_to_a_checkpoint.py",
@@ -157,75 +105,6 @@ local_tests = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[BackendDependencies.PANDAS],
     # ),
-    IntegrationTestFixture(
-        name="how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_get_one_or_more_batches_of_data_from_a_configured_datasource",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="connecting_to_your_data_pandas_yaml",
-        user_flow_script="docs/docusaurus/docs/snippets/pandas_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="connecting_to_your_data_pandas_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_introspect_and_partition_your_data_yaml_gradual",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_introspect_and_partition_your_data_yaml_complete",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="in_memory_pandas_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_choose_which_dataconnector_to_use",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_pandas_datasource",
-        user_flow_script="docs/docusaurus/docs/snippets/how_to_configure_a_pandas_datasource.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_runtimedataconnector",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[],
-    ),
     IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
         user_flow_script="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py",
@@ -246,24 +125,11 @@ local_tests = [
         user_flow_script="docs/docusaurus/docs/snippets/result_format.py",
         backend_dependencies=[],
     ),
-    IntegrationTestFixture(
-        name="how_to_create_and_edit_expectations_with_instant_feedback_block_config",
-        user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[],
-    ),
     # Fluent Datasources
     # IntegrationTestFixture(
     #     name="how_to_create_and_edit_expectations_with_instant_feedback_fluent",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py",  # noqa: E501
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[],
-    # ),
-    # IntegrationTestFixture(
-    #     name="how_to_create_an_expectation_suite_with_the_missingness_data_assistant",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py",  # noqa: E501
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     #     backend_dependencies=[],
     # ),
     # IntegrationTestFixture(
@@ -325,39 +191,11 @@ fluent_datasources = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[],
     # ),
-    # IntegrationTestFixture(
-    #     name="rule_base_profiler_multi_batch_example",
-    #     data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",  # noqa: E501
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",  # noqa: E501
-    #     backend_dependencies=[BackendDependencies.PANDAS],
-    # ),
     IntegrationTestFixture(
         name="glossary_batch_request",
         data_context_dir=None,
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="docs/docusaurus/docs/snippets/batch_request.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="checkpoints_and_actions_core_concepts",
-        user_flow_script="docs/docusaurus/docs/snippets/checkpoints_and_actions.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_create_a_new_checkpoint",
-        data_context_dir=None,
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="validate_data_by_running_a_checkpoint",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
-        data_context_dir=None,
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[],
     ),
     # IntegrationTestFixture(
@@ -371,13 +209,6 @@ fluent_datasources = [
         user_flow_script="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="checkpoints_glossary",
-        user_flow_script="docs/docusaurus/docs/snippets/checkpoints.py",
-        data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
     # IntegrationTestFixture(
@@ -488,7 +319,6 @@ failed_rows_tests = [
 
 
 # populate docs_test_matrix with sub-lists
-docs_test_matrix += core_tests
 docs_test_matrix += local_tests
 docs_test_matrix += quickstart
 docs_test_matrix += fluent_datasources
@@ -508,50 +338,9 @@ docs_test_matrix += athena_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 docs_test_matrix += failed_rows_tests
+docs_test_matrix += docs_tests
 
-pandas_integration_tests = [
-    IntegrationTestFixture(
-        name="pandas_one_multi_batch_request_one_validator",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/one_multi_batch_request_one_validator.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="pandas_two_batch_requests_two_validators",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/two_batch_requests_two_validators.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="pandas_multiple_batch_requests_one_validator_multiple_steps",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="pandas_multiple_batch_requests_one_validator_one_step",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="pandas_execution_engine_with_gcp_installed",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/common_workflows/pandas_execution_engine_with_gcp_installed.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/cloud_provider_configs/gcp/my_example_creds.json",
-                ".gcs/my_example_creds.json",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-]
+pandas_integration_tests: List[IntegrationTestFixture] = []
 
 # populate integration_test_matrix with sub-lists
 integration_test_matrix: List[IntegrationTestFixture] = []
@@ -581,7 +370,7 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(  # noqa: C901, PLR0912, PLR0915
+def _execute_integration_test(  # noqa: C901, PLR0915
     integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
 ):
     """
@@ -664,7 +453,7 @@ def _execute_integration_test(  # noqa: C901, PLR0912, PLR0915
         test_script_module = importlib.util.module_from_spec(spec)
         loader.exec_module(test_script_module)
     except Exception as e:
-        logger.error(str(e))
+        logger.error(str(e))  # noqa: TRY400
         if "JavaPackage" in str(e) and "aws_glue" in user_flow_script:
             logger.debug("This is something aws_glue related, so just going to return")
             # Should try to copy aws-glue-libs jar files to Spark jar during pipeline setup

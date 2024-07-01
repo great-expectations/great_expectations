@@ -5,22 +5,25 @@ import inspect
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Generator, List, Optional, Tuple, Type, Union
 
 import pytest
 
 from great_expectations.compatibility.pydantic import DirectoryPath, validate_arguments
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import ColumnPartitioner
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context import get_context as get_gx_context
 from great_expectations.datasource.fluent.batch_request import (
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import (
     _FLUENT_DATASOURCES_KEY,
 )
+from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
@@ -66,33 +69,24 @@ class DataContext:
             cls._context = DataContext(context_root_dir=context_root_dir)
 
         assert cls._context
-        if cls._context.root_directory:
-            # load config and add/instantiate Datasources & Assets
-            config_path = pathlib.Path(cls._context.root_directory) / _config_file
-            cls._config = GxConfig.parse_yaml(config_path)
-            for ds_name, datasource in cls._config.datasources.items():
-                logger.info(f"Loaded '{ds_name}' from config")
-                cls._context._add_fluent_datasource(datasource)
-                # TODO: add assets?
-
         return cls._context
 
     @validate_arguments
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
         self.root_directory = context_root_dir
-        self._sources: _SourceFactories = _SourceFactories(self)
+        self._data_sources: _SourceFactories = _SourceFactories(self)  # type: ignore[arg-type]
         self._datasources: Dict[str, Datasource] = {}
         self.config_provider: _ConfigurationProvider | None = None
-        logger.info(f"Available Factories - {self._sources.factories}")
-        logger.debug(f"`type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
+        logger.info(f"Available Factories - {self._data_sources.factories}")
+        logger.debug(f"`type_lookup` mapping ->\n{pf(self._data_sources.type_lookup)}")
 
     @property
-    def sources(self) -> _SourceFactories:
-        return self._sources
+    def data_sources(self) -> _SourceFactories:
+        return self._data_sources
 
     @property
     def datasources(self) -> DatasourceDict:
-        return self._datasources
+        return self._datasources  # type: ignore[return-value]
 
     def _add_fluent_datasource(self, datasource: Datasource) -> Datasource:
         self._datasources[datasource.name] = datasource
@@ -125,18 +119,24 @@ def get_context(context_root_dir: Optional[DirectoryPath] = None, **kwargs):
 class DummyDataAsset(DataAsset):
     """Minimal Concrete DataAsset Implementation"""
 
-    def build_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+    @override
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters] = None,
+        batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
+    ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
 @pytest.fixture(scope="function")
-def context_sources_cleanup() -> _SourceFactories:
+def context_sources_cleanup() -> Generator[_SourceFactories, None, None]:
     """Return the sources object and reset types/factories on teardown"""
     try:
         # setup
-        sources_copy = copy.deepcopy(_SourceFactories._SourceFactories__crud_registry)
+        sources_copy = copy.deepcopy(_SourceFactories._SourceFactories__crud_registry)  # type: ignore[attr-defined]
         type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
-        sources = get_context().sources
+        sources = get_context().data_sources
 
         assert (
             "add_datasource" not in sources.factories
@@ -144,13 +144,13 @@ def context_sources_cleanup() -> _SourceFactories:
 
         yield sources
     finally:
-        _SourceFactories._SourceFactories__crud_registry = sources_copy
+        _SourceFactories._SourceFactories__crud_registry = sources_copy  # type: ignore[attr-defined]
         _SourceFactories.type_lookup = type_lookup_copy
 
 
 @pytest.fixture(scope="function")
-def empty_sources(context_sources_cleanup) -> _SourceFactories:
-    _SourceFactories._SourceFactories__crud_registry.clear()
+def empty_sources(context_sources_cleanup) -> Generator[_SourceFactories, None, None]:
+    _SourceFactories._SourceFactories__crud_registry.clear()  # type: ignore[attr-defined]
     _SourceFactories.type_lookup.clear()
     assert not _SourceFactories.type_lookup
     yield context_sources_cleanup
@@ -174,6 +174,7 @@ class TestMetaDatasource:
             type: str = "my_test"
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -196,6 +197,7 @@ class TestMetaDatasource:
             type: str = "my_test"
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -216,6 +218,7 @@ class TestMetaDatasource:
             extra_field: str
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -251,6 +254,7 @@ class TestMetaDatasource:
             type: str = "foo_bar"
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -276,10 +280,12 @@ class TestMisconfiguredMetaDatasource:
 
             class MissingTypeDatasource(Datasource):
                 @property
+                @override
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
-                def test_connection(self) -> None: ...
+                @override
+                def test_connection(self) -> None: ...  # type: ignore[override]
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
@@ -288,7 +294,8 @@ class TestMisconfiguredMetaDatasource:
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
 
-            def test_connection(self) -> None: ...
+            @override
+            def test_connection(self) -> None: ...  # type: ignore[override]
 
         with pytest.raises(NotImplementedError):
             MissingExecEngineTypeDatasource(name="name").get_execution_engine()
@@ -307,10 +314,12 @@ class TestMisconfiguredMetaDatasource:
                 asset_types: ClassVar[List[Type[DataAsset]]] = [MissingTypeAsset]
 
                 @property
+                @override
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
-                def test_connection(self) -> None: ...
+                @override
+                def test_connection(self) -> None: ...  # type: ignore[override]
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
@@ -320,6 +329,7 @@ class TestMisconfiguredMetaDatasource:
             type: str = "valid"
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -339,6 +349,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     class BlueAsset(DataAsset):
         type = "blue"
 
+        @override
         def test_connection(self): ...
 
     class PurpleDatasource(Datasource):
@@ -346,13 +357,14 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         type: str = "purple"
 
         @property
+        @override
         def execution_engine_type(self) -> Type[ExecutionEngine]:
             return DummyExecutionEngine
 
         def test_connection(self): ...
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
-            asset = RedAsset(name=asset_name)
+            asset = RedAsset(name=asset_name)  # type: ignore[call-arg] # ?
             self._add_asset(asset=asset)
             return asset
 
@@ -360,7 +372,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     context = get_context()
 
     # 3. Add a datasource
-    purple_ds: Datasource = context.sources.add_purple("my_ds_name")
+    purple_ds: Datasource = context.data_sources.add_purple("my_ds_name")
 
     # 4. Add a DataAsset
     red_asset: DataAsset = purple_ds.add_red_asset("my_asset_name")
@@ -399,13 +411,13 @@ def context_with_fluent_datasource(
     context_config_data: Tuple[AbstractDataContext, pathlib.Path, pathlib.Path],
 ) -> Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]:
     context, config_file_path, data_dir = context_config_data
-    assert 0 == len(context.datasources)
-    context.sources.add_pandas_filesystem(
+    assert len(context.datasources) == 0
+    context.data_sources.add_pandas_filesystem(
         name=DEFAULT_CRUD_DATASOURCE_NAME,
         base_directory=data_dir,
         data_context_root_directory=config_file_path.parent,
     )
-    assert 1 == len(context.datasources)
+    assert len(context.datasources) == 1
     assert_fluent_datasource_content(
         config_file_path=config_file_path,
         fluent_datasource_config={
@@ -431,9 +443,9 @@ def test_add_datasource_with_datasource_object(context_with_fluent_datasource, u
     new_datasource = copy.deepcopy(context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME))
     new_datasource.name = "new_datasource"
     if use_positional_arg:
-        context.sources.add_pandas_filesystem(new_datasource)
+        context.data_sources.add_pandas_filesystem(new_datasource)
     else:
-        context.sources.add_pandas_filesystem(datasource=new_datasource)
+        context.data_sources.add_pandas_filesystem(datasource=new_datasource)
     assert len(context.datasources) == 2
     assert_fluent_datasource_content(
         config_file_path=config_file_path,
@@ -459,13 +471,13 @@ def test_update_datasource(context_with_fluent_datasource, use_positional_arg):
     data_dir_2 = data_dir.parent / "data2"
     data_dir_2.mkdir()
     if use_positional_arg:
-        context.sources.update_pandas_filesystem(
+        context.data_sources.update_pandas_filesystem(
             DEFAULT_CRUD_DATASOURCE_NAME,
             base_directory=data_dir_2,
             data_context_root_directory=config_file_path.parent,
         )
     else:
-        context.sources.update_pandas_filesystem(
+        context.data_sources.update_pandas_filesystem(
             name=DEFAULT_CRUD_DATASOURCE_NAME,
             base_directory=data_dir_2,
             data_context_root_directory=config_file_path.parent,
@@ -503,11 +515,11 @@ def test_update_datasource_with_datasource_object(
     # Add an asset and update datasource
     (data_dir / "1.csv").touch()
     if use_positional_arg:
-        datasource.add_csv_asset("csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+        datasource.add_csv_asset("csv_asset")
     else:
-        datasource.add_csv_asset(name="csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+        datasource.add_csv_asset(name="csv_asset")
 
-    context.sources.update_pandas_filesystem(datasource=datasource)
+    context.data_sources.update_pandas_filesystem(datasource=datasource)
     assert_fluent_datasource_content(
         config_file_path=config_file_path,
         fluent_datasource_config={
@@ -517,7 +529,6 @@ def test_update_datasource_with_datasource_object(
                 "type": "pandas_filesystem",
                 "assets": {
                     "csv_asset": {
-                        "batching_regex": "(?P<file_name>.*).csv",
                         "type": "csv",
                     },
                 },
@@ -533,13 +544,13 @@ def test_add_or_update_datasource_using_add(context_with_fluent_datasource, use_
     data_dir_2 = data_dir.parent / "data2"
     data_dir_2.mkdir()
     if use_positional_arg:
-        context.sources.add_or_update_pandas_filesystem(
+        context.data_sources.add_or_update_pandas_filesystem(
             f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
             base_directory=data_dir_2,
             data_context_root_directory=config_file_path.parent,
         )
     else:
-        context.sources.add_or_update_pandas_filesystem(
+        context.data_sources.add_or_update_pandas_filesystem(
             name=f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
             base_directory=data_dir_2,
             data_context_root_directory=config_file_path.parent,
@@ -568,13 +579,13 @@ def test_add_or_update_datasource_using_update(context_with_fluent_datasource, u
     data_dir_2 = data_dir.parent / "data2"
     data_dir_2.mkdir()
     if use_positional_arg:
-        context.sources.add_or_update_pandas_filesystem(
+        context.data_sources.add_or_update_pandas_filesystem(
             DEFAULT_CRUD_DATASOURCE_NAME,
             base_directory=data_dir_2,
             data_context_root_directory=config_file_path.parent,
         )
     else:
-        context.sources.add_or_update_pandas_filesystem(
+        context.data_sources.add_or_update_pandas_filesystem(
             name=DEFAULT_CRUD_DATASOURCE_NAME,
             base_directory=data_dir_2,
             data_context_root_directory=config_file_path.parent,
@@ -599,7 +610,7 @@ def test_add_or_update_datasource_using_update(context_with_fluent_datasource, u
 @pytest.mark.unit
 def test_delete_datasource(context_with_fluent_datasource):
     context, config_file_path, _data_dir = context_with_fluent_datasource
-    context.sources.delete(name=DEFAULT_CRUD_DATASOURCE_NAME)
+    context.data_sources.delete(name=DEFAULT_CRUD_DATASOURCE_NAME)
     assert_fluent_datasource_content(config_file_path, {})
 
 
@@ -609,7 +620,7 @@ def test_legacy_delete_datasource_raises_deprecation_warning(
 ):
     context, _, _ = context_with_fluent_datasource
     with pytest.deprecated_call():
-        context.sources.delete_pandas_filesystem(name=DEFAULT_CRUD_DATASOURCE_NAME)
+        context.data_sources.delete_pandas_filesystem(name=DEFAULT_CRUD_DATASOURCE_NAME)
 
 
 if __name__ == "__main__":

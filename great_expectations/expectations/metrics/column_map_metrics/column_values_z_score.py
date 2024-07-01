@@ -48,7 +48,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         try:
             return (column - mean) / std_dev
         except TypeError:
-            raise (TypeError("Cannot complete Z-score calculations on a non-numerical column."))
+            raise (TypeError("Cannot complete Z-score calculations on a non-numerical column."))  # noqa: TRY003
 
     @column_condition_partial(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _pandas_condition(cls, column, _metrics, threshold, double_sided, **kwargs) -> pd.Series:
@@ -63,7 +63,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
                 under_threshold = z_score < threshold
             return under_threshold
         except TypeError:
-            raise (TypeError("Cannot check if a string lies under a numerical threshold"))
+            raise (TypeError("Cannot check if a string lies under a numerical threshold"))  # noqa: TRY003
 
     @column_function_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_function(cls, column, _metrics, _dialect, **kwargs):

@@ -8,7 +8,7 @@ from great_expectations.data_context.types.base import GXCloudConfig
 
 # Randomly generated values but formatted to represent actual creds
 # Globally scoped so they can be shared across pytest.params
-base_url = "https://api.testing.greatexpectations.io"
+base_url = "https://api.testing.greatexpectations.io/"
 access_token = "1009d2fe-54b3-43b8-8297-ba2d517f9752"
 organization_id = "0dcf5ce1-806f-4199-9e69-e24dfba5e62a"
 
@@ -27,9 +27,6 @@ organization_id = "0dcf5ce1-806f-4199-9e69-e24dfba5e62a"
                 GXCloudEnvironmentVariable.BASE_URL: base_url,
                 GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
                 GXCloudEnvironmentVariable.ORGANIZATION_ID: organization_id,
-                GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,
-                GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
-                GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: organization_id,
             },
             id="include_org_id",
         ),
@@ -38,8 +35,6 @@ organization_id = "0dcf5ce1-806f-4199-9e69-e24dfba5e62a"
             {
                 GXCloudEnvironmentVariable.BASE_URL: base_url,
                 GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
-                GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,
-                GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
             },
             id="omit_org_id",
         ),

@@ -21,6 +21,7 @@ from typing import (
     MutableMapping,
     MutableSequence,
     Optional,
+    Protocol,
     Sequence,
     Set,
     Type,
@@ -39,7 +40,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.batch_definition import BatchDefinition, PartitionerT
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.constants import (
@@ -47,18 +48,23 @@ from great_expectations.datasource.fluent.constants import (
 )
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
+    GenericBaseModel,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
-from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.exceptions.exceptions import (
+    DataContextError,
+    MissingDataContextError,
+)
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
+from great_expectations.datasource.fluent.data_connector import (
+    DataConnector,
+)
 
 if TYPE_CHECKING:
     import pandas as pd
-    from typing_extensions import Self, TypeAlias, TypeGuard
-
-    from great_expectations.core.partitioners import Partitioner
+    from typing_extensions import TypeAlias, TypeGuard
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -77,14 +83,11 @@ if TYPE_CHECKING:
     from great_expectations.data_context import (
         AbstractDataContext as GXDataContext,
     )
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
+        BatchParameters,
         BatchRequest,
-        BatchRequestOptions,
     )
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,
-    )
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.type_lookup import (
         TypeLookup,
     )
@@ -92,6 +95,79 @@ if TYPE_CHECKING:
     from great_expectations.validator.v1_validator import (
         Validator as V1Validator,
     )
+
+
+class PartitionerSortingProtocol(Protocol):
+    """Interface defining the fields a Partitioner must contain for sorting."""
+
+    sort_ascending: bool
+
+    @property
+    def param_names(self) -> list[str]:
+        """The parameter names that specify a batch derived from this partitioner
+
+        For example, for PartitionerYearMonth this returns ["year", "month"]. For more
+        examples, please see concrete Partitioner* classes.
+        """
+        ...
+
+
+class PartitionerProtocol(PartitionerSortingProtocol, Protocol):
+    @property
+    def columns(self) -> list[str]:
+        """The names of the column used to partition the data"""
+        ...
+
+    @property
+    def method_name(self) -> str:
+        """Returns a partitioner method name.
+
+        The possible values of partitioner method names are defined in the enum,
+        great_expectations.execution_engine.partition_and_sample.data_partitioner.PartitionerMethod
+        """
+        ...
+
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
+        """A shim to our execution engine partitioner methods
+
+        We translate any internal Partitioner state and what is passed in from
+        a batch_request to the partitioner_kwargs required by our execution engine.
+
+        Look at Partitioner* classes for concrete examples.
+        """
+        ...
+
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
+    ) -> Dict[str, Any]:
+        """Translates `options` to the execution engine batch spec kwarg identifiers
+
+        Arguments:
+            options: A BatchRequest.options dictionary that specifies ALL the fields necessary
+                     to specify a batch with respect to this partitioner.
+
+        Returns:
+            A dictionary that can be added to batch_spec_kwargs["batch_identifiers"].
+            This has one of 2 forms:
+              1. This category has many parameters are derived from 1 column.
+                 These only are datetime partitioners and the batch_spec_kwargs["batch_identifiers"]
+                 look like:
+                   {column_name: {datepart_1: value, datepart_2: value, ...}
+                 where datepart_* are strings like "year", "month", "day". The exact
+                 fields depend on the partitioner.
+
+              2. This category has only 1 parameter for each column.
+                 This is used for all other partitioners and the
+                 batch_spec_kwargs["batch_identifiers"]
+                 look like:
+                   {column_name_1: value, column_name_2: value, ...}
+                 where value is the value of the column after being processed by the partitioner.
+                 For example, for the PartitionerModInteger where mod = 3,
+                 {"passenger_count": 2}, means the raw passenger count value is in the set:
+                 {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
+                 This category was only 1 parameter per column.
+        """
+        ...
 
 
 class TestConnectionError(Exception):
@@ -102,6 +178,14 @@ class GxDatasourceWarning(UserWarning):
     """
     Warning related to usage or configuration of a Datasource that could lead to
     unexpected behavior.
+    """
+
+
+class GxContextWarning(GxDatasourceWarning):
+    """
+    Warning related to a Datasource with a missing context.
+    Usually because the Datasource was created directly rather than using a
+    `context.sources` factory method.
     """
 
 
@@ -124,15 +208,11 @@ SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 def _is_sorter_list(
     sorters: SortersDefinition,
 ) -> TypeGuard[list[Sorter]]:
-    if len(sorters) == 0 or isinstance(sorters[0], Sorter):
-        return True
-    return False
+    return len(sorters) == 0 or isinstance(sorters[0], Sorter)
 
 
 def _is_str_sorter_list(sorters: SortersDefinition) -> TypeGuard[list[str]]:
-    if len(sorters) > 0 and isinstance(sorters[0], str):
-        return True
-    return False
+    return len(sorters) > 0 and isinstance(sorters[0], str)
 
 
 def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
@@ -147,7 +227,9 @@ def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
 
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
-    raise ValueError(f"sorters is a not a SortersDefinition but is a {type(sorters)}")
+    raise ValueError(  # noqa: TRY003
+        f"sorters is a not a SortersDefinition but is a {type(sorters)}"
+    )
 
 
 def _sorter_from_str(sort_key: str) -> Sorter:
@@ -167,11 +249,14 @@ def _sorter_from_str(sort_key: str) -> Sorter:
     return Sorter(key=sort_key, reverse=False)
 
 
-# It would be best to bind this to Datasource, but we can't now due to circular dependencies
-_DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
+# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
+_ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
-class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
+DatasourceT = TypeVar("DatasourceT", bound="Datasource")
+
+
+class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -188,12 +273,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     # non-field private attributes
     _save_batch_definition: Callable[[BatchDefinition], None] = pydantic.PrivateAttr()
-    _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _datasource: DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
-    def datasource(self) -> _DatasourceT:
+    def datasource(self) -> DatasourceT:
         return self._datasource
 
     def test_connection(self) -> None:
@@ -206,25 +291,25 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
-    def get_batch_request_options_keys(
-        self, partitioner: Optional[Partitioner] = None
+    def get_batch_parameters_keys(
+        self, partitioner: Optional[PartitionerT] = None
     ) -> tuple[str, ...]:
         raise NotImplementedError(
-            """One needs to implement "get_batch_request_options_keys" on a DataAsset subclass."""
+            """One needs to implement "get_batch_parameters_keys" on a DataAsset subclass."""
         )
 
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-    ) -> BatchRequest:
+        partitioner: Optional[PartitionerT] = None,
+    ) -> BatchRequest[PartitionerT]:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling get_batch_request_options_keys(...).
+                calling get_batch_parameters_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
@@ -254,8 +339,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     @public_api
     def add_batch_definition(
-        self, name: str, partitioner: Optional[Partitioner] = None
-    ) -> BatchDefinition:
+        self,
+        name: str,
+        partitioner: Optional[PartitionerT] = None,
+    ) -> BatchDefinition[PartitionerT]:
         """Add a BatchDefinition to this DataAsset.
         BatchDefinition names must be unique within a DataAsset.
 
@@ -270,14 +357,14 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         """
         batch_definition_names = {bc.name for bc in self.batch_definitions}
         if name in batch_definition_names:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f'"{name}" already exists (all existing batch_definition names are {", ".join(batch_definition_names)})'  # noqa: E501
             )
 
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        batch_definition = BatchDefinition(name=name, partitioner=partitioner)
+        batch_definition = BatchDefinition[PartitionerT](name=name, partitioner=partitioner)
         batch_definition.set_data_asset(self)
         self.batch_definitions.append(batch_definition)
         self.update_batch_definition_field_set()
@@ -292,7 +379,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         return batch_definition
 
     @public_api
-    def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
+    def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         """Delete a batch definition.
 
         Args:
@@ -300,7 +387,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         """
         batch_definition_names = {bc.name for bc in self.batch_definitions}
         if batch_definition not in self.batch_definitions:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f'"{batch_definition.name}" does not exist (all existing batch_definition names are {batch_definition_names})'  # noqa: E501
             )
 
@@ -326,30 +413,36 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
-    def get_batch_definition(self, batch_definition_name: str) -> BatchDefinition:
+    def get_batch_definition(self, batch_definition_name: str) -> BatchDefinition[PartitionerT]:
         batch_definitions = [
             batch_definition
             for batch_definition in self.batch_definitions
             if batch_definition.name == batch_definition_name
         ]
         if len(batch_definitions) == 0:
-            raise KeyError(f"BatchDefinition {batch_definition_name} not found")
+            raise KeyError(  # noqa: TRY003
+                f"BatchDefinition {batch_definition_name} not found"
+            )
         elif len(batch_definitions) > 1:
-            raise KeyError(f"Multiple keys for {batch_definition_name} found")
+            raise KeyError(  # noqa: TRY003
+                f"Multiple keys for {batch_definition_name} found"
+            )
         return batch_definitions[0]
 
-    def _batch_request_options_are_valid(
-        self, options: BatchRequestOptions, partitioner: Optional[Partitioner]
+    def _batch_parameters_are_valid(
+        self, options: BatchParameters, partitioner: Optional[PartitionerT]
     ) -> bool:
-        valid_options = self.get_batch_request_options_keys(partitioner=partitioner)
+        valid_options = self.get_batch_parameters_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))
 
     def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
-        """Performs config variable substitution and populates batch request options for
+        """Performs config variable substitution and populates batch parameters for
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)
-        config_variables = self._datasource.data_context.config_variables  # type: ignore[attr-defined]
+        if not self._datasource.data_context:
+            raise MissingDataContextError()
+        config_variables = self._datasource.data_context.config_variables
         batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
             data=batch_metadata, replace_variables_dict=config_variables
         )
@@ -363,55 +456,24 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def add_sorters(self: Self, sorters: SortersDefinition) -> Self:
-        """Associates a sorter to this DataAsset
-
-        The passed in sorters will replace any previously associated sorters.
-        Batches returned from this DataAsset will be sorted on the batch's
-        metadata in the order specified by `sorters`. Sorters work left to right.
-        That is, batches will be sorted first by sorters[0].key, then
-        sorters[1].key, and so on. If sorter[i].reverse is True, that key will
-        sort the batches in descending, as opposed to ascending, order.
-
-        Args:
-            sorters: A list of either Sorter objects or strings. The strings
-              are a shorthand for Sorter objects and are parsed as follows:
-              r'[+-]?.*'
-              An optional prefix of '+' or '-' sets Sorter.reverse to
-              'False' or 'True' respectively. It is 'False' if no prefix is present.
-              The rest of the string gets assigned to the Sorter.key.
-              For example:
-              ["key1", "-key2", "key3"]
-              is equivalent to:
-              [
-                  Sorter(key="key1", reverse=False),
-                  Sorter(key="key2", reverse=True),
-                  Sorter(key="key3", reverse=False),
-              ]
-
-        Returns:
-            This DataAsset with the passed in sorters accessible via self.order_by
-        """
-        # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
-        # https://docs.pydantic.dev/usage/model_config/#options
-        self.order_by = _sorter_from_list(sorters)
-        return self
-
-    def sort_batches(self, batch_list: List[Batch]) -> None:
+    def sort_batches(
+        self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
+    ) -> None:
         """Sorts batch_list in place in the order configured in this DataAsset.
-
         Args:
             batch_list: The list of batches to sort in place.
+            partitioner: Configuration used to determine sort.
         """
-        for sorter in reversed(self.order_by):
+        reverse = not partitioner.sort_ascending
+        for key in reversed(partitioner.param_names):
             try:
                 batch_list.sort(
-                    key=functools.cmp_to_key(_sort_batches_with_none_metadata_values(sorter.key)),
-                    reverse=sorter.reverse,
+                    key=functools.cmp_to_key(_sort_batches_with_none_metadata_values(key)),
+                    reverse=reverse,
                 )
             except KeyError as e:
-                raise KeyError(
-                    f"Trying to sort {self.name} table asset batches on key {sorter.key} "
+                raise KeyError(  # noqa: TRY003
+                    f"Trying to sort {self.name} table asset batches on key {key} "
                     "which isn't available on all batches."
                 ) from e
 
@@ -439,7 +501,7 @@ def _sort_batches_with_none_metadata_values(
             return 1
 
         # This line should never be reached; hence, "ValueError" with corresponding error message is raised.  # noqa: E501
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             f'Unexpected Batch metadata key combination, "{a.metadata[key]}" and "{b.metadata[key]}", was encountered.'  # noqa: E501
         )
 
@@ -448,10 +510,6 @@ def _sort_batches_with_none_metadata_values(
 
 # If a Datasource can have more than 1 _DataAssetT, this will need to change.
 _DataAssetT = TypeVar("_DataAssetT", bound=DataAsset)
-
-
-# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
-_ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
 class Datasource(
@@ -467,7 +525,7 @@ class Datasource(
     # The important part of defining `assets` is setting the Dict type correctly.
     # In addition, one must define the methods in the `Abstract Methods` section below.
     # If one writes a class level docstring, this will become the documenation for the
-    # data context method `data_context.sources.add_my_datasource` method.
+    # data context method `data_context.data_sources.add_my_datasource` method.
 
     # class attrs
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
@@ -542,10 +600,14 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    def add_batch_definition(self, batch_definition: BatchDefinition) -> BatchDefinition:
+    def add_batch_definition(
+        self, batch_definition: BatchDefinition[PartitionerT]
+    ) -> BatchDefinition[PartitionerT]:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
-            raise DataContextError("Cannot save datasource without a data context.")
+            raise DataContextError(  # noqa: TRY003
+                "Cannot save datasource without a data context."
+            )
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
@@ -564,10 +626,12 @@ class Datasource(
         output.set_data_asset(batch_definition.data_asset)
         return output
 
-    def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
+    def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
-            raise DataContextError("Cannot save datasource without a data context.")
+            raise DataContextError(  # noqa: TRY003
+                "Cannot save datasource without a data context."
+            )
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
@@ -648,7 +712,7 @@ class Datasource(
             found_asset._datasource = self
             return found_asset
         except IndexError as exc:
-            raise LookupError(
+            raise LookupError(  # noqa: TRY003
                 f'"{asset_name}" not found. Available assets are ({", ".join(self.get_asset_names())})'  # noqa: E501
             ) from exc
 
@@ -687,7 +751,7 @@ class Datasource(
 
         asset_names: Set[str] = self.get_asset_names()
         if asset.name in asset_names:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f'"{asset.name}" already exists (all existing assets are {", ".join(asset_names)})'
             )
 
@@ -756,7 +820,9 @@ class Datasource(
             for idx, sorter in enumerate(order_by):
                 if isinstance(sorter, str):
                     if not sorter:
-                        raise ValueError('"order_by" list cannot contain an empty string')
+                        raise ValueError(  # noqa: TRY003
+                            '"order_by" list cannot contain an empty string'
+                        )
                     order_by_sorters.append(_sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
                     key: Optional[Any] = sorter.get("key")
@@ -766,7 +832,9 @@ class Datasource(
                     elif key:
                         order_by_sorters.append(Sorter(key=key))
                     else:
-                        raise ValueError('"order_by" list dict must have a key named "key"')
+                        raise ValueError(  # noqa: TRY003
+                            '"order_by" list dict must have a key named "key"'
+                        )
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
@@ -836,7 +904,7 @@ class Datasource(
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
-_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__.keys()}
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -981,7 +1049,7 @@ class Batch:
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
 
     @property
-    def result_format(self) -> str | ResultFormat:
+    def result_format(self) -> str | dict | ResultFormat:
         # We always `return a ResultFormat`. However to prevent having to do #ignore[assignment] we return  # noqa: E501
         # `str | ResultFormat`. When the getter/setter have different types mypy gets confused on lines like:  # noqa: E501
         # batch.result_format = "SUMMARY"
@@ -1014,7 +1082,7 @@ class Batch:
         else:
             # If we are type checking, we should never fall through to this case. However, exploratory  # noqa: E501
             # workflows are not being type checked.
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003, TRY004
                 f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"  # noqa: E501
             )
 
@@ -1032,13 +1100,18 @@ class Batch:
 
         context = self.datasource.data_context
         if context is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "We can't validate batches that are attached to datasources without a data context"
             )
-        batch_definition = self.data_asset.add_batch_definition(
-            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())])
+
+        # note: batch definition is created but NOT added to the asset, as it should not persist
+        batch_definition = BatchDefinition(
+            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())]),
+            partitioner=self.batch_request.partitioner,
         )
+        batch_definition.set_data_asset(self.data_asset)
+
         return V1Validator(
             batch_definition=batch_definition,
-            batch_request_options=self.batch_request.options,
+            batch_parameters=self.batch_request.options,
         )

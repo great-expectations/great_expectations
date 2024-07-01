@@ -22,14 +22,16 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
 from great_expectations.types import DictDot
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    filter_properties_dict,
+)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
@@ -354,7 +356,7 @@ class ExecutionEngine(ABC):
             return domain_kwargs
 
         if filter_nan:
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "Base ExecutionEngine does not support adding nan condition filters"
             )
 
@@ -701,7 +703,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column" not in compute_domain_kwargs:
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "Column not provided in compute_domain_kwargs"
             )
 
@@ -733,7 +735,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "column_A or column_B not found within domain_kwargs"
             )
 
@@ -766,12 +768,12 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column_list" not in domain_kwargs:
-            raise gx_exceptions.GreatExpectationsError("column_list not found within domain_kwargs")
+            raise gx_exceptions.GreatExpectationsError("column_list not found within domain_kwargs")  # noqa: TRY003
 
         column_list = compute_domain_kwargs.pop("column_list")
 
         if len(column_list) < 2:  # noqa: PLR2004
-            raise gx_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "column_list must contain at least 2 columns"
             )
 

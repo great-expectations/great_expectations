@@ -21,7 +21,7 @@ context = gx.get_context(project_root_dir=".")
 # </snippet>
 
 # add datasource and asset
-data_asset = context.sources.add_spark_filesystem(
+data_asset = context.data_sources.add_spark_filesystem(
     name="visits_datasource", base_directory=folder_path
 ).add_csv_asset(
     name="visits",
@@ -33,7 +33,7 @@ data_asset = context.sources.add_spark_filesystem(
 
 # get checkpoint
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_spark.py get checkpoint">
-my_checkpoint = context.checkpoints.get("my_checkpoint")
+my_checkpoint = context.get_legacy_checkpoint("my_checkpoint")
 # </snippet>
 
 # Example 1 - No unexpected_index_column_names. This is the default.

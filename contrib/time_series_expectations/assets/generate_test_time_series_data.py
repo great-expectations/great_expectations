@@ -64,7 +64,7 @@ def generate_time_series_data_and_plot(
         )
 
     else:
-        raise ValueError(f"Invalid grain: {grain}")
+        raise ValueError(f"Invalid grain: {grain}")  # noqa: TRY003
 
     df.to_csv(
         os.path.join(  # noqa: PTH118

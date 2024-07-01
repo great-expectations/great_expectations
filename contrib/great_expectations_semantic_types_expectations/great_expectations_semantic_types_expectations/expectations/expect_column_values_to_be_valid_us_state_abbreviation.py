@@ -14,14 +14,9 @@ def is_valid_state_abbreviation(state: str, dc_statehood: bool):
         list_of_state_abbrs.append("DC")
     else:
         pass
-    if len(state) != 2:
+    if len(state) != 2 or type(state) != str:  # noqa: E721
         return False
-    elif type(state) != str:  # noqa: E721
-        return False
-    elif state in list_of_state_abbrs:
-        return True
-    else:
-        return False
+    return state in list_of_state_abbrs
 
 
 # This class defines a Metric to support your Expectation.

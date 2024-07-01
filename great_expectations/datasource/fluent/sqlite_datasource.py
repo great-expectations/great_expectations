@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
-        BatchRequestOptions,
+        BatchParameters,
         DataAsset,
         SortersDefinition,
     )
@@ -84,12 +84,12 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
         }
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "datetime" not in options:
-            raise ValueError(
-                "'datetime' must be specified in the batch request options to create a batch identifier"  # noqa: E501
+            raise ValueError(  # noqa: TRY003
+                "'datetime' must be specified in the batch parameters to create a batch identifier"
             )
         return {self.column_name: options["datetime"]}
 

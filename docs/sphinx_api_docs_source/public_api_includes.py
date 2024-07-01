@@ -1,5 +1,5 @@
-"""Methods, classes and files to be included as part of the public API, even if they are not mentioned in docs snippets.
-"""
+"""Methods, classes and files to be included as part of the public API, even if they are not mentioned in docs snippets."""
+
 from __future__ import annotations
 
 import pathlib
@@ -73,13 +73,6 @@ DEFAULT_INCLUDES: list[IncludeExcludeDefinition] = [
         reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
         name="SNSNotificationAction",
         filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="DataAssistantResult is returned from running a DataAssistant",
-        name="DataAssistantResult",
-        filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py"
-        ),
     ),
     IncludeExcludeDefinition(
         reason="DataConnectors are part of the public API",

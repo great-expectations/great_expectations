@@ -1013,7 +1013,7 @@ def test_column_partition_metric_pd():
                     11,
                 ],
                 "b": [
-                    datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
+                    datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))  # noqa: DTZ001
                     for week_idx in range(12)
                 ],
             },
@@ -1134,7 +1134,7 @@ def test_column_partition_metric_pd():
     assert all(
         isclose(
             operand_a=element.to_pydatetime(),
-            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),
+            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),  # noqa: DTZ001
         )
         for idx, element in enumerate(results[desired_metric.id])
     )
@@ -1174,7 +1174,7 @@ def test_column_partition_metric_sa(sa):  # noqa: PLR0915
                     11,
                 ],
                 "b": [
-                    datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
+                    datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))  # noqa: DTZ001
                     for week_idx in range(12)
                 ],
             },
@@ -1350,7 +1350,7 @@ def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     assert all(
         isclose(
             operand_a=element,
-            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),
+            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),  # noqa: DTZ001
         )
         for idx, element in enumerate(results[desired_metric.id])
     )
@@ -1391,7 +1391,7 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
                     11,
                 ],
                 "b": [
-                    datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
+                    datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))  # noqa: DTZ001
                     for week_idx in range(12)
                 ],
             },
@@ -1573,7 +1573,7 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     assert all(
         isclose(
             operand_a=element,
-            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),
+            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),  # noqa: DTZ001
         )
         for idx, element in enumerate(results[desired_metric.id])
     )
@@ -4638,7 +4638,7 @@ def test_batch_aggregate_metrics_pd():
         "table.columns": table_columns_metric,
     }
 
-    start = datetime.datetime.now()
+    start = datetime.datetime.now()  # noqa: DTZ005
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             desired_metric_1,
@@ -4649,7 +4649,7 @@ def test_batch_aggregate_metrics_pd():
         metrics=metrics,
     )
     metrics.update(results)
-    end = datetime.datetime.now()
+    end = datetime.datetime.now()  # noqa: DTZ005
     print(end - start)
     assert results[desired_metric_1.id] == "2021-06-18"
     assert results[desired_metric_2.id] == "2021-01-01"
@@ -4754,7 +4754,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
     }
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
-    start = datetime.datetime.now()
+    start = datetime.datetime.now()  # noqa: DTZ005
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             desired_metric_1,
@@ -4765,7 +4765,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metrics=metrics,
     )
     metrics.update(results)
-    end = datetime.datetime.now()
+    end = datetime.datetime.now()  # noqa: DTZ005
     print("t1")
     print(end - start)
     assert results[desired_metric_1.id] == 3
@@ -4876,7 +4876,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
     desired_metric_4.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_4,
     }
-    start = datetime.datetime.now()
+    start = datetime.datetime.now()  # noqa: DTZ005
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
     results = engine.resolve_metrics(
@@ -4889,7 +4889,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metrics=metrics,
     )
     metrics.update(results)
-    end = datetime.datetime.now()
+    end = datetime.datetime.now()  # noqa: DTZ005
     print(end - start)
     assert results[desired_metric_1.id] == 3
     assert results[desired_metric_2.id] == 1

@@ -23,13 +23,13 @@ context = gx.get_context(project_root_dir=".")
 # </snippet>
 
 # add datasource and asset
-data_asset = context.sources.add_pandas(name="visits_datasource").add_csv_asset(
+data_asset = context.data_sources.add_pandas(name="visits_datasource").add_csv_asset(
     name="visits", filepath_or_buffer=file_path, sep="\t"
 )
 
 # get checkpoint
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py get checkpoint">
-my_checkpoint = context.checkpoints.get("my_checkpoint")
+my_checkpoint = context.get_legacy_checkpoint("my_checkpoint")
 # </snippet>
 
 # Example 1 - No unexpected_index_column_names. This is the default.

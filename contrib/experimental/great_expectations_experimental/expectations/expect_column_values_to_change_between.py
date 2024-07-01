@@ -30,7 +30,7 @@ class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
     def _pandas(cls, column, from_value, to_value, **kwargs):
         # throw an error if one of the values is not numeric
         if not pd.to_numeric(column, errors="coerce").notnull().all():
-            raise TypeError("Column values must be numeric !")
+            raise TypeError("Column values must be numeric !")  # noqa: TRY003
 
         # calculate the difference of the current row with the previous.
         # If previous is NaN fills with the initial value "from_value" to consider it true
@@ -181,7 +181,7 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
 # This method defines a prescriptive Renderer
 #     @classmethod
 #     @renderer(renderer_type="renderer.prescriptive")
-#     @render_evaluation_parameter_string
+#     @render_suite_parameter_string
 #     def _prescriptive_renderer(
 #         cls,
 #         configuration=None,

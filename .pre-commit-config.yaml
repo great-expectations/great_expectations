@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-ast
       - id: check-json
@@ -18,11 +18,11 @@ repos:
       - id: detect-private-key
         exclude: tests/test_fixtures/database_key_test*
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.3.0"
+    rev: "v0.4.8"
     hooks:
       - id: ruff
-        files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests) # TODO: add docs/ etc.
         args: ["--fix"]
+        exclude: ^(build|examples|docs/docusaurus/versioned_docs/version-0.17|docs/docusaurus/versioned_docs/version-0.18)
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8

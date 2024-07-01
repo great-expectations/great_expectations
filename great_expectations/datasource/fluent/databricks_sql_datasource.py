@@ -42,7 +42,7 @@ def _parse_param_from_query_string(param: str, query: str) -> str | None:
     if not path_results:
         return None
     if len(path_results) > 1:
-        raise ValueError(f"Only one `{param}` query entry is allowed")
+        raise ValueError(f"Only one `{param}` query entry is allowed")  # noqa: TRY003
     return path_results[0]
 
 
@@ -171,10 +171,7 @@ class DatabricksTableAsset(SqlTableAsset):
             True if the target string is bracketed by quotes.
         """
         # TODO: what todo with regular quotes? Error? Warn? "Fix"?
-        for quote in ["`"]:
-            if target.startswith(quote) and target.endswith(quote):
-                return True
-        return False
+        return target.startswith("`") and target.endswith("`")
 
 
 @public_api
@@ -210,10 +207,10 @@ class DatabricksSQLDatasource(SQLDatasource):
 
             # Raise specific error informing how to install dependencies only if relevant
             if isinstance(nested_exception, sa.exc.NoSuchModuleError):
-                raise TestConnectionError(
+                raise TestConnectionError(  # noqa: TRY003
                     "Could not connect to Databricks - please ensure you've installed necessary dependencies with `pip install great_expectations[databricks]`."  # noqa: E501
                 ) from e
-            raise e
+            raise e  # noqa: TRY201
 
     @override
     def _create_engine(self) -> sqlalchemy.Engine:

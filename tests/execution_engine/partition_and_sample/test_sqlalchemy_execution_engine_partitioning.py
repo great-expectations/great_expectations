@@ -31,13 +31,7 @@ from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases
 from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (  # noqa: E501
     TaxiPartitioningTestCase,
     TaxiPartitioningTestCasesBase,
-    TaxiPartitioningTestCasesColumnValue,
-    TaxiPartitioningTestCasesConvertedDateTime,
     TaxiPartitioningTestCasesDateTime,
-    TaxiPartitioningTestCasesDividedInteger,
-    TaxiPartitioningTestCasesHashedColumn,
-    TaxiPartitioningTestCasesModInteger,
-    TaxiPartitioningTestCasesMultiColumnValues,
     TaxiPartitioningTestCasesWholeTable,
     TaxiTestData,
 )
@@ -435,49 +429,6 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiPartitioningTestCasesColumnValue(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="passenger_count",
-                test_column_names=None,
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesDividedInteger(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="pickup_location_id",
-                test_column_names=None,
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesModInteger(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="pickup_location_id",
-                test_column_names=None,
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesHashedColumn(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="pickup_location_id",
-                test_column_names=None,
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesMultiColumnValues(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name=None,
-                test_column_names=[
-                    "rate_code_id",
-                    "payment_type",
-                ],
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
         TaxiPartitioningTestCasesDateTime(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
@@ -486,16 +437,9 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiPartitioningTestCasesConvertedDateTime(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="pickup_datetime",
-                test_column_names=None,
-                column_names_to_convert=None,
-            )
-        ),
     ],
 )
+@pytest.mark.xfail(reason="To be implemented in V1-305", strict=True)
 @pytest.mark.sqlite
 def test_sqlite_partition(
     taxi_test_cases: TaxiPartitioningTestCasesBase,
@@ -514,8 +458,8 @@ def test_sqlite_partition(
             batch_spec = SqlAlchemyDatasourceBatchSpec(
                 table_name="test",
                 schema_name="main",
-                partitioner_method=test_case.partitioner_method_name,
-                partitioner_kwargs=test_case.partitioner_kwargs,
+                partitioner_method=test_case.add_batch_definition_method_name,
+                partitioner_kwargs=test_case.add_batch_definition_kwargs,
                 batch_identifiers={},
             )
         else:  # noqa: PLR5501
@@ -524,8 +468,8 @@ def test_sqlite_partition(
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
                     schema_name="main",
-                    partitioner_method=test_case.partitioner_method_name,
-                    partitioner_kwargs=test_case.partitioner_kwargs,
+                    partitioner_method=test_case.add_batch_definition_method_name,
+                    partitioner_kwargs=test_case.add_batch_definition_kwargs,
                     batch_identifiers={
                         taxi_test_cases.test_column_name: test_case.expected_column_values[0]
                     },
@@ -536,8 +480,8 @@ def test_sqlite_partition(
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
                     schema_name="main",
-                    partitioner_method=test_case.partitioner_method_name,
-                    partitioner_kwargs=test_case.partitioner_kwargs,
+                    partitioner_method=test_case.add_batch_definition_method_name,
+                    partitioner_kwargs=test_case.add_batch_definition_kwargs,
                     batch_identifiers={
                         column_name: test_case.expected_column_values[0][column_name]
                         for column_name in taxi_test_cases.test_column_names

@@ -1,80 +1,21 @@
-from typing import Callable, Dict
+import urllib.parse
+from typing import Dict
 from unittest import mock
 
 import pytest
 
-from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.types.base import (
-    DatasourceConfig,
-    datasourceConfigSchema,
-)
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from great_expectations.exceptions import StoreBackendError
 from tests.data_context.conftest import MockResponse
-
-
-@pytest.mark.cloud
-def test_datasource_store_set(
-    ge_cloud_base_url: str,
-    ge_cloud_organization_id: str,
-    block_config_datasource_config: DatasourceConfig,
-    datasource_config_with_names_and_ids: DatasourceConfig,
-    datasource_store_ge_cloud_backend: DatasourceStore,
-    mocked_datasource_post_response: Callable[[], MockResponse],
-    mocked_datasource_get_response: Callable[[], MockResponse],
-) -> None:
-    """What does this test and why?
-
-    The datasource store when used with a cloud backend should emit the correct request when creating a new datasource.
-    """  # noqa: E501
-
-    # Note: id will be provided by the backend on create
-    key = GXCloudIdentifier(
-        resource_type=GXCloudRESTResource.DATASOURCE,
-    )
-
-    with mock.patch(
-        "requests.Session.post",
-        autospec=True,
-        side_effect=mocked_datasource_post_response,
-    ) as mock_post, mock.patch(
-        "requests.Session.get",
-        autospec=True,
-        side_effect=mocked_datasource_get_response,
-    ):
-        saved_datasource_config: DatasourceConfig = datasource_store_ge_cloud_backend.set(
-            key=key, value=block_config_datasource_config
-        )
-
-    serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-    expected_datasource_config = serializer.serialize(block_config_datasource_config)
-
-    mock_post.assert_called_once_with(
-        mock.ANY,  # requests.Session object
-        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
-        json={
-            "data": {
-                "type": "datasource",
-                "attributes": {
-                    "datasource_config": expected_datasource_config,
-                    "organization_id": ge_cloud_organization_id,
-                },
-            }
-        },
-    )
-
-    assert serializer.serialize(saved_datasource_config) == serializer.serialize(
-        datasource_config_with_names_and_ids
-    )
 
 
 @pytest.mark.cloud
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    block_config_datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -82,7 +23,7 @@ def test_datasource_store_get_by_id(
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource.
     """  # noqa: E501
 
-    id: str = "example_id_normally_uuid"
+    id = "8706d5fb-0432-47ab-943c-daa824210e99"
 
     key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
 
@@ -91,7 +32,12 @@ def test_datasource_store_get_by_id(
             {
                 "data": {
                     "id": id,
-                    "attributes": {"datasource_config": block_config_datasource_config},
+                    "attributes": {
+                        "datasource_config": {
+                            "name": "my_datasource",
+                            "type": "pandas",
+                        }
+                    },
                 }
             },
             200,
@@ -102,7 +48,9 @@ def test_datasource_store_get_by_id(
 
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
+            urllib.parse.urljoin(
+                ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/datasources/{id}"
+            ),
             params=None,
         )
 
@@ -111,7 +59,6 @@ def test_datasource_store_get_by_id(
 def test_datasource_store_get_by_name(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    block_config_datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -119,7 +66,7 @@ def test_datasource_store_get_by_name(
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource with a name.
     """  # noqa: E501
 
-    id: str = "example_id_normally_uuid"
+    id = "8706d5fb-0432-47ab-943c-daa824210e99"
     datasource_name: str = "example_datasource_config_name"
 
     def mocked_response(*args, **kwargs):
@@ -127,7 +74,12 @@ def test_datasource_store_get_by_name(
             {
                 "data": {
                     "id": id,
-                    "attributes": {"datasource_config": block_config_datasource_config},
+                    "attributes": {
+                        "datasource_config": {
+                            "name": "my_datasource",
+                            "type": "pandas",
+                        }
+                    },
                 }
             },
             200,
@@ -145,7 +97,9 @@ def test_datasource_store_get_by_name(
 
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
+            urllib.parse.urljoin(
+                ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/datasources"
+            ),
             params={"name": datasource_name},
         )
 
@@ -171,14 +125,9 @@ def test_datasource_store_delete_by_id(
 
         mock_delete.assert_called_once_with(
             mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
-            json={
-                "data": {
-                    "type": "datasource",
-                    "id": id,
-                    "attributes": {"deleted": True},
-                }
-            },
+            urllib.parse.urljoin(
+                ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/datasources/{id}"
+            ),
         )
 
 
@@ -187,7 +136,7 @@ def test_datasource_store_delete_by_id(
     "http_verb,method,args",
     [
         ("get", "get", []),
-        ("put", "set", ["foobar"]),
+        ("put", "set", [PandasDatasource(name="my_datasource")]),
         pytest.param(
             "delete",
             "delete",

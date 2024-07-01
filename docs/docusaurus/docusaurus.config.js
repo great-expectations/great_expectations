@@ -51,7 +51,7 @@ module.exports = {
         'GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.',
       buttons: {
         primary: {
-          label: 'Sign up for GX Cloud',
+          label: 'Try GX Cloud',
           href: 'https://greatexpectations.io/cloud',
         },
         secondary: {
@@ -107,6 +107,7 @@ module.exports = {
             },
           ],
           dropdownActiveClassDisabled: true,
+          className: 'version-dropdown',
         },
         {
           type: 'search',
@@ -118,6 +119,7 @@ module.exports = {
           position: 'left',
           owner: 'great-expectations',
           repository: 'great_expectations',
+          className: 'github-badge',
         },
         {
           label: 'Home',
@@ -175,7 +177,7 @@ module.exports = {
         },
         {
           to: 'https://greatexpectations.io/cloud',
-          label: 'Sign up for GX Cloud',
+          label: 'Try GX Cloud',
           position: 'left',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access',
@@ -272,7 +274,7 @@ module.exports = {
               path: '1.0-prerelease',
             },
             ['0.18']: {
-              label: '0.18.9',
+              label: '0.18.17',
               path: '',
             },
           },

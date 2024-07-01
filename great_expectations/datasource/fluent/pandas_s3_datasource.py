@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
@@ -21,10 +21,7 @@ from great_expectations.datasource.fluent.pandas_datasource import PandasDatasou
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
-
+    from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -69,11 +66,11 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                     s3_client = aws.boto3.client("s3", **boto3_options)
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.  # noqa: E501
-                    raise PandasS3DatasourceError(
+                    raise PandasS3DatasourceError(  # noqa: TRY003
                         f'Due to exception: "{type(e).__name__}:{e}", "s3_client" could not be created.'  # noqa: E501
                     ) from e
             else:
-                raise PandasS3DatasourceError(
+                raise PandasS3DatasourceError(  # noqa: TRY003
                     'Unable to create "PandasS3Datasource" due to missing boto3 dependency.'
                 )
 
@@ -94,7 +91,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         try:
             _ = self._get_s3_client()
         except Exception as e:
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
@@ -106,7 +103,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: FileDataAsset,
         s3_prefix: str = "",
         s3_delimiter: str = "/",  # TODO: delimiter conflicts with csv asset args
         s3_max_keys: int = 1000,
@@ -116,7 +113,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         """Builds and attaches the `S3DataConnector` to the asset."""
         # TODO: use the `asset_options_type` for validation and defaults
         if kwargs:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
 
@@ -124,7 +121,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             s3_client=self._get_s3_client(),
-            batching_regex=data_asset.batching_regex,
             bucket=self.bucket,
             prefix=s3_prefix,
             delimiter=s3_delimiter,
@@ -137,7 +133,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
                 bucket=self.bucket,
                 prefix=s3_prefix,
                 delimiter=s3_delimiter,

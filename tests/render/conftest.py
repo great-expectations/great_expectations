@@ -2,11 +2,16 @@ import json
 import os
 
 import pytest
+import pytest_mock
 
 import great_expectations as gx
+from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
+from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResult
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.self_check.util import expectationSuiteValidationResultSchema
 
@@ -37,3 +42,35 @@ def titanic_profiled_name_column_evrs():
     name_column_evrs = evrs_by_column["Name"]
 
     return name_column_evrs
+
+
+@pytest.fixture
+def v1_checkpoint_result(mocker: pytest_mock.MockFixture):
+    result_a = mocker.MagicMock(
+        spec=ExpectationSuiteValidationResult,
+        suite_name="my_bad_suite",
+        meta={},
+        statistics={"successful_expectations": 3, "evaluated_expectations": 5},
+        batch_id="my_batch",
+        success=False,
+    )
+    result_a.asset_name = "my_first_asset"
+    result_b = mocker.MagicMock(
+        spec=ExpectationSuiteValidationResult,
+        suite_name="my_good_suite",
+        meta={"run_id": "my_run_id"},
+        statistics={"successful_expectations": 1, "evaluated_expectations": 1},
+        batch_id="my_other_batch",
+        success=True,
+    )
+    result_b.asset_name = None
+
+    return CheckpointResult(
+        run_id=RunIdentifier(run_name="my_run_id"),
+        run_results={
+            mocker.MagicMock(spec=ValidationResultIdentifier): result_a,
+            mocker.MagicMock(spec=ValidationResultIdentifier): result_b,
+        },
+        checkpoint_config=mocker.MagicMock(spec=Checkpoint, name="my_checkpoint"),
+        success=False,
+    )

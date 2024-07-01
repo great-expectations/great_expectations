@@ -5,8 +5,8 @@ from typing import Dict, Union
 
 from scipy import stats
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,
 )
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
@@ -123,8 +123,8 @@ class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
 class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -207,7 +207,7 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
-    # @render_evaluation_parameter_string
+    # @render_suite_parameter_string
     # def _prescriptive_renderer(
     #     cls,
     #     configuration=None,

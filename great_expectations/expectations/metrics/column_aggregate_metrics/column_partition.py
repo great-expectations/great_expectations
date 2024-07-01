@@ -126,7 +126,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
                 },
             )
         else:
-            raise ValueError("Invalid parameter for bins argument")
+            raise ValueError("Invalid parameter for bins argument")  # noqa: TRY003
 
         return dependencies
 
@@ -219,7 +219,7 @@ def _get_column_partition_using_metrics(
             max_=max_,
         )
     else:
-        raise ValueError("Invalid parameter for bins argument")
+        raise ValueError("Invalid parameter for bins argument")  # noqa: TRY003
 
     return result_bins
 

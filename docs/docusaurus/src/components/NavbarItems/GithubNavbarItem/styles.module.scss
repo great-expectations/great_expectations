@@ -8,12 +8,6 @@
     padding-right: 2rem;
 }
 
-@media (max-width: $mobile-breakpoint) {
-    .githubBadge {
-        display: none;
-    }
-}
-
 .githubBadgeNoErrors {
     min-width: 8.5rem;
 }
@@ -51,4 +45,20 @@ a:hover {
 
 .githubLogo {
     height: 18px;
+}
+
+@media (max-width: $mobile-breakpoint) {
+    .githubBadge {
+        position: absolute;
+        right: calc(var(--ifm-navbar-padding-horizontal) + 2.5rem);
+        padding-right: 0;
+    }
+
+    .githubBadgeNoErrors {
+        min-width: 0;
+    }
+
+    .githubBadgeInfo {
+        display: none;
+    }
 }

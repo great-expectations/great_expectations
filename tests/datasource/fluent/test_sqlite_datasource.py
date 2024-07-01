@@ -128,7 +128,6 @@ def create_sqlite_source() -> (
         "partitioner_class",
         "partitioner_kwargs",
         "partitioner_query_responses",
-        "sorter_args",
         "all_batches_cnt",
         "specified_batch_request",
         "specified_batch_cnt",
@@ -139,7 +138,6 @@ def create_sqlite_source() -> (
             PartitionerConvertedDatetime,
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
             [("2019-02-01",), ("2019-02-23",)],
-            ["datetime"],
             2,
             {"datetime": "2019-02-23"},
             1,
@@ -154,7 +152,6 @@ def test_sqlite_specific_partitioner(
     partitioner_class,
     partitioner_kwargs,
     partitioner_query_responses,
-    sorter_args,
     all_batches_cnt,
     specified_batch_request,
     specified_batch_cnt,
@@ -165,7 +162,6 @@ def test_sqlite_specific_partitioner(
         partitioner_query_response=[response for response in partitioner_query_responses],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
-        asset.add_sorters(sorter_args)
         # Test getting all batches
         partitioner = partitioner_class(**partitioner_kwargs)
         batch_request = asset.build_batch_request(partitioner=partitioner)

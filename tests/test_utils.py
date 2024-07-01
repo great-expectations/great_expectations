@@ -5,7 +5,7 @@ import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generator, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -22,19 +22,20 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.store import (
     CheckpointStore,
     ConfigurationStore,
-    ProfilerStore,
     Store,
     StoreBackend,
 )
-from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
+from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
@@ -90,7 +91,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         if is_root:
             trace = " -> ".join(reversed(exc.traces))
             exc = AssertionError(f"{exc!s}\nTRACE: {trace}")
-        raise exc
+        raise exc  # noqa: TRY201
 
 
 def safe_remove(path):
@@ -214,38 +215,6 @@ def build_checkpoint_store_using_filesystem(
     )
 
 
-def build_profiler_store_using_store_backend(
-    store_name: str,
-    store_backend: Union[StoreBackend, dict],
-    overwrite_existing: bool = False,
-) -> ProfilerStore:
-    return cast(
-        ProfilerStore,
-        build_configuration_store(
-            class_name="ProfilerStore",
-            module_name="great_expectations.data_context.store",
-            store_name=store_name,
-            store_backend=store_backend,
-            overwrite_existing=overwrite_existing,
-        ),
-    )
-
-
-def build_profiler_store_using_filesystem(
-    store_name: str,
-    base_directory: str,
-    overwrite_existing: bool = False,
-) -> ProfilerStore:
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
-    store = build_profiler_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend_obj,
-        overwrite_existing=overwrite_existing,
-    )
-    return store
-
-
 def save_config_to_filesystem(
     configuration_store_class_name: str,
     configuration_store_module_name: str,
@@ -339,27 +308,6 @@ def delete_config_from_store_backend(
         configuration_key=configuration_key,
     )
     config_store.remove_key(key=key)
-
-
-def load_checkpoint_config_from_store_backend(
-    store_name: str,
-    store_backend: Union[StoreBackend, dict],
-    checkpoint_name: str,
-) -> CheckpointConfig:
-    config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend,
-    )
-    key = ConfigurationIdentifier(
-        configuration_key=checkpoint_name,
-    )
-    try:
-        return config_store.get(key=key)  # type: ignore[return-value]
-    except gx_exceptions.InvalidBaseYamlConfigError as exc:
-        logger.error(exc.messages)
-        raise gx_exceptions.InvalidCheckpointConfigError(
-            "Error while processing DataContextConfig.", exc
-        )
 
 
 def delete_checkpoint_config_from_store_backend(
@@ -666,7 +614,7 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
             return return_value
         except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
-            logger.error(error_message)
+            logger.error(error_message)  # noqa: TRY400
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
             # sensitive information does not make it into our CI logs.
@@ -696,7 +644,7 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
             return return_value
         except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
-            logger.error(error_message)
+            logger.error(error_message)  # noqa: TRY400
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
             # sensitive information does not make it into our CI logs.
@@ -794,18 +742,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         connection_string=connection_string
     )
-    data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "temp_data_connector",
-        },
-        runtime_environment={
-            "execution_engine": execution_engine,
-            "datasource_name": "temp_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-    introspection_output = data_connector._introspect_db()
+    introspection_output = introspect_db(execution_engine=execution_engine)
 
     tables_to_drop: List[str] = []
     tables_dropped: List[str] = []
@@ -824,6 +761,103 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         warnings.warn(f"Warning: Tables skipped: {tables_skipped}")
 
     return tables_dropped
+
+
+def introspect_db(  # noqa: C901, PLR0912
+    execution_engine: SqlAlchemyExecutionEngine,
+    schema_name: Union[str, None] = None,
+    ignore_information_schemas_and_system_tables: bool = True,
+    information_schemas: Optional[List[str]] = None,
+    system_tables: Optional[List[str]] = None,
+    include_views=True,
+) -> List[Dict[str, str]]:
+    # This code was broken out from the InferredAssetSqlDataConnector when it was removed
+    if information_schemas is None:
+        information_schemas = [
+            "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
+            "information_schema",  # postgres, redshift, mysql
+            "performance_schema",  # mysql
+            "sys",  # mysql
+            "mysql",  # mysql
+        ]
+
+    if system_tables is None:
+        system_tables = ["sqlite_master"]  # sqlite
+
+    engine: sqlalchemy.Engine = execution_engine.engine
+    inspector: sqlalchemy.Inspector = sa.inspect(engine)
+
+    selected_schema_name = schema_name
+
+    tables: List[Dict[str, str]] = []
+    schema_names: List[str] = inspector.get_schema_names()
+    for schema_name in schema_names:
+        if ignore_information_schemas_and_system_tables and schema_name in information_schemas:
+            continue
+
+        if selected_schema_name is not None and schema_name != selected_schema_name:
+            continue
+
+        table_names: List[str] = inspector.get_table_names(schema=schema_name)
+        for table_name in table_names:
+            if ignore_information_schemas_and_system_tables and (table_name in system_tables):
+                continue
+
+            tables.append(
+                {
+                    "schema_name": schema_name,
+                    "table_name": table_name,
+                    "type": "table",
+                }
+            )
+
+        # Note Abe 20201112: This logic is currently untested.
+        if include_views:
+            # Note: this is not implemented for bigquery
+            try:
+                view_names = inspector.get_view_names(schema=schema_name)
+            except NotImplementedError:
+                # Not implemented by Athena dialect
+                pass
+            else:
+                for view_name in view_names:
+                    if ignore_information_schemas_and_system_tables and (
+                        view_name in system_tables
+                    ):
+                        continue
+
+                    tables.append(
+                        {
+                            "schema_name": schema_name,
+                            "table_name": view_name,
+                            "type": "view",
+                        }
+                    )
+
+    # SQLAlchemy's introspection does not list "external tables" in Redshift Spectrum (tables whose data is stored on S3).  # noqa: E501
+    # The following code fetches the names of external schemas and tables from a special table
+    # 'svv_external_tables'.
+    try:
+        if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
+            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+            result = execution_engine.execute_query(
+                sa.text("select schemaname, tablename from svv_external_tables")
+            ).fetchall()
+            for row in result:
+                tables.append(
+                    {
+                        "schema_name": row[0],
+                        "table_name": row[1],
+                        "type": "table",
+                    }
+                )
+    except Exception as e:
+        # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this  # noqa: E501
+        # exception is highly unlikely to fire.
+        if "UndefinedTable" not in str(e):
+            raise e  # noqa: TRY201
+
+    return tables
 
 
 @contextmanager
@@ -866,7 +900,7 @@ def check_athena_table_count(
         return len(result) == expected_table_count
     except SQLAlchemyError:
         error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
-        logger.error(error_message)
+        logger.error(error_message)  # noqa: TRY400
         raise gx_exceptions.DatabaseConnectionError(error_message)
         # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
         # sensitive information does not make it into our CI logs.
@@ -914,7 +948,7 @@ def get_default_mysql_url() -> str:
     Returns:
         String of default connection to Docker container
     """
-    return "mysql+pymysql://root@localhost/test_ci"
+    return "mysql+pymysql://root@127.0.0.1/test_ci"
 
 
 def get_default_trino_url() -> str:
@@ -984,6 +1018,26 @@ def get_connection_string_and_dialect(
         connection_string: str = db_config["connection_string"]
 
     return dialect, connection_string
+
+
+def add_datasource(
+    context: AbstractDataContext, *, name: str, connection_string: str
+) -> SQLDatasource:
+    """Add a datasource to the context based on the dialect from config file.
+
+    Needed because context.data_sources.add_sql is prohibitted when
+    more specific methods are available.
+    """
+    with open("./connection_string.yml") as f:
+        db_config: dict = yaml_handler.load(f)
+
+    dialect: str = db_config["dialect"]
+    if dialect == "snowflake":
+        return context.data_sources.add_snowflake(name=name, connection_string=connection_string)
+    elif dialect == "postgres":
+        return context.data_sources.add_postgres(name=name, connection_string=connection_string)
+    else:
+        return context.data_sources.add_sql(name=name, connection_string=connection_string)
 
 
 def find_strings_in_nested_obj(  # noqa: C901 - 14

@@ -10,7 +10,6 @@ matter here but we leverage an existing fixture to mimic the contents of request
 in production. The same logic applies to all UUIDs in this test.
 """
 
-from collections import OrderedDict
 from typing import Callable, Optional, Set, Union
 from unittest import mock
 
@@ -18,17 +17,13 @@ import pytest
 import responses
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
 )
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
-    construct_json_payload,
-    construct_url,
 )
-from great_expectations.data_context.types.base import CheckpointConfig
 
 # module level markers
 pytestmark = pytest.mark.cloud
@@ -74,6 +69,14 @@ def construct_ge_cloud_store_backend(
             "https://app.test.greatexpectations.io/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/my-resource/8746e25c-de4d-450d-967b-df0d5546590d",
             id="with id",
         ),
+        pytest.param(
+            "https://app.test.greatexpectations.io",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "expectation_suites",
+            "8746e25c-de4d-450d-967b-df0d5546590d",
+            "https://app.test.greatexpectations.io/api/v1/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/expectation-suites/8746e25c-de4d-450d-967b-df0d5546590d",
+            id="expectation-suites V1",
+        ),
     ],
 )
 def test_construct_url(
@@ -84,7 +87,7 @@ def test_construct_url(
     expected: str,
 ) -> None:
     assert (
-        construct_url(
+        GXCloudStoreBackend.construct_versioned_url(
             base_url=base_url,
             organization_id=organization_id,
             resource_name=resource_name,
@@ -186,6 +189,17 @@ def test_construct_url(
             },
             id="with nested kwargs",
         ),
+        pytest.param(
+            "expectation_suite",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "v1_configs_dont_use_attribute_key",
+            {"expectations": [], "meta": None, "notes": None},
+            {},
+            {
+                "data": {"expectations": [], "meta": None, "notes": None},
+            },
+            id="V1 expectation suite",
+        ),
     ],
 )
 def test_construct_json_payload(
@@ -197,7 +211,7 @@ def test_construct_json_payload(
     expected: dict,
 ) -> None:
     assert (
-        construct_json_payload(
+        GXCloudStoreBackend.construct_versioned_payload(
             resource_type=resource_type,
             organization_id=organization_id,
             attributes_key=attributes_key,
@@ -208,70 +222,19 @@ def test_construct_json_payload(
     )
 
 
-def test_set(
-    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
-) -> None:
-    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
-
-    my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
-        name="my_minimal_simple_checkpoint",
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
-                name="update_data_docs",
-                action=ActionDetails(class_name="UpdateDataDocsAction"),
-            ),
-        ],
-    )
-    my_simple_checkpoint_config_serialized = my_simple_checkpoint_config.get_schema_class()().dump(
-        my_simple_checkpoint_config
-    )
-
-    with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        store_backend.set(("checkpoint", None, None), my_simple_checkpoint_config_serialized)
-        mock_post.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "attributes": {
-                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-                        "checkpoint_config": OrderedDict(
-                            [
-                                ("name", "my_minimal_simple_checkpoint"),
-                                ("expectation_suite_name", None),
-                                ("batch_request", {}),
-                                (
-                                    "action_list",
-                                    [
-                                        {
-                                            "name": "store_validation_result",
-                                            "action": {
-                                                "class_name": "StoreValidationResultAction",
-                                            },
-                                        },
-                                        {
-                                            "name": "update_data_docs",
-                                            "action": {
-                                                "class_name": "UpdateDataDocsAction",
-                                            },
-                                        },
-                                    ],
-                                ),
-                                ("evaluation_parameters", {}),
-                                ("runtime_configuration", {}),
-                                ("validations", []),
-                                ("id", None),
-                                ("expectation_suite_id", None),
-                            ]
-                        ),
-                    },
-                }
-            },
+@pytest.mark.cloud
+def test_construct_json_payload_raises_error_with_V1_resource_and_wrong_attributes_value_type():
+    v1_resource = "expectation_suite"
+    organization_id = "de5b9ca6-caf7-43c8-a820-5540ec6df9b2"
+    attributes_value_of_legacy_type = "a string"
+    with pytest.raises(
+        TypeError, match="Parameter attributes_value of type <class 'str'> is unsupported in GX V1."
+    ):
+        GXCloudStoreBackend.construct_versioned_payload(
+            resource_type=v1_resource,
+            organization_id=organization_id,
+            attributes_key="",
+            attributes_value=attributes_value_of_legacy_type,
         )
 
 
@@ -315,7 +278,7 @@ def test_has_key_with_empty_payload_from_backend(
     name = "my_nonexistent_suite"
     responses.add(
         responses.GET,
-        f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
+        f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
         json={"data": []},
         status=200,
     )
@@ -334,7 +297,7 @@ def test_get_with_empty_payload_from_backend(
     name = "my_nonexistent_suite"
     responses.add(
         responses.GET,
-        f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
+        f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
         json={"data": []},
         status=200,
     )
@@ -367,7 +330,7 @@ def test_remove_key_with_only_id(
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         mock_response = mock_delete.return_value
-        mock_response.status_code = 200
+        mock_response.status_code = 204
 
         store_backend.remove_key(
             (
@@ -380,13 +343,6 @@ def test_remove_key_with_only_id(
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                    "attributes": {"deleted": True},
-                }
-            },
         )
 
 
@@ -397,7 +353,7 @@ def test_remove_key_with_id_and_name(
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         mock_response = mock_delete.return_value
-        mock_response.status_code = 200
+        mock_response.status_code = 204
 
         store_backend.remove_key(
             ("checkpoint", "0ccac18e-7631-4bdd-8a42-3c35cce574c6", "checkpoint_name")
@@ -407,13 +363,6 @@ def test_remove_key_with_id_and_name(
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                    "attributes": {"deleted": True},
-                }
-            },
         )
 
 
@@ -516,3 +465,35 @@ def test_config_property_and_defaults(
         "module_name": GXCloudStoreBackend.__module__,
         "suppress_store_backend_id": True,
     }
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        pytest.param(("checkpoint", None), id="invalid length"),
+        pytest.param(
+            (
+                "my_fake_gx_resource",
+                "9805c644-6728-459f-846e-db7b40e8e811",
+                "test_resource",
+            ),
+            id="invalid resource type",
+        ),
+    ],
+)
+def test_ge_cloud_store_backend_invalid_key_raises_error(
+    ge_cloud_access_token: str,
+    key: tuple,
+) -> None:
+    ge_cloud_credentials = {
+        "access_token": ge_cloud_access_token,
+        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+    }
+
+    backend = GXCloudStoreBackend(
+        ge_cloud_credentials=ge_cloud_credentials,
+        ge_cloud_resource_type=GXCloudRESTResource.CHECKPOINT,
+    )
+
+    with pytest.raises(TypeError):
+        backend.get(key)

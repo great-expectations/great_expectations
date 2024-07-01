@@ -7,14 +7,15 @@ from typing import TYPE_CHECKING, Iterator
 import pandas as pd
 import pytest
 
-from great_expectations.datasource.data_connector.util import normalize_directory_path
+from great_expectations.datasource.fluent.data_connector.filesystem_data_connector import (
+    normalize_directory_path,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
@@ -22,9 +23,7 @@ if TYPE_CHECKING:
         DataAsset,
         SparkFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-    )
+    from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
     from great_expectations.validator.validator import Validator
 
 
@@ -59,12 +58,12 @@ def datasource(
     Those assertions can be found in the datasource_name fixture."""
     original_base_dir = base_dir
 
-    datasource = context.sources.add_spark_filesystem(
+    datasource = context.data_sources.add_spark_filesystem(
         name=datasource_name, base_directory=original_base_dir
     )
 
     datasource.base_directory = normalize_directory_path(updated_base_dir, context.root_directory)
-    datasource = context.sources.add_or_update_spark_filesystem(datasource=datasource)
+    datasource = context.data_sources.add_or_update_spark_filesystem(datasource=datasource)
     assert (
         datasource.base_directory == updated_base_dir
     ), "The datasource was not updated in the previous method call."
@@ -117,7 +116,7 @@ def expectation_suite(
     Those assertions can be found in the expectation_suite fixture."""
     expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_be_null",
+            type="expect_column_values_to_not_be_null",
             kwargs={
                 "column": "name",
                 "mostly": 1,
@@ -127,11 +126,6 @@ def expectation_suite(
     return expectation_suite
 
 
-@pytest.mark.xfail(
-    reason="Expectation suites in 1.0.0 now have a name attribute "
-    "instead of expectation_suite_name which mercury currently doesn't support",
-    strict=True,
-)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
@@ -151,9 +145,7 @@ def test_interactive_validator(
     assert expectation_validation_result.success
 
 
-@pytest.mark.xfail(
-    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
-)
+@pytest.mark.xfail(reason="Fails due to a V1 change in the Checkpoint shape.", strict=True)
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""

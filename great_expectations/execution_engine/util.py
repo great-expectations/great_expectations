@@ -219,27 +219,27 @@ def infer_distribution_parameters(  # noqa: C901, PLR0912
     if params is None:
         params = {}
     elif not isinstance(params, dict):
-        raise TypeError("params must be a dictionary object, see great_expectations documentation")
+        raise TypeError("params must be a dictionary object, see great_expectations documentation")  # noqa: TRY003
 
-    if "mean" not in params.keys():
+    if "mean" not in params:
         params["mean"] = data.mean()
 
-    if "std_dev" not in params.keys():
+    if "std_dev" not in params:
         params["std_dev"] = data.std()
 
     if distribution == "beta":
         # scipy cdf(x, a, b, loc=0, scale=1)
-        if "alpha" not in params.keys():
+        if "alpha" not in params:
             # from https://stats.stackexchange.com/questions/12232/calculating-the-parameters-of-a-beta-distribution-using-the-mean-and-variance
             params["alpha"] = (params["mean"] ** 2) * (
                 ((1 - params["mean"]) / params["std_dev"] ** 2) - (1 / params["mean"])
             )
-        if "beta" not in params.keys():
+        if "beta" not in params:
             params["beta"] = params["alpha"] * ((1 / params["mean"]) - 1)
 
     elif distribution == "gamma":
         # scipy cdf(x, a, loc=0, scale=1)
-        if "alpha" not in params.keys():
+        if "alpha" not in params:
             # Using https://en.wikipedia.org/wiki/Gamma_distribution
             params["alpha"] = params["mean"] / params.get("scale", 1)
 
@@ -249,20 +249,20 @@ def infer_distribution_parameters(  # noqa: C901, PLR0912
 
     elif distribution == "uniform":
         # scipy cdf(x, loc=0, scale=1)
-        if "min" not in params.keys():
-            if "loc" in params.keys():
+        if "min" not in params:
+            if "loc" in params:
                 params["min"] = params["loc"]
             else:
                 params["min"] = min(data)
-        if "max" not in params.keys():
-            if "scale" in params.keys():
+        if "max" not in params:
+            if "scale" in params:
                 params["max"] = params["scale"]
             else:
                 params["max"] = max(data) - params["min"]
 
     elif distribution == "chi2":
         # scipy cdf(x, df, loc=0, scale=1)
-        if "df" not in params.keys():
+        if "df" not in params:
             # from https://en.wikipedia.org/wiki/Chi-squared_distribution
             params["df"] = params["mean"]
 
@@ -273,7 +273,7 @@ def infer_distribution_parameters(  # noqa: C901, PLR0912
     # Lambda is optional
     #        params['scale'] = 1 / params['lambda']
     elif distribution != "norm":
-        raise AttributeError(
+        raise AttributeError(  # noqa: TRY003
             "Unsupported distribution type. Please refer to Great Expectations Documentation"
         )
 
@@ -364,20 +364,20 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
         "chi2",
         "expon",
     ]:
-        raise AttributeError(f"Unsupported  distribution provided: {distribution}")
+        raise AttributeError(f"Unsupported  distribution provided: {distribution}")  # noqa: TRY003
 
     if isinstance(params, dict):
         # `params` is a dictionary
         if params.get("std_dev", 1) <= 0 or params.get("scale", 1) <= 0:
-            raise ValueError("std_dev and scale must be positive.")
+            raise ValueError("std_dev and scale must be positive.")  # noqa: TRY003
 
         # alpha and beta are required and positive
         if distribution == "beta" and (params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0):
-            raise ValueError(f"Invalid parameters: {beta_msg}")
+            raise ValueError(f"Invalid parameters: {beta_msg}")  # noqa: TRY003
 
         # alpha is required and positive
         elif distribution == "gamma" and params.get("alpha", -1) <= 0:
-            raise ValueError(f"Invalid parameters: {gamma_msg}")
+            raise ValueError(f"Invalid parameters: {gamma_msg}")  # noqa: TRY003
 
         # lambda is a required and positive
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
@@ -385,37 +385,37 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
 
         # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
-            raise ValueError(f"Invalid parameters: {chi2_msg}:")
+            raise ValueError(f"Invalid parameters: {chi2_msg}:")  # noqa: TRY003
 
-    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701
+    elif isinstance(params, (tuple, list)):
         scale = None
 
         # `params` is a tuple or a list
         if distribution == "beta":
             if len(params) < 2:  # noqa: PLR2004
-                raise ValueError(f"Missing required parameters: {beta_msg}")
+                raise ValueError(f"Missing required parameters: {beta_msg}")  # noqa: TRY003
             if params[0] <= 0 or params[1] <= 0:
-                raise ValueError(f"Invalid parameters: {beta_msg}")
+                raise ValueError(f"Invalid parameters: {beta_msg}")  # noqa: TRY003
             if len(params) == 4:  # noqa: PLR2004
                 scale = params[3]
             elif len(params) > 4:  # noqa: PLR2004
-                raise ValueError(f"Too many parameters provided: {beta_msg}")
+                raise ValueError(f"Too many parameters provided: {beta_msg}")  # noqa: TRY003
 
         elif distribution == "norm":
             if len(params) > 2:  # noqa: PLR2004
-                raise ValueError(f"Too many parameters provided: {norm_msg}")
+                raise ValueError(f"Too many parameters provided: {norm_msg}")  # noqa: TRY003
             if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
-                raise ValueError(f"Missing required parameters: {gamma_msg}")
+                raise ValueError(f"Missing required parameters: {gamma_msg}")  # noqa: TRY003
             if len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
             if len(params) > 3:  # noqa: PLR2004
-                raise ValueError(f"Too many parameters provided: {gamma_msg}")
+                raise ValueError(f"Too many parameters provided: {gamma_msg}")  # noqa: TRY003
             elif params[0] <= 0:
-                raise ValueError(f"Invalid parameters: {gamma_msg}")
+                raise ValueError(f"Invalid parameters: {gamma_msg}")  # noqa: TRY003
 
         # elif distribution == 'poisson':
         #    if len(params) < 1:
@@ -429,29 +429,29 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
             if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
             if len(params) > 2:  # noqa: PLR2004
-                raise ValueError(f"Too many arguments provided: {uniform_msg}")
+                raise ValueError(f"Too many arguments provided: {uniform_msg}")  # noqa: TRY003
 
         elif distribution == "chi2":
             if len(params) < 1:
-                raise ValueError(f"Missing required parameters: {chi2_msg}")
+                raise ValueError(f"Missing required parameters: {chi2_msg}")  # noqa: TRY003
             elif len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
             elif len(params) > 3:  # noqa: PLR2004
-                raise ValueError(f"Too many arguments provided: {chi2_msg}")
+                raise ValueError(f"Too many arguments provided: {chi2_msg}")  # noqa: TRY003
             if params[0] <= 0:
-                raise ValueError(f"Invalid parameters: {chi2_msg}")
+                raise ValueError(f"Invalid parameters: {chi2_msg}")  # noqa: TRY003
 
         elif distribution == "expon":
             if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
             if len(params) > 2:  # noqa: PLR2004
-                raise ValueError(f"Too many arguments provided: {expon_msg}")
+                raise ValueError(f"Too many arguments provided: {expon_msg}")  # noqa: TRY003
 
         if scale is not None and scale <= 0:
-            raise ValueError("std_dev and scale must be positive.")
+            raise ValueError("std_dev and scale must be positive.")  # noqa: TRY003
 
     else:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003, TRY004
             "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"  # noqa: E501
         )
 

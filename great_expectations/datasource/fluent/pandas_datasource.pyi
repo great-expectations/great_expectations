@@ -35,8 +35,9 @@ from great_expectations._docs_decorators import (
 from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import Partitioner
-from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.partitioners import ColumnPartitioner
+from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
     CSVEngine,
@@ -47,8 +48,8 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchMetadata,
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     Datasource,
 )
@@ -69,16 +70,17 @@ class _PandasDataAsset(DataAsset):
     def _get_reader_method(self) -> str: ...
     @override
     def test_connection(self) -> None: ...
-    def batch_request_options_template(self) -> BatchRequestOptions: ...
+    def batch_parameters_template(self) -> BatchParameters: ...
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = ...,
+        options: Optional[BatchParameters] = ...,
         batch_slice: Optional[BatchSlice] = ...,
-        partitioner: Optional[Partitioner] = ...,
+        partitioner: Optional[ColumnPartitioner] = ...,
     ) -> BatchRequest: ...
+    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition: ...
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...
     @override

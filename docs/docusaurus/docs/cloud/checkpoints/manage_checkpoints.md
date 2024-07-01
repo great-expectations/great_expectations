@@ -10,7 +10,7 @@ A Checkpoint validates Expectation Suite data. After you create a Checkpoint to 
 
 ## Prerequisites
 
-- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
+- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
 
 - You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
@@ -84,7 +84,7 @@ A Checkpoint validates Expectation Suite data. After you create a Checkpoint to 
 
 ## Add a Validation to a Checkpoint
 
-Add Validation data to a Checkpoint to aggregate individual Expectation Suite or Data Source Validations into a single Checkpoint. For more information, see [Manage Checkpoints](/core/validate_data/checkpoints/manage_checkpoints.md).
+Add Validation data to a Checkpoint to aggregate individual Expectation Suite or Data Source Validations.
 
 1. In GX Cloud, click **Checkpoints**.
 

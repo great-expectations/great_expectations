@@ -14,6 +14,7 @@ def test_send_sns_notification(sns, aws_credentials):
             "missing_count": None,
             "missing_percent": None,
         },
+        "suite_name": "empty_suite",
     }
     result = ExpectationSuiteValidationResult(**results)
     topic = "test"

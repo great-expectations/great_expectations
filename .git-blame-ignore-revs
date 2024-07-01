@@ -38,3 +38,15 @@ c3df7cde688332cb101432909145b37ff4108803
 # black -> ruff format
 # https://github.com/great-expectations/great_expectations/pull/9536
 697d5910c8331721e7dc299b1c0a294de84275b5
+# Ban unittest.mock usage
+# https://github.com/great-expectations/great_expectations/pull/9586
+fc5023b4e1f1dad2e9c6faa8897fa92991b821ab
+# Reduce max cyclomatic complexity from 10 -> 8
+# https://github.com/great-expectations/great_expectations/pull/9622
+edf5dbdc77b418d659dc9d87462cd6df9a85436c
+# Change line-length from 88 -> 100
+# https://github.com/great-expectations/great_expectations/pull/9584
+d170c89167a96b702edc02b16dbf5984619d0e8f
+# enable TRYceratops linting; add noqa comments
+# https://github.com/great-expectations/great_expectations/pull/9684
+2bbfb50a6458f09ef197ee1174666a4c4726a850

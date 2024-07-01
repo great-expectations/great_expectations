@@ -38,14 +38,14 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
         **kwargs,
     ):
         if not is_valid_continuous_partition_object(partition_object):
-            raise ValueError("Invalid continuous partition object.")
+            raise ValueError("Invalid continuous partition object.")  # noqa: TRY003
 
         # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object  # noqa: E501
         if (partition_object["bins"][0] == -np.inf) or (partition_object["bins"][-1] == np.inf):
-            raise ValueError("Partition endpoints must be finite.")
+            raise ValueError("Partition endpoints must be finite.")  # noqa: TRY003
 
         if "tail_weights" in partition_object and np.sum(partition_object["tail_weights"]) > 0:
-            raise ValueError("Partition cannot have tail weights -- endpoints must be finite.")
+            raise ValueError("Partition cannot have tail weights -- endpoints must be finite.")  # noqa: TRY003
 
         test_cdf = np.append(np.array([0]), np.cumsum(partition_object["weights"]))
 

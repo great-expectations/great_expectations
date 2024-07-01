@@ -19,7 +19,7 @@ EXCLUDED_FILENAMES_PATTERN = re.compile(r"node_modules", re.IGNORECASE)
 def check_dependencies(*deps: str) -> None:
     for dep in deps:
         if not shutil.which(dep):
-            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")
+            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")  # noqa: TRY002, TRY003
 
 
 def run_grep(target_dir: pathlib.Path) -> List[str]:
@@ -39,7 +39,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             capture_output=True,
         )
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
+        raise RuntimeError(  # noqa: TRY003
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         ) from e
     return res.stdout.splitlines()

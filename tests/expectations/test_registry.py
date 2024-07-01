@@ -18,7 +18,7 @@ def test_registry_basics():
 
 def test_registry_from_configuration():
     configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={"column": "PClass", "value_set": [1, 2, 3]},
     )
     assert configuration._get_expectation_impl() == gxe.ExpectColumnValuesToBeInSet

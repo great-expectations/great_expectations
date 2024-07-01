@@ -46,7 +46,7 @@ class InlineRenderer(Renderer):
         if isinstance(render_object, (ExpectationConfiguration, ExpectationValidationResult)):
             self._render_object = render_object
         else:
-            raise InlineRendererError(
+            raise InlineRendererError(  # noqa: TRY003
                 f"InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."  # noqa: E501
             )
 
@@ -65,13 +65,13 @@ class InlineRenderer(Renderer):
         expectation_type: str
         renderer_types: List[AtomicRendererType]
         if isinstance(render_object, ExpectationConfiguration):
-            expectation_type = render_object.expectation_type
+            expectation_type = render_object.type
             renderer_types = [AtomicRendererType.PRESCRIPTIVE]
         elif isinstance(render_object, ExpectationValidationResult):
             if render_object.expectation_config:
-                expectation_type = render_object.expectation_config.expectation_type
+                expectation_type = render_object.expectation_config.type
             else:
-                raise InlineRendererError(
+                raise InlineRendererError(  # noqa: TRY003
                     "ExpectationValidationResult passed to InlineRenderer._get_atomic_rendered_content_for_object is missing an expectation_config."  # noqa: E501
                 )
             renderer_types = [
@@ -79,7 +79,7 @@ class InlineRenderer(Renderer):
                 AtomicRendererType.PRESCRIPTIVE,
             ]
         else:
-            raise InlineRendererError(
+            raise InlineRendererError(  # noqa: TRY003
                 f"InlineRenderer._get_atomic_rendered_content_for_object can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."  # noqa: E501
             )
 
@@ -149,7 +149,7 @@ class InlineRenderer(Renderer):
                     render_object=render_object,
                 )
             else:
-                raise InlineRendererError(
+                raise InlineRendererError(  # noqa: TRY003, TRY301
                     f"renderer_name: {renderer_name} was not found in the registry for expectation_type: {expectation_type}"  # noqa: E501
                 )
 
@@ -183,7 +183,7 @@ class InlineRenderer(Renderer):
                 )
                 renderer_rendered_content.exception = error_message
             else:
-                raise InlineRendererError(
+                raise InlineRendererError(  # noqa: TRY003
                     f'Renderer "{failure_renderer}" was not found in the registry.'
                 )
 

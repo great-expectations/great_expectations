@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.  # noqa: E501
-def instantiate_class_from_config(  # noqa: C901, PLR0912
+def instantiate_class_from_config(  # noqa: C901
     config, runtime_environment, config_defaults=None
 ):
     """Build a GX class from configuration dictionaries."""
@@ -41,11 +41,8 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
         try:
             module_name = config_defaults.pop("module_name")
         except KeyError:
-            raise KeyError(
-                "Neither config : {} nor config_defaults : {} contains a module_name key.".format(
-                    config,
-                    config_defaults,
-                )
+            raise KeyError(  # noqa: TRY003
+                f"Neither config : {config} nor config_defaults : {config_defaults} contains a module_name key."  # noqa: E501
             )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
@@ -63,11 +60,8 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
         try:
             class_name = config_defaults.pop("class_name")
         except KeyError:
-            raise KeyError(
-                "Neither config : {} nor config_defaults : {} contains a class_name key.".format(
-                    config,
-                    config_defaults,
-                )
+            raise KeyError(  # noqa: TRY003
+                f"Neither config : {config} nor config_defaults : {config_defaults} contains a class_name key."  # noqa: E501
             )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
@@ -98,9 +92,7 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
         class_instance = class_(**config_with_defaults)
     except TypeError as e:
         raise TypeError(
-            "Couldn't instantiate class: {} with config: \n\t{}\n \n".format(
-                class_name, format_dict_for_error_message(config_with_defaults)
-            )
+            f"Couldn't instantiate class: {class_name} with config: \n\t{format_dict_for_error_message(config_with_defaults)}\n \n"  # noqa: E501
             + str(e)
         )
 
@@ -215,13 +207,13 @@ class PasswordMasker:
         try:
             matched: re.Match[str] | None = azure_conn_str_re.match(url)
             if not matched:
-                raise StoreConfigurationError(
+                raise StoreConfigurationError(  # noqa: TRY003, TRY301
                     f"The URL for the Azure connection-string, was not configured properly. Please check and try again: {url} "  # noqa: E501
                 )
             res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"  # noqa: E501
             return res
         except Exception as e:
-            raise StoreConfigurationError(
+            raise StoreConfigurationError(  # noqa: TRY003
                 f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"  # noqa: E501
             )
 

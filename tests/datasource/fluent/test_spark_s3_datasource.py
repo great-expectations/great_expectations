@@ -1,29 +1,19 @@
 from __future__ import annotations
 
-import logging
-import re
-from typing import TYPE_CHECKING, List, cast
+from typing import TYPE_CHECKING, List
 
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import SparkS3Datasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
-    S3DataConnector,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.spark_file_path_datasource import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
-
-
-logger = logging.getLogger(__file__)
 
 
 @pytest.fixture()
@@ -43,16 +33,18 @@ def spark_s3_datasource(s3_mock, s3_bucket: str) -> SparkS3Datasource:
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     keys: List[str] = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
+        "yellow_tripdata_sample_2024-01.csv",
+        "yellow_tripdata_sample_2024-02.csv",
+        "yellow_tripdata_sample_2024-03.csv",
+        "yellow_tripdata_sample_2024-04.csv",
+        "yellow_tripdata_sample_2024-05.csv",
+        "yellow_tripdata_sample_2024-06.csv",
+        "yellow_tripdata_sample_2024-07.csv",
+        "yellow_tripdata_sample_2024-08.csv",
+        "yellow_tripdata_sample_2024-09.csv",
+        "yellow_tripdata_sample_2024-10.csv",
+        "yellow_tripdata_sample_2024-11.csv",
+        "yellow_tripdata_sample_2024-12.csv",
         "subfolder/for_recursive_search.csv",
     ]
 
@@ -70,208 +62,71 @@ def spark_s3_datasource(s3_mock, s3_bucket: str) -> SparkS3Datasource:
 
 
 @pytest.fixture
-def csv_asset(spark_s3_datasource: SparkS3Datasource) -> _FilePathDataAsset:
+def csv_asset(spark_s3_datasource: SparkS3Datasource) -> PathDataAsset:
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         header=True,
         infer_schema=True,
     )
     return asset
 
 
-@pytest.fixture
-def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    data_connector: S3DataConnector = cast(S3DataConnector, csv_asset._data_connector)
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: E501
-    return regex, test_connection_error_message
-
-
-@pytest.mark.big
+@pytest.mark.unit
 def test_construct_spark_s3_datasource(spark_s3_datasource: SparkS3Datasource):
     assert spark_s3_datasource.name == "spark_s3_datasource"
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         header=True,
         infer_schema=True,
         batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
     assert asset.batch_metadata == asset_specified_metadata
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_construct_csv_asset_directly():
-    # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
-@pytest.mark.big
-def test_csv_asset_with_batching_regex_unnamed_parameters(
-    spark_s3_datasource: SparkS3Datasource,
-):
-    asset = spark_s3_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-        header=True,
-        infer_schema=True,
-    )
-    options = asset.get_batch_request_options_keys()
-    assert options == (
-        "batch_request_param_1",
-        "batch_request_param_2",
-        "batch_request_param_3",
-        "path",
-    )
-
-
-@pytest.mark.big
+@pytest.mark.unit
 def test_csv_asset_with_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_request_options_keys()
-    assert options == (
-        "name",
-        "timestamp",
-        "price",
-        "path",
-    )
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=batching_regex)
+    options = asset.get_batch_parameters_keys(partitioner=batch_def.partitioner)
+    assert options == ("path", "year", "month")
 
 
-@pytest.mark.big
-def test_csv_asset_with_some_batching_regex_named_parameters(
-    spark_s3_datasource: SparkS3Datasource,
-):
-    asset = spark_s3_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
-        header=True,
-        infer_schema=True,
-    )
-    options = asset.get_batch_request_options_keys()
-    assert options == (
-        "name",
-        "batch_request_param_2",
-        "price",
-        "path",
-    )
-
-
-@pytest.mark.big
+@pytest.mark.unit
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
         header=True,
         infer_schema=True,
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
-        asset.build_batch_request({"name": "alex", "timestamp": "1234567890", "price": 1300})
+        asset.build_batch_request({"year": "2024", "month": 5})
 
 
-@pytest.mark.big
-@pytest.mark.xfail(
-    reason="Accessing objects on moto.mock_s3 using Spark is not working (this test is conducted using Jupyter notebook manually)."  # noqa: E501
-)
-def test_get_batch_list_from_fully_specified_batch_request(
-    spark_s3_datasource: SparkS3Datasource,
-):
-    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
-    asset = spark_s3_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-        header=True,
-        infer_schema=True,
-        batch_metadata=asset_specified_metadata,
-    )
-
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
-    assert batch.batch_request.datasource_name == spark_s3_datasource.name
-    assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.metadata == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-        **asset_specified_metadata,
-    }
-    assert batch.id == "spark_s3_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-
-    request = asset.build_batch_request({"name": "alex"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 2
-
-
-@pytest.mark.spark
-def test_test_connection_failures(
-    spark_session,
-    s3_mock,
-    spark_s3_datasource: SparkS3Datasource,
-    bad_regex_config: tuple[re.Pattern, str],
-):
-    regex, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
-        name="csv_asset",
-        batching_regex=regex,
-    )
-    csv_asset._datasource = spark_s3_datasource
-    spark_s3_datasource.assets = [
-        csv_asset,
-    ]
-    csv_asset._data_connector = S3DataConnector(
-        datasource_name=spark_s3_datasource.name,
-        data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
-        s3_client=s3_mock,
-        bucket=spark_s3_datasource.bucket,
-        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
-    )
-    csv_asset._test_connection_error_message = test_connection_error_message
-
-    with pytest.raises(TestConnectionError) as e:
-        spark_s3_datasource.test_connection()
-
-    assert str(e.value) == str(test_connection_error_message)
-
-
-@pytest.mark.big
+@pytest.mark.unit
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -286,11 +141,9 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset_recursive",
-        batching_regex=r".*",
         header=True,
         infer_schema=True,
         batch_metadata=asset_specified_metadata,
         s3_recursive_file_discovery=True,
     )
-    recursion_match = asset.batching_regex.match(".*/.*.csv")
-    assert recursion_match is not None
+    assert asset.batch_metadata == asset_specified_metadata

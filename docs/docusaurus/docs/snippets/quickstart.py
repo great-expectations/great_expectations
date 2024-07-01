@@ -1,6 +1,7 @@
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 # </snippet>
 
@@ -11,14 +12,14 @@ context = gx.get_context()
 
 # Connect to data
 # <snippet name="tutorials/quickstart/quickstart.py connect_to_data">
-batch = context.sources.pandas_default.read_csv(
+batch = context.data_sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>
 
 # Create Expectations
 # <snippet name="tutorials/quickstart/quickstart.py create_expectation">
-suite = context.add_expectation_suite("my_suite")
+suite = context.suites.add(ExpectationSuite(name="my_suite"))
 
 # TODO: update where these expectations are imported
 suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))

@@ -34,7 +34,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, rule, **kwargs):
         if rule["ranges"]:
-            raise ValueError("Ranges must contain at least 1 variable!")
+            raise ValueError("Ranges must contain at least 1 variable!")  # noqa: TRY003
 
         return column.apply(lambda x: ColumnRuleFollowers._helper(x, rule))
 
@@ -47,7 +47,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
         if x is None:
             x = ""
         if not isinstance(x, str):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "Column values must be strings in order to use 'expect_column_values_to_follow_rule'"
             )
         for name, rnge in rule["ranges"].items():
@@ -55,7 +55,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
                 strings[name] = str(x[rnge[0] : rnge[1]])
                 names += name + ","
             else:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "Unexpected range. Ensure that the second number in your range is larger than the first."
                 )
 
@@ -210,7 +210,7 @@ class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
 # This method defines a prescriptive Renderer
 #     @classmethod
 #     @renderer(renderer_type="renderer.prescriptive")
-#     @render_evaluation_parameter_string
+#     @render_suite_parameter_string
 #     def _prescriptive_renderer(
 #         cls,
 #         configuration=None,

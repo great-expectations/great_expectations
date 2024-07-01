@@ -12,8 +12,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.compatibility import pyspark
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
@@ -33,12 +32,12 @@ def datasource(
     """Test Adding and Updating the Datasource associated with this module.
     Note: There is no need to test Get or Delete Datasource.
     Those assertions can be found in the datasource_name fixture."""
-    datasource = context.sources.add_spark(
+    datasource = context.data_sources.add_spark(
         name=datasource_name,
         persist=True,
     )
     datasource.persist = False
-    datasource = context.sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
+    datasource = context.data_sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
     assert (
         datasource.persist is False
     ), "The datasource was not updated in the previous method call."
@@ -47,7 +46,7 @@ def datasource(
     assert datasource.persist is True, "The datasource was not updated in the previous method call."
     datasource.persist = False
     datasource_dict = datasource.dict()
-    datasource = context.sources.add_or_update_spark(**datasource_dict)
+    datasource = context.data_sources.add_or_update_spark(**datasource_dict)
     assert (
         datasource.persist is False
     ), "The datasource was not updated in the previous method call."
@@ -118,7 +117,7 @@ def expectation_suite(
     Those assertions can be found in the expectation_suite fixture."""
     expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_be_null",
+            type="expect_column_values_to_not_be_null",
             kwargs={
                 "column": "name",
                 "mostly": 1,
@@ -128,11 +127,6 @@ def expectation_suite(
     return expectation_suite
 
 
-@pytest.mark.xfail(
-    reason="Expectation suites in 1.0.0 now have a name attribute "
-    "instead of expectation_suite_name which mercury currently doesn't support",
-    strict=True,
-)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
@@ -152,7 +146,8 @@ def test_interactive_validator(
 
 
 @pytest.mark.xfail(
-    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
+    reason="Fails due to a V1 change in the Checkpoint shape.",
+    strict=True,
 )
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):

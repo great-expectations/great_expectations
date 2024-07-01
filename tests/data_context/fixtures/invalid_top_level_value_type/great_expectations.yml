@@ -2,8 +2,7 @@
 config_version: "foo"
 plugins_directory: "foo"
 expectations_store_name: expectations_store
-evaluation_parameter_store_name: "foo"
-datasources: "foo"
+suite_parameter_store_name: "foo"
 stores: "foo"
-validations_store_name: "foo"
+validation_results_store_name: "foo"
 data_docs_sites: "foo"

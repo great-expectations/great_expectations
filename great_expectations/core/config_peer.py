@@ -68,7 +68,7 @@ class ConfigPeer(ABC):
         elif mode == ConfigOutputModes.JSON_DICT:
             config_kwargs = config.to_json_dict()
         else:
-            raise ValueError(f'Unknown mode {mode} in "BaseCheckpoint.get_config()".')
+            raise ValueError(f'Unknown mode {mode} in "BaseCheckpoint.get_config()".')  # noqa: TRY003
 
         kwargs["inplace"] = True
         filter_properties_dict(

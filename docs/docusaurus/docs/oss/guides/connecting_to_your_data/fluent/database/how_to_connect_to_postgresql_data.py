@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_postgresql_data" tests/integration/test_script_runner.py --postgresql
 ```
 """
+
 import pathlib
 
 import pandas as pd
@@ -62,7 +63,7 @@ my_connection_string = PG_CONNECTION_STRING
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py add_postgres">
-datasource = context.sources.add_postgres(
+datasource = context.data_sources.add_postgres(
     name=datasource_name, connection_string=my_connection_string
 )
 # </snippet>

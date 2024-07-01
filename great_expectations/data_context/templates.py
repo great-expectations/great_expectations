@@ -44,10 +44,6 @@ PROJECT_HELP_COMMENT = f"""
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
 config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
-
-# Datasources tell Great Expectations where your data lives and how to get it.
-# Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
-datasources: {{}}
 """  # noqa: E501
 
 CONFIG_VARIABLES_INTRO = """
@@ -79,16 +75,17 @@ EXPECTATIONS_STORE_STRING = yaml.dump(
     {"expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value["expectations_store"]}
 ).replace("\n", "\n  ")[:-2]
 VALIDATIONS_STORE_STRING = yaml.dump(
-    {"validations_store": DataContextConfigDefaults.DEFAULT_STORES.value["validations_store"]}
+    {
+        "validation_results_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "validation_results_store"
+        ]
+    }
 ).replace("\n", "\n  ")[:-2]
-EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
-    DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
+SUITE_PARAMETER_STORE_STRING = yaml.dump(
+    DataContextConfigDefaults.DEFAULT_STORES.value["suite_parameter_store"]
 )
 CHECKPOINT_STORE_STRING = yaml.dump(
     {"checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]}
-).replace("\n", "\n  ")[:-2]
-PROFILER_STORE_STRING = yaml.dump(
-    {"profiler_store": DataContextConfigDefaults.DEFAULT_STORES.value["profiler_store"]}
 ).replace("\n", "\n  ")[:-2]
 VALIDATION_DEFINITION_STORE_STRING = yaml.dump(
     {
@@ -113,20 +110,19 @@ stores:
 # leave this section alone.
 #
 # Three stores are required: expectations, validations, and
-# evaluation_parameters, and must exist with a valid store entry. Additional
+# suite_parameters, and must exist with a valid store entry. Additional
 # stores can be configured for uses such as data_docs, etc.
   {EXPECTATIONS_STORE_STRING}
   {VALIDATIONS_STORE_STRING}
-  evaluation_parameter_store:
-    # Evaluation Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/docs/reference/evaluation_parameters/
-    {EVALUATION_PARAMETER_STORE_STRING}
+  suite_parameter_store:
+    # Suite Parameters enable dynamic expectations. Read more here:
+    # https://docs.greatexpectations.io/docs/reference/suite_parameters/
+    {SUITE_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
-  {PROFILER_STORE_STRING}
   {VALIDATION_DEFINITION_STORE_STRING}
 expectations_store_name: expectations_store
-validations_store_name: validations_store
-evaluation_parameter_store_name: evaluation_parameter_store
+validation_results_store_name: validation_results_store
+suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
@@ -146,19 +142,17 @@ data_docs_sites:
 """
 )
 
-ANONYMIZED_USAGE_STATISTICS_ENABLED = """
-anonymous_usage_statistics:
-  enabled: True
+USAGE_STATISTICS_ENABLED = """
+analytics_enabled: True
 """
 
-ANONYMIZED_USAGE_STATISTICS_DISABLED = """
-anonymous_usage_statistics:
-  enabled: False
+USAGE_STATISTICS_DISABLED = """
+analytics_enabled: False
 """
 
 PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = (
-    PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + ANONYMIZED_USAGE_STATISTICS_ENABLED
+    PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + USAGE_STATISTICS_ENABLED
 )
 PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED = (
-    PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + ANONYMIZED_USAGE_STATISTICS_DISABLED
+    PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + USAGE_STATISTICS_DISABLED
 )

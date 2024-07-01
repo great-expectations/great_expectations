@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
@@ -21,10 +21,9 @@ from great_expectations.datasource.fluent.spark_datasource import SparkDatasourc
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+    from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
+        SPARK_PATH_ASSET_UNION,
     )
-
 
 logger = logging.getLogger(__name__)
 
@@ -69,11 +68,11 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                     s3_client = aws.boto3.client("s3", **boto3_options)
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.  # noqa: E501
-                    raise SparkS3DatasourceError(
+                    raise SparkS3DatasourceError(  # noqa: TRY003
                         f'Due to exception: "{e!s}", "s3_client" could not be created.'
                     ) from e
             else:
-                raise SparkS3DatasourceError(
+                raise SparkS3DatasourceError(  # noqa: TRY003
                     'Unable to create "SparkS3Datasource" due to missing boto3 dependency.'
                 )
 
@@ -95,7 +94,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             # tests S3 connection
             _ = self._get_s3_client()
         except Exception as e:
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
@@ -110,7 +109,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        data_asset: SPARK_PATH_ASSET_UNION,
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,
@@ -119,7 +118,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     ) -> None:
         """Builds and attaches the `S3DataConnector` to the asset."""
         if kwargs:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
 
@@ -127,7 +126,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             s3_client=self._get_s3_client(),
-            batching_regex=data_asset.batching_regex,
             bucket=self.bucket,
             prefix=s3_prefix,
             delimiter=s3_delimiter,
@@ -140,7 +138,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
                 bucket=self.bucket,
                 prefix=s3_prefix,
                 delimiter=s3_delimiter,

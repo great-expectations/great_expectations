@@ -26,7 +26,7 @@ datasource_name = None
 assert datasource_name, "Please set datasource_name."
 
 # Get or add Datasource
-datasource: Datasource = context.sources.add_or_update_pandas(datasource_name)
+datasource: Datasource = context.data_sources.add_or_update_pandas(datasource_name)
 
 # Provide an Asset name
 asset_name = None
@@ -55,8 +55,8 @@ expectation_suite_name = None
 assert expectation_suite_name, "Please set expectation_suite_name."
 
 # Get or add Expectation Suite
-expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite(
-    expectation_suite_name=expectation_suite_name
+expectation_suite: ExpectationSuite = context.suites.add(
+    ExpectationSuite(name=expectation_suite_name)
 )
 expectation_suite_ge_cloud_id: str = expectation_suite.ge_cloud_id
 
@@ -71,7 +71,7 @@ assert column_name is not None, "Please set column_name."
 # Look up all expectations types here - https://greatexpectations.io/expectations/
 expectation_configuration = gx.core.ExpectationConfiguration(
     **{
-        "expectation_type": "expect_column_min_to_be_between",
+        "type": "expect_column_min_to_be_between",
         "kwargs": {"column": column_name, "min_value": 0.1},
         "meta": {},
     }
@@ -80,7 +80,7 @@ expectation_configuration = gx.core.ExpectationConfiguration(
 expectation_suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
 # Save the Expectation Suite
-context.update_expectation_suite(expectation_suite=expectation_suite)
+expectation_suite.save()
 
 print(f"\n{20*'='}\nExpectation Suite\n{20*'='}\n")
 pprint.pprint(expectation_suite)

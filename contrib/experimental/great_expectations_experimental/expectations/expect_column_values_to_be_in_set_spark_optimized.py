@@ -46,7 +46,7 @@ class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
                 data=value_set, schema=df.schema[column_name].dataType
             )
         except TypeError as e:
-            raise InvalidExpectationConfigurationError(
+            raise InvalidExpectationConfigurationError(  # noqa: TRY003
                 f"`value_set` must be of same type as `column` : {e}"
             )
 

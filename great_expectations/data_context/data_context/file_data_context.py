@@ -19,10 +19,6 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    datasourceConfigSchema,
-)
-from great_expectations.datasource.datasource_serializer import (
-    YAMLReadyDictDatasourceConfigSerializer,
 )
 from great_expectations.datasource.fluent.config import GxConfig
 
@@ -109,7 +105,7 @@ class FileDataContext(SerializableDataContext):
             project_config = FileDataContext._load_file_backed_project_config(
                 context_root_directory=self._context_root_directory,
             )
-        return self._apply_global_config_overrides(config=project_config)
+        return project_config
 
     @override
     def _init_datasource_store(self) -> DatasourceStore:
@@ -134,7 +130,6 @@ class FileDataContext(SerializableDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            serializer=YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema),
         )
         return datasource_store
 
@@ -191,11 +186,11 @@ class FileDataContext(SerializableDataContext):
                 config_commented_map_from_yaml = yaml.load(data)
 
         except DuplicateKeyError:
-            raise gx_exceptions.InvalidConfigurationYamlError(
+            raise gx_exceptions.InvalidConfigurationYamlError(  # noqa: TRY003
                 "Error: duplicate key found in project YAML file."
             )
         except YAMLError as err:
-            raise gx_exceptions.InvalidConfigurationYamlError(
+            raise gx_exceptions.InvalidConfigurationYamlError(  # noqa: TRY003
                 f"Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{err}"  # noqa: E501
             )
         except OSError:
@@ -205,7 +200,7 @@ class FileDataContext(SerializableDataContext):
             return DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
-        except gx_exceptions.InvalidDataContextConfigError:
+        except gx_exceptions.InvalidDataContextConfigError:  # noqa: TRY302
             # Just to be explicit about what we intended to catch
             raise
 

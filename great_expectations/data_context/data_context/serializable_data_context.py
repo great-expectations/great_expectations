@@ -11,8 +11,11 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.data_context.constants import (
+    CURRENT_GX_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
+)
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -21,10 +24,6 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_GX_CONFIG_VERSION,
-    MINIMUM_SUPPORTED_CONFIG_VERSION,
-    AnonymizedUsageStatisticsConfig,
-    DataContextConfig,
     DataContextConfigDefaults,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -47,7 +46,6 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.VALIDATION_DEFINITIONS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
@@ -95,7 +93,7 @@ class SerializableDataContext(AbstractDataContext):
         cls, context_root_dir: PathStr | None, project_root_dir: PathStr | None
     ) -> PathStr | None:
         if project_root_dir and context_root_dir:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"  # noqa: E501
             )
 
@@ -107,71 +105,8 @@ class SerializableDataContext(AbstractDataContext):
 
         return context_root_dir
 
-    def _check_for_usage_stats_sync(  # noqa: PLR0911
-        self, project_config: DataContextConfig
-    ) -> bool:
-        """
-        If there are differences between the DataContextConfig used to instantiate
-        the DataContext and the DataContextConfig assigned to `self.config`, we want
-        to save those changes to disk so that subsequent instantiations will utilize
-        the same values.
-
-        A small caveat is that if that difference stems from a global override (env var
-        or conf file), we don't want to write to disk. This is due to the fact that
-        those mechanisms allow for dynamic values and saving them will make them static.
-
-        Args:
-            project_config: The DataContextConfig used to instantiate the DataContext.
-
-        Returns:
-            A boolean signifying whether or not the current DataContext's config needs
-            to be persisted in order to recognize changes made to usage statistics.
-        """
-        project_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
-            project_config.anonymous_usage_statistics
-        )
-        context_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
-            self.config.anonymous_usage_statistics
-        )
-
-        if (
-            project_config_usage_stats.enabled is False  # type: ignore[union-attr]
-            or context_config_usage_stats.enabled is False  # type: ignore[union-attr]
-        ):
-            return False
-
-        if project_config_usage_stats.explicit_id is False:  # type: ignore[union-attr]
-            return True
-
-        if project_config_usage_stats == context_config_usage_stats:
-            return False
-
-        if project_config_usage_stats is None or context_config_usage_stats is None:
-            return True
-
-        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
-        global_data_context_id: Optional[str] = self._get_data_context_id_override()
-        if (
-            project_config_usage_stats.data_context_id  # noqa: PLR1714
-            != context_config_usage_stats.data_context_id
-            and context_config_usage_stats.data_context_id != global_data_context_id
-        ):
-            return True
-
-        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
-        global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
-        if (
-            project_config_usage_stats.usage_statistics_url  # noqa: PLR1714
-            != context_config_usage_stats.usage_statistics_url
-            and context_config_usage_stats.usage_statistics_url != global_usage_stats_url
-        ):
-            return True
-
-        return False
-
-    @public_api
     @classmethod
-    def create(
+    def _create(
         cls,
         project_root_dir: Optional[PathStr] = None,
         runtime_environment: Optional[dict] = None,
@@ -224,8 +159,8 @@ class SerializableDataContext(AbstractDataContext):
 
         uncommitted_dir = gx_dir / cls.GX_UNCOMMITTED_DIR
         if pathlib.Path.is_file(uncommitted_dir.joinpath(cls.GX_CONFIG_VARIABLES)):
-            message = """Warning. An existing `config_variables.yml` was found here: {}.
-    - No action was taken.""".format(uncommitted_dir)
+            message = f"""Warning. An existing `config_variables.yml` was found here:
+            {uncommitted_dir}. - No action was taken."""
             warnings.warn(message)
         else:
             cls._write_config_variables_template_to_disk(uncommitted_dir)
@@ -283,7 +218,7 @@ class SerializableDataContext(AbstractDataContext):
         try:
             cls._scaffold_gitignore(base_dir)
         except Exception as e:
-            raise gx_exceptions.GitIgnoreScaffoldingError(
+            raise gx_exceptions.GitIgnoreScaffoldingError(  # noqa: TRY003
                 f"Could not create .gitignore in {base_dir} because of an error: {e}"
             )
 
@@ -387,22 +322,20 @@ class SerializableDataContext(AbstractDataContext):
         validate_config_version: bool = True,
     ) -> bool:
         if not isinstance(config_version, (int, float)):
-            raise gx_exceptions.UnsupportedConfigVersionError(
+            raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
                 "The argument `config_version` must be a number.",
             )
 
         if validate_config_version:
             if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-                raise gx_exceptions.UnsupportedConfigVersionError(
-                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(  # noqa: E501
-                        config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
-                    ),
+                raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
+                    f"""Invalid config version ({config_version})\n
+                                                                  The version number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}"""  # noqa: E501
                 )
             elif config_version > CURRENT_GX_CONFIG_VERSION:
-                raise gx_exceptions.UnsupportedConfigVersionError(
-                    "Invalid config version ({}).\n    The maximum valid version is {}.".format(
-                        config_version, CURRENT_GX_CONFIG_VERSION
-                    ),
+                raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
+                    f"""Invalid config version ({config_version}).\n
+                                                                  The maximum valid version is {CURRENT_GX_CONFIG_VERSION}."""  # noqa: E501
                 )
 
         yml_path = cls._find_context_yml_file(search_start_dir=context_root_dir)
@@ -514,7 +447,7 @@ class SerializableDataContext(AbstractDataContext):
         context = cls._attempt_context_instantiation(ge_dir)
         if not context:
             return False
-        return bool(context.list_expectation_suites())
+        return bool(context.suites.all())
 
     @classmethod
     def _attempt_context_instantiation(cls, ge_dir: PathStr) -> Optional[SerializableDataContext]:

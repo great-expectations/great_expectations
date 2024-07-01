@@ -39,17 +39,17 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
         elif match_on == "all":
             result = regex_match_df.all(axis="columns")
         else:
-            raise ValueError("match_on must be either 'any' or 'all'")
+            raise ValueError("match_on must be either 'any' or 'all'")  # noqa: TRY003
 
         return result
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, regex_list, match_on, _dialect, **kwargs):
         if match_on not in ["any", "all"]:
-            raise ValueError("match_on must be any or all")
+            raise ValueError("match_on must be any or all")  # noqa: TRY003
 
         if len(regex_list) == 0:
-            raise ValueError("At least one regex must be supplied in the regex_list.")
+            raise ValueError("At least one regex must be supplied in the regex_list.")  # noqa: TRY003
 
         regex_expression = get_dialect_regex_expression(column, regex_list[0], _dialect)
         if regex_expression is None:
@@ -74,4 +74,4 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
             formatted_regex_list = [f"(?={regex})" for regex in regex_list]
             return column.rlike("".join(formatted_regex_list))
         else:
-            raise ValueError("match_on must be either 'any' or 'all'")
+            raise ValueError("match_on must be either 'any' or 'all'")  # noqa: TRY003

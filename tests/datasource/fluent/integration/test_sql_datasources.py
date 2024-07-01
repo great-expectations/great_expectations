@@ -6,6 +6,7 @@ import pathlib
 import shutil
 import sys
 import uuid
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -21,6 +22,8 @@ import pytest
 from packaging.version import Version
 from pytest import param
 
+import great_expectations.expectations.core as gxe
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
@@ -33,6 +36,8 @@ from great_expectations.compatibility.sqlalchemy import (
 from great_expectations.compatibility.sqlalchemy import (
     __version__ as sqlalchemy_version,
 )
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
@@ -46,9 +51,7 @@ from great_expectations.execution_engine.sqlalchemy_dialect import (
     GXSqlDialect,
     quote_str,
 )
-from great_expectations.expectations.expectation import (
-    ExpectationConfiguration,
-)
+from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -157,23 +160,15 @@ def _get_exception_details(
     ]
 ]:
     """Extract a list of exception_info dicts from a CheckpointResult."""
-    validation_results: list[
-        dict[
-            Literal["exception_info", "expectation_config", "meta", "result", "success"],
-            dict,
-        ]
-    ] = next(  # type: ignore[index, assignment]
-        iter(result.to_json_dict()["run_results"].values())  # type: ignore[call-overload,union-attr]
-    )[
-        "validation_result"  # type: ignore[index]
-    ][
-        "results"  # type: ignore[index]
-    ]
+    first_run_result = next(iter(result.run_results.values()))
+    validation_results = first_run_result.results
     if prettyprint:
         print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
 
     exc_details = [
-        r["exception_info"] for r in validation_results if r["exception_info"]["raised_exception"]
+        r["exception_info"]
+        for r in validation_results
+        if r["exception_info"].get("raised_exception")
     ]
     if exc_details and prettyprint:
         print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
@@ -287,7 +282,7 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
 
 @pytest.fixture
 def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
-    ds = context.sources.add_sql(
+    ds = context.data_sources.add_sql(
         "trino",
         connection_string="trino://user:@localhost:8088/tpch/sf1",
     )
@@ -296,7 +291,7 @@ def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
 
 @pytest.fixture
 def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
-    ds = context.sources.add_postgres(
+    ds = context.data_sources.add_postgres(
         "postgres",
         connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
@@ -305,13 +300,11 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 
 @pytest.fixture
 def databricks_creds_populated() -> bool:
-    if (
+    return bool(
         os.getenv("DATABRICKS_TOKEN")
         or os.getenv("DATABRICKS_HOST")
         or os.getenv("DATABRICKS_HTTP_PATH")
-    ):
-        return True
-    return False
+    )
 
 
 @pytest.fixture
@@ -320,7 +313,7 @@ def databricks_sql_ds(
 ) -> DatabricksSQLDatasource:
     if not databricks_creds_populated:
         pytest.skip("no databricks credentials")
-    ds = context.sources.add_databricks_sql(
+    ds = context.data_sources.add_databricks_sql(
         "databricks_sql",
         connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
@@ -331,9 +324,7 @@ def databricks_sql_ds(
 
 @pytest.fixture
 def snowflake_creds_populated() -> bool:
-    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return True
-    return False
+    return bool(os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"))
 
 
 @pytest.fixture
@@ -343,18 +334,21 @@ def snowflake_ds(
 ) -> SnowflakeDatasource:
     if not snowflake_creds_populated:
         pytest.skip("no snowflake credentials")
-    ds = context.sources.add_snowflake(
+    ds = context.data_sources.add_snowflake(
         "snowflake",
-        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
+        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci"
+        f"/{RAND_SCHEMA}?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account  # noqa: E501
-        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
+        # connection_string="snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     return ds
 
 
 @pytest.fixture
 def sqlite_ds(context: EphemeralDataContext, tmp_path: pathlib.Path) -> SqliteDatasource:
-    ds = context.sources.add_sqlite("sqlite", connection_string=f"sqlite:///{tmp_path}/test.db")
+    ds = context.data_sources.add_sqlite(
+        "sqlite", connection_string=f"sqlite:///{tmp_path}/test.db"
+    )
     return ds
 
 
@@ -461,7 +455,7 @@ class TestTableIdentifiers:
         if not snowflake_ds:
             pytest.skip("no snowflake datasource")
         # create table
-        schema = get_random_identifier_name()
+        schema = RAND_SCHEMA
         table_factory(
             gx_engine=snowflake_ds.get_execution_engine(),
             table_names={table_name},
@@ -471,7 +465,7 @@ class TestTableIdentifiers:
         table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names(schema=schema)
         print(f"snowflake tables:\n{pf(table_names)}))")
 
-        snowflake_ds.add_table_asset(asset_name, table_name=table_name, schema_name=schema)
+        snowflake_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.sqlite
     def test_sqlite(
@@ -492,6 +486,9 @@ class TestTableIdentifiers:
 
         sqlite_ds.add_table_asset(asset_name, table_name=table_name)
 
+    @pytest.mark.filterwarnings(  # snowflake `add_table_asset` raises warning on passing a schema
+        "once::great_expectations.datasource.fluent.GxDatasourceWarning"
+    )
     @pytest.mark.parametrize(
         "datasource_type,schema",
         [
@@ -528,40 +525,30 @@ class TestTableIdentifiers:
             schema=schema,
         )
 
-        asset = datasource.add_table_asset(asset_name, table_name=table_name, schema_name=schema)
-
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
-        suite.add_expectation_configuration(
-            expectation_configuration=ExpectationConfiguration(
-                expectation_type="expect_column_values_to_not_be_null",
-                kwargs={
-                    "column": "name",
-                    "mostly": 1,
-                },
+        with warnings.catch_warnings():
+            # passing a schema to snowflake tables is deprecated
+            warnings.simplefilter("once", DeprecationWarning)
+            asset = datasource.add_table_asset(
+                asset_name, table_name=table_name, schema_name=schema
             )
-        )
-        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+            batch_definition = asset.add_batch_definition_whole_table("whole table!")
 
-        checkpoint_config = {
-            "name": f"{datasource.name}-{asset.name}",
-            "validations": [
-                {
-                    "expectation_suite_name": suite.name,
-                    "batch_request": {
-                        "datasource_name": datasource.name,
-                        "data_asset_name": asset.name,
-                    },
-                }
-            ],
-        }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
-            **checkpoint_config,
+        suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
+        suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))
+
+        checkpoint = context.checkpoints.add(
+            Checkpoint(
+                name=f"{datasource.name}-{asset.name}",
+                validation_definitions=[
+                    ValidationDefinition(
+                        name="validation_definition", suite=suite, data=batch_definition
+                    )
+                ],
+            )
         )
         result = checkpoint.run()
 
-        _ = _get_exception_details(result, prettyprint=True)
+        _get_exception_details(result, prettyprint=True)
         assert result.success is True
 
 
@@ -736,6 +723,9 @@ def _raw_query_check_column_exists(
         return True
 
 
+@pytest.mark.filterwarnings(
+    "once::DeprecationWarning"
+)  # snowflake `add_table_asset` raises warning on passing a schema
 @pytest.mark.parametrize(
     "column_name",
     [
@@ -827,34 +817,26 @@ class TestColumnIdentifiers:
         )
         print(f"asset:\n{asset!r}\n")
 
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
+        suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                expectation_type=expectation_type,
+                type=expectation_type,
                 kwargs={
                     "column": column_name,
-                    "mostly": 1,
                 },
             )
         )
-        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+        suite.save()
 
-        checkpoint_config = {
-            "name": f"{datasource.name}-{asset.name}",
-            "validations": [
-                {
-                    "expectation_suite_name": suite.name,
-                    "batch_request": {
-                        "datasource_name": datasource.name,
-                        "data_asset_name": asset.name,
-                    },
-                }
-            ],
-        }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
-            **checkpoint_config,
+        batch_definition = asset.add_batch_definition_whole_table("my_batch_def")
+        validation_definition = ValidationDefinition(
+            name="my_validation_def", suite=suite, data=batch_definition
+        )
+
+        checkpoint = context.checkpoints.add(
+            checkpoint=Checkpoint(
+                name="my_checkpoint", validation_definitions=[validation_definition]
+            )
         )
         result = checkpoint.run()
 

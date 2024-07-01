@@ -27,15 +27,11 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
         actual = store.serialize(basic_data_context_config)
 
     expected = {
+        "analytics_enabled": True,
+        "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 2.0,
         "data_docs_sites": {},
-        "include_rendered_content": {
-            "expectation_suite": False,
-            "expectation_validation_result": False,
-            "globally": False,
-        },
-        "profiler_store_name": None,
         "plugins_directory": "plugins/",
         "stores": {
             "checkpoint_store": {
@@ -45,8 +41,8 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                     "class_name": "TupleFilesystemStoreBackend",
                 },
             },
-            "evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore",
+            "suite_parameter_store": {
+                "class_name": "SuiteParameterStore",
                 "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
@@ -56,14 +52,11 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                     "class_name": "TupleFilesystemStoreBackend",
                 },
             },
-            "profiler_store": {
-                "class_name": "ProfilerStore",
-            },
             "validation_definition_store": {
                 "class_name": "ValidationDefinitionStore",
             },
-            "validations_store": {
-                "class_name": "ValidationsStore",
+            "validation_results_store": {
+                "class_name": "ValidationResultsStore",
             },
         },
     }

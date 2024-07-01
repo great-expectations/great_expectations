@@ -99,7 +99,7 @@ def test__base_metric_provider__registration(mock_registry):
     CustomMetricProvider()
 
     assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
-    assert "custom_metric" in mock_registry._registered_metrics.keys()
+    assert "custom_metric" in mock_registry._registered_metrics
 
 
 def test__table_metric_provider__registration(mock_registry):
@@ -149,7 +149,7 @@ def test__table_metric_provider__registration(mock_registry):
     CustomTableMetricProvider()
 
     assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
-    assert "table.custom_metric" in mock_registry._registered_metrics.keys()
+    assert "table.custom_metric" in mock_registry._registered_metrics
 
 
 def test__column_map_metric__registration(mock_registry):
@@ -196,7 +196,7 @@ def test__column_map_metric__registration(mock_registry):
         "column_values.equal_seven.unexpected_count.aggregate_fn",
     ]
     for key in new_keys:
-        assert key in mock_registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics
 
 
 def test__column_pair_map_metric__registration(mock_registry):
@@ -226,7 +226,7 @@ def test__column_pair_map_metric__registration(mock_registry):
 
     assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 7
 
-    for key in mock_registry._registered_metrics.keys():
+    for key in mock_registry._registered_metrics:
         if "column_pair_values.equal_seven" in key:
             print(key)
 
@@ -240,7 +240,7 @@ def test__column_pair_map_metric__registration(mock_registry):
         "column_pair_values.equal_seven.filtered_row_count",
     ]
     for key in new_keys:
-        assert key in mock_registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics
 
 
 def test__multicolumn_map_metric__registration(mock_registry):
@@ -290,7 +290,7 @@ def test__multicolumn_map_metric__registration(mock_registry):
         "multicolumn_values.equal_seven.filtered_row_count",
     ]
     for key in new_keys:
-        assert key in mock_registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics
 
 
 def test__query_metric_provider__registration(mock_registry):
@@ -329,4 +329,4 @@ def test__query_metric_provider__registration(mock_registry):
     CustomQueryMetricProvider()
 
     assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
-    assert "query.custom_metric" in mock_registry._registered_metrics.keys()
+    assert "query.custom_metric" in mock_registry._registered_metrics
