@@ -39,11 +39,13 @@ Explore core Expectations for schema validation, delving into their practical ap
 
 Ensures the presence of a specified column in your dataset. This Expectation is foundational for
 schema validation, verifying that critical columns are included, thus preventing data processing
-errors due to missing fields.
+errors due to missing fields. ([Link to Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_to_exist))
 
 ```python
 dataset.expect_column_to_exist("sender_account_number")
 ```
+
 
 :::info[Use Case]
 Ideal during data ingestion or integration of multiple data sources to ensure that
@@ -60,7 +62,8 @@ as possible, minimizing downstream errors and rework.
 
 Ensures that the values in a specified column are within a specified type list. This Expectation is
 useful for columns with varied permissible types, such as mixed-type fields often found in legacy
-databases.
+databases. ([Link to Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list))
 
 ```python
 dataset.expect_column_values_to_be_in_type_list("account_type", ["int", "str"])
@@ -79,7 +82,8 @@ encountered, aiding in eventual standardization efforts.
 ### Expect Column Values to be of Type
 
 Validates that the values within a column are of a specific data type. This is more stringent
-compared to the previous Expectation, suitable for scenarios needing strict type adherence.
+compared to the previous Expectation, suitable for scenarios needing strict type adherence. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type))
 
 ```python
 dataset.expect_column_values_to_be_of_type("transfer_amount", "float")
@@ -98,7 +102,8 @@ any type deviation could lead to significant processing errors or inaccuracies.
 ### Expect Table Column Count to Equal
 
 Ensures the dataset has an exact number of columns. This precise Expectation is for datasets with a
-fixed schema structure, providing a strong safeguard against unexpected changes.
+fixed schema structure, providing a strong safeguard against unexpected changes. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal))
 
 ```python
 dataset.expect_table_column_count_to_equal(7)
@@ -117,7 +122,8 @@ especially when new regulatory requirements emerge.
 ### Expect Table Columns to Match Ordered List
 
 Validates the exact order of columns. This is crucial when processing pipelines depend on a specific
-column order, ensuring consistency and reliability.
+column order, ensuring consistency and reliability. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list))
 
 ```python
 dataset.expect_table_columns_to_match_ordered_list([
@@ -139,7 +145,8 @@ Use `expect_table_columns_to_match_ordered_list` over
 ### Expect Table Columns to Match Set
 
 Checks that the dataset contains specific columns, without regard to order. This Expectation offers
-flexibility where column presence is more critical than their sequence.
+flexibility where column presence is more critical than their sequence. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set))
 
 ```python
 dataset.expect_table_columns_to_match_set([
@@ -161,7 +168,8 @@ various sources where column order might differ, but consistency in available da
 ### Expect Table Column Count to be Between
 
 Validates that the number of columns falls within a specific range, offering flexibility for
-datasets that can expand or contract within a known boundary.
+datasets that can expand or contract within a known boundary. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between))
 
 ```python
 dataset.expect_table_column_count_to_be_between(min_value=5, max_value=7)
