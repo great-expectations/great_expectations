@@ -20,7 +20,7 @@ from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
+    from pytest_mock import MockerFixture, MockType
 
     from great_expectations.data_context import EphemeralDataContext
 
@@ -108,7 +108,7 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
 class TestConfigPasstrough:
     def test_kwargs_passed_to_create_engine(
         self,
-        create_engine_spy: mock.MagicMock,  # noqa: TID251
+        create_engine_spy: MockType,
         monkeypatch: pytest.MonkeyPatch,
         ephemeral_context_with_defaults: EphemeralDataContext,
         ds_kwargs: dict,
