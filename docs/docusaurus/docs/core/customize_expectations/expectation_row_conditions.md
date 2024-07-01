@@ -21,7 +21,7 @@ To solve this issue GX allows you to define Conditional Expectations that only a
 
 ## Create a Conditional Expectation
 
-Great Expectations lets you express Conditional Expectations with a `row_condition` argument that can be passed to all Expectations that evaluate rows within a Dataset.  The `row_condition` argument should be a boolean expression string.  The Conditional Expectation will validate rows that result in the `row_condition` string being `true`.  When the `row_condition` string evaluates as `false`, the row in question will not be validated by the Expectation.
+Great Expectations lets you express Conditional Expectations with a `row_condition` argument that can be passed to all Expectations that evaluate rows within a Dataset.  The `row_condition` argument should be a boolean expression string.  The Conditional Expectation will validate rows that result in the `row_condition` string being `True`.  When the `row_condition` string evaluates as `False`, the row in question will not be validated by the Expectation.
 
 ### Prerequisites
 
@@ -46,7 +46,7 @@ The data used in the examples for this procedure is passenger data for the Titan
 
 2. Determine the `row_condition` expression.
 
-   The `row_condition` argument should be a boolean expression string which will be evaluated for each row in the Batch the Expectation validates.  When the `row_condition` evaluates as `true` the row will be included in the Expectation's validations.  When the `row_condition` evaluates as `false`, the Expectation will be skipped for that row.
+   The `row_condition` argument should be a boolean expression string which will be evaluated for each row in the Batch the Expectation validates.  When the `row_condition` evaluates as `True` the row will be included in the Expectation's validations.  When the `row_condition` evaluates as `False`, the Expectation will be skipped for that row.
 
    The syntax of the `row_condition` argument is based on the `condition_parser` that was previously specified.  
 
