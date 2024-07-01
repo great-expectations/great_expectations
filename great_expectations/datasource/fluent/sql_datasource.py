@@ -967,6 +967,7 @@ class SQLDatasource(Datasource):
         return self._engine
 
     def _create_engine(self) -> sqlalchemy.Engine:
+        LOGGER.info(f"Creating a SQLAlchemy engine for {type(self).__name__} - {self.name}")
         model_dict = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
