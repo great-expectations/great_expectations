@@ -10,6 +10,10 @@ from great_expectations.expectations.model_field_descriptions import MOSTLY_DESC
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     substitute_none_for_missing,
@@ -22,6 +26,7 @@ if TYPE_CHECKING:
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 
@@ -226,6 +231,49 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
                     },
                 }
             )
+
+    @classmethod
+    def _prescriptive_template(
+        cls,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column_list", RendererValueType.ARRAY),
+            ("sum_total", RendererValueType.NUMBER),
+            ("mostly", RendererValueType.NUMBER),
+            ("ignore_row_if", RendererValueType.STRING),
+        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        params = renderer_configuration.params
+
+        template_str = ""
+        if params.column_list:
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            template_str += "Sum across columns " + cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
+            )
+            template_str += " must be $sum_total, at least $mostly_pct % of the time."
+        else:
+            template_str += " must be $sum_total."
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
