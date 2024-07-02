@@ -10,6 +10,75 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+
+### 0.18.17
+* [FEATURE] Snowflake - Better Account Identifier related TestConnectionErrors ([#10043](https://github.com/great-expectations/great_expectations/pull/10043))
+* [BUGFIX] Fix `get_user_friendly_error_message` with non-standard formats ([#10061](https://github.com/great-expectations/great_expectations/pull/10061))
+
+### 0.18.16
+* [FEATURE] Add new `ConfigUri` type ([#10000](https://github.com/great-expectations/great_expectations/pull/10000))
+* [FEATURE] Snowflake - minimal support for key-pair auth ([#10031](https://github.com/great-expectations/great_expectations/pull/10031))
+* [FEATURE] Snowflake - Forward compatibility updates ([#10036](https://github.com/great-expectations/great_expectations/pull/10036))
+* [BUGFIX] fix snowflake schema introspection for `expect_column_values_to_be_in_type_list` and `expect_column_values_to_be_of_type` ([#9906](https://github.com/great-expectations/great_expectations/pull/9906))
+* [BUGFIX] 0.18.x - Avoid writing to great_expectations.yml during init ([#10040](https://github.com/great-expectations/great_expectations/pull/10040))
+* [BUGFIX] Snowflake - Fix `private_key` Unicode serialization errors ([#10046](https://github.com/great-expectations/great_expectations/pull/10046))
+* [DOCS] release_prep 0.18.15 ([#9984](https://github.com/great-expectations/great_expectations/pull/9984))
+* [MAINTENANCE] 0.18.x - mypy `1.7.1` -> `1.10` ([#9988](https://github.com/great-expectations/great_expectations/pull/9988))
+* [MAINTENANCE] 0.18.x - CVE 2024 36039 ([#10033](https://github.com/great-expectations/great_expectations/pull/10033))
+* [MAINTENANCE] Revert Snowflake field requirement changes for `0.18.x` ([#10012](https://github.com/great-expectations/great_expectations/pull/10012))
+* REVERTED - [FEATURE] SnowflakeDatasource - Require `database` and `schema` fields ([#9980](https://github.com/great-expectations/great_expectations/pull/9980))
+* REVERTED - [FEATURE] Snowflake - use `Datasource` level `schema` when creating `TableAsset` ([#9992](https://github.com/great-expectations/great_expectations/pull/9992))
+* REVERTED - [FEATURE] Restrict substitutable sections for `Snowflake.connection_string` ([#10002](https://github.com/great-expectations/great_expectations/pull/10002))
+
+### 0.18.15
+* [BUGFIX] fix checkpoint name in slack notif ([#9964](https://github.com/great-expectations/great_expectations/pull/9964))
+* [BUGFIX] 0.18.x -  Prevent Error on Read Only Filesystem ([#9977](https://github.com/great-expectations/great_expectations/pull/9977))
+* [MAINTENANCE] 0.18.x - ruff update `0.1.11` -> `0.4.5` ([#9975](https://github.com/great-expectations/great_expectations/pull/9975))
+
+### 0.18.14
+* [FEATURE] update slack notifications design ([#9952](https://github.com/great-expectations/great_expectations/pull/9952))
+* [BUGFIX] Set application query param for SnowflakeDatasource ([#9863](https://github.com/great-expectations/great_expectations/pull/9863))
+* [BUGFIX] Show FDS Asset name in DataDocs ([#9950](https://github.com/great-expectations/great_expectations/pull/9950))(thanks @morphatic)
+* [MAINTENANCE] Remove TIME from supported metric list ([#9844](https://github.com/great-expectations/great_expectations/pull/9844))
+* [MAINTENANCE] Schedule packaging pipeline to run on 0.18.x ([#9921](https://github.com/great-expectations/great_expectations/pull/9921))
+* [MAINTENANCE] performance, avoid HTTP round trips ([#9929](https://github.com/great-expectations/great_expectations/pull/9929))
+
+### 0.18.13
+* [FEATURE] Remove [cloud] optional dependency ([#9814](https://github.com/great-expectations/great_expectations/pull/9814))
+* [BUGFIX] `scrapy` compatibility - handle `dir()` inconsistencies ([#9830](https://github.com/great-expectations/great_expectations/pull/9830))
+* [MAINTENANCE] Export `great_expectations.data_context` types ([#9738](https://github.com/great-expectations/great_expectations/pull/9738))
+* [MAINTENANCE] Retire ColumnDescriptiveMetrics - 0.18 ([#9789](https://github.com/great-expectations/great_expectations/pull/9789))
+
+### 0.18.12
+* [FEATURE] MetricListMetricRetriever - 0.18.x ([#9615](https://github.com/great-expectations/great_expectations/pull/9615))
+* [MAINTENANCE] TableMetrics - BatchInspector updates (0.18.x) ([#9630](https://github.com/great-expectations/great_expectations/pull/9630))
+
+### 0.18.11
+* [FEATURE] (0.18.x) Don't break context for invalid datasource configs ([#9596](https://github.com/great-expectations/great_expectations/pull/9596))
+* [MAINTENANCE] Update incorrect contract tests ([#9543](https://github.com/great-expectations/great_expectations/pull/9543))
+* [MAINTENANCE] Update referential integrity test so DB is only created once - `0.18` ([#9545](https://github.com/great-expectations/great_expectations/pull/9545))
+* [MAINTENANCE] CDMs - Metrics as ENUM - 0.18 ([#9572](https://github.com/great-expectations/great_expectations/pull/9572))
+* [MAINTENANCE] Refactor `ColumnDescriptiveMetricsMetricRetriever` to parent class (0.18.x) ([#9612](https://github.com/great-expectations/great_expectations/pull/9612))
+
+### 0.18.10
+* [BUGFIX] - Prevent duplicate Expectations in Validation Results ([#9533](https://github.com/great-expectations/great_expectations/pull/9533))
+
+### 0.18.9
+* [BUGFIX] Re-enable GCS Docs Integration test ([#9237](https://github.com/great-expectations/great_expectations/pull/9237))
+* [BUGFIX] Fix add or update expectation suite ([#9268](https://github.com/great-expectations/great_expectations/pull/9268))
+* [BUGFIX] Misconfigured Expectations affecting unassociated Checkpoints ([#9431](https://github.com/great-expectations/great_expectations/pull/9431))
+* [BUGFIX] Should not fail loading utils if an integration is missing a type ([#9428](https://github.com/great-expectations/great_expectations/pull/9428))
+* [BUGFIX] Snowflake ci fix ([#9458](https://github.com/great-expectations/great_expectations/pull/9458))
+* [BUGFIX] Fix incorrect python version in Snowflake reqs ([#9464](https://github.com/great-expectations/great_expectations/pull/9464))
+* [BUGFIX] Fix clickhouse CI failure with pandas 2.2 ([#9470](https://github.com/great-expectations/great_expectations/pull/9470))
+* [MAINTENANCE] Add upper bound for numpy ([#9257](https://github.com/great-expectations/great_expectations/pull/9257))
+* [MAINTENANCE] Remove Click constraint in 0.18.x ([#9255](https://github.com/great-expectations/great_expectations/pull/9255))
+* [MAINTENANCE] Only do docs checks and build on develop ([#9463](https://github.com/great-expectations/great_expectations/pull/9463))
+* [MAINTENANCE] Ignore `Pandas` `DeprecationWarning` for legacy `PandasDataset` ([#9471](https://github.com/great-expectations/great_expectations/pull/9471))
+* [MAINTENANCE] Ignore pandas `DeprecationWarning` for legacy `CustomPandasDataset` ([#9473](https://github.com/great-expectations/great_expectations/pull/9473))
+* [MAINTENANCE] Fix pandas usage due to `DeprecationWarning` ([#9478](https://github.com/great-expectations/great_expectations/pull/9478))
+* [MAINTENANCE] Release without `docs-snippets` tests for `0.18.x` ([#9480](https://github.com/great-expectations/great_expectations/pull/9480))
+
 ### 0.18.8
 * [FEATURE] Add min and max of timestamp cols to Column Descriptive Met… ([#9207](https://github.com/great-expectations/great_expectations/pull/9207))
 * [FEATURE] `TableAsset.test_connection()` should fail if table is not queryable. ([#9198](https://github.com/great-expectations/great_expectations/pull/9198))

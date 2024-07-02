@@ -167,7 +167,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
   In this example the variable `suite` is your Expectation Suite.
 
-2. [Create an Expectation](/core/create_expectations/expectations/manage_expectations.md#create-an-expectation).
+2. [Create an Expectation](/core/_create_expectations/expectations/manage_expectations.md#create-an-expectation).
   
   In this example the variable `expectation` is the Expectation to add to the Expectation Suite.
 
@@ -232,7 +232,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
   In this example the variable `expectation` is the Expectation you want to edit.
 
-2. [Modify the Expectation](/core/create_expectations/expectations/manage_expectations.md#modify-an-expectation):
+2. [Modify the Expectation](/core/_create_expectations/expectations/manage_expectations.md#modify-an-expectation):
 
   ```python title="Python code" name="core/expectation_suites/_examples/edit_a_single_expectation.py edit attribute"
   ```
@@ -244,7 +244,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
   `expectation.save()` is explicitly used to update the configuration of an Expectation in an Expectation Suite.
   
-  An Expectation Suite continues to use the Expectation's original values unless you save your modifications. You can [test changes to an Expectation](/core/create_expectations/expectations/manage_expectations.md#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
+  An Expectation Suite continues to use the Expectation's original values unless you save your modifications. You can [test changes to an Expectation](/core/_create_expectations/expectations/manage_expectations.md#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
 
 </TabItem>
 
