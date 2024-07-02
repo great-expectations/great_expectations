@@ -1,4 +1,5 @@
 import datetime
+import io
 import json
 import os
 import uuid
@@ -838,6 +839,118 @@ def test_TupleS3StoreBackend_with_s3_put_options(aws_credentials):
     assert my_store.get(("AAA",)) == "aaa"
     assert my_store.has_key(("AAA",))
     assert my_store.list_keys() == [(".ge_store_backend_id",), ("AAA",)]
+
+
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_boto3_options(monkeypatch, mocker):
+    """
+    What does this test, test and why?
+    Checks if the boto3 options are passed correctly to the TupleS3StoreBackend
+    and that a role is assumed using ExternalId and Tags when specified.
+    """
+    # There doesn't appear to be a good way to test the STS parameters using moto,
+    # so we use the botocore.stubs.Stubber for testing.
+    from botocore.response import StreamingBody
+    from botocore.stub import Stubber
+
+    sts_client = boto3.client("sts", region_name="us-east-1")
+    s3_client = boto3.client("s3", region_name="us-east-1")
+    sts_stub = Stubber(sts_client)
+    s3_stub = Stubber(s3_client)
+    external_id = "my-external-id"
+    tags = [{"Key": "tag1", "Value": "value1"}]
+    role_arn = "arn:aws:sts::123456789012:role/test-role"
+    access_key = "test_access_key1"
+    secret_key = "test_secret_key"
+    session_token = "test_token"
+    assume_role_response = {
+        "AssumedRoleUser": {
+            "Arn": role_arn,
+            "AssumedRoleId": "arn:aws:sts::123456789012:assumed-role/test-role/GXAssumeRoleSession",
+        },
+        "Credentials": {
+            "AccessKeyId": access_key,
+            "Expiration": datetime.datetime(2024, 7, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc),
+            "SecretAccessKey": secret_key,
+            "SessionToken": session_token,
+        },
+        "PackedPolicySize": 1,
+        "ResponseMetadata": {},
+    }
+    sts_expected_params = {
+        "RoleArn": role_arn,
+        "RoleSessionName": "GXAssumeRoleSession",
+        "ExternalId": external_id,
+        "DurationSeconds": 3600,
+        "Tags": tags,
+    }
+
+    store_backend_id = "10000000-0000-0000-0000-00000000e003"
+
+    def construct_get_object_response(backend_id):
+        content = f"{StoreBackend.STORE_BACKEND_ID_PREFIX}{backend_id}".encode()
+        body = StreamingBody(io.BytesIO(content), len(content))
+        return {
+            "Body": body,
+            "ContentEncoding": "utf-8",
+            "ContentType": "application/json",
+        }
+
+    get_object_response = construct_get_object_response(store_backend_id)
+    get_object_response2 = construct_get_object_response(store_backend_id)
+    s3_expected_params = {"Bucket": "leakybucket", "Key": StoreBackend.STORE_BACKEND_ID_KEY[0]}
+    sts_stub.add_response("assume_role", assume_role_response, expected_params=sts_expected_params)
+    s3_stub.add_response("get_object", get_object_response, expected_params=s3_expected_params)
+    s3_stub.add_response("get_object", get_object_response2, expected_params=s3_expected_params)
+
+    with monkeypatch.context() as m:
+        aws_mock = mocker.Mock()
+        aws_mock.boto3.client = mocker.Mock(side_effect=[sts_client, s3_client, s3_client])
+        m.setattr("great_expectations.data_context.store.tuple_store_backend.aws", aws_mock)
+        with sts_stub:
+            with s3_stub:
+                my_store = TupleS3StoreBackend(
+                    bucket="leakybucket",
+                    boto3_options={
+                        "assume_role_arn": role_arn,
+                        "assume_role_duration": 3600,
+                        "external_id": external_id,
+                        "tags": tags,
+                    },
+                )
+                sts_stub.assert_no_pending_responses()
+                assert my_store.store_backend_id == uuid.UUID(store_backend_id)
+                s3_stub.assert_no_pending_responses()
+
+
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_boto3_options_failure(monkeypatch, mocker):
+    """
+    What does this test, test and why?
+    Checks if an invalid tag passed in boto3 options to the TupleS3StoreBackend
+    will cause a warning to be logged and an invalid configuration.
+    """
+
+    external_id = "my-external-id"
+    tags = [{"a": "tag1", "b": "value1"}]
+    role_arn = "arn:aws:sts::123456789012:role/test-role"
+    with monkeypatch.context() as m:
+        warning_mock = mocker.Mock(side_effect=None)
+        m.setattr(
+            "great_expectations.data_context.store._store_backend.logger.warning", warning_mock
+        )
+        my_store = TupleS3StoreBackend(
+            bucket="leakybucket",
+            boto3_options={
+                "assume_role_arn": role_arn,
+                "assume_role_duration": 3600,
+                "external_id": external_id,
+                "tags": tags,
+            },
+        )
+        assert str(my_store.store_backend_id) == StoreBackend.STORE_BACKEND_INVALID_CONFIGURATION_ID
+        call_args = warning_mock.call_args_list
+        assert "tags in boto3_options" in call_args[0][0][0]
 
 
 @pytest.mark.skipif(

@@ -708,11 +708,28 @@ class TupleS3StoreBackend(TupleStoreBackend):
         client = aws.boto3.client("sts", self._boto3_options.get("region_name"))
         role_arn = self._boto3_options.pop("assume_role_arn")
         assume_role_duration = self._boto3_options.pop("assume_role_duration")
-        response = client.assume_role(
-            RoleArn=role_arn,
-            RoleSessionName=role_session_name,
-            DurationSeconds=assume_role_duration,
-        )
+        assume_role_params = {
+            "RoleArn": role_arn,
+            "RoleSessionName": role_session_name,
+            "DurationSeconds": assume_role_duration,
+        }
+        if "external_id" in self._boto3_options:
+            assume_role_params["ExternalId"] = self._boto3_options.pop("external_id")
+        if "tags" in self._boto3_options:
+            tags = self._boto3_options.pop("tags")
+            if not isinstance(tags, list):
+                raise StoreBackendError(  # noqa: TRY003
+                    "Error: tags in boto3_options must be a list of dictionaries"
+                )
+            if not all(
+                isinstance(tag, dict) and set(tag.keys()) == {"Key", "Value"} for tag in tags
+            ):
+                raise StoreBackendError(  # noqa: TRY003
+                    """Error: tags in boto3_options must be a list of dictionaries,
+                    each with keys 'Key' and 'Value'"""
+                )
+            assume_role_params["Tags"] = tags
+        response = client.assume_role(**assume_role_params)
         self._boto3_options["aws_access_key_id"] = response["Credentials"]["AccessKeyId"]
         self._boto3_options["aws_secret_access_key"] = response["Credentials"]["SecretAccessKey"]
         self._boto3_options["aws_session_token"] = response["Credentials"]["SessionToken"]
