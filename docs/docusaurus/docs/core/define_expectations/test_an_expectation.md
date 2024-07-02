@@ -144,7 +144,7 @@ Data can be validated against individual Expectations.  This workflow is general
    }
    ```
 
-   For more information about Validation Results, what they contain, and how to adjust their verbosity see [Choose result format](../run_validations/choose_result_format.md).
+   For more information about Validation Results, what they contain, and how to adjust their verbosity see [Choose result format](../trigger_actions_based_on_results/choose_a_result_format/choose_a_result_format.md).
 
 
 </TabItem>
