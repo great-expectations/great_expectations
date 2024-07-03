@@ -10,6 +10,11 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.18
+* [FEATURE] Add atomic renderer for `ExpectMulticolumnSumToEqual` (#10076) ([#10077](https://github.com/great-expectations/great_expectations/pull/10077))
+* [FEATURE] Snowflake - narrow Account Identifier regex ([#10069](https://github.com/great-expectations/great_expectations/pull/10069))
+* [FEATURE] Add missing atomic renderers to Expectations (#10079) ([#10080](https://github.com/great-expectations/great_expectations/pull/10080))
+
 ### 0.18.17
 * [FEATURE] Snowflake - Better Account Identifier related TestConnectionErrors ([#10043](https://github.com/great-expectations/great_expectations/pull/10043))
 * [BUGFIX] Fix `get_user_friendly_error_message` with non-standard formats ([#10061](https://github.com/great-expectations/great_expectations/pull/10061))
