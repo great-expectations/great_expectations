@@ -255,7 +255,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "pandas", (("<", "2.2.0"),)),
         ("requirements-dev.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev.txt", "pypd", (("==", "1.1.0"),)),
-        ("requirements-dev.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
+        ("requirements-dev.txt", "ruamel.yaml", (("<", "0.18"), (">=", "0.16"))),
         ("requirements-dev.txt", "ruff", (("==", "0.4.5"),)),
         ("requirements-dev.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev.txt", "sqlalchemy", (("<", "2.0.0"),)),
@@ -280,7 +280,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         (
             "requirements-types.txt",
             "ruamel.yaml",
-            (("<", "0.17.18"), (">=", "0.16")),
+            (("<", "0.18"), (">=", "0.16")),
         ),
         ("requirements-types.txt", "ruff", (("==", "0.4.5"),)),
         ("requirements-types.txt", "snapshottest", (("==", "0.6.0"),)),
@@ -291,5 +291,5 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements.txt", "numpy", (("<", "2.0.0"), (">=", "1.22.4"))),
-        ("requirements.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
+        ("requirements.txt", "ruamel.yaml", (("<", "0.18"), (">=", "0.16"))),
     }
