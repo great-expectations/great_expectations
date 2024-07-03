@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Tuple, Type, Union
 
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -229,6 +230,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                 }
             )
 
+    @override
     @classmethod
     def _prescriptive_template(
         cls,
@@ -237,7 +239,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("threshold", RendererValueType.NUMBER),
-            ("boolean", RendererValueType.BOOLEAN),
+            ("double_sided", RendererValueType.BOOLEAN),
             ("mostly", RendererValueType.NUMBER),
         )
         for name, param_type in add_param_args:

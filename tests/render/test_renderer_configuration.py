@@ -1,4 +1,4 @@
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 import pytest
 
@@ -15,6 +15,9 @@ from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
     RendererValueType,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 def mock_expectation_validation_result_from_expectation_configuration(
@@ -145,3 +148,28 @@ def test_renderer_configuration_add_param_validation(
         str(error_wrapper_exc) == exception_message
         for error_wrapper_exc in [error_wrapper.exc for error_wrapper in e.value.raw_errors]
     )
+
+
+@pytest.mark.unit
+def test_add_param_args():
+    expectation_configuration = ExpectationConfiguration(
+        type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "foo", "threshold": 2, "double_sided": False, "mostly": 1.0},
+    )
+    renderer_configuration = RendererConfiguration(configuration=expectation_configuration)
+
+    add_param_args: AddParamArgs = (
+        ("column", RendererValueType.STRING),
+        ("threshold", RendererValueType.NUMBER),
+        ("double_sided", RendererValueType.BOOLEAN),
+        ("mostly", RendererValueType.NUMBER),
+    )
+    for name, param_type in add_param_args:
+        renderer_configuration.add_param(name=name, param_type=param_type)
+
+    params = renderer_configuration.params
+
+    assert params.column
+    assert params.threshold
+    assert params.double_sided
+    assert params.mostly
