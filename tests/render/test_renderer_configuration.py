@@ -162,7 +162,7 @@ def test_renderer_configuration_add_param_validation(
 @pytest.mark.unit
 def test_add_param_args():
     expectation_configuration = ExpectationConfiguration(
-        type="expect_column_value_z_scores_to_be_less_than",
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={"column": "foo", "threshold": 2, "double_sided": False, "mostly": 1.0},
     )
     renderer_configuration = RendererConfiguration(
@@ -189,7 +189,7 @@ def test_add_param_args():
 @pytest.mark.unit
 def test_template_str_setter():
     expectation_configuration = ExpectationConfiguration(
-        type="expect_column_value_z_scores_to_be_less_than",
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={"column": "foo", "threshold": 2, "double_sided": False, "mostly": 1.0},
     )
     renderer_configuration = RendererConfiguration(
@@ -205,7 +205,7 @@ def test_template_str_setter():
 @pytest.mark.unit
 def test_add_array_params():
     expectation_configuration = ExpectationConfiguration(
-        type="expect_column_values_to_match_like_pattern_list",
+        expectation_type="expect_column_values_to_match_like_pattern_list",
         kwargs={
             "column": "foo",
             "like_pattern_list": ["%", "_"],
