@@ -26,7 +26,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
   <LinkCard 
       topIcon 
       label="Filesystem Data"
-      description="Connect to data organized as files in a folder hierarchy and organize it into Batches for validation."
+      description="Connect to data stored as files in a folder hierarchy and organize it into Batches for validation."
       to="/core/connect_to_data/filesystem_data" 
       icon="/img/expectation_icon.svg" 
   />
