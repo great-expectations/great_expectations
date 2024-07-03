@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
@@ -7,6 +7,13 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
@@ -133,3 +140,42 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for double_sided kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+
+    @override
+    @classmethod
+    def _prescriptive_template(
+        cls,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("threshold", RendererValueType.NUMBER),
+            ("double_sided", RendererValueType.BOOLEAN),
+            ("mostly", RendererValueType.NUMBER),
+        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        params = renderer_configuration.params
+
+        if renderer_configuration.include_column_name:
+            template_str = "$column value z-scores must be "
+        else:
+            template_str = "Value z-scores must be "
+
+        if params.double_sided is True:
+            template_str += "greater than -$threshold and less than $threshold"
+        else:
+            template_str += "less than $threshold"
+
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
+            )
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
