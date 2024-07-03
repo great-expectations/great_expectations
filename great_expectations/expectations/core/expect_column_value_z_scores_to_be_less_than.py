@@ -265,4 +265,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         else:
             template_str += "."
 
+        renderer_configuration.template_str = template_str
+
         return renderer_configuration
