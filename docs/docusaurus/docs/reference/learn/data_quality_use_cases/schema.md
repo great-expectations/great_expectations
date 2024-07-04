@@ -22,14 +22,10 @@ leveraging these Expectations to implement effective schema validation in your d
 
 ## Data preview
 
-Below is a sample of the dataset that is referenced by examples and explanations within this article.
+This example uses the `yellow_tripdata` dataset that comes preinstalled within the Great Expectations
+`greatexpectations/demo:2024-04-11` docker container.
 
-| type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_date       |
-|----------|------------------------|--------------------|-----------------|---------------------|
-| domestic | 244084670977           | Jaxson Duke        | 9143.40         | 2024-05-01 01:12    |
-| domestic | 954005011218           | Nelson O’Connell   | 3285.21         | 2024-05-01 05:08    |
-
-This dataset includes columns like `sender_account_number`, `recipient_fullname`, `transfer_amount`, and `transfer_date`.
+This dataset includes columns like `VendorID`, `total_amount`, `payment_type`, and `tpep_pickup_datetime`.
 
 ## Key schema Expectations
 
@@ -43,7 +39,7 @@ errors due to missing fields. ([Link to Expectation
 Gallery](https://greatexpectations.io/expectations/expect_column_to_exist))
 
 ```python
-dataset.expect_column_to_exist("sender_account_number")
+expectation = gxe.ExpectColumnToExist(column="VendorID")
 ```
 
 
@@ -66,7 +62,7 @@ databases. ([Link to Expectation
 Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list))
 
 ```python
-dataset.expect_column_values_to_be_in_type_list("account_type", ["int", "str"])
+expectation = gxe.ExpectColumnValuesToBeInTypeList(column="payment_type", type_list=["DOUBLE_PRECISION", "STRING"])
 ```
 
 :::info[Use Case]
@@ -86,7 +82,7 @@ compared to the previous Expectation, suitable for scenarios needing strict type
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type))
 
 ```python
-dataset.expect_column_values_to_be_of_type("transfer_amount", "float")
+expectation = gxe.ExpectColumnValuesToBeOfType(column="total_amount", type_="DOUBLE_PRECISION")
 ```
 
 :::info[Use Case]
@@ -95,7 +91,7 @@ apparent type changes can occur when new values appear.
 :::
 
 :::tip[GX Tip]
-Opt for `expect_column_values_to_be_of_type` when dealing with columns where
+Opt for `ExpectColumnValuesToBeOfType` when dealing with columns where
 any type deviation could lead to significant processing errors or inaccuracies.
 :::
 
@@ -106,7 +102,7 @@ fixed schema structure, providing a strong safeguard against unexpected changes.
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal))
 
 ```python
-dataset.expect_table_column_count_to_equal(7)
+expectation = gxe.ExpectTableColumnCountToEqual(value=19)
 ```
 
 :::info[Use Case]
@@ -149,10 +145,7 @@ flexibility where column presence is more critical than their sequence. ([Link
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set))
 
 ```python
-dataset.expect_table_columns_to_match_set([
-    "sender_account_number", "recipient_account_number",
-    "transfer_amount", "transfer_date"
-])
+expectation = gxe.ExpectTableColumnsToMatchSet(column_set=["VendorID", "payment_type", "total_amount"], exact_match=False)
 ```
 
 :::info[Use Case]
@@ -161,7 +154,7 @@ warehousing operations where column integrity is crucial, but order might vary.
 :::
 
 :::tip[GX Tip]
-Opt for `expect_table_columns_to_match_set` when integrating datasets from
+Opt for `ExpectTableColumnsToMatchSet` when integrating datasets from
 various sources where column order might differ, but consistency in available data is required.
 :::
 
@@ -172,7 +165,7 @@ datasets that can expand or contract within a known boundary. ([Link
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between))
 
 ```python
-dataset.expect_table_column_count_to_be_between(min_value=5, max_value=7)
+expectation = gxe.ExpectTableColumnCountToBeBetween(min_value=1, max_value=20)
 ```
 
 :::info[Use Case]
@@ -187,61 +180,55 @@ with business requirements and anticipates potential future expansion.
 
 ## Examples and scenarios
 
--- TODO: these are mostly pseudo code ----
+### Comparative Analysis: Ensuring Schema Consistency in Travel information
 
 ### Comparative analysis: Ensuring schema consistency in financial transfers
 
-**Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
-
-**Goal**: Validate two datasets to ensure the presence of specific columns and correct column count.
+**Goal**: Validate example datasets to ensure the presence of specific columns and correct column count.
 
 ```python
-import pandas as pd
 import great_expectations as gx
+import great_expectations.exceptions as exceptions
+import great_expectations.expectations as gxe
 
-# Sample datasets
-data_1 = [
-    {'type': 'domestic', 'sender_account_number': '244084670977', 'recipient_fullname': 'Jaxson Duke', 'transfer_amount': 9143.40, 'transfer_date': '2024-05-01 01:12'},
-    {'type': 'domestic', 'sender_account_number': '954005011218', 'recipient_fullname': 'Nelson O’Connell', 'transfer_amount': 3285.21, 'transfer_date': '2024-05-01 05:08'}
-]
-data_2 = [
-    {'type': 'domestic', 'sender_account_number': '842374923847', 'recipient_fullname': 'Alex Smith', 'transfer_amount': 5783.18, 'transfer_date': '2024-04-12 15:35'},
-    # Missing 'recipient_fullname'
-    {'type': 'domestic', 'sender_account_number': '673894027340', 'transfer_amount': 8493.14, 'transfer_date': '2024-04-21 09:50'}
-]
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.datasource.fluent.interfaces import Datasource
 
-df1 = pd.DataFrame(data_1)
-df2 = pd.DataFrame(data_2)
+from constants import (
+    DB_CONNECTION_STRING,
+    TABLE_NAME,
+    DATASOURCE_NAME,
+    ASSET_NAME,
+    SUITE_NAME,
+    BATCH_DEFINITION_NAME_WHOLE_TABLE
+)
 
-context = gx.get_context()
+context = gx.get_context(mode="file")
 
-expectation_suite_name = "schema_comparison_suite"
-context.create_expectation_suite(expectation_suite_name)
+try:
+    datasource = context.sources.add_postgres(DATASOURCE_NAME, connection_string=DB_CONNECTION_STRING)
+    data_asset = datasource.add_table_asset(name=ASSET_NAME, table_name=TABLE_NAME)
+    batch_definition = data_asset.add_batch_definition_whole_table(BATCH_DEFINITION_NAME_WHOLE_TABLE)
 
-validator_1 = context.get_validator(df1, expectation_suite_name=expectation_suite_name)
-validator_2 = context.get_validator(df2, expectation_suite_name=expectation_suite_name)
+except exceptions.DataContextError:
+    datasource = context.get_datasource(DATASOURCE_NAME)
+    assert isinstance(datasource, Datasource)
+    data_asset = datasource.get_asset(asset_name=ASSET_NAME)
+    batch_definition = next(bd for bd in data_asset.batch_definitions if bd.name == BATCH_DEFINITION_NAME_WHOLE_TABLE)
 
-# Define Expectations
-validator_1.expect_column_to_exist("recipient_fullname")
-validator_2.expect_column_to_exist("recipient_fullname")
+expectation = gxe.ExpectColumnValuesToNotBeInSet(column="total_amount", value_set=[0])
+batch = batch_definition.get_batch()
+result = batch.validate(expectation)
+print(result)
 
-validator_1.expect_table_column_count_to_equal(5)
-validator_2.expect_table_column_count_to_equal(5)
-
-# Run validation
-result_1 = validator_1.validate()
-result_2 = validator_2.validate()
-
-print("Validation Result 1:", result_1)
-print("Validation Result 2:", result_2)
+expectation = gxe.ExpectTableColumnCountToEqual(value=17)
+result = batch.validate(expectation)
+print(result)
 ```
 
-Snippet:
-
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py full sample code"
-```
-
-**Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
+**Insight**: Dataset fails to validate due to `total_amount` being equal to zero in one of the rows and the column count
+not matching the previous version after two new columns where added during a database migration. This highlights how missing
+critical columns can disrupt processing or lead to compliance issues.
 
 ### Different Expectation suites: Strict vs. relaxed type checking
 
@@ -251,27 +238,34 @@ Snippet:
 
 ```python
 # First Expectation Suite: strict column order
-expectation_suite_name_1 = "schema_ordered_columns"
-suite_1 = context.create_expectation_suite(expectation_suite_name_1)
-validator_1 = context.get_validator(df1, expectation_suite_name=expectation_suite_name_1)
-validator_1.expect_table_columns_to_match_ordered_list([
-    "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"
-])
+try:
+    suite = context.suites.add(ExpectationSuite(name="STRICT COLUMN ORDER"))
+
+    expectation = suite.add_expectation(
+        gxe.ExpectTableColumnsToMatchSet(column_set=[
+            "index", "VendorID", "tpep_pickup_datetime", "tpep_dropoff_datetime",
+            "passenger_count", "trip_distance", "RatecodeID", "store_and_fwd_flag",
+            "PULocationID", "DOLocationID", "payment_type", "fare_amount", "extra",
+            "mta_tax", "tip_amount", "tolls_amount", "improvement_surcharge",
+            "total_amount", "congestion_surcharge"
+            ]))
+
+except exceptions.DataContextError:
+    suite = context.suites.get("STRICT COLUMN ORDER")
 
 # Second Expectation Suite: relaxed column order
-expectation_suite_name_2 = "schema_unordered_columns"
-suite_2 = context.create_expectation_suite(expectation_suite_name_2)
-validator_2 = context.get_validator(df2, expectation_suite_name=expectation_suite_name_2)
-validator_2.expect_table_columns_to_match_set([
-    "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"
-])
+try:
+    suite = context.suites.add(ExpectationSuite(name="RELAXED COLUMN ORDER"))
+
+    expectation = suite.add_expectation(
+        gxe.ExpectTableColumnsToMatchSet(column_set=["index", "VendorID", "total_amount"], exact_match=False))
+
+except exceptions.DataContextError:
+    suite = context.suites.get("RELAXED COLUMN ORDER")
 
 # Run validation
-result_ordered = validator_1.validate()
-result_unordered = validator_2.validate()
-
-print("Ordered Columns Validation Result:", result_ordered)
-print("Unordered Columns Validation Result:", result_unordered)
+results = batch.validate(suite)
+print(results)
 ```
 
 **Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
