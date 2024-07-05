@@ -236,6 +236,11 @@ print("Validation Result 1:", result_1)
 print("Validation Result 2:", result_2)
 ```
 
+Snippet:
+
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py full sample code"
+```
+
 **Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
 
 ### Different Expectation suites: Strict vs. relaxed type checking

@@ -1,3 +1,6 @@
+from tests.integration.backend_dependencies import BackendDependencies
+from tests.integration.integration_test_fixture import IntegrationTestFixture
+
 docs_tests = []
 
 connecting_to_a_datasource = [
@@ -48,5 +51,16 @@ connecting_to_a_datasource = [
     # ),
 ]
 
+learn_data_quality_use_cases = [
+    # Schema.
+    IntegrationTestFixture(
+        name="data_quality_use_case_schema",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py",
+        data_dir="tests/test_sets/learn_data_quality_use_cases/",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+]
 
 docs_tests.extend(connecting_to_a_datasource)
+docs_tests.extend(learn_data_quality_use_cases)
