@@ -253,7 +253,14 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
             template_str = "Value z-scores must be "
 
         if params.double_sided.value is True:
-            template_str += "greater than -$threshold and less than $threshold"
+            inverse_threshold = params.threshold.value * -1
+            renderer_configuration.add_param(
+                name="inverse_threshold", param_type=RendererValueType.NUMBER
+            )
+            if inverse_threshold < params.threshold.value:
+                template_str += "greater than $inverse_threshold and less than $threshold"
+            else:
+                template_str += "greater than $threshold and less than $inverse_threshold"
         else:
             template_str += "less than $threshold"
 
