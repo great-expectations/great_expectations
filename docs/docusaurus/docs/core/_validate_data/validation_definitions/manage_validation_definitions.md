@@ -39,7 +39,7 @@ A Validation Definition is a fixed reference that links a Batch of data to an Ex
 
   In this example the variable `context` is your Data Context.
 
-3. Get an Expectation Suite with Expectations.  This can be [an existing Expectation Suite retrieved from your Data Context](/core/create_expectations/expectation_suites/manage_expectation_suites.md#get-an-existing-expectation-suite) or a new Expectation Suite in your current code.
+3. Get an Expectation Suite with Expectations.  This can be [an existing Expectation Suite retrieved from your Data Context](/core/_create_expectations/expectation_suites/manage_expectation_suites.md#get-an-existing-expectation-suite) or a new Expectation Suite in your current code.
 
   In this example the variable `suite` is your Expectation Suite.
 
