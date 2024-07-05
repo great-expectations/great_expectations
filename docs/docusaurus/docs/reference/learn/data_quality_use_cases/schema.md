@@ -180,8 +180,6 @@ with business requirements and anticipates potential future expansion.
 
 ## Examples and scenarios
 
-### Comparative Analysis: Ensuring Schema Consistency in Travel information
-
 ### Comparative analysis: Ensuring schema consistency in financial transfers
 
 **Goal**: Validate example datasets to ensure the presence of specific columns and correct column count.
