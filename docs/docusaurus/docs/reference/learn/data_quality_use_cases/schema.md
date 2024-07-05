@@ -33,7 +33,11 @@ This dataset includes columns like `sender_account_number`, `recipient_fullname`
 
 ## Key schema Expectations
 
-Explore core Expectations for schema validation, delving into their practical applications and nuances:
+GX offers a collection of Expectations for schema validation, all of which can be added to an Expectation Suite directly from the GX Cloud UI or by using the GX Core Python library.
+
+![Add a schema Expectation in GX Cloud](./images/gx_cloud_schema_expectations_add.gif)
+
+The schema Expectations provide straightforward, practical solutions for common validation scenarios and can also be used to satisfy more nuanced validation needs.
 
 ### Expect Column to Exist
 
@@ -186,6 +190,10 @@ with business requirements and anticipates potential future expansion.
 :::
 
 ## Examples and scenarios
+
+Successful schema validation can be accomplished using either GX Cloud or the GX Python library. The examples and scenarios in this section are presented using the GX Python library, but can be implemented as Cloud workflows to achieve the same result.
+
+![Validate schema Expectations in GX Cloud](./images/gx_cloud_schema_expectations_validate.gif)
 
 -- TODO: these are mostly pseudo code ----
 
