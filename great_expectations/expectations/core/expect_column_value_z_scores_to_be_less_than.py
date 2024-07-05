@@ -252,7 +252,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         else:
             template_str = "Value z-scores must be "
 
-        if params.double_sided is True:
+        if params.double_sided.value is True:
             template_str += "greater than -$threshold and less than $threshold"
         else:
             template_str += "less than $threshold"
