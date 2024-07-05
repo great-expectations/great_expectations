@@ -69,7 +69,7 @@ A Validation Definition is a fixed reference that links a Batch of data to an Ex
 
    ```python title="Python"
    definition_name = "My Validation Definition"
-   validation_definition = ValidationDefintion(data=batch_definition, suite=suite, name=definition_name)
+   validation_definition = ValidationDefinition(data=batch_definition, suite=suite, name=definition_name)
    ```
 
 6. Optional. Save the Validation Definition to your Data Context.
@@ -109,7 +109,7 @@ batch_definition = context.get_datasource(data_source_name).get(data_asset_name)
 
 # highlight-start
 definition_name = "My Validation Definition"
-validation_definition = ValidationDefintion(data=batch_definition, suite=suite, name=definition_name)
+validation_definition = ValidationDefinition(data=batch_definition, suite=suite, name=definition_name)
 # highlight-end
 
 # highlight-start
