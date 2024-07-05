@@ -21,12 +21,12 @@ GX_ROOT_DIR = pathlib.Path(gx.__file__).parent.parent
 
 TEST_DATA_SETS = [
     {
-        "table_name" : "transfers_1",
-        "test_data_path" :  "tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_1.csv"
+        "table_name": "transfers_1",
+        "test_data_path": "tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_1.csv",
     },
     {
-        "table_name" : "transfers_2",
-        "test_data_path" :  "tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_2.csv"
+        "table_name": "transfers_2",
+        "test_data_path": "tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_2.csv",
     },
 ]
 
@@ -47,22 +47,17 @@ context = gx.get_context()
 # Create the Data Source and Data Assets.
 # CONNECTION_STRING contains the connection string to connect to the postgres database.
 datasource = context.data_sources.add_postgres(
-    "postgres database",
-    connection_string=CONNECTION_STRING
+    "postgres database", connection_string=CONNECTION_STRING
 )
 
-data_asset_1 = datasource.add_table_asset(
-    name="data asset 1",
-    table_name="transfers_1"
-)
+data_asset_1 = datasource.add_table_asset(name="data asset 1", table_name="transfers_1")
 
-data_asset_2 = datasource.add_table_asset(
-    name="data asset 2",
-    table_name="transfers_2"
-)
+data_asset_2 = datasource.add_table_asset(name="data asset 2", table_name="transfers_2")
 
 # Create the Expectation Suite and add an Expectation.
-suite = context.suites.add(gx.core.expectation_suite.ExpectationSuite(name="schema expectations"))
+suite = context.suites.add(
+    gx.core.expectation_suite.ExpectationSuite(name="schema expectations")
+)
 suite.add_expectation(gxe.ExpectColumnToExist(column="recipient_fullname"))
 suite.add_expectation(gxe.ExpectTableColumnCountToEqual(value=5))
 
