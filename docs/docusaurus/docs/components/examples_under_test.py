@@ -60,6 +60,20 @@ learn_data_quality_use_cases = [
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
+    IntegrationTestFixture(
+        name="data_quality_use_case_strict_columns",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/strict_columns.py",
+        data_dir="tests/test_sets/learn_data_quality_use_cases/",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+    IntegrationTestFixture(
+        name="data_quality_use_case_relaxed_columns",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/relaxed_columns.py",
+        data_dir="tests/test_sets/learn_data_quality_use_cases/",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
 ]
 
 docs_tests.extend(connecting_to_a_datasource)
