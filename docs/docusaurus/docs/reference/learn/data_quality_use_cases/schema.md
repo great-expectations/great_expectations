@@ -129,7 +129,7 @@ to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_c
 dataset.expect_table_columns_to_match_ordered_list([
     "sender_account_number", "recipient_account_number",
     "transfer_amount", "transfer_date"
-])
+    ])
 ```
 
 :::info[Use Case]
@@ -151,7 +151,8 @@ to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_c
 ```python
 expectation = gxe.ExpectTableColumnsToMatchSet(column_set=[
     "sender_account_number", "recipient_account_number",
-    "transfer_amount", "transfer_date"], exact_match=False)
+    "transfer_amount", "transfer_date"
+    ], exact_match=False)
 ```
 
 :::info[Use Case]
@@ -218,7 +219,9 @@ data_asset_2 = datasource.add_table_asset(
 
 # Create the Expectation Suite and add an Expectation.
 suite = context.suites.add(gx.core.expectation_suite.ExpectationSuite(name="schema expectations"))
+
 suite.add_expectation(gxe.ExpectColumnToExist(column="recipient_fullname"))
+suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="recipient_fullname"))
 suite.add_expectation(gxe.ExpectTableColumnCountToEqual(value=5))
 
 # Create the Batch Definitions.
@@ -251,12 +254,13 @@ try:
 
     expectation = suite.add_expectation(
         gxe.ExpectTableColumnsToMatchSet(column_set=[
-            "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"]))
+            "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"
+            ]))
 
 except exceptions.DataContextError:
     suite = context.suites.get("STRICT COLUMN ORDER")
 
-# Show result
+# Run validation
 results = batch.validate(suite)
 print(results)
 ```
@@ -273,7 +277,7 @@ try:
 except exceptions.DataContextError:
     suite = context.suites.get("RELAXED COLUMN ORDER")
 
-# Show result
+# # Run validation
 results = batch.validate(suite)
 print(results)
 ```

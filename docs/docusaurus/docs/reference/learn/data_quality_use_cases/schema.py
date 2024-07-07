@@ -63,7 +63,9 @@ data_asset_2 = datasource.add_table_asset(
 
 # Create the Expectation Suite and add an Expectation.
 suite = context.suites.add(gx.core.expectation_suite.ExpectationSuite(name="schema expectations"))
+
 suite.add_expectation(gxe.ExpectColumnToExist(column="recipient_fullname"))
+suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="recipient_fullname"))
 suite.add_expectation(gxe.ExpectTableColumnCountToEqual(value=5))
 
 # Create the Batch Definitions.
