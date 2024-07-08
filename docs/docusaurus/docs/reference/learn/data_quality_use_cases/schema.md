@@ -33,7 +33,11 @@ This dataset includes columns like `sender_account_number`, `recipient_fullname`
 
 ## Key schema Expectations
 
-Explore core Expectations for schema validation, delving into their practical applications and nuances:
+GX offers a collection of Expectations for schema validation, all of which can be added to an Expectation Suite directly from the GX Cloud UI or by using the GX Core Python library.
+
+![Add a schema Expectation in GX Cloud](./images/gx_cloud_schema_expectations_add.gif)
+
+The schema Expectations provide straightforward, practical solutions for common validation scenarios and can also be used to satisfy more nuanced validation needs.
 
 ### Expect Column to Exist
 
@@ -187,8 +191,11 @@ with business requirements and anticipates potential future expansion.
 
 ## Examples and scenarios
 
-### Comparative analysis: Ensuring schema consistency in financial transfers
+Successful schema validation can be accomplished using either GX Cloud or the GX Python library. The examples and scenarios in this section are presented using the GX Python library, but can be implemented as Cloud workflows to achieve the same result.
 
+![Validate schema Expectations in GX Cloud](./images/gx_cloud_schema_expectations_validate.gif)
+
+### Comparative analysis: Ensuring schema consistency in financial transfers
 
 **Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
 
@@ -295,11 +302,6 @@ print(results)
 - **Relying Solely on Schema Validation**: One common pitfall is the over-reliance on schema validation as the sole mechanism for data quality assurance. While schema validation ensures structural integrity, it does not account for semantic correctness. To achieve comprehensive data quality, combine schema validation with semantic checks at the field level, such as validating value ranges, patterns, and relationships between fields.
 
 - **Logging and Monitoring**: Even the best validation setup can fail without proper logging and monitoring. Undetected schema validation failures can propagate through the data pipeline unnoticed, leading to broader issues. Detailed logging and real-time monitoring are essential to create an audit trail and enable quick detection and resolution of schema validation problems, maintaining the integrity of your data pipelines.
-
-### Additional resources on the web
-
-- [Data Quality with Great Expectations](https://astrafy.io/the-hub/blog/technical/data-quality-with-great-expectations)
-- [AWS Well-Architected: Validate the data quality of source systems before transferring data for analytics](https://docs.aws.amazon.com/wellarchitected/latest/analytics-lens/best-practice-1.1---validate-the-data-quality-of-source-systems-before-transferring-data-for-analytics..html)
 
 ## The path forward
 

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 import pytest
 
@@ -8,6 +8,7 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.core import (
     ExpectationValidationResult,
 )
+from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -15,6 +16,9 @@ from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
     RendererValueType,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 def mock_expectation_validation_result_from_expectation_configuration(
@@ -145,3 +149,73 @@ def test_renderer_configuration_add_param_validation(
         str(error_wrapper_exc) == exception_message
         for error_wrapper_exc in [error_wrapper.exc for error_wrapper in e.value.raw_errors]
     )
+
+
+@pytest.mark.unit
+def test_add_param_args():
+    expectation_configuration = ExpectationConfiguration(
+        type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "foo", "threshold": 2, "double_sided": False, "mostly": 1.0},
+    )
+    renderer_configuration = RendererConfiguration(configuration=expectation_configuration)
+
+    add_param_args: AddParamArgs = (
+        ("column", RendererValueType.STRING),
+        ("threshold", RendererValueType.NUMBER),
+        ("double_sided", RendererValueType.BOOLEAN),
+        ("mostly", RendererValueType.NUMBER),
+    )
+    for name, param_type in add_param_args:
+        renderer_configuration.add_param(name=name, param_type=param_type)
+
+    params = renderer_configuration.params
+
+    assert params.column
+    assert params.threshold
+    assert params.double_sided
+    assert params.mostly
+
+
+@pytest.mark.unit
+def test_template_str_setter():
+    expectation_configuration = ExpectationConfiguration(
+        type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "foo", "threshold": 2, "double_sided": False, "mostly": 1.0},
+    )
+    renderer_configuration = RendererConfiguration(configuration=expectation_configuration)
+
+    template_str = "My rendered string"
+    renderer_configuration.template_str = template_str
+
+    assert renderer_configuration.template_str == template_str
+
+
+@pytest.mark.unit
+def test_add_array_params():
+    expectation_configuration = ExpectationConfiguration(
+        type="expect_column_values_to_match_like_pattern_list",
+        kwargs={"column": "foo", "like_pattern_list": ["%", "_"], "match_on": "any", "mostly": 1.0},
+    )
+    renderer_configuration = RendererConfiguration(configuration=expectation_configuration)
+    renderer_configuration.add_param(name="like_pattern_list", param_type=RendererValueType.ARRAY)
+
+    array_param_name = "like_pattern_list"
+    param_prefix = array_param_name + "_"
+
+    renderer_configuration = Expectation._add_array_params(
+        array_param_name=array_param_name,
+        param_prefix=param_prefix,
+        renderer_configuration=renderer_configuration,
+    )
+    params = renderer_configuration.params
+
+    assert params.like_pattern_list_0
+    assert params.like_pattern_list_1
+
+    array_string = Expectation._get_array_string(
+        array_param_name=array_param_name,
+        param_prefix=param_prefix,
+        renderer_configuration=renderer_configuration,
+    )
+
+    assert array_string == "$like_pattern_list_0 $like_pattern_list_1"

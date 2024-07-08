@@ -63,10 +63,13 @@
         },
         "column": {
             "title": "Column",
+            "description": "The column name.",
+            "minLength": 1,
             "type": "string"
         },
         "column_index": {
             "title": "Column Index",
+            "description": "If not None, checks the order of the columns. The expectation will fail if the column is not in location column_index (zero-indexed).",
             "anyOf": [
                 {
                     "type": "integer"
