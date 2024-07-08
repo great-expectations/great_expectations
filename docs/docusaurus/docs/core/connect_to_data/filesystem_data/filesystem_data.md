@@ -14,24 +14,51 @@ To connect to your Filesystem data, you first create a Data Source which tells G
 
 ## Create a Data Source
 
-Data Sources tell GX where your data is located and how to connect to it.  With Filesystem data this is done by directing GX to the folder that contains the data files.  GX supports accessing Filesystem data from Amazon S3, Azure Blob Storage, Google Cloud Storage, and local or networked filesystems.
-
-<Tabs queryString="data_source_type" groupId="data_source_type" defaultValue="file" values={[{label: "File Data Source", value:"file"}, {label: "Directory Data Source", value:"directory"}]}>
-
-   <TabItem value="file" label="File Data Source">
-
-   </TabItem>
-
-   <TabItem value="directory" label="Directory Data Source">
-
-   </TabItem>
-
-</Tabs>
 
 ## Create a Data Asset
 
 A Data Asset is a collection of related records in a Data Source.  
 
+<Tabs className="hidden" queryString="data_location" groupId="data_location" defaultValue="filesystem">
+
+   <TabItem value="filesystem" label="Local or networked filesystem">
+
+   </TabItem>
+
+   <TabItem value="s3" label="Amazon S3">
+
+   </TabItem>
+
+   <TabItem value="abs" label="Azure Blob Storage">
+
+   </TabItem>
+
+   <TabItem value="gcs" label="Google Cloud Storage">
+
+   </TabItem>
+
+</Tabs>
+
 ## Create a Batch Definition
 
 A Batch Definition determines which records in a Data Asset are retrieved for Validation.  Batch Definitions can be configured to either provide all of the records in a Data Asset, or to subdivide the Data Asset based on a Datetime field and return Batches based on a requested year, month, or day.
+
+<Tabs className="hidden" queryString="data_location" groupId="data_location" defaultValue="filesystem">
+
+   <TabItem value="filesystem" label="Local or networked filesystem">
+
+   </TabItem>
+
+   <TabItem value="s3" label="Amazon S3">
+
+   </TabItem>
+
+   <TabItem value="abs" label="Azure Blob Storage">
+
+   </TabItem>
+
+   <TabItem value="gcs" label="Google Cloud Storage">
+
+   </TabItem>
+
+</Tabs>

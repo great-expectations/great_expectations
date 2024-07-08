@@ -1,1 +1,0 @@
-Spark Filesystem Data Sources support two types of Data Assets.  A File Data Source will treat each file in the Data Source individually (similar to individual tables in a database).  A Directory Data Source will treat all of the files in the directory as a single table that happens to be partitioned into files.
