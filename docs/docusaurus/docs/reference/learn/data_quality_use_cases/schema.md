@@ -141,8 +141,8 @@ columns are computed during serialization.
 :::
 
 :::tip[GX Tip]
-Use `expect_table_columns_to_match_ordered_list` over
-`expect_table_columns_to_match_set` when order matters, such as in scripts directly referencing column positions.
+Use `ExpectTableColumnsToMatchOrderedList` over
+`ExpectTableColumnsToMatchSet` when order matters, such as in scripts directly referencing column positions.
 :::
 
 ### Expect Table Columns to Match Set
