@@ -55,7 +55,9 @@ data_asset_1 = datasource.add_table_asset(name="data asset 1", table_name="trans
 data_asset_2 = datasource.add_table_asset(name="data asset 2", table_name="transfers_2")
 
 # Create the Expectation Suite and add an Expectation.
-suite = context.suites.add(gx.core.expectation_suite.ExpectationSuite(name="schema expectations"))
+suite = context.suites.add(
+    gx.core.expectation_suite.ExpectationSuite(name="schema expectations")
+)
 
 suite.add_expectation(gxe.ExpectColumnToExist(column="recipient_fullname"))
 suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="recipient_fullname"))
