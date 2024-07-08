@@ -248,7 +248,7 @@ print(f"Validation results 2:\n{results_2}")
 
 **Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
 
-### Different Expectation Suites: Strict vs. Relaxed Type Checking
+### Different Expectation suites: Strict vs. relaxed type checking
 
 **Context**: In some contexts, both the names and order of columns can be critically important. Using different suites to enforce these aspects can help maintain consistency.
 
