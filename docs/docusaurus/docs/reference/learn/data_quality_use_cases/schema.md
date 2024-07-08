@@ -47,7 +47,7 @@ errors due to missing fields. ([Link to Expectation
 Gallery](https://greatexpectations.io/expectations/expect_column_to_exist))
 
 ```python
-expectation = gxe.ExpectColumnToExist(column="sender_account_number")
+gxe.ExpectColumnToExist(column="sender_account_number")
 ```
 
 
@@ -70,7 +70,7 @@ databases. ([Link to Expectation
 Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list))
 
 ```python
-expectation = gxe.ExpectColumnValuesToBeInTypeList(column="account_type", type_list=["INTEGER", "STRING"])
+gxe.ExpectColumnValuesToBeInTypeList(column="account_type", type_list=["INTEGER", "STRING"])
 ```
 
 :::info[Use Case]
@@ -90,7 +90,7 @@ compared to the previous Expectation, suitable for scenarios needing strict type
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type))
 
 ```python
-expectation = gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION")
+gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION")
 ```
 
 :::info[Use Case]
@@ -110,7 +110,7 @@ fixed schema structure, providing a strong safeguard against unexpected changes.
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal))
 
 ```python
-expectation = gxe.ExpectTableColumnCountToEqual(value=5)
+gxe.ExpectTableColumnCountToEqual(value=5)
 ```
 
 :::info[Use Case]
@@ -130,10 +130,9 @@ column order, ensuring consistency and reliability. ([Link
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list))
 
 ```python
-dataset.expect_table_columns_to_match_ordered_list([
-    "sender_account_number", "recipient_account_number",
-    "transfer_amount", "transfer_date"
-    ])
+gxe.ExpectTableColumnsToMatchOrderedList([
+  "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
+])
 ```
 
 :::info[Use Case]
@@ -153,10 +152,9 @@ flexibility where column presence is more critical than their sequence. ([Link
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set))
 
 ```python
-expectation = gxe.ExpectTableColumnsToMatchSet(column_set=[
-    "sender_account_number", "recipient_account_number",
-    "transfer_amount", "transfer_date"
-    ], exact_match=False)
+gxe.ExpectTableColumnsToMatchSet(column_set=[
+  "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
+], exact_match=False)
 ```
 
 :::info[Use Case]
@@ -176,7 +174,7 @@ datasets that can expand or contract within a known boundary. ([Link
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between))
 
 ```python
-expectation = gxe.ExpectTableColumnCountToBeBetween(min_value=6, max_value=8)
+gxe.ExpectTableColumnCountToBeBetween(min_value=6, max_value=8)
 ```
 
 :::info[Use Case]
