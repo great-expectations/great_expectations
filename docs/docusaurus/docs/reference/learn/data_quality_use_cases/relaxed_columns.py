@@ -38,7 +38,7 @@ for test_data_set in TEST_DATA_SETS:
         connection_string=CONNECTION_STRING,
     )
 
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py full sample code">
+# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/relaxed_columns.py relaxed columns sample code">
 import great_expectations as gx
 import great_expectations.expectations as gxe
 

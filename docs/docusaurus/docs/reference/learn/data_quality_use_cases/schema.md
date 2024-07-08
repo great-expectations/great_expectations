@@ -199,49 +199,7 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 **Goal**: Validate two datasets to ensure the presence of specific columns and correct column count.
 
-```python
-import great_expectations as gx
-import great_expectations.expectations as gxe
-
-context = gx.get_context()
-
-# Create the Data Source and Data Assets.
-# CONNECTION_STRING contains the connection string to connect to the postgres database.
-datasource = context.data_sources.add_postgres(
-    "postgres database",
-    connection_string=CONNECTION_STRING
-)
-
-data_asset_1 = datasource.add_table_asset(
-    name="data asset 1",
-    table_name="transfers_1"
-)
-
-data_asset_2 = datasource.add_table_asset(
-    name="data asset 2",
-    table_name="transfers_2"
-)
-
-# Create the Expectation Suite and add an Expectation.
-suite = context.suites.add(gx.core.expectation_suite.ExpectationSuite(name="schema expectations"))
-
-suite.add_expectation(gxe.ExpectColumnToExist(column="recipient_fullname"))
-suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="recipient_fullname"))
-suite.add_expectation(gxe.ExpectTableColumnCountToEqual(value=5))
-
-# Create the Batch Definitions.
-batch_definition_1 = data_asset_1.add_batch_definition_whole_table("batch definition 1")
-batch_1 = batch_definition_1.get_batch()
-
-batch_definition_2 = data_asset_1.add_batch_definition_whole_table("batch definition 2")
-batch_2 = batch_definition_2.get_batch()
-
-# Validate Batches using the Expectation Suite.
-results_1 = batch_1.validate(suite)
-results_2 = batch_2.validate(suite)
-
-print(f"Validation results 1:\n{results_1}")
-print(f"Validation results 2:\n{results_2}")
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py full sample code"
 ```
 
 **Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
@@ -252,39 +210,10 @@ print(f"Validation results 2:\n{results_2}")
 
 **Goal**: Validate datasets to ensure columns appear in the correct order and all required columns are present.
 
-```python
-# First Expectation Suite: strict column order
-try:
-    suite = context.suites.add(ExpectationSuite(name="STRICT COLUMN ORDER"))
-
-    expectation = suite.add_expectation(
-        gxe.ExpectTableColumnsToMatchSet(column_set=[
-            "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"
-            ]))
-
-except exceptions.DataContextError:
-    suite = context.suites.get("STRICT COLUMN ORDER")
-
-# Run validation
-results = batch.validate(suite)
-print(results)
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/strict_columns.py strict columns sample code"
 ```
 
-```python
-# Second Expectation Suite: relaxed column order
-try:
-    suite = context.suites.add(ExpectationSuite(name="RELAXED COLUMN ORDER"))
-
-    expectation = suite.add_expectation(
-        gxe.ExpectTableColumnsToMatchSet(column_set=[
-            "type", "sender_account_number", "transfer_amount", "transfer_date"],
-            exact_match=False))
-except exceptions.DataContextError:
-    suite = context.suites.get("RELAXED COLUMN ORDER")
-
-# # Run validation
-results = batch.validate(suite)
-print(results)
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/relaxed_columns.py relaxed columns sample code"
 ```
 
 **Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
