@@ -38,7 +38,7 @@ for test_data_set in TEST_DATA_SETS:
         connection_string=CONNECTION_STRING,
     )
 
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py full sample code">
+# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/strict_columns.py strict columns sample code">
 import great_expectations as gx
 import great_expectations.expectations as gxe
 
@@ -56,12 +56,20 @@ data_asset_2 = datasource.add_table_asset(name="data asset 2", table_name="trans
 
 # Create the Expectation Suite and add an Expectation.
 suite = context.suites.add(
-    gx.core.expectation_suite.ExpectationSuite(name="schema expectations")
+    gx.core.expectation_suite.ExpectationSuite(name="strict column order")
 )
 
-suite.add_expectation(gxe.ExpectColumnToExist(column="recipient_fullname"))
-suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="recipient_fullname"))
-suite.add_expectation(gxe.ExpectTableColumnCountToEqual(value=5))
+suite.add_expectation(
+    gxe.ExpectTableColumnsToMatchSet(
+        column_set=[
+            "type",
+            "sender_account_number",
+            "recipient_fullname",
+            "transfer_amount",
+            "transfer_date",
+        ]
+    )
+)
 
 # Create the Batch Definitions.
 batch_definition_1 = data_asset_1.add_batch_definition_whole_table("batch definition 1")

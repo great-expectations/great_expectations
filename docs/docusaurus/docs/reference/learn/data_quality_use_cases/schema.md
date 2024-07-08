@@ -47,7 +47,7 @@ errors due to missing fields. ([Link to Expectation
 Gallery](https://greatexpectations.io/expectations/expect_column_to_exist))
 
 ```python
-dataset.expect_column_to_exist("sender_account_number")
+gxe.ExpectColumnToExist(column="sender_account_number")
 ```
 
 
@@ -70,7 +70,7 @@ databases. ([Link to Expectation
 Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list))
 
 ```python
-dataset.expect_column_values_to_be_in_type_list("account_type", ["int", "str"])
+gxe.ExpectColumnValuesToBeInTypeList(column="account_type", type_list=["INTEGER", "STRING"])
 ```
 
 :::info[Use Case]
@@ -90,7 +90,7 @@ compared to the previous Expectation, suitable for scenarios needing strict type
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type))
 
 ```python
-dataset.expect_column_values_to_be_of_type("transfer_amount", "float")
+gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION")
 ```
 
 :::info[Use Case]
@@ -99,7 +99,7 @@ apparent type changes can occur when new values appear.
 :::
 
 :::tip[GX Tip]
-Opt for `expect_column_values_to_be_of_type` when dealing with columns where
+Opt for `ExpectColumnValuesToBeOfType` when dealing with columns where
 any type deviation could lead to significant processing errors or inaccuracies.
 :::
 
@@ -110,7 +110,7 @@ fixed schema structure, providing a strong safeguard against unexpected changes.
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal))
 
 ```python
-dataset.expect_table_column_count_to_equal(7)
+gxe.ExpectTableColumnCountToEqual(value=5)
 ```
 
 :::info[Use Case]
@@ -130,9 +130,8 @@ column order, ensuring consistency and reliability. ([Link
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list))
 
 ```python
-dataset.expect_table_columns_to_match_ordered_list([
-    "sender_account_number", "recipient_account_number",
-    "transfer_amount", "transfer_date"
+gxe.ExpectTableColumnsToMatchOrderedList([
+  "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
 ])
 ```
 
@@ -142,8 +141,8 @@ columns are computed during serialization.
 :::
 
 :::tip[GX Tip]
-Use `expect_table_columns_to_match_ordered_list` over
-`expect_table_columns_to_match_set` when order matters, such as in scripts directly referencing column positions.
+Use `ExpectTableColumnsToMatchOrderedList` over
+`ExpectTableColumnsToMatchSet` when order matters, such as in scripts directly referencing column positions.
 :::
 
 ### Expect Table Columns to Match Set
@@ -153,10 +152,9 @@ flexibility where column presence is more critical than their sequence. ([Link
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set))
 
 ```python
-dataset.expect_table_columns_to_match_set([
-    "sender_account_number", "recipient_account_number",
-    "transfer_amount", "transfer_date"
-])
+gxe.ExpectTableColumnsToMatchSet(column_set=[
+  "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
+], exact_match=False)
 ```
 
 :::info[Use Case]
@@ -165,7 +163,7 @@ warehousing operations where column integrity is crucial, but order might vary.
 :::
 
 :::tip[GX Tip]
-Opt for `expect_table_columns_to_match_set` when integrating datasets from
+Opt for `ExpectTableColumnsToMatchSet` when integrating datasets from
 various sources where column order might differ, but consistency in available data is required.
 :::
 
@@ -176,7 +174,7 @@ datasets that can expand or contract within a known boundary. ([Link
 to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between))
 
 ```python
-dataset.expect_table_column_count_to_be_between(min_value=5, max_value=7)
+gxe.ExpectTableColumnCountToBeBetween(min_value=6, max_value=8)
 ```
 
 :::info[Use Case]
@@ -195,56 +193,11 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 ![Validate schema Expectations in GX Cloud](./images/gx_cloud_schema_expectations_validate.gif)
 
--- TODO: these are mostly pseudo code ----
-
 ### Comparative analysis: Ensuring schema consistency in financial transfers
 
 **Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
 
 **Goal**: Validate two datasets to ensure the presence of specific columns and correct column count.
-
-```python
-import pandas as pd
-import great_expectations as gx
-
-# Sample datasets
-data_1 = [
-    {'type': 'domestic', 'sender_account_number': '244084670977', 'recipient_fullname': 'Jaxson Duke', 'transfer_amount': 9143.40, 'transfer_date': '2024-05-01 01:12'},
-    {'type': 'domestic', 'sender_account_number': '954005011218', 'recipient_fullname': 'Nelson O’Connell', 'transfer_amount': 3285.21, 'transfer_date': '2024-05-01 05:08'}
-]
-data_2 = [
-    {'type': 'domestic', 'sender_account_number': '842374923847', 'recipient_fullname': 'Alex Smith', 'transfer_amount': 5783.18, 'transfer_date': '2024-04-12 15:35'},
-    # Missing 'recipient_fullname'
-    {'type': 'domestic', 'sender_account_number': '673894027340', 'transfer_amount': 8493.14, 'transfer_date': '2024-04-21 09:50'}
-]
-
-df1 = pd.DataFrame(data_1)
-df2 = pd.DataFrame(data_2)
-
-context = gx.get_context()
-
-expectation_suite_name = "schema_comparison_suite"
-context.create_expectation_suite(expectation_suite_name)
-
-validator_1 = context.get_validator(df1, expectation_suite_name=expectation_suite_name)
-validator_2 = context.get_validator(df2, expectation_suite_name=expectation_suite_name)
-
-# Define Expectations
-validator_1.expect_column_to_exist("recipient_fullname")
-validator_2.expect_column_to_exist("recipient_fullname")
-
-validator_1.expect_table_column_count_to_equal(5)
-validator_2.expect_table_column_count_to_equal(5)
-
-# Run validation
-result_1 = validator_1.validate()
-result_2 = validator_2.validate()
-
-print("Validation Result 1:", result_1)
-print("Validation Result 2:", result_2)
-```
-
-Snippet:
 
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py full sample code"
 ```
@@ -257,29 +210,10 @@ Snippet:
 
 **Goal**: Validate datasets to ensure columns appear in the correct order and all required columns are present.
 
-```python
-# First Expectation Suite: strict column order
-expectation_suite_name_1 = "schema_ordered_columns"
-suite_1 = context.create_expectation_suite(expectation_suite_name_1)
-validator_1 = context.get_validator(df1, expectation_suite_name=expectation_suite_name_1)
-validator_1.expect_table_columns_to_match_ordered_list([
-    "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"
-])
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/strict_columns.py strict columns sample code"
+```
 
-# Second Expectation Suite: relaxed column order
-expectation_suite_name_2 = "schema_unordered_columns"
-suite_2 = context.create_expectation_suite(expectation_suite_name_2)
-validator_2 = context.get_validator(df2, expectation_suite_name=expectation_suite_name_2)
-validator_2.expect_table_columns_to_match_set([
-    "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"
-])
-
-# Run validation
-result_ordered = validator_1.validate()
-result_unordered = validator_2.validate()
-
-print("Ordered Columns Validation Result:", result_ordered)
-print("Unordered Columns Validation Result:", result_unordered)
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/relaxed_columns.py relaxed columns sample code"
 ```
 
 **Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
