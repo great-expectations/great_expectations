@@ -1,0 +1,3 @@
+All Data Contexts include a built in `pandas_default` Data Source.  This Data Source gives access to all of the `read_*(...)` methods available in pandas.  It allows you to read in a file of data without first configuring your own Data Source, Data Asset, and Batch Definition.
+
+For more information on using the `pandas_default` Data Source, see the tab for `pandas_default` under the [Retrieve data](#retrieve-data) section of this page.

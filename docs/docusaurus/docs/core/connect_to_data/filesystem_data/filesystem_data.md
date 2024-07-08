@@ -7,6 +7,7 @@ hide_title: false
 
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
+import CreateADataSource from './_create_a_data_source/_create_a_data_source.md';
 
 Filesystem data consists of data stored in file formats such as `.csv` or `.parquet`, and located in an environment with a folder hierarchy such as Amazon S3, Azure Blob Storage, Google Cloud Storage, or local and networked filesystems.
 
@@ -14,6 +15,7 @@ To connect to your Filesystem data, you first create a Data Source which tells G
 
 ## Create a Data Source
 
+<CreateADataSource/>
 
 ## Create a Data Asset
 
@@ -62,3 +64,5 @@ A Batch Definition determines which records in a Data Asset are retrieved for Va
    </TabItem>
 
 </Tabs>
+
+## Retrieve data
