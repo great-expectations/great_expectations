@@ -203,6 +203,8 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     )
 
     class Config:
+        title = "Expect column pair values to be equal"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnPairValuesToBeEqual]

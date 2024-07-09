@@ -1,5 +1,5 @@
 {
-    "title": "Expect Column KL Divergence To Be Less Than",
+    "title": "ExpectColumnKLDivergenceToBeLessThan",
     "description": "Base class for column aggregate Expectations.\n\nThese types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,\nnumber of unique values, column type, etc.\n\n--Documentation--\n    - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/\n\nArgs:\n domain_keys (tuple): A tuple of the keys used to determine the domain of the\n     expectation.\n success_keys (tuple): A tuple of the keys used to determine the success of\n     the expectation.\n\n     - A  \"column\" key is required for column expectations.\n\nRaises:\n    InvalidExpectationConfigurationError: If no `column` is specified",
     "type": "object",
     "properties": {
@@ -152,6 +152,16 @@
         "metadata": {
             "type": "object",
             "properties": {
+                "expectation_class": {
+                    "title": "Expectation Class",
+                    "type": "string",
+                    "const": "ExpectColumnKLDivergenceToBeLessThan"
+                },
+                "expectation_type": {
+                    "title": "Expectation Type",
+                    "type": "string",
+                    "const": "expect_column_kl_divergence_to_be_less_than"
+                },
                 "domain_type": {
                     "title": "Domain Type",
                     "type": "string",
