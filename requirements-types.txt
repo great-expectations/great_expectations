@@ -7,6 +7,7 @@
 --requirement docs/sphinx_api_docs_source/requirements-dev-api-docs.txt
 # typing stubs
 pandas-stubs
+sqlalchemy<1.6.0
 types-beautifulsoup4
 types-colorama
 types-decorator
@@ -28,4 +29,3 @@ types-tqdm
 types-typed-ast
 types-tzlocal
 types-urllib3
-sqlalchemy<1.6.0
