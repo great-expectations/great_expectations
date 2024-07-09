@@ -81,7 +81,7 @@ class OrganizationIdNotSpecifiedError(Exception):
         )
 
 
-def _extract_fluent_datasources(config_dict: dict) -> dict:
+def _transform_data_sources(config_dict: dict) -> dict:
     """
     Transform data sources to expected shape
     """
@@ -264,7 +264,7 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         # This should be done before datasources are popped from the config below until
         # fluent_datasourcse are renamed datasourcess ()
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
+        config["fluent_datasources"] = _transform_data_sources(config)
 
         # Various context variables are no longer top-level keys in V1
         for var in (
