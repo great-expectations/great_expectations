@@ -66,3 +66,17 @@ A Batch Definition determines which records in a Data Asset are retrieved for Va
 </Tabs>
 
 ## Retrieve data
+
+Filesystem data can be retrieved from your Batch Definition or through the `.read_*(...)` methods available from the `pandas_default` Data Source.
+
+<Tabs queryString="retrieval_method" groupId="retrieval_method" defaultValue='batch_definition'>
+
+   <TabItem value="batch_definition" label="Batch Definition">
+   
+   </TabItem>
+
+   <TabItem value="pandas_default" label="pandas_default">
+   
+   </TabItem>
+
+</Tabs>
