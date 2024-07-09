@@ -39,7 +39,7 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column entries to be strings with length equal to the provided value."
 )
 VALUE_DESCRIPTION = "The expected value for a column entry length."
-DATA_QUALITY_ISSUES = ["Pattern Matching"]
+DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
@@ -194,6 +194,8 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column value lengths to equal"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValueLengthsToEqual]
