@@ -10,7 +10,7 @@ We also consolidate logic for warning based on version number in this module.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal, NoReturn
 
 from packaging.version import Version
 
@@ -20,23 +20,27 @@ from great_expectations.compatibility.typing_extensions import override
 class NotImported:
     def __init__(self, message: str):
         self.__dict__["gx_error_message"] = message
+        self.error = ModuleNotFoundError(self.__dict__["gx_error_message"])
 
-    def __getattr__(self, attr: str) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+    def __getattr__(self, attr: str) -> NoReturn:
+        self.raise_error()
 
     @override
-    def __setattr__(self, key: str, value: Any) -> None:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+    def __setattr__(self, key: str, value: Any) -> NoReturn:
+        self.raise_error()
 
-    def __call__(self, *args, **kwargs) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+    def __call__(self, *args, **kwargs) -> NoReturn:
+        self.raise_error()
 
     @override
     def __str__(self) -> str:
         return self.__dict__["gx_error_message"]
 
-    def __bool__(self):
+    def __bool__(self) -> Literal[False]:
         return False
+
+    def raise_error(self) -> NoReturn:
+        raise self.error
 
 
 def is_version_greater_or_equal(version: str | Version, compare_version: str | Version) -> bool:
