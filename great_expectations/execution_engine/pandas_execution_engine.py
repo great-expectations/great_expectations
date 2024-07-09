@@ -195,7 +195,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
     @override
     def load_batch_data(
-        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame] # type: ignore[override]
+        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]  # type: ignore[override]
     ) -> None:
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
