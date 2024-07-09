@@ -215,7 +215,7 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
 def marker_coverage(
     ctx: Context,
 ):
-    pytest_cmds = ["pytest", "--verify-marker-coverage-and-exit"]
+    pytest_cmds = ["pytest", "--verify-marker-coverage-and-exit", "-W=once"]
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
 
