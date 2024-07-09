@@ -495,6 +495,11 @@ class SnowflakeDatasource(SQLDatasource):
             return SNOWFLAKE_PARTNER_APPLICATION_CLOUD
         return SNOWFLAKE_PARTNER_APPLICATION_OSS
 
+    def _get_url_args(self) -> dict[str, str | bool]:
+        excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
+        # dump as json dict to force serialization of things like AnyUrl
+        return self._json_dict(exclude=excluded_fields, exclude_none=True)
+
     @override
     def get_execution_engine(self) -> SqlAlchemyExecutionEngine:
         """
