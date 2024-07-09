@@ -1,3 +1,5 @@
-All Data Contexts include a built in `pandas_default` Data Source.  This Data Source gives access to all of the `read_*(...)` methods available in pandas.  It allows you to read in a file of data without first configuring your own Data Source, Data Asset, and Batch Definition.
+All Data Contexts include a built in `pandas_default` Data Source.  This Data Source gives access to all of the `read_*(...)` methods available in pandas.
+
+The `read_*(...)` methods of the `pandas_default` Data Source allow you to load data into GX without first configuring a Data Source, Data Asset, and Batch Definition.  However, it does not save configurations for reading files to the Data Context and provides less versatility than a fully configured Data Source, Data Asset, and Batch Definition. Therefore, the `pandas_default` Data Source is intended to facilitate testing Expectations and engaging in data exploration but is less suited for use in production and automated workflows. 
 
 For more information on using the `pandas_default` Data Source, see the tab for `pandas_default` under the [Retrieve data](#retrieve-data) section of this page.

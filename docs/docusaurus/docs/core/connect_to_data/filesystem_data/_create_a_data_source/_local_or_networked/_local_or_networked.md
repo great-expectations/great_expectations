@@ -5,12 +5,17 @@ import PrereqPythonInstall from '../../../../_core_components/prerequisites/_pyt
 import PrereqGxInstall from '../../../../_core_components/prerequisites/_gx_installation.md'
 import PrereqDataContext from '../../../../_core_components/prerequisites/_preconfigured_data_context.md'
 
+import PandasDefault from './_pandas_default.md'
 
 ### Prerequisites
 - <PrereqPythonInstall/>
 - <PrereqGxInstall/>
 - <PrereqDataContext/>
 - Access to data files in a local or networked directory.
+
+:::info Quick access  to sample data
+<PandasDefault/>
+:::
 
 <Tabs>
 
