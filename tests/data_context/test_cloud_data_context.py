@@ -6,10 +6,12 @@ import responses
 
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 
-CLOUD_BASE_URL = "https://greatexpectations.io/fake-url"
+CLOUD_BASE_URL = "https://api.greatexpectations.io/fake"
 ACCESS_TOKEN = "my-secret-access-token"
 ORG_ID = str(uuid.uuid4())
-CONTEXT_CONFIGURATION_URL = f"{CLOUD_BASE_URL}/organizations/{ORG_ID}/data-context-configuration"
+CONTEXT_CONFIGURATION_URL = (
+    f"{CLOUD_BASE_URL}/api/v1/organizations/{ORG_ID}/data-context-configuration"
+)
 
 
 def _create_cloud_config_response(
