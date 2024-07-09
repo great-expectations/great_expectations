@@ -195,7 +195,9 @@ class PandasExecutionEngine(ExecutionEngine):
 
     @override
     def load_batch_data(
-        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]  # type: ignore[override]
+        self,
+        batch_id: str,
+        batch_data: Union[PandasBatchData, pd.DataFrame],  # type: ignore[override]
     ) -> None:
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
@@ -270,7 +272,7 @@ class PandasExecutionEngine(ExecutionEngine):
             reader_fn: DataFrameFactoryFn = self._get_reader_fn(
                 reader_method, s3_url.key
             )
-            buf = BytesIO(s3_object["Body"].read())
+            buf = BytesIO(s3_object["Body"].read())  # type: ignore[possibly-undefined]
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
