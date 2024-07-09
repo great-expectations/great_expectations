@@ -27,6 +27,10 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigUri,
     _check_config_substitutions_needed,
 )
+from great_expectations.datasource.fluent.constants import (
+    SNOWFLAKE_PARTNER_APPLICATION_CLOUD,
+    SNOWFLAKE_PARTNER_APPLICATION_OSS,
+)
 from great_expectations.datasource.fluent.sql_datasource import (
     FluentBaseModel,
     SQLDatasource,
@@ -438,6 +442,19 @@ class SnowflakeDatasource(SQLDatasource):
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
         # dump as json dict to force serialization of things like AnyUrl
         return self._json_dict(exclude=excluded_fields, exclude_none=True)
+
+    def _get_snowflake_partner_application(self) -> str:
+        """
+        This is used to set the application query parameter in the Snowflake connection URL,
+        which provides attribution to GX for the Snowflake Partner program.
+        """
+
+        # This import is here to avoid a circular import
+        from great_expectations.data_context import CloudDataContext
+
+        if isinstance(self._data_context, CloudDataContext):
+            return SNOWFLAKE_PARTNER_APPLICATION_CLOUD
+        return SNOWFLAKE_PARTNER_APPLICATION_OSS
 
     @override
     def get_execution_engine(self) -> SqlAlchemyExecutionEngine:
