@@ -845,7 +845,7 @@ def gx_cloud_api_fake_ctx(
     org_url_base_V1 = urllib.parse.urljoin(
         cloud_details.base_url, f"api/v1/organizations/{cloud_details.org_id}/"
     )
-    dc_config_url = urllib.parse.urljoin(org_url_base_V0, "data-context-configuration")
+    dc_config_url = urllib.parse.urljoin(org_url_base_V1, "data-context-configuration")
     me_url = urllib.parse.urljoin(org_url_base_V0, "accounts/me")
 
     assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
