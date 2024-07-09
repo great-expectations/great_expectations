@@ -87,12 +87,9 @@ def _extract_fluent_datasources(config_dict: dict) -> dict:
     We need to extract the fluent datasources otherwise the data context will attempt eager config
     substitutions and other inappropriate operations.
     """
-    datasources = config_dict.get("datasources", {})
-    fds_names: list[str] = []
-    for ds_name, ds in datasources.items():
-        if "type" in ds:
-            fds_names.append(ds_name)
-    return {name: datasources.pop(name) for name in fds_names}
+    datasources = config_dict.get("data_sources", [])
+    data_sources_by_name = {ds["name"]: ds for ds in datasources}
+    return data_sources_by_name
 
 
 @public_api
@@ -269,7 +266,7 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         # This should be done before datasources are popped from the config below until
         # fluent_datasourcse are renamed datasourcess ()
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
+        config["data_sources"] = _extract_fluent_datasources(config)
 
         # Various context variables are no longer top-level keys in V1
         for var in (
