@@ -860,27 +860,27 @@ def gx_cloud_api_fake_ctx(
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
-            urllib.parse.urljoin(org_url_base_V0, "datasources"),
+            urllib.parse.urljoin(org_url_base_V1, "datasources"),
             get_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "datasources"),
+            urllib.parse.urljoin(org_url_base_V1, "datasources"),
             post_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"datasources/{UUID_REGEX}")),
             get_datasource_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"datasources/{UUID_REGEX}")),
             delete_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.PUT,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"datasources/{UUID_REGEX}")),
             put_datasource_cb,
         )
         resp_mocker.add_callback(
