@@ -20,6 +20,7 @@ from typing import (
     Type,
     Union,
     cast,
+    overload,
 )
 
 from typing_extensions import Annotated
@@ -91,6 +92,37 @@ LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 class SQLDatasourceError(Exception):
     pass
+
+
+class SQLAlchemyCreateEngineError(SQLDatasourceError):
+    """
+    An error creating a SQLAlchemy `Engine` object.
+
+    Not to be confused with the GX `SQLAlchemyExecutionEngine`.
+    """
+
+    @overload
+    def __init__(self, addendum: str | None = ..., cause: Exception = ...): ...
+
+    @overload
+    def __init__(self, addendum: str = ..., cause: Exception | None = ...): ...
+
+    def __init__(
+        self,
+        addendum: str | None = None,
+        cause: Exception | None = None,
+    ):
+        """Must provide a `cause`, `addendum`, or both."""
+        message = "Unable to create SQLAlchemy Engine"
+        if cause:
+            message += f": due to {cause!r}"
+        if addendum:
+            message += f": {addendum}"
+        super().__init__(message)
+        if cause:
+            assert (
+                self.__cause__ is cause
+            ), "Declared `cause` doesn't match actual cause"  # TODO: remove me?
 
 
 class _Partitioner(PartitionerProtocol, Protocol):
@@ -960,9 +992,7 @@ class SQLDatasource(Datasource):
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501
                 # one possible case is a missing plugin (e.g. psycopg2)
-                raise SQLDatasourceError(  # noqa: TRY003
-                    "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
-                ) from e
+                raise SQLAlchemyCreateEngineError(cause=e) from e
             self._cached_connection_string = self.connection_string
         return self._engine
 
