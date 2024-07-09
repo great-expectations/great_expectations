@@ -1,6 +1,6 @@
 Click>=7.1.2         # CLI tooling
 cookiecutter==2.1.1  # Project templating
-mypy==1.10.0            # Type checker
+mypy==1.10.1            # Type checker
 pydantic>=1.0        # Needed for mypy plugin
 pytest>=5.3.5        # Test framework
 ruff==0.4.8        # Linting / code style / formatting
