@@ -19,18 +19,18 @@ from great_expectations.compatibility.typing_extensions import override
 
 class NotImported:
     def __init__(self, message: str):
-        self.__message = message
-        self.__error = ModuleNotFoundError(self.__dict__["gx_error_message"])
+        self.__dict__["gx_error_message"] = message
+        self.__dict__["error"] = ModuleNotFoundError(message)
 
     def __getattr__(self, attr: str) -> NoReturn:
-        self.raise_error()
+        raise self.raise_error()
 
     @override
     def __setattr__(self, key: str, value: Any) -> NoReturn:
-        self.raise_error()
+        raise self.raise_error()
 
     def __call__(self, *args, **kwargs) -> NoReturn:
-        self.raise_error()
+        raise self.raise_error()
 
     @override
     def __str__(self) -> str:
@@ -40,7 +40,7 @@ class NotImported:
         return False
 
     def raise_error(self) -> NoReturn:
-        raise self.__error
+        raise self.__dict__["error"]
 
 
 def is_version_greater_or_equal(version: str | Version, compare_version: str | Version) -> bool:
