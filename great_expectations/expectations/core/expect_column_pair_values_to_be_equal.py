@@ -44,7 +44,7 @@ SUPPORTED_DATA_SOURCES = [
     "BigQuery",
     "Snowflake",
 ]
-DATA_QUALITY_ISSUES = ["Data Integrity"]
+DATA_QUALITY_ISSUES = ["Data integrity"]
 
 
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
