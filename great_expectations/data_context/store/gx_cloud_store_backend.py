@@ -230,7 +230,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         filter_properties_dict(properties=self._config, inplace=True)
 
     @override
-    def _get(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> ResponsePayload:  # type: ignore[override]
+    def _get(
+        self, key: Tuple[GXCloudRESTResource, str | None, str | None]
+    ) -> ResponsePayload:  # type: ignore[override]
         url = self.get_url_for_key(key=key)
 
         # if name is included in the key, add as a param
@@ -275,7 +277,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
-                str(response.text),
+                str(response.text),  # type: ignore[possibly-undefined]
                 str(jsonError),
             )
             raise StoreBackendError(
