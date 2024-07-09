@@ -1778,7 +1778,7 @@ class DataContextConfig(BaseYamlConfig):
     def __init__(  # noqa: C901, PLR0913
         self,
         config_version: Optional[float] = None,
-        data_sources: Optional[dict] = None,
+        fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validation_results_store_name: Optional[str] = None,
         suite_parameter_store_name: Optional[str] = None,
@@ -1814,7 +1814,7 @@ class DataContextConfig(BaseYamlConfig):
                 checkpoint_store_name = store_backend_defaults.checkpoint_store_name
 
         self._config_version = config_version
-        self.fluent_datasources = data_sources or {}
+        self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name
         self.suite_parameter_store_name = suite_parameter_store_name
