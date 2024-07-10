@@ -57,9 +57,8 @@ class TestSnowflake:
                 # query the asset, if it fails then we should expect a TestConnectionError
                 # expect the sql ProgrammingError to be raised
                 # we are only testing the failure case here
-                snowflake_ds.get_engine().execute(
-                    f"SELECT * FROM {table_name} LIMIT 1;"
-                )
+                with snowflake_ds.get_engine().connect() as conn:
+                    conn.execute(f"SELECT * FROM {table_name} LIMIT 1;")
                 print(f"{table_name} is queryable")
             except sa.exc.ProgrammingError:
                 print(f"{table_name} is not queryable")
@@ -101,7 +100,8 @@ class TestSnowflake:
         table_name = random.choice(inspector_tables)
 
         # query the table to make sure it is queryable
-        snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
+        with snowflake_ds.get_engine().connect() as conn:
+            conn.execute(f"SELECT * FROM {table_name} LIMIT 1;")
 
         # the table is queryable so the `add_table_asset()` should pass the test_connection step
         asset = snowflake_ds.add_table_asset(
