@@ -73,7 +73,9 @@ def test_add_fluent_datasource_are_persisted(
     assert datasource.id
     assert set_spy.call_count == 1
     cloud_api_fake.assert_call_count(
-        urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"),
+        urllib.parse.urljoin(
+            GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"
+        ),
         2,
     )
 
@@ -201,7 +203,7 @@ def test_context_add_or_update_datasource(
     if isinstance(empty_contexts, CloudDataContext):
         # TODO: adjust call counts as needed
         datasources_url = urllib.parse.urljoin(
-            GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"
+            GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"
         )
         cloud_api_fake.assert_call_count(
             datasources_url,
@@ -215,7 +217,7 @@ def test_context_add_or_update_datasource(
         response = requests.get(f"{datasources_url}/{datasource.id}")
         response.raise_for_status()
         print(pf(response.json(), depth=4))
-        assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
+        assert response.json()["data"].get("assets")
 
     # add_or_update should be idempotent
     datasource = context.data_sources.add_or_update_pandas_filesystem(
@@ -303,7 +305,7 @@ def test_cloud_context_delete_datasource(
         name="delete_ds_test", base_directory=taxi_data_samples_dir
     )
     datasources_url = urllib.parse.urljoin(
-        GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"
+        GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"
     )
 
     # check cloud_api_fake items
@@ -389,11 +391,7 @@ def test_invalid_datasource_config_does_not_break_cloud_context(
     cloud_api_fake_db["datasources"][datasource_id] = {
         "data": {
             "id": datasource_id,
-            "type": "datasource",
-            "attributes": {
-                "name": datasource_name,
-                "datasource_config": invalid_datasource_config,
-            },
+            **invalid_datasource_config,
         }
     }
     with pytest.warns(GxInvalidDatasourceWarning):
@@ -470,7 +468,7 @@ class TestPandasDefaultWithCloud:
         assert verify_asset_names_mock.assert_call_count(
             urllib.parse.urljoin(
                 cloud_details.base_url,
-                f"organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
+                f"api/v1/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
             ),
             1,
         )

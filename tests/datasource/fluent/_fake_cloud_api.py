@@ -277,7 +277,7 @@ def delete_datasources_cb(
     deleted_ds = datasources.pop(datasource_id, None)
     print(pf(deleted_ds, depth=5))
     if deleted_ds:
-        ds_name = deleted_ds["data"]["attributes"]["datasource_config"]["name"]
+        ds_name = deleted_ds["data"]["name"]
         _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].remove(ds_name)
         LOGGER.debug(f"Deleted datasource '{ds_name}'")
         result = CallbackResult(204, headers={}, body="")
@@ -302,16 +302,12 @@ def delete_data_assets_cb(
 
     # find and remove asset from datasource config
     for datasource in datasources.values():
-        for idx, asset in enumerate(
-            datasource["data"]["attributes"]["datasource_config"].get("assets", {})
-        ):
+        for idx, asset in enumerate(datasource["data"].get("assets", {})):
             if asset.get("id") == data_asset_id:
                 deleted_asset_idx = idx
                 break
         if deleted_asset_idx is not None:
-            deleted_asset = datasource["data"]["attributes"]["datasource_config"]["assets"].pop(
-                deleted_asset_idx
-            )
+            deleted_asset = datasource["data"]["assets"].pop(deleted_asset_idx)
             break
 
     if deleted_asset:
