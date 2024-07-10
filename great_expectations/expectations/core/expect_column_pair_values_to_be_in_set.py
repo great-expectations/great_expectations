@@ -195,6 +195,8 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     )
 
     class Config:
+        titile = "Expect column pair values to be in set"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnPairValuesToBeInSet]
