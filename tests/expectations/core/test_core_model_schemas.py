@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 import pytest
@@ -29,10 +28,8 @@ def test_schemas_updated():
         if isinstance(expectation, MetaExpectation)
     }
     schema_file_paths = Path(schemas.__file__).parent.glob("*.json")
-    all_schemas = {
-        file_path.stem: json.loads(file_path.read_bytes()) for file_path in schema_file_paths
-    }
+    all_schemas = {file_path.stem: file_path.read_text() for file_path in schema_file_paths}
     for cls_name, schema in all_schemas.items():
         assert (
-            schema == all_models[cls_name].schema()
+            all_models[cls_name].schema_json(indent=4) + "\n" == schema
         ), "json schemas not updated, run `invoke schemas --sync`"
