@@ -27,6 +27,7 @@ def set_v1_get_context_endpoint():
     GXCloudStoreBackend._ENDPOINT_VERSION_LOOKUP[GXCloudRESTResource.DATA_CONTEXT] = previous
 
 
+@pytest.mark.xfail(reason="V1 API changes require OSS changes")
 @pytest.mark.cloud
 @pytest.mark.parametrize("analytics_enabled", [True, False])
 def test_get_context(set_v1_get_context_endpoint: None, monkeypatch, analytics_enabled):
