@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import functools
 import logging
 import urllib.parse
@@ -18,7 +19,11 @@ from typing import (
 from great_expectations._docs_decorators import deprecated_method_or_class, public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
-from great_expectations.compatibility.snowflake import URL
+from great_expectations.compatibility.snowflake import (
+    IS_SNOWFLAKE_INSTALLED,
+    SNOWFLAKE_NOT_IMPORTED,
+)
+from great_expectations.compatibility.snowflake import URL as SnowflakeURL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
@@ -27,10 +32,14 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigUri,
     _check_config_substitutions_needed,
 )
+from great_expectations.datasource.fluent.constants import (
+    SNOWFLAKE_PARTNER_APPLICATION_CLOUD,
+    SNOWFLAKE_PARTNER_APPLICATION_OSS,
+)
 from great_expectations.datasource.fluent.sql_datasource import (
     FluentBaseModel,
+    SQLAlchemyCreateEngineError,
     SQLDatasource,
-    SQLDatasourceError,
     TableAsset,
 )
 
@@ -51,6 +60,28 @@ REQUIRED_QUERY_PARAMS: Final[Iterable[str]] = {  # errors will be thrown if any 
 }
 
 MISSING: Final = object()  # sentinel value to indicate missing values
+
+
+@functools.lru_cache(maxsize=4)
+def _is_b64_encoded(sb: str | bytes) -> bool:
+    """
+    Check if a string or bytes is base64 encoded.
+    By decoding and then encoding it, we can check if it's the same.
+
+    Copied from: https://stackoverflow.com/a/45928164/6304433
+    """
+    try:
+        if isinstance(sb, str):
+            # If there's unicode, an exception will be thrown and the function will return false
+            sb_bytes = bytes(sb, "ascii")
+        elif isinstance(sb, bytes):
+            sb_bytes = sb
+        else:
+            return False
+        return base64.b64encode(base64.b64decode(sb_bytes)) == sb_bytes
+    except Exception as exc:
+        LOGGER.debug(f"Exception handled while checking base64 encoding - {exc!r}")
+    return False
 
 
 @functools.lru_cache(maxsize=4)
@@ -423,6 +454,18 @@ class SnowflakeDatasource(SQLDatasource):
             )
         return connection_string
 
+    @pydantic.validator("kwargs")
+    def _base64_encode_private_key(cls, kwargs: dict) -> dict:
+        if connect_args := kwargs.get("connect_args", {}):
+            if private_key := connect_args.get("private_key"):
+                # test if it's already base64 encoded
+                if _is_b64_encoded(private_key):
+                    LOGGER.info("private_key is already base64 encoded")
+                else:
+                    LOGGER.info("private_key is not base64 encoded, encoding now")
+                    connect_args["private_key"] = base64.standard_b64encode(private_key)
+        return kwargs
+
     class Config:
         @staticmethod
         def schema_extra(schema: dict, model: type[SnowflakeDatasource]) -> None:
@@ -435,6 +478,24 @@ class SnowflakeDatasource(SQLDatasource):
             schema["properties"]["connection_string"].update({"oneOf": connection_string_prop})
 
     def _get_connect_args(self) -> dict[str, str | bool]:
+        excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
+        # dump as json dict to force serialization of things like AnyUrl
+        return self._json_dict(exclude=excluded_fields, exclude_none=True)
+
+    def _get_snowflake_partner_application(self) -> str:
+        """
+        This is used to set the application query parameter in the Snowflake connection URL,
+        which provides attribution to GX for the Snowflake Partner program.
+        """
+
+        # This import is here to avoid a circular import
+        from great_expectations.data_context import CloudDataContext
+
+        if isinstance(self._data_context, CloudDataContext):
+            return SNOWFLAKE_PARTNER_APPLICATION_CLOUD
+        return SNOWFLAKE_PARTNER_APPLICATION_OSS
+
+    def _get_url_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
         # dump as json dict to force serialization of things like AnyUrl
         return self._json_dict(exclude=excluded_fields, exclude_none=True)
@@ -484,23 +545,59 @@ class SnowflakeDatasource(SQLDatasource):
                 connection_string: str | dict = model_dict.pop("connection_string")
 
                 if isinstance(connection_string, str):
-                    self._engine = sa.create_engine(connection_string, **kwargs)
+                    url = sa.engine.url.make_url(connection_string)
+                    url = url.update_query_dict(
+                        query_parameters={"application": self._get_snowflake_partner_application()}
+                    )
+                    self._engine = self._build_engine_with_connect_args(url=url, **kwargs)
                 else:
-                    self._engine = self._build_engine_with_connect_args(**connection_string)
+                    self._engine = self._build_engine_with_connect_args(
+                        application=self._get_snowflake_partner_application(),
+                        **connection_string,
+                        **kwargs,
+                    )
 
             except Exception as e:
-                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501
-                # one possible case is a missing plugin (e.g. psycopg2)
-                raise SQLDatasourceError(  # noqa: TRY003
-                    "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
-                ) from e
-            # Since a connection string isn't strictly required for Snowflake, we conditionally cache  # noqa: E501
+                # connection_string passed pydantic validation, but fails to create sqla engine
+                # Possible case is a missing plugin (e.g. snowflake-sqlalchemy)
+                if IS_SNOWFLAKE_INSTALLED:
+                    raise SQLAlchemyCreateEngineError(
+                        cause=e, addendum=str(SNOWFLAKE_NOT_IMPORTED)
+                    ) from e
+                raise SQLAlchemyCreateEngineError(cause=e) from e
+            # connection string isn't strictly required for Snowflake, so we conditionally cache
             if isinstance(self.connection_string, str):
                 self._cached_connection_string = self.connection_string
         return self._engine
 
-    def _build_engine_with_connect_args(self, **kwargs) -> sqlalchemy.Engine:
-        connect_args = self._get_connect_args()
-        connect_args.update(kwargs)
-        url = URL(**connect_args)
-        return sa.create_engine(url)
+    def _build_engine_with_connect_args(
+        self,
+        url: SnowflakeURL | None = None,
+        connect_args: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> sqlalchemy.Engine:
+        if not url:
+            url_args = self._get_url_args()
+            url_args.update(kwargs)
+            url = SnowflakeURL(**url_args)
+        else:
+            url_args = {}
+
+        engine_kwargs: dict[Literal["url", "connect_args"], Any] = {}
+        if connect_args:
+            if private_key := connect_args.get("private_key"):
+                url_args.pop(  # TODO: update models + validation to handle this
+                    "password", None
+                )
+                LOGGER.info(
+                    "private_key detected,"
+                    " ignoring password and using private_key for authentication"
+                )
+                # assume the private_key is base64 encoded
+                connect_args["private_key"] = base64.standard_b64decode(private_key)
+
+            engine_kwargs["connect_args"] = connect_args
+
+        engine_kwargs["url"] = url
+
+        return sa.create_engine(**engine_kwargs)

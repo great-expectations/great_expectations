@@ -10,7 +10,7 @@ We also consolidate logic for warning based on version number in this module.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal, NoReturn
 
 from packaging.version import Version
 
@@ -18,24 +18,24 @@ from great_expectations.compatibility.typing_extensions import override
 
 
 class NotImported:
-    def __init__(self, message: str):
+    def __init__(self, message: str) -> None:
         self.__dict__["gx_error_message"] = message
 
-    def __getattr__(self, attr: str) -> Any:
+    def __getattr__(self, attr: str) -> NoReturn:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
     @override
-    def __setattr__(self, key: str, value: Any) -> None:
+    def __setattr__(self, key: str, value: Any) -> NoReturn:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
-    def __call__(self, *args, **kwargs) -> Any:
+    def __call__(self, *args, **kwargs) -> NoReturn:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
     @override
     def __str__(self) -> str:
         return self.__dict__["gx_error_message"]
 
-    def __bool__(self):
+    def __bool__(self) -> Literal[False]:
         return False
 
 
