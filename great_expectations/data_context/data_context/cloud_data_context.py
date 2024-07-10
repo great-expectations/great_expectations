@@ -255,7 +255,8 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         # This should be done before datasources are popped from the config below until
         # fluent_datasourcse are renamed datasourcess ()
-        config["fluent_datasources"] = {ds["name"]: ds for ds in config.get("data_sources", [])}
+        v1_data_sources = config.pop("data_sources", [])
+        config["fluent_datasources"] = {ds["name"]: ds for ds in v1_data_sources}
 
         # Various context variables are no longer top-level keys in V1
         for var in (
