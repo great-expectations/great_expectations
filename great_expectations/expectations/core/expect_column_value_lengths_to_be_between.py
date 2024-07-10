@@ -60,7 +60,7 @@ MIN_VALUE_DESCRIPTION = "The minimum value for a column entry length."
 MAX_VALUE_DESCRIPTION = "The maximum value for a column entry length."
 STRICT_MIN_DESCRIPTION = "If True, values must be strictly larger than min_value."
 STRICT_MAX_DESCRIPTION = "If True, values must be strictly smaller than max_value."
-DATA_QUALITY_ISSUES = ["Numerical Data"]
+DATA_QUALITY_ISSUES = ["Numerical data"]
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
@@ -249,6 +249,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column value lengths to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValueLengthsToBeBetween]

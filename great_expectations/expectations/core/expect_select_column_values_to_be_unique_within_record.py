@@ -195,6 +195,8 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     args_keys = ("column_list",)
 
     class Config:
+        title = "Expect select column values to be unique within record"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectSelectColumnValuesToBeUniqueWithinRecord]

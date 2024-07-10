@@ -368,6 +368,8 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column KL divergence to be less than"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnKLDivergenceToBeLessThan]

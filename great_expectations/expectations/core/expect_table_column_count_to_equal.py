@@ -155,6 +155,8 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     args_keys = ("value",)
 
     class Config:
+        title = "Expect table column count to equal"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

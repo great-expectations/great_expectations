@@ -32,7 +32,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     ge_cloud_runtime_organization_id,
     ge_cloud_access_token,
 ):
-    called_with_url = f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"  # noqa: E501
+    called_with_url = f"{ge_cloud_runtime_base_url}/api/v1/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"  # noqa: E501
 
     # Ensure that the request goes through
     responses.get(

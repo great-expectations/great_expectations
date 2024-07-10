@@ -164,6 +164,8 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     args_keys = ("other_table_name",)
 
     class Config:
+        title = "Expect table row count to equal other table"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectTableRowCountToEqualOtherTable]

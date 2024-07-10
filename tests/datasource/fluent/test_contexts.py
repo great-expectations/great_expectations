@@ -141,13 +141,11 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     ).add_query_asset(asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"')
 
     fds_after_add: dict = yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
-    print(f"'{asset_name}' added\n-----------------\n{pf(fds_after_add)}")
     assert asset_name in fds_after_add[datasource_name]["assets"]
 
     context.fluent_datasources[datasource_name].delete_asset(asset_name)
 
     fds_after_delete: dict = yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
-    print(f"\n\n'{asset_name}' deleted\n-----------------\n{pf(fds_after_delete)}")
     assert asset_name not in fds_after_delete[datasource_name].get("assets", {})
 
 

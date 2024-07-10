@@ -228,7 +228,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -381,7 +381,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:

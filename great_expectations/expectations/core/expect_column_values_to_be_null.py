@@ -188,6 +188,8 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     args_keys = ("column",)
 
     class Config:
+        title = "Expect column values to be null"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeNull]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)
