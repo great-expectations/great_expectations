@@ -69,7 +69,7 @@ ALLOW_RELATIVE_ERROR_DESCRIPTION = (
     "communications on backends that support or require it."
 )
 SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
-DATA_QUALITY_ISSUES = ["Numerical Data"]
+DATA_QUALITY_ISSUES = ["Numerical data"]
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
@@ -265,6 +265,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column quantile values to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnQuantileValuesToBeBetween]
