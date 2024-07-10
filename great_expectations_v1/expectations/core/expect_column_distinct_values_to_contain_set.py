@@ -210,6 +210,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column distinct values to contain set"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnDistinctValuesToContainSet]

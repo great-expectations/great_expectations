@@ -160,6 +160,8 @@ class ExpectColumnToExist(BatchExpectation):
     args_keys = ("column", "column_index")
 
     class Config:
+        title = "Expect column to exist"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnToExist]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

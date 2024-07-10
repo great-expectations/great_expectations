@@ -192,6 +192,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     args_keys = ("column", "threshold")
 
     class Config:
+        title = "Expect column value z-scores to be less than"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValueZScoresToBeLessThan]

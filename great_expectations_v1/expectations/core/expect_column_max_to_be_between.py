@@ -69,7 +69,7 @@ SUPPORTED_DATA_SOURCES = [
     "BigQuery",
     "Snowflake",
 ]
-DATA_QUALITY_ISSUES = ["Numerical Data"]
+DATA_QUALITY_ISSUES = ["Numerical data"]
 
 
 class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
@@ -220,6 +220,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
     class Config:
+        title = "Expect column maximum to be between"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMaxToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)

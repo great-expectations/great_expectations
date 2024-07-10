@@ -187,6 +187,8 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     args_keys = ("column_list",)
 
     class Config:
+        title = "Expect table columns to match ordered list"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchOrderedList]

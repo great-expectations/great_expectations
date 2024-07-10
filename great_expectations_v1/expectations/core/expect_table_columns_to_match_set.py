@@ -201,6 +201,8 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     )
 
     class Config:
+        title = "Expect table columns to match set"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchSet]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

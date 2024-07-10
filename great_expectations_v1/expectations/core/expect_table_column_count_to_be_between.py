@@ -183,6 +183,8 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     )
 
     class Config:
+        title = "Expect table column count to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectTableColumnCountToBeBetween]

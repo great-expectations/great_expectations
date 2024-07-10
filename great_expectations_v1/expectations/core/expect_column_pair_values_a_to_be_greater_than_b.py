@@ -210,6 +210,8 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     )
 
     class Config:
+        title = "Expect column pair values A to be greater than B"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnPairValuesAToBeGreaterThanB]

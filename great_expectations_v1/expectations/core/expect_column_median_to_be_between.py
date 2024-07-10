@@ -57,7 +57,7 @@ SUPPORTED_DATA_SOURCES = [
     "BigQuery",
     "Snowflake",
 ]
-DATA_QUALITY_ISSUES = ["Numerical Data"]
+DATA_QUALITY_ISSUES = ["Numerical data"]
 
 
 class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
@@ -213,6 +213,8 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column median to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnMedianToBeBetween]

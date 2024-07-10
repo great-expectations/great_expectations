@@ -217,6 +217,8 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to be in set"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInSet]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)

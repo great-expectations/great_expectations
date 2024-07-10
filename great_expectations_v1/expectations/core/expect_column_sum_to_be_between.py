@@ -205,6 +205,8 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column sum to be between"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnSumToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)

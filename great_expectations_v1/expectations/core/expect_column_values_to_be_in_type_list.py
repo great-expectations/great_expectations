@@ -237,6 +237,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to be in type list"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInTypeList]

@@ -222,6 +222,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
     """ A Column Aggregate Metric Decorator for the Unique Value Count"""
 
     class Config:
+        title = "Expect column unique value count to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnUniqueValueCountToBeBetween]
