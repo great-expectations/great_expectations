@@ -21,7 +21,10 @@ import OverviewCard from '@site/src/components/OverviewCard';
 ## Supplemental Information
 
 <LinkCardGrid>
+  <LinkCard topIcon label="Data quality use cases" description="Learn how to use GX to validate key data quality dimensions" to="/reference/learn/data_quality_use_cases/dq_use_cases_lp.md" icon="/img/statistics_icon.svg" />
+
   <LinkCard topIcon label="Usage statistics" description="Learn what usage statistics are collected and how they are used" to="/reference/learn/usage_statistics" icon="/img/statistics_icon.svg" />
+
   <LinkCard topIcon label="Glossary" description="An alphabetical list of GX terms and words with definitions" to="/reference/learn/glossary" icon="/img/glossary_icon.svg" />
 </LinkCardGrid>
 

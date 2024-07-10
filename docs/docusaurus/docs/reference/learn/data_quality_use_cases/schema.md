@@ -1,7 +1,10 @@
 ---
 sidebar_label: 'Schema'
-title: 'Ensuring schema consistency with Great Expectations'
+title: 'Ensure schema consistency with GX'
 ---
+
+import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs';
 
 **Data schema** refers to the structural blueprint of a dataset, encompassing elements such as column
 names, data types, and the overall organization of information. When working with data, ensuring
@@ -19,6 +22,9 @@ to define and enforce the structural integrity of your datasets. These tools ena
 robust schema validation within your data pipelines, helping to catch and address schema-related
 issues before they propagate through your data ecosystem. This guide will walk you through
 leveraging these Expectations to implement effective schema validation in your data workflows.
+
+## Prerequisite knowledge
+This article assumes basic familiarity with GX components and workflows. Reference the [GX Overview](/core/introduction/gx_overview.md) for additional content on GX fundamentals.
 
 ## Data preview
 
@@ -39,95 +45,111 @@ GX offers a collection of Expectations for schema validation, all of which can b
 
 The schema Expectations provide straightforward, practical solutions for common validation scenarios and can also be used to satisfy more nuanced validation needs.
 
-### Expect Column to Exist
+### Column-level Expectations
 
-Ensures the presence of a specified column in your dataset. This Expectation is foundational for
-schema validation, verifying that critical columns are included, thus preventing data processing
-errors due to missing fields. ([Link to Expectation
-Gallery](https://greatexpectations.io/expectations/expect_column_to_exist))
+:::warning[TODO]
+Add parent section introduction sentence(s) and move tips fro individual Expectations to parent level.
+:::
+
+Column-level schema Expectations ...
+
+#### Expect Column Values To Be Of Type
+
+Validates that the values within a column are of a specific data type. This is more stringent
+compared to the previous Expectation, suitable for scenarios needing strict type adherence.
+
+**Use Case:** Handling data transferred using formats that do not embed schema
+(e.g., CSV), where apparent type changes can occur when new values appear.
 
 ```python
-gxe.ExpectColumnToExist(column="sender_account_number")
+gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION")
 ```
 
+View `ExpectColumnValuesToBeOfType` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type).
 
-:::info[Use Case]
-Ideal during data ingestion or integration of multiple data sources to ensure that
-essential fields are present before proceeding with downstream processing.
-:::
+---
 
-:::tip[GX Tip]
-Implement this Expectation early in your data pipeline to catch missing columns as soon
-as possible, minimizing downstream errors and rework.
-:::
+#### Expect Column Values To Be In Type List
 
+Ensures that the values in a specified column are within a specified type list. This Expectation is useful for columns with varied permissible types, such as mixed-type fields often found in legacy databases.
 
-### Expect Column Values to be in Type List
-
-Ensures that the values in a specified column are within a specified type list. This Expectation is
-useful for columns with varied permissible types, such as mixed-type fields often found in legacy
-databases. ([Link to Expectation
-Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list))
+**Use Case:** Suitable for datasets transitioning from older systems where type consistency might
+not be strictly enforced, aiding smooth data migration and validation.
 
 ```python
 gxe.ExpectColumnValuesToBeInTypeList(column="account_type", type_list=["INTEGER", "STRING"])
 ```
 
-:::info[Use Case]
-Suitable for datasets transitioning from older systems where type consistency might
-not be strictly enforced, aiding smooth data migration and validation.
-:::
+View `ExpectColumnValuesToBeInTypeList` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list).
 
 :::tip[GX Tip]
 Combine this Expectation with detailed logging to track which types are most frequently
 encountered, aiding in eventual standardization efforts.
 :::
 
-### Expect Column Values to be of Type
+### Table-level Expectations
 
-Validates that the values within a column are of a specific data type. This is more stringent
-compared to the previous Expectation, suitable for scenarios needing strict type adherence. ([Link
-to Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type))
+:::warning[TODO]
+Add parent section introduction sentence(s) and move tips fro individual Expectations to parent level.
+:::
+
+Table-level schema Expectations ...
+
+#### Expect Column To Exist
+
+Ensures the presence of a specified column in your dataset. This Expectation is foundational for
+schema validation, verifying that critical columns are included, thus preventing data processing
+errors due to missing fields.
+
+**Use Case:** Ideal during data ingestion or integration of multiple data sources to ensure that
+essential fields are present before proceeding with downstream processing.
 
 ```python
-gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION")
+gxe.ExpectColumnToExist(column="sender_account_number")
 ```
 
-:::info[Use Case]
-Handling data transferred using formats that do not embed schema (e.g., CSV), where
-apparent type changes can occur when new values appear.
-:::
+View `ExpectColumnToExist` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_to_exist).
+
 
 :::tip[GX Tip]
-Opt for `ExpectColumnValuesToBeOfType` when dealing with columns where
-any type deviation could lead to significant processing errors or inaccuracies.
+Implement this Expectation early in your data pipeline to catch missing columns as soon
+as possible, minimizing downstream errors and rework.
 :::
 
-### Expect Table Column Count to Equal
+---
+
+#### Expect Table Column Count To Equal
 
 Ensures the dataset has an exact number of columns. This precise Expectation is for datasets with a
-fixed schema structure, providing a strong safeguard against unexpected changes. ([Link
-to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal))
+fixed schema structure, providing a strong safeguard against unexpected changes.
+
+**Use Case:** Perfect for regulatory reporting scenarios where the schema is strictly defined, and any deviation can lead to compliance violations.
 
 ```python
 gxe.ExpectTableColumnCountToEqual(value=5)
 ```
 
-:::info[Use Case]
-Perfect for regulatory reporting scenarios where the schema is strictly defined, and
-any deviation can lead to compliance violations.
-:::
+View `ExpectTableColumnCountToEqual` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal).
+
 
 :::tip[GX Tip]
 Periodically review and update this Expectation alongside any schema changes,
 especially when new regulatory requirements emerge.
 :::
 
-### Expect Table Columns to Match Ordered List
+---
+
+#### Expect Table Columns To Match Ordered List
 
 Validates the exact order of columns. This is crucial when processing pipelines depend on a specific
-column order, ensuring consistency and reliability. ([Link
-to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list))
+column order, ensuring consistency and reliability.
+
+**Use Case:** Particularly relevant when handling scenarios such as changes in the order in which
+columns are computed during serialization.
 
 ```python
 gxe.ExpectTableColumnsToMatchOrderedList([
@@ -135,52 +157,58 @@ gxe.ExpectTableColumnsToMatchOrderedList([
 ])
 ```
 
-:::info[Use Case]
-Particularly relevant when handling scenarios such as changes in the order in which
-columns are computed during serialization.
-:::
+View `ExpectTableColumnsToMatchOrderedList` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list).
+
 
 :::tip[GX Tip]
 Use `ExpectTableColumnsToMatchOrderedList` over
 `ExpectTableColumnsToMatchSet` when order matters, such as in scripts directly referencing column positions.
 :::
 
-### Expect Table Columns to Match Set
+---
+
+#### Expect Table Columns To Match Set
 
 Checks that the dataset contains specific columns, without regard to order. This Expectation offers
-flexibility where column presence is more critical than their sequence. ([Link
-to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set))
+flexibility where column presence is more critical than their sequence.
+
+**Use Case:** Useful for datasets that might undergo reordering during preprocessing; key for data warehousing operations where column integrity is crucial, but order might vary.
 
 ```python
-gxe.ExpectTableColumnsToMatchSet(column_set=[
-  "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
-], exact_match=False)
+gxe.ExpectTableColumnsToMatchSet(
+  column_set=[
+    "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
+  ],
+  exact_match=False
+)
 ```
 
-:::info[Use Case]
-Useful for datasets that might undergo reordering during preprocessing; key for data
-warehousing operations where column integrity is crucial, but order might vary.
-:::
+View `ExpectTableColumnsToMatchSet` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set).
+
 
 :::tip[GX Tip]
 Opt for `ExpectTableColumnsToMatchSet` when integrating datasets from
 various sources where column order might differ, but consistency in available data is required.
 :::
 
-### Expect Table Column Count to be Between
+---
+
+#### Expect Table Column Count To Be Between
 
 Validates that the number of columns falls within a specific range, offering flexibility for
-datasets that can expand or contract within a known boundary. ([Link
-to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between))
+datasets that can expand or contract within a known boundary.
+
+**Use Case:**  Beneficial for evolving datasets where additional columns could be added over time, but the general structure remains bounded within a predictable range.
 
 ```python
 gxe.ExpectTableColumnCountToBeBetween(min_value=6, max_value=8)
 ```
 
-:::info[Use Case]
-Beneficial for evolving datasets where additional columns could be added over time,
-but the general structure remains bounded within a predictable range.
-:::
+View `ExpectTableColumnCountToBeBetween` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between).
+
 
 :::tip[GX Tip]
 Regularly review the allowed range as your dataset evolves, ensuring it aligns
@@ -193,7 +221,7 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 ![Validate schema Expectations in GX Cloud](./images/gx_cloud_schema_expectations_validate.gif)
 
-### Comparative analysis: Ensuring schema consistency in financial transfers
+### Ensure schema consistency across datasets
 
 **Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
 
@@ -204,7 +232,7 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 **Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
 
-### Different Expectation suites: Strict vs. relaxed type checking
+### Strict vs. relaxed type checking
 
 **Context**: In some contexts, both the names and order of columns can be critically important. Using different suites to enforce these aspects can help maintain consistency.
 
@@ -218,9 +246,7 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 **Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
 
-## Community best practices
-
-### Common pitfalls and how to avoid them
+## Avoid common schema validation pitfalls
 
 - **Inconsistent Data Types**: Inconsistencies in data types can arise when data is ingested from diverse sources or when schema definitions are updated without comprehensive checks. These inconsistencies often lead to processing errors, making analyses unreliable. Regular monitoring of data ingestion points and strict enforcement of type consistency through your data validation framework can mitigate these issues.
 
@@ -234,13 +260,4 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 Robust schema validation is fundamental to trustworthy data pipelines. Great Expectations empowers you to proactively define and enforce the structural integrity of your data, ensuring its reliability for critical analyses and decision-making processes. By consistently incorporating schema validation practices, you enhance data quality, reduce downstream errors, and foster a strong culture of data confidence within your organization.
 
-However, schema validation is just one aspect of a comprehensive data quality strategy. Achieving high-quality data requires a multifaceted approach involving:
-
-1. **Data Integrity**: Ensures that data remains accurate and consistent over its lifecycle by validating key constraints.
-2. **Missing Data**: Identifies and validates gaps in datasets to [maintain completeness](/reference/learn/data_quality_use_cases/missingness.md) and usability.
-3. **Patterns and Formats**: Ensures that data values adhere to expected formats or patterns for consistency.
-4. **Cardinality and Membership**: Ensures that columns maintain correct unique counts and that values belong to a specified set.
-5. **Data Volume**: Monitors and validates the number of records to ensure they fall within expected bounds.
-6. **Numerical Data**: Validates numerical data properties and distributions to detect anomalies.
-
-To effectively handle these dimensions, consider integrating various Expectations to cover these broader data quality aspects. Regular validation, monitoring, and iterations are key to maintaining high standards.
+However, schema validation is just one aspect of a comprehensive data quality strategy. Achieving high-quality data requires a multifaceted approach requiring validation across [multiple aspects of data quality, including data integrity, missingness, volume, and distribution](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md). To effectively handle these dimensions, consider integrating various Expectations to cover these broader data quality aspects. Regular validation, monitoring, and iterations are key to maintaining high standards.
