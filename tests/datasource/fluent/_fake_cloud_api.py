@@ -286,7 +286,6 @@ def delete_datasources_cb(
 
     datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["datasources"]
     deleted_ds = datasources.pop(datasource_id, None)
-    print(pf(deleted_ds, depth=5))
     if deleted_ds:
         ds_name = deleted_ds["data"]["attributes"]["datasource_config"]["name"]
         _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].remove(ds_name)
