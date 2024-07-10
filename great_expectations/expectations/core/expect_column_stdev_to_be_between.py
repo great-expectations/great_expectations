@@ -216,6 +216,8 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column standard deviation to be between"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnStdevToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)

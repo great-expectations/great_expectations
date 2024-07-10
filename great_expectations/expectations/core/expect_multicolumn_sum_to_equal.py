@@ -47,7 +47,7 @@ SUPPORTED_DATA_SOURCES = [
     "BigQuery",
     "Snowflake",
 ]
-DATA_QUALITY_ISSUES = ["Data Integrity"]
+DATA_QUALITY_ISSUES = ["Data integrity"]
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
@@ -204,6 +204,8 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     )
 
     class Config:
+        title = "Expect multicolumn sum to equal"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectMulticolumnSumToEqual]) -> None:
             MulticolumnMapExpectation.Config.schema_extra(schema, model)

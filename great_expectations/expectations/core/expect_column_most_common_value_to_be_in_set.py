@@ -202,6 +202,8 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column most common value to be in set"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnMostCommonValueToBeInSet]

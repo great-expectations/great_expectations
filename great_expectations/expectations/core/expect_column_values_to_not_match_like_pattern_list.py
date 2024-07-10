@@ -40,7 +40,7 @@ EXPECTATION_SHORT_DESCRIPTION = (
 LIKE_PATTERN_LIST_DESCRIPTION = (
     "The list of SQL like pattern expressions the column entries should NOT match."
 )
-DATA_QUALITY_ISSUES = ["Pattern Matching"]
+DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = ["SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
 
 
@@ -205,6 +205,8 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to not match like pattern list"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotMatchLikePatternList]

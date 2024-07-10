@@ -190,6 +190,8 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     args_keys = ("column_list",)
 
     class Config:
+        title = "Expect compound columns to be unique"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectCompoundColumnsToBeUnique]

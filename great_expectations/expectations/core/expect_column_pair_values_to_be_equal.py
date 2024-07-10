@@ -44,7 +44,7 @@ SUPPORTED_DATA_SOURCES = [
     "BigQuery",
     "Snowflake",
 ]
-DATA_QUALITY_ISSUES = ["Data Integrity"]
+DATA_QUALITY_ISSUES = ["Data integrity"]
 
 
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
@@ -203,6 +203,8 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     )
 
     class Config:
+        title = "Expect column pair values to be equal"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnPairValuesToBeEqual]
