@@ -119,10 +119,6 @@ class SQLAlchemyCreateEngineError(SQLDatasourceError):
         if addendum:
             message += f": {addendum}"
         super().__init__(message)
-        if cause:
-            assert (
-                self.__cause__ is cause
-            ), "Declared `cause` doesn't match actual cause"  # TODO: remove me?
 
 
 class _Partitioner(PartitionerProtocol, Protocol):
