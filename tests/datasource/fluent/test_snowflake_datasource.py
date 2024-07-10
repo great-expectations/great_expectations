@@ -99,6 +99,10 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                 "user": "my_user",
                 "password": "DUMMY_VALUE",
                 "account": "my_account",
+                "database": "d_public",
+                "schema": "s_public",
+                "warehouse": "my_wh",
+                "role": "my_role",
             },
             "kwargs": {"connect_args": {"private": _EXAMPLE_PRIVATE_KEY}},
         },
@@ -110,6 +114,10 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                 "user": "my_user",
                 "password": "DUMMY_VALUE",
                 "account": "my_account",
+                "database": "d_public",
+                "schema": "s_public",
+                "warehouse": "my_wh",
+                "role": "my_role",
             },
             "kwargs": {"connect_args": {"private": _EXAMPLE_B64_ENCODED_PRIVATE_KEY}},
         },
@@ -122,6 +130,16 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
 def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MY_USER", "my_user")
     monkeypatch.setenv("MY_PASSWORD", "my_password")
+
+
+@pytest.fixture
+def sf_test_connection_noop(monkeypatch: pytest.MonkeyPatch) -> None:
+    TEST_LOGGER.warning("Monkeypatching SnowflakeDatasource.test_connection() to a noop")
+
+    def noop(self):
+        TEST_LOGGER.info(".test_connection noop")
+
+    monkeypatch.setattr(SnowflakeDatasource, "test_connection", noop)
 
 
 @pytest.mark.unit
