@@ -59,46 +59,38 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
     ```python title="Python"
     import os
     import great_expectations as gx
-    from airflow import DAG
-    from airflow.operators.python import PythonOperator
-    from datetime import datetime
+    import pendulum
+    from airflow.decorators import dag, task
 
-    # Replace <YOUR_ACCESS_TOKEN> and <YOUR_CLOUD_ORGANIZATION_ID> with your credentials.
 
-    GX_CLOUD_ACCESS_TOKEN = "<YOUR_ACCESS_TOKEN>"
-    GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"
-
-    CHECKPOINT_NAME = "<YOUR_CHECKPOINT>"
-
-    def run_gx_airflow():
-
-        context = gx.get_context(
-            cloud_access_token=GX_CLOUD_ACCESS_TOKEN,
-            cloud_organization_id=GX_CLOUD_ORGANIZATION_ID,
-        )
-        checkpoint = context.get_legacy_checkpoint(name=CHECKPOINT_NAME)
-        checkpoint.run()
-
-    default_args = {
-        'owner': 'airflow',
-        'depends_on_past': False,
-        'start_date': datetime(2023, 8, 9),
-    }
-
-    gx_dag = DAG(
-        'gx_dag',
-        default_args=default_args,
-        schedule= '0 0 * * *', # This is set to run daily at midnight. Adjust as needed.
-        catchup=False
+    @dag(
+        schedule=None,
+        start_date=pendulum.datetime(2023, 8, 9),
+        catchup=False,
     )
+    def gx_dag_with_deco():
+        os.environ["NO_PROXY"] = "*" #https://github.com/apache/airflow/discussions/24463
+        print("Great Expectations DAG Started")
 
-    run_gx_task = PythonOperator(
-        task_id='gx_airflow',
-        python_callable=run_gx_airflow,
-        dag=gx_dag,
-    )
+        @task
+        def run_checkpoint():
+            print("Running Checkpoint")
+            # Replace <YOUR_ACCESS_TOKEN>, <YOUR_CLOUD_ORGANIZATION_ID>, and <CHECKPOINT_NAME> with your credentials
+            GX_CLOUD_ACCESS_TOKEN = ""
+            GX_CLOUD_ORGANIZATION_ID = ""
+            CHECKPOINT_NAME = ""
+            context = gx.get_context(
+                cloud_access_token=GX_CLOUD_ACCESS_TOKEN,
+                cloud_organization_id=GX_CLOUD_ORGANIZATION_ID,
+            )
+            checkpoint = context.get_checkpoint(name=CHECKPOINT_NAME)
+            checkpoint.run()
+            return f"Checkpoint ran: {CHECKPOINT_NAME}"
 
-    run_gx_task
+        run_checkpoint()
+
+
+    run_this = gx_dag_with_deco()
     ```
 
 3. Save your changes and close the `gx_dag.py` DAG file.
