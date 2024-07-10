@@ -23,7 +23,10 @@ GX_ROOT_DIR = pathlib.Path(gx.__file__).parent.parent
 # Add test data to database for testing.
 load_data_into_test_database(
     table_name="transfers_1",
-    csv_path=str(GX_ROOT_DIR / "tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_1.csv"),
+    csv_path=str(
+        GX_ROOT_DIR
+        / "tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_1.csv"
+    ),
     connection_string=CONNECTION_STRING,
 )
 
@@ -44,55 +47,62 @@ suite = context.suites.add(gxe.ExpectColumnToExist("transfer_amount"))
 ## Start Expectation snippets.
 
 suite.add_expectation(
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeOfType">
-gxe.ExpectColumnValuesToBeOfType(
-    column="transfer_amount",
-    type_="DOUBLE_PRECISION"
-)
-# </snippet>
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeOfType">
+    gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION")
+    # </snippet>
 )
 
 suite.add_expectation(
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeInTypeList">
-gxe.ExpectColumnValuesToBeInTypeList(column="account_type", type_list=["INTEGER", "STRING"])
-# </snippet>
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeInTypeList">
+    gxe.ExpectColumnValuesToBeInTypeList(
+        column="account_type", type_list=["INTEGER", "STRING"]
+    )
+    # </snippet>
 )
 
 suite.add_expectation(
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnToExist">
-gxe.ExpectColumnToExist(column="sender_account_number")
-# </snippet>
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnToExist">
+    gxe.ExpectColumnToExist(column="sender_account_number")
+    # </snippet>
 )
 
 suite.add_expectation(
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToEqual">
-gxe.ExpectTableColumnCountToEqual(value=5)
-# </snippet>
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToEqual">
+    gxe.ExpectTableColumnCountToEqual(value=5)
+    # </snippet>
 )
 
 suite.add_expectation(
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchOrderedList">
-gxe.ExpectTableColumnsToMatchOrderedList([
-  "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
-])
-# </snippet>
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchOrderedList">
+    gxe.ExpectTableColumnsToMatchOrderedList(
+        [
+            "sender_account_number",
+            "recipient_account_number",
+            "transfer_amount",
+            "transfer_date",
+        ]
+    )
+    # </snippet>
 )
 
 suite.add_expectation(
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchSet">
-gxe.ExpectTableColumnsToMatchSet(
-  column_set=[
-    "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
-  ],
-  exact_match=False
-)
-# </snippet>
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchSet">
+    gxe.ExpectTableColumnsToMatchSet(
+        column_set=[
+            "sender_account_number",
+            "recipient_account_number",
+            "transfer_amount",
+            "transfer_date",
+        ],
+        exact_match=False,
+    )
+    # </snippet>
 )
 
 suite.add_expectation(
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToBeBetween">
-gxe.ExpectTableColumnCountToBeBetween(min_value=6, max_value=8)
-# </snippet>
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToBeBetween">
+    gxe.ExpectTableColumnCountToBeBetween(min_value=6, max_value=8)
+    # </snippet>
 )
 
 results = batch.validate(suite)
