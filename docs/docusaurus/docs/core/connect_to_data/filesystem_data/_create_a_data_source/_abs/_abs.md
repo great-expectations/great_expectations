@@ -17,44 +17,41 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
 1. Define the Data Source's parameters.
 
-   The following information is required when you create an Amazon S3 Data Source:
+   The following information is required when you create a Microsoft Azure Blob Storage Data Source:
 
    - `name`: A descriptive name used to reference the Data Source.  This should be unique within the Data Context.
-   - `bucket_name`: The Amazon S3 bucket name.
-   - `boto3_options`: Optional. Additional options for the Data Source. In the following examples, the default values are used.
+   - `azure_options`: Authentication settings.
+   
+   The `azure_options` parameter accepts a dictionary which should include two keys: `credential` and either `account_url` or `conn_str`.
 
-   Replace the variable values with your own and run the following Python code to define `name`, `bucket_name` and `boto3_options`:
+   - `credential`: An Azure Blob Storage token
+   - `account_url`: The url of your Azure Blob Storage account.  If you provide this then `conn_str` should be left out of the dictionary.
+   - `conn_str`: The connection string for your Azure Blob Storage account.  If you provide this then `account_url` should not be included in the dictionary.
+
+   To keep your credentials secure you can define them as environment variables or entries in `config_variables.yml`.  For more information on secure storage and retrieval of credentials in GX see [Configure credentials](/core/connect_to_data/sql_data/sql_data.md#configure-credentials).
+
+   Update the variables in the following code and execute it to define `name` and `azure_options`.  In this example, the value for `account_url` is pulled from the environment variable `AZURE_STORAGE_ACCOUNT_URL` and the value for `credential` is pulled from the environment variable `AZURE_CREDENTIAL`:
 
    ```python title="Python"
    datasource_name = "nyc_taxi_data"
-   bucket_name = "my_bucket"
-   boto3_options = {}
+   azure_options = {
+      "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
+      "credential": "${AZURE_CREDENTIAL}",
+   }
    ```
 
-   :::info Additional options for `boto3_options`
+2. Add an Azure Blob Storage Data Source to your Data Context.
 
-   The parameter `boto3_options` allows you to pass the following information:
+   GX can leverage either pandas or Spark as the backend for your Azure Blob Storage Data Source.  To create your Data Source, execute one of the following sets of code:
 
-   - `region_name`: Your AWS region name.
-   - `endpoint_url`: specifies an S3 endpoint.  You can provide an environment variable reference such as `"${S3_ENDPOINT}"` to securely include this in your code.  The string `"${S3_ENDPOINT}"` will be replaced with the value of the environment variable `S3_ENDPOINT`.
-   
-   For more information on secure storage and retrieval of credentials in GX see [Configure credentials](/core/connect_to_data/sql_data/sql_data.md#configure-credentials).
-
-   :::
-
-2. Add a S3 Filesystem Data Source to your Data Context.
-
-   GX can leverage either pandas or Spark as the backend for your S3 Filesystem Data Source.  To create your Data Source, execute one of the following sets of code:
- 
    <Tabs queryString="data_source_type" groupId="data_source_type" defaultValue='pandas_filesystem'>
 
    <TabItem value="pandas_filesystem" label="pandas">
 
    ```python title="Python"
-   datasource = context.sources.add_pandas_s3(
-      name=datasource_name,
-      bucket=bucket_name,
-      boto3_options=boto3_options
+   data_source = gx.data_sources.add_pandas_abs(
+      name=data_source_name,
+      azure_options=azure_options
    )
    ```
 
@@ -63,10 +60,9 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
    <TabItem value="spark" label="Spark">
 
    ```python title="Python"
-   datasource = context.sources.add_spark_s3(
-      name=datasource_name,
-      bucket=bucket_name,
-      boto3_options=boto3_options
+   data_source = gx.data_sources.add_spark_abs(
+      name=data_source_name,
+      azure_options=azure_options
    )
    ```
 
@@ -101,15 +97,16 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
    context = gx.get_context()
 
    # Define the Data Source's parameters:
-   datasource_name = "my_s3_datasource"
-   bucket_name = "my_bucket"
-   boto3_options = {}
+   datasource_name = "my_datasource"
+   azure_options = {
+      "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
+      "credential": "${AZURE_CREDENTIAL}",
+   }
    
    # Create the Data Source:
-   datasource = context.sources.add_pandas_s3(
-      name=datasource_name,
-      bucket=bucket_name,
-      boto3_options=boto3_options
+   data_source = gx.data_sources.add_pandas_abs(
+      name=data_source_name,
+      azure_options=azure_options
    )
    
    # Retrieve the Data Source:
@@ -126,15 +123,16 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
    context = gx.get_context()
 
    # Define the Data Source's parameters:
-   datasource_name = "my_s3_datasource"
-   bucket_name = "my_bucket"
-   boto3_options = {}
+   datasource_name = "my_datasource"
+   azure_options = {
+      "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
+      "credential": "${AZURE_CREDENTIAL}",
+   }
    
    # Create the Data Source:
-   datasource = context.sources.add_spark_s3(
-      name=datasource_name,
-      bucket=bucket_name,
-      boto3_options=boto3_options
+   data_source = gx.data_sources.add_spark_abs(
+      name=data_source_name,
+      azure_options=azure_options
    )
 
    # Retrieve the Data Source:
@@ -148,4 +146,3 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 </TabItem>
 
 </Tabs>
-

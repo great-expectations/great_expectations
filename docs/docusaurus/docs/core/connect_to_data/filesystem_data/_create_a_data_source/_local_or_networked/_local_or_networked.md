@@ -25,7 +25,7 @@ import PandasDefault from './_pandas_default.md'
 
    The following information is required when you create a Filesystem Data Source for a local or networked directory:
 
-   - `name`: A unique name for the Data Source.  This name can be used to retrieve the Data Source from the Data Context if needed.
+   - `name`: A descriptive name used to reference the Data Source.  This should be unique within the Data Context.
    - `base_directory`: The path to the folder that contains the data files, or the root folder of the directory hierarchy that contains the data files.
    
    If you are using a File Data Context, you can provide a path that is relative to the Data Context's `base_directory`.  Otherwise, you should provide the absolute path to the folder that contains your data.
@@ -71,13 +71,14 @@ import PandasDefault from './_pandas_default.md'
 
 5. Optional. Retrieve your Data Source from your Data Context.
 
-   You can retrieve your Data Source elsewhere in your code with:
+   You can retrieve your Data Source elsewhere in your code by updating the value of `datasource_name` and executing:
 
    ```python title="Python"
-   datasource = context.data_sources.get("nyc_taxi_data")
+   datasource_name="nyc_taxi_data"
+   datasource = context.data_sources.get(datasource_name)
    ```
 
-   If you are using a File Data Context you can also retrieve your Data Source from the Data Context in future python sessions.
+   If you are using a File Data Context your Data Source can also be retrieved from the Data Context in future python sessions.
 
 </TabItem>
 
