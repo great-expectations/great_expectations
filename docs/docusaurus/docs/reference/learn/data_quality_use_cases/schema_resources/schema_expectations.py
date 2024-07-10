@@ -40,8 +40,9 @@ data_asset = datasource.add_table_asset(name="data asset", table_name="transfers
 batch_definition = data_asset.add_batch_definition_whole_table("batch definition")
 batch = batch_definition.get_batch()
 
-# Add an initial Expectation just to get the suite created for testing.
-suite = context.suites.add(gxe.ExpectColumnToExist("transfer_amount"))
+suite = context.suites.add(
+    gx.core.expectation_suite.ExpectationSuite(name="example schema expectations")
+)
 
 #############################
 ## Start Expectation snippets.
