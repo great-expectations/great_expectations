@@ -79,6 +79,7 @@
         },
         "ignore_row_if": {
             "title": "Ignore Row If",
+            "description": "If specified, sets the condition on which a given row is to be ignored.",
             "default": "all_values_are_missing",
             "enum": [
                 "all_values_are_missing",

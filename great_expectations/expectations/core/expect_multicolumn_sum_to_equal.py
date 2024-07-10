@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Literal, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
 )
@@ -36,6 +37,9 @@ EXPECTATION_SHORT_DESCRIPTION = (
 )
 COLUMN_LIST_DESCRIPTION = "Set of columns to be checked"
 SUM_TOTAL_DESCRIPTION = "Expected sum of columns"
+IGNORE_ROW_IF_DESCRIPTION = (
+    "If specified, sets the condition on which a given row is to be ignored."
+)
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
@@ -67,7 +71,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
-            If specified, sets the condition on which a given row is to be ignored. Default "neither".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "neither".
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
@@ -179,7 +183,10 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
 
     sum_total: float
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
-        "all_values_are_missing"
+        pydantic.Field(
+            default="all_values_are_missing",
+            description=IGNORE_ROW_IF_DESCRIPTION,
+        )
     )
 
     # This dictionary contains metadata for display in the public gallery
