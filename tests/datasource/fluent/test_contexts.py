@@ -73,7 +73,7 @@ def test_add_fluent_datasource_are_persisted(
     assert datasource.id
     assert set_spy.call_count == 1
     cloud_api_fake.assert_call_count(
-        urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"),
+        urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"),
         2,
     )
 
@@ -113,9 +113,7 @@ def test_partitioners_are_persisted_on_creation(
     partitioner = ColumnPartitionerYearly(column_name="date")
     my_asset.add_batch_definition(name="cloud partitioner test", partitioner=partitioner)
 
-    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
-        "datasource_config"
-    ]
+    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]
 
     # partitioners should be present
     assert datasource_config["assets"][0]["batch_definitions"][0]["partitioner"]
@@ -169,7 +167,7 @@ def test_delete_asset_with_cloud_data_context(
 
     cloud_api_fake.assert_call_count(
         urllib.parse.urljoin(
-            GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/data-assets/{asset.id}"
+            GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/data-assets/{asset.id}"
         ),
         1,
     )
@@ -177,9 +175,7 @@ def test_delete_asset_with_cloud_data_context(
 
     asset_names = [
         asset["name"]
-        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
-            "datasource_config"
-        ]["assets"]
+        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["assets"]
     ]
     assert asset_name not in asset_names
 
