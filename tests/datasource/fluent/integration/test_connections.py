@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 import sqlalchemy as sa
 from pytest import param
+from sqlalchemy.sql import text
 
 from great_expectations.datasource.fluent import (
     SnowflakeDatasource,
@@ -33,11 +34,10 @@ class TestSnowflake:
         self, context: DataContext, connection_string: str
     ):
         """
-        A SnowflakeDatasource can successfully connect even if things like warehouse, and role are omitted.
-        However, if we try to add an asset that is not queryable with the current datasource connection details,
-        then we should expect a TestConnectionError.
+        If we try to add an asset that is not queryable with the current datasource
+        connection details, then we should expect a TestConnectionError.
         https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#connection-parameters
-        """  # noqa: E501
+        """
         snowflake_ds: SnowflakeDatasource = context.data_sources.add_snowflake(
             "my_ds", connection_string=connection_string
         )
@@ -53,7 +53,8 @@ class TestSnowflake:
                 # query the asset, if it fails then we should expect a TestConnectionError
                 # expect the sql ProgrammingError to be raised
                 # we are only testing the failure case here
-                snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
+                with snowflake_ds.get_engine().connect() as conn:
+                    conn.execute(text(f"SELECT * FROM {table_name} LIMIT 1;"))
                 print(f"{table_name} is queryable")
             except sa.exc.ProgrammingError:
                 print(f"{table_name} is not queryable")
@@ -72,7 +73,7 @@ class TestSnowflake:
         "connection_string",
         [
             param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?warehouse=ci&role=ci",
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?warehouse=ci&role=ci&database=ci&schema=public",
                 id="full connection string",
             ),
         ],
@@ -91,7 +92,8 @@ class TestSnowflake:
         table_name = random.choice(inspector_tables)
 
         # query the table to make sure it is queryable
-        snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
+        with snowflake_ds.get_engine().connect() as conn:
+            conn.execute(text(f"SELECT * FROM {table_name} LIMIT 1;"))
 
         # the table is queryable so the `add_table_asset()` should pass the test_connection step
         asset = snowflake_ds.add_table_asset(name="reachable asset", table_name=table_name)
