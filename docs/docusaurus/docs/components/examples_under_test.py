@@ -117,22 +117,22 @@ expectation_tests = [
 learn_data_quality_use_cases = [
     # Schema.
     IntegrationTestFixture(
-        name="data_quality_use_case_schema",
-        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py",
+        name="data_quality_use_case_schema_expectations",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py",
         data_dir="tests/test_sets/learn_data_quality_use_cases/",
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
     IntegrationTestFixture(
-        name="data_quality_use_case_strict_columns",
-        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/strict_columns.py",
+        name="data_quality_use_case_schema_consistency_across_datasets",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_consistency_across_datasets.py",
         data_dir="tests/test_sets/learn_data_quality_use_cases/",
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
     IntegrationTestFixture(
-        name="data_quality_use_case_relaxed_columns",
-        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/relaxed_columns.py",
+        name="data_quality_use_case_schema_strict_and_relaxed_validation",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_strict_and_relaxed.py",
         data_dir="tests/test_sets/learn_data_quality_use_cases/",
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],

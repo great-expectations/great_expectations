@@ -41,7 +41,7 @@ This dataset includes columns like `sender_account_number`, `recipient_fullname`
 
 GX offers a collection of Expectations for schema validation, all of which can be added to an Expectation Suite directly from the GX Cloud UI or by using the GX Core Python library.
 
-![Add a schema Expectation in GX Cloud](./images/gx_cloud_schema_expectations_add.gif)
+![Add a schema Expectation in GX Cloud](./schema_resources/gx_cloud_schema_expectations_add.gif)
 
 The schema Expectations provide straightforward, practical solutions for common validation scenarios and can also be used to satisfy more nuanced validation needs.
 
@@ -61,8 +61,7 @@ compared to the previous Expectation, suitable for scenarios needing strict type
 **Use Case:** Handling data transferred using formats that do not embed schema
 (e.g., CSV), where apparent type changes can occur when new values appear.
 
-```python
-gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION")
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeOfType"
 ```
 
 View `ExpectColumnValuesToBeOfType` in the [Expectation
@@ -77,8 +76,7 @@ Ensures that the values in a specified column are within a specified type list. 
 **Use Case:** Suitable for datasets transitioning from older systems where type consistency might
 not be strictly enforced, aiding smooth data migration and validation.
 
-```python
-gxe.ExpectColumnValuesToBeInTypeList(column="account_type", type_list=["INTEGER", "STRING"])
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeInTypeList"
 ```
 
 View `ExpectColumnValuesToBeInTypeList` in the [Expectation
@@ -106,8 +104,7 @@ errors due to missing fields.
 **Use Case:** Ideal during data ingestion or integration of multiple data sources to ensure that
 essential fields are present before proceeding with downstream processing.
 
-```python
-gxe.ExpectColumnToExist(column="sender_account_number")
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnToExist"
 ```
 
 View `ExpectColumnToExist` in the [Expectation
@@ -128,9 +125,9 @@ fixed schema structure, providing a strong safeguard against unexpected changes.
 
 **Use Case:** Perfect for regulatory reporting scenarios where the schema is strictly defined, and any deviation can lead to compliance violations.
 
-```python
-gxe.ExpectTableColumnCountToEqual(value=5)
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToEqual"
 ```
+
 
 View `ExpectTableColumnCountToEqual` in the [Expectation
 Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal).
@@ -151,10 +148,7 @@ column order, ensuring consistency and reliability.
 **Use Case:** Particularly relevant when handling scenarios such as changes in the order in which
 columns are computed during serialization.
 
-```python
-gxe.ExpectTableColumnsToMatchOrderedList([
-  "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
-])
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchOrderedList"
 ```
 
 View `ExpectTableColumnsToMatchOrderedList` in the [Expectation
@@ -175,13 +169,7 @@ flexibility where column presence is more critical than their sequence.
 
 **Use Case:** Useful for datasets that might undergo reordering during preprocessing; key for data warehousing operations where column integrity is crucial, but order might vary.
 
-```python
-gxe.ExpectTableColumnsToMatchSet(
-  column_set=[
-    "sender_account_number", "recipient_account_number", "transfer_amount", "transfer_date"
-  ],
-  exact_match=False
-)
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchSet"
 ```
 
 View `ExpectTableColumnsToMatchSet` in the [Expectation
@@ -202,8 +190,7 @@ datasets that can expand or contract within a known boundary.
 
 **Use Case:**  Beneficial for evolving datasets where additional columns could be added over time, but the general structure remains bounded within a predictable range.
 
-```python
-gxe.ExpectTableColumnCountToBeBetween(min_value=6, max_value=8)
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToBeBetween"
 ```
 
 View `ExpectTableColumnCountToBeBetween` in the [Expectation
@@ -219,7 +206,7 @@ with business requirements and anticipates potential future expansion.
 
 Successful schema validation can be accomplished using either GX Cloud or the GX Python library. The examples and scenarios in this section are presented using the GX Python library, but can be implemented as Cloud workflows to achieve the same result.
 
-![Validate schema Expectations in GX Cloud](./images/gx_cloud_schema_expectations_validate.gif)
+![Validate schema Expectations in GX Cloud](./schema_resources/gx_cloud_schema_expectations_validate.gif)
 
 ### Ensure schema consistency across datasets
 
@@ -227,7 +214,7 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 **Goal**: Validate two datasets to ensure the presence of specific columns and correct column count.
 
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema.py full sample code"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_consistency_across_datasets.py full sample code"
 ```
 
 **Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
@@ -238,10 +225,7 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 **Goal**: Validate datasets to ensure columns appear in the correct order and all required columns are present.
 
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/strict_columns.py strict columns sample code"
-```
-
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/relaxed_columns.py relaxed columns sample code"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_strict_and_relaxed.py full sample code"
 ```
 
 **Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
