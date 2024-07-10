@@ -128,13 +128,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
         id: str = str(uuid.uuid4())
         ds["id"] = id
 
-        ds_response_json = {
-            "data": {
-                "attributes": {"datasource_config": ds},
-                "id": id,
-                "type": "datasource",
-            }
-        }
+        ds_response_json = {"data": ds}
 
         datasource_config[name] = name
         datasources_by_id[id] = ds_response_json
@@ -868,7 +862,7 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"data-assets/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"data-assets/{UUID_REGEX}")),
             delete_data_assets_cb,
         )
         resp_mocker.add_callback(
