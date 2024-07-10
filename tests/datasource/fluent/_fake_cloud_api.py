@@ -12,7 +12,6 @@ from typing import (
     Dict,
     Final,
     Generator,
-    Literal,
     NamedTuple,
     Optional,
     Sequence,
@@ -61,14 +60,10 @@ DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
 # ##########################
 
 
-class _DatasourceSchema(pydantic.BaseModel):
+class _DatasourceSchema(pydantic.BaseModel, extra="allow"):
     id: Optional[str] = None
-    type: Literal["datasource"]
-    attributes: Dict[str, Union[Dict, str]]
-
-    @property
-    def name(self) -> str:
-        return self.attributes["datasource_config"]["name"]  # type: ignore[index]
+    type: str
+    name: str
 
 
 class CloudResponseSchema(pydantic.BaseModel):
@@ -76,14 +71,8 @@ class CloudResponseSchema(pydantic.BaseModel):
 
     @classmethod
     def from_datasource_json(cls, ds_payload: str | bytes) -> CloudResponseSchema:
-        payload_dict = json.loads(ds_payload)
-        data = {
-            "id": payload_dict["data"].get("id"),
-            "type": "datasource",
-            "attributes": payload_dict["data"]["attributes"],
-        }
-
-        return cls(data=data)  # type: ignore[arg-type] # pydantic type coercion
+        data = json.loads(ds_payload)
+        return cls(**data)  # type: ignore[arg-type] # pydantic type coercion
 
 
 class CallbackResult(NamedTuple):
@@ -427,7 +416,7 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
 
     old_datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if old_datasource:
-        if payload.data.name != old_datasource["data"]["attributes"]["datasource_config"]["name"]:
+        if payload.data.name != old_datasource["data"]["name"]:
             raise NotImplementedError("Unsure how to handle name change")
         _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
         result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload.json())
@@ -450,9 +439,7 @@ def get_datasources_cb(
     datasources_list: list[dict] = list(all_datasources.values())
     if queried_names:
         datasources_list = [
-            d["data"]
-            for d in datasources_list
-            if d["data"]["attributes"]["datasource_config"]["name"] in queried_names
+            d["data"] for d in datasources_list if d["data"]["name"] in queried_names
         ]
     else:
         datasources_list = [d["data"] for d in datasources_list]

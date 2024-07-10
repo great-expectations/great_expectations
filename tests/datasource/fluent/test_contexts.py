@@ -426,7 +426,7 @@ def verify_asset_names_mock(
 
             payload = CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
-            assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
+            assets = payload.data["assets"]  # type: ignore[index]
             assert assets, "No assets found"
             for asset in assets:
                 if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:  # type: ignore[index]
@@ -435,10 +435,7 @@ def verify_asset_names_mock(
                     )
             old_datasource: dict | None = cloud_api_fake_db["datasources"].get(datasource_id)
             if old_datasource:
-                if (
-                    payload.data.name
-                    != old_datasource["data"]["attributes"]["datasource_config"]["name"]
-                ):
+                if payload.data.name != old_datasource["data"]["name"]:
                     raise NotImplementedError("Unsure how to handle name change")
                 cloud_api_fake_db["datasources"][datasource_id] = payload.dict()
             return CallbackResult(
