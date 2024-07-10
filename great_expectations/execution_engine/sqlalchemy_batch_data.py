@@ -284,12 +284,6 @@ class SqlAlchemyBatchData(BatchData):
                 f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
-        elif dialect == GXSqlDialect.ORACLE:
-            # oracle 18c introduced PRIVATE temp tables which are transient objects
-            stmt_1 = f"CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}"
-            # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
-            # this means an empty table will persist after the db session
-            stmt_2 = f"CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}"
         # Please note that Teradata is currently experimental (as of 0.13.43)
         elif dialect == GXSqlDialect.TERADATASQL:
             stmt = f'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'
@@ -297,7 +291,13 @@ class SqlAlchemyBatchData(BatchData):
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}"
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
+
         if dialect == GXSqlDialect.ORACLE:
+            # oracle 18c introduced PRIVATE temp tables which are transient objects
+            stmt_1 = f"CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}"
+            # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
+            # this means an empty table will persist after the db session
+            stmt_2 = f"CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}"
             try:
                 self.execution_engine.execute_query_in_transaction(sa.text(stmt_1))
             except sqlalchemy.DatabaseError:

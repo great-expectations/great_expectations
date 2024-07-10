@@ -270,7 +270,7 @@ class PandasExecutionEngine(ExecutionEngine):
             reader_fn: DataFrameFactoryFn = self._get_reader_fn(
                 reader_method, s3_url.key
             )
-            buf = BytesIO(s3_object["Body"].read())
+            buf = BytesIO(s3_object["Body"].read())  # type: ignore[possibly-undefined]
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
