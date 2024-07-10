@@ -9,7 +9,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 - <PrereqPythonInstall/>
 - <PrereqGxInstall/>
 - <PrereqDataContext/>
-- Access to data files on a S3 bucket.
+- Access to data files in Azure Blob Storage.
 
 <Tabs>
 
