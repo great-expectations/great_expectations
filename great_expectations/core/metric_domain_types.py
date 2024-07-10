@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 @public_api
-class MetricDomainTypes(enum.Enum):
+class MetricDomainTypes(str, enum.Enum):
     """Enum type, whose members signify the data "Domain", on which a metric can be computed.
 
     A wide variety of "Domain" types can be defined with applicable metrics associated with their respective "Domain"
