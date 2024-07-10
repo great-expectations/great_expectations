@@ -134,7 +134,7 @@ class DatasourceStore(Store):
     @override
     @staticmethod
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:  # type: ignore[override]
-        return data
+        return data  # type: ignore[return-value]
 
     def retrieve_by_name(self, datasource_name: str) -> FluentDatasource:
         """Retrieves a Datasource persisted in the store by it's given name.

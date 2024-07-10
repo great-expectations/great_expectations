@@ -72,7 +72,7 @@ class CloudResponseSchema(pydantic.BaseModel):
     @classmethod
     def from_datasource_json(cls, ds_payload: str | bytes) -> CloudResponseSchema:
         data = json.loads(ds_payload)
-        return cls(**data)  # type: ignore[arg-type] # pydantic type coercion
+        return cls(**data)
 
 
 class CallbackResult(NamedTuple):

@@ -429,7 +429,7 @@ def verify_asset_names_mock(
             assets = payload.data["assets"]  # type: ignore[index]
             assert assets, "No assets found"
             for asset in assets:
-                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:  # type: ignore[index]
+                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
