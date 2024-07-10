@@ -81,15 +81,6 @@ class OrganizationIdNotSpecifiedError(Exception):
         )
 
 
-def _transform_data_sources(config_dict: dict) -> dict:
-    """
-    Transform data sources to expected shape
-    """
-    datasources = config_dict.get("data_sources", [])
-    data_sources_by_name = {ds["name"]: ds for ds in datasources}
-    return data_sources_by_name
-
-
 @public_api
 class CloudDataContext(SerializableDataContext):
     """Subclass of AbstractDataContext that contains functionality necessary to work in a GX Cloud-backed environment."""  # noqa: E501
@@ -264,7 +255,7 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         # This should be done before datasources are popped from the config below until
         # fluent_datasourcse are renamed datasourcess ()
-        config["fluent_datasources"] = _transform_data_sources(config)
+        config["fluent_datasources"] = {ds["name"]: ds for ds in config.get("data_sources", [])}
 
         # Various context variables are no longer top-level keys in V1
         for var in (
