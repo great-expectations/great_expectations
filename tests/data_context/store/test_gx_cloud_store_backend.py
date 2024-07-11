@@ -260,7 +260,7 @@ def test_list_keys_with_empty_payload_from_backend(
 
     responses.add(
         responses.GET,
-        f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
+        f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
         json={"data": []},
         status=200,
     )
@@ -318,7 +318,7 @@ def test_get_all(
         store_backend.get_all()
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
-            url=f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
+            url=f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
             params=None,
         )
 
