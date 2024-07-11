@@ -47,11 +47,7 @@ The schema Expectations provide straightforward, practical solutions for common 
 
 ### Column-level Expectations
 
-:::warning[TODO]
-Add parent section introduction sentence(s) and move tips fro individual Expectations to parent level.
-:::
-
-Column-level schema Expectations ...
+Column-level schema Expectations ensure that the individual columns within your dataset adhere to specific criteria. These Expectations are designed to validate various aspects such as data types, existence, and permissible value ranges within columns.
 
 #### Expect Column Values To Be Of Type
 
@@ -82,18 +78,14 @@ not be strictly enforced, aiding smooth data migration and validation.
 View `ExpectColumnValuesToBeInTypeList` in the [Expectation
 Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list).
 
-:::tip[GX Tip]
-Combine this Expectation with detailed logging to track which types are most frequently
-encountered, aiding in eventual standardization efforts.
+:::tip[GX tip for column-level Expectations]
+Combine `ExpectColumnValuesToBeInTypeList` with detailed logging to track which types are most
+frequently encountered, aiding in eventual standardization efforts.
 :::
 
 ### Table-level Expectations
 
-:::warning[TODO]
-Add parent section introduction sentence(s) and move tips fro individual Expectations to parent level.
-:::
-
-Table-level schema Expectations ...
+Table-level schema Expectations focus on the overall structure of your dataset. These Expectations are aimed at ensuring the dataset conforms to predefined schema constraints like the presence of necessary columns, column count, and column order.
 
 #### Expect Column To Exist
 
