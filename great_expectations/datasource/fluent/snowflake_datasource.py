@@ -530,6 +530,7 @@ class SnowflakeDatasource(SQLDatasource):
                 category=GxDatasourceWarning,
             )
             return None
+        LOGGER.info(f"Checking if schema {self.schema_} exists")
         inspector: Inspector = sa.inspect(self.get_engine())
         if self.schema_ not in inspector.get_schema_names():
             in_database = f" in database {self.database}" if self.database else ""
