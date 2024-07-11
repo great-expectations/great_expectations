@@ -354,7 +354,7 @@ class BaseCheckpoint(ConfigPeer):
                 checkpoint_run_results.update(run_results)
 
         return CheckpointResult(
-            validation_result_url=validation_result_url,
+            validation_result_url=validation_result_url,  # type: ignore[possibly-undefined]
             run_id=run_id,  # type: ignore[arg-type] # could be str
             run_results=checkpoint_run_results,
             checkpoint_config=self.config,
