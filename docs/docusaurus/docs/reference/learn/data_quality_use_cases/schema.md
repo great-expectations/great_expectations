@@ -101,14 +101,7 @@ essential fields are present before proceeding with downstream processing.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnToExist"
 ```
 
-View `ExpectColumnToExist` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_column_to_exist).
-
-
-:::tip[GX Tip]
-Implement this Expectation early in your data pipeline to catch missing columns as soon
-as possible, minimizing downstream errors and rework.
-:::
+View `ExpectColumnToExist` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_to_exist).
 
 ---
 
@@ -127,11 +120,6 @@ View `ExpectTableColumnCountToEqual` in the [Expectation
 Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal).
 
 
-:::tip[GX Tip]
-Periodically review and update this Expectation alongside any schema changes,
-especially when new regulatory requirements emerge.
-:::
-
 ---
 
 #### Expect Table Columns To Match Ordered List
@@ -147,12 +135,6 @@ columns are computed during serialization.
 
 View `ExpectTableColumnsToMatchOrderedList` in the [Expectation
 Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list).
-
-
-:::tip[GX Tip]
-Use `ExpectTableColumnsToMatchOrderedList` over
-`ExpectTableColumnsToMatchSet` when order matters, such as in scripts directly referencing column positions.
-:::
 
 ---
 
@@ -170,11 +152,6 @@ View `ExpectTableColumnsToMatchSet` in the [Expectation
 Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set).
 
 
-:::tip[GX Tip]
-Opt for `ExpectTableColumnsToMatchSet` when integrating datasets from
-various sources where column order might differ, but consistency in available data is required.
-:::
-
 ---
 
 #### Expect Table Column Count To Be Between
@@ -190,11 +167,6 @@ datasets that can expand or contract within a known boundary.
 View `ExpectTableColumnCountToBeBetween` in the [Expectation
 Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between).
 
-
-:::tip[GX Tip]
-Regularly review the allowed range as your dataset evolves, ensuring it aligns
-with business requirements and anticipates potential future expansion.
-:::
 
 ---
 
