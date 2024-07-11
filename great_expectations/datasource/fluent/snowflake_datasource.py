@@ -21,7 +21,7 @@ from typing import (
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import (
     AnyUrl,
-    errors,
+    errors
 )
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
