@@ -84,10 +84,12 @@
         },
         "or_equal": {
             "title": "Or Equal",
+            "description": "If True, then values can be equal, not strictly greater.",
             "type": "boolean"
         },
         "ignore_row_if": {
             "title": "Ignore Row If",
+            "description": "If specified, sets the condition on which a given row is to be ignored.",
             "default": "both_values_are_missing",
             "enum": [
                 "both_values_are_missing",

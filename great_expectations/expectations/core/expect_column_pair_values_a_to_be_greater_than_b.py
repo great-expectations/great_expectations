@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     render_suite_parameter_string,
@@ -34,6 +35,9 @@ if TYPE_CHECKING:
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the values in column A to be greater than column B."
 OR_EQUAL_DESCRIPTION = "If True, then values can be equal, not strictly greater."
+IGNORE_ROW_IF_DESCRIPTION = (
+    "If specified, sets the condition on which a given row is to be ignored."
+)
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
@@ -65,7 +69,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
-            If specified, sets the condition on which a given row is to be ignored. Default "neither".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "neither".
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
@@ -176,9 +180,12 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 }}
     """  # noqa: E501
 
-    or_equal: Union[bool, None] = None
+    or_equal: Union[bool, None] = pydantic.Field(default=None, description=OR_EQUAL_DESCRIPTION)
     ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
-        "both_values_are_missing"
+        pydantic.Field(
+            default="both_values_are_missing",
+            description=IGNORE_ROW_IF_DESCRIPTION,
+        )
     )
 
     # This dictionary contains metadata for display in the public gallery
