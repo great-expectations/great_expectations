@@ -354,6 +354,11 @@ def test_data_context_variables_set(
     _test_variables_set(cloud_data_context_variables)
 
 
+@pytest.fixture
+def v1_cloud_base_url(ge_cloud_base_url: str) -> str:
+    return urllib.parse.urljoin(ge_cloud_base_url, "api/v1/")
+
+
 @pytest.mark.unit
 def test_data_context_variables_save_config(
     mocker: MockerFixture,
@@ -362,7 +367,7 @@ def test_data_context_variables_save_config(
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
     # The below GX Cloud variables were used to instantiate the above CloudDataContextVariables
-    ge_cloud_base_url: str,
+    v1_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
 ) -> None:
@@ -414,19 +419,15 @@ def test_data_context_variables_save_config(
 
     assert mock_put.call_count == 1
     url = urllib.parse.urljoin(
-        ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/data-context-variables"
+        v1_cloud_base_url, f"organizations/{ge_cloud_organization_id}/data-context-variables"
     )
     mock_put.assert_called_with(
         MOCK_ANY,  # requests.Session object
         url,
         json={
             "data": {
-                "type": "data_context_variables",
-                "attributes": {
-                    "organization_id": ge_cloud_organization_id,
-                    "data_context_variables": expected_config_dict,
-                },
-            }
+                **expected_config_dict,
+            },
         },
     )
 
