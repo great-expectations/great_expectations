@@ -7,7 +7,10 @@ from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
 )
-from great_expectations.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_LIST_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
@@ -35,7 +38,6 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Expect that the sum of row values in a specified column list "
     "is the same for each row, and equal to a specified sum total."
 )
-COLUMN_LIST_DESCRIPTION = "Set of columns to be checked"
 SUM_TOTAL_DESCRIPTION = "Expected sum of columns"
 IGNORE_ROW_IF_DESCRIPTION = (
     "If specified, sets the condition on which a given row is to be ignored."
@@ -181,7 +183,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    sum_total: float
+    sum_total: float = pydantic.Field(description=SUM_TOTAL_DESCRIPTION)
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         pydantic.Field(
             default="all_values_are_missing",
