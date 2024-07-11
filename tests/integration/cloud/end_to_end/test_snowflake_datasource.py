@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import uuid
 import warnings
@@ -23,6 +24,8 @@ if TYPE_CHECKING:
 
 pytestmark: Final = pytest.mark.cloud
 
+TEST_LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
+
 RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
 
 ConnectionDetailKeys = Literal[
@@ -34,8 +37,9 @@ ConnectionDetailKeys = Literal[
 def filter_gx_datasource_schema_warnings() -> Generator[None, None, None]:
     """Filter out GxDatasourceWarning about schema format."""
     with warnings.catch_warnings():
+        TEST_LOGGER.info("Filtering out GxDatasourceWarning about schema format.")
         warnings.filterwarnings(
-            action="default",
+            action="ignore",
             message=r".*Schema .* is enclosed in double quotes and would fail sqlalchemy based schema check; skipping",
             category=GxDatasourceWarning,
         )
