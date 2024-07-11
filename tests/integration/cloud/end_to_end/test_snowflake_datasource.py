@@ -127,6 +127,7 @@ def datasource(
     context: CloudDataContext,
     connection_string: str | ConfigStr,
     get_missing_datasource_error_type: type[Exception],
+    filter_gx_datasource_warnings: None,
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource: SnowflakeDatasource = context.sources.add_snowflake(
