@@ -19,10 +19,7 @@ from typing import (
 )
 
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import (
-    AnyUrl,
-    errors
-)
+from great_expectations.compatibility.pydantic import AnyUrl, errors
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
