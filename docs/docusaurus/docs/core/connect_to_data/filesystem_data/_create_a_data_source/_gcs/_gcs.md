@@ -8,6 +8,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 ### Prerequisites
 - <PrereqPythonInstall/>
 - <PrereqGxInstall/>
+  - Optional. To create a Spark Filesystem Data Source you will also need to [install the Spark Python dependencies](/core/set_up_a_gx_environment/install_additional_dependencies.md?dependencies=spark).
 - <PrereqDataContext/>
 - Access to data files in Google Cloud Storage.
 
