@@ -109,6 +109,36 @@ class TestSnowflake:
         )
         print(f"\n  Yay, asset was created!\n{asset!r}")
 
+    @pytest.mark.parametrize(
+        "connection_string",
+        [
+            param(
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?warehouse=ci&role=ci&database=ci&schema=not_a_real_schema1",
+            ),
+            param(
+                {
+                    "account": "oca29081.us-east-1",
+                    "user": "ci",
+                    "password": "${SNOWFLAKE_CI_USER_PASSWORD}",
+                    "database": "ci",
+                    "schema": "not_a_real_schema2",
+                    "warehouse": "ci",
+                    "role": "ci",
+                }
+            ),
+        ],
+        ids=lambda x: type(x).__name__,
+    )
+    def test_invalid_schema_should_raise_test_connection_error(
+        self, context: DataContext, connection_string: str | dict
+    ):
+        with pytest.raises(TestConnectionError) as exc_info:
+            _: SnowflakeDatasource = context.sources.add_snowflake(
+                "my_ds", connection_string=connection_string
+            )
+        print(exc_info)
+        # check specific error message
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
