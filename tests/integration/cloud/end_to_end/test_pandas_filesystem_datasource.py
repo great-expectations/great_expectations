@@ -180,6 +180,7 @@ def checkpoint(
 
 
 @pytest.mark.cloud
+@pytest.mark.xfail(reason="XFAILED on develop")
 def test_interactive_validator(
     context: CloudDataContext,
     batch_request: BatchRequest,

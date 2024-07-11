@@ -291,6 +291,7 @@ def table_factory() -> Generator[TableFactory, None, None]:
         engine = engines[dialect]
         with engine.connect() as conn:
             transaction = conn.begin()
+            schema: str | None = None
             for table in tables:
                 name = table["table_name"]
                 schema = table["schema"]
