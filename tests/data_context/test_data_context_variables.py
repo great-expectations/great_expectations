@@ -354,11 +354,6 @@ def test_data_context_variables_set(
     _test_variables_set(cloud_data_context_variables)
 
 
-@pytest.fixture
-def v1_cloud_base_url(ge_cloud_base_url: str) -> str:
-    return urllib.parse.urljoin(ge_cloud_base_url, "api/v1/")
-
-
 @pytest.mark.unit
 def test_data_context_variables_save_config(
     mocker: MockerFixture,
@@ -425,9 +420,7 @@ def test_data_context_variables_save_config(
         MOCK_ANY,  # requests.Session object
         url,
         json={
-            "data": {
-                **expected_config_dict,
-            },
+            "data": expected_config_dict,
         },
     )
 
