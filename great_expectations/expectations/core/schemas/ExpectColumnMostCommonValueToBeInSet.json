@@ -143,23 +143,6 @@
             "description": "If True, then the expectation will still succeed if values outside the designated set are as common (but not more common) than designated values.",
             "type": "boolean"
         },
-        "library_metadata": {
-            "title": "Library Metadata",
-            "default": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "column aggregate expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
-            },
-            "type": "object"
-        },
         "metadata": {
             "type": "object",
             "properties": {

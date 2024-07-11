@@ -78,6 +78,7 @@
         },
         "value_set": {
             "title": "Value Set",
+            "description": "A set of objects used for comparison.",
             "anyOf": [
                 {
                     "type": "object"
