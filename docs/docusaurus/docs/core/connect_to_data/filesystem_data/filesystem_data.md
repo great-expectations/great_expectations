@@ -7,7 +7,9 @@ hide_title: false
 
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
+
 import CreateADataSource from './_create_a_data_source/_create_a_data_source.md';
+import CreateADataAsset from './_create_a_data_asset/_create_a_data_asset.md';
 
 Filesystem data consists of data stored in file formats such as `.csv` or `.parquet`, and located in an environment with a folder hierarchy such as Amazon S3, Azure Blob Storage, Google Cloud Storage, or local and networked filesystems.  GX can leverage either pandas or Spark to read this data.
 
@@ -19,27 +21,7 @@ To connect to your Filesystem data, you first create a Data Source which tells G
 
 ## Create a Data Asset
 
-A Data Asset is a collection of related records in a Data Source.  
-
-<Tabs className="hidden" queryString="data_location" groupId="data_location" defaultValue="filesystem">
-
-   <TabItem value="filesystem" label="Local or networked filesystem">
-
-   </TabItem>
-
-   <TabItem value="s3" label="Amazon S3">
-
-   </TabItem>
-
-   <TabItem value="abs" label="Azure Blob Storage">
-
-   </TabItem>
-
-   <TabItem value="gcs" label="Google Cloud Storage">
-
-   </TabItem>
-
-</Tabs>
+<CreateADataAsset/>
 
 ## Create a Batch Definition
 
