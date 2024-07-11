@@ -31,9 +31,9 @@ ConnectionDetailKeys = Literal[
 @pytest.fixture(scope="module")
 def connection_string() -> str:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci?warehouse=ci&role=ci"
+        return 'snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/"DUMMY_SCHEMA"?warehouse=ci&role=ci'
     elif os.getenv("SNOWFLAKE_USER") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return "snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
+        return 'snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB/"DUMMY_SCHEMA"?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser'
     else:
         pytest.skip("no snowflake credentials")
 
@@ -46,7 +46,7 @@ def connection_details() -> dict[ConnectionDetailKeys, str]:
             "user": "ci",
             "password": "${SNOWFLAKE_CI_USER_PASSWORD}",
             "database": "ci",
-            "schema": RANDOM_SCHEMA,
+            "schema": '"DUMMY_SCHEMA"',  # need to use quoted schema to avoid ds schema check before schema creation
             "warehouse": "ci",
             "role": "ci",
         }
