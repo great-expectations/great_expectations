@@ -2,11 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
+from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.expectations.expectation import (
     MulticolumnMapExpectation,
     render_suite_parameter_string,
 )
-from great_expectations_v1.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
+from great_expectations_v1.expectations.model_field_descriptions import (
+    COLUMN_LIST_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
 from great_expectations_v1.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations_v1.render.renderer.renderer import renderer
 from great_expectations_v1.render.renderer_configuration import (
@@ -29,7 +33,6 @@ if TYPE_CHECKING:
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the compound columns to be unique."
-COLUMN_LIST_DESCRIPTION = "Set of columns to be checked."
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
@@ -168,7 +171,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    column_list: Sequence[str]
+    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {

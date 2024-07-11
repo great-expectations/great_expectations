@@ -30,9 +30,9 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
-from great_expectations import __version__ as ge_version
 from typing_extensions import ParamSpec, dataclass_transform
 
+from great_expectations import __version__ as ge_version
 from great_expectations_v1._docs_decorators import public_api
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.compatibility.pydantic import Field, ModelMetaclass, StrictStr
@@ -62,6 +62,8 @@ from great_expectations_v1.expectations.model_field_descriptions import (
     COLUMN_A_DESCRIPTION,
     COLUMN_B_DESCRIPTION,
     COLUMN_DESCRIPTION,
+    COLUMN_LIST_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations_v1.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
     Mostly,
@@ -2344,8 +2346,8 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_list: List[StrictStr]
-    mostly: Mostly = 1.0
+    column_list: List[StrictStr] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
+    mostly: Mostly = pydantic.Field(default=1.0, description=MOSTLY_DESCRIPTION)
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"

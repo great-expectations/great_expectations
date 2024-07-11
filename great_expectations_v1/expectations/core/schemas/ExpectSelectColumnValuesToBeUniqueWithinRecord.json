@@ -63,6 +63,7 @@
         },
         "column_list": {
             "title": "Column List",
+            "description": "The column names to evaluate.",
             "type": "array",
             "items": {
                 "type": "string"
@@ -70,8 +71,8 @@
         },
         "mostly": {
             "title": "Mostly",
-            "default": 1.0,
             "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "default": 1.0,
             "type": "number",
             "minimum": 0.0,
             "maximum": 1.0,
@@ -79,6 +80,7 @@
         },
         "ignore_row_if": {
             "title": "Ignore Row If",
+            "description": "If specified, sets the condition on which a given row is to be ignored.",
             "default": "all_values_are_missing",
             "type": "string"
         },

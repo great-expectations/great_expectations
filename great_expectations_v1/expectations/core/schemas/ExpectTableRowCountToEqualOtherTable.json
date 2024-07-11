@@ -63,6 +63,7 @@
         },
         "other_table_name": {
             "title": "Other Table Name",
+            "description": "The name of the other table. Other table must be located within the same database.",
             "type": "string"
         },
         "metadata": {
