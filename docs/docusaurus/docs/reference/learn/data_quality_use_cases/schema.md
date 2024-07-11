@@ -78,6 +78,8 @@ not be strictly enforced, aiding smooth data migration and validation.
 View `ExpectColumnValuesToBeInTypeList` in the [Expectation
 Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list).
 
+---
+
 :::tip[GX tip for column-level Expectations]
 Combine `ExpectColumnValuesToBeInTypeList` with detailed logging to track which types are most
 frequently encountered, aiding in eventual standardization efforts.
@@ -193,6 +195,17 @@ Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_
 Regularly review the allowed range as your dataset evolves, ensuring it aligns
 with business requirements and anticipates potential future expansion.
 :::
+
+---
+
+:::tip[GX tip for table-level Expectations]
+- Implement `ExpectColumnToExist` early in your data pipeline to catch missing columns as soon as possible, minimizing downstream errors and rework.
+- Periodically review and update `ExpectTableColumnCountToEqual` Expectation alongside any schema changes, especially when new regulatory requirements emerge.
+- Use `ExpectTableColumnsToMatchOrderedList` over `ExpectTableColumnsToMatchSet` when order matters, such as in scripts directly referencing column positions.
+- Opt for `ExpectTableColumnsToMatchSet` when integrating datasets from various sources where column order might differ, but consistency in available data is required.
+- Regularly review the allowed range in `ExpectTableColumnCountToBeBetween` as your dataset evolves, ensuring it aligns with business requirements and anticipates potential future expansion.
+:::
+
 
 ## Examples and scenarios
 
