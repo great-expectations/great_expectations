@@ -7,7 +7,10 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
+from great_expectations.expectations.model_field_descriptions import (
+    IGNORE_ROW_IF_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -34,9 +37,6 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Note that records can be duplicated."
 )
 COLUMN_LIST_DESCRIPTION = "The column names to evaluate."
-IGNORE_ROW_IF_DESCRIPTION = (
-    "If specified, sets the condition on which a given row is to be ignored."
-)
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",

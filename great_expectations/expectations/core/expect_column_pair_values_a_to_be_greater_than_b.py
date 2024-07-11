@@ -10,6 +10,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.model_field_descriptions import (
     COLUMN_A_DESCRIPTION,
     COLUMN_B_DESCRIPTION,
+    IGNORE_ROW_IF_DESCRIPTION,
     MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -35,9 +36,6 @@ if TYPE_CHECKING:
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the values in column A to be greater than column B."
 OR_EQUAL_DESCRIPTION = "If True, then values can be equal, not strictly greater."
-IGNORE_ROW_IF_DESCRIPTION = (
-    "If specified, sets the condition on which a given row is to be ignored."
-)
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",

@@ -9,6 +9,7 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.model_field_descriptions import (
     COLUMN_LIST_DESCRIPTION,
+    IGNORE_ROW_IF_DESCRIPTION,
     MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import RenderedStringTemplateContent
@@ -39,9 +40,6 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "is the same for each row, and equal to a specified sum total."
 )
 SUM_TOTAL_DESCRIPTION = "Expected sum of columns"
-IGNORE_ROW_IF_DESCRIPTION = (
-    "If specified, sets the condition on which a given row is to be ignored."
-)
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
