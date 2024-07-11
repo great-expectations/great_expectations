@@ -46,7 +46,7 @@ If you have specific business requirements, or you want to examine specific data
 
 5. Edit the Expectation Suite name or validation schedule and then click **Save**.
 
-5. Optional. If the Expectation Suite name was changed, update the name in all code that included the previous Expectation Suite name.
+6. Optional. If the Expectation Suite name was changed, update the name in all code that included the previous Expectation Suite name.
 
 ## Delete an Expectation Suite
 
