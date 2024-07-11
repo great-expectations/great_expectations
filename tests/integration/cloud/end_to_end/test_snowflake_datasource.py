@@ -121,11 +121,11 @@ def test_create_datasource(
     ],
 )
 def test_create_4xx_error_message_handling(
+    filter_gx_datasource_schema_warnings: None,
     context: CloudDataContext,
     connection_details: dict[str, str],
     details_override: dict[str, str | None],
     expected_err_pattern: str,
-    filter_gx_datasource_schema_warnings: None,
 ):
     connection = {**connection_details, **details_override}
     with pytest.raises(
@@ -143,10 +143,10 @@ def test_create_4xx_error_message_handling(
 
 @pytest.fixture(scope="module")
 def datasource(
+    filter_gx_datasource_schema_warnings: None,
     context: CloudDataContext,
     connection_string: str | ConfigStr,
     get_missing_datasource_error_type: type[Exception],
-    filter_gx_datasource_schema_warnings: None,
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource: SnowflakeDatasource = context.sources.add_snowflake(
