@@ -36,7 +36,7 @@ def filter_gx_datasource_schema_warnings() -> Generator[None, None, None]:
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "ignore",
-            message='Schema ".*" is enclosed in double quotes and would fail sqlalchemy based schema check; skipping',
+            message=r"Schema \".*\" is enclosed in double quotes and would fail sqlalchemy based schema check; skipping",
             category=GxDatasourceWarning,
         )
         yield
@@ -121,6 +121,7 @@ def test_create_4xx_error_message_handling(
     connection_details: dict[str, str],
     details_override: dict[str, str | None],
     expected_err_pattern: str,
+    filter_gx_datasource_schema_warnings: None,
 ):
     connection = {**connection_details, **details_override}
     with pytest.raises(
