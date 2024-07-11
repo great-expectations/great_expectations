@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_suite_parameter_string,
@@ -33,6 +34,9 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Note that records can be duplicated."
 )
 COLUMN_LIST_DESCRIPTION = "The column names to evaluate."
+IGNORE_ROW_IF_DESCRIPTION = (
+    "If specified, sets the condition on which a given row is to be ignored."
+)
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
@@ -63,7 +67,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     Other Parameters:
         ignore_row_if (str): \
             "all_values_are_missing", "any_value_is_missing", "never" \
-            If specified, sets the condition on which a given row is to be ignored. Default "never".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "never".
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
@@ -173,8 +177,10 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    column_list: Sequence[str]
-    ignore_row_if: str = "all_values_are_missing"
+    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
+    ignore_row_if: str = pydantic.Field(
+        default="all_values_are_missing", description=IGNORE_ROW_IF_DESCRIPTION
+    )
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
