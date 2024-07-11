@@ -63,6 +63,7 @@
         },
         "value": {
             "title": "Value",
+            "description": "The expected number of columns.",
             "anyOf": [
                 {
                     "type": "integer"
