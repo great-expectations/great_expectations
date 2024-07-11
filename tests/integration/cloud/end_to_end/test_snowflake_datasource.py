@@ -35,8 +35,8 @@ def filter_gx_datasource_schema_warnings() -> Generator[None, None, None]:
     """Filter out GxDatasourceWarning about schema format."""
     with warnings.catch_warnings():
         warnings.filterwarnings(
-            "ignore",
-            message=r"Schema \".*\" is enclosed in double quotes and would fail sqlalchemy based schema check; skipping",
+            action="default",
+            message=r".*Schema .* is enclosed in double quotes and would fail sqlalchemy based schema check; skipping",
             category=GxDatasourceWarning,
         )
         yield
