@@ -63,6 +63,7 @@
         },
         "column_set": {
             "title": "Column Set",
+            "description": "The column names, in any order.",
             "anyOf": [
                 {
                     "type": "array",
@@ -80,6 +81,7 @@
         },
         "exact_match": {
             "title": "Exact Match",
+            "description": "If True, the list of columns must exactly match the observed columns. If False, observed columns must include column_set but additional columns will pass.",
             "type": "boolean"
         },
         "metadata": {
