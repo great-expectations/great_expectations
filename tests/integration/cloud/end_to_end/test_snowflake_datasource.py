@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import TYPE_CHECKING, Final, Iterator
+import warnings
+from typing import TYPE_CHECKING, Final, Generator, Iterator
 
 import pytest
 from typing_extensions import Literal
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.datasource.fluent import GxDatasourceWarning
 from great_expectations.exceptions import StoreBackendError
 
 if TYPE_CHECKING:
@@ -26,6 +28,18 @@ RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
 ConnectionDetailKeys = Literal[
     "account", "user", "password", "database", "schema", "warehouse", "role"
 ]
+
+
+@pytest.fixture(scope="module")
+def filter_gx_datasource_schema_warnings() -> Generator[None, None, None]:
+    """Filter out GxDatasourceWarning about schema format."""
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message='Schema ".*" is enclosed in double quotes and would fail sqlalchemy based schema check; skipping',
+            category=GxDatasourceWarning,
+        )
+        yield
 
 
 @pytest.fixture(scope="module")
@@ -127,7 +141,7 @@ def datasource(
     context: CloudDataContext,
     connection_string: str | ConfigStr,
     get_missing_datasource_error_type: type[Exception],
-    filter_gx_datasource_warnings: None,
+    filter_gx_datasource_schema_warnings: None,
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource: SnowflakeDatasource = context.sources.add_snowflake(
