@@ -62,7 +62,9 @@ def connections(
 
 
 def test_create_datasource(
-    context: CloudDataContext, connections: str | dict[str, str]
+    context: CloudDataContext,
+    connections: str | dict[str, str],
+    filter_gx_datasource_warnings: None,
 ):
     datasource_name = f"i{uuid.uuid4().hex}"
     _: SnowflakeDatasource = context.sources.add_snowflake(
