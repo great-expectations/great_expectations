@@ -35,7 +35,7 @@ Below is a sample of the dataset that is referenced by examples and explanations
 | domestic | 244084670977           | Jaxson Duke        | 9143.40         | 2024-05-01 01:12    |
 | domestic | 954005011218           | Nelson O’Connell   | 3285.21         | 2024-05-01 05:08    |
 
-[This dataset]is representative of financial transfers recorded by banking institutions. Its fields include account type, sender account, sender name, transfer amount, and transfer date.
+This dataset is representative of financial transfers recorded by banking institutions. Its fields include account type, sender account, sender name, transfer amount, and transfer date.
 
 You can [access this dataset](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_1.csv) from the `great_expectations` GitHub repo in order to reproduce the code recipes provided in this article.
 
