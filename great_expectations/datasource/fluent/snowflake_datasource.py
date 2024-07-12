@@ -43,6 +43,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SQLAlchemyCreateEngineError,
     SQLDatasource,
     TableAsset,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -336,10 +337,15 @@ class SnowflakeDsn(AnyUrl):
         return urllib.parse.parse_qs(self.query)
 
     @property
-    def account_identifier(self) -> str:
+    def account_identifier(self) -> AccountIdentifier:
         """Alias for host."""
         assert self.host
-        return self.host
+        return AccountIdentifier(self.host)
+
+    @property
+    def account(self) -> AccountIdentifier:
+        """Alias for account_identifier."""
+        return self.account_identifier
 
     @property
     def database(self) -> str:
@@ -368,7 +374,7 @@ class ConnectionDetails(FluentBaseModel):
     https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#additional-connection-parameters
     """
 
-    account: str
+    account: AccountIdentifier
     user: str
     password: Union[ConfigStr, str]
     database: str = pydantic.Field(
@@ -387,6 +393,11 @@ class ConnectionDetails(FluentBaseModel):
         """Returns the required fields for this model as defined in the schema."""
         return cls.schema()["required"]
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema: dict, model: type[ConnectionDetails]) -> None:
+            schema["properties"]["account"] = AccountIdentifier.get_schema()
+
 
 @public_api
 class SnowflakeDatasource(SQLDatasource):
@@ -404,7 +415,25 @@ class SnowflakeDatasource(SQLDatasource):
     # TODO: rename this to `connection` for v1?
     connection_string: Union[ConnectionDetails, ConfigUri, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
 
-    # TODO: add props for account, user, password, etc?
+    # TODO: add props for user, password, etc?
+
+    @property
+    def account(self) -> AccountIdentifier | None:
+        """Convenience property to get the `account` regardless of the connection string format."""
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
+            return self.connection_string.account
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine account"
+        )
+        if not subbed_str:
+            return None
+        hostname = urllib.parse.urlparse(subbed_str).hostname
+        if hostname:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=GxDatasourceWarning)
+            return AccountIdentifier(hostname)
+        return None
 
     @property
     def schema_(self) -> str | None:
@@ -443,6 +472,29 @@ class SnowflakeDatasource(SQLDatasource):
         if isinstance(self.connection_string, ConnectionDetails):
             return self.connection_string.role
         return self.connection_string.params.get("role", [None])[0]
+
+    @override
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the SnowflakeDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the SQLDatasource,
+            whether to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        try:
+            super().test_connection(test_assets=test_assets)
+        except TestConnectionError as e:
+            if self.account and not self.account.match:
+                raise TestConnectionError(
+                    AccountIdentifier.MSG_TEMPLATE.format(
+                        value=self.account,
+                        formats=AccountIdentifier.FORMATS,
+                    )
+                ) from e
+            raise
 
     @deprecated_method_or_class(
         version="1.0.0a4",
