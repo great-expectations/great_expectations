@@ -170,7 +170,7 @@ class PartitionerProtocol(PartitionerSortingProtocol, Protocol):
         ...
 
 
-class TestConnectionError(Exception):
+class TestConnectionError(ConnectionError):
     """
     Raised if `.test_connection()` fails to connect to the datasource.
     """
