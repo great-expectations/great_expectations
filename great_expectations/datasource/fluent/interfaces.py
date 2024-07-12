@@ -178,15 +178,16 @@ class TestConnectionError(ConnectionError):
     def __init__(
         self,
         message: str = "Attempt to connect to datasource failed",
+        *,
         cause: Exception | None = None,
         addendum: str | None = None,
     ):
         """
         Args:
             `message` base of the error message to be provided to the user.
-            `addendum` is optional additional information that can be added to the error message.
             `cause` is the original exception that caused the error, the repr of which will be added
                 to the error message.
+            `addendum` is optional additional information that can be added to the error message.
         """
         self.cause = cause  # not guaranteed to be the same as `self.__cause__`
         self.addendum = addendum
