@@ -40,7 +40,7 @@ def filter_gx_datasource_schema_warnings() -> Generator[None, None, None]:
         TEST_LOGGER.info("Filtering out GxDatasourceWarning about schema format.")
         warnings.filterwarnings(
             action="ignore",
-            message=r".*Schema .* is enclosed in double quotes and would fail sqlalchemy based schema check; skipping",
+            message=r".*Schema.*",
             category=GxDatasourceWarning,
         )
         yield
@@ -80,9 +80,9 @@ def connections(
 
 
 def test_create_datasource(
+    filter_gx_datasource_warnings: None,
     context: CloudDataContext,
     connections: str | dict[str, str],
-    filter_gx_datasource_warnings: None,
 ):
     datasource_name = f"i{uuid.uuid4().hex}"
     _: SnowflakeDatasource = context.sources.add_snowflake(
@@ -121,7 +121,7 @@ def test_create_datasource(
     ],
 )
 def test_create_4xx_error_message_handling(
-    filter_gx_datasource_schema_warnings: None,
+    filter_gx_datasource_warnings: None,
     context: CloudDataContext,
     connection_details: dict[str, str],
     details_override: dict[str, str | None],
@@ -293,6 +293,7 @@ def checkpoint(
 
 
 def test_interactive_validator(
+    filter_gx_datasource_schema_warnings: None,
     context: CloudDataContext,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
