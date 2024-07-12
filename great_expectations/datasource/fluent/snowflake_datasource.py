@@ -444,34 +444,58 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.schema_
-        return _get_database_and_schema_from_path(self.connection_string.path)["schema"]
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine schema"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
+        return _get_database_and_schema_from_path(url_path)["schema"]
 
     @property
     def database(self) -> str | None:
-        """
-        Convenience property to get the `database` regardless of the connection string format.
-        """
+        """Convenience property to get the `database` regardless of the connection string format."""
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
-        return _get_database_and_schema_from_path(self.connection_string.path)["database"]
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine database"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
+        return _get_database_and_schema_from_path(url_path)["database"]
 
     @property
     def warehouse(self) -> str | None:
         """
         Convenience property to get the `warehouse` regardless of the connection string format.
         """
-        if isinstance(self.connection_string, ConnectionDetails):
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.warehouse
-        return self.connection_string.params.get("warehouse", [None])[0]
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine warehouse"
+        )
+        if not subbed_str:
+            return None
+        return urllib.parse.parse_qs(urllib.parse.urlparse(subbed_str).query).get(
+            "warehouse", [None]
+        )[0]
 
     @property
     def role(self) -> str | None:
-        """
-        Convenience property to get the `role` regardless of the connection string format.
-        """
-        if isinstance(self.connection_string, ConnectionDetails):
+        """Convenience property to get the `role` regardless of the connection string format."""
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.role
-        return self.connection_string.params.get("role", [None])[0]
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine role"
+        )
+        if not subbed_str:
+            return None
+        return urllib.parse.parse_qs(urllib.parse.urlparse(subbed_str).query).get("role", [None])[0]
 
     @override
     def test_connection(self, test_assets: bool = True) -> None:
