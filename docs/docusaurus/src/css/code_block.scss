@@ -54,8 +54,8 @@ div.theme-code-block {
   .prism-code + div:has(button) {
     top: calc(var(--ifm-pre-padding) / 2);
 
-    &:hover {
-      opacity: 0.75 !important;
+    button:hover {
+      opacity: 0.5 !important;
     }
 
     button {

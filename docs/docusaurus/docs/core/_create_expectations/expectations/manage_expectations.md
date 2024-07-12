@@ -63,7 +63,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
   In this procedure the variable `batch` is your Batch of data. 
 
-2. Get the Expectation to test.  This could be a [newly created](#create-an-expectation) Expectation, an Expectation [retrieved from an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.
+2. Get the Expectation to test.  This could be a [newly created](#create-an-expectation) Expectation, an Expectation [retrieved from an Expectation Suite](/core/_create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.
 
   In this procedure the variable `expectation` is your Expectation to test.
 
@@ -75,7 +75,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 4. Optional. [Modify the Expectation](#modify-an-expectation) and test it again.
  
-5. Optional. [Add the Expectation to an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#add-expectations-to-an-expectation-suite).
+5. Optional. [Add the Expectation to an Expectation Suite](/core/_create_expectations/expectation_suites/manage_expectation_suites.md#add-expectations-to-an-expectation-suite).
    
   :::caution 
 
@@ -113,7 +113,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="procedure" label="Procedure">
 
-1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.  
+1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/_create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.  
 
   In this procedure the variable `expectation` is the Expectation you're modifying.
 
@@ -220,4 +220,4 @@ class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
 ## Next steps
 
 - Create Custom SQL Expectations
-- [Manage Expectation Suites](/core/create_expectations/expectation_suites/manage_expectation_suites.md)
+- [Manage Expectation Suites](/core/_create_expectations/expectation_suites/manage_expectation_suites.md)

@@ -18,6 +18,10 @@ from great_expectations.render.components import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 if TYPE_CHECKING:
@@ -27,6 +31,7 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationValidationResult,
     )
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column entries to be strings that do NOT match "
@@ -35,7 +40,7 @@ EXPECTATION_SHORT_DESCRIPTION = (
 LIKE_PATTERN_LIST_DESCRIPTION = (
     "The list of SQL like pattern expressions the column entries should NOT match."
 )
-DATA_QUALITY_ISSUES = ["Pattern Matching"]
+DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = ["SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
 
 
@@ -200,6 +205,8 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to not match like pattern list"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotMatchLikePatternList]
@@ -229,6 +236,50 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
                     },
                 }
             )
+
+    @classmethod
+    def _prescriptive_template(
+        cls,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("like_pattern_list", RendererValueType.ARRAY),
+            ("mostly", RendererValueType.NUMBER),
+        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        params = renderer_configuration.params
+
+        if renderer_configuration.include_column_name:
+            template_str = "$column values must not match "
+        else:
+            template_str = "Values must not match "
+
+        if params.like_pattern_list:
+            array_param_name = "like_pattern_list"
+            param_prefix = "like_pattern_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            template_str += "the following like patterns: " + cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
+            )
+            template_str += " , at least $mostly_pct % of the time."
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
