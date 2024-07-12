@@ -14,8 +14,14 @@ from pytest import param
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.datasource.fluent import (
+    GxContextWarning,
+    SQLDatasource,
+    TestConnectionError,
+)
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
+    AccountIdentifier,
     SnowflakeDatasource,
     SnowflakeDsn,
 )
@@ -140,6 +146,111 @@ def sf_test_connection_noop(monkeypatch: pytest.MonkeyPatch) -> None:
         TEST_LOGGER.info(".test_connection noop")
 
     monkeypatch.setattr(SnowflakeDatasource, "test_connection", noop)
+
+
+@pytest.fixture
+def sql_ds_test_connection_always_fail(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Monkey patch the parent class' test_connection() method to always fail.
+    Useful for testing the extra handling that SnowflakeDatasource.test_connection() provides.
+    """
+    TEST_LOGGER.warning("Monkeypatching SQLDatasource.test_connection() to a always fail")
+
+    def fail(self, test_assets: bool = True):
+        TEST_LOGGER.info("SQLDatasource.test_connection() always fail")
+        raise TestConnectionError("always fail")
+
+    monkeypatch.setattr(SQLDatasource, "test_connection", fail)
+
+
+@pytest.mark.unit
+class TestAccountIdentifier:
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "orgname.account_name",
+            "orgname-account_name",
+            "abc12345.us-east-1.aws",
+            "xy12345.us-gov-west-1.aws",
+            "xy12345.europe-west4.gcp",
+            "xy12345.central-us.azure",
+        ],
+    )
+    def test_str_and_repr_methods(self, value: str):
+        account_identifier: AccountIdentifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert str(account_identifier) == value
+        assert repr(account_identifier) == f"AccountIdentifier({value!r})"
+
+    @pytest.mark.parametrize("account_name", ["account_name", "account-name"])
+    def test_fmt1_parse(self, account_name: str):
+        orgname = "orgname"
+        value = f"{orgname}-{account_name}"
+        print(f"{value=}")
+
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert account_identifier.match
+
+        assert account_identifier.account_name == account_name
+        assert account_identifier.orgname == orgname
+        assert account_identifier.as_tuple() == (orgname, account_name)
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "abc12345.us-east-1.aws",
+            "xy12345.us-gov-west-1.aws",
+            "xy12345.europe-west4.gcp",
+            "xy12345.central-us.azure",
+        ],
+    )
+    def test_fmt2_parse(self, value: str):
+        """
+        The cloud portion is technically optional if the the provider is AWS, but expecting greatly
+        simplifies our parsing logic.
+        """
+        print(f"{value=}")
+        locator, _, _remainder = value.partition(".")
+        cloud_region_id, _, cloud_service = _remainder.partition(".")
+
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert account_identifier.match
+
+        assert account_identifier.account_locator == locator
+        assert account_identifier.region == (cloud_region_id or None)
+        assert account_identifier.cloud == (cloud_service or None)
+
+        assert account_identifier.as_tuple() == (
+            locator,
+            cloud_region_id,
+            cloud_service,
+        )
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "foobar",
+            "orgname.account-name",
+            "orgname.account_name",
+            "my_account.us-east-1",
+            "xy12345.us-gov-west-1.aws.",
+            "xy12345.europe-west4.gcp.bar",
+            "xy12345.us-east-1.nope",
+            "xy12345.",
+            "xy12345.central-us.bazar",
+            "xy12345_us-gov-west-1_aws",
+            "xy12345_europe-west4_gcp",
+            "xy12345_central-us_azure",
+        ],
+    )
+    def test_invalid_formats(self, value: str):
+        """
+        Test that an invalid format that does not match but can still be stringified as
+        the original value.
+        """
+        print(f"{value=}")
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert not account_identifier.match
+        assert str(account_identifier) == value
 
 
 @pytest.mark.unit
@@ -794,7 +905,17 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        assert datasource.schema_
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.schema_
+                ), "Don't expect schema to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.schema_
+        else:
+            assert datasource.schema_ == datasource.connection_string.schema_
 
     def test_database(
         self,
@@ -804,17 +925,17 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        assert datasource.database
-
-    def test_role(
-        self,
-        ds_config: dict,
-        seed_env_vars: None,
-        param_id: str,
-        ephemeral_context_with_defaults: AbstractDataContext,
-    ):
-        datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        assert datasource.role
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.database
+                ), "Don't expect database to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.database
+        else:
+            assert datasource.database == datasource.connection_string.database
 
     def test_warehouse(
         self,
@@ -824,7 +945,57 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        assert datasource.warehouse
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.warehouse
+                ), "Don't expect warehouse to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.warehouse
+        else:
+            assert datasource.warehouse == datasource.connection_string.warehouse
+
+    def test_role(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.role
+                ), "Don't expect role to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.role
+        else:
+            assert datasource.role == datasource.connection_string.role
+
+    def test_account(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.account
+                ), "Don't expect account to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.account
+        else:
+            assert datasource.account == datasource.connection_string.account
 
 
 if __name__ == "__main__":
