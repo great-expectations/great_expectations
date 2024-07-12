@@ -9,6 +9,7 @@ from pytest import param
 from sqlalchemy.sql import text
 
 from great_expectations.datasource.fluent import (
+    GxDatasourceWarning,
     SnowflakeDatasource,
     TestConnectionError,
 )
@@ -109,6 +110,68 @@ class TestSnowflake:
             name="reachable asset", table_name=table_name
         )
         print(f"\n  Yay, asset was created!\n{asset!r}")
+
+    @pytest.mark.parametrize(
+        "connection_string",
+        [
+            param(
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/not_a_real_schema?warehouse=ci&role=ci&database=ci",
+            ),
+            param(
+                {
+                    "account": "oca29081.us-east-1",
+                    "user": "ci",
+                    "password": "${SNOWFLAKE_CI_USER_PASSWORD}",
+                    "database": "ci",
+                    "schema": "not_a_real_schema",
+                    "warehouse": "ci",
+                    "role": "ci",
+                }
+            ),
+        ],
+        ids=lambda x: type(x).__name__,
+    )
+    def test_invalid_schema_should_raise_test_connection_error(
+        self, context: DataContext, connection_string: str | dict
+    ):
+        with pytest.raises(
+            TestConnectionError, match="Schema not_a_real_schema not found"
+        ):
+            _: SnowflakeDatasource = context.sources.add_snowflake(
+                "my_ds", connection_string=connection_string
+            )
+
+    @pytest.mark.parametrize(
+        "connection_string",
+        [
+            param(
+                'snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/"quoted_schema"?warehouse=ci&role=ci&database=ci',
+            ),
+            param(
+                {
+                    "account": "oca29081.us-east-1",
+                    "user": "ci",
+                    "password": "${SNOWFLAKE_CI_USER_PASSWORD}",
+                    "database": "ci",
+                    "schema": '"quoted_schema"',
+                    "warehouse": "ci",
+                    "role": "ci",
+                }
+            ),
+        ],
+        ids=lambda x: type(x).__name__,
+    )
+    def test_quoted_schema_should_raise_waring(
+        self, context: DataContext, connection_string: str | dict
+    ):
+        with pytest.warns(
+            GxDatasourceWarning,
+            match='Schema "quoted_schema" is enclosed in double quotes and would fail sqlalchemy based schema check; skipping',
+        ):
+            datasource: SnowflakeDatasource = context.sources.add_snowflake(
+                "my_ds", connection_string=connection_string
+            )
+        assert datasource, "datasource should have been created"
 
 
 if __name__ == "__main__":

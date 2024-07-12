@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import logging
 import os
 import uuid
-from typing import TYPE_CHECKING, Final, Iterator
+import warnings
+from typing import TYPE_CHECKING, Final, Generator, Iterator
 
 import pytest
 from typing_extensions import Literal
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.datasource.fluent import GxDatasourceWarning
 from great_expectations.exceptions import StoreBackendError
 
 if TYPE_CHECKING:
@@ -21,6 +24,8 @@ if TYPE_CHECKING:
 
 pytestmark: Final = pytest.mark.cloud
 
+TEST_LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
+
 RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
 
 ConnectionDetailKeys = Literal[
@@ -29,17 +34,24 @@ ConnectionDetailKeys = Literal[
 
 
 @pytest.fixture(scope="module")
+def filter_gx_datasource_schema_warnings() -> Generator[None, None, None]:
+    """Filter out GxDatasourceWarning about schema format."""
+    with warnings.catch_warnings():
+        TEST_LOGGER.info("Filtering out GxDatasourceWarning about schema format.")
+        warnings.filterwarnings(
+            action="ignore",
+            message=r".*Schema.*",
+            category=GxDatasourceWarning,
+        )
+        yield
+
+
+@pytest.fixture(scope="module")
 def connection_string() -> str:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return (
-            "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci"
-            f"/{RANDOM_SCHEMA}?warehouse=ci&role=ci"
-        )
+        return 'snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/"DUMMY_SCHEMA"?warehouse=ci&role=ci'
     elif os.getenv("SNOWFLAKE_USER") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return (
-            "snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB"
-            f"/{RANDOM_SCHEMA}?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
-        )
+        return 'snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB/"DUMMY_SCHEMA"?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser'
     else:
         pytest.skip("no snowflake credentials")
 
@@ -52,7 +64,7 @@ def connection_details() -> dict[ConnectionDetailKeys, str]:
             "user": "ci",
             "password": "${SNOWFLAKE_CI_USER_PASSWORD}",
             "database": "ci",
-            "schema": RANDOM_SCHEMA,
+            "schema": '"DUMMY_SCHEMA"',  # need to use quoted schema to avoid ds schema check before schema creation
             "warehouse": "ci",
             "role": "ci",
         }
@@ -68,7 +80,9 @@ def connections(
 
 
 def test_create_datasource(
-    context: CloudDataContext, connections: str | dict[str, str]
+    filter_gx_datasource_warnings: None,
+    context: CloudDataContext,
+    connections: str | dict[str, str],
 ):
     datasource_name = f"i{uuid.uuid4().hex}"
     _: SnowflakeDatasource = context.sources.add_snowflake(
@@ -107,6 +121,7 @@ def test_create_datasource(
     ],
 )
 def test_create_4xx_error_message_handling(
+    filter_gx_datasource_warnings: None,
     context: CloudDataContext,
     connection_details: dict[str, str],
     details_override: dict[str, str | None],
@@ -128,6 +143,7 @@ def test_create_4xx_error_message_handling(
 
 @pytest.fixture(scope="module")
 def datasource(
+    filter_gx_datasource_schema_warnings: None,
     context: CloudDataContext,
     connection_string: str | ConfigStr,
     get_missing_datasource_error_type: type[Exception],
@@ -183,7 +199,9 @@ def data_asset(
         schema_name=RANDOM_SCHEMA,
     )
     asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_table_asset(name=asset_name, table_name=table_name)
+    _ = datasource.add_table_asset(
+        name=asset_name, table_name=table_name, schema_name=RANDOM_SCHEMA
+    )
     table_asset = datasource.get_asset(asset_name=asset_name)
     yield table_asset
     datasource.delete_asset(asset_name=asset_name)
@@ -275,6 +293,7 @@ def checkpoint(
 
 
 def test_interactive_validator(
+    filter_gx_datasource_schema_warnings: None,
     context: CloudDataContext,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,

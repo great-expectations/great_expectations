@@ -365,8 +365,7 @@ def snowflake_ds(
         pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
-        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci"
-        f"/{RAND_SCHEMA}?warehouse=ci&role=ci",
+        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
         # connection_string="snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
@@ -500,7 +499,9 @@ class TestTableIdentifiers:
         )
         print(f"snowflake tables:\n{pf(table_names)}))")
 
-        snowflake_ds.add_table_asset(asset_name, table_name=table_name)
+        snowflake_ds.add_table_asset(
+            asset_name, table_name=table_name, schema_name=schema
+        )
 
     @pytest.mark.sqlite
     def test_sqlite(
