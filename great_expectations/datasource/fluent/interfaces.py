@@ -171,7 +171,28 @@ class PartitionerProtocol(PartitionerSortingProtocol, Protocol):
 
 
 class TestConnectionError(Exception):
-    pass
+    """
+    Raised if `.test_connection()` fails to connect to the datasource.
+    """
+
+    def __init__(
+        self,
+        message: str = "Attempt to connect to datasource failed",
+        cause: Exception | None = None,
+        addendum: str | None = None,
+    ):
+        """
+        Args:
+            `message` base of the error message to be provided to the user.
+            `addendum` is optional additional information that can be added to the error message.
+            `cause` is the original exception that caused the error, the repr of which will be added
+                to the error message.
+        """
+        if cause:
+            message += f": due to {cause!r}"
+        if addendum:
+            message += f": {addendum}"
+        super().__init__(message)
 
 
 class GxDatasourceWarning(UserWarning):
