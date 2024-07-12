@@ -1,6 +1,6 @@
 ---
 sidebar_label: 'Schema'
-title: 'Ensure schema consistency with GX'
+title: 'Validate data schema with GX'
 ---
 
 import TabItem from '@theme/TabItem';
@@ -24,7 +24,7 @@ issues before they propagate through your data ecosystem. This guide will walk y
 leveraging these Expectations to implement effective schema validation in your data workflows.
 
 ## Prerequisite knowledge
-This article assumes basic familiarity with GX components and workflows. Reference the [GX Overview](/core/introduction/gx_overview.md) for additional content on GX fundamentals.
+This article assumes basic familiarity with GX components and workflows. See the [GX Overview](/core/introduction/gx_overview.md) for additional content on GX fundamentals.
 
 ## Data preview
 
@@ -35,11 +35,13 @@ Below is a sample of the dataset that is referenced by examples and explanations
 | domestic | 244084670977           | Jaxson Duke        | 9143.40         | 2024-05-01 01:12    |
 | domestic | 954005011218           | Nelson O’Connell   | 3285.21         | 2024-05-01 05:08    |
 
-This dataset includes columns like `sender_account_number`, `recipient_fullname`, `transfer_amount`, and `transfer_date`.
+[This dataset]is representative of financial transfers recorded by banking institutions. Its fields include account type, sender account, sender name, transfer amount, and transfer date.
+
+You can [access this dataset](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_1.csv) from the `great_expectations` GitHub repo in order to reproduce the code recipes provided in this article.
 
 ## Key schema Expectations
 
-GX offers a collection of Expectations for schema validation, all of which can be added to an Expectation Suite directly from the GX Cloud UI or by using the GX Core Python library.
+GX offers a collection of Expectations for schema validation, all of which can be added to an Expectation Suite directly from the GX Cloud UI or using the GX Core Python library.
 
 ![Add a schema Expectation in GX Cloud](./schema_resources/gx_cloud_schema_expectations_add.gif)
 
@@ -47,7 +49,7 @@ The schema Expectations provide straightforward, practical solutions for common 
 
 ### Column-level Expectations
 
-Column-level schema Expectations ensure that the individual columns within your dataset adhere to specific criteria. These Expectations are designed to validate various aspects such as data types, existence, and permissible value ranges within columns.
+Column-level schema Expectations ensure that the individual columns within your dataset adhere to specific criteria. These Expectations are designed to validate various aspects such as data type and permissible value ranges within columns.
 
 #### Expect Column Values To Be Of Type
 
@@ -60,10 +62,9 @@ compared to the previous Expectation, suitable for scenarios needing strict type
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeOfType"
 ```
 
-View `ExpectColumnValuesToBeOfType` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type).
+<sup>View `ExpectColumnValuesToBeOfType` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type).</sup>
 
----
 
 #### Expect Column Values To Be In Type List
 
@@ -75,10 +76,11 @@ not be strictly enforced, aiding smooth data migration and validation.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeInTypeList"
 ```
 
-View `ExpectColumnValuesToBeInTypeList` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list).
+<sup>View `ExpectColumnValuesToBeInTypeList` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list).</sup>
 
----
+<br/>
+<br/>
 
 :::tip[GX tip for column-level Expectations]
 Combine `ExpectColumnValuesToBeInTypeList` with detailed logging to track which types are most
@@ -101,9 +103,8 @@ essential fields are present before proceeding with downstream processing.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnToExist"
 ```
 
-View `ExpectColumnToExist` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_to_exist).
+<sup>View `ExpectColumnToExist` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_to_exist).</sup>
 
----
 
 #### Expect Table Column Count To Equal
 
@@ -115,12 +116,9 @@ fixed schema structure, providing a strong safeguard against unexpected changes.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToEqual"
 ```
 
+<sup>View `ExpectTableColumnCountToEqual` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal).</sup>
 
-View `ExpectTableColumnCountToEqual` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal).
-
-
----
 
 #### Expect Table Columns To Match Ordered List
 
@@ -133,10 +131,9 @@ columns are computed during serialization.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchOrderedList"
 ```
 
-View `ExpectTableColumnsToMatchOrderedList` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list).
+<sup>View `ExpectTableColumnsToMatchOrderedList` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list).</sup>
 
----
 
 #### Expect Table Columns To Match Set
 
@@ -148,11 +145,9 @@ flexibility where column presence is more critical than their sequence.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchSet"
 ```
 
-View `ExpectTableColumnsToMatchSet` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set).
+<sup>View `ExpectTableColumnsToMatchSet` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set).</sup>
 
-
----
 
 #### Expect Table Column Count To Be Between
 
@@ -164,13 +159,13 @@ datasets that can expand or contract within a known boundary.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToBeBetween"
 ```
 
-View `ExpectTableColumnCountToBeBetween` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between).
+<sup>View `ExpectTableColumnCountToBeBetween` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between).</sup>
 
+<br/>
+<br/>
 
----
-
-:::tip[GX tip for table-level Expectations]
+:::tip[GX tips for table-level Expectations]
 - Implement `ExpectColumnToExist` early in your data pipeline to catch missing columns as soon as possible, minimizing downstream errors and rework.
 - Periodically review and update `ExpectTableColumnCountToEqual` Expectation alongside any schema changes, especially when new regulatory requirements emerge.
 - Use `ExpectTableColumnsToMatchOrderedList` over `ExpectTableColumnsToMatchSet` when order matters, such as in scripts directly referencing column positions.
@@ -185,40 +180,40 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 ![Validate schema Expectations in GX Cloud](./schema_resources/gx_cloud_schema_expectations_validate.gif)
 
-### Ensure schema consistency across datasets
+### Schema consistency across datasets
 
-**Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
+**Context**: In scenarios where data is subject to regulatory compliance and critical to operational accuracy, adhering to a fixed schema is paramount. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions and regulatory penalties.
 
-**Goal**: Validate two datasets to ensure the presence of specific columns and correct column count.
+**Goal**: Validate two datasets, using the same schema Expectations, to ensure that each dataset contains the presence of required columns and correct column count.
 
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_consistency_across_datasets.py full sample code"
 ```
 
-**Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
+**Insight**: Dataset 2 fails to validate due to the absence of the `recipient_fullname` column and the incorrect column count, highlighting how missing critical columns can disrupt data processing or lead to compliance issues.
 
-### Strict vs. relaxed type checking
+### Strict vs. relaxed schema validation
 
-**Context**: In some contexts, both the names and order of columns can be critically important. Using different suites to enforce these aspects can help maintain consistency.
+**Context**: Requirements for column names, types, and ordering vary depending on the context. For instance, when application code references columns by ordinal position instead of name, it is essential to retain a defined column ordering. In other cases, it may be sufficient to only check for the presence of a column in a dataset. Using different Expectation Suites to enforce these aspects can help maintain schema consistency.
 
-**Goal**: Validate datasets to ensure columns appear in the correct order and all required columns are present.
+**Goal**: Validate the same dataset using two separate Expectation Suites to demonstrate the difference in results using strict approach to schema validation vs. a relaxed approach.
 
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_strict_and_relaxed.py full sample code"
 ```
 
-**Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
+**Insight**: The strict Expectation Suite ensures that columns appear in the specified order and are of the required data type, crucial in contexts where order matters for processing logic. The relaxed Expectation Suite allows flexibility of column order and typing but ensures all required columns are present.
 
 ## Avoid common schema validation pitfalls
 
-- **Inconsistent Data Types**: Inconsistencies in data types can arise when data is ingested from diverse sources or when schema definitions are updated without comprehensive checks. These inconsistencies often lead to processing errors, making analyses unreliable. Regular monitoring of data ingestion points and strict enforcement of type consistency through your data validation framework (see [ExpectColumnValuesToBeOfType](#expect-column-values-to-be-of-type) and [ExpectColumnValuesToBeInTypeList](#expect-column-values-to-be-in-type-list)) can mitigate these issues.
+- **Inconsistent Data Types**: Inconsistencies in data types can arise when data is ingested from diverse sources or when schema definitions are updated without comprehensive checks. These inconsistencies often lead to processing errors, making analyses unreliable. Regular monitoring of data ingestion points and strict enforcement of type consistency through your data validation framework (see [`ExpectColumnValuesToBeOfType`](#expect-column-values-to-be-of-type) and [`ExpectColumnValuesToBeInTypeList`](#expect-column-values-to-be-in-type-list)) can mitigate these issues.
 
-- **Schema Evolution**: Evolving business requirements often necessitate changes in data schemas, which if not managed correctly, can lead to significant disruptions. Schema changes can break data pipelines and lead to data compatibility issues. Implementing a structured process for schema versioning and maintaining backward compatibility can help ensure that these changes are less disruptive. Periodically review and update schema Expectations like [ExpectTableColumnCountToEqual](#expect-table-column-count-to-equal) and [ExpectTableColumnsToMatchOrderedList](#expect-table-columns-to-match-ordered-list).
+- **Schema Evolution**: Evolving business requirements often necessitate changes in data schemas, which if not managed correctly, can lead to significant disruptions. Schema changes can break data pipelines and lead to data compatibility issues. Implementing a structured process for schema versioning and maintaining backward compatibility can help ensure that these changes are less disruptive. Periodically review and update schema Expectations like [`ExpectTableColumnCountToEqual`](#expect-table-column-count-to-equal) and [`ExpectTableColumnsToMatchOrderedList`](#expect-table-columns-to-match-ordered-list).
 
 - **Relying Solely on Schema Validation**: One common pitfall is the over-reliance on schema validation as the sole mechanism for data quality assurance. While schema validation ensures structural integrity, it does not account for semantic correctness. To achieve comprehensive data quality, combine schema validation with semantic checks at the field level, such as validating value ranges, patterns, and relationships between fields. Start by implementing [column-level Expectations](#column-level-expectations) and [table-level Expectations](#table-level-expectations).
 
-- **Logging and Monitoring**: Even the best validation setup can fail without proper logging and monitoring. Undetected schema validation failures can propagate through the data pipeline unnoticed, leading to broader issues. Detailed logging and real-time monitoring are essential to create an audit trail and enable quick detection and resolution of schema validation problems, maintaining the integrity of your data pipelines. Regularly review and adjust schema Expectations like [ExpectTableColumnCountToBeBetween](#expect-table-column-count-to-be-between) to align with current business requirements and ensure effective oversight.
+- **Logging and Monitoring**: Even the best validation setup can fail without proper logging and monitoring. Undetected schema validation failures can propagate through the data pipeline unnoticed, leading to broader issues. Detailed logging and real-time monitoring are essential to create an audit trail and enable quick detection and resolution of schema validation problems, maintaining the integrity of your data pipelines. Regularly review and adjust schema Expectations like [`ExpectTableColumnCountToBeBetween`](#expect-table-column-count-to-be-between) to align with current business requirements and ensure effective oversight.
 
 ## The path forward
 
 Robust schema validation is fundamental to trustworthy data pipelines. Great Expectations empowers you to proactively define and enforce the structural integrity of your data, ensuring its reliability for critical analyses and decision-making processes. By consistently incorporating schema validation practices, you enhance data quality, reduce downstream errors, and foster a strong culture of data confidence within your organization.
 
-However, schema validation is just one aspect of a comprehensive data quality strategy. Achieving high-quality data requires a multifaceted approach requiring validation across [multiple aspects of data quality, including data integrity, missingness, volume, and distribution](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md). To effectively handle these dimensions, consider integrating various Expectations to cover these broader data quality aspects. Regular validation, monitoring, and iterations are key to maintaining high standards.
+However, schema validation is just one aspect of a comprehensive data quality strategy. Achieving high-quality data requires a multifaceted approach requiring validation across [multiple aspects of data quality](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md), including data integrity, missingness, volume, and distribution. To effectively handle these dimensions, consider integrating various Expectations to cover these broader data quality aspects. Regular validation, monitoring, and iterations are key to maintaining high standards.

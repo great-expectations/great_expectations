@@ -44,8 +44,8 @@ import great_expectations.expectations as gxe
 
 context = gx.get_context()
 
-# Create the Data Source and Data Assets.
-# CONNECTION_STRING contains the connection string to connect to the postgres database.
+# Create Data Source and Data Assets.
+# CONNECTION_STRING contains the connection string for the Postgres database.
 datasource = context.data_sources.add_postgres(
     "postgres database", connection_string=CONNECTION_STRING
 )
@@ -54,26 +54,22 @@ data_asset_1 = datasource.add_table_asset(name="data asset 1", table_name="trans
 
 data_asset_2 = datasource.add_table_asset(name="data asset 2", table_name="transfers_2")
 
-# Create the Expectation Suite and add an Expectation.
+# Create Expectation Suite and add Expectations.
 suite = context.suites.add(
     gx.core.expectation_suite.ExpectationSuite(name="schema expectations")
 )
 
 suite.add_expectation(gxe.ExpectColumnToExist(column="recipient_fullname"))
-suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="recipient_fullname"))
 suite.add_expectation(gxe.ExpectTableColumnCountToEqual(value=5))
 
-# Create the Batch Definitions.
+# Create Batch Definitions.
 batch_definition_1 = data_asset_1.add_batch_definition_whole_table("batch definition 1")
 batch_1 = batch_definition_1.get_batch()
 
 batch_definition_2 = data_asset_1.add_batch_definition_whole_table("batch definition 2")
 batch_2 = batch_definition_2.get_batch()
 
-# Validate Batches using the Expectation Suite.
+# Validate Batches using Expectation Suite.
 results_1 = batch_1.validate(suite)
 results_2 = batch_2.validate(suite)
-
-print(f"Validation results 1:\n{results_1}")
-print(f"Validation results 2:\n{results_2}")
 # </snippet>
