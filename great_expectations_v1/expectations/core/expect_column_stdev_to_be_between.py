@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.core.suite_parameters import (
@@ -188,7 +188,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
     strict_max: bool = pydantic.Field(False, description=STRICT_MAX_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -216,6 +216,8 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column standard deviation to be between"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnStdevToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)

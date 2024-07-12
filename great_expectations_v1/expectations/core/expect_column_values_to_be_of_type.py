@@ -256,6 +256,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to be of type"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeOfType]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)

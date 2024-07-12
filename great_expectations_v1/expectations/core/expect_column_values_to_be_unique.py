@@ -179,6 +179,8 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     args_keys = ("column",)
 
     class Config:
+        title = "Expect column values to be unique"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeUnique]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)

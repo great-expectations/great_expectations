@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.compatibility.typing_extensions import override
@@ -189,7 +189,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -209,6 +209,8 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column distinct values to equal set"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnDistinctValuesToEqualSet]

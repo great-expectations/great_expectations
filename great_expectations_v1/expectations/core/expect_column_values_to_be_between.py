@@ -242,6 +242,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeBetween]

@@ -2,11 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
+from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.expectations.expectation import (
     MulticolumnMapExpectation,
     render_suite_parameter_string,
 )
-from great_expectations_v1.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
+from great_expectations_v1.expectations.model_field_descriptions import (
+    IGNORE_ROW_IF_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
 from great_expectations_v1.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations_v1.render.renderer.renderer import renderer
 from great_expectations_v1.render.renderer_configuration import (
@@ -63,7 +67,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     Other Parameters:
         ignore_row_if (str): \
             "all_values_are_missing", "any_value_is_missing", "never" \
-            If specified, sets the condition on which a given row is to be ignored. Default "never".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "never".
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
@@ -173,8 +177,10 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    column_list: Sequence[str]
-    ignore_row_if: str = "all_values_are_missing"
+    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
+    ignore_row_if: str = pydantic.Field(
+        default="all_values_are_missing", description=IGNORE_ROW_IF_DESCRIPTION
+    )
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -195,6 +201,8 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     args_keys = ("column_list",)
 
     class Config:
+        title = "Expect select column values to be unique within record"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectSelectColumnValuesToBeUniqueWithinRecord]
