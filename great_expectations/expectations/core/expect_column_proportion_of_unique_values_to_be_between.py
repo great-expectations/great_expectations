@@ -228,6 +228,8 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
 
     class Config:
+        title = "Expect column proportion of unique values to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnProportionOfUniqueValuesToBeBetween]

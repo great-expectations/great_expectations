@@ -13,7 +13,10 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.expectation_configuration import (
     parse_result_format,
 )
-from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
     LegacyRendererType,
@@ -74,7 +77,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -188,6 +191,8 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     args_keys = ("column",)
 
     class Config:
+        title = "Expect column values to be null"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeNull]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)

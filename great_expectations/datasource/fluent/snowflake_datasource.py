@@ -3,11 +3,13 @@ from __future__ import annotations
 import base64
 import functools
 import logging
+import re
 import urllib.parse
 import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     Final,
     Iterable,
     Literal,
@@ -41,6 +43,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SQLAlchemyCreateEngineError,
     SQLDatasource,
     TableAsset,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -119,6 +122,138 @@ def _get_config_substituted_connection_string(
         )
         return None
     return datasource.connection_string.get_config_value(datasource._data_context.config_provider)
+
+
+class AccountIdentifier(str):
+    """
+    Custom Pydantic compatible `str` type for the account identifier in
+    a `SnowflakeDsn` or `ConnectionDetails`.
+
+    https://docs.snowflake.com/en/user-guide/admin-account-identifier
+    https://docs.snowflake.com/user-guide/organizations-connect
+
+    Expected formats:
+    1. Account name in your organization
+        a. `<orgname>-<account_name>` - e.g. `"myOrg-my_account"`
+        b. `<orgname>-<account-name>` - e.g. `"myOrg-my-account"`
+    2. Account locator in a region
+        a. `<account_locator>.<region>.<cloud>` - e.g. `"abc12345.us-east-1.aws"`
+
+    The cloud group is optional if on aws but expecting it to be there makes it easier to
+    distinguish formats.
+    GX does not throw errors based on the regex parsing result.
+
+    The `.` separated version of the Account name format is not supported with SQLAlchemy.
+    """
+
+    FORMATS: ClassVar[str] = "<orgname>-<account_name> or <account_locator>.<region>.<cloud>"
+
+    FMT_1: ClassVar[str] = r"^(?P<orgname>[a-zA-Z0-9]+)[-](?P<account_name>[a-zA-Z0-9-_]+)$"
+    FMT_2: ClassVar[str] = (
+        r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
+    )
+    PATTERN: ClassVar[re.Pattern] = re.compile(f"{FMT_1}|{FMT_2}")
+
+    MSG_TEMPLATE: ClassVar[str] = (
+        "Account identifier '{value}' does not match expected format {formats} ;"
+        " it MAY be invalid. https://docs.snowflake.com/en/user-guide/admin-account-identifier"
+    )
+
+    def __init__(self, value: str) -> None:
+        self._match = self.PATTERN.match(value)
+
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({super().__repr__()})"
+
+    @classmethod
+    def __get_validators__(cls) -> Any:
+        yield cls._validate
+
+    @classmethod
+    def get_schema(cls) -> dict:
+        """Can be used by Pydantic models to customize the generated jsonschema."""
+        return {
+            "title": cls.__name__,
+            "type": "string",
+            "description": "Snowflake Account identifiers can be in one of two formats:"
+            f" {cls.FORMATS}",
+            "pattern": cls.PATTERN.pattern,
+            "examples": [
+                "myOrg-my_account",
+                "myOrg-my-account",
+                "abc12345.us-east-1.aws",
+            ],
+        }
+
+    @classmethod
+    def _validate(cls, value: str) -> AccountIdentifier:
+        if not value:
+            raise ValueError("Account identifier cannot be empty")  # noqa: TRY003
+        v = cls(value)
+        if not v._match:
+            LOGGER.info(
+                cls.MSG_TEMPLATE.format(value=value, formats=cls.FORMATS),
+            )
+        return v
+
+    @property
+    def match(self) -> re.Match[str] | None:
+        return self._match
+
+    @property
+    def orgname(self) -> str | None:
+        """
+        Part of format 1:
+        * `<orgname>-<account_name>`
+        * `<orgname>-<account-name>`
+        """
+        if self._match:
+            return self._match.group("orgname")
+        return None
+
+    @property
+    def account_name(self) -> str | None:
+        """
+        Part of format 1:
+        * `<orgname>-<account_name>`
+        * `<orgname>-<account-name>`
+        """
+        if self._match:
+            return self._match.group("account_name")
+        return None
+
+    @property
+    def account_locator(self) -> str | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("account_locator")
+        return None
+
+    @property
+    def region(self) -> str | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("region")
+        return None
+
+    @property
+    def cloud(self) -> Literal["aws", "gcp", "azure"] | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("cloud")  # type: ignore[return-value] # regex
+        return None
+
+    def as_tuple(
+        self,
+    ) -> tuple[str | None, str | None, str | None] | tuple[str | None, str | None]:
+        fmt1 = (self.account_locator, self.region, self.cloud)
+        if any(fmt1):
+            return fmt1
+        fmt2 = (self.orgname, self.account_name)
+        if any(fmt2):
+            return fmt2
+        raise ValueError("Account identifier does not match either expected format")  # noqa: TRY003
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -202,10 +337,15 @@ class SnowflakeDsn(AnyUrl):
         return urllib.parse.parse_qs(self.query)
 
     @property
-    def account_identifier(self) -> str:
+    def account_identifier(self) -> AccountIdentifier:
         """Alias for host."""
         assert self.host
-        return self.host
+        return AccountIdentifier(self.host)
+
+    @property
+    def account(self) -> AccountIdentifier:
+        """Alias for account_identifier."""
+        return self.account_identifier
 
     @property
     def database(self) -> str:
@@ -234,7 +374,7 @@ class ConnectionDetails(FluentBaseModel):
     https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#additional-connection-parameters
     """
 
-    account: str
+    account: AccountIdentifier
     user: str
     password: Union[ConfigStr, str]
     database: str = pydantic.Field(
@@ -253,6 +393,11 @@ class ConnectionDetails(FluentBaseModel):
         """Returns the required fields for this model as defined in the schema."""
         return cls.schema()["required"]
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema: dict, model: type[ConnectionDetails]) -> None:
+            schema["properties"]["account"] = AccountIdentifier.get_schema()
+
 
 @public_api
 class SnowflakeDatasource(SQLDatasource):
@@ -270,7 +415,25 @@ class SnowflakeDatasource(SQLDatasource):
     # TODO: rename this to `connection` for v1?
     connection_string: Union[ConnectionDetails, ConfigUri, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
 
-    # TODO: add props for account, user, password, etc?
+    # TODO: add props for user, password, etc?
+
+    @property
+    def account(self) -> AccountIdentifier | None:
+        """Convenience property to get the `account` regardless of the connection string format."""
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
+            return self.connection_string.account
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine account"
+        )
+        if not subbed_str:
+            return None
+        hostname = urllib.parse.urlparse(subbed_str).hostname
+        if hostname:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=GxDatasourceWarning)
+            return AccountIdentifier(hostname)
+        return None
 
     @property
     def schema_(self) -> str | None:
@@ -281,34 +444,82 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.schema_
-        return _get_database_and_schema_from_path(self.connection_string.path)["schema"]
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine schema"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
+        return _get_database_and_schema_from_path(url_path)["schema"]
 
     @property
     def database(self) -> str | None:
-        """
-        Convenience property to get the `database` regardless of the connection string format.
-        """
+        """Convenience property to get the `database` regardless of the connection string format."""
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
-        return _get_database_and_schema_from_path(self.connection_string.path)["database"]
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine database"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
+        return _get_database_and_schema_from_path(url_path)["database"]
 
     @property
     def warehouse(self) -> str | None:
         """
         Convenience property to get the `warehouse` regardless of the connection string format.
         """
-        if isinstance(self.connection_string, ConnectionDetails):
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.warehouse
-        return self.connection_string.params.get("warehouse", [None])[0]
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine warehouse"
+        )
+        if not subbed_str:
+            return None
+        return urllib.parse.parse_qs(urllib.parse.urlparse(subbed_str).query).get(
+            "warehouse", [None]
+        )[0]
 
     @property
     def role(self) -> str | None:
-        """
-        Convenience property to get the `role` regardless of the connection string format.
-        """
-        if isinstance(self.connection_string, ConnectionDetails):
+        """Convenience property to get the `role` regardless of the connection string format."""
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.role
-        return self.connection_string.params.get("role", [None])[0]
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine role"
+        )
+        if not subbed_str:
+            return None
+        return urllib.parse.parse_qs(urllib.parse.urlparse(subbed_str).query).get("role", [None])[0]
+
+    @override
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the SnowflakeDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the SQLDatasource,
+            whether to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        try:
+            super().test_connection(test_assets=test_assets)
+        except TestConnectionError as e:
+            if self.account and not self.account.match:
+                raise TestConnectionError(
+                    message=e.__class__.__name__,
+                    addendum=AccountIdentifier.MSG_TEMPLATE.format(
+                        value=self.account,
+                        formats=AccountIdentifier.FORMATS,
+                    ),
+                ) from e
+            raise
 
     @deprecated_method_or_class(
         version="1.0.0a4",

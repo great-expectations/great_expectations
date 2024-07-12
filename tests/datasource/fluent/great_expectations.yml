@@ -51,7 +51,6 @@ fluent_datasources:
         order_by:
           - key: year
           - key: month
-
   sqlite_taxi:
     type: sqlite
     connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
@@ -198,7 +197,7 @@ fluent_datasources:
           abs_container: "this_is_always_required"
   my_snowflake_ds:
     type: snowflake
-    connection_string: "snowflake://user_login_name:password@account_identifier/database/public?warehouse=wh&role=role"
+    connection_string: "snowflake://user_login_name:password@account.us-east-2.aws/database/public?warehouse=wh&role=role"
     assets:
       my_table_asset_wo_partitioners:
         id: d8b22f50-d3f9-4d04-9b4c-cfed86b157ff
@@ -206,7 +205,7 @@ fluent_datasources:
         table_name: my_table
   my_snowflake_ds_with_connect_args:
     type: snowflake
-    account: "myorganization"
+    account: "myorganization-myaccount"
     user: "testuser1"
     password: "foobarbaz"
     database: "testdb"
@@ -221,7 +220,7 @@ fluent_datasources:
         table_name: my_table
   my_snow_flake_w_private_key:
     type: snowflake
-    connection_string: "snowflake://user_login_name:dummy_value@account_identifier/db/schema?role=role&warehouse=wh"
+    connection_string: "snowflake://user_login_name:dummy_value@account.us-east-2.aws/db/schema?role=role&warehouse=wh"
     kwargs:
       connect_args:
         private_key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWEFJQkFBS0JnSHBGZENkS09HTGFpTUg5dDF0aDFsS3FKVmNEd2ZubFAybHBuZUFOYmJzZ0hiNi80VTJVCnVhMDg1emxOWWhaNXhKc25TZHFJQWZyYWd6dVZZTmsyT0Nwb04xUWtxNG9XYWQwYTRjRUIyUUJ0UDlqczBkVlcKeFFPYkpNOHQxWkxIQjNMdzFOQ3FCNk9lZmtQN1hsRTB3NmFYUlo1SVd3dlZDODZjQlhWQm1CWHpBZ01CQUFFQwpnWUFCUjZUVm5ITkdwWjcwMk9FSWRkZTJlYzEyUWJYUUZkUTZHRDdzejNjc2xFTjdjYXE4RXloMlpjTE4yTCtFCkdMWTBJWThtV0hJYzNCaXZrUHE0aTFhL0p5UlV6RVRvSnZqVmQ4SjFzbHJ6ejhyeU1PQWlQYnh0MzNJcGdHTDMKLzhLZ09MWXhqZGc1YnBuNnNDWmxPWHk3V1lqbDFIOFRCdzhDelpGNDFIYTI0UUpCQU03VSs4bTBoeWtuYm5CRApnS1hHYjBlSElCeDB6bFBhTkp3REhVY0pYdWp4YlZmd1ZqS1dMeTA3Sm9YUmlBZ1B1VnN6SU1odTByK1hhODdMClcyV0xkVHNDUVFDWFZtMEhlN1NheXRucmxBRmNrNS9MNEVqdFdhQVFHZm1WNGVhd0kySGVtV01qajB0dWtkRnQKd0FXSER1S1lNYitiZzIxT1UyWFF4b2xsWVlKZmsvYXBBa0JhU2UxMFd1Tloyc1hDS2lXQnVJTWhaV0ptS2JOYwpOWGdiMXR3MEEybzBKQmhJZURrWXNpajhCTU5IVFhXbGx6K2lDVXE1VkcrWmhYOWhjYkovUElhN0FrRUFqZmdkCnYrOWt0ZkdtRFVHREpYMjNZbUs5Qnl3VTVBWDZCWWt1Qi82cFNWRkxsNGhOa3lSbit6VXYra3NVZHdIMFpjY2QKTzJVeEZuR3BZdG5lbkJzS1FRSkJBTVgydGdGY2cvL3QxTGk0K2R4bFR2WlovY2xaQ0xwV1hwNEhRZ0J3enhNTgp3cERvRjQwT3pOWXJyS0lib1U0QkpGT01PQldBUzRERkRZR2RmTFZTOTlnPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==

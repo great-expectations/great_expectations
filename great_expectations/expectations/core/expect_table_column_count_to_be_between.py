@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
@@ -151,8 +152,12 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None]
-    max_value: Union[float, SuiteParameterDict, datetime, None]
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        description=MAX_VALUE_DESCRIPTION
+    )
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -177,6 +182,8 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     )
 
     class Config:
+        title = "Expect table column count to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectTableColumnCountToBeBetween]

@@ -88,6 +88,23 @@ class ConfigStr(SecretStr):
         yield cls._validate_template_str_format
         yield cls.validate
 
+    @classmethod
+    @override
+    def __modify_schema__(cls, field_schema: dict) -> None:
+        """Update the generated schema when used in a pydantic model."""
+        SecretStr.__modify_schema__(field_schema)
+        field_schema.update(
+            {
+                "description": "Contains config templates"
+                " to be substituted at runtime. Runtime values will never be serialized.",
+                "pattern": ".*" + TEMPLATE_STR_REGEX.pattern + ".*",
+                "examples": [
+                    "hello_${NAME}",
+                    "${MY_CFG_VAR}",
+                ],
+            }
+        )
+
 
 UriParts: TypeAlias = Literal[  # https://docs.pydantic.dev/1.10/usage/types/#url-properties
     "scheme", "host", "user", "password", "port", "path", "query", "fragment", "tld"
@@ -213,6 +230,23 @@ class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" sig
         # the value returned from the previous validator
         yield ConfigStr._validate_template_str_format
         yield cls.validate  # equivalent to AnyUrl.validate
+
+    @classmethod
+    @override
+    def __modify_schema__(cls, field_schema: dict) -> None:
+        """Update the generated schema when used in a pydantic model."""
+        ConfigStr.__modify_schema__(field_schema)
+        AnyUrl.__modify_schema__(field_schema)
+        field_schema.update(
+            {
+                "description": "Contains config templates for user:password in a URI"
+                " to be substituted at runtime. Runtime values will never be serialized.",
+                "examples": [
+                    "snowflake://dickens:${PASSWORD}@host/db/schema",
+                    "snowflake://${USER}:${PASSWORD}@host/db/schema",
+                ],
+            }
+        )
 
 
 def _check_config_substitutions_needed(
