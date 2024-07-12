@@ -188,6 +188,8 @@ class TestConnectionError(Exception):
             `cause` is the original exception that caused the error, the repr of which will be added
                 to the error message.
         """
+        self.cause = cause  # not guaranteed to be the same as `self.__cause__`
+        self.addendum = addendum
         if cause:
             message += f": due to {cause!r}"
         if addendum:
