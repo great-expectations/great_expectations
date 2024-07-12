@@ -4,7 +4,7 @@ import base64
 import logging
 from pprint import pformat as pf
 from sys import version_info as python_version
-from typing import TYPE_CHECKING, Final, Literal, Sequence
+from typing import TYPE_CHECKING, Final, Sequence
 from unittest.mock import ANY
 
 import pytest
@@ -181,25 +181,10 @@ class TestAccountIdentifier:
         assert str(account_identifier) == value
         assert repr(account_identifier) == f"AccountIdentifier({value!r})"
 
-    @pytest.mark.parametrize("separator", [".", "-"])
-    def test_fmt1_hyphen_parse(self, separator: Literal[".", "-"]):
+    @pytest.mark.parametrize("account_name", ["account_name", "account-name"])
+    def test_fmt1_parse(self, account_name: str):
         orgname = "orgname"
-        account_name = "account-name"
-        value = f"{orgname}{separator}{account_name}"
-        print(f"{value=}")
-
-        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
-        assert account_identifier.match
-
-        assert account_identifier.account_name == account_name
-        assert account_identifier.orgname == orgname
-        assert account_identifier.as_tuple() == (orgname, account_name)
-
-    @pytest.mark.parametrize("separator", [".", "-"])
-    def test_fmt1_underscore_parse(self, separator: Literal[".", "-"]):
-        orgname = "orgname"
-        account_name = "account_name"
-        value = f"{orgname}{separator}{account_name}"
+        value = f"{orgname}-{account_name}"
         print(f"{value=}")
 
         account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
@@ -220,8 +205,8 @@ class TestAccountIdentifier:
     )
     def test_fmt2_parse(self, value: str):
         """
-        The cloud portion is technically optional if the the provider is AWS,
-        but expecting greatly simplifies our parsing logic
+        The cloud portion is technically optional if the the provider is AWS, but expecting greatly
+        simplifies our parsing logic.
         """
         print(f"{value=}")
         locator, _, _remainder = value.partition(".")
@@ -244,6 +229,8 @@ class TestAccountIdentifier:
         "value",
         [
             "foobar",
+            "orgname.account-name",
+            "orgname.account_name",
             "my_account.us-east-1",
             "xy12345.us-gov-west-1.aws.",
             "xy12345.europe-west4.gcp.bar",
@@ -257,8 +244,8 @@ class TestAccountIdentifier:
     )
     def test_invalid_formats(self, value: str):
         """
-        Test that if an invalid format does not match it can still be stringified
-        as the original value.
+        Test that an invalid format that does not match but can still be stringified as
+        the original value.
         """
         print(f"{value=}")
         account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
