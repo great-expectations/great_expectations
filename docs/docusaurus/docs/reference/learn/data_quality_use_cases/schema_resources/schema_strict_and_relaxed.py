@@ -62,6 +62,9 @@ strict_suite.add_expectation(
     )
 )
 
+strict_suite.add_expectation(
+    gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION"))
+
 strict_results = batch.validate(strict_suite)
 print(f"Validation with strict suite:\n{strict_results}")
 
@@ -81,6 +84,9 @@ relaxed_suite.add_expectation(
         exact_match=False,
     )
 )
+
+relaxed_suite.add_expectation(
+    gxe.ExpectColumnValuesToBeInTypeList(column="transfer_amount", type_list=["DOUBLE_PRECISION", "STRING"]))
 
 relaxed_results = batch.validate(relaxed_suite)
 print(f"Validation with relaxed suite:\n{relaxed_results}")
