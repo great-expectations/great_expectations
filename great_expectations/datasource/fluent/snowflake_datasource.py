@@ -3,11 +3,13 @@ from __future__ import annotations
 import base64
 import functools
 import logging
+import re
 import urllib.parse
 import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     Final,
     Iterable,
     Literal,
@@ -119,6 +121,138 @@ def _get_config_substituted_connection_string(
         )
         return None
     return datasource.connection_string.get_config_value(datasource._data_context.config_provider)
+
+
+class AccountIdentifier(str):
+    """
+    Custom Pydantic compatible `str` type for the account identifier in
+    a `SnowflakeDsn` or `ConnectionDetails`.
+
+    https://docs.snowflake.com/en/user-guide/admin-account-identifier
+    https://docs.snowflake.com/user-guide/organizations-connect
+
+    Expected formats:
+    1. Account name in your organization
+        a. `<orgname>-<account_name>` - e.g. `"myOrg-my_account"`
+        b. `<orgname>-<account-name>` - e.g. `"myOrg-my-account"`
+    2. Account locator in a region
+        a. `<account_locator>.<region>.<cloud>` - e.g. `"abc12345.us-east-1.aws"`
+
+    The cloud group is optional if on aws but expecting it to be there makes it easier to
+    distinguish formats.
+    GX does not throw errors based on the regex parsing result.
+
+    The `.` separated version of the Account name format is not supported with SQLAlchemy.
+    """
+
+    FORMATS: ClassVar[str] = "<orgname>-<account_name> or <account_locator>.<region>.<cloud>"
+
+    FMT_1: ClassVar[str] = r"^(?P<orgname>[a-zA-Z0-9]+)[-](?P<account_name>[a-zA-Z0-9-_]+)$"
+    FMT_2: ClassVar[str] = (
+        r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
+    )
+    PATTERN: ClassVar[re.Pattern] = re.compile(f"{FMT_1}|{FMT_2}")
+
+    MSG_TEMPLATE: ClassVar[str] = (
+        "Account identifier '{value}' does not match expected format {formats} ;"
+        " it MAY be invalid. https://docs.snowflake.com/en/user-guide/admin-account-identifier"
+    )
+
+    def __init__(self, value: str) -> None:
+        self._match = self.PATTERN.match(value)
+
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({super().__repr__()})"
+
+    @classmethod
+    def __get_validators__(cls) -> Any:
+        yield cls._validate
+
+    @classmethod
+    def get_schema(cls) -> dict:
+        """Can be used by Pydantic models to customize the generated jsonschema."""
+        return {
+            "title": cls.__name__,
+            "type": "string",
+            "description": "Snowflake Account identifiers can be in one of two formats:"
+            f" {cls.FORMATS}",
+            "pattern": cls.PATTERN.pattern,
+            "examples": [
+                "myOrg-my_account",
+                "myOrg-my-account",
+                "abc12345.us-east-1.aws",
+            ],
+        }
+
+    @classmethod
+    def _validate(cls, value: str) -> AccountIdentifier:
+        if not value:
+            raise ValueError("Account identifier cannot be empty")  # noqa: TRY003
+        v = cls(value)
+        if not v._match:
+            LOGGER.info(
+                cls.MSG_TEMPLATE.format(value=value, formats=cls.FORMATS),
+            )
+        return v
+
+    @property
+    def match(self) -> re.Match[str] | None:
+        return self._match
+
+    @property
+    def orgname(self) -> str | None:
+        """
+        Part of format 1:
+        * `<orgname>-<account_name>`
+        * `<orgname>-<account-name>`
+        """
+        if self._match:
+            return self._match.group("orgname")
+        return None
+
+    @property
+    def account_name(self) -> str | None:
+        """
+        Part of format 1:
+        * `<orgname>-<account_name>`
+        * `<orgname>-<account-name>`
+        """
+        if self._match:
+            return self._match.group("account_name")
+        return None
+
+    @property
+    def account_locator(self) -> str | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("account_locator")
+        return None
+
+    @property
+    def region(self) -> str | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("region")
+        return None
+
+    @property
+    def cloud(self) -> Literal["aws", "gcp", "azure"] | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("cloud")  # type: ignore[return-value] # regex
+        return None
+
+    def as_tuple(
+        self,
+    ) -> tuple[str | None, str | None, str | None] | tuple[str | None, str | None]:
+        fmt1 = (self.account_locator, self.region, self.cloud)
+        if any(fmt1):
+            return fmt1
+        fmt2 = (self.orgname, self.account_name)
+        if any(fmt2):
+            return fmt2
+        raise ValueError("Account identifier does not match either expected format")  # noqa: TRY003
 
 
 class _UrlPasswordError(pydantic.UrlError):
