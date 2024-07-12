@@ -14,7 +14,11 @@ from pytest import param
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent import SQLDatasource, TestConnectionError
+from great_expectations.datasource.fluent import (
+    GxContextWarning,
+    SQLDatasource,
+    TestConnectionError,
+)
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     AccountIdentifier,
@@ -914,7 +918,17 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        assert datasource.schema_
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.schema_
+                ), "Don't expect schema to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.schema_
+        else:
+            assert datasource.schema_ == datasource.connection_string.schema_
 
     def test_database(
         self,
@@ -924,17 +938,17 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        assert datasource.database
-
-    def test_role(
-        self,
-        ds_config: dict,
-        seed_env_vars: None,
-        param_id: str,
-        ephemeral_context_with_defaults: AbstractDataContext,
-    ):
-        datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        assert datasource.role
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.database
+                ), "Don't expect database to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.database
+        else:
+            assert datasource.database == datasource.connection_string.database
 
     def test_warehouse(
         self,
@@ -944,7 +958,57 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        assert datasource.warehouse
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.warehouse
+                ), "Don't expect warehouse to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.warehouse
+        else:
+            assert datasource.warehouse == datasource.connection_string.warehouse
+
+    def test_role(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.role
+                ), "Don't expect role to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.role
+        else:
+            assert datasource.role == datasource.connection_string.role
+
+    def test_account(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.account
+                ), "Don't expect account to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.account
+        else:
+            assert datasource.account == datasource.connection_string.account
 
 
 if __name__ == "__main__":
