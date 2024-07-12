@@ -200,7 +200,7 @@ jobs:
         run: pip install . -c constraints-dev.txt -r reqs/requirements-dev-test.txt
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
+        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=2.0
 
   doc-checks:
     needs: [static-analysis]

@@ -274,6 +274,8 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
+            else:
+                raise ValueError("unresolvable template_str")
 
         return [
             RenderedStringTemplateContent(
