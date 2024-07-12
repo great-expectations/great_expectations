@@ -15,6 +15,7 @@ from typing import (
     Optional,
     Type,
     Union,
+    overload,
 )
 
 from great_expectations.compatibility import pydantic
@@ -40,6 +41,8 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
+    from sqlalchemy.engine import Inspector  # noqa: TID251 # type checking import
+
     from great_expectations.compatibility import sqlalchemy
     from great_expectations.compatibility.pydantic.networks import Parts
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -47,6 +50,35 @@ if TYPE_CHECKING:
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 MISSING: Final = object()  # sentinel value to indicate missing values
+
+SNOWFLAKE_QUOTE_CHAR: Final[str] = '"'
+
+
+def _is_bracketed_by_quotes(value: str) -> bool:
+    return value.startswith(SNOWFLAKE_QUOTE_CHAR) and value.endswith(
+        SNOWFLAKE_QUOTE_CHAR
+    )
+
+
+@overload
+def _to_lower_if_not_quoted(value: str) -> str:
+    ...
+
+
+@overload
+def _to_lower_if_not_quoted(value: None) -> None:
+    ...
+
+
+def _to_lower_if_not_quoted(value: str | None) -> str | None:
+    """
+    Convert a string to lowercase if it is not enclosed in double quotes.
+    """
+    if not value:
+        return value
+    if _is_bracketed_by_quotes(value):
+        return value
+    return value.lower()
 
 
 @functools.lru_cache(maxsize=4)
@@ -407,7 +439,7 @@ class SnowflakeDatasource(SQLDatasource):
         `schema_` to avoid conflict with Pydantic models schema property.
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
-            return self.connection_string.schema_
+            return _to_lower_if_not_quoted(self.connection_string.schema_)
 
         subbed_str: str | None = _get_config_substituted_connection_string(
             self, warning_msg="Unable to determine schema"
@@ -415,7 +447,9 @@ class SnowflakeDatasource(SQLDatasource):
         if not subbed_str:
             return None
         url_path: str = urllib.parse.urlparse(subbed_str).path
-        return _get_database_and_schema_from_path(url_path)["schema"]
+        return _to_lower_if_not_quoted(
+            _get_database_and_schema_from_path(url_path)["schema"]
+        )
 
     @property
     def database(self) -> str | None:
@@ -465,6 +499,8 @@ class SnowflakeDatasource(SQLDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SnowflakeDatasource.
 
+        If a schema is provided, it will also check if the schema exists.
+
         Args:
             test_assets: If assets have been passed to the SQLDatasource, whether to test them as well.
 
@@ -482,6 +518,20 @@ class SnowflakeDatasource(SQLDatasource):
                     )
                 ) from e
             raise
+        if not self.schema_:
+            LOGGER.info("No schema provided, skipping schema presence check")
+            return None
+        if _is_bracketed_by_quotes(self.schema_):
+            warnings.warn(
+                message=f"Schema {self.schema_} is enclosed in double quotes and would fail sqlalchemy based schema check; skipping",
+                category=GxDatasourceWarning,
+            )
+            return None
+        LOGGER.info(f"Checking if schema {self.schema_} exists")
+        inspector: Inspector = sa.inspect(self.get_engine())
+        if self.schema_ not in inspector.get_schema_names():
+            in_database = f" in database {self.database}" if self.database else ""
+            raise TestConnectionError(f"Schema {self.schema_} not found {in_database}")
 
     @pydantic.root_validator(pre=True)
     def _convert_root_connection_detail_fields(cls, values: dict) -> dict:
