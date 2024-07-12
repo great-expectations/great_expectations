@@ -513,10 +513,11 @@ class SnowflakeDatasource(SQLDatasource):
         except TestConnectionError as e:
             if self.account and not self.account.match:
                 raise TestConnectionError(
-                    AccountIdentifier.MSG_TEMPLATE.format(
+                    message=e.__class__.__name__,
+                    addendum=AccountIdentifier.MSG_TEMPLATE.format(
                         value=self.account,
                         formats=AccountIdentifier.FORMATS,
-                    )
+                    ),
                 ) from e
             raise
 
