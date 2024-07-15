@@ -1007,7 +1007,7 @@ class TableAsset(_SQLAsset):
             The target string in lowercase if it is not bracketed by quotes.
         """
         if cls._is_bracketed_by_quotes(target):
-            LOGGER.info(
+            LOGGER.warning(
                 f"The {target}  string is bracketed by quotes, so it will not be converted to lowercase."
                 " May cause sqlalchemy case-sensitivity issues."
             )
