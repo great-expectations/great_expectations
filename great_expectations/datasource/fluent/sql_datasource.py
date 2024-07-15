@@ -978,7 +978,11 @@ class TableAsset(_SQLAsset):
 
     @staticmethod
     def _is_bracketed_by_quotes(target: str) -> bool:
-        """Returns True if the target string is bracketed by quotes.
+        """
+        Returns True if the target string is bracketed by quotes.
+
+        Override this method if the quote characters are different than `'` or `"` in the target database,
+        such as backticks in Databricks SQL.
 
         Arguments:
             target: A string to check if it is bracketed by quotes.
@@ -990,6 +994,28 @@ class TableAsset(_SQLAsset):
             if target.startswith(quote) and target.endswith(quote):
                 return True
         return False
+
+    @classmethod
+    def _to_lower_if_not_bracketed_by_quotes(cls, target: str) -> str:
+        """Returns the target string in lowercase if it is not bracketed by quotes.
+        This is used to ensure case-insensitivity in sqlalchemy queries.
+
+        Arguments:
+            target: A string to convert to lowercase if it is not bracketed by quotes.
+
+        Returns:
+            The target string in lowercase if it is not bracketed by quotes.
+        """
+        if cls._is_bracketed_by_quotes(target):
+            LOGGER.info(
+                f"The {target}  string is bracketed by quotes, so it will not be converted to lowercase."
+                " May cause sqlalchemy case-sensitivity issues."
+            )
+            return target
+        LOGGER.info(
+            f"Setting {target} to lowercase to ensure sqlalchemy case-insensitivity."
+        )
+        return target.lower()
 
 
 def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
@@ -1182,6 +1208,10 @@ class SQLDatasource(Datasource):
             eg, it could be a TableAsset or a SqliteTableAsset.
         """
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
+        if schema_name:
+            schema_name = self._TableAsset._to_lower_if_not_bracketed_by_quotes(
+                schema_name
+            )
         asset = self._TableAsset(
             name=name,
             table_name=table_name,
