@@ -10,6 +10,14 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.19
+* [FEATURE] Snowflake test for the presence of a schema in `test_connection()` ([#10100](https://github.com/great-expectations/great_expectations/pull/10100))
+* [BUGFIX] Z-score renderer when `double_sided` ([#10085](https://github.com/great-expectations/great_expectations/pull/10085))
+* [BUGFIX] SQLDatasource - lowercase unquoted `schema_names` for SQLAlchemy case-sensitivity compatibility ([#10107](https://github.com/great-expectations/great_expectations/pull/10107))
+* [MAINTENANCE] Export `great_expectations.compatibility` types ([#10089](https://github.com/great-expectations/great_expectations/pull/10089))
+* [MAINTENANCE] 0.18.x - mypy - `possibly-undefined` ([#10091](https://github.com/great-expectations/great_expectations/pull/10091))
+* [MAINTENANCE] loosen ruamel pin ([#10081](https://github.com/great-expectations/great_expectations/pull/10081))
+
 ### 0.18.18
 * [FEATURE] Add atomic renderer for `ExpectMulticolumnSumToEqual` (#10076) ([#10077](https://github.com/great-expectations/great_expectations/pull/10077))
 * [FEATURE] Snowflake - narrow Account Identifier regex ([#10069](https://github.com/great-expectations/great_expectations/pull/10069))
