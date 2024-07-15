@@ -73,6 +73,33 @@ def sql_datasource(
     )
 
 
+@pytest.fixture
+def sql_datasource_test_connection_noop(
+    monkeypatch: pytest.MonkeyPatch, sql_datasource: SQLDatasource
+) -> SQLDatasource:
+    """
+    Patch and return the sql_datasource fixture `SQLDatasource.test_connection()` and `TableAsset.test_connection()`
+    to be noops and always pass.
+    """
+
+    LOGGER.warning(f"Patching {sql_datasource.name} `.test_connection()` to a noop")
+
+    def noop(self: SQLDatasource | TableAsset):
+        LOGGER.warning(f"{self.__class__.__name__}.test_connection noop")
+
+    # monkeypatch.setattr(SQLDatasource, "test_connection", noop, raising=True)
+    monkeypatch.setattr(TableAsset, "test_connection", noop, raising=True)
+    return sql_datasource
+
+
+@pytest.fixture
+def sql_datasource_noop_test_connection(
+    sql_datasource: SQLDatasource,
+    sql_datasource_test_connection_noop: MockType,
+) -> SQLDatasource:
+    return sql_datasource
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "ds_kwargs",
@@ -394,11 +421,10 @@ class TestTableAsset:
     @pytest.mark.parametrize("schema_name", ["my_schema", "MY_SCHEMA", "My_Schema"])
     def test_unquoted_schema_names_are_added_as_lowercase(
         self,
-        sql_datasource: SQLDatasource,
-        sql_datasource_test_connection_noop: MockType,
+        sql_datasource_noop_test_connection: SQLDatasource,
         schema_name: str,
     ):
-        table_asset = sql_datasource.add_table_asset(
+        table_asset = sql_datasource_noop_test_connection.add_table_asset(
             name="my_table_asset",
             table_name="my_table",
             schema_name=schema_name,
@@ -418,11 +444,10 @@ class TestTableAsset:
     )
     def test_quoted_schema_names_are_not_modified(
         self,
-        sql_datasource: SQLDatasource,
-        sql_datasource_test_connection_noop: MockType,
+        sql_datasource_noop_test_connection: SQLDatasource,
         schema_name: str,
     ):
-        table_asset = sql_datasource.add_table_asset(
+        table_asset = sql_datasource_noop_test_connection.add_table_asset(
             name="my_table_asset",
             table_name="my_table",
             schema_name=schema_name,

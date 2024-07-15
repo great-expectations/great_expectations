@@ -38,7 +38,6 @@ from great_expectations.datasource.fluent import (
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
-from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -55,7 +54,6 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 if TYPE_CHECKING:
     import responses
     from pytest import FixtureRequest
-    from pytest_mock import MockFixture, MockType
 
     from great_expectations.data_context import CloudDataContext
 
@@ -401,16 +399,3 @@ def seeded_contexts(
         request.param
     )
     return context_fixture
-
-
-@pytest.fixture
-def sql_datasource_test_connection_noop(mocker: MockFixture) -> MockType:
-    """Patch the SQLDatasource.test_connection() method to be a noop and always pass."""
-    CNF_TEST_LOGGER.warning(
-        f"Patching {SQLDatasource.__name__}.test_connection() to a noop"
-    )
-
-    def noop(self):
-        CNF_TEST_LOGGER.warning(".test_connection noop")
-
-    return mocker.patch.object(SQLDatasource, "test_connection", noop)
