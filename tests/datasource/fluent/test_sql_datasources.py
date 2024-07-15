@@ -16,9 +16,11 @@ from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
+    from pytest_mock import MockerFixture, MockType
 
-    from great_expectations.data_context import EphemeralDataContext
+    from great_expectations.data_context import (
+        EphemeralDataContext,
+    )
 
 
 LOGGER = logging.getLogger(__name__)
@@ -385,6 +387,47 @@ def test_recreate_from_dict(
         ephemeral_context_with_defaults.delete_datasource(d1.name)
         d2 = ephemeral_context_with_defaults.sources.add_sql(**d1.dict())
     assert d1 == d2
+
+
+@pytest.mark.unit
+class TestTableAsset:
+    @pytest.mark.parametrize("schema_name", ["my_schema", "MY_SCHEMA", "My_Schema"])
+    def test_unquoted_schema_names_are_added_as_lowercase(
+        self,
+        sql_datasource: SQLDatasource,
+        sql_datasource_test_connection_noop: MockType,
+        schema_name: str,
+    ):
+        table_asset = sql_datasource.add_table_asset(
+            name="my_table_asset",
+            table_name="my_table",
+            schema_name=schema_name,
+        )
+        assert table_asset.schema_name == schema_name.lower()
+
+    @pytest.mark.parametrize(
+        "schema_name",
+        [
+            '"my_schema"',
+            '"MY_SCHEMA"',
+            '"My_Schema"',
+            "'my_schema'",
+            "'MY_SCHEMA'",
+            "'My_Schema'",
+        ],
+    )
+    def test_quoted_schema_names_are_not_modified(
+        self,
+        sql_datasource: SQLDatasource,
+        sql_datasource_test_connection_noop: MockType,
+        schema_name: str,
+    ):
+        table_asset = sql_datasource.add_table_asset(
+            name="my_table_asset",
+            table_name="my_table",
+            schema_name=schema_name,
+        )
+        assert table_asset.schema_name == schema_name
 
 
 if __name__ == "__main__":
