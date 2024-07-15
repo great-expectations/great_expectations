@@ -76,6 +76,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
         def run_checkpoint():
             print("Running Checkpoint")
             # Replace <YOUR_ACCESS_TOKEN>, <YOUR_CLOUD_ORGANIZATION_ID>, and <CHECKPOINT_NAME> with your credentials
+            # You can also set GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID as environment variables
             GX_CLOUD_ACCESS_TOKEN = ""
             GX_CLOUD_ORGANIZATION_ID = ""
             CHECKPOINT_NAME = ""
