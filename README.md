@@ -49,6 +49,11 @@ Learn more about our plans for 1.0 and how we’ll be making this transition in 
 --------------------------------------------------
 -->
 
+## Python version support
+
+GX OSS supports Python `3.8` through `3.11`.
+Experimental support for Python `3.12` and later can be enabled by setting a `GX_PYTHON_EXPERIMENTAL` environment variable when installing `great_expectations`.
+
 ## Get started
 
 GX recommends deploying GX OSS within a virtual environment. For more information about getting started with GX OSS, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/guides/setup/get_started_lp).

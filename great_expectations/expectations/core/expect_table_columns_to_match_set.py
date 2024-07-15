@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -34,7 +35,17 @@ EXACT_MATCH_DESCRIPTION = (
     "If True, the list of columns must exactly match the observed columns. "
     "If False, observed columns must include column_set but additional columns will pass."
 )
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 DATA_QUALITY_ISSUES = ["Schema"]
 
 
@@ -71,6 +82,13 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -148,8 +166,10 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    column_set: Union[list, set, SuiteParameterDict, None]
-    exact_match: Union[bool, None]
+    column_set: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
+        description=COLUMN_SET_DESCRIPTION
+    )
+    exact_match: Union[bool, None] = pydantic.Field(description=EXACT_MATCH_DESCRIPTION)
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -174,6 +194,8 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     )
 
     class Config:
+        title = "Expect table columns to match set"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchSet]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

@@ -29,7 +29,6 @@ div.theme-code-block {
     display: flex;
     font-size: var(--p-md-font-size);
     opacity: 0.75;
-    text-transform: capitalize;
 
     &::before {
       background: url('/img/file-solid.svg') 0 50% no-repeat;
@@ -55,8 +54,8 @@ div.theme-code-block {
   .prism-code + div:has(button) {
     top: calc(var(--ifm-pre-padding) / 2);
 
-    &:hover {
-      opacity: 0.75 !important;
+    button:hover {
+      opacity: 0.5 !important;
     }
 
     button {

@@ -17,6 +17,9 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from flaky import flaky
 
+from docs.docusaurus.docs.components.examples_under_test import (
+    docs_tests,
+)
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -88,61 +91,6 @@ def delay_rerun(*args):
 
 # to be populated by the smaller lists below
 docs_test_matrix: List[IntegrationTestFixture] = []
-
-core_tests = [
-    # Expectation example scripts
-    IntegrationTestFixture(
-        name="create_an_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectations/_examples/create_an_expectation.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="edit_an_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectations/_examples/edit_an_expectation.py",
-        backend_dependencies=[],
-    ),
-    # Expectation Suite example scripts
-    IntegrationTestFixture(
-        name="add_expectations_to_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/add_expectations_to_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="create_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/create_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="delete_an_expectation_in_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/delete_an_expectation_in_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="delete_an_expectation_suite",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/delete_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="edit_a_single_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/edit_a_single_expectation.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="edit_all_expectations_in_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/edit_all_expectations_in_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="get_a_specific_expectation_from_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="get_an_existing_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/get_an_existing_expectation_suite.py",
-        backend_dependencies=[],
-    ),
-]
 
 local_tests = [
     # IntegrationTestFixture(
@@ -371,7 +319,6 @@ failed_rows_tests = [
 
 
 # populate docs_test_matrix with sub-lists
-docs_test_matrix += core_tests
 docs_test_matrix += local_tests
 docs_test_matrix += quickstart
 docs_test_matrix += fluent_datasources
@@ -391,6 +338,7 @@ docs_test_matrix += athena_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 docs_test_matrix += failed_rows_tests
+docs_test_matrix += docs_tests
 
 pandas_integration_tests: List[IntegrationTestFixture] = []
 
