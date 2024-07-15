@@ -2,7 +2,7 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 import PrereqPythonInstall from '../../../../_core_components/prerequisites/_python_installation.md'
-import PrereqGxInstall from '../../../../_core_components/prerequisites/_gx_installation_with_s3_dependencies.md'
+import PrereqGxInstall from '../../../../_core_components/prerequisites/_gx_installation_with_abs_dependencies.md'
 import PrereqDataContext from '../../../../_core_components/prerequisites/_preconfigured_data_context.md'
 
 ### Prerequisites
