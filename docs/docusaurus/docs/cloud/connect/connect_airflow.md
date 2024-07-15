@@ -79,6 +79,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
             # You can also set GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID as environment variables
             GX_CLOUD_ACCESS_TOKEN = ""
             GX_CLOUD_ORGANIZATION_ID = ""
+            # alternativey set CHECKPOINT_NAME to be a runtime parameter
             CHECKPOINT_NAME = ""
             context = gx.get_context(
                 cloud_access_token=GX_CLOUD_ACCESS_TOKEN,
