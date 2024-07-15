@@ -63,6 +63,7 @@
         },
         "column_list": {
             "title": "Column List",
+            "description": "Set of columns to be checked.",
             "type": "array",
             "items": {
                 "type": "string"
@@ -70,8 +71,8 @@
         },
         "mostly": {
             "title": "Mostly",
-            "default": 1.0,
             "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "default": 1.0,
             "type": "number",
             "minimum": 0.0,
             "maximum": 1.0,

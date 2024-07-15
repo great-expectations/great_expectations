@@ -62,6 +62,8 @@ from great_expectations.expectations.model_field_descriptions import (
     COLUMN_A_DESCRIPTION,
     COLUMN_B_DESCRIPTION,
     COLUMN_DESCRIPTION,
+    COLUMN_LIST_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
     Mostly,
@@ -2344,8 +2346,8 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_list: List[StrictStr]
-    mostly: Mostly = 1.0
+    column_list: List[StrictStr] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
+    mostly: Mostly = pydantic.Field(default=1.0, description=MOSTLY_DESCRIPTION)
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"

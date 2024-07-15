@@ -1045,10 +1045,7 @@ class SQLDatasource(Datasource):
             engine: sqlalchemy.Engine = self.get_engine()
             engine.connect()
         except Exception as e:
-            raise TestConnectionError(  # noqa: TRY003
-                "Attempt to connect to datasource failed with the following error message: "
-                f"{e!s}"
-            ) from e
+            raise TestConnectionError(cause=e) from e
         if self.assets and test_assets:
             for asset in self.assets:
                 asset._datasource = self

@@ -104,7 +104,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GXCloudRESTResource.DATASOURCE: EndpointVersion.V1,
         GXCloudRESTResource.DATA_ASSET: EndpointVersion.V1,
         GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V1,
-        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V0,
+        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V1,
         GXCloudRESTResource.EXPECTATION_SUITE: EndpointVersion.V1,
         GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V0,
         GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
