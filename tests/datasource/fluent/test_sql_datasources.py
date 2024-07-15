@@ -61,6 +61,16 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sa, "create_engine", _fake_create_engine, raising=True)
 
 
+@pytest.fixture
+def sql_datasource(
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    filter_gx_datasource_warnings: None,
+) -> SQLDatasource:
+    return ephemeral_context_with_defaults.sources.add_sql(
+        name="my_sql_datasource", connection_string="sqlite:///"
+    )
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "ds_kwargs",
