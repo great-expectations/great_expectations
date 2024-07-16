@@ -451,7 +451,10 @@ class SnowflakeDatasource(SQLDatasource):
         if not subbed_str:
             return None
         url_path: str = urllib.parse.urlparse(subbed_str).path
-        return _get_database_and_schema_from_path(url_path)["schema"]
+
+        return TableAsset._to_lower_if_not_bracketed_by_quotes(
+            _get_database_and_schema_from_path(url_path)["schema"]
+        )
 
     @property
     def database(self) -> str | None:

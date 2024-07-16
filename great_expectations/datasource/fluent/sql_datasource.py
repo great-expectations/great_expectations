@@ -16,6 +16,7 @@ from typing import (
     Literal,
     Optional,
     Protocol,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -88,6 +89,37 @@ if TYPE_CHECKING:
     )
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
+
+_DEFAULT_QUOTE_CHARACTERS: Final[Tuple[str, str]] = ('"', "'")
+
+
+@overload
+def to_lower_if_not_quoted(value: str, quote_characters: Sequence[str] = ...) -> str: ...
+
+
+@overload
+def to_lower_if_not_quoted(value: None, quote_characters: Sequence[str] = ...) -> None: ...
+
+
+def to_lower_if_not_quoted(
+    value: str | None,
+    quote_characters: Sequence[str] = _DEFAULT_QUOTE_CHARACTERS,
+) -> str | None:
+    """
+    Convert a string to lowercase if it is not enclosed in quotes.
+    """
+    if not value:
+        return value
+    for char in quote_characters:
+        if value.startswith(char) and value.endswith(char):
+            LOGGER.warning(
+                f"The {value} string is bracketed by quotes,"
+                " so it will not be converted to lowercase."
+                " May cause sqlalchemy case-sensitivity issues."
+            )
+            return value
+    LOGGER.info(f"Setting {value} to lowercase to ensure sqlalchemy case-insensitivity.")
+    return value.lower()
 
 
 class SQLDatasourceError(Exception):
@@ -899,7 +931,10 @@ class TableAsset(_SQLAsset):
         Returns:
             True if the target string is bracketed by quotes.
         """
-        return any(target.startswith(quote) and target.endswith(quote) for quote in ["'", '"'])
+        return any(
+            target.startswith(quote) and target.endswith(quote)
+            for quote in _DEFAULT_QUOTE_CHARACTERS
+        )
 
     @classmethod
     def _to_lower_if_not_bracketed_by_quotes(cls, target: str) -> str:
@@ -912,15 +947,7 @@ class TableAsset(_SQLAsset):
         Returns:
             The target string in lowercase if it is not bracketed by quotes.
         """
-        if cls._is_bracketed_by_quotes(target):
-            LOGGER.warning(
-                f"The {target}  string is bracketed by quotes,"
-                " so it will not be converted to lowercase."
-                " May cause sqlalchemy case-sensitivity issues."
-            )
-            return target
-        LOGGER.info(f"Setting {target} to lowercase to ensure sqlalchemy case-insensitivity.")
-        return target.lower()
+        return to_lower_if_not_quoted(target, quote_characters=_DEFAULT_QUOTE_CHARACTERS)
 
 
 def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
