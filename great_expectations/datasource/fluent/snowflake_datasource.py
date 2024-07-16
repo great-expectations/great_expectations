@@ -444,7 +444,7 @@ class SnowflakeDatasource(SQLDatasource):
         `schema_` to avoid conflict with Pydantic models schema property.
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
-            return self.connection_string.schema_
+            return to_lower_if_not_quoted(self.connection_string.schema_)
 
         subbed_str: str | None = _get_config_substituted_connection_string(
             self, warning_msg="Unable to determine schema"
