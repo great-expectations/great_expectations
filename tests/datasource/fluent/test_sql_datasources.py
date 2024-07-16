@@ -12,7 +12,11 @@ from pytest import param
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.datasource.fluent import GxDatasourceWarning, SQLDatasource
-from great_expectations.datasource.fluent.sql_datasource import TableAsset
+from great_expectations.datasource.fluent.sql_datasource import (
+    DEFAULT_QUOTE_CHARACTERS,
+    TableAsset,
+    to_lower_if_not_quoted,
+)
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
@@ -367,6 +371,32 @@ def test_specific_datasource_warnings(
             context.data_sources.add_sql(
                 name="my_datasource", connection_string=connection_string
             ).test_connection()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["input_", "expected_output", "quote_characters"],
+    [
+        ("my_schema", "my_schema", DEFAULT_QUOTE_CHARACTERS),
+        ("MY_SCHEMA", "my_schema", DEFAULT_QUOTE_CHARACTERS),
+        ("My_Schema", "my_schema", DEFAULT_QUOTE_CHARACTERS),
+        ('"my_schema"', '"my_schema"', DEFAULT_QUOTE_CHARACTERS),
+        ('"MY_SCHEMA"', '"MY_SCHEMA"', DEFAULT_QUOTE_CHARACTERS),
+        ('"My_Schema"', '"My_Schema"', DEFAULT_QUOTE_CHARACTERS),
+        ("'my_schema'", "'my_schema'", DEFAULT_QUOTE_CHARACTERS),
+        ("'MY_SCHEMA'", "'MY_SCHEMA'", DEFAULT_QUOTE_CHARACTERS),
+        ("'My_Schema'", "'My_Schema'", DEFAULT_QUOTE_CHARACTERS),
+        (None, None, DEFAULT_QUOTE_CHARACTERS),
+        ("", "", DEFAULT_QUOTE_CHARACTERS),
+        ("`My_Schema`", "`My_Schema`", ("`",)),
+        ("'My_Schema'", "'my_schema'", ("`",)),
+    ],
+    ids=lambda x: str(x),
+)
+def test_to_lower_if_not_quoted(
+    input_: str | None, expected_output: str | None, quote_characters: tuple[str, ...]
+):
+    assert to_lower_if_not_quoted(input_, quote_characters=quote_characters) == expected_output
 
 
 @pytest.mark.unit

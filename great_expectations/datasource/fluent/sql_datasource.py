@@ -90,7 +90,7 @@ if TYPE_CHECKING:
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
-_DEFAULT_QUOTE_CHARACTERS: Final[Tuple[str, str]] = ('"', "'")
+DEFAULT_QUOTE_CHARACTERS: Final[Tuple[str, str]] = ('"', "'")
 
 
 @overload
@@ -103,7 +103,7 @@ def to_lower_if_not_quoted(value: None, quote_characters: Sequence[str] = ...) -
 
 def to_lower_if_not_quoted(
     value: str | None,
-    quote_characters: Sequence[str] = _DEFAULT_QUOTE_CHARACTERS,
+    quote_characters: Sequence[str] = DEFAULT_QUOTE_CHARACTERS,
 ) -> str | None:
     """
     Convert a string to lowercase if it is not enclosed in quotes.
@@ -933,7 +933,7 @@ class TableAsset(_SQLAsset):
         """
         return any(
             target.startswith(quote) and target.endswith(quote)
-            for quote in _DEFAULT_QUOTE_CHARACTERS
+            for quote in DEFAULT_QUOTE_CHARACTERS
         )
 
     @classmethod
@@ -947,7 +947,7 @@ class TableAsset(_SQLAsset):
         Returns:
             The target string in lowercase if it is not bracketed by quotes.
         """
-        return to_lower_if_not_quoted(target, quote_characters=_DEFAULT_QUOTE_CHARACTERS)
+        return to_lower_if_not_quoted(target, quote_characters=DEFAULT_QUOTE_CHARACTERS)
 
 
 def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
