@@ -44,6 +44,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
     TableAsset,
     TestConnectionError,
+    to_lower_if_not_quoted,
 )
 
 if TYPE_CHECKING:
@@ -452,9 +453,7 @@ class SnowflakeDatasource(SQLDatasource):
             return None
         url_path: str = urllib.parse.urlparse(subbed_str).path
 
-        return TableAsset._to_lower_if_not_bracketed_by_quotes(
-            _get_database_and_schema_from_path(url_path)["schema"]
-        )
+        return to_lower_if_not_quoted(_get_database_and_schema_from_path(url_path)["schema"])
 
     @property
     def database(self) -> str | None:
