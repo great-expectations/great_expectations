@@ -16,9 +16,11 @@ from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
+    from pytest_mock import MockerFixture, MockType
 
-    from great_expectations.data_context import EphemeralDataContext
+    from great_expectations.data_context import (
+        EphemeralDataContext,
+    )
 
 
 LOGGER = logging.getLogger(__name__)
@@ -59,6 +61,42 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
         return in_memory_sqlite_engine
 
     monkeypatch.setattr(sa, "create_engine", _fake_create_engine, raising=True)
+
+
+@pytest.fixture
+def sql_datasource(
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    filter_gx_datasource_warnings: None,
+) -> SQLDatasource:
+    return ephemeral_context_with_defaults.sources.add_sql(
+        name="my_sql_datasource", connection_string="sqlite:///"
+    )
+
+
+@pytest.fixture
+def sql_datasource_table_asset_test_connection_noop(
+    monkeypatch: pytest.MonkeyPatch, sql_datasource: SQLDatasource
+) -> SQLDatasource:
+    """
+    Patch and return the sql_datasource fixture `TableAsset.test_connection()`
+    to be a noop and always pass.
+    """
+
+    LOGGER.warning(f"Patching {sql_datasource.name} `.test_connection()` to a noop")
+
+    def noop(self: SQLDatasource | TableAsset):
+        LOGGER.warning(f"{self.__class__.__name__}.test_connection noop called")
+
+    monkeypatch.setattr(TableAsset, "test_connection", noop, raising=True)
+    return sql_datasource
+
+
+@pytest.fixture
+def sql_datasource_noop_test_connection(
+    sql_datasource: SQLDatasource,
+    sql_datasource_test_connection_noop: MockType,
+) -> SQLDatasource:
+    return sql_datasource
 
 
 @pytest.mark.unit
@@ -329,6 +367,90 @@ def test_specific_datasource_warnings(
             context.data_sources.add_sql(
                 name="my_datasource", connection_string=connection_string
             ).test_connection()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "config",
+    [
+        {
+            "name": "connection_string only",
+            "connection_string": "sqlite:///",
+        },
+        {
+            "name": "no subs + kwargs",
+            "connection_string": "sqlite:///",
+            "kwargs": {"isolation_level": "SERIALIZABLE"},
+        },
+        {
+            "name": "subs + kwargs",
+            "connection_string": "sqlite:///${MY_VAR}",
+            "kwargs": {"isolation_level": "SERIALIZABLE"},
+        },
+    ],
+    ids=lambda x: x["name"],
+)
+def test_recreate_from_dict(
+    monkeypatch: pytest.MonkeyPatch,
+    create_engine_fake: None,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    config: dict,
+):
+    """
+    Test that .dict() method of a datasource can be fed back into the constructor to recreate
+    the datasource.
+    """
+    monkeypatch.setenv("MY_VAR", "my_var_value")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        d1 = ephemeral_context_with_defaults.sources.add_sql(**config)
+        ephemeral_context_with_defaults.delete_datasource(d1.name)
+        d2 = ephemeral_context_with_defaults.sources.add_sql(**d1.dict())
+    assert d1 == d2
+
+
+@pytest.mark.unit
+class TestTableAsset:
+    @pytest.mark.parametrize("schema_name", ["my_schema", "MY_SCHEMA", "My_Schema"])
+    def test_unquoted_schema_names_are_added_as_lowercase(
+        self,
+        sql_datasource_table_asset_test_connection_noop: SQLDatasource,
+        schema_name: str,
+    ):
+        my_datasource: SQLDatasource = sql_datasource_table_asset_test_connection_noop
+
+        table_asset = my_datasource.add_table_asset(
+            name="my_table_asset",
+            table_name="my_table",
+            schema_name=schema_name,
+        )
+        assert table_asset.schema_name == schema_name.lower()
+
+    @pytest.mark.parametrize(
+        "schema_name",
+        [
+            '"my_schema"',
+            '"MY_SCHEMA"',
+            '"My_Schema"',
+            "'my_schema'",
+            "'MY_SCHEMA'",
+            "'My_Schema'",
+        ],
+    )
+    def test_quoted_schema_names_are_not_modified(
+        self,
+        sql_datasource_table_asset_test_connection_noop: SQLDatasource,
+        schema_name: str,
+    ):
+        my_datasource: SQLDatasource = sql_datasource_table_asset_test_connection_noop
+
+        table_asset = my_datasource.add_table_asset(
+            name="my_table_asset",
+            table_name="my_table",
+            schema_name=schema_name,
+        )
+        assert table_asset.schema_name == schema_name
 
 
 if __name__ == "__main__":
