@@ -4,7 +4,7 @@ import great_epectations as gx
 context = gx.get_context()
 
 # Define the Data Source's parameters:
-data_source_name = "my_datasource"
+data_source_name = "my_filesystem_data_source"
 azure_options = {
     "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
     "credential": "${AZURE_CREDENTIAL}",
@@ -19,4 +19,4 @@ data_source = gx.data_sources.add_pandas_abs(
 # </snippet>
 
 # Retrieve the Data Source:
-datasource = context.data_sources.get("nyc_taxi_data")
+data_source = context.data_sources.get("nyc_taxi_data")

@@ -54,7 +54,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
    You can retrieve your Data Asset from the Data Context by updating `data_source_name` with the name of your Data Source and `asset_name` with the name of your Data Asset before executing the following:
 
    ```python
-   data_source_name = "nyc_taxi_data"
+   data_source_name = "my_filesystem_data_source"
    asset_name = "gcs_taxi_csv_file_asset"
    file_csv_asset = context.get_data_source(data_source_name).get_asset(asset_name)
    ```
@@ -70,7 +70,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
    #  a Data Source defined.
    context = gx.get_context()
 
-   data_source_name = "nyc_taxi_data"
+   data_source_name = "my_filesystem_data_source"
    data_source = context.get_datasource(data_source_name)
 
    # Define the Data Asset's parameters:
@@ -81,7 +81,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
    file_csv_asset = data_source.add_csv_asset(name=asset_name)
 
    # Use the Data Context to retrieve the Data Asset when needed:
-   data_source_name = "nyc_taxi_data"
+   data_source_name = "my_filesystem_data_source"
    asset_name = "gcs_taxi_csv_file_asset"
    file_csv_asset = context.get_data_source(data_source_name).get_asset(asset_name)
    ```

@@ -4,7 +4,7 @@ import great_epectations as gx
 context = gx.get_context()
 
 # Define the Data Source's parameters:
-data_source_name = "my_gcs_datasource"
+data_source_name = "my_filesystem_data_source"
 bucket_or_name = "my_bucket"
 gcs_options = {}
 
@@ -17,5 +17,5 @@ data_source = gx.data_sources.add_pandas_gcs(
 # </snippet>
 
 # Retrieve the Data Source:
-data_source_name = "my_datasource"
-datasource = context.data_sources.get(data_source_name)
+data_source_name = "my_filesystem_data_source"
+data_source = context.data_sources.get(data_source_name)

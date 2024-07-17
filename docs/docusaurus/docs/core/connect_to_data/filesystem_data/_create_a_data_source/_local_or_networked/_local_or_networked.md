@@ -37,7 +37,7 @@ import PandasDefault from './_pandas_default.md'
    # This path is relative to the `base_directory` of the Data Context.
    source_folder = "./data/taxi_yellow_tripdata_samples"
 
-   data_source_name = "nyc_taxi_data"
+   data_source_name = "my_filesystem_data_source"
    ```
 
 2. Add a Filesystem Data Source to your Data Context.
@@ -76,7 +76,7 @@ import PandasDefault from './_pandas_default.md'
 
    ```python title="Python"
    data_source_name="nyc_taxi_data"
-   datasource = context.data_sources.get(data_source_name)
+   data_source = context.data_sources.get(data_source_name)
    ```
 
    If you are using a File Data Context your Data Source can also be retrieved from the Data Context in future python sessions.
@@ -100,16 +100,16 @@ import PandasDefault from './_pandas_default.md'
    # This path is relative to the `base_directory` of the Data Context.
    source_folder = "./data/taxi_yellow_tripdata_samples"
 
-   data_source_name = "nyc_taxi_data"
+   data_source_name = "my_filesystem_data_source"
    
    # Create the Data Source:
-   datasource = gx.data_sources.add_pandas_filesystem(
+   data_source = gx.data_sources.add_pandas_filesystem(
       name="nyc_taxi_data",
       base_directory=source_folder
    )
    
    # Retrieve the Data Source:
-   datasource = context.data_sources.get("nyc_taxi_data")
+   data_source = context.data_sources.get("nyc_taxi_data")
    ```
 
    </TabItem>
@@ -125,16 +125,16 @@ import PandasDefault from './_pandas_default.md'
    # This path is relative to the `base_directory` of the Data Context.
    source_folder = "./data/taxi_yellow_tripdata_samples"
    
-   data_source_name = "nyc_taxi_data"
+   data_source_name = "my_filesystem_data_source"
    
    # Create the Data Source:
-   datasource = gx.data_sources.add_spark_filesystem(
+   data_source = gx.data_sources.add_spark_filesystem(
       name=data_source_name,
       base_directory=source_folder
    )
 
    # Retrieve the Data Source:
-   datasource = context.data_sources.get("nyc_taxi_data")
+   data_source = context.data_sources.get("nyc_taxi_data")
    ```
 
    </TabItem>
