@@ -6,12 +6,15 @@ const truncateDescription = (description) => {
     return description.length > TITLE_MAX_CHARACTERS ? description.substring(0, TITLE_MAX_CHARACTERS) + "..." : description;
 }
 
-const fullDescription = (description, name, email) => {
-    return `Name: ${name || '-'}\nEmail: ${email || '-'}\n\n${description}`;
+const formatOptionalValue = (value) => value || '-';
+
+const fullDescription = (description, name, email, selectedValue) => {
+    const formattedSelectedValue = selectedValue.replaceAll("-"," ");
+    return `Name: ${formatOptionalValue(name)}\nEmail: ${formatOptionalValue(email)}\nSelected feedback type: ${formattedSelectedValue}\n\n${description}`;
 }
 
 exports.handler = async (req, context) => {
-    const { description, name, email } = JSON.parse(req.body);
+    const { description, name, email, selectedValue } = JSON.parse(req.body);
     const response = await fetch("https://greatexpectations.atlassian.net/rest/api/2/issue", {
         method: "POST",
         headers: {
@@ -24,7 +27,7 @@ exports.handler = async (req, context) => {
                     "id": DOCUMENTATION_BOARD_ID
                 },
                 "summary": truncateDescription(description),
-                "description": fullDescription(description, name, email),
+                "description": fullDescription(description, name, email, selectedValue),
                 "issuetype": {
                     "id": STORY_ISSUETYPE_ID
                 }

@@ -63,11 +63,7 @@ export default function WasThisHelpful(){
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    description: formData.description,
-                    name: formData.name,
-                    email: formData.email
-                })
+                body: JSON.stringify(formData)
             });
             if (response.ok) {
                 setIsOpen(false)
@@ -182,7 +178,7 @@ export default function WasThisHelpful(){
                         />
                     }
 
-                    {error && <p>An error occured, please try again</p>}
+                    {error && <p className={styles.errorMessage}>An error occured, please try again</p>}
 
                     <input type="submit" disabled={!formData.description} className={styles.submitButton}
                            value="Submit"/>
