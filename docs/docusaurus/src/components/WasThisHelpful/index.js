@@ -9,6 +9,7 @@ export default function WasThisHelpful(){
     const { pathname } = useLocation();
     const [feedbackSent, setFeedbackSent] = useState(false)
     const [isOpen, setIsOpen] = useState(false);
+    const [error, setError] = useState(false);
     const config = useDocusaurusContext()
 
     useEffect(() => {
@@ -51,20 +52,26 @@ export default function WasThisHelpful(){
             $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0'
         })
         setIsOpen(false)
+        setError(false)
     }
 
-    const sendReview = (e) => {
+    const sendReview = async (e) => {
         e.preventDefault()
-        if(formData.description){
-            posthog.capture("survey sent", {
-                $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0',
-                $survey_response: formData.name,
-                $survey_response_1: formData.email,
-                $survey_response_2: formData.description,
-                $survey_response_3: pathname,
-                $survey_response_4: formData.selectedValue.replaceAll('-', ' ')
-            })
-            setIsOpen(false)
+        if (formData.description) {
+            const response = await fetch("/.netlify/functions/createJiraTicketInDocsBoard", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    description: formData.description
+                })
+            });
+            if (response.ok) {
+                setIsOpen(false)
+            } else {
+                setError(true)
+            }
         }
     }
 
@@ -172,6 +179,8 @@ export default function WasThisHelpful(){
                             placeholder={formData.selectedValue === 'language-typo' ? "Describe the typo that you've found." : "Try to be specific and detailed."}
                         />
                     }
+
+                    {error && <p>An error occured, please try again</p>}
 
                     <input type="submit" disabled={!formData.description} className={styles.submitButton}
                            value="Submit"/>
