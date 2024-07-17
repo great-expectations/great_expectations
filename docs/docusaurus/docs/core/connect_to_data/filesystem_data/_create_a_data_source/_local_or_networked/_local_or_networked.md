@@ -33,11 +33,7 @@ import PandasDefault from './_pandas_default.md'
 
    In this example, a relative folder path is defined for a folder that happens to contain taxi trip data for New York City:
 
-   ```python title="Python"
-   # This path is relative to the `base_directory` of the Data Context.
-   source_folder = "./data/taxi_yellow_tripdata_samples"
-
-   data_source_name = "my_filesystem_data_source"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_spark.py - define Data Source parameters"
    ```
 
 2. Add a Filesystem Data Source to your Data Context.
@@ -48,38 +44,19 @@ import PandasDefault from './_pandas_default.md'
 
    <TabItem value="pandas_filesystem" label="pandas">
 
-   ```python title="Python"
-   data_source = gx.data_sources.add_pandas_filesystem(
-      name=data_source_name,
-      base_directory=source_folder
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_pandas.py - add Data Source"
    ```
 
    </TabItem>
 
    <TabItem value="spark" label="Spark">
 
-   ```python title="Python"
-   data_source = gx.data_sources.add_spark_filesystem(
-      name=data_source_name,
-      base_directory=source_folder
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_spark.py - add Data Source"
    ```
 
    </TabItem>
 
    </Tabs>
-
-5. Optional. Retrieve your Data Source from your Data Context.
-
-   You can retrieve your Data Source elsewhere in your code by updating the value of `data_source_name` and executing:
-
-   ```python title="Python"
-   data_source_name="nyc_taxi_data"
-   data_source = context.data_sources.get(data_source_name)
-   ```
-
-   If you are using a File Data Context your Data Source can also be retrieved from the Data Context in future python sessions.
 
 </TabItem>
 
@@ -91,50 +68,14 @@ import PandasDefault from './_pandas_default.md'
 
    <TabItem value="pandas_filesystem" label="pandas example">
 
-   ```python title="Python"
-   import great_epectations as gx
-
-   context = gx.get_context()
-
-   # Define the Data Source's parameters:
-   # This path is relative to the `base_directory` of the Data Context.
-   source_folder = "./data/taxi_yellow_tripdata_samples"
-
-   data_source_name = "my_filesystem_data_source"
-   
-   # Create the Data Source:
-   data_source = gx.data_sources.add_pandas_filesystem(
-      name="nyc_taxi_data",
-      base_directory=source_folder
-   )
-   
-   # Retrieve the Data Source:
-   data_source = context.data_sources.get("nyc_taxi_data")
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_pandas.py - full example"
    ```
 
    </TabItem>
 
    <TabItem value="spark" label="Spark example">
 
-   ```python title="Python"
-   import great_epectations as gx
-
-   context = gx.get_context()
-
-   # Define the Data Source's parameters:
-   # This path is relative to the `base_directory` of the Data Context.
-   source_folder = "./data/taxi_yellow_tripdata_samples"
-   
-   data_source_name = "my_filesystem_data_source"
-   
-   # Create the Data Source:
-   data_source = gx.data_sources.add_spark_filesystem(
-      name=data_source_name,
-      base_directory=source_folder
-   )
-
-   # Retrieve the Data Source:
-   data_source = context.data_sources.get("nyc_taxi_data")
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_spark.py - full example"
    ```
 
    </TabItem>
