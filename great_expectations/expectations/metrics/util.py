@@ -348,6 +348,7 @@ class CaseInsensitiveString(str):
     def __hash__(self):
         return hash(self._lower)
 
+    @override
     def __str__(self) -> str:
         return self._original
 

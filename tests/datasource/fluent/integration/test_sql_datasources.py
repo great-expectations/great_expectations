@@ -858,7 +858,7 @@ class TestColumnExpectations:
             else None
         )
 
-        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")
+        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")  # type: ignore[index] # FIXME
         print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
         print(f"type:\n  {type(column_name)}\n")
 
@@ -978,7 +978,7 @@ class TestColumnExpectations:
             else None
         )
 
-        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")
+        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")  # type: ignore[index] # FIXME
         print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
         print(f"type:\n  {type(column_name)}\n")
 
