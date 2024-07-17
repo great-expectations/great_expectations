@@ -22,119 +22,57 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
 2. Add a Batch Definition to the Data Asset.
 
-   A path Batch Definition returns all of the records in a data file as a single Batch.  A partitioned Batch Definition will return the records of a file in a Data Asset based on the file name that match a regex.
+   A whole directory Batch Definition returns all of the records in a data file as a single Batch.  A partitioned directory Batch Definition will subdivide the records according to a datetime field and return those records that match a specified year, month, or day.
 
-   <Tabs queryString="batch_definition" groupId="batch_definition" defaultValue='path'>
+   <Tabs queryString="batch_definition" groupId="batch_definition" defaultValue='whole_directory'>
 
-   <TabItem value="path" label="Path">
+   <TabItem value="whole_directory" label="Whole directory">
    
-   To define a path Batch Definition you need to provide the following information:
+   Because a whole directory Batch Definition returns the records from all of the files it can read in the Data Asset you only need to provide one addditional piece of information to define one:
 
    - `name`: A name by which you can reference the Batch Definition in the future.  This should be unique within the Data Asset.
-   - `path`: The path within the Data Asset of the data file containing the records to return.
  
-   Update the `batch_definition_name` and `batch_definition_path` variables and execute the following code to create a path Batch Definition:
+   Update the `batch_definition_name` variable and execute the following code to create a whole directory Batch Definition:
 
-   ```python title="Python"
-   batch_definition_name="yellow_tripdata_sample_2019-01.csv"
-   batch_definition_path="first_3_files/yellow_tripdata_sample_2019-01.csv"
-   path_batch_definition = file_asset.add_batch_definition_path(
-      name=batch_definition_name,
-      path=batch_definition_path
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_whole_directory.py - add Batch Definition"
    ```
 
    </TabItem>
 
    <TabItem value="partitioned" label="Partitioned">
    
-   {GxData.product_name} currently supports partitioning File Data Assets based on dates.  The files can be returned by year, month, or day.
+   {GxData.product_name} currently supports partitioning Directory Data Assets based on a datetime field.  Therefore, to define a partitioned Directory Batch Definition you need to provide two pieces of information:
+
+   - `name`:A name by which you can reference the Batch Definition in the future.  This should be unique within the Data Asset.
+   - `column`: The datetime column that records should be subdivided on.
+
+   The Batch Definition can be configured to return records by year, month, or day.
 
    <Tabs queryString="partition_type" groupId="partition_type" defaultValue='yearly'>
    
    <TabItem value="yearly" label="Yearly">
-   
-   For example, say your Data Asset contains the following files with year dates in the file names:
 
-   - yellow_tripdata_sample_2019.csv
-   - yellow_tripdata_sample_2020.csv
-   - yellow_tripdata_sample_2021.csv
+   Update the `batch_definition_name` and `batch_definition_column` variables in the following code, then execute it to create a Batch Definition that subdivides the records in a directory by year:
 
-   You can create a regex that will match these files by replacing the year in the file names with a named regex matching pattern.  This pattern should be named `year`.
-
-   For the above three files, the regex pattern would be:
-
-   ```regexp title="Regular Expression"
-   yellow_tripdata_sample_(?P<year>\d{4})\.csv
-   ```
-
-   Update the `batch_definition_name` and `batch_definition_regex` variables in the following code, then execute it to create a yearly Batch Definition:
-
-   ```python
-   batch_definition_name="yearly_yellow_tripdata_sample"
-   batch_definition_regex=r"yellow_tripdata_sample_(?P<year>\d{4})\.csv"
-   file_csv_yearly_batch_definition = pandas_file_csv_asset.add_batch_definition_yearly(
-       name=batch_definition_name,
-       regex=batch_definition_regex
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_yearly.py - define Batch Definition parameters"
    ```
 
    </TabItem>
 
    <TabItem value="monthly" label="Monthly">
    
-   For example, say your Data Asset contains the following files with year and month dates in their names:
+   Update the `batch_definition_name` and `batch_definition_column` variables in the following code, then execute it to create a Batch Definition that subdivides the records in a directory by month:
 
-   - yellow_tripdata_sample_2019-01.csv
-   - yellow_tripdata_sample_2019-02.csv
-   - yellow_tripdata_sample_2019-03.csv
-
-   You can create a regex that will match these files by replacing the year and month in the file names with named regex matching patterns.  These patterns should be correspondingly named `year` and `month`.
-
-   For the above three files, the regex pattern would be:
-
-   ```regexp title="Regular Expression"
-   yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv
-   ```
-
-   Update the `batch_definition_name` and `batch_definition_regex` variables in the following code, then execute it to create a monthly Batch Definition:
-
-   ```python
-   batch_definition_name="monthly_yellow_tripdata_sample"
-   batch_definition_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-   monthly_batch_definition = file_asset.add_batch_definition_monthly(
-       name=batch_definition_name,
-       regex=batch_definition_regex
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_monthly.py - define Batch Definition parameters"
    ```
 
    </TabItem>
 
    <TabItem value="daily" label="Daily">
    
-   For example, say your Data Asset contains the following files with year, month, and day dates in their names:
+   Update the `batch_definition_name` and `batch_definition_column` variables in the following code, then execute it to create a Batch Definition that subdivides the records in a directory by day:
 
-   - yellow_tripdata_sample_2019-07-15.csv
-   - yellow_tripdata_sample_2019-07-16.csv
-   - yellow_tripdata_sample_2019-07-17.csv
-
-   You can create a regex that will match these files by replacing the year, month, and day in the file names with named regex matching patterns.  These patterns should be correspondingly named `year`, `month`, and `day`.
-
-   For the above three files, the regex pattern would be:
-
-   ```regexp title="Regular Expression"
-   yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
-   ```
-
-   Update the `batch_definition_name` and `batch_definition_regex` variables in the following code, then execute it to create a daily Batch Definition:
-
-   ```python
-   batch_definition_name="daily_yellow_tripdata_sample"
-   batch_definition_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv"
-   daily_batch_definition = file_asset.add_batch_definition_monthly(
-       name=batch_definition_name,
-       regex=batch_definition_regex
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py - define Batch Definition parameters"
    ```
 
    </TabItem>
@@ -145,21 +83,17 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
    </Tabs>
    
-4. Optional. Verify the Batch Definition is valid.
-   
+5. Optional. Verify the Batch Definition is valid.
 
-   <Tabs className="hidden" queryString="batch_definition" groupId="batch_definition" defaultValue='path'>
+   <Tabs className="hidden" queryString="batch_definition" groupId="batch_definition" defaultValue='whole_directory'>
 
-   <TabItem value="path" label="Path">
+   <TabItem value="whole_directory" label="Whole directory">
 
-   A path Batch Definition always returns all records in a specific file as a single Batch.  Therefore you do not need to provide any additional parameters to retrieve data from a path Batch Definition.
+   A whole directory Batch Definition always returns all available records as a single Batch.  Therefore you do not need to provide any additional parameters to retrieve data from a path Batch Definition.
    
    After retrieving your data you can verify that the Batch Definition is valid by printing the first few retrieved records with `batch.head()`:
 
-   ```python title="Python"
-   batch = batch_definition.get_batch()
-   print(batch)
-   batch.head()
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_whole_directory.py - retrieve and verify Batch"
    ```
 
    </TabItem>
@@ -174,33 +108,21 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
    
    <TabItem value="yearly" label="Yearly">
 
-    ```python
-   yearly_batch = yearly_batch_definition.get_batch(
-      batch_parameters={"year": 2020}
-   )
-   yearly_batch.head()
+    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_yearly.py - retrieve and verify Batch"
    ```
 
    </TabItem>
 
    <TabItem value="monthly" label="Monthly">
 
-    ```python
-   monthly_batch = monthly_batch_definition.get_batch(
-      batch_parameters={"year": 2020, "month": 1}
-   )
-   monthly_batch.head()
+    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_monthly.py - retrieve and verify Batch"
    ```
 
    </TabItem>
 
    <TabItem value="daily" label="Daily">
   
-    ```python
-   daily_batch = daily_batch_definition.get_batch(
-      batch_parameters={"year": 2020, "month": 1, "day": 14}
-   )
-   daily_batch.head()
+    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py - retrieve and verify Batch"
    ```
 
    </TabItem>
@@ -213,7 +135,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
 5. Optional. Create additional Batch Definitions.
 
-   A Data Asset can have multiple Batch Definitions as long as each Batch Definition has a unique name within that Data Asset. Repeat this procedure to add additional path or partitioned Batch Definitions to your Data Asset.
+   A Data Asset can have multiple Batch Definitions as long as each Batch Definition has a unique name within that Data Asset. Repeat this procedure to add additional whole directory or partitioned Batch Definitions to your Data Asset.
 
 </TabItem>
 
@@ -221,7 +143,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
 Full example code for whole directory Batch Definitions and partitioned yearly, monthly, or daily Batch Definitions:
 
-<Tabs queryString="batch" groupId="batch" defaultValue=whole_directory'>
+<Tabs queryString="batch" groupId="batch" defaultValue='whole_directory'>
 
 <TabItem value="whole_directory" label="Whole directory">
 
@@ -232,21 +154,21 @@ Full example code for whole directory Batch Definitions and partitioned yearly, 
 
 <TabItem value="yearly" label="Yearly">
 
-```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_yearly.py - full_example"
+```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_yearly.py - full example"
 ```
 
 </TabItem>
 
 <TabItem value="monthly" label="Monthly">
 
-```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_monthly.py - full_example"
+```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_monthly.py - full example"
 ```
 
 </TabItem>
 
 <TabItem value="daily" label="Daily">
 
-```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py - full_example"
+```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py - full example"
 ```
 
 </TabItem>
