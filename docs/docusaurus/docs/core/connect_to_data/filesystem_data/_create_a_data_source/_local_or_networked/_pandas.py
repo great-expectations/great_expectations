@@ -1,4 +1,4 @@
-# <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_pandas.py - full_example">
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_pandas.py - full example">
 import great_epectations as gx
 
 context = gx.get_context()
