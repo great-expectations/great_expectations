@@ -556,8 +556,15 @@
             "type": "object",
             "properties": {
                 "account": {
-                    "title": "Account",
-                    "type": "string"
+                    "title": "AccountIdentifier",
+                    "type": "string",
+                    "description": "Snowflake Account identifiers can be in one of two formats: <orgname>-<account_name> or <account_locator>.<region>.<cloud>",
+                    "pattern": "^(?P<orgname>[a-zA-Z0-9]+)[-](?P<account_name>[a-zA-Z0-9-_]+)$|^(?P<account_locator>[a-zA-Z0-9]+)\\.(?P<region>[a-zA-Z0-9-]+)\\.(?P<cloud>aws|gcp|azure)$",
+                    "examples": [
+                        "myOrg-my_account",
+                        "myOrg-my-account",
+                        "abc12345.us-east-1.aws"
+                    ]
                 },
                 "user": {
                     "title": "User",

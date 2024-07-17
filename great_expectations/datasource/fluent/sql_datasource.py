@@ -16,6 +16,7 @@ from typing import (
     Literal,
     Optional,
     Protocol,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -88,6 +89,37 @@ if TYPE_CHECKING:
     )
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
+
+DEFAULT_QUOTE_CHARACTERS: Final[Tuple[str, str]] = ('"', "'")
+
+
+@overload
+def to_lower_if_not_quoted(value: str, quote_characters: Sequence[str] = ...) -> str: ...
+
+
+@overload
+def to_lower_if_not_quoted(value: None, quote_characters: Sequence[str] = ...) -> None: ...
+
+
+def to_lower_if_not_quoted(
+    value: str | None,
+    quote_characters: Sequence[str] = DEFAULT_QUOTE_CHARACTERS,
+) -> str | None:
+    """
+    Convert a string to lowercase if it is not enclosed in quotes.
+    """
+    if not value:
+        return value
+    for char in quote_characters:
+        if value.startswith(char) and value.endswith(char):
+            LOGGER.warning(
+                f"The {value} string is bracketed by quotes,"
+                " so it will not be converted to lowercase."
+                " May cause sqlalchemy case-sensitivity issues."
+            )
+            return value
+    LOGGER.info(f"Setting {value} to lowercase to ensure sqlalchemy case-insensitivity.")
+    return value.lower()
 
 
 class SQLDatasourceError(Exception):
@@ -887,7 +919,11 @@ class TableAsset(_SQLAsset):
 
     @staticmethod
     def _is_bracketed_by_quotes(target: str) -> bool:
-        """Returns True if the target string is bracketed by quotes.
+        """
+        Returns True if the target string is bracketed by quotes.
+
+        Override this method if the quote characters are different than `'` or `"` in the
+        target database, such as backticks in Databricks SQL.
 
         Arguments:
             target: A string to check if it is bracketed by quotes.
@@ -895,7 +931,23 @@ class TableAsset(_SQLAsset):
         Returns:
             True if the target string is bracketed by quotes.
         """
-        return any(target.startswith(quote) and target.endswith(quote) for quote in ["'", '"'])
+        return any(
+            target.startswith(quote) and target.endswith(quote)
+            for quote in DEFAULT_QUOTE_CHARACTERS
+        )
+
+    @classmethod
+    def _to_lower_if_not_bracketed_by_quotes(cls, target: str) -> str:
+        """Returns the target string in lowercase if it is not bracketed by quotes.
+        This is used to ensure case-insensitivity in sqlalchemy queries.
+
+        Arguments:
+            target: A string to convert to lowercase if it is not bracketed by quotes.
+
+        Returns:
+            The target string in lowercase if it is not bracketed by quotes.
+        """
+        return to_lower_if_not_quoted(target, quote_characters=DEFAULT_QUOTE_CHARACTERS)
 
 
 def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
@@ -1045,10 +1097,7 @@ class SQLDatasource(Datasource):
             engine: sqlalchemy.Engine = self.get_engine()
             engine.connect()
         except Exception as e:
-            raise TestConnectionError(  # noqa: TRY003
-                "Attempt to connect to datasource failed with the following error message: "
-                f"{e!s}"
-            ) from e
+            raise TestConnectionError(cause=e) from e
         if self.assets and test_assets:
             for asset in self.assets:
                 asset._datasource = self
@@ -1078,6 +1127,8 @@ class SQLDatasource(Datasource):
             eg, it could be a TableAsset or a SqliteTableAsset.
         """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
+        if schema_name:
+            schema_name = self._TableAsset._to_lower_if_not_bracketed_by_quotes(schema_name)
         asset = self._TableAsset(
             name=name,
             table_name=table_name,
