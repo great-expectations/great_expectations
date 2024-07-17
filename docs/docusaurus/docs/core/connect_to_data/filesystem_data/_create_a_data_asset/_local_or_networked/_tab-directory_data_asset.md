@@ -50,7 +50,7 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
 
 <TabItem value="sample_code" label="Sample code">
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_directory_asset.py - add Data Asset"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_directory_asset.py - full example"
    ```
 
 </TabItem>

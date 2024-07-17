@@ -32,7 +32,7 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
 
    This example uses taxi trip data stored in `.csv` files, so the name `"taxi_csv_files"` will be used for the Data Asset: 
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_directory_asset.py - define Data Asset parameters"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_file_asset.py - define Data Asset parameters"
    ```
 
 2. Add the Data Asset to your Data Source.
@@ -44,14 +44,14 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
 
    The following example creates a Data Asset that can read `.csv` file data:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_file_asset.py - define Data Asset parameters"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_file_asset.py - add Data Asset"
    ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_file_asset.py - add Data Asset"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_file_asset.py - full example"
    ```
 
 </TabItem>

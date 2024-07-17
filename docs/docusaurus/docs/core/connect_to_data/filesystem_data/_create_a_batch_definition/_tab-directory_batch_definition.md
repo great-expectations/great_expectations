@@ -17,10 +17,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
    Replace the value of `data_source_name` with the name of your Data Source and the value of `asset_name` with the name of your Data Asset in the following code.  Then execute it to retrieve an existing Data Source and Data Asset from your Data Context:
 
-   ```python title="Python"
-   data_source_name = "my_filesystem_data_source"
-   asset_name = "abs_taxi_csv_file_asset"
-   file_data_asset = context.get_data_source(data_source_name).get_asset(asset_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_whole_directory.py - retrieve Data Asset"
    ```
 
 2. Add a Batch Definition to the Data Asset.
@@ -222,8 +219,39 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_batch_definition/_create_a_batch_definition.md full example"
+Full example code for whole directory Batch Definitions and partitioned yearly, monthly, or daily Batch Definitions:
+
+<Tabs queryString="batch" groupId="batch" defaultValue=whole_directory'>
+
+<TabItem value="whole_directory" label="Whole directory">
+
+```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_whole_directory.py - full_example"
 ```
+
+</TabItem>
+
+<TabItem value="yearly" label="Yearly">
+
+```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_yearly.py - full_example"
+```
+
+</TabItem>
+
+<TabItem value="monthly" label="Monthly">
+
+```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_monthly.py - full_example"
+```
+
+</TabItem>
+
+<TabItem value="daily" label="Daily">
+
+```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py - full_example"
+```
+
+</TabItem>
+
+</Tabs>
 
 </TabItem>
 

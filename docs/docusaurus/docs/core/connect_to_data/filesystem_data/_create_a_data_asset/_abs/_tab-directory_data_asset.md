@@ -16,6 +16,12 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
 
 <TabItem value="procedure" label="Procedure">
 
+1. Retrieve your Data Source.
+   Replace the value of `data_source_name` in the following code with the name of your Data Source and execute it to retrieve your Data Source from the Data Context:
+
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_abs/_directory_asset.py - retrieve Data Source"
+   ```
+
 1. Define your Data Asset's parameters.
 
    To define a Directory Data Asset for Azure Blob Storage you provide the following elements:
@@ -27,10 +33,7 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
 
    This example uses taxi trip data stored in `.csv` files in the `data/taxi_yellow_tripdata_samples/` folder within the Azure Blob Storage container:
 
-   ```python title="Python"
-    asset_name = "abs_taxi_csv_directory_asset"
-    abs_container = "my_container"
-    abs_name_starts_with = "data/taxi_yellow_tripdata_samples/"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_abs/_directory_asset.py - define Data Asset parameters"
     ```
 
 3. Add the Data Asset to your Data Source.
@@ -41,54 +44,13 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
    
    The following example creates a Data Asset that can read `.csv` file data:
 
-   ```python
-   directory_csv_asset = data_source.add_directory_csv_asset(
-      name=asset_name,
-      abs_container=abs_container,
-      abs_name_starts_with=abs_name_starts_with,
-   )
-   ```
-   
-4. Optional. Retrieve the Data Asset from your Data Source.
-
-   You can retrieve your Data Asset from the Data Context by updating `data_source_name` with the name of your Data Source and `asset_name` with the name of your Data Asset before executing the following:
-
-   ```python
-   data_source_name = "my_filesystem_data_source"
-   asset_name = "abs_taxi_csv_directory_asset"
-   directory_csv_asset = context.get_data_source(data_source_name).get_asset(asset_name)
-   ```
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_abs/_directory_asset.py - add Data Asset"
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-   ```python
-   import great_expectations as gx
-   
-   # This example uses a File Data Context which already has
-   #  a Data Source defined.
-   context = gx.get_context()
-
-   data_source_name = "my_filesystem_data_source"
-   data_source = context.get_datasource(data_source_name)
-
-   # Define the Data Asset's parameters:
-   asset_name = "abs_taxi_csv_directory_asset"
-   abs_container = "my_container"
-   abs_name_starts_with = "data/taxi_yellow_tripdata_samples/"
-   
-   # Add the Data Asset to the Data Source:
-   directory_csv_asset = data_source.add_directory_csv_asset(
-      name=asset_name,
-      abs_container=abs_container,
-      abs_name_starts_with=abs_name_starts_with,
-   )
-
-   # Use the Data Context to retrieve the Data Asset when needed:
-   data_source_name = "my_filesystem_data_source"
-   asset_name = "abs_taxi_csv_directory_asset"
-   directory_csv_asset = context.get_data_source(data_source_name).get_asset(asset_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_abs/_directory_asset.py - full example"
    ```
 
 </TabItem>

@@ -212,11 +212,7 @@ Full example code for path Batch Definitions and partitioned yearly, monthly, or
 
 </TabItem>
 
-
 </Tabs>
-
-
-
 
 </TabItem>
 
