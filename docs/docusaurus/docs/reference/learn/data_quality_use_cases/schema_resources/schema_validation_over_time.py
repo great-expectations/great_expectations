@@ -32,6 +32,7 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
+
 def add_column_to_transfers_table() -> None:
     connection = psycopg2.connect("host=db dbname=gx_example_db user=example_user")
     query = "ALTER TABLE transfers ADD COLUMN recipient_account_number INTEGER"
@@ -89,8 +90,7 @@ validation_definition = gx.core.validation_definition.ValidationDefinition(
 # Define and run Checkpoint.
 checkpoint = context.checkpoints.add(
     gx.checkpoint.checkpoint.Checkpoint(
-        name="checkpoint",
-        validation_definitions=[validation_definition]
+        name="checkpoint", validation_definitions=[validation_definition]
     )
 )
 
@@ -115,7 +115,7 @@ for x in context.validation_results_store.get_all():
             "success": x["success"],
             "evaluated_expectations": x["statistics"]["evaluated_expectations"],
             "passed_expectations": x["statistics"]["successful_expectations"],
-            "failure_rate": 1 - (x["statistics"]["success_percent"]/100),
+            "failure_rate": 1 - (x["statistics"]["success_percent"] / 100),
         }
     )
 
