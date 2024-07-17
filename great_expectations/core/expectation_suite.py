@@ -316,7 +316,6 @@ class ExpectationSuite(SerializableDictDot):
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         return myself
 
-    @public_api
     def remove_expectation(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
@@ -524,7 +523,6 @@ class ExpectationSuite(SerializableDictDot):
         ]
         return expectation_configurations_attempted_to_be_added
 
-    @public_api
     def add_expectation_configuration(
         self,
         expectation_configuration: ExpectationConfiguration,

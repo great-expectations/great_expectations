@@ -5,7 +5,6 @@ import logging
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 
 if TYPE_CHECKING:
@@ -141,8 +140,7 @@ class Profiler(metaclass=abc.ABCMeta):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         self.configuration = configuration
 
-    @public_api  # noqa: B027
-    def validate(  # empty-method-without-abstract-decorator
+    def validate(  # noqa: B027  # empty-method-without-abstract-decorator
         self, item_to_validate: Any
     ) -> None:
         """Raise an exception if `item_to_validate` cannot be profiled.
