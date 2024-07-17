@@ -35,7 +35,7 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
-from great_expectations._docs_decorators import new_method_or_class, public_api
+from great_expectations._docs_decorators import new_method_or_class
 from great_expectations.compatibility import aws, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import Subquery
@@ -248,7 +248,6 @@ def _dialect_requires_persisted_connection(
     return return_val
 
 
-@public_api
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
 
@@ -590,7 +589,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
-    @public_api
     @override
     def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
@@ -787,7 +785,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable
 
-    @public_api
     @override
     def get_compute_domain(
         self,
@@ -1307,7 +1304,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             with self.engine.connect() as connection:
                 yield connection
 
-    @public_api
     @new_method_or_class(version="0.16.14")
     def execute_query(
         self, query: sqlalchemy.Selectable
@@ -1325,7 +1321,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return result
 
-    @public_api
     @new_method_or_class(version="0.16.14")
     def execute_query_in_transaction(
         self, query: sqlalchemy.Selectable
