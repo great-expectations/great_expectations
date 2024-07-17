@@ -44,6 +44,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
     TableAsset,
     TestConnectionError,
+    to_lower_if_not_quoted,
 )
 
 if TYPE_CHECKING:
@@ -443,7 +444,7 @@ class SnowflakeDatasource(SQLDatasource):
         `schema_` to avoid conflict with Pydantic models schema property.
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
-            return self.connection_string.schema_
+            return to_lower_if_not_quoted(self.connection_string.schema_)
 
         subbed_str: str | None = _get_config_substituted_connection_string(
             self, warning_msg="Unable to determine schema"
@@ -451,7 +452,8 @@ class SnowflakeDatasource(SQLDatasource):
         if not subbed_str:
             return None
         url_path: str = urllib.parse.urlparse(subbed_str).path
-        return _get_database_and_schema_from_path(url_path)["schema"]
+
+        return to_lower_if_not_quoted(_get_database_and_schema_from_path(url_path)["schema"])
 
     @property
     def database(self) -> str | None:
