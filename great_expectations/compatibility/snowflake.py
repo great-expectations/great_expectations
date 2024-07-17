@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Final
+
 from great_expectations.compatibility.not_imported import NotImported
 
 SNOWFLAKE_NOT_IMPORTED = NotImported(
@@ -30,3 +32,5 @@ try:
     import snowflake.sqlalchemy.custom_types as snowflaketypes
 except (ImportError, AttributeError):
     snowflaketypes = SNOWFLAKE_NOT_IMPORTED
+
+IS_SNOWFLAKE_INSTALLED: Final[bool] = snowflake is not SNOWFLAKE_NOT_IMPORTED

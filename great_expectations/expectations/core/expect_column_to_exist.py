@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility.pydantic import Field, StrictStr
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
@@ -34,7 +35,17 @@ COLUMN_INDEX_DESCRIPTION = (
     "If not None, checks the order of the columns. "
     "The expectation will fail if the column is not in location column_index (zero-indexed)."
 )
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 DATA_QUALITY_ISSUES = ["Schema"]
 
 
@@ -69,6 +80,13 @@ class ExpectColumnToExist(BatchExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -117,8 +135,10 @@ class ExpectColumnToExist(BatchExpectation):
             }}
     """  # noqa: E501
 
-    column: str
-    column_index: Union[int, SuiteParameterDict, None] = None
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
+    column_index: Union[int, SuiteParameterDict, None] = Field(
+        default=None, description=COLUMN_INDEX_DESCRIPTION
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
@@ -143,6 +163,8 @@ class ExpectColumnToExist(BatchExpectation):
     args_keys = ("column", "column_index")
 
     class Config:
+        title = "Expect column to exist"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnToExist]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

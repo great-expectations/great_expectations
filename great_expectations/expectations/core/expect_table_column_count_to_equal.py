@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -29,7 +30,17 @@ if TYPE_CHECKING:
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the number of columns in a table to equal a value."
 VALUE_DESCRIPTION = "The expected number of columns."
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 DATA_QUALITY_ISSUES = ["Schema"]
 
 
@@ -67,6 +78,13 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -119,7 +137,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    value: Union[int, SuiteParameterDict]
+    value: Union[int, SuiteParameterDict] = pydantic.Field(description=VALUE_DESCRIPTION)
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -138,6 +156,8 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     args_keys = ("value",)
 
     class Config:
+        title = "Expect table column count to equal"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

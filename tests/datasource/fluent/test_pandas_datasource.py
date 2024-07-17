@@ -134,7 +134,6 @@ class TestDynamicPandasAssets:
         asset_class_names: set[str] = {
             camel_to_snake(t.__name__).split("_asset")[0] for t in PandasDatasource.asset_types
         }
-        print(asset_class_names)
 
         assert type_name in PandasDatasource._type_lookup
         assert type_name in asset_class_names

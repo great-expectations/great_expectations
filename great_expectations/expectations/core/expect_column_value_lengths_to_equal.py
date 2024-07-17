@@ -1,13 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -30,9 +35,26 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings with length equal to the provided value."
+)
+VALUE_DESCRIPTION = "The expected value for a column entry length."
+DATA_QUALITY_ISSUES = ["Pattern matching"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+
 
 class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
-    """Expect the column entries to be strings with length equal to the provided value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
@@ -45,13 +67,13 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         value (int): \
-            The expected value for a column entry length.
+            {VALUE_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -72,11 +94,18 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Pattern Matching
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -90,16 +119,16 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 ExpectColumnValueLengthsToEqual(
                     column="test",
                     value=5
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -108,26 +137,26 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
                 ExpectColumnValueLengthsToEqual(
                     column="test2",
                     value=5
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -138,16 +167,16 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    value: Union[float, SuiteParameterDict]
+    value: Union[float, SuiteParameterDict] = pydantic.Field(description=VALUE_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -155,6 +184,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.value_length.equals"
     success_keys = ("value", "mostly")
@@ -162,6 +192,39 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         "column",
         "value",
     )
+
+    class Config:
+        title = "Expect column value lengths to equal"
+
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValueLengthsToEqual]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

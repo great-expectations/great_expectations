@@ -35,7 +35,16 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect each column value to be unique."
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 DATA_QUALITY_ISSUES = ["Cardinality"]
 
 
@@ -80,6 +89,12 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -164,6 +179,8 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     args_keys = ("column",)
 
     class Config:
+        title = "Expect column values to be unique"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeUnique]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)

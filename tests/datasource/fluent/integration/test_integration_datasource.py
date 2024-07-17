@@ -337,8 +337,8 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
         "great_expectations.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
     ) as mock_batch_identifiers:
         mock_batch_identifiers.return_value = [
-            {"pickup_date": datetime.datetime(2019, 2, 1)},
-            {"pickup_date": datetime.datetime(2019, 2, 2)},
+            {"pickup_date": datetime.datetime(2019, 2, 1)},  # noqa: DTZ001
+            {"pickup_date": datetime.datetime(2019, 2, 2)},  # noqa: DTZ001
         ]
         specified_batches = asset.get_batch_list_from_batch_request(
             asset.build_batch_request(

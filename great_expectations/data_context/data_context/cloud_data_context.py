@@ -81,20 +81,6 @@ class OrganizationIdNotSpecifiedError(Exception):
         )
 
 
-def _extract_fluent_datasources(config_dict: dict) -> dict:
-    """
-    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
-    We need to extract the fluent datasources otherwise the data context will attempt eager config
-    substitutions and other inappropriate operations.
-    """
-    datasources = config_dict.get("datasources", {})
-    fds_names: list[str] = []
-    for ds_name, ds in datasources.items():
-        if "type" in ds:
-            fds_names.append(ds_name)
-    return {name: datasources.pop(name) for name in fds_names}
-
-
 @public_api
 class CloudDataContext(SerializableDataContext):
     """Subclass of AbstractDataContext that contains functionality necessary to work in a GX Cloud-backed environment."""  # noqa: E501
@@ -269,7 +255,8 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         # This should be done before datasources are popped from the config below until
         # fluent_datasourcse are renamed datasourcess ()
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
+        v1_data_sources = config.pop("data_sources", [])
+        config["fluent_datasources"] = {ds["name"]: ds for ds in v1_data_sources}
 
         # Various context variables are no longer top-level keys in V1
         for var in (

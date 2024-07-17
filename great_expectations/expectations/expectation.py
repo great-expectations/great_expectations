@@ -62,6 +62,8 @@ from great_expectations.expectations.model_field_descriptions import (
     COLUMN_A_DESCRIPTION,
     COLUMN_B_DESCRIPTION,
     COLUMN_DESCRIPTION,
+    COLUMN_LIST_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
     Mostly,
@@ -284,38 +286,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
-    @staticmethod
-    def _format_title(schema_title: str):
-        # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
-        split_between_caps_and_nums = (
-            "".join([" " + c if (c.isdigit() or c == c.upper()) else c for c in schema_title])
-            .lstrip()
-            .split(" ")
-        )
-        join_multi_caps_and_nums: list[str] = []
-        for idx, token in enumerate(split_between_caps_and_nums):
-            if idx > 0:
-                consecutive_caps = (
-                    token.upper() == token
-                    and split_between_caps_and_nums[idx - 1].upper()
-                    == split_between_caps_and_nums[idx - 1]
-                )
-                consecutive_digits = (
-                    token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
-                )
-                if (
-                    len(token) == 1
-                    and len(split_between_caps_and_nums[idx - 1]) == 1
-                    and (consecutive_caps or consecutive_digits)
-                ):
-                    join_multi_caps_and_nums[-1] = join_multi_caps_and_nums[-1] + token
-                else:
-                    join_multi_caps_and_nums.append(token)
-            else:
-                join_multi_caps_and_nums.append(token)
-
-        return " ".join(join_multi_caps_and_nums)
-
     class Config:
         arbitrary_types_allowed = True
         smart_union = True
@@ -324,10 +294,20 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
-            schema["title"] = model._format_title(schema_title=schema.get("title", ""))
             schema["properties"]["metadata"] = {
                 "type": "object",
-                "properties": {},
+                "properties": {
+                    "expectation_class": {
+                        "title": "Expectation Class",
+                        "type": "string",
+                        "const": model.__name__,
+                    },
+                    "expectation_type": {
+                        "title": "Expectation Type",
+                        "type": "string",
+                        "const": model.expectation_type,
+                    },
+                },
             }
 
     id: Union[str, None] = None
@@ -1506,7 +1486,6 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: Mostly = 1.0
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1848,6 +1827,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     """  # noqa: E501
 
     column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
+    mostly: Mostly = 1.0
 
     catch_exceptions: bool = True
 
@@ -2113,6 +2093,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
 
     column_A: StrictStr = Field(min_length=1, description=COLUMN_A_DESCRIPTION)
     column_B: StrictStr = Field(min_length=1, description=COLUMN_B_DESCRIPTION)
+    mostly: Mostly = 1.0
 
     catch_exceptions: bool = True
 
@@ -2365,7 +2346,8 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_list: List[StrictStr]
+    column_list: List[StrictStr] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
+    mostly: Mostly = pydantic.Field(default=1.0, description=MOSTLY_DESCRIPTION)
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"
