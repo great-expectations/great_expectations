@@ -450,7 +450,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.variables.expectations_store_name
 
     @expectations_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def expectations_store_name(self, value: str) -> None:
         """Set the name of the expectations store.
@@ -479,7 +478,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.variables.validation_results_store_name
 
     @validation_results_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def validation_results_store_name(self, value: str) -> None:
         """Set the name of the validations store.
@@ -516,7 +514,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return None
 
     @checkpoint_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def checkpoint_store_name(self, value: str) -> None:
         """Set the name of the checkpoint store.
@@ -649,7 +646,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_argument(
         argument_name="datasource",
         version="0.15.49",
@@ -720,7 +716,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
         return datasource
 
-    @public_api
     def update_datasource(
         self,
         datasource: FluentDatasource,
@@ -765,7 +760,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_datasource(
         self,
@@ -861,7 +855,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
-    @public_api
     def get_datasource(self, datasource_name: str = "default") -> FluentDatasource:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
@@ -885,7 +878,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource._data_context = self
         return datasource
 
-    @public_api
     def add_store(self, store_name: str, store_config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.
 
@@ -982,7 +974,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.variables.data_docs_sites = sites
             self._save_project_config()
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def delete_store(self, store_name: str) -> None:
         """Delete an existing Store from the DataContext.
@@ -1004,7 +995,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
-    @public_api
     def list_datasources(self) -> List[dict]:
         """List the configurations of the datasources associated with this context.
 
@@ -1015,7 +1005,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return [ds.dict() for ds in self.datasources.values()]
 
-    @public_api
     def delete_datasource(self, datasource_name: Optional[str]) -> None:
         """Delete a given Datasource by name.
 
@@ -1035,7 +1024,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
-    @public_api
     def get_validator(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -1330,7 +1318,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return validator
 
-    @public_api
     def get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -1498,7 +1485,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return datasource_names
 
-    @public_api
     def get_available_data_asset_names(
         self,
         datasource_names: str | list[str] | None = None,
