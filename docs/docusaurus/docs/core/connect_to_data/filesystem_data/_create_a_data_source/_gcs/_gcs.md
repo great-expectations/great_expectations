@@ -37,10 +37,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
    Update the variables in the following code and execute it to define `name`, `bucket_or_name`, and `gcs_options`. In this example the default `GOOGLE_APPLICATION_CREDENTIALS` environment variable points to the location of the credentials json and therefore the `gcs_options` dictionary is left empty:  
 
-   ```python title="Python"
-   datasource_name = "my_gcs_datasource"
-   bucket_or_name = "my_bucket"
-   gcs_options = {}
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_spark.py - define Data Source parameters"
    ```
 
 3. Add a Google Cloud Storage Data Source to your Data Context.
@@ -51,40 +48,19 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
    <TabItem value="pandas_filesystem" label="pandas">
 
-   ```python title="Python"
-   data_source = gx.data_sources.add_pandas_gcs(
-      name=data_source_name,
-      bucket_or_name=bucket_or_name,
-      gcs_options=gcs_options
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_pandas.py - add Data Source"
    ```
 
    </TabItem>
 
    <TabItem value="spark" label="Spark">
 
-   ```python title="Python"
-   data_source = gx.data_sources.add_spark_gcs(
-      name=data_source_name,
-      bucket_or_name=bucket_or_name,
-      gcs_options=gcs_options
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_spark.py - add Data Source"
    ```
 
    </TabItem>
 
    </Tabs>
-
-4. Optional. Retrieve your Data Source from your Data Context.
-
-   You can retrieve your Data Source elsewhere in your code by updating the value of `datasource_name` and executing:
-
-   ```python title="Python"
-   datasource_name="nyc_taxi_data"
-   datasource = context.data_sources.get(datasource_name)
-   ```
-
-   If you are using a File Data Context your Data Source can also be retrieved from the Data Context in future python sessions.
 
 </TabItem>
 
@@ -96,52 +72,15 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
    <TabItem value="pandas_filesystem" label="pandas example">
 
-   ```python title="Python"
-   import great_epectations as gx
-
-   context = gx.get_context()
-
-   # Define the Data Source's parameters:
-   datasource_name = "my_gcs_datasource"
-   bucket_or_name = "my_bucket"
-   gcs_options = {}
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_pandas.py - add Data Source"
    
-   # Create the Data Source:
-   data_source = gx.data_sources.add_pandas_gcs(
-      name=data_source_name,
-      bucket_or_name=bucket_or_name,
-      gcs_options=gcs_options
-   )
-   
-   # Retrieve the Data Source:
-   datasource_name = "my_datasource"
-   datasource = context.data_sources.get(datasource_name)
    ```
 
    </TabItem>
 
    <TabItem value="spark" label="Spark example">
 
-   ```python title="Python"
-   import great_epectations as gx
-
-   context = gx.get_context()
-
-   # Define the Data Source's parameters:
-   datasource_name = "my_gcs_datasource"
-   bucket_or_name = "my_bucket"
-   gcs_options = {}
-   
-   # Create the Data Source:
-   data_source = gx.data_sources.add_spark_gcs(
-      name=data_source_name,
-      bucket_or_name=bucket_or_name,
-      gcs_options=gcs_options
-   )
-
-   # Retrieve the Data Source:
-   datasource_name = "my_datasource"
-   datasource = context.data_sources.get(datasource_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_spark.py - add Data Source"
    ```
 
    </TabItem>

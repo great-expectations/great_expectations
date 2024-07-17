@@ -16,7 +16,10 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
 <TabItem value="procedure" label="Procedure">
 
-1. Define your Data Asset's parameters.
+1. Retrieve your Data Source.
+
+
+2. Define your Data Asset's parameters.
 
    To define a File Data Asset for Azure Blob Storage you provide the following elements:
 
@@ -33,7 +36,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
     abs_name_starts_with = "data/taxi_yellow_tripdata_samples/"
     ```
 
-2. Add the Data Asset to your Data Source.
+3. Add the Data Asset to your Data Source.
 
    A new Data Asset is created and added to a Data Source simultaneously.  The file format that the Data Asset can read is determined by the method used when the Data Asset is added to the Data Source.
 
@@ -46,7 +49,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
    file_csv_asset = data_source.add_csv_asset(name=asset_name)
    ```
    
-3. Optional. Retrieve the Data Asset from your Data Source.
+4. Optional. Retrieve the Data Asset from your Data Source.
 
    You can retrieve your Data Asset from the Data Context by updating `data_source_name` with the name of your Data Source and `asset_name` with the name of your Data Asset before executing the following:
 

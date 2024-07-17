@@ -33,12 +33,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
    Update the variables in the following code and execute it to define `name` and `azure_options`.  In this example, the value for `account_url` is pulled from the environment variable `AZURE_STORAGE_ACCOUNT_URL` and the value for `credential` is pulled from the environment variable `AZURE_CREDENTIAL`:
 
-   ```python title="Python"
-   datasource_name = "nyc_taxi_data"
-   azure_options = {
-      "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
-      "credential": "${AZURE_CREDENTIAL}",
-   }
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_spark.py - define parameters"
    ```
 
 2. Add an Azure Blob Storage Data Source to your Data Context.
@@ -49,38 +44,19 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
    <TabItem value="pandas_filesystem" label="pandas">
 
-   ```python title="Python"
-   data_source = gx.data_sources.add_pandas_abs(
-      name=data_source_name,
-      azure_options=azure_options
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_pandas.py - add Data Source"
    ```
 
    </TabItem>
 
    <TabItem value="spark" label="Spark">
 
-   ```python title="Python"
-   data_source = gx.data_sources.add_spark_abs(
-      name=data_source_name,
-      azure_options=azure_options
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_spark.py - add Data Source"
    ```
 
    </TabItem>
 
    </Tabs>
-
-3. Optional. Retrieve your Data Source from your Data Context.
-
-   You can retrieve your Data Source elsewhere in your code by updating the value of `datasource_name` and executing:
-
-   ```python title="Python"
-   datasource_name="nyc_taxi_data"
-   datasource = context.data_sources.get(datasource_name)
-   ```
-
-   If you are using a File Data Context your Data Source can also be retrieved from the Data Context in future python sessions.
 
 </TabItem>
 
@@ -92,52 +68,14 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
    <TabItem value="pandas_filesystem" label="pandas example">
 
-   ```python title="Python"
-   import great_epectations as gx
-
-   context = gx.get_context()
-
-   # Define the Data Source's parameters:
-   datasource_name = "my_datasource"
-   azure_options = {
-      "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
-      "credential": "${AZURE_CREDENTIAL}",
-   }
-   
-   # Create the Data Source:
-   data_source = gx.data_sources.add_pandas_abs(
-      name=data_source_name,
-      azure_options=azure_options
-   )
-   
-   # Retrieve the Data Source:
-   datasource = context.data_sources.get("nyc_taxi_data")
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_pandas.py - full example"
    ```
 
    </TabItem>
 
    <TabItem value="spark" label="Spark example">
 
-   ```python title="Python"
-   import great_epectations as gx
-
-   context = gx.get_context()
-
-   # Define the Data Source's parameters:
-   datasource_name = "my_datasource"
-   azure_options = {
-      "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
-      "credential": "${AZURE_CREDENTIAL}",
-   }
-   
-   # Create the Data Source:
-   data_source = gx.data_sources.add_spark_abs(
-      name=data_source_name,
-      azure_options=azure_options
-   )
-
-   # Retrieve the Data Source:
-   datasource = context.data_sources.get("nyc_taxi_data")
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_spark.py - full example"
    ```
 
    </TabItem>

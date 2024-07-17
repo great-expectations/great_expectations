@@ -72,11 +72,11 @@ import PandasDefault from './_pandas_default.md'
 
 5. Optional. Retrieve your Data Source from your Data Context.
 
-   You can retrieve your Data Source elsewhere in your code by updating the value of `datasource_name` and executing:
+   You can retrieve your Data Source elsewhere in your code by updating the value of `data_source_name` and executing:
 
    ```python title="Python"
-   datasource_name="nyc_taxi_data"
-   datasource = context.data_sources.get(datasource_name)
+   data_source_name="nyc_taxi_data"
+   datasource = context.data_sources.get(data_source_name)
    ```
 
    If you are using a File Data Context your Data Source can also be retrieved from the Data Context in future python sessions.
