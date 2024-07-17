@@ -16,7 +16,14 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
 <TabItem value="procedure" label="Procedure">
 
-1. Define your Data Asset's parameters.
+1. Retrieve your Data Source.
+
+   Replace the value of `data_source_name` in the following code with the name of your Data Source and execute it to retrieve your Data Source from the Data Context:
+
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_gcs/_file_asset.py - retrieve Data Source"
+   ```
+
+2. Define your Data Asset's parameters.
 
    To define a File Data Asset for Google Cloud Storage you provide the following elements:
 
@@ -28,12 +35,10 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
    This example uses taxi trip data stored in `.csv` files in the `data/taxi_yellow_tripdata_samples/` folder within the Google Cloud Storage Data Source:
 
-   ```python title="Python"
-   asset_name = "gcs_taxi_csv_file_asset"
-   gcs_prefix = "data/taxi_yellow_tripdata_samples/"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_gcs/_file_asset.py - define Data Asset parameters"
    ```
 
-2. Add the Data Asset to your Data Source.
+3. Add the Data Asset to your Data Source.
 
    A new Data Asset is created and added to a Data Source simultaneously.  The file format that the Data Asset can read is determined by the method used when the Data Asset is added to the Data Source.
 
@@ -42,48 +47,14 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 
    The following example creates a Data Asset that can read `.csv` file data:
 
-   ```python
-   file_csv_asset = data_source.add_csv_asset(
-      name=asset_name,
-      gcs_prefix=gcs_prefix,
-   )
-   ```
-   
-3. Optional. Retrieve the Data Asset from your Data Source.
-
-   You can retrieve your Data Asset from the Data Context by updating `data_source_name` with the name of your Data Source and `asset_name` with the name of your Data Asset before executing the following:
-
-   ```python
-   data_source_name = "my_filesystem_data_source"
-   asset_name = "gcs_taxi_csv_file_asset"
-   file_csv_asset = context.get_data_source(data_source_name).get_asset(asset_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_gcs/_file_asset.py - add Data Asset"
    ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-   ```python
-   import great_expectations as gx
-   
-   # This example uses a File Data Context which already has
-   #  a Data Source defined.
-   context = gx.get_context()
-
-   data_source_name = "my_filesystem_data_source"
-   data_source = context.get_datasource(data_source_name)
-
-   # Define the Data Asset's parameters:
-   asset_name = "gcs_taxi_csv_file_asset"
-   gcs_prefix = "data/taxi_yellow_tripdata_samples/"
-
-   # Add the Data Asset to the Data Source:
-   file_csv_asset = data_source.add_csv_asset(name=asset_name)
-
-   # Use the Data Context to retrieve the Data Asset when needed:
-   data_source_name = "my_filesystem_data_source"
-   asset_name = "gcs_taxi_csv_file_asset"
-   file_csv_asset = context.get_data_source(data_source_name).get_asset(asset_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_gcs/_file_asset.py - full example"
    ```
 
 </TabItem>
