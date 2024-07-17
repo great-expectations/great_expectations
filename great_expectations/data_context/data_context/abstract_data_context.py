@@ -1208,13 +1208,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             # batch_request could actually be None here since we do explicit None checks in the
             # sum check above while here we do a truthy check.
             batch_request_list = [batch_request]  # type: ignore[list-item]
-        for batch_request in batch_request_list:
+        for batch_req in batch_request_list:
             computed_batch_list.extend(
                 self.get_batch_list(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
                     data_asset_name=data_asset_name,
-                    batch_request=batch_request,
+                    batch_request=batch_req,
                     batch_data=batch_data,
                     data_connector_query=data_connector_query,
                     batch_identifiers=batch_identifiers,
