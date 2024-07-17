@@ -3,10 +3,15 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Literal, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
 )
-from great_expectations.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_LIST_DESCRIPTION,
+    IGNORE_ROW_IF_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
@@ -34,7 +39,6 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Expect that the sum of row values in a specified column list "
     "is the same for each row, and equal to a specified sum total."
 )
-COLUMN_LIST_DESCRIPTION = "Set of columns to be checked"
 SUM_TOTAL_DESCRIPTION = "Expected sum of columns"
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
@@ -67,7 +71,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
-            If specified, sets the condition on which a given row is to be ignored. Default "neither".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "neither".
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
@@ -177,9 +181,12 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    sum_total: float
+    sum_total: float = pydantic.Field(description=SUM_TOTAL_DESCRIPTION)
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
-        "all_values_are_missing"
+        pydantic.Field(
+            default="all_values_are_missing",
+            description=IGNORE_ROW_IF_DESCRIPTION,
+        )
     )
 
     # This dictionary contains metadata for display in the public gallery

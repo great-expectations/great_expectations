@@ -250,7 +250,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "posthog", (("<", "3"), (">=", "2.1.0"))),
         ("requirements-dev.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev.txt", "pypd", (("==", "1.1.0"),)),
-        ("requirements-dev.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
+        ("requirements-dev.txt", "ruamel.yaml", (("<", "0.18"), (">=", "0.16"))),
         ("requirements-dev.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev.txt", "sqlalchemy", (("<", "2.0.0"),)),
         ("requirements-dev.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
@@ -261,5 +261,5 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements.txt", "numpy", (("<", "2.0.0"), (">=", "1.26.0"))),
         ("requirements.txt", "posthog", (("<", "3"), (">=", "2.1.0"))),
-        ("requirements.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
+        ("requirements.txt", "ruamel.yaml", (("<", "0.18"), (">=", "0.16"))),
     }

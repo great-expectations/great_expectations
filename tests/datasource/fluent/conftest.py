@@ -74,7 +74,8 @@ PG_CONFIG_YAML_FILE: Final = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 _DEFAULT_TEST_YEARS = list(range(2021, 2023))
 _DEFAULT_TEST_MONTHS = list(range(1, 13))
 
-logger = logging.getLogger(__name__)
+
+CNF_TEST_LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 def sqlachemy_execution_engine_mock_cls(
@@ -184,7 +185,7 @@ def seed_ds_env_vars(
 
     for name, value in config_sub_dict.items():
         monkeypatch.setenv(name, value)
-        logger.info(f"Setting ENV - {name} = '{value}'")
+        CNF_TEST_LOGGER.info(f"Setting ENV - {name} = '{value}'")
 
     # return as tuple of tuples so that the return value is immutable and therefore cacheable
     return tuple((k, v) for k, v in config_sub_dict.items())
@@ -209,7 +210,7 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     assert gx_yml.exists()
 
     tmp_gx_dir = gx_yml.parent.absolute()
-    logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
+    CNF_TEST_LOGGER.info(f"tmp_gx_dir -> {tmp_gx_dir}")
     return tmp_gx_dir
 
 
@@ -275,7 +276,9 @@ _CLIENT_DUMMY = _TestClientDummy()
 
 
 def _get_test_client_dummy(*args, **kwargs) -> _TestClientDummy:
-    logger.debug(f"_get_test_client_dummy() called with \nargs: {pf(args)}\nkwargs: {pf(kwargs)}")
+    CNF_TEST_LOGGER.debug(
+        f"_get_test_client_dummy() called with \nargs: {pf(args)}\nkwargs: {pf(kwargs)}"
+    )
     return _CLIENT_DUMMY
 
 
@@ -317,12 +320,15 @@ def cloud_storage_get_client_doubles(
     azure_get_client_dummy,
 ):
     """
-    Patches Datasources that rely on a private _get_*_client() method to return test doubles instead.
+    Patches Datasources that rely on a private _get_*_client() method to return test doubles
+    instead.
 
     gcs
     azure
-    """  # noqa: E501
-    logger.warning("Patching cloud storage _get_*_client() methods to return client test doubles")
+    """
+    CNF_TEST_LOGGER.warning(
+        "Patching cloud storage _get_*_client() methods to return client test doubles"
+    )
 
 
 @pytest.fixture
@@ -358,7 +364,7 @@ def fluent_yaml_config_file(
         yaml_string = "\n# Fluent\n" + fluent_gx_config_yml_str
         f_append.write(yaml_string)
 
-    logger.debug(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
+    CNF_TEST_LOGGER.debug(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
 
 
@@ -390,7 +396,7 @@ def seed_cloud(
     _CLOUD_API_FAKE_DB.update(fake_db_data)
 
     seeded_datasources = _CLOUD_API_FAKE_DB["data-context-configuration"]["datasources"]
-    logger.info(f"Seeded Datasources ->\n{pf(seeded_datasources, depth=2)}")
+    CNF_TEST_LOGGER.info(f"Seeded Datasources ->\n{pf(seeded_datasources, depth=2)}")
     assert seeded_datasources
 
     yield cloud_api_fake

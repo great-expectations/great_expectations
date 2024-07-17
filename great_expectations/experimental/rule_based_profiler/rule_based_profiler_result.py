@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationSuite,  # noqa: TCH001
@@ -25,7 +24,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
 
 
-@public_api
 @dataclass(frozen=True)
 class RuleBasedProfilerResult(SerializableDictDot):
     """
@@ -101,7 +99,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
             "citation": self.citation,
         }
 
-    @public_api
     @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """
@@ -112,7 +109,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
         """
         return self.to_dict()
 
-    @public_api
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """
         Retrieve the `ExpectationSuite` generated during the `RuleBasedProfiler` run.

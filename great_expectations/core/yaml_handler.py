@@ -5,11 +5,9 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 
 
-@public_api
 class YAMLHandler:
     """Facade class designed to be a lightweight wrapper around YAML serialization.
 
@@ -43,7 +41,6 @@ class YAMLHandler:
         self._handler.indent(mapping=2, sequence=4, offset=2)
         self._handler.default_flow_style = False
 
-    @public_api
     def load(self, stream: io.TextIOWrapper | str) -> dict[str, JSONValues]:
         """Converts a YAML input stream into a Python dictionary.
 
@@ -66,7 +63,6 @@ class YAMLHandler:
         """  # noqa: E501
         return self._handler.load(stream=stream)
 
-    @public_api
     def dump(
         self,
         data: dict,
