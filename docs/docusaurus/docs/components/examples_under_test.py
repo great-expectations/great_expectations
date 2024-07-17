@@ -124,8 +124,8 @@ learn_data_quality_use_cases = [
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
     IntegrationTestFixture(
-        name="data_quality_use_case_schema_consistency_across_datasets",
-        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_consistency_across_datasets.py",
+        name="data_quality_use_case_schema_validation_over_time",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py",
         data_dir="tests/test_sets/learn_data_quality_use_cases/",
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],

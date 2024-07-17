@@ -37,7 +37,7 @@ Below is a sample of the dataset that is referenced by examples and explanations
 
 This dataset is representative of financial transfers recorded by banking institutions. Its fields include account type, sender account, sender name, transfer amount, and transfer date.
 
-You can [access this dataset](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_1.csv) from the `great_expectations` GitHub repo in order to reproduce the code recipes provided in this article.
+You can [access this dataset](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers.csv) from the `great_expectations` GitHub repo in order to reproduce the code recipes provided in this article.
 
 ## Key schema Expectations
 
@@ -180,16 +180,24 @@ Successful schema validation can be accomplished using either GX Cloud or the GX
 
 ![Validate schema Expectations in GX Cloud](./schema_resources/gx_cloud_schema_expectations_validate.gif)
 
-### Schema consistency across datasets
+### Schema consistency over time
 
-**Context**: In scenarios where data is subject to regulatory compliance and critical to operational accuracy, adhering to a fixed schema is paramount. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions and regulatory penalties.
+**Context**: Upstream changes to data can have disruptive downstream effects if not managed correctly and explicitly. Data consumers need to have confidence that changes to upstream data sources do not violate the assumptions that govern the intent and actuality of how the data is used downstream. Proactively monitoring adherence to schema Expectations over time enables data users to proactively catch changes that might introduce breaking - or subtle, non-breaking - changes that affect their use of the data.
 
-**Goal**: Validate two datasets, using the same schema Expectations, to ensure that each dataset contains the presence of required columns and correct column count.
+**Goal**: Validate a table's schema over time with a defined Expectation Suite of schema Expectations, and use Validation Result history to determine when breaking changes were made to a table.
 
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_consistency_across_datasets.py full sample code"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full sample code"
 ```
 
-**Insight**: Dataset 2 fails to validate due to the absence of the `recipient_fullname` column and the incorrect column count, highlighting how missing critical columns can disrupt data processing or lead to compliance issues.
+**Result**:
+
+| validation_timestamp | success | evaluated_expectations | passed_expectations | failure_rate |
+| :- | :- | :- | :- | :- |
+| timestamp of first Validation | True | 2 | 2 | 0 |
+| timestamp of second Validation | False | 2 | 1 | 0.5 |
+
+
+**Insight**: A subsequent run of a Checkpoint after table schema is modified highlights when the upstream change was caught, as well as the failure rate of Expectations violated by the change.
 
 ### Strict vs. relaxed schema validation
 

@@ -21,10 +21,10 @@ GX_ROOT_DIR = pathlib.Path(gx.__file__).parent.parent
 
 # Add test data to database for testing.
 load_data_into_test_database(
-    table_name="transfers_1",
+    table_name="transfers",
     csv_path=str(
         GX_ROOT_DIR
-        / "tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers_1.csv"
+        / "tests/test_sets/learn_data_quality_use_cases/schema_financial_transfers.csv"
     ),
     connection_string=CONNECTION_STRING,
 )
@@ -41,7 +41,7 @@ datasource = context.data_sources.add_postgres(
     "postgres database", connection_string=CONNECTION_STRING
 )
 
-data_asset = datasource.add_table_asset(name="data asset", table_name="transfers_1")
+data_asset = datasource.add_table_asset(name="data asset", table_name="transfers")
 
 batch_definition = data_asset.add_batch_definition_whole_table("batch definition")
 
