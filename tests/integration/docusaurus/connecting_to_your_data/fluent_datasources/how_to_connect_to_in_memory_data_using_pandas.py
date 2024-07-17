@@ -5,7 +5,6 @@ pytest -v --docs-tests -k "how_to_connect_to_in_memory_data_using_pandas" tests/
 ```
 """
 
-import pathlib
 import great_expectations as gx
 
 context = gx.get_context()

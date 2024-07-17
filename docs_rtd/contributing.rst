@@ -107,5 +107,3 @@ Our goal is to make your experience as great as possible. Please follow these st
    /contributing/levels_of_maturity
    /contributing/style_guide
    /contributing/miscellaneous
-
-

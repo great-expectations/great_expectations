@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import logging
+import warnings
 from datetime import date, datetime
 from pprint import pformat as pf
 from typing import (
@@ -8,6 +10,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Final,
     List,
     Literal,
     Optional,
@@ -25,7 +28,11 @@ from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.batch_spec import (
+    BatchSpec,
+    RuntimeQueryBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -40,6 +47,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    GxDatasourceWarning,
     Sorter,
     SortersDefinition,
     TestConnectionError,
@@ -60,6 +68,8 @@ if TYPE_CHECKING:
         BatchMetadata,
         BatchSlice,
     )
+
+LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 class SQLDatasourceError(Exception):
@@ -680,7 +690,7 @@ class _SQLAsset(DataAsset):
                     )
                 )
             # Creating the batch_spec is our hook into the execution engine.
-            batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
+            batch_spec = self._create_batch_spec(batch_spec_kwargs)
             execution_engine: SqlAlchemyExecutionEngine = (
                 self.datasource.get_execution_engine()
             )
@@ -784,12 +794,18 @@ class _SQLAsset(DataAsset):
             )
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
-        """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec
+        """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec
 
         This is called by get_batch_list_from_batch_request to generate the batches.
 
         Returns:
-            A dictionary that will be passed to SqlAlchemyDatasourceBatchSpec(**returned_dict)
+            A dictionary that will be passed to self._create_batch_spec(**returned_dict)
+        """
+        raise NotImplementedError
+
+    def _create_batch_spec(self, batch_spec_kwargs: dict) -> BatchSpec:
+        """
+        Instantiates a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec.
         """
         raise NotImplementedError
 
@@ -831,6 +847,10 @@ class QueryAsset(_SQLAsset):
             "temp_table_schema_name": None,
             "batch_identifiers": {},
         }
+
+    @override
+    def _create_batch_spec(self, batch_spec_kwargs: dict) -> RuntimeQueryBatchSpec:
+        return RuntimeQueryBatchSpec(**batch_spec_kwargs)
 
 
 @public_api
@@ -901,14 +921,19 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
-        if not inspector.has_table(
-            table_name=self.table_name,
-            schema=self.schema_name,
-        ):
-            raise TestConnectionError(
-                f"Attempt to connect to table: {self.qualified_name} failed because the table"
-                f" {self.table_name} does not exist."
+        try:
+            with engine.connect() as connection:
+                table = sa.table(self.table_name, schema=self.schema_name)
+                # don't need to fetch any data, just want to make sure the table is accessible
+                connection.execute(sa.select(1, table).limit(1))
+        except Exception as query_error:
+            LOGGER.info(
+                f"{self.name} `.test_connection()` query failed: {query_error!r}"
             )
+            raise TestConnectionError(
+                f"Attempt to connect to table: {self.qualified_name} failed because the test query "
+                f"failed. Ensure the table exists and the user has access to select data from the table: {query_error}"
+            ) from query_error
 
     @override
     def test_splitter_connection(self) -> None:
@@ -945,9 +970,19 @@ class TableAsset(_SQLAsset):
             "batch_identifiers": {},
         }
 
+    @override
+    def _create_batch_spec(
+        self, batch_spec_kwargs: dict
+    ) -> SqlAlchemyDatasourceBatchSpec:
+        return SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
+
     @staticmethod
     def _is_bracketed_by_quotes(target: str) -> bool:
-        """Returns True if the target string is bracketed by quotes.
+        """
+        Returns True if the target string is bracketed by quotes.
+
+        Override this method if the quote characters are different than `'` or `"` in the target database,
+        such as backticks in Databricks SQL.
 
         Arguments:
             target: A string to check if it is bracketed by quotes.
@@ -959,6 +994,58 @@ class TableAsset(_SQLAsset):
             if target.startswith(quote) and target.endswith(quote):
                 return True
         return False
+
+    @classmethod
+    def _to_lower_if_not_bracketed_by_quotes(cls, target: str) -> str:
+        """Returns the target string in lowercase if it is not bracketed by quotes.
+        This is used to ensure case-insensitivity in sqlalchemy queries.
+
+        Arguments:
+            target: A string to convert to lowercase if it is not bracketed by quotes.
+
+        Returns:
+            The target string in lowercase if it is not bracketed by quotes.
+        """
+        if cls._is_bracketed_by_quotes(target):
+            LOGGER.warning(
+                f"The {target}  string is bracketed by quotes, so it will not be converted to lowercase."
+                " May cause sqlalchemy case-sensitivity issues."
+            )
+            return target
+        LOGGER.info(
+            f"Setting {target} to lowercase to ensure sqlalchemy case-insensitivity."
+        )
+        return target.lower()
+
+
+def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
+    """
+    Warns if a more specific datasource type may be more appropriate based on the connection string connector prefix.
+    """
+    from great_expectations.datasource.fluent.sources import _SourceFactories
+
+    connector: str = connection_string.split("://")[0].split("+")[0]
+
+    type_lookup_plus: dict[str, str] = {
+        n: _SourceFactories.type_lookup[n].__name__
+        for n in _SourceFactories.type_lookup.type_names()
+    }
+    # type names are not always exact match to connector strings
+    type_lookup_plus.update(
+        {
+            "postgresql": type_lookup_plus["postgres"],
+            "databricks": type_lookup_plus["databricks_sql"],
+        }
+    )
+
+    more_specific_datasource: str | None = type_lookup_plus.get(connector)
+    if more_specific_datasource:
+        warnings.warn(
+            f"You are using a generic SQLDatasource but a more specific {more_specific_datasource} "
+            "may be more appropriate"
+            " https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data",
+            category=GxDatasourceWarning,
+        )
 
 
 # This improves our error messages by providing a more specific type for pydantic to validate against
@@ -989,7 +1076,7 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
-    create_temp_table: bool = True
+    create_temp_table: bool = False
     kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
         default={},
         description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
@@ -1014,6 +1101,13 @@ class SQLDatasource(Datasource):
         """Returns the default execution engine type."""
         return SqlAlchemyExecutionEngine
 
+    @pydantic.validator("connection_string", pre=True)
+    def _config_str_instance_compatibility(cls, v: Union[ConfigStr, str]) -> str:
+        """If a ConfigStr is passed, we need to convert it back to string for pydantic to validate it."""
+        if isinstance(v, ConfigStr):
+            return str(v)
+        return v
+
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
@@ -1022,8 +1116,7 @@ class SQLDatasource(Datasource):
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
                 raise SQLDatasourceError(
-                    "Unable to create a SQLAlchemy engine from "
-                    f"connection_string: {self.connection_string} due to the "
+                    "Unable to create a SQLAlchemy engine due to the "
                     f"following exception: {e!s}"
                 ) from e
             self._cached_connection_string = self.connection_string
@@ -1037,7 +1130,10 @@ class SQLDatasource(Datasource):
         _check_config_substitutions_needed(
             self, model_dict, raise_warning_if_provider_not_present=True
         )
+        # the connection_string has had config substitutions applied
         connection_string = model_dict.pop("connection_string")
+        if self.__class__.__name__ == "SQLDatasource":
+            _warn_for_more_specific_datasource_type(connection_string)
         kwargs = model_dict.pop("kwargs", {})
         return sa.create_engine(connection_string, **kwargs)
 
@@ -1049,6 +1145,9 @@ class SQLDatasource(Datasource):
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
+            # by default we exclude unset values to prevent lots of extra values in the yaml files
+            # but we want to include them here
+            exclude_unset=False,
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
@@ -1109,6 +1208,10 @@ class SQLDatasource(Datasource):
             eg, it could be a TableAsset or a SqliteTableAsset.
         """
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
+        if schema_name:
+            schema_name = self._TableAsset._to_lower_if_not_bracketed_by_quotes(
+                schema_name
+            )
         asset = self._TableAsset(
             name=name,
             table_name=table_name,

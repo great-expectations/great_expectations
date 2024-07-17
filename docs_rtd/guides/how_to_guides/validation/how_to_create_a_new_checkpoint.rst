@@ -28,7 +28,7 @@ Steps
 
             great_expectations checkpoint new my_checkpoint my_suite
 
-        2. Next, you will be prompted to select a data asset you want to couple with the Expectation Suite. 
+        2. Next, you will be prompted to select a data asset you want to couple with the Expectation Suite.
 
         3. You will then see a message that indicates the Checkpoint has been added to your project.
 

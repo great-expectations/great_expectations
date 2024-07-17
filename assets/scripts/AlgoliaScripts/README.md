@@ -14,7 +14,7 @@ Install my-project with npm
 ```bash
   cd AlgoliaScripts
   npm install
-  
+
   // Upload expectations to algolia
   node upload-expec
 

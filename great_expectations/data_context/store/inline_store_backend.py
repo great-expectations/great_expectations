@@ -12,7 +12,10 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions.exceptions import StoreBackendError
+from great_expectations.exceptions.exceptions import (
+    StoreBackendError,
+    StoreBackendUnsupportedResourceTypeError,
+)
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -98,7 +101,12 @@ class InlineStoreBackend(StoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        project_config = self._data_context.config
+        variable_config = project_config.get(self._resource_type)
+        if isinstance(variable_config, dict):
+            return list(variable_config.values())
+        else:
+            raise StoreBackendUnsupportedResourceTypeError(self._resource_type.value)
 
     @override
     def _set(self, key: tuple[str, ...], value: Any, **kwargs: dict) -> None:
@@ -219,8 +227,8 @@ class InlineStoreBackend(StoreBackend):
                 context.config.to_yaml(outfile)
         # In environments where wrting to disk is not allowed, it is impossible to
         # save changes. As such, we log a warning but do not raise.
-        except PermissionError as e:
-            logger.warning(f"Could not save project config to disk: {e}")
+        except (PermissionError, OSError) as e:
+            logger.warning(f"Could not save project config to disk: {e!r}")
 
     @staticmethod
     def _determine_resource_name(key: tuple[str, ...]) -> str | None:

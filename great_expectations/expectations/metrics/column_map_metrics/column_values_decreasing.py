@@ -54,18 +54,18 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         # The first element is null, so it gets a bye and is always treated as True
         if parse_strings_as_datetimes:
             series_diff[series_diff.isnull()] = datetime.timedelta(seconds=-1)
-            series_diff = pd.to_timedelta(series_diff, unit="S")
+            series_diff = pd.to_timedelta(series_diff, unit="s")
         else:
             series_diff[series_diff.isnull()] = -1
 
         strictly: bool = kwargs.get("strictly") or False
         if strictly:
             if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() < 0.0  # noqa: PLR2004
+                return series_diff.dt.total_seconds() < 0.0
             return series_diff < 0
         else:
             if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() <= 0.0  # noqa: PLR2004
+                return series_diff.dt.total_seconds() <= 0.0
             return series_diff <= 0
 
     @metric_partial(

@@ -1,17 +1,16 @@
+import warnings
+
 import boto3
 from awsglue.context import GlueContext
 from pyspark.context import SparkContext
 
-import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
-from great_expectations.data_context import get_context
-
-import warnings
 
 yaml = YAMLHandler()
 

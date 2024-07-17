@@ -5,11 +5,9 @@ pytest -v --docs-tests -k "how_to_instantiate_a_specific_filesystem_data_context
 ```
 """
 
-import great_expectations as gx
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 import pathlib
+
+import great_expectations as gx
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )

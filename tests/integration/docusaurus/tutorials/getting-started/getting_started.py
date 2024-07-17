@@ -20,7 +20,7 @@ assert context
 # First configure a new Datasource and add to DataContext
 
 # <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py datasource_yaml">
-datasource_yaml = f"""
+datasource_yaml = """
 name: getting_started_datasource
 class_name: Datasource
 execution_engine:
@@ -122,7 +122,7 @@ validator.expectation_suite = suite
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
-my_checkpoint_config = f"""
+my_checkpoint_config = """
 name: getting_started_checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
@@ -172,7 +172,7 @@ assert checkpoint_result.run_results
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
 # <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py checkpoint_yaml_config">
-yaml_config = f"""
+yaml_config = """
 name: getting_started_checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:

@@ -12,7 +12,7 @@ In this guide, you will utilize a <TechnicalTag tag="data_assistant" text="Data 
 
 <Prerequisites>
 
-- A minimum of two configured [Datasources](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview) and [Assets](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/manage_data_assets_lp)
+- A minimum of two configured [Data Sources](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview) and [Assets](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/manage_data_assets_lp)
 - A basic understanding of how to [configure Expectation in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations)
 - Completion of the <TechnicalTag tag="data_assistant" text="Data Assistants" /> overview
 
@@ -21,7 +21,7 @@ In this guide, you will utilize a <TechnicalTag tag="data_assistant" text="Data 
 
 ## Set-Up
 
-In this workflow, we will be making use of the `OnboardingDataAssistant` to profile against a <TechnicalTag tag="batch_request" text="BatchRequest" /> representing our source data, and validate the resulting suite against a `BatchRequest` representing our second set of data.
+In this workflow, we will be making use of the `OnboardingDataAssistant` to profile against a <TechnicalTag tag="batch_request" text="BatchRequest" /> representing our data, and validate the resulting suite against a `BatchRequest` representing our second set of data.
 
 To begin, we'll need to import Great Expectations and instantiate our <TechnicalTag tag="data_context" text="Data Context" />:
 
@@ -41,7 +41,7 @@ context = gx.get_context(
 
 In order to profile our first table and validate our second table, we need to set up our Batch Requests pointing to each set of data.
 
-In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Data Source" /> as our source data -- the data we trust to be correct.
+In this guide, you'll use a MySQL <TechnicalTag tag="datasource" text= "Data Source" />.
 
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py mysql_batch_request"
 ```
@@ -51,7 +51,7 @@ From this data, we will create an <TechnicalTag tag="expectation_suite" text="Ex
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py pg_batch_request"
 ```
 
-## Profile source data
+## Profile data
 
 We can now use the `OnboardingDataAssistant` to profile our MySQL data defined in the `mysql_batch_request` above.
 
@@ -97,6 +97,6 @@ By default, the Checkpoint above also updates your Data Docs, allowing you to fu
 
 <div style={{"text-align":"center"}}>
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
-Congratulations!<br/>&#127881; You've just compared two tables across Datasources! &#127881;
+Congratulations!<br/>&#127881; You've just compared two tables across Data Sources! &#127881;
 </b></p>
 </div>

@@ -1,16 +1,17 @@
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.data_context import get_context
+from great_expectations.execution_engine import SparkDFExecutionEngine
 
 yaml = YAMLHandler()
 
 # Set up a basic spark session
-spark = gx.core.util.get_or_create_spark_application()
+spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # basic dataframe
 data = [

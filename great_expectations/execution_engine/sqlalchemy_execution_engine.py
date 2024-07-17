@@ -5,12 +5,10 @@ import datetime
 import hashlib
 import logging
 import math
-import os
 import random
 import re
 import string
 import traceback
-import warnings
 from contextlib import contextmanager
 from pathlib import Path
 from typing import (
@@ -318,7 +316,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._connection_string = connection_string
         self._url = url
         self._create_temp_table = create_temp_table
-        os.environ["SF_PARTNER"] = "great_expectations_oss"  # noqa: TID251
 
         # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive by
         # keeping a reference to it.
@@ -403,7 +400,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name="trino.sqlalchemy.dialect"
             )
         elif self.dialect_name == GXSqlDialect.CLICKHOUSE:
-            # WARNING: Teradata Support is experimental, functionality is not fully under test
+            # WARNING: ClickHouse Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="clickhouse_sqlalchemy.drivers.base"
             )
@@ -1249,7 +1246,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
-    ) -> Union[sqlalchemy.Selectable, str]:
+    ) -> sqlalchemy.Selectable:
         if (
             batch_spec.get("query") is not None
             and batch_spec.get("sampling_method") is not None
@@ -1316,14 +1313,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if not isinstance(query, str):
                 raise ValueError(f"SQL query should be a str but got {query}")
             # Query is a valid SELECT query that begins with r"\w+select\w"
-            selectable = sa.select(sa.text(query.lstrip()[6:].lstrip())).subquery()
+            selectable = sa.select(
+                sa.text(query.lstrip()[6:].strip().rstrip(";").rstrip())
+            ).subquery()
 
         return selectable
 
     @override
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
-    ) -> Tuple[Any, BatchMarkers]:
+    ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
         if not isinstance(
             batch_spec, (SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec)
         ):
@@ -1358,33 +1357,30 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_schema_name: str = batch_spec.get("schema_name", None)
         source_table_name: str = batch_spec.get("table_name", None)
 
-        if batch_spec.get("bigquery_temp_table"):
-            # deprecated-v0.15.3
-            warnings.warn(
-                "BigQuery tables that are created as the result of a query are no longer created as "
-                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
-                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
-                "v0.15.3 and will be removed in v0.18.",
-                DeprecationWarning,
-            )
-
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
+        # this is where splitter components are added to the selectable
+        selectable: sqlalchemy.Selectable = self._build_selectable_from_batch_spec(
+            batch_spec=batch_spec
+        )
+        # NOTE: what's being checked here is the presence of a `query` attribute, we could check this directly
+        # instead of doing an instance check
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
-            query: str = batch_spec.query
-
+            # re-compile the query to include any new parameters
+            compiled_query = selectable.compile(
+                dialect=self.engine.dialect,
+                compile_kwargs={"literal_binds": True},
+            )
+            query_str = str(compiled_query)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
-                query=query,
+                query=query_str,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            selectable: Union[
-                sqlalchemy.Selectable, str
-            ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,

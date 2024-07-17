@@ -10,7 +10,7 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
 
 ## Prerequisites
 
-- You have [set up your environment](../set_up_gx_cloud.md). 
+- You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
 
 - You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 
@@ -36,21 +36,23 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
     checkpoint_name = <checkpoint_name> 
     ```
 
-4. Run the following code to define the Checkpoint configuration including the Data Source and Data Asset names:
+4. Run the following code to define the Checkpoint configuration.
 
     ```python title="Jupyter Notebook"
     checkpoint_config = {
         "name": checkpoint_name,
         "validations": [{
             "expectation_suite_name": expectation_suite.expectation_suite_name,
-             "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
-             "batch_request": {
+            "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
+            "batch_request": {
                 "datasource_name": "<data_source_name>",
                 "data_asset_name": "<data_asset_name>",
-      },
-    }],
+             },
+        }],
     } 
     ```
+    Replace `data_source_name` and `data_asset_name` with the names of an existing Data Source and Data Asset. If you haven't connected to a Data Source and created a Data Asset, see [Manage Data Assets](/docs/cloud/data_assets/manage_data_assets).
+
 5. Run the following code to add the Checkpoint:
 
     ```python title="Jupyter Notebook"

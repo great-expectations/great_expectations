@@ -80,9 +80,7 @@ Uncomment the next cell and set data_source_name to one of these names.
             data_source_name = configured_datasources[0]["name"]
             display(
                 HTML(
-                    "Will be using this data source from your project's great_expectations.yml: <b>{:s}</b>".format(
-                        data_source_name
-                    )
+                    f"Will be using this data source from your project's great_expectations.yml: <b>{data_source_name:s}</b>"
                 )
             )
 
@@ -95,17 +93,15 @@ Uncomment the next cell and set data_source_name to one of these names.
         if len(configured_datasources) == 0:
             display(
                 HTML(
-                    """
+                    f"""
 <p>
-No {:s} data sources found in the great_expectations.yml of your project.
+No {data_source_type:s} data sources found in the great_expectations.yml of your project.
 </p>
 
 <p>
 If you did not create the data source during init, here is how to add it now: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">How To Add a Data Source</a>
 </p>
-""".format(
-                        data_source_type
-                    )
+"""
                 )
             )
         elif len(configured_datasources) > 1:
@@ -128,9 +124,7 @@ Uncomment the next cell and set data_source_name to one of these names.
             data_source_name = configured_datasources[0]
             display(
                 HTML(
-                    "Will be using this {:s} data source from your project's great_expectations.yml: <b>{:s}</b>".format(
-                        data_source_type, data_source_name
-                    )
+                    f"Will be using this {data_source_type:s} data source from your project's great_expectations.yml: <b>{data_source_name:s}</b>"
                 )
             )
 
@@ -245,9 +239,7 @@ def show_available_data_asset_names(context, data_source_name=None) -> None:
                     if len(data_asset_expectation_suite_keys) > 0:
                         html += "<ul>"
                         for es_key in data_asset_expectation_suite_keys:
-                            html += "<li><span class='expectation-suite'>Expectation Suite</span>: {:s}</li>".format(
-                                es_key.expectation_suite_name
-                            )
+                            html += f"<li><span class='expectation-suite'>Expectation Suite</span>: {es_key.expectation_suite_name:s}</li>"
                         html += "</ul>"
                 html += "</ul>"
             else:

@@ -13,7 +13,7 @@ Start editing
 
     * Go to the `Great Expectations docs <http://docs.greatexpectations.io/en/latest/>`__.
     * On each page, you’ll see an ``Edit on GitHub`` button in the top right. Click this to go to the source file in the Great Expectations GitHub repo.
-    
+
 **1B. Edit from Github**
 
     * If you’re already on GitHub, the docs are located in ``great_expectations > docs``. You can directly navigate to the respective page you want to edit (but getting there from `docs.great_expectations.io <http://docs.greatexpectations.io/en/latest/>`__ is a little easier).
@@ -49,7 +49,7 @@ Submit a pull request
 
 **6. Wait for a core team member to approve and merge your PR**
 
-    * Once all checks pass, a Great Expectations team member will approve your PR and merge it. 
+    * Once all checks pass, a Great Expectations team member will approve your PR and merge it.
     * GitHub will notify you of comments or a successful merge according to your notification settings.
     * If there are any issues, please address them promptly.
 
@@ -63,6 +63,3 @@ Submit a pull request
 .. ------------------
 
 .. #FIXME: Insert video version here.
-
-
-

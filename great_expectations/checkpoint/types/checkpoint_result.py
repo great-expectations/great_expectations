@@ -201,14 +201,14 @@ class CheckpointResult(SerializableDictDot):
 
         Args:
             group_by: Specify how the ExpectationValidationResults should be grouped.
-                Valid options are "validation_result_identifier", "expectation_suite_name",
-                "data_asset_name", or the default None. Providing an invalid group_by
-                value will cause this method to silently fail, and return None.
+            Valid options are "validation_result_identifier", "expectation_suite_name",
+            "data_asset_name", or the default None. Providing an invalid group_by
+            value will cause this method to silently fail, and return None.
 
         Returns:
             A list of ExpectationSuiteValidationResult, when group_by=None
-            A dict of ValidationResultIdentifier keys and ExpectationValidationResults
-                values, when group_by="validation_result_identifier"
+            A dict of ValidationResultIdentifier keys and ExpectationValidationResults values,
+                when group_by="validation_result_identifier"
             A dict of str keys and ExpectationValidationResults values, when
                 group_by="expectation_suite_name" or group_by="data_asset_name"
             None, when group_by is something other than the options described above

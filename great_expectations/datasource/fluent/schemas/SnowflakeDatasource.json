@@ -45,7 +45,10 @@
         },
         "connection_string": {
             "title": "Connection String",
-            "anyOf": [
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/ConnectionDetails"
+                },
                 {
                     "type": "string",
                     "writeOnly": true,
@@ -61,7 +64,7 @@
         },
         "create_temp_table": {
             "title": "Create Temp Table",
-            "default": true,
+            "default": false,
             "type": "boolean"
         },
         "kwargs": {
@@ -79,52 +82,11 @@
                     {}
                 ]
             }
-        },
-        "account": {
-            "title": "Account",
-            "type": "string"
-        },
-        "user": {
-            "title": "User",
-            "type": "string"
-        },
-        "password": {
-            "title": "Password",
-            "anyOf": [
-                {
-                    "type": "string",
-                    "writeOnly": true,
-                    "format": "password"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "database": {
-            "title": "Database",
-            "type": "string"
-        },
-        "schema": {
-            "title": "Schema",
-            "type": "string"
-        },
-        "warehouse": {
-            "title": "Warehouse",
-            "type": "string"
-        },
-        "role": {
-            "title": "Role",
-            "type": "string"
-        },
-        "numpy": {
-            "title": "Numpy",
-            "default": false,
-            "type": "boolean"
         }
     },
     "required": [
-        "name"
+        "name",
+        "connection_string"
     ],
     "additionalProperties": false,
     "definitions": {
@@ -501,6 +463,70 @@
             "required": [
                 "name",
                 "query"
+            ],
+            "additionalProperties": false
+        },
+        "ConnectionDetails": {
+            "title": "ConnectionDetails",
+            "description": "Information needed to connect to a Snowflake database.\nAlternative to a connection string.\n\nhttps://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#additional-connection-parameters",
+            "type": "object",
+            "properties": {
+                "account": {
+                    "title": "AccountIdentifier",
+                    "type": "string",
+                    "description": "Snowflake Account identifiers can be in one of two formats: <orgname>-<account_name> or <account_locator>.<region>.<cloud>",
+                    "pattern": "^(?P<orgname>[a-zA-Z0-9]+)[-](?P<account_name>[a-zA-Z0-9-_]+)$|^(?P<account_locator>[a-zA-Z0-9]+)\\.(?P<region>[a-zA-Z0-9-]+)\\.(?P<cloud>aws|gcp|azure)$",
+                    "examples": [
+                        "myOrg-my_account",
+                        "myOrg-my-account",
+                        "abc12345.us-east-1.aws"
+                    ]
+                },
+                "user": {
+                    "title": "User",
+                    "type": "string"
+                },
+                "password": {
+                    "title": "Password",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "writeOnly": true,
+                            "format": "password"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "database": {
+                    "title": "Database",
+                    "description": "Default database for the connection",
+                    "type": "string"
+                },
+                "schema": {
+                    "title": "Schema",
+                    "description": "Default schema for the connection",
+                    "type": "string"
+                },
+                "warehouse": {
+                    "title": "Warehouse",
+                    "type": "string"
+                },
+                "role": {
+                    "title": "Role",
+                    "type": "string"
+                },
+                "numpy": {
+                    "title": "Numpy",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "account",
+                "user",
+                "password"
             ],
             "additionalProperties": false
         }

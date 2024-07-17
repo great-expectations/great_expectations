@@ -933,7 +933,7 @@ def build_in_memory_runtime_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context = context_factory(project_config=data_context_config, mode="ephemeral")  # type: ignore[call-overload] # Need to add overload
+    context = context_factory(project_config=data_context_config, mode="ephemeral")
 
     return context
 
@@ -1273,7 +1273,7 @@ def filter_properties_dict(  # noqa: PLR0913, PLR0912
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: dict,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1286,7 +1286,7 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: list,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1299,7 +1299,7 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: set,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1312,7 +1312,7 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: tuple,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1325,7 +1325,7 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: None,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1382,7 +1382,7 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: k not in keep_fields
+                lambda k: k not in keep_fields  # type: ignore[arg-type]
                 and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,

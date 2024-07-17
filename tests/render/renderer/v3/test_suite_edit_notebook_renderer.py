@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import json
 import os
 import shutil
-from typing import TYPE_CHECKING
 
 import pytest
+from nbformat import NotebookNode
 
 from great_expectations.cli.suite import _suite_edit_workflow
 from great_expectations.core import ExpectationSuiteValidationResult
@@ -32,9 +34,6 @@ from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.validator.validator import Validator
 from tests.render.util import run_notebook
-
-if TYPE_CHECKING:
-    from nbformat.notebooknode import NotebookNode
 
 
 @pytest.fixture
@@ -509,13 +508,13 @@ def test_render_with_no_column_cells_without_batch_request(
     expected = {
         "nbformat": 4,
         "nbformat_minor": 5,
-        "metadata": {},
+        "metadata": NotebookNode({}),
         "cells": [
             {
                 "id": "smooth-texture",
                 "cell_type": "markdown",
-                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite:\n\n**Expectation Suite Name**: `critical`\n",
-                "metadata": {},
+                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite:\n\n**Expectation Suite Name**: `critical`",
+                "metadata": NotebookNode({}),
             },
             {
                 "id": "genetic-canada",
@@ -577,7 +576,7 @@ def test_render_with_no_column_cells_without_batch_request(
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         obs_cell.pop("id", None)
         expected_cell.pop("id", None)
-        assert obs_cell == expected_cell
+        assert obs_cell == NotebookNode(expected_cell)
     assert obs == expected
 
 
@@ -600,8 +599,8 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
             {
                 "id": "configured-swing",
                 "cell_type": "markdown",
-                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite:\n\n**Expectation Suite Name**: `warning`\n",
-                "metadata": {},
+                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite:\n\n**Expectation Suite Name**: `warning`",
+                "metadata": NotebookNode({}),
             },
             {
                 "id": "proof-employee",
@@ -919,7 +918,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         obs_cell.pop("id", None)
         expected_cell.pop("id", None)
-        assert obs_cell == expected_cell
+        assert obs_cell == NotebookNode(expected_cell)
     assert obs == expected
 
 

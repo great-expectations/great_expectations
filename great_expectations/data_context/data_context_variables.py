@@ -43,6 +43,7 @@ class DataContextVariableSchema(str, enum.Enum):
     )
     CONFIG_VERSION = "config_version"
     DATASOURCES = "datasources"
+    FLUENT_DATASOURCES = "fluent_datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
     VALIDATIONS_STORE_NAME = "validations_store_name"
     EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store_name"

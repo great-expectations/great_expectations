@@ -1,8 +1,8 @@
 ---
-sidebar_label: "Connect to filesystem source data"
-title: "Connect to filesystem source data"
+sidebar_label: "Connect to filesystem Data Assets"
+title: "Connect to filesystem Data Assets"
 id: connect_filesystem_source_data
-description: Connect to source data stored in filesystem files.
+description: Connect to filesystem Data Assets.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
@@ -25,7 +25,7 @@ import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cl
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-Use the information provided here to connect to source data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems. Great Expectations (GX) uses the term source data when referring to data in its original format, and the term source data system when referring to the storage location for source data.
+Use the information provided here to connect to Data Assets stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems. Great Expectations (GX) uses the term Data Asset when referring to data in its original format, and the term Data Source when referring to the storage location for Data Assets.
 
 <Tabs
   groupId="connect-filesystem-source-data"
@@ -38,9 +38,9 @@ Use the information provided here to connect to source data stored on Amazon S3,
   ]}>
 <TabItem value="amazon">
 
-## Amazon S3 source data
+## Amazon S3 Data Source
 
-Connect to source data on Amazon S3.
+Connect to an Amazon S3 Data Source.
 
 <Tabs
   groupId="connect-amazon-source-data"
@@ -173,7 +173,7 @@ Run the following Python code:
 
 ## Microsoft Azure Blob Storage
 
-Connect to source data on Microsoft Azure Blob Storage.
+Connect to a Microsoft Azure Blob Storage Data Source.
 
 <Tabs
   groupId="connect-azure-source-data"
@@ -294,9 +294,9 @@ The following information is required when you create a Microsoft Azure Blob Sto
 </TabItem>
 <TabItem value="gcs">
 
-## GCS source data
+## GCS Data Source
 
-Connect to source data on GCS.
+Connect to a GCS Data Source.
 
 <Tabs
   groupId="connect-gcs-source-data"
@@ -365,7 +365,7 @@ For more information on Google Cloud and authentication, see the following:
 </TabItem>
 <TabItem value="spark">
 
-Use Spark to connect to source data stored on GCS.  The following examples connect to .csv data.
+Use Spark to connect to a GCS Data Source.  The following examples connect to .csv data.
 
 ### Prerequisites
 
@@ -431,9 +431,9 @@ For more information on Google Cloud and authentication, see the following:
 </TabItem>
 <TabItem value="filesystem">
 
-## Filesystem source data
+## Filesystem Data Source
 
-Connect to source data on a filesystem.
+Connect to filesystem Data Assets.
 
 <Tabs
   groupId="connect-filesystem-source-data"
@@ -451,7 +451,7 @@ Connect to source data on a filesystem.
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- Access to source data stored in a filesystem
+- Access to filesystem Data Assets 
 
 </Prerequisites> 
 
@@ -505,7 +505,7 @@ batch_request = asset.build_batch_request()
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- Access to source data stored in a filesystem
+- Access to filesystem Data Assets 
 
 </Prerequisites> 
 
@@ -579,7 +579,7 @@ For more information on Pandas `read_*` methods, see [the Pandas Input/output do
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- Access to source data stored in a filesystem
+- Access to filesystem Data Assets 
 
 </Prerequisites> 
 

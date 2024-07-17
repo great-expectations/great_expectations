@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional
 
 import altair as alt
 import numpy as np
@@ -44,9 +44,11 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import MetricsCalculator
+from great_expectations.validator.metrics_calculator import (
+    MetricsCalculator,
+    _MetricsDict,
+)
 from great_expectations.validator.validator import (
     ValidationDependencies,
 )
@@ -248,9 +250,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                     execution_engine=execution_engine,
                     show_progress_bars=True,
                 )
-                resolved_metrics: Dict[
-                    Tuple[str, str, str], MetricValue
-                ] = metrics_calculator.compute_metrics(
+                resolved_metrics: _MetricsDict
+                resolved_metrics, _ = metrics_calculator.compute_metrics(
                     metric_configurations=[partition_metric_configuration],
                     runtime_configuration=None,
                     min_graph_edges_pbar_enable=0,

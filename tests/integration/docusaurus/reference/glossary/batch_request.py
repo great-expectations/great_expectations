@@ -1,6 +1,7 @@
 import pathlib
-import great_expectations as gx
 import tempfile
+
+import great_expectations as gx
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -42,4 +43,4 @@ options = asset.batch_request_options
 print(options)
 # </snippet>
 
-assert set(options) == set(["year", "month", "path"])
+assert set(options) == {"year", "month", "path"}

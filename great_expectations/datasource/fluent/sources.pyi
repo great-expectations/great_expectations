@@ -47,9 +47,15 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
-from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
+from great_expectations.datasource.fluent.snowflake_datasource import (
+    ConnectionDetails as SnowflakeConnectionDetails,
+)
+from great_expectations.datasource.fluent.snowflake_datasource import (
+    SnowflakeDsn,
+)
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
 from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
+from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger
@@ -68,7 +74,7 @@ def _get_field_details(
 ) -> _FieldDetails: ...
 
 class _SourceFactories:
-    type_lookup: ClassVar
+    type_lookup: ClassVar[TypeLookup]
     def __init__(self, data_context: GXDataContext) -> None: ...
     @classmethod
     def register_datasource(
@@ -574,13 +580,15 @@ class _SourceFactories:
         name: str,
     ) -> None: ...
     @overload
-    def add_snowflake(  # noqa: PLR0913
+    def add_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -592,7 +600,7 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def add_snowflake(  # noqa: PLR0913
+    def add_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
@@ -603,20 +611,22 @@ class _SourceFactories:
         account: str = ...,
         user: str = ...,
         password: Union[ConfigStr, str] = ...,
-        database: Optional[str] = ...,
-        schema: Optional[str] = ...,
+        database: str = ...,
+        schema: str = ...,
         warehouse: Optional[str] = ...,
         role: Optional[str] = ...,
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def update_snowflake(  # noqa: PLR0913
+    def update_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -628,7 +638,7 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def update_snowflake(  # noqa: PLR0913
+    def update_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
@@ -639,20 +649,22 @@ class _SourceFactories:
         account: str = ...,
         user: str = ...,
         password: Union[ConfigStr, str] = ...,
-        database: Optional[str] = ...,
-        schema: Optional[str] = ...,
+        database: str = ...,
+        schema: str = ...,
         warehouse: Optional[str] = ...,
         role: Optional[str] = ...,
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def add_or_update_snowflake(  # noqa: PLR0913
+    def add_or_update_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[
+            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
+        ] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -664,7 +676,7 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     @overload
-    def add_or_update_snowflake(  # noqa: PLR0913
+    def add_or_update_snowflake(
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = ...,
         name: Optional[str] = ...,
@@ -675,8 +687,8 @@ class _SourceFactories:
         account: str = ...,
         user: str = ...,
         password: Union[ConfigStr, str] = ...,
-        database: Optional[str] = ...,
-        schema: Optional[str] = ...,
+        database: str = ...,
+        schema: str = ...,
         warehouse: Optional[str] = ...,
         role: Optional[str] = ...,
         numpy: bool = ...,

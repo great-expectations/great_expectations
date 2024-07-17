@@ -1,4 +1,4 @@
 great_expectations
-pyodbc>=4.0.30
 pyarrow
+pyodbc>=4.0.30
 pytest

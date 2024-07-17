@@ -1,8 +1,8 @@
 ---
-sidebar_label: "Connect to a source data system"
-title: "Connect to a source data system"
+sidebar_label: "Connect to a Data Source"
+title: "Connect to a Data Source"
 id: connect_gx_source_data_system
-description: Install and configure Great Expectations to access data stored on Amazon S3, Google Cloud Storage, Microsoft Azure Blob Storage, and SQL databases.
+description: Install and configure Great Expectations to access Data Assets stored on Amazon S3, Google Cloud Storage, Microsoft Azure Blob Storage, and SQL databases.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
@@ -31,7 +31,7 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 
-This is where you'll find information about creating your Great Expectations (GX) Python environment, installing GX locally, and how to configure the dependencies necessary to access source data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or SQL databases. GX uses the term source data when referring to data in its original format, and the term source data system when referring to the storage location for source data.
+This is where you'll find information about creating your Great Expectations (GX) Python environment, installing GX locally, and how to configure the dependencies necessary to access Data Assets stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or SQL databases. GX uses the term Data Asset when referring to data in its original format, and the term Data Source when referring to the storage location for Data Assets.
 
 <Tabs
   groupId="install-gx-cloud-storage"

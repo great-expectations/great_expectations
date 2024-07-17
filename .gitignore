@@ -52,7 +52,7 @@ wheels/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
+# Unit test / coverage reports / profiling data
 htmlcov/
 .tox/
 .coverage
@@ -64,6 +64,7 @@ coverage.xml
 .hypothesis/
 src/dgtest/
 type_cov/
+.profiles/
 
 # Translations
 *.mo
@@ -149,3 +150,7 @@ metastore_db
 Pipfile
 Pipfile.lock
 
+# contract testing files
+tests/integration/cloud/rest_contracts/pacts
+
+.databricks

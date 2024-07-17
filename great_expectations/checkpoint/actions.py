@@ -55,9 +55,10 @@ class ValidationAction:
         data_context: Data Context that is used by the Action.
     """
 
-    def __init__(self, data_context: AbstractDataContext) -> None:
+    def __init__(self, data_context: AbstractDataContext, name: str) -> None:
         """Create a ValidationAction"""
         self.data_context = data_context
+        self.name = name
 
     @property
     def _using_cloud_context(self) -> bool:
@@ -139,11 +140,8 @@ class ValidationAction:
 
 
 class NoOpAction(ValidationAction):
-    def __init__(
-        self,
-        data_context,
-    ) -> None:
-        super().__init__(data_context)
+    def __init__(self, data_context, name) -> None:
+        super().__init__(data_context=data_context, name=name)
 
     @override
     def _run(  # noqa: PLR0913
@@ -201,9 +199,12 @@ class SlackNotificationAction(ValidationAction):
         show_failed_expectations: Shows a list of failed expectation types.
     """
 
+    SLACK_CLOUD_ANALYTICS_PARAMETER = "?slack=true"
+
     def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
+        name: str,
         renderer: dict,
         slack_webhook: Optional[str] = None,
         slack_token: Optional[str] = None,
@@ -213,7 +214,7 @@ class SlackNotificationAction(ValidationAction):
         show_failed_expectations: bool = False,
     ) -> None:
         """Create a SlackNotificationAction"""
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -249,7 +250,7 @@ class SlackNotificationAction(ValidationAction):
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
-        checkpoint_identifier=None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("SlackNotificationAction.run")
 
@@ -265,7 +266,7 @@ class SlackNotificationAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
 
         validation_success = validation_result_suite.success
@@ -297,10 +298,15 @@ class SlackNotificationAction(ValidationAction):
                 "store_validation_result" in payload
                 and "validation_result_url" in payload["store_validation_result"]
             ):
-                validation_result_urls.append(
+                cloud_validation_url = (
                     payload["store_validation_result"]["validation_result_url"]
+                    + self.SLACK_CLOUD_ANALYTICS_PARAMETER
                 )
+                validation_result_urls.append(cloud_validation_url)
 
+        checkpoint_name = None
+        if checkpoint_identifier is not None:
+            checkpoint_name = checkpoint_identifier.resource_name
         if (
             self.notify_on == "all"
             or self.notify_on == "success"
@@ -309,11 +315,13 @@ class SlackNotificationAction(ValidationAction):
             and not validation_success
         ):
             query: Dict = self.renderer.render(
-                validation_result_suite,
-                data_docs_pages,
-                self.notify_with,
-                self.show_failed_expectations,
-                validation_result_urls,
+                name=self.name,
+                checkpoint_name=checkpoint_name,
+                validation_result=validation_result_suite,
+                data_docs_pages=data_docs_pages,
+                notify_with=self.notify_with,
+                show_failed_expectations=self.show_failed_expectations,
+                validation_result_urls=validation_result_urls,
             )
 
             # this will actually send the POST request to the Slack webapp server
@@ -354,13 +362,14 @@ class PagerdutyAlertAction(ValidationAction):
     def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
+        name: str,
         api_key: str,
         routing_key: str,
         notify_on: str = "failure",
         severity: str = "critical",
     ) -> None:
         """Create a PagerdutyAlertAction"""
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
         self.api_key = api_key
@@ -396,7 +405,7 @@ class PagerdutyAlertAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
 
         validation_success = validation_result_suite.success
@@ -462,15 +471,16 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
+        name: str,
         renderer: dict,
         microsoft_teams_webhook: str,
         notify_on: str = "all",
     ) -> None:
         """Create a MicrosoftTeamsNotificationAction"""
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -515,7 +525,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
         validation_success = validation_result_suite.success
         data_docs_pages = None
@@ -575,6 +585,7 @@ class OpsgenieAlertAction(ValidationAction):
     def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
+        name: str,
         renderer: dict,
         api_key: str,
         region: Optional[str] = None,
@@ -583,7 +594,7 @@ class OpsgenieAlertAction(ValidationAction):
         tags: Optional[list[str]] = None,
     ) -> None:
         """Create an OpsgenieAlertAction"""
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -630,7 +641,7 @@ class OpsgenieAlertAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
 
         validation_success = validation_result_suite.success
@@ -716,6 +727,7 @@ class EmailAction(ValidationAction):
     def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
+        name: str,
         renderer: dict,
         smtp_address: str,
         smtp_port: str,
@@ -729,7 +741,7 @@ class EmailAction(ValidationAction):
         notify_with: Optional[list[str]] = None,
     ) -> None:
         """Create an EmailAction"""
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -793,7 +805,7 @@ class EmailAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
 
         validation_success = validation_result_suite.success
@@ -861,9 +873,10 @@ class StoreValidationResultAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
+        name: str,
         target_store_name: Optional[str] = None,
     ) -> None:
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:
@@ -915,9 +928,7 @@ class StoreValidationResultAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
+                f"validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {type(validation_result_suite_identifier)}."
             )
 
         checkpoint_ge_cloud_id = None
@@ -973,9 +984,12 @@ class StoreEvaluationParametersAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context: AbstractDataContext, target_store_name: Optional[str] = None
+        self,
+        data_context: AbstractDataContext,
+        name: str,
+        target_store_name: Optional[str] = None,
     ) -> None:
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
 
         if target_store_name is None:
             self.target_store = data_context.evaluation_parameter_store
@@ -1007,9 +1021,7 @@ class StoreEvaluationParametersAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
+                f"validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {type(validation_result_suite_identifier)}."
             )
 
         self.data_context.store_evaluation_parameters(validation_result_suite)
@@ -1051,19 +1063,18 @@ class StoreMetricsAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
+        name: str,
         requested_metrics: dict,
         target_store_name: Optional[str] = "metrics_store",
     ) -> None:
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         self._requested_metrics = requested_metrics
         self._target_store_name = target_store_name
         try:
             store = data_context.stores[target_store_name]
         except KeyError:
             raise DataContextError(
-                "Unable to find store {} in your DataContext configuration.".format(
-                    target_store_name
-                )
+                f"Unable to find store {target_store_name} in your DataContext configuration."
             )
         if not isinstance(store, MetricStore):
             raise DataContextError(
@@ -1095,9 +1106,7 @@ class StoreMetricsAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
+                f"validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {type(validation_result_suite_identifier)}."
             )
 
         self.data_context.store_validation_result_metrics(
@@ -1138,13 +1147,14 @@ class UpdateDataDocsAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
+        name: str,
         site_names: list[str] | str | None = None,
     ) -> None:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
         """
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         self._site_names = site_names
 
     @override
@@ -1172,9 +1182,7 @@ class UpdateDataDocsAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
-                    type(validation_result_suite_identifier)
-                )
+                f"validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {type(validation_result_suite_identifier)}"
             )
 
         # TODO Update for RenderedDataDocs
@@ -1233,11 +1241,12 @@ class SNSNotificationAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
+        name: str,
         sns_topic_arn: str,
         sns_message_subject: Optional[str],
     ) -> None:
         """Inits SNSNotificationAction."""
-        super().__init__(data_context)
+        super().__init__(data_context=data_context, name=name)
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
@@ -1279,8 +1288,8 @@ class SNSNotificationAction(ValidationAction):
 
 
 class APINotificationAction(ValidationAction):
-    def __init__(self, data_context, url) -> None:
-        super().__init__(data_context)
+    def __init__(self, data_context, name, url) -> None:
+        super().__init__(data_context=data_context, name=name)
         self.url = url
 
     @override

@@ -8,8 +8,6 @@ from great_expectations.data_context.types.base import DatasourceConfig
 def test_datasource_delete_removes_from_cache_and_config_data_context(
     empty_data_context: DataContext, block_config_datasource_config: DatasourceConfig
 ):
-    """context.datasource_delete should remove from the datasource cache and also config independent of the save_changes setting."""
-
     context: DataContext = empty_data_context
     datasource_name: str = "my_datasource"
 

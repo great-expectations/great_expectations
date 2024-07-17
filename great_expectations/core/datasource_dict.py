@@ -92,7 +92,7 @@ class DatasourceDict(UserDict):
                         name=name, config=config
                     )
             except gx_exceptions.DatasourceInitializationError as e:
-                logger.warning(f"Cannot initialize datasource {name}: {e}")
+                logger.warning(f"Cannot initialize datasource {name}: {e}")  # type: ignore[possibly-undefined] # ok
 
         return datasources
 

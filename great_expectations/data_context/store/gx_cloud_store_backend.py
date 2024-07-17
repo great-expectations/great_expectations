@@ -114,6 +114,12 @@ def get_user_friendly_error_message(
         errors = error_json.get("errors")
         if errors:
             support_message.append(json.dumps(errors))
+        elif (  # error doesn't conform to the standard format but we still want to expose it
+            # TODO: consider removing this once our error format has stabilized
+            response.status_code
+            in (400, 409, 422)
+        ):
+            support_message.append(json.dumps(error_json))
 
     except json.JSONDecodeError:
         support_message.append(
@@ -269,7 +275,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
-                str(response.text),
+                str(response.text),  # type: ignore[possibly-undefined]
                 str(jsonError),
             )
             raise StoreBackendError(
@@ -454,7 +460,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_credentials
 
     @override
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, str]]:  # type: ignore[override]
+    def list_keys(
+        self, prefix: Tuple = ()
+    ) -> List[Tuple[GXCloudRESTResource, str, str]]:
         url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],

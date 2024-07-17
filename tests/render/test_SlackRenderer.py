@@ -1,5 +1,6 @@
 import pytest
 
+from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -51,7 +52,9 @@ def failed_expectation_suite_validation_result():
                 "generator_asset": "z",
             },
             "expectation_suite_name": "default",
-            "run_id": "2019-09-25T060538.829112Z",
+            "run_id": RunIdentifier(
+                run_name="test_100", run_time="2019-09-25T060538.829112Z"
+            ),
         },
     )
 
@@ -76,7 +79,9 @@ def success_expectation_suite_validation_result():
                 "generator_asset": "z",
             },
             "expectation_suite_name": "default",
-            "run_id": "2019-09-25T060538.829112Z",
+            "run_id": RunIdentifier(
+                run_name="test_100", run_time="2019-09-25T060538.829112Z"
+            ),
         },
     )
 
@@ -86,32 +91,38 @@ def test_SlackRenderer_validation_results_with_datadocs(
 ):
     validation_result_suite = success_expectation_suite_validation_result
 
-    rendered_output = SlackRenderer().render(validation_result_suite)
+    rendered_output = SlackRenderer().render(
+        validation_result=validation_result_suite,
+        checkpoint_name="checkpoint_name_testing",
+        name="testing",
+    )
 
     expected_output = {
         "blocks": [
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data "
-                    "asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: "
-                    "`data_asset_name=x/y/z`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "testing - checkpoint_name_testing - Success "
+                    ":white_check_mark:",
+                    "type": "plain_text",
                 },
+                "type": "header",
+            },
+            {
+                "text": {
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
+                },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*Asset*: x/y/z  *Expectation Suite*: default",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
             },
             {"type": "divider"},
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "mrkdwn",
-                        "text": "Learn how to review validation results in Data Docs: "
-                        "https://docs.greatexpectations.io/docs/terms/data_docs",
-                    }
-                ],
-            },
-        ],
-        "text": "default: Success :tada:",
+        ]
     }
     print(rendered_output)
     print(expected_output)
@@ -120,82 +131,96 @@ def test_SlackRenderer_validation_results_with_datadocs(
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
     notify_with = ["local_site"]
     rendered_output = SlackRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
+        validation_result=validation_result_suite,
+        data_docs_pages=data_docs_pages,
+        notify_with=notify_with,
+        name="hello",
+        checkpoint_name="checkpoint_name",
     )
 
     expected_output = {
         "blocks": [
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data "
-                    "asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: "
-                    "`data_asset_name=x/y/z`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "hello - checkpoint_name - Success " ":white_check_mark:",
+                    "type": "plain_text",
                 },
+                "type": "header",
             },
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*DataDocs* can be found here: `file:///localsite/index.html` \n (Please copy and paste "
-                    "link into a browser to view)\n",
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
                 },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*Asset*: x/y/z  *Expectation Suite*: default",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*DataDocs* can be found here: "
+                    "`file:///localsite/index.html` \n"
+                    " (Please copy and paste link into a browser to "
+                    "view)\n",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
             },
             {"type": "divider"},
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "mrkdwn",
-                        "text": "Learn how to review validation results in Data Docs: "
-                        "https://docs.greatexpectations.io/docs/terms/data_docs",
-                    }
-                ],
-            },
-        ],
-        "text": "default: Success :tada:",
+        ]
     }
     assert rendered_output == expected_output
 
     # not configured
     notify_with = ["fake_site"]
     rendered_output = SlackRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
+        validation_result=validation_result_suite,
+        data_docs_pages=data_docs_pages,
+        notify_with=notify_with,
+        name="hello",
+        checkpoint_name="checkpoint_name",
     )
 
     expected_output = {
         "blocks": [
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data "
-                    "asset name*: `x/y/z`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: "
-                    "`data_asset_name=x/y/z`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "hello - checkpoint_name - Success " ":white_check_mark:",
+                    "type": "plain_text",
                 },
+                "type": "header",
             },
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*ERROR*: Slack is trying to provide a link to the following DataDocs: `fake_site`, "
-                    "but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
                 },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*Asset*: x/y/z  *Expectation Suite*: default",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*ERROR*: Slack is trying to provide a link to "
+                    "the following DataDocs: `fake_site`, but it is "
+                    "not configured under `data_docs_sites` in the "
+                    "`great_expectations.yml`\n",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
             },
             {"type": "divider"},
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "mrkdwn",
-                        "text": "Learn how to review validation results in Data Docs: "
-                        "https://docs.greatexpectations.io/docs/terms/data_docs",
-                    }
-                ],
-            },
-        ],
-        "text": "default: Success :tada:",
+        ]
     }
 
     assert rendered_output == expected_output
@@ -221,36 +246,43 @@ def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
             "great_expectations_version": "v0.8.0__develop",
             "active_batch_definition": batch_definition,
             "expectation_suite_name": "default",
-            "run_id": "2019-09-25T060538.829112Z",
+            "run_id": RunIdentifier(
+                run_name="test_100", run_time="2019-09-25T060538.829112Z"
+            ),
         },
     )
 
-    rendered_output = SlackRenderer().render(validation_result_suite)
+    rendered_output = SlackRenderer().render(
+        validation_result=validation_result_suite,
+        name="hello",
+        checkpoint_name="testing",
+    )
 
     expected_output = {
         "blocks": [
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data "
-                    "asset name*: `test_data_asset`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `("
-                    ")`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "hello - testing - Success :white_check_mark:",
+                    "type": "plain_text",
                 },
+                "type": "header",
+            },
+            {
+                "text": {
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
+                },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*Asset*: test_data_asset  *Expectation Suite*: " "default",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
             },
             {"type": "divider"},
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "mrkdwn",
-                        "text": "Learn how to review validation results in Data Docs: "
-                        "https://docs.greatexpectations.io/docs/terms/data_docs",
-                    }
-                ],
-            },
-        ],
-        "text": "default: Success :tada:",
+        ]
     }
     print(rendered_output)
     print(expected_output)
@@ -259,82 +291,96 @@ def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
     notify_with = ["local_site"]
     rendered_output = SlackRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
+        validation_result=validation_result_suite,
+        data_docs_pages=data_docs_pages,
+        notify_with=notify_with,
+        name="hello",
+        checkpoint_name="testing",
     )
 
     expected_output = {
         "blocks": [
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data "
-                    "asset name*: `test_data_asset`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `("
-                    ")`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "hello - testing - Success :white_check_mark:",
+                    "type": "plain_text",
                 },
+                "type": "header",
             },
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*DataDocs* can be found here: `file:///localsite/index.html` \n (Please copy and paste "
-                    "link into a browser to view)\n",
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
                 },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*Asset*: test_data_asset  *Expectation Suite*: " "default",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*DataDocs* can be found here: "
+                    "`file:///localsite/index.html` \n"
+                    " (Please copy and paste link into a browser to "
+                    "view)\n",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
             },
             {"type": "divider"},
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "mrkdwn",
-                        "text": "Learn how to review validation results in Data Docs: "
-                        "https://docs.greatexpectations.io/docs/terms/data_docs",
-                    }
-                ],
-            },
-        ],
-        "text": "default: Success :tada:",
+        ]
     }
     assert rendered_output == expected_output
 
     # not configured
     notify_with = ["fake_site"]
     rendered_output = SlackRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
+        validation_result=validation_result_suite,
+        data_docs_pages=data_docs_pages,
+        notify_with=notify_with,
+        name="hello",
+        checkpoint_name="testing",
     )
 
     expected_output = {
         "blocks": [
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation suite name*: `default`\n*Data "
-                    "asset name*: `test_data_asset`\n*Run ID*: `2019-09-25T060538.829112Z`\n*Batch ID*: `("
-                    ")`\n*Summary*: *0* of *0* expectations were met",
+                    "text": "hello - testing - Success :white_check_mark:",
+                    "type": "plain_text",
                 },
+                "type": "header",
             },
             {
-                "type": "section",
                 "text": {
-                    "type": "mrkdwn",
-                    "text": "*ERROR*: Slack is trying to provide a link to the following DataDocs: `fake_site`, "
-                    "but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
                 },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*Asset*: test_data_asset  *Expectation Suite*: " "default",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
+            },
+            {
+                "text": {
+                    "text": "*ERROR*: Slack is trying to provide a link to "
+                    "the following DataDocs: `fake_site`, but it is "
+                    "not configured under `data_docs_sites` in the "
+                    "`great_expectations.yml`\n",
+                    "type": "mrkdwn",
+                },
+                "type": "section",
             },
             {"type": "divider"},
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "mrkdwn",
-                        "text": "Learn how to review validation results in Data Docs: "
-                        "https://docs.greatexpectations.io/docs/terms/data_docs",
-                    }
-                ],
-            },
-        ],
-        "text": "default: Success :tada:",
+        ]
     }
 
     assert rendered_output == expected_output
@@ -425,22 +471,6 @@ def test_create_failed_expectations_text():
     )
 
 
-def test_SlackRenderer_show_failed_expectations(
-    failed_expectation_suite_validation_result,
-):
-    slack_renderer = SlackRenderer()
-    rendered_msg = slack_renderer.render(
-        validation_result=failed_expectation_suite_validation_result,
-        show_failed_expectations=True,
-    )
-
-    assert (
-        """*Failed Expectations*:
-:x:expect_column_values_to_be_between (my_column)"""
-        in rendered_msg["blocks"][0]["text"]["text"]
-    )
-
-
 def test_slack_renderer_shows_gx_cloud_url(failed_expectation_suite_validation_result):
     slack_renderer = SlackRenderer()
     cloud_url = "app.greatexpectations.io/?validationResultId=123-456-789"
@@ -448,10 +478,12 @@ def test_slack_renderer_shows_gx_cloud_url(failed_expectation_suite_validation_r
         validation_result=failed_expectation_suite_validation_result,
         show_failed_expectations=True,
         validation_result_urls=[cloud_url],
+        name="hello",
+        checkpoint_name="testing",
     )
 
     assert (
         ""
-        f"*<{cloud_url} | Failed :x:>*"
-        "" in rendered_msg["blocks"][0]["text"]["text"]
+        "<app.greatexpectations.io/?validationResultId=123-456-789|View Results>"
+        "" in rendered_msg["blocks"][2]["text"]["text"]
     )

@@ -26,9 +26,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
-def instantiate_class_from_config(  # noqa: PLR0912
-    config, runtime_environment, config_defaults=None
-):
+def instantiate_class_from_config(config, runtime_environment, config_defaults=None):
     """Build a GX class from configuration dictionaries."""
 
     if config_defaults is None:
@@ -42,10 +40,7 @@ def instantiate_class_from_config(  # noqa: PLR0912
             module_name = config_defaults.pop("module_name")
         except KeyError:
             raise KeyError(
-                "Neither config : {} nor config_defaults : {} contains a module_name key.".format(
-                    config,
-                    config_defaults,
-                )
+                f"Neither config : {config} nor config_defaults : {config_defaults} contains a module_name key."
             )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
@@ -64,10 +59,7 @@ def instantiate_class_from_config(  # noqa: PLR0912
             class_name = config_defaults.pop("class_name")
         except KeyError:
             raise KeyError(
-                "Neither config : {} nor config_defaults : {} contains a class_name key.".format(
-                    config,
-                    config_defaults,
-                )
+                f"Neither config : {config} nor config_defaults : {config_defaults} contains a class_name key."
             )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
@@ -98,9 +90,7 @@ def instantiate_class_from_config(  # noqa: PLR0912
         class_instance = class_(**config_with_defaults)
     except TypeError as e:
         raise TypeError(
-            "Couldn't instantiate class: {} with config: \n\t{}\n \n".format(
-                class_name, format_dict_for_error_message(config_with_defaults)
-            )
+            f"Couldn't instantiate class: {class_name} with config: \n\t{format_dict_for_error_message(config_with_defaults)}\n \n"
             + str(e)
         )
 

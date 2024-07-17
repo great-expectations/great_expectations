@@ -10,7 +10,6 @@ import logging
 import os
 import pathlib
 import shutil
-import sys
 from typing import List
 
 import pkg_resources
@@ -91,6 +90,12 @@ def delay_rerun(*args):
 docs_test_matrix: List[IntegrationTestFixture] = []
 
 local_tests = [
+    IntegrationTestFixture(
+        name="how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[],
+    ),
     IntegrationTestFixture(
         name="how_to_validate_multiple_batches_within_single_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py",
@@ -539,21 +544,19 @@ def pytest_parsed_arguments(request):
 
 @flaky(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, integration_test_fixture)
     _execute_integration_test(integration_test_fixture, tmp_path)
 
 
 @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.mark.slow  # 79.77s
 def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(  # noqa: PLR0912, PLR0915
+def _execute_integration_test(  # noqa: PLR0915
     integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
 ):
     """

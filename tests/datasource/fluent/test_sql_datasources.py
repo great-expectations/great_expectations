@@ -1,56 +1,202 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import logging
+import warnings
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Any, Generator
 from unittest import mock
 
 import pytest
+from pytest import param
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.datasource.fluent import SQLDatasource
+from great_expectations.datasource.fluent import GxDatasourceWarning, SQLDatasource
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
+    from pytest_mock import MockerFixture, MockType
 
-    from great_expectations.data_context import EphemeralDataContext
+    from great_expectations.data_context import (
+        EphemeralDataContext,
+    )
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def create_engine_spy(mocker: MockerFixture) -> mock.MagicMock:
-    return mocker.spy(sa, "create_engine")
+def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, None]:
+    spy = mocker.spy(sa, "create_engine")
+    yield spy
+    if not spy.call_count:
+        LOGGER.warning("SQLAlchemy create_engine was not called")
+
+
+@pytest.fixture
+def gx_sqlalchemy_execution_engine_spy(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
+) -> Generator[mock.MagicMock, None, None]:
+    """
+    Mock the SQLDatasource.execution_engine_type property to return a spy so that what would be passed to
+    the GX SqlAlchemyExecutionEngine constructor can be inspected.
+
+    NOTE: This is not exactly what gets passed to the sqlalchemy.engine.create_engine() function, but it is close.
+    """
+    spy = mocker.Mock(spec=SqlAlchemyExecutionEngine)
+    monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
+    yield spy
+    if not spy.call_count:
+        LOGGER.warning("SqlAlchemyExecutionEngine.__init__() was not called")
+
+
+@pytest.fixture
+def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Monkeypatch sqlalchemy.create_engine to always return a in-memory sqlite engine."""
+    in_memory_sqlite_engine = sa.create_engine("sqlite:///")
+
+    def _fake_create_engine(*args, **kwargs) -> sa.engine.Engine:
+        LOGGER.info(f"Mock create_engine called with {args=} {kwargs=}")
+        return in_memory_sqlite_engine
+
+    monkeypatch.setattr(sa, "create_engine", _fake_create_engine, raising=True)
+
+
+@pytest.fixture
+def sql_datasource(
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    filter_gx_datasource_warnings: None,
+) -> SQLDatasource:
+    return ephemeral_context_with_defaults.sources.add_sql(
+        name="my_sql_datasource", connection_string="sqlite:///"
+    )
+
+
+@pytest.fixture
+def sql_datasource_table_asset_test_connection_noop(
+    monkeypatch: pytest.MonkeyPatch, sql_datasource: SQLDatasource
+) -> SQLDatasource:
+    """
+    Patch and return the sql_datasource fixture `TableAsset.test_connection()`
+    to be a noop and always pass.
+    """
+
+    LOGGER.warning(f"Patching {sql_datasource.name} `.test_connection()` to a noop")
+
+    def noop(self: SQLDatasource | TableAsset):
+        LOGGER.warning(f"{self.__class__.__name__}.test_connection noop called")
+
+    monkeypatch.setattr(TableAsset, "test_connection", noop, raising=True)
+    return sql_datasource
+
+
+@pytest.fixture
+def sql_datasource_noop_test_connection(
+    sql_datasource: SQLDatasource,
+    sql_datasource_test_connection_noop: MockType,
+) -> SQLDatasource:
+    return sql_datasource
 
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "ds_kwargs",
     [
-        dict(
-            connection_string="sqlite:///",
-            kwargs={"isolation_level": "SERIALIZABLE"},
+        param(
+            dict(
+                connection_string="sqlite:///",
+            ),
+            id="connection_string only",
         ),
-        dict(
-            connection_string="${MY_CONN_STR}",
-            kwargs={"isolation_level": "SERIALIZABLE"},
+        param(
+            dict(
+                connection_string="sqlite:///",
+                kwargs={"isolation_level": "SERIALIZABLE"},
+            ),
+            id="no subs + kwargs",
+        ),
+        param(
+            dict(
+                connection_string="${MY_CONN_STR}",
+                kwargs={"isolation_level": "SERIALIZABLE"},
+            ),
+            id="subs + kwargs",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                create_temp_table=True,
+            ),
+            id="create_temp_table=True",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                create_temp_table=False,
+            ),
+            id="create_temp_table=False",
         ),
     ],
 )
-def test_kwargs_are_passed_to_create_engine(
-    create_engine_spy: mock.MagicMock,
-    monkeypatch: pytest.MonkeyPatch,
-    ephemeral_context_with_defaults: EphemeralDataContext,
-    ds_kwargs: dict,
-):
-    monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
+class TestConfigPassthrough:
+    def test_kwargs_passed_to_create_engine(
+        self,
+        create_engine_spy: mock.MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+        ephemeral_context_with_defaults: EphemeralDataContext,
+        ds_kwargs: dict,
+        filter_gx_datasource_warnings: None,
+    ):
+        monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
-    context = ephemeral_context_with_defaults
-    ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
-    print(ds)
-    ds.test_connection()
+        context = ephemeral_context_with_defaults
+        ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
+        print(ds)
+        ds.test_connection()
 
-    create_engine_spy.assert_called_once_with(
-        "sqlite:///", **{"isolation_level": "SERIALIZABLE"}
-    )
+        create_engine_spy.assert_called_once_with(
+            "sqlite:///",
+            **{
+                **ds.dict(include={"kwargs"}, exclude_unset=False)["kwargs"],
+                **ds_kwargs.get("kwargs", {}),
+            },
+        )
+
+    def test_ds_config_passed_to_gx_sqlalchemy_execution_engine(
+        self,
+        gx_sqlalchemy_execution_engine_spy: mock.MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+        ephemeral_context_with_defaults: EphemeralDataContext,
+        ds_kwargs: dict,
+        filter_gx_datasource_warnings: None,
+    ):
+        monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
+
+        context = ephemeral_context_with_defaults
+        ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
+        print(ds)
+        gx_execution_engine: SqlAlchemyExecutionEngine = ds.get_execution_engine()
+        print(f"{gx_execution_engine=}")
+
+        expected_args: dict[str, Any] = {
+            # kwargs that we expect are passed to SqlAlchemyExecutionEngine
+            # including datasource field default values
+            **ds.dict(
+                exclude_unset=False,
+                exclude={"kwargs", *ds_kwargs.keys(), *ds._get_exec_engine_excludes()},
+            ),
+            **{k: v for k, v in ds_kwargs.items() if k not in ["kwargs"]},
+            **ds_kwargs.get("kwargs", {}),
+            # config substitution should have been performed
+            **ds.dict(
+                include={"connection_string"}, config_provider=ds._config_provider
+            ),
+        }
+        assert "create_temp_table" in expected_args
+
+        print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args)}")
+        gx_sqlalchemy_execution_engine_spy.assert_called_once_with(**expected_args)
 
 
 @pytest.mark.unit
@@ -187,6 +333,129 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
             assert isinstance(table_asset.table_name, sqlalchemy.quoted_name)
             assert table_asset.table_name in table_names_in_dbms_schema
             assert table_asset.table_name in quoted_table_names
+
+
+@pytest.mark.big
+@pytest.mark.parametrize(
+    ["connection_string", "suggested_datasource_class"],
+    [
+        ("gregshift://", None),
+        ("sqlite:///", "SqliteDatasource"),
+        ("snowflake+pyodbc://", "SnowflakeDatasource"),
+        ("postgresql+psycopg2://bob:secret@localhost:5432/my_db", "PostgresDatasource"),
+        ("${MY_PG_CONN_STR}", "PostgresDatasource"),
+        ("databricks://", "DatabricksSQLDatasource"),
+    ],
+)
+def test_specific_datasource_warnings(
+    create_engine_fake: None,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    monkeypatch: pytest.MonkeyPatch,
+    connection_string: str,
+    suggested_datasource_class: str | None,
+):
+    """
+    This test ensures that a warning is raised when a specific datasource class is suggested.
+    """
+    context = ephemeral_context_with_defaults
+    monkeypatch.setenv(
+        "MY_PG_CONN_STR", "postgresql://bob:secret@localhost:5432/bobs_db"
+    )
+
+    if suggested_datasource_class:
+        with pytest.warns(GxDatasourceWarning, match=suggested_datasource_class):
+            context.sources.add_sql(
+                name="my_datasource", connection_string=connection_string
+            )
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")  # should already be the default
+            context.sources.add_sql(
+                name="my_datasource", connection_string=connection_string
+            ).test_connection()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "config",
+    [
+        {
+            "name": "connection_string only",
+            "connection_string": "sqlite:///",
+        },
+        {
+            "name": "no subs + kwargs",
+            "connection_string": "sqlite:///",
+            "kwargs": {"isolation_level": "SERIALIZABLE"},
+        },
+        {
+            "name": "subs + kwargs",
+            "connection_string": "sqlite:///${MY_VAR}",
+            "kwargs": {"isolation_level": "SERIALIZABLE"},
+        },
+    ],
+    ids=lambda x: x["name"],
+)
+def test_recreate_from_dict(
+    monkeypatch: pytest.MonkeyPatch,
+    create_engine_fake: None,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    config: dict,
+):
+    """
+    Test that .dict() method of a datasource can be fed back into the constructor to recreate the datasource.
+    """
+    monkeypatch.setenv("MY_VAR", "my_var_value")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        d1 = ephemeral_context_with_defaults.sources.add_sql(**config)
+        ephemeral_context_with_defaults.delete_datasource(d1.name)
+        d2 = ephemeral_context_with_defaults.sources.add_sql(**d1.dict())
+    assert d1 == d2
+
+
+@pytest.mark.unit
+class TestTableAsset:
+    @pytest.mark.parametrize("schema_name", ["my_schema", "MY_SCHEMA", "My_Schema"])
+    def test_unquoted_schema_names_are_added_as_lowercase(
+        self,
+        sql_datasource_table_asset_test_connection_noop: SQLDatasource,
+        schema_name: str,
+    ):
+        my_datasource: SQLDatasource = sql_datasource_table_asset_test_connection_noop
+
+        table_asset = my_datasource.add_table_asset(
+            name="my_table_asset",
+            table_name="my_table",
+            schema_name=schema_name,
+        )
+        assert table_asset.schema_name == schema_name.lower()
+
+    @pytest.mark.parametrize(
+        "schema_name",
+        [
+            '"my_schema"',
+            '"MY_SCHEMA"',
+            '"My_Schema"',
+            "'my_schema'",
+            "'MY_SCHEMA'",
+            "'My_Schema'",
+        ],
+    )
+    def test_quoted_schema_names_are_not_modified(
+        self,
+        sql_datasource_table_asset_test_connection_noop: SQLDatasource,
+        schema_name: str,
+    ):
+        my_datasource: SQLDatasource = sql_datasource_table_asset_test_connection_noop
+
+        table_asset = my_datasource.add_table_asset(
+            name="my_table_asset",
+            table_name="my_table",
+            schema_name=schema_name,
+        )
+        assert table_asset.schema_name == schema_name
 
 
 if __name__ == "__main__":

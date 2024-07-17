@@ -10,13 +10,13 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml">
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
 
 introspection:  # Each key in the "introspection" section is the name of an InferredAssetSqlDataConnector (key name "introspection" in "SimpleSqlalchemyDatasource" configuration is reserved).
-    whole_table: {{}}  # Any alphanumeric key name is acceptable.
+    whole_table: {}  # Any alphanumeric key name is acceptable.
 """
 # </snippet>
 
@@ -32,13 +32,13 @@ context.test_yaml_config(datasource_yaml)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py buggy_datasource_yaml">
-datasource_yaml = f"""  # buggy datasource_yaml configuration
+datasource_yaml = """  # buggy datasource_yaml configuration
 name: mis_configured_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
 
 introspecting:  # illegal top-level key name
-    whole_table: {{}}
+    whole_table: {}
 """
 # </snippet>
 
@@ -49,7 +49,7 @@ context.test_yaml_config(datasource_yaml)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_introspection">
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
@@ -82,7 +82,7 @@ available_data_asset_names = context.datasources[
 assert len(available_data_asset_names) == 2
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables">
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
@@ -90,7 +90,7 @@ connection_string: <CONNECTION_STRING>
 tables:  # Each key in the "tables" section is a table_name (key name "tables" in "SimpleSqlalchemyDatasource" configuration is reserved).
     yellow_tripdata_sample_2019_01:  # Must match table name exactly.
         partitioners:  # Each key in the "partitioners" sub-section the name of a ConfiguredAssetSqlDataConnector (key name "partitioners" in "SimpleSqlalchemyDatasource" configuration is reserved).
-            whole_table: {{}}
+            whole_table: {}
 """
 # </snippet>
 
@@ -101,7 +101,7 @@ context.test_yaml_config(datasource_yaml)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables_partitioners">
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>

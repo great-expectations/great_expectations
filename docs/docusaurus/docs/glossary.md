@@ -49,10 +49,6 @@ title: "Glossary"
 
 [**Plugin:**](./terms/plugin.md) Extends Great Expectations' components and/or functionality.
 
-[**Profiler:**](./terms/profiler.md) Generates Metrics and candidate Expectations from data.
-
-[**Profiling:**](./terms/profiler.md) The act of generating Metrics and candidate Expectations from data.
-
 [**Renderer:**](./terms/renderer.md) A method for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.
 
 [**Store:**](./terms/store.md) A connector to store and retrieve information about metadata in Great Expectations.

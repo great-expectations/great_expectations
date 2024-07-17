@@ -3,6 +3,7 @@ This is a template for creating custom BatchExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations
 """
+from __future__ import annotations
 
 from typing import Dict, Optional
 
@@ -183,8 +184,8 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: dict | None = None,
+        execution_engine: ExecutionEngine | None = None,
     ):
         unique_columns = metrics.get("table.columns.unique")
         batch_columns = metrics.get("table.columns")

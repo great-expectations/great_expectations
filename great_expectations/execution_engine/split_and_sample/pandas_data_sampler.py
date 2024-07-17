@@ -115,7 +115,7 @@ class PandasDataSampler(DataSampler):
             batch_spec, "value_list"
         )
 
-        return df[df[column_name].isin(value_list)]
+        return df[df[column_name].isin(value_list)]  # type: ignore[arg-type]
 
     def sample_using_hash(
         self,

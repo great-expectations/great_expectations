@@ -4,7 +4,7 @@
 extend = "../../pyproject.toml"
 
 # relaxing linting rules for legacy dataset module
-extend-ignore = [
+lint.extend-ignore = [
     # https://github.com/charliermarsh/ruff#pyflakes-f
     "F841", # unused-variable
     # https://github.com/charliermarsh/ruff#error-e

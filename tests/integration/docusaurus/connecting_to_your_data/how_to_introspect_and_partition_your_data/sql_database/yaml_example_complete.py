@@ -13,7 +13,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py datasource_yaml">
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>

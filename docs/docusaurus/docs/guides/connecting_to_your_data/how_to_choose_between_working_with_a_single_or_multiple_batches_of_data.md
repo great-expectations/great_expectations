@@ -21,7 +21,7 @@ By the end of this guide, you will know when it will be most beneficial to be wo
 
 ## Steps
 
-The steps of this guide will allow you to quickly determine if you will want to use a single Batch or multiple Batches when creating Expectations and performing Validations.  This knowledge will then inform how you configure Data Assets in your Datasources.
+The steps of this guide will allow you to quickly determine if you will want to use a single Batch or multiple Batches when creating Expectations and performing Validations.  This knowledge will then inform how you configure Data Assets in your Data Sources.
 
 ### 1. Determine if a single Batch or multiple Batches of data will be most beneficial in your future use cases
 
@@ -77,11 +77,11 @@ The first of these is when you are working with a Runtime Data Connector. The Ru
 
 The second is when you are using a Sql Data Source and you want to work with a single Batch of data that would otherwise be split between Batches in a Data Asset that was configured to permit the return of more than one Batch.  
 
-The reason that this case only applies to Sql Datasources is due to the difference in how Batches are handled in File System Datasources and Sql Datasources.
+The reason that this case only applies to Sql Data Sources is due to the difference in how Batches are handled in File System Data Sources and Sql Data Sources.
 
-#### How do Sql Datasources and File System Datasources differ in how they handle Batches?
+#### How do Sql Data Sources and File System Data Sources differ in how they handle Batches?
 
-Data Asset configurations that permit the return of more than one Batch of data function differently between File System Datasources and Sql Datasources.  This is due to differences in how files are handled by Pandas and PySpark versus how tables are handled by SqlAlchemy.
+Data Asset configurations that permit the return of more than one Batch of data function differently between File System Data Sources and Sql Data Sources.  This is due to differences in how files are handled by Pandas and PySpark versus how tables are handled by SqlAlchemy.
 
 In a File System Data Source:
 - A Data Asset may consist of one or more files.
@@ -101,7 +101,7 @@ However, in a Sql Data Source, a Data Asset that permits the return of more than
 
 ### 3. Next Steps
 
-Congratulations!  At this point you should have a solid understanding of when to work with a single Batch of Data and when to work with multiple Batches of Data.  You should also know when you can use a single Data Asset that permits the return of multiple Batches to cover both workflows, and when you need to define and use a Data Asset that only corresponds to a single Batch.  Using this knowledge, your next step is to actually define the Datasources and Data Assets that you will be requesting Batches from in the future.
+Congratulations!  At this point you should have a solid understanding of when to work with a single Batch of Data and when to work with multiple Batches of Data.  You should also know when you can use a single Data Asset that permits the return of multiple Batches to cover both workflows, and when you need to define and use a Data Asset that only corresponds to a single Batch.  Using this knowledge, your next step is to actually define the Data Sources and Data Assets that you will be requesting Batches from in the future.
 
 ## Additional Information
 

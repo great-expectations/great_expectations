@@ -100,7 +100,7 @@ For convenience, the `FileDataContext.create(...)` method instantiates and retur
 ```
 
 :::info What if the folder is not empty?
-If the `project_root_dir` provided to the `FileDataContext.create(...)` method points to a folder that does not already have a Data Context present, the `FileDataContext.create(...)` method initializes a Filesystem Data Context in that location even if other files and folders are present.  This allows you to initialize a Filesystem Data Context in a folder that contains your source data or other project related contents.
+If the `project_root_dir` provided to the `FileDataContext.create(...)` method points to a folder that does not already have a Data Context present, the `FileDataContext.create(...)` method initializes a Filesystem Data Context in that location even if other files and folders are present.  This allows you to initialize a Filesystem Data Context in a folder that contains your Data Assets or other project related contents.
 
 If a Data Context already exists in `project_root_dir`, the `FileDataContext.create(...)` method will not re-initialize it.  Instead, `FileDataContext.create(...)` instantiates and returns the existing Data Context.
 :::
@@ -220,9 +220,9 @@ Run the following command to initialize the `EphemeralDataContext` class while p
 
 :::
 
-### Connect GX to source data systems
+### Connect to a Data Source
 
-Now that you have an Ephemeral Data Context you can connect GX to your data. See the following topics:
+Now that you have an Ephemeral Data Context you can connect GX to your Data Source. See the following topics:
 
 <ConnectingToDataFluently />
 
@@ -238,7 +238,7 @@ To customize a Data Context configuration for Metadata Stores and Data Docs, see
 - [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
 - [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
 
-To connect GX to source data:
+To connect GX to a Data Source:
 
 - [How to configure a Pandas Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
 - [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)

@@ -9,7 +9,6 @@ import traceback
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -244,7 +243,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return domain_builder
 
-    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
         args_payload_fn=get_profiler_run_usage_statistics,
@@ -1499,7 +1497,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def rule_states(self) -> List[RuleState]:
         return self._rule_states
 
-    @public_api
     def to_json_dict(self) -> dict:
         """Returns a JSON-serializable dict representation of this RuleBasedProfiler.
 
@@ -1529,7 +1526,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self.__repr__()
 
 
-@public_api
 class RuleBasedProfiler(BaseRuleBasedProfiler):
     """Create a `RuleBasedProfiler` to profile one or more batches of data.
 

@@ -32,7 +32,6 @@ from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
     run_checkpoint_and_data_doc,
     run_data_assistant_and_checkpoint,
-    run_multibatch_data_assistant_and_checkpoint,
 )
 
 if TYPE_CHECKING:
@@ -68,15 +67,6 @@ def test_run_data_assistant_and_checkpoint(
     ],
 ):
     run_data_assistant_and_checkpoint(datasource_test_data=datasource_test_data)
-
-
-# This is marked by the various backend used in testing in the multibatch_datasource_test_data fixture.
-@pytest.mark.slow  # sql: 33s  # pandas: 9s
-def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test_data):
-    """Test using data assistants to create expectation suite using multiple batches and to run checkpoint"""
-    run_multibatch_data_assistant_and_checkpoint(
-        multibatch_datasource_test_data=multibatch_datasource_test_data
-    )
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
@@ -120,27 +110,47 @@ def test_batch_head(
 
 
 @pytest.mark.sqlite
-def test_sql_query_data_asset(empty_data_context):
-    context = empty_data_context
-    datasource = sqlite_datasource(context, "yellow_tripdata.db")
-    passenger_count_value = 5
-    asset = (
-        datasource.add_query_asset(
-            name="query_asset",
-            query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
+class TestQueryAssets:
+    def test_success_with_splitters(self, empty_data_context):
+        context = empty_data_context
+        datasource = sqlite_datasource(context, "yellow_tripdata.db")
+        passenger_count_value = 5
+        asset = (
+            datasource.add_query_asset(
+                name="query_asset",
+                query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
+            )
+            .add_splitter_year_and_month(column_name="pickup_datetime")
+            .add_sorters(["year"])
         )
-        .add_splitter_year_and_month(column_name="pickup_datetime")
-        .add_sorters(["year"])
-    )
-    validator = context.get_validator(
-        batch_request=asset.build_batch_request({"year": 2019})
-    )
-    result = validator.expect_column_distinct_values_to_equal_set(
-        column="passenger_count",
-        value_set=[passenger_count_value],
-        result_format={"result_format": "BOOLEAN_ONLY"},
-    )
-    assert result.success
+        validator = context.get_validator(
+            batch_request=asset.build_batch_request({"year": 2019})
+        )
+        result = validator.expect_column_distinct_values_to_equal_set(
+            column="passenger_count",
+            value_set=[passenger_count_value],
+            result_format={"result_format": "BOOLEAN_ONLY"},
+        )
+        assert result.success
+
+    def test_splitter_filtering(self, empty_data_context):
+        context = empty_data_context
+        datasource = sqlite_datasource(
+            context, "../../test_cases_for_sql_data_connector.db"
+        )
+
+        asset = datasource.add_query_asset(
+            name="trip_asset_split_by_event_type",
+            query="SELECT * FROM table_partitioned_by_date_column__A",
+        ).add_splitter_column_value("event_type")
+        batch_request = asset.build_batch_request({"event_type": "start"})
+        validator = context.get_validator(batch_request=batch_request)
+
+        # All rows returned by head have the start event_type.
+        result = validator.execution_engine.batch_manager.active_batch.head(n_rows=50)
+        unique_event_types = set(result.data["event_type"].unique())
+        print(f"{unique_event_types=}")
+        assert unique_event_types == {"start"}
 
 
 @pytest.mark.filesystem

@@ -30,6 +30,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
             ]
         },
         target_store_name="metrics_store",
+        name="testing",
     )
 
     run_id = RunIdentifier(run_name="bar")
@@ -141,6 +142,7 @@ def test_StoreMetricsAction_column_metric(
             ]
         },
         target_store_name="metrics_store",
+        name="testing",
     )
 
     run_id = RunIdentifier(run_name="bar")

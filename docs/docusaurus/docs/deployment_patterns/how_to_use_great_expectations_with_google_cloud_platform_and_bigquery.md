@@ -190,7 +190,7 @@ To configure the BigQuery Data Source, see [How to connect to a BigQuery databas
   ]}>
 <TabItem value="gcs">
 
-Add a CSV `Asset` to your `Datasource` by using the `add_csv_asset` function.
+Add a CSV `Asset` to your `Data Source` by using the `add_csv_asset` function.
 
 First, configure the `prefix` and `batching_regex`. The `prefix` is for the path in the GCS bucket where we can find our files. The `batching_regex` is a regular expression that indicates which files to treat as Batches in the Asset, and how to identify them.
 
@@ -214,7 +214,7 @@ Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Data Source by usin
 </TabItem>
 <TabItem value="bigquery">
 
-Add a BigQuery `Asset` into your `Datasource` either as a table asset or query asset.
+Add a BigQuery `Asset` into your `Data Source` either as a table asset or query asset.
 
 In the first example, a table `Asset` named `my_table_asset` is built by naming the table in our BigQuery Database, which is `taxi_data` in our case. 
 
@@ -240,7 +240,7 @@ In the second example, a query `Asset` named `my_query_asset` is built by submit
   ]}>
 <TabItem value="gcs">
 
-For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+In the following example, you'll create an Expectation Suite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), that you'll describe in your `BatchRequest.` To create Expectation Suites, using domain knowledge or a Data Assistant, see (../guides/expectations/expectations/expectations_lp.md).
 
 First create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 

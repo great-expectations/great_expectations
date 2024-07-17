@@ -24,7 +24,7 @@ import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/n
 
 This guide demonstrates how to organize Batches in a file-based Data Asset. This includes how to use a regular expression to indicate which files should be returned as Batches and how to add Batch Sorters to a Data Asset to specify the order in which Batches are returned.
 
-:::caution Datasources defined with the block-config method
+:::caution Data Sources defined with the block-config method
 
 If you are using a Data Source that was created with the advanced block-config method, see the following resources:
 - [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
@@ -38,7 +38,7 @@ If you are using a Data Source that was created with the advanced block-config m
 <Prerequisites>
 
 - A working installation of Great Expectations
-- A Data Source that connects to a location with source data files
+- A Data Source that connects to a location with Data Assets
 
 </Prerequisites>
 
@@ -57,7 +57,7 @@ To retrieve this Data Source, we will supply the `get_datasource(...)` method of
 
 ## Create a `batching_regex`
 
-In a file-based Data Asset, any file that matches a provided regular expression (the `batching_regex` parameter) will be included as a Batch in the Data Asset.  Therefore, to organize multiple files into Batches in a single Data Asset we must define a regular expression that will match one or more of our source data files.
+In a file-based Data Asset, any file that matches a provided regular expression (the `batching_regex` parameter) will be included as a Batch in the Data Asset.  Therefore, to organize multiple files into Batches in a single Data Asset we must define a regular expression that will match one or more of our Data Source files.
 
 For this example, our Data Source points to a folder that contains the following files:
 - "yellow_tripdata_sample_2019-03.csv"
@@ -69,7 +69,7 @@ To create a `batching_regex` that matches multiple files, we will include a name
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_batching_regex"
 ```
 
-In the above example, the named group "`year`" will match any four numeric characters in a file name.  This will result in each of our source data files matching the regular expression.
+In the above example, the named group "`year`" will match any four numeric characters in a file name.  This will result in each of our Data Source files matching the regular expression.
 
 :::tip Why use named groups?
 

@@ -184,7 +184,6 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     observed,
     row_condition,
     spark_session,
-    basic_spark_df_execution_engine,
     titanic_df,
 ):
     df: pd.DataFrame = titanic_df

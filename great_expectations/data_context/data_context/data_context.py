@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 @overload
-def DataContext(  # noqa: PLR0913
+def DataContext(
     context_root_dir: PathStr = ...,
     runtime_environment: dict | None = ...,
     cloud_mode: Literal[False] = ...,
@@ -39,7 +39,7 @@ def DataContext(  # noqa: PLR0913
 
 
 @overload
-def DataContext(  # noqa: PLR0913
+def DataContext(
     context_root_dir: PathStr | None = ...,
     runtime_environment: dict | None = ...,
     cloud_mode: bool = ...,

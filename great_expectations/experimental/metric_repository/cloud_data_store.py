@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, TypeVar
 
-from great_expectations.compatibility.pydantic import BaseModel, Extra
+from great_expectations.compatibility.pydantic import BaseModel
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session
 from great_expectations.experimental.metric_repository.data_store import DataStore
@@ -25,7 +25,7 @@ class PayloadData(BaseModel):
     attributes: Dict[str, Any]
 
     class Config:
-        extra = Extra.forbid
+        extra = "forbid"
 
 
 def orjson_dumps(v, *, default):
@@ -49,7 +49,7 @@ class Payload(BaseModel):
     data: PayloadData
 
     class Config:
-        extra = Extra.forbid
+        extra = "forbid"
         json_dumps = orjson_dumps
         json_loads = orjson_loads
 

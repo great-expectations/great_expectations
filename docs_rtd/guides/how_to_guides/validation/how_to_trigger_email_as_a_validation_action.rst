@@ -59,10 +59,10 @@ Steps
                 sender_alias: ${sender_alias}
                 receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
 
-3. Run your ``action_list_operator``, to validate a batch of data and receive an email on the success or failure of validation suite.  
+3. Run your ``action_list_operator``, to validate a batch of data and receive an email on the success or failure of validation suite.
 
   .. code-block:: python
-  
+
       context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="email_test")
 
   If successful, you should receive an email that looks like this:

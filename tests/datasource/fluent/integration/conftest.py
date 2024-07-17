@@ -7,11 +7,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from great_expectations import get_context
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
 from great_expectations.datasource.fluent import (
     BatchRequest,
     PandasFilesystemDatasource,
@@ -30,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 def default_pandas_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     relative_path = pathlib.Path(
@@ -48,6 +50,7 @@ def default_pandas_data(
 
 
 def pandas_sql_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     passenger_count = np.repeat([1, 1, 1, 2, 6], 2000)
@@ -69,6 +72,7 @@ def pandas_sql_data(
 
 
 def pandas_filesystem_datasource(
+    test_backends,
     context: AbstractDataContext,
 ) -> PandasFilesystemDatasource:
     relative_path = pathlib.Path(
@@ -85,10 +89,13 @@ def pandas_filesystem_datasource(
 
 
 def pandas_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, PandasFilesystemDatasource, DataAsset, BatchRequest]:
     context.config_variables.update({"pipeline_filename": __file__})
-    pandas_ds = pandas_filesystem_datasource(context=context)
+    pandas_ds = pandas_filesystem_datasource(
+        test_backends=test_backends, context=context
+    )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
@@ -100,7 +107,7 @@ def pandas_data(
 
 
 def sqlite_datasource(
-    context: AbstractDataContext, db_filename: str
+    context: AbstractDataContext, db_filename: str | pathlib.Path
 ) -> SqliteDatasource:
     relative_path = pathlib.Path(
         "..",
@@ -115,11 +122,13 @@ def sqlite_datasource(
     datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
+        # don't set `create_temp_table` so that we can test the default behavior
     )
     return datasource
 
 
 def sql_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
@@ -136,8 +145,12 @@ def sql_data(
 
 
 def spark_filesystem_datasource(
+    test_backends,
     context: AbstractDataContext,
 ) -> SparkFilesystemDatasource:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     relative_path = pathlib.Path(
         "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -152,9 +165,13 @@ def spark_filesystem_datasource(
 
 
 def spark_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, SparkFilesystemDatasource, DataAsset, BatchRequest]:
-    spark_ds = spark_filesystem_datasource(context=context)
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
+    spark_ds = spark_filesystem_datasource(test_backends=test_backends, context=context)
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
@@ -167,6 +184,7 @@ def spark_data(
 
 
 def multibatch_pandas_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     relative_path = pathlib.Path(
@@ -189,6 +207,7 @@ def multibatch_pandas_data(
 
 
 def multibatch_sql_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     datasource = sqlite_datasource(
@@ -207,8 +226,12 @@ def multibatch_sql_data(
 
 
 def multibatch_spark_data(
+    test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     relative_path = pathlib.Path(
         "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -240,12 +263,11 @@ def multibatch_spark_data(
     ]
 )
 def datasource_test_data(
-    test_backends, empty_data_context, request
+    test_backends,
+    empty_data_context,
+    request,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if request.param.__name__ == "spark_data" and "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
-    return request.param(empty_data_context)
+    return request.param(test_backends=test_backends, context=empty_data_context)
 
 
 @pytest.fixture(
@@ -258,18 +280,17 @@ def datasource_test_data(
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if (
-        request.param.__name__ == "multibatch_spark_data"
-        and "SparkDFDataset" not in test_backends
-    ):
-        pytest.skip("No spark backend selected.")
-
-    return request.param(empty_data_context)
+    return request.param(test_backends=test_backends, context=empty_data_context)
 
 
 @pytest.fixture(params=[pandas_filesystem_datasource, spark_filesystem_datasource])
 def filesystem_datasource(test_backends, empty_data_context, request) -> Datasource:
-    if request.param.__name__ == "spark_data" and "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
+    return request.param(test_backends=test_backends, context=empty_data_context)
 
-    return request.param(empty_data_context)
+
+@pytest.fixture
+def context() -> EphemeralDataContext:
+    """Return an ephemeral data context for testing."""
+    ctx = get_context(mode="ephemeral")
+    assert isinstance(ctx, EphemeralDataContext)
+    return ctx

@@ -1,6 +1,6 @@
 ---
-sidebar_label: "Install GX with source data system dependencies"
-title: "Install Great Expectations with source data system dependencies"
+sidebar_label: "Install GX with Data Source dependencies"
+title: "Install Great Expectations with Data Source dependencies"
 id: install_gx
 description: Install Great Expectations locally, or in a hosted environment.
 toc_min_heading_level: 2

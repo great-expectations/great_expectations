@@ -1,3 +1,4 @@
+# ruff: noqa: I001
 """
 To run this code as a local test, use the following console command:
 ```
@@ -6,6 +7,7 @@ pytest -v --docs-tests -k "how_to_explicitly_instantiate_an_ephemeral_data_conte
 """
 
 import pathlib
+
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )

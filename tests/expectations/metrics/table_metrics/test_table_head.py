@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pandas as pd
 import pytest
 
@@ -160,3 +162,46 @@ def test_table_head_sqlite(
         len(get_sqlite_temp_table_names_from_engine(engine.engine))
         == expected_temp_tables
     )
+
+
+@pytest.mark.sqlite
+@pytest.mark.parametrize(
+    "execution_engine",
+    [
+        "sqlite_batch_with_table_name",
+        "sqlite_batch_with_selectable_with_temp_table",
+        "sqlite_batch_with_selectable_without_temp_table",
+    ],
+)
+@pytest.mark.parametrize(
+    "n_rows",
+    [None, 0, 1, 2],
+)
+@pytest.mark.parametrize(
+    "fetch_all",
+    [None, True, False],
+)
+def test_limit_included_in_head_query(
+    execution_engine,
+    n_rows,
+    fetch_all,
+    request,
+):
+    engine = request.getfixturevalue(execution_engine)
+    table_head = TableHead()
+
+    with mock.patch(
+        "great_expectations.compatibility.sqlalchemy_and_pandas.pd.read_sql"
+    ) as mock_node:
+        table_head._sqlalchemy(
+            execution_engine=engine,
+            metric_domain_kwargs={},
+            metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
+            metrics={},
+            runtime_configuration={},
+        )
+
+        args, kwargs = mock_node.call_args
+        mock_node.assert_called_once()
+
+        assert ("limit" in str(kwargs["sql"]).lower()) == (fetch_all is not True)

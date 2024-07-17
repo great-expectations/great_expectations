@@ -28,6 +28,10 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
+from great_expectations.expectations.snowflake_util import (
+    map_sfsqlalchemy_type_to_sf_type,
+    normalize_snowflake_data_type_name,
+)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -202,7 +206,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 renderer_configuration=renderer_configuration,
             )
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -252,7 +256,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 [f"$v__{i!s}" for i, v in enumerate(params["type_list"])]
             )
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, no_scientific=True
                 )
@@ -378,7 +382,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             "result": {"observed_value": actual_column_type.type.__name__},
         }
 
-    def _validate_sqlalchemy(
+    def _validate_sqlalchemy(  # necessary branching to handle many SQL dialects until schema introspection is reworked as an abstraction
         self, actual_column_type, expected_types_list, execution_engine
     ):
         # Our goal is to be as explicit as possible. We will match the dialect
@@ -395,6 +399,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         else:
             types = []
             type_module = _get_dialect_type_module(execution_engine=execution_engine)
+
+            if type_module.__name__ == "snowflake.sqlalchemy.snowdialect":
+                return self._handle_sqlalchemy_snowflake(
+                    actual_column_type=actual_column_type,
+                    expected_types_list=expected_types_list,
+                )
+
             for type_ in expected_types_list:
                 try:
                     if type_module.__name__ == "pyathena.sqlalchemy_athena":
@@ -576,3 +587,26 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 actual_column_type=actual_column_type,
                 expected_types_list=expected_types_list,
             )
+
+    def _handle_sqlalchemy_snowflake(self, actual_column_type, expected_types_list):
+        """
+        Handle the Snowflake SQLAlchemy dialect.
+        """
+        success = False
+        normalized_native_type_name = map_sfsqlalchemy_type_to_sf_type(
+            normalize_snowflake_data_type_name(actual_column_type)
+        )
+
+        for expected_type in expected_types_list:
+            normalized_expected_type_name = normalize_snowflake_data_type_name(
+                expected_type
+            )
+
+            if normalized_native_type_name == normalized_expected_type_name:
+                success = True
+                break
+
+        return {
+            "success": success,
+            "result": {"observed_value": normalized_native_type_name},
+        }

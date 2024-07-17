@@ -91,7 +91,7 @@ traitlets==5.9.0
 typed-ast==1.4.1
 tzlocal==2.1
 Unidecode==1.1.1
-urllib3==1.26.17
+urllib3==1.26.18
 wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.5.1

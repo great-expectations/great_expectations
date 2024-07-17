@@ -1,3 +1,4 @@
+# ruff: noqa: F841
 """Example Script: How to configure a Spark/Pandas/Sql Datasource (universal configuration elements)
 
 This example script is intended for use in documentation on how to configure Datasources.  It contains the top level

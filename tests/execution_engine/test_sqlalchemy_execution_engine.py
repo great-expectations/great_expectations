@@ -142,7 +142,11 @@ def test_instantiation_via_url_with_kwargs(sa):
 
 
 @pytest.mark.sqlite
-def test_instantiation_via_fluent_data_sources_with_kwargs(sa, empty_data_context):
+def test_instantiation_via_fluent_data_sources_with_kwargs(
+    sa,
+    empty_data_context,
+    filter_gx_datasource_warnings: None,
+):
     db_file = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -218,7 +222,7 @@ def test_instantiation_via_fluent_data_source__trino_add_sql(sa, empty_data_cont
     )
 
     # add (save) the checkpoint to the data context
-    context.add_checkpoint(checkpoint=checkpoint)
+    context.add_or_update_checkpoint(checkpoint=checkpoint)
     cp = context.get_checkpoint(name="my_checkpoint")
     assert cp.name == "my_checkpoint"
 
@@ -1141,7 +1145,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
 @pytest.mark.sqlite
 def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
+        engine=sqlite_view_engine,
     )
     add_dataframe_to_db(df=test_df, name="test_table_0", con=my_execution_engine.engine)
 

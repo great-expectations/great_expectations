@@ -1,8 +1,9 @@
 from typing import Dict, Optional
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import MetricFunctionTypes
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -22,8 +23,6 @@ from great_expectations.expectations.metrics import (
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -218,7 +217,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: ExecutionEngine = None,
     ):
         """Validates the given data against the set minimum and maximum value thresholds for the column max"""
@@ -259,7 +258,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert (

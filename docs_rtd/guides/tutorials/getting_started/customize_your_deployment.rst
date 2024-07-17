@@ -16,7 +16,7 @@ Components
 
 Here's an overview of the components of a typical Great Expectations deployment:
 
-* Great Expectations configs and metadata 
+* Great Expectations configs and metadata
 
     * :ref:`tutorials__getting_started__customize_your_deployment__options_for_storing_great_expectations_configuration`
     * :ref:`tutorials__getting_started__customize_your_deployment__options_for_storing_expectations`
@@ -133,9 +133,9 @@ If you also want to modify your :ref:reference__core_concepts__validation__valid
 
 .. Creating and editing Expectations
 .. ---------------------------------
-.. 
+..
 .. #FIXME: Need words here.
-.. 
+..
 .. #FIXME: Need list here, after we wrangle the how-to guides for creating and editing Expectations.
 
 .. _tutorials__getting_started__customize_your_deployment__options_for_triggering_validation:

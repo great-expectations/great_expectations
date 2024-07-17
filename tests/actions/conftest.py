@@ -106,7 +106,9 @@ def validation_result_suite():
         meta={
             "great_expectations_version": "v0.8.0__develop",
             "expectation_suite_name": "asset.default",
-            "run_id": "test_100",
+            "run_id": RunIdentifier(
+                run_name="test_100", run_time="2019-09-25T060538.829112Z"
+            ),
         },
     )
 
@@ -133,7 +135,9 @@ def validation_result_suite_with_ge_cloud_id(validation_result_suite_ge_cloud_id
         meta={
             "great_expectations_version": "v0.8.0__develop",
             "expectation_suite_name": "asset.default",
-            "run_id": "test_100",
+            "run_id": RunIdentifier(
+                run_name="test_100", run_time="2019-09-25T060538.829112Z"
+            ),
         },
         ge_cloud_id=validation_result_suite_ge_cloud_id,
     )
@@ -143,7 +147,7 @@ def validation_result_suite_with_ge_cloud_id(validation_result_suite_ge_cloud_id
 def validation_result_suite_id():
     return ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier("asset.default"),
-        run_id=RunIdentifier(run_name="test_100"),
+        run_id=RunIdentifier(run_name="test_100", run_time="2019-09-25T060538.829112Z"),
         batch_identifier="1234",
     )
 

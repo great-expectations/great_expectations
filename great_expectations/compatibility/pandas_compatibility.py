@@ -47,10 +47,10 @@ def execute_pandas_to_datetime(  # noqa: PLR0913
     if is_version_less_than(pd.__version__, "2.0.0"):
         return pd.to_datetime(
             arg=arg,
-            errors=errors,
+            errors=errors,  # type: ignore[arg-type]
             dayfirst=dayfirst,
             yearfirst=yearfirst,
-            utc=utc,
+            utc=utc,  # type: ignore[arg-type]
             format=format,
             exact=exact,
             unit=unit,
@@ -66,10 +66,10 @@ def execute_pandas_to_datetime(  # noqa: PLR0913
             # infer_datetime_format is deprecated as of 2.0.0
             return pd.to_datetime(
                 arg=arg,
-                errors=errors,
+                errors=errors,  # type: ignore[arg-type]
                 dayfirst=dayfirst,
                 yearfirst=yearfirst,
-                utc=utc,
+                utc=utc,  # type: ignore[arg-type]
                 format=format,
                 unit=unit,
                 origin=origin,
@@ -78,10 +78,10 @@ def execute_pandas_to_datetime(  # noqa: PLR0913
         else:
             return pd.to_datetime(
                 arg=arg,
-                errors=errors,
+                errors=errors,  # type: ignore[arg-type]
                 dayfirst=dayfirst,
                 yearfirst=yearfirst,
-                utc=utc,
+                utc=utc,  # type: ignore[arg-type]
                 format=format,
                 exact=exact,
                 unit=unit,

@@ -1,6 +1,7 @@
 import pathlib
-import great_expectations as gx
 import tempfile
+
+import great_expectations as gx
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -38,8 +39,9 @@ assert "my_pandas_datasource" in context.datasources
 assert context.datasources["my_pandas_datasource"].get_asset("csv_asset") is not None
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler get_asset">
-import great_expectations as gx
 import pathlib
+
+import great_expectations as gx
 
 context = gx.get_context(
     context_root_dir=(
@@ -122,7 +124,7 @@ context.open_data_docs(resource_identifier=validation_result_identifier)
 # </snippet>
 
 assert len(checkpoint_result.list_validation_results()) == 1
-assert checkpoint_result.list_validation_results()[0]["success"] == True
+assert checkpoint_result.list_validation_results()[0]["success"] is True
 
 suite = None
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler optional_params">

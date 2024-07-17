@@ -341,11 +341,7 @@ class HtmlSiteStore:
 
         # The key's resource_identifier didn't match any known key_class
         raise TypeError(
-            "resource_identifier in key: {!r} must one of {}, not {!r}".format(
-                key,
-                set(self.store_backends.keys()),
-                type(key),
-            )
+            f"resource_identifier in key: {key!r} must one of {set(self.store_backends.keys())}, not {type(key)!r}"
         )
 
     def list_keys(self):
@@ -435,9 +431,7 @@ class HtmlSiteStore:
                         else:
                             # fallback
                             logger.warning(
-                                "Unable to automatically determine content_type for {}".format(
-                                    source_name
-                                )
+                                f"Unable to automatically determine content_type for {source_name}"
                             )
                             content_type = "text/html; charset=utf8"
 

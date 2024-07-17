@@ -19,4 +19,3 @@ This section contains a collection of practical step-by-step instructions to hel
    /guides/tutorials
    /guides/workflows_patterns
    /guides/how_to_guides
-

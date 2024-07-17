@@ -1,3 +1,4 @@
+# ruff: noqa: B018
 """Example Script: How to create an Expectation Suite with the Onboarding Data Assistant
 
 This example script is intended for use in documentation on how to use an Onboarding Data Assistant to create

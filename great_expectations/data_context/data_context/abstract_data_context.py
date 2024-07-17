@@ -94,7 +94,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import (
     GXCloudIDAwareRef,
-    GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -152,6 +151,9 @@ if TYPE_CHECKING:
     from great_expectations.core.datasource_dict import DatasourceDict
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
+    )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
     )
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
@@ -468,10 +470,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
+                f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
             )
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
@@ -763,7 +763,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._sources
 
     def _add_fluent_datasource(
-        self, datasource: Optional[FluentDatasource] = None, **kwargs
+        self, datasource: Optional[FluentDatasource] = None, save_changes=True, **kwargs
     ) -> FluentDatasource:
         if datasource:
             datasource_name = datasource.name
@@ -792,7 +792,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
-        self._save_project_config()
+        if save_changes:
+            self._save_project_config()
 
         return return_obj
 
@@ -847,40 +848,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._project_config = project_config
         self.variables.config = project_config
 
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def save_datasource(
-        self, datasource: BaseDatasource | FluentDatasource | LegacyDatasource
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
-        """Save a Datasource to the configured DatasourceStore.
-
-        Stores the underlying DatasourceConfig in the store and Data Context config,
-        updates the cached Datasource and returns the Datasource.
-        The cached and returned Datasource is re-constructed from the config
-        that was stored as some store implementations make edits to the stored
-        config (e.g. adding identifiers).
-
-        Args:
-            datasource: Datasource to store.
-
-        Returns:
-            The datasource, after storing and retrieving the stored config.
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "save_datasource is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use update_datasource or add_or_update_datasource instead.",
-            DeprecationWarning,
-        )
-        return self.add_or_update_datasource(datasource=datasource)
-
     @overload
     def add_datasource(
         self,
         name: str = ...,
         initialize: bool = ...,
-        save_changes: bool | None = ...,
         datasource: None = ...,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -895,7 +867,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         initialize: bool = ...,
-        save_changes: bool | None = ...,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -906,7 +877,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @public_api
-    @deprecated_argument(argument_name="save_changes", version="0.15.32")
     @new_argument(
         argument_name="datasource",
         version="0.15.49",
@@ -920,7 +890,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -933,7 +902,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             name: the name of the new Datasource to add
             initialize: if False, add the Datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
-            save_changes: should GX save the Datasource config?
             datasource: an existing Datasource you wish to persist
             kwargs: the configuration for the new Datasource
 
@@ -943,7 +911,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._add_datasource(
             name=name,
             initialize=initialize,
-            save_changes=save_changes,
             datasource=datasource,
             **kwargs,
         )
@@ -970,7 +937,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -983,7 +949,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource = self._add_block_config_datasource(
                 name=name,
                 initialize=initialize,
-                save_changes=save_changes,
                 datasource=datasource,
                 **kwargs,
             )
@@ -993,12 +958,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | LegacyDatasource | None:
-        save_changes = self._determine_save_changes_flag(save_changes)
-
         logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
 
         if datasource:
@@ -1028,37 +990,30 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._instantiate_datasource_from_config_and_update_project_config(
             config=datasource_config,
             initialize=initialize,
-            save_changes=save_changes,
         )
 
     @public_api
     def update_datasource(
         self,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource,
-        save_changes: bool | None = None,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """Updates a Datasource that already exists in the store.
 
         Args:
             datasource: The Datasource object to update.
-            save_changes: do I save changes to disk?
 
         Returns:
             The updated Datasource.
         """
-        save_changes = self._determine_save_changes_flag(save_changes)
         if isinstance(datasource, FluentDatasource):
             self._update_fluent_datasource(datasource=datasource)
         else:
-            datasource = self._update_block_config_datasource(
-                datasource=datasource, save_changes=save_changes
-            )
+            datasource = self._update_block_config_datasource(datasource=datasource)
         return datasource
 
     def _update_block_config_datasource(
         self,
         datasource: LegacyDatasource | BaseDatasource,
-        save_changes: bool,
     ) -> BaseDatasource | LegacyDatasource:
         name = datasource.name
         config = datasource.config
@@ -1068,16 +1023,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
 
-        if save_changes:
-            self._datasource_store.update_by_name(
-                datasource_name=name, datasource_config=datasource_config
-            )
+        self._datasource_store.update_by_name(
+            datasource_name=name, datasource_config=datasource_config
+        )
 
         updated_datasource = (
             self._instantiate_datasource_from_config_and_update_project_config(
                 config=datasource_config,
                 initialize=True,
-                save_changes=False,
             )
         )
 
@@ -1309,47 +1262,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def save_profiler(
-        self,
-        profiler: RuleBasedProfiler,
-    ) -> RuleBasedProfiler:
-        """Save an existing Profiler object utilizing the context's underlying ProfilerStore.
-
-        Args:
-            profiler: The Profiler object to persist.
-
-        Returns:
-            The input profiler - may be modified with an id depending on the backing store.
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use update_profiler or add_or_update_profiler instead.",
-            DeprecationWarning,
-        )
-        name = profiler.name
-        ge_cloud_id = profiler.ge_cloud_id
-        key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
-
-        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
-        if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.id
-
-        # If an id is present, we want to prioritize that as our key for object retrieval
-        if ge_cloud_id:
-            name = None  # type: ignore[assignment]
-
-        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
-        return profiler
-
-    def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
-    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
-        return ConfigurationIdentifier(configuration_key=name)
-
     @public_api
     def get_datasource(
         self, datasource_name: str = "default"
@@ -1537,7 +1449,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
-        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
+        for datasource_name, datasource_config in self.config.datasources.items():
             if isinstance(datasource_config, dict):
                 datasource_config = DatasourceConfig(  # noqa: PLW2901
                     **datasource_config
@@ -1559,24 +1471,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasources
 
     @public_api
-    @deprecated_argument(argument_name="save_changes", version="0.15.32")
-    def delete_datasource(
-        self, datasource_name: Optional[str], save_changes: Optional[bool] = None
-    ) -> None:
+    def delete_datasource(self, datasource_name: Optional[str]) -> None:
         """Delete a given Datasource by name.
 
         Note that this method causes deletion from the underlying DatasourceStore.
-        This can be overridden to only impact the Datasource cache through the deprecated
-        `save_changes` argument.
 
         Args:
             datasource_name: The name of the target datasource.
-            save_changes: Should this change be persisted by the DatasourceStore?
 
         Raises:
             ValueError: The `datasource_name` isn't provided or cannot be found.
         """
-        save_changes = self._determine_save_changes_flag(save_changes)
 
         if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
@@ -1586,19 +1491,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(datasource, FluentDatasource):
             # Note: this results in some unnecessary dict lookups
             self._delete_fluent_datasource(datasource_name)
-        elif save_changes:
+        else:
             self.datasources.pop(datasource_name, None)
 
-        self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+        self.config.datasources.pop(datasource_name, None)
 
-        if save_changes:
-            self._save_project_config()
+        self._save_project_config()
 
+    @public_api
     @overload
-    def add_checkpoint(  # noqa: PLR0913
+    def add_checkpoint(
         self,
         name: str = ...,
-        config_version: int | float = ...,  # noqa: PYI041
+        config_version: float = ...,
         template_name: str | None = ...,
         module_name: str = ...,
         class_name: str = ...,
@@ -1629,11 +1534,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
+    @public_api
     @overload
-    def add_checkpoint(  # noqa: PLR0913
+    def add_checkpoint(
         self,
         name: None = ...,
-        config_version: int | float = ...,  # noqa: PYI041
+        config_version: float = ...,
         template_name: None = ...,
         module_name: str = ...,
         class_name: str = ...,
@@ -1687,7 +1593,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -1779,17 +1685,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        result: Checkpoint | CheckpointConfig
-        try:
-            result = self.checkpoint_store.add_checkpoint(checkpoint)
-        except gx_exceptions.CheckpointError as e:
-            # deprecated-v0.15.50
-            warnings.warn(
-                f"{e.message}; using add_checkpoint to overwrite an existing value is deprecated as of v0.15.50 "
-                "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
-                DeprecationWarning,
-            )
-            result = self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        result = self.checkpoint_store.add_checkpoint(checkpoint)
 
         if isinstance(result, CheckpointConfig):
             result = Checkpoint.instantiate_from_config_with_runtime_args(
@@ -1825,11 +1721,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         return result
 
     @overload
-    def add_or_update_checkpoint(  # noqa: PLR0913
+    def add_or_update_checkpoint(
         self,
         name: str = ...,
         id: str | None = ...,
-        config_version: int | float = ...,  # noqa: PYI041
+        config_version: float = ...,
         template_name: str | None = ...,
         module_name: str = ...,
         class_name: str = ...,
@@ -1846,6 +1742,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_on: str | None = ...,
         notify_with: str | list[str] | None = ...,
         expectation_suite_id: str | None = ...,
+        expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
         validator: Validator | None = ...,
         checkpoint: None = ...,
@@ -1857,11 +1754,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_checkpoint(  # noqa: PLR0913
+    def add_or_update_checkpoint(
         self,
         name: None = ...,
         id: None = ...,
-        config_version: int | float = ...,  # noqa: PYI041
+        config_version: float = ...,
         template_name: None = ...,
         module_name: str = ...,
         class_name: str = ...,
@@ -1878,6 +1775,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_on: None = ...,
         notify_with: None = ...,
         expectation_suite_id: None = ...,
+        expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
         validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
@@ -1899,7 +1797,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -1917,6 +1815,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_on: str | None = None,
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
@@ -1943,6 +1842,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             default_validation_id: The default validation ID to use in generating this checkpoint.
             validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
@@ -1950,6 +1850,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
@@ -1990,7 +1894,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -2159,7 +2063,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,  # noqa: PYI041
+        run_id: str | float | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | None = None,
@@ -2186,7 +2090,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             run_time: The date/time of the run
             result_format: One of several supported formatting directives for expectation validation results
             ge_cloud_id: Great Expectations Cloud id for the checkpoint
-            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
+            expectation_suite_ge_cloud_id: An alias for `expectation_suite_id`.
             id: Great Expectations Cloud id for the checkpoint (preferred over `ge_cloud_id`)
             expectation_suite_id: Great Expectations Cloud id for the expectation suite (preferred over `expectation_suite_ge_cloud_id`)
             **kwargs: Additional kwargs to pass to the validation operator
@@ -2235,7 +2139,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,  # noqa: PYI041
+        run_id: str | float | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | None = None,
@@ -2721,67 +2625,8 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return datasource.get_batch_list_from_batch_request(batch_request=result)
 
-    @public_api
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def create_expectation_suite(
-        self,
-        expectation_suite_name: str,
-        overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
-    ) -> ExpectationSuite:
-        """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
-
-        Note that this method can be called by itself or run within the get_validator workflow.
-
-        When run with create_expectation_suite():
-
-        ```python
-        expectation_suite_name = "genres_movies.fkey"
-        context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-        batch = context.get_batch_list(
-            expectation_suite_name=expectation_suite_name
-        )[0]
-        ```
-
-        When run as part of get_validator():
-
-        ```python
-        validator = context.get_validator(
-            datasource_name="my_datasource",
-            data_connector_name="whole_table",
-            data_asset_name="my_table",
-            create_expectation_suite_with_name="my_expectation_suite",
-        )
-        validator.expect_column_values_to_be_in_set("c1", [4,5,6])
-        ```
-
-        Args:
-            expectation_suite_name: The name of the suite to create.
-            overwrite_existing: Whether to overwrite if a suite with the given name already exists.
-            **kwargs: Any key-value arguments to pass to the store when persisting.
-
-        Returns:
-            A new (empty) ExpectationSuite.
-
-        Raises:
-            ValueError: The input `overwrite_existing` is of the wrong type.
-            DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "create_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
-            DeprecationWarning,
-        )
-        return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            overwrite_existing=overwrite_existing,
-        )
-
     @overload
-    def add_expectation_suite(  # noqa: PLR0913
+    def add_expectation_suite(
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2799,7 +2644,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_expectation_suite(  # noqa: PLR0913
+    def add_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -2984,7 +2829,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return ExpectationSuiteIdentifier(name)
 
     @overload
-    def add_or_update_expectation_suite(  # noqa: PLR0913
+    def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -3003,7 +2848,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_expectation_suite(  # noqa: PLR0913
+    def add_or_update_expectation_suite(
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -3077,16 +2922,30 @@ class AbstractDataContext(ConfigPeer, ABC):
                 meta=meta,
             )
 
-        try:
-            existing = self.get_expectation_suite(
-                expectation_suite_name=expectation_suite.name
-            )
-        except gx_exceptions.DataContextError:
-            # not found
-            return self._add_expectation_suite(expectation_suite=expectation_suite)
+        if id is not None or (
+            expectation_suite is not None and expectation_suite.ge_cloud_id is not None
+        ):
+            try:
+                self.get_expectation_suite(
+                    ge_cloud_id=id or expectation_suite.ge_cloud_id
+                )
+            except gx_exceptions.DataContextError:
+                raise gx_exceptions.ExpectationSuiteError(
+                    f"An Expectation Suite with id: {id or expectation_suite.ge_cloud_id} not found."
+                )
+        elif expectation_suite_name is not None or (
+            expectation_suite is not None
+            and expectation_suite.expectation_suite_name is not None
+        ):
+            try:
+                existing = self.get_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                    or expectation_suite.expectation_suite_name
+                )
+            except gx_exceptions.DataContextError:
+                return self._add_expectation_suite(expectation_suite=expectation_suite)
+            expectation_suite.ge_cloud_id = existing.ge_cloud_id
 
-        # The suite object must have an ID in order to request a PUT to GX Cloud.
-        expectation_suite.ge_cloud_id = existing.ge_cloud_id
         return self._update_expectation_suite(expectation_suite=expectation_suite)
 
     @public_api
@@ -3178,7 +3037,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
     @overload
-    def add_profiler(  # noqa: PLR0913
+    def add_profiler(
         self,
         name: str,
         config_version: float,
@@ -3193,7 +3052,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_profiler(  # noqa: PLR0913
+    def add_profiler(
         self,
         name: None = ...,
         config_version: None = ...,
@@ -3207,7 +3066,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_argument(
         argument_name="profiler",
         version="0.15.48",
@@ -3235,34 +3093,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
-        try:
-            return RuleBasedProfiler.add_profiler(
-                data_context=self,
-                profiler_store=self.profiler_store,
-                name=name,
-                config_version=config_version,
-                rules=rules,
-                variables=variables,
-                profiler=profiler,
-            )
-        except gx_exceptions.ProfilerError as e:
-            # deprecated-v0.15.50
-            warnings.warn(
-                f"{e.message}; using add_profiler to overwrite an existing value is deprecated as of v0.15.50 "
-                "and will be removed in v0.18. Please use add_or_update_profiler instead.",
-                DeprecationWarning,
-            )
-            return RuleBasedProfiler.add_or_update_profiler(
-                data_context=self,
-                profiler_store=self.profiler_store,
-                name=name,
-                config_version=config_version,
-                rules=rules,
-                variables=variables,
-                profiler=profiler,
-            )
+        return RuleBasedProfiler.add_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+            profiler=profiler,
+        )
 
-    @public_api
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -3298,7 +3138,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
-    @public_api
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -3330,7 +3169,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def update_profiler(self, profiler: RuleBasedProfiler) -> RuleBasedProfiler:
         """Update a Profiler that already exists.
@@ -3348,7 +3186,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     @overload
-    def add_or_update_profiler(  # noqa: PLR0913
+    def add_or_update_profiler(
         self,
         name: str = ...,
         id: str | None = ...,
@@ -3364,7 +3202,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_profiler(  # noqa: PLR0913
+    def add_or_update_profiler(
         self,
         name: None = ...,
         id: None = ...,
@@ -3379,7 +3217,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_profiler(  # noqa: PLR0913
         self,
@@ -3746,15 +3583,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
             except gx_exceptions.BatchKwargsError:
                 raise gx_exceptions.ProfilerError(
-                    "Unable to build batch_kwargs for datasource {}, using batch kwargs generator {} for name {}".format(
-                        datasource_name, batch_kwargs_generator_name, data_asset_name
-                    )
+                    f"Unable to build batch_kwargs for datasource {datasource_name}, using batch kwargs generator {batch_kwargs_generator_name} for name {data_asset_name}"
                 )
             except ValueError:
                 raise gx_exceptions.ProfilerError(
-                    "Unable to find datasource {} or batch kwargs generator {}.".format(
-                        datasource_name, batch_kwargs_generator_name
-                    )
+                    f"Unable to find datasource {datasource_name} or batch kwargs generator {batch_kwargs_generator_name}."
                 )
         else:
             batch_kwargs.update(additional_batch_kwargs)
@@ -4040,9 +3873,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def get_docs_sites_urls(
         self,
-        resource_identifier=None,
+        resource_identifier: ExpectationSuiteIdentifier
+        | ValidationResultIdentifier
+        | GXCloudIdentifier
+        | str
+        | None = None,
         site_name: Optional[str] = None,
-        only_if_exists=True,
+        only_if_exists: bool = True,
         site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
@@ -4305,6 +4142,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         except ValidationError:
             raise
 
+    @overload
+    def _normalize_absolute_or_relative_path(self, path: str) -> str:
+        ...
+
+    @overload
+    def _normalize_absolute_or_relative_path(self, path: None) -> None:
+        ...
+
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
     ) -> Optional[str]:
@@ -4337,7 +4182,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
         usage_stats_enabled: bool = self._is_usage_stats_enabled()
         if not usage_stats_enabled:
-            logger.info(
+            logger.debug(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
             config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
@@ -4368,7 +4213,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 {"usage_statistics_url": global_usage_statistics_url}
             )
             if not usage_statistics_url_errors:
-                logger.info(
+                logger.debug(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
                 config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
@@ -4378,10 +4223,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
             logger.warning(
-                "The following globally-defined config variables failed validation:\n{}\n\n"
-                "Please fix the variables if you would like to apply global values to project_config.".format(
-                    json.dumps(validation_errors, indent=2)
-                )
+                f"The following globally-defined config variables failed validation:\n{json.dumps(validation_errors, indent=2)}\n\n"
+                "Please fix the variables if you would like to apply global values to project_config."
             )
 
         return config_with_global_config_overrides
@@ -4414,9 +4257,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 usage_statistics_enabled = False
             else:
                 logger.warning(
-                    "GE_USAGE_STATS environment variable must be one of: {}".format(
-                        AbstractDataContext.FALSEY_STRINGS
-                    )
+                    f"GE_USAGE_STATS environment variable must be one of: {AbstractDataContext.FALSEY_STRINGS}"
                 )
         for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
@@ -4530,7 +4371,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self._datasources
 
     @property
-    def fluent_datasources(self) -> Dict[str, FluentDatasource]:
+    def fluent_datasources(self) -> Mapping[str, FluentDatasource]:
         return {
             name: ds
             for (name, ds) in self.datasources.items()
@@ -4819,14 +4660,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self,
         config: DatasourceConfig,
         initialize: bool,
-        save_changes: bool,
     ) -> Optional[Datasource]:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
         Args:
             config: Datasource Config to initialize and/or store.
             initialize: Whether to initialize the datasource, alternatively you can store without initializing.
-            save_changes: Whether to store the configuration in your configuration store (GX cloud or great_expectations.yml)
 
         Returns:
             Datasource object if initialized.
@@ -4843,8 +4682,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
-        if save_changes:
-            config = self._datasource_store.set(key=None, value=config)
+        config = self._datasource_store.set(key=None, value=config)
 
         datasource: Optional[Datasource] = None
         if initialize:
@@ -4859,11 +4697,47 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 name = datasource.name
                 self.datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
-                if save_changes:
-                    self._datasource_store.delete(config)
+                self._datasource_store.delete(config)
                 raise e
 
         self.config.datasources[name] = config  # type: ignore[index,assignment]
+
+        return datasource
+
+    # TODO: this should just be _instantiate_datasource_from_config after BDS is removed
+    def _instantiate_datasource_from_config_with_substitution(
+        self, config: DatasourceConfig
+    ) -> Datasource:
+        """Perform substitutions and initialize the Datasource without storing configuration.
+
+        Args:
+            config: Datasource Config to initialize and/or store.
+
+        Returns:
+            Datasource object.
+
+        Raises:
+            DatasourceInitializationError
+        """
+        # TODO: Pulling IDs of existing entities is likely not what we want when testing configuration, but keeping
+        # existing behavior for now
+        name = config.name
+        if not config.id and name and name in self.datasources:
+            existing_datasource = self.datasources[name]
+            if isinstance(existing_datasource, BaseDatasource):
+                config.id = existing_datasource.id
+
+        substituted_config = self._perform_substitutions_on_datasource_config(config)
+
+        datasource = self._instantiate_datasource_from_config(
+            raw_config=config, substituted_config=substituted_config
+        )
+        name = datasource.name
+
+        # TODO: also unlikely desired as "testing" whether we can instantiate an object should not update
+        # caches or config, but keeping existing behavior for now
+        self.datasources[name] = datasource
+        self.config.datasources[name] = config  # type: ignore[assignment]
 
         return datasource
 
@@ -4881,22 +4755,48 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
-        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
-        # https://github.com/great-expectations/great_expectations/pull/3377
-        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
-        for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
-            if not expectation_suite_dict:
-                continue
-            expectation_suite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
+        # we have to iterate through all expectation suites because evaluation parameters
+        # can reference metric values from other suites
 
-            dependencies: dict = (
-                expectation_suite.get_evaluation_parameter_dependencies()
-            )
-            if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
+        if self.expectations_store.cloud_mode:
+            # use get_all to prevent round trips to GX Cloud.
+            for exp_suite_dict in self.expectations_store.get_all():
+                if not exp_suite_dict:
+                    continue
+                expectation_suite = ExpectationSuite(
+                    **exp_suite_dict, data_context=self
+                )
+
+                dependencies: dict = (
+                    expectation_suite.get_evaluation_parameter_dependencies()
+                )
+                if len(dependencies) > 0:
+                    nested_update(self._evaluation_parameter_dependencies, dependencies)
+
+        else:
+            for key in self.expectations_store.list_keys():
+                try:
+                    expectation_suite_dict: dict = cast(
+                        dict, self.expectations_store.get(key)
+                    )
+                except ValidationError as e:
+                    # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
+                    # we should ignore that instead of breaking all checkpoints in the entire context
+                    logger.info(
+                        f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
+                        f"because it failed to load with message: {e}"
+                    )
+                    continue
+
+                if not expectation_suite_dict:
+                    continue
+                expectation_suite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=self
+                )
+
+                dependencies = expectation_suite.get_evaluation_parameter_dependencies()
+                if len(dependencies) > 0:
+                    nested_update(self._evaluation_parameter_dependencies, dependencies)
 
         self._evaluation_parameter_dependencies_compiled = True
 
@@ -4908,7 +4808,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         validations_store_name=None,
         failed_only=False,
         include_rendered_content=None,
-    ):
+    ) -> ExpectationValidationResult | dict:
         """Get validation results from a configured store.
 
         Args:
@@ -5052,8 +4952,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     except gx_exceptions.UnavailableMetricError:
                         # This will happen frequently in larger pipelines
                         logger.debug(
-                            "metric {} was requested by another expectation suite but is not available in "
-                            "this validation result.".format(metric_name)
+                            f"metric {metric_name} was requested by another expectation suite but is not available in "
+                            "this validation result."
                         )
 
     def send_usage_message(
@@ -5096,28 +4996,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             else:
                 return False
         return include_rendered_content
-
-    @staticmethod
-    def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
-        """
-        This method is meant to enable the gradual deprecation of the `save_changes` boolean
-        flag on various Datasource CRUD methods. Moving forward, we will always persist changes
-        made by these CRUD methods (a.k.a. the behavior created by save_changes=True).
-
-        As part of this effort, `save_changes` has been set to `None` as a default value
-        and will be automatically converted to `True` within this method. If a user passes in a boolean
-        value (thereby bypassing the default arg of `None`), a deprecation warning will be raised.
-        """
-        if save_changes is not None:
-            # deprecated-v0.15.32
-            warnings.warn(
-                'The parameter "save_changes" is deprecated as of v0.15.32; moving forward, '
-                "changes made to Datasources will always be persisted by Store implementations. "
-                "As support will be removed in v0.18, please omit the argument moving forward.",
-                DeprecationWarning,
-            )
-            return save_changes
-        return True
 
     @public_api
     def test_yaml_config(  # noqa: PLR0913
@@ -5276,9 +5154,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 ]["names"]
             except KeyError:
                 raise gx_exceptions.ProfilerError(
-                    "batch kwargs Generator {} not found. Specify the name of a generator configured in this datasource".format(
-                        batch_kwargs_generator_name
-                    )
+                    f"batch kwargs Generator {batch_kwargs_generator_name} not found. Specify the name of a generator configured in this datasource"
                 )
 
         available_data_asset_name_list = sorted(
@@ -5287,9 +5163,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         if len(available_data_asset_name_list) == 0:
             raise gx_exceptions.ProfilerError(
-                "No Data Assets found in Datasource {}. Used batch kwargs generator: {}.".format(
-                    datasource_name, batch_kwargs_generator_name
-                )
+                f"No Data Assets found in Datasource {datasource_name}. Used batch kwargs generator: {batch_kwargs_generator_name}."
             )
         total_data_assets = len(available_data_asset_name_list)
 
@@ -5408,11 +5282,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @public_api
     def build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
+        site_names: list[str] | None = None,
+        resource_identifiers: list[ExpectationSuiteIdentifier]
+        | list[ValidationResultIdentifier]
+        | None = None,
+        dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> dict[str, str]:
         """Build Data Docs for your project.
 
         --Documentation--
@@ -5552,7 +5428,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             input value with all `$` characters replaced with the escape string
         """
         if isinstance(value, dict) or isinstance(value, OrderedDict):  # noqa: PLR1701
-            return {  # type: ignore[return-value] # recursive call expects str
+            return {
                 k: self.escape_all_config_variables(
                     value=v,
                     dollar_sign_escape_string=dollar_sign_escape_string,
@@ -5616,9 +5492,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(
-                "Creating new substitution_variables file at {config_variables_filepath}".format(
-                    config_variables_filepath=config_variables_filepath
-                )
+                f"Creating new substitution_variables file at {config_variables_filepath}"
             )
             with open(config_variables_filepath, "w") as template:
                 template.write(CONFIG_VARIABLES_TEMPLATE)
@@ -5628,7 +5502,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
         """Called at beginning of DataContext __init__ after config_providers init."""
-        logger.info(
+        logger.debug(
             f"{self.__class__.__name__} has not implemented `_load_fluent_config()` returning empty `GxConfig`"
         )
         return GxConfig(fluent_datasources=[])
@@ -5642,8 +5516,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
             datasource._rebuild_asset_data_connectors()
-
-            self._add_fluent_datasource(datasource=datasource)
+            # since we are loading the datasource from existing config, we do not need to save it
+            self._add_fluent_datasource(datasource=datasource, save_changes=False)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """

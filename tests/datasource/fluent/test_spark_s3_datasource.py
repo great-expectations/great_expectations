@@ -49,7 +49,6 @@ def aws_credentials() -> None:
     os.environ["AWS_DEFAULT_REGION"] = "testing"
 
 
-@pytest.mark.skipif(not aws.boto3)
 @pytest.fixture
 def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
     with mock_s3():
@@ -274,8 +273,9 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.big
+@pytest.mark.spark
 def test_test_connection_failures(
+    spark_session,
     s3_mock,
     spark_s3_datasource: SparkS3Datasource,
     bad_regex_config: tuple[re.Pattern, str],

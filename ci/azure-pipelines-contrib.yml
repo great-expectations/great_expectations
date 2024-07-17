@@ -1,10 +1,10 @@
 trigger:
-  - develop
+  - 0.18.x
 
 variables:
   contrib_major: 0
   contrib_minor: 1
-  isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  is018xBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/0.18.x')]
   python.version: '3.8'
 
 name: $(Date:yyyyMMdd)$(Rev:rrr)
@@ -70,7 +70,7 @@ stages:
 
       - job: deploy_experimental
         dependsOn: [changes, test]
-        condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.ExperimentalChanged'], true), eq(variables.isDevelop, true))
+        condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.ExperimentalChanged'], true), eq(variables.is018xBranch, true))
 
         steps:
           - task: UsePythonVersion@0

@@ -13,7 +13,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py datasource_yaml">
-datasource_yaml = rf"""
+datasource_yaml = r"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:

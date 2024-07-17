@@ -15,7 +15,7 @@ GX is a Python library that provides a framework for describing the acceptable s
 When working with GX you use the following four core components to access, store, and manage underlying objects and processes:
 
 - **[Data Context:](#data-context)** Manages the settings and metadata for a GX project, and provides an entry point to the GX Python API.
-- **[Datasources:](#datasources)** Connects to your source data, and organizes retrieved data for future use.
+- **[Data Sources:](#datasources)** Connects to your Data Source, and organizes retrieved data for future use.
 - **[Expectations:](#expectations)** Identifies the standards to which your data should conform.
 - **[Checkpoints:](#checkpoints)** Validates a set of Expectations against a specific set of data.
 
@@ -53,17 +53,17 @@ You can configure where your Data Docs are hosted.  Unlike Stores, you can defin
 
 For more information, see [Host and share Data Docs](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs).
 
-## Datasources
+## Data Sources
 
 ![Data Source overview](./images_overview/datasource_flowchart.png)
 
-Datasources connect GX to source data such as CSV files in a folder, a PostgreSQL database hosted on AWS, or any combination of data formats and environments. Regardless of the format of your source data or where it resides, Datasources provide GX with a unified API for working with it.
+Data Sources connect GX to Data Assets such as CSV files in a folder, a PostgreSQL database hosted on AWS, or any combination of data formats and environments. Regardless of the format of your Data Asset or where it resides, Data Sources provide GX with a unified API for working with it.
 
 For more information, see [Connect to data](/docs/guides/connecting_to_your_data/connect_to_data_lp).
 
 ### Data Assets and Batches
 
-Data Assets are collections of records within a Data Source.  While a Data Source tells GX how to connect to your source data, Data Assets tell GX how to organize that data. Although the records in your Data Assets can correspond directly to the contents of tables or files in your source data they do not necessarily need to. For instance, you could combine multiple tables worth of records in a SQL Data Source into a single Query Data Asset that joins the tables in question.  For a File Data Source, you could use regular expressions to define a Data Asset as the contents of all of the `.csv` files in a specific subfolder.
+Data Assets are collections of records within a Data Source.  A Data Source tells GX how to connect to your Data Assets and Data Assets tell GX how to organize that data. Although the records in your Data Assets can correspond directly to the contents of tables or files in your Data Source they do not necessarily need to. For instance, you could combine multiple tables worth of records in a SQL Data Source into a single Query Data Asset that joins the tables in question.  For a File Data Source, you could use regular expressions to define a Data Asset as the contents of all the `.csv` files in a specific subfolder.
 
 Data Assets can be further partitioned into Batches.  Batches are unique subsets of records within a Data Asset.  For example, say you have a Data Asset in a SQL Data Source that consists of all records from last year in a given table.  You could then partition those records into Batches of data that correspond to the records for individual months of that year.
 
@@ -81,7 +81,7 @@ For more information, see [Request data from a Data Asset](/docs/guides/connecti
 
 ## Expectations
 
-An Expectation is a verifiable assertion about source data.  Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behaviors. Unlike traditional unit tests which describe the expected behavior of code given a specific input, Expectations apply to the input data itself. For example, you can define an Expectation that a column contains no null values. When GX runs that Expectation on your data it generates a report which indicates if a null value was found.
+An Expectation is a verifiable assertion about data.  Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behaviors. Unlike traditional unit tests which describe the expected behavior of code given a specific input, Expectations apply to the input data itself. For example, you can define an Expectation that a column contains no null values. When GX runs that Expectation on your data it generates a report which indicates if a null value was found.
 
 Expectations can be built directly from the domain knowledge of subject matter experts, interactively while introspecting a set of data, or through automated tools provided by GX.
 
@@ -93,15 +93,15 @@ For more information, see [Create Expectations](/docs/guides/expectations/expect
 
 Expectation Suites are collections of Expectations describing your data.  When GX validates data, an Expectation Suite helps streamline the process by running all of the contained Expectations against that data.  In almost all cases, when you create an Expectation you will be creating it inside of an Expectation Suite object.
 
-You can define multiple Expectation Suites for the same data to cover different use cases.  An example could be having one Expectation Suite for raw data, and a more strict Expectation Suite for that same data post-processing.  Because an Expectation Suite is decoupled from a specific source of data, you can apply the same Expectation Suite against multiple, disparate Datasources.  For instance, you can reuse an Expectation Suite that was created around an older set of data to validate the quality of a new set of data.
+You can define multiple Expectation Suites for the same data to cover different use cases.  An example could be having one Expectation Suite for raw data, and a more strict Expectation Suite for that same data post-processing.  Because an Expectation Suite is decoupled from a specific source of data, you can apply the same Expectation Suite against multiple, disparate Data Sources.  For instance, you can reuse an Expectation Suite that was created around an older set of data to validate the quality of a new set of data.
 
-For more information, see [Create and manage Expectations and Expectation Suite](/docs/guides/expectations/create_manage_expectations_lp).
+For more information, see [Create and manage Expectations and Expectation Suites](/docs/guides/expectations/create_manage_expectations_lp).
 
 ### Data Assistants
 
 A Data Assistant is a utility that automates the process of building Expectations by asking questions about your data, gathering information to describe what is observed, and then presenting Metrics and proposed Expectations based on the answers it has determined.  This can accelerate the process of creating Expectations for the provided data.
 
-For more information, see [Profilers and Data Assistants](/docs/guides/expectations/profilers_data_assistants_lp).
+For more information, see [Data Assistants](/docs/guides/expectations/data_assistants_lp).
 
 ### Custom Expectations
 

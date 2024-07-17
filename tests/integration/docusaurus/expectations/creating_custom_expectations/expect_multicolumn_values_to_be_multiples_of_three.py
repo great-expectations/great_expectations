@@ -1,26 +1,22 @@
-from typing import Dict, Optional, Union
+from typing import Optional
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ExpectationValidationResult,
     MulticolumnMapExpectation,
 )
-from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py MulticolumnValuesMultipleThree class_def">

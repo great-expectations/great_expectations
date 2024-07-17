@@ -40,9 +40,6 @@ resources:
     ports:
       - 8088:8080
 
-variables:
-  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-
 stages:
   - stage: scope_check
     pool:
@@ -164,7 +161,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
       - job: mssql
@@ -195,7 +192,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
       - job: postgres
@@ -223,7 +220,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest --postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli
             displayName: 'pytest'
 
       - job: trino
@@ -260,5 +257,5 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'

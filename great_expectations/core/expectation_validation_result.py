@@ -392,14 +392,14 @@ class ExpectationValidationResult(SerializableDictDot):
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool(required=False, allow_none=True)
     expectation_config = fields.Nested(
-        lambda: ExpectationConfigurationSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
+        lambda: ExpectationConfigurationSchema, required=False, allow_none=True
     )
     result = fields.Dict(required=False, allow_none=True)
     meta = fields.Dict(required=False, allow_none=True)
     exception_info = fields.Dict(required=False, allow_none=True)
     rendered_content = fields.List(
         fields.Nested(
-            lambda: RenderedAtomicContentSchema, required=False, allow_none=True  # type: ignore[arg-type,return-value]
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
         )
     )
 
@@ -566,6 +566,9 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         )
         myself["statistics"] = convert_to_json_serializable(myself["statistics"])
         myself["meta"] = convert_to_json_serializable(myself["meta"])
+        myself["results"] = [
+            convert_to_json_serializable(result) for result in myself["results"]
+        ]
         myself = expectationSuiteValidationResultSchema.dump(myself)
         return myself
 
@@ -604,9 +607,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                     return metric_value
 
         raise gx_exceptions.UnavailableMetricError(
-            "Metric {} with metric_kwargs_id {} is not available.".format(
-                metric_name, metric_kwargs_id
-            )
+            f"Metric {metric_name} with metric_kwargs_id {metric_kwargs_id} is not available."
         )
 
     def get_failed_validation_results(

@@ -13,6 +13,7 @@ GE_TEST_GCP_PROJECT=<YOUR GCP PROJECT> GE_TEST_BIGQUERY_DATASET=<YOUR BIGQUERY D
 ```
 """
 import os
+import pathlib
 import subprocess
 
 import great_expectations as gx
@@ -50,7 +51,7 @@ try:
         check=True,
         stderr=subprocess.PIPE,
     )
-except Exception as e:
+except Exception:
     pass
 
 create_data_docs_directory = """
@@ -111,10 +112,10 @@ app_yaml = app_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
 )
 
-team_gcs_app_directory = os.path.join(context.root_directory, "team_gcs_app")
-os.makedirs(team_gcs_app_directory, exist_ok=True)
+team_gcs_app_directory = pathlib.Path(context.root_directory, "team_gcs_app")
+team_gcs_app_directory.mkdir(exist_ok=True)
 
-app_yaml_file_path = os.path.join(team_gcs_app_directory, "app.yaml")
+app_yaml_file_path = pathlib.Path(team_gcs_app_directory, "app.yaml")
 with open(app_yaml_file_path, "w") as f:
     yaml.dump(app_yaml, f)
 
@@ -131,7 +132,7 @@ flask>=1.1.0
 google-cloud-storage
 """
 
-requirements_txt_file_path = os.path.join(team_gcs_app_directory, "requirements.txt")
+requirements_txt_file_path = pathlib.Path(team_gcs_app_directory, "requirements.txt")
 with open(requirements_txt_file_path, "w") as f:
     f.write(requirements_txt)
 
@@ -170,7 +171,7 @@ def server_error(e):
 # </snippet>
 """
 
-main_py_file_path = os.path.join(team_gcs_app_directory, "main.py")
+main_py_file_path = pathlib.Path(team_gcs_app_directory, "main.py")
 with open(main_py_file_path, "w") as f:
     f.write(main_py)
 
@@ -230,7 +231,7 @@ data_docs_site_yaml = data_docs_site_yaml.replace(
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
 )
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:

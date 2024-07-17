@@ -23,7 +23,7 @@ Metrics can have any name. However, for the "core" Great Expectations metrics, w
   - ``column_values.in_set.unexpected_rows`` provides full rows for which the value in the domain column was unexpected
   - ``column_values.in_set.unexpected_value_counts`` provides a count of how many times each unexpected value occurred
 
-Additionally, to facilitate optimized computatation of Metrics, we use **Metric Partials** which define partially-parameterized functions that are necessary to build a desired Metric. 
+Additionally, to facilitate optimized computatation of Metrics, we use **Metric Partials** which define partially-parameterized functions that are necessary to build a desired Metric.
 
 - For aggregate metrics, we often use an ExecutionEngine specific function with the suffix ``.aggregate_fn``, such as ``column.max.aggregate_fn``.
 - For map metrics, to compute ``column_values.in_set.unexpected_count``, we will rely on a **condition** called ``column_values.in_set.condition`.

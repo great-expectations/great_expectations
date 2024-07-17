@@ -260,6 +260,7 @@ def _sqlalchemy_column_map_condition_values(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     selectable = execution_engine.get_domain_records(
@@ -274,7 +275,9 @@ def _sqlalchemy_column_map_condition_values(
             query = query.select_from(selectable.subquery())
         else:
             query = query.select_from(selectable)
+
     result_format = metric_value_kwargs["result_format"]
+
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
     elif (
@@ -376,6 +379,7 @@ def _spark_column_map_condition_values(
     )
 
     result_format = metric_value_kwargs["result_format"]
+
     if result_format["result_format"] == "COMPLETE":
         rows = filtered.select(
             F.col(column_name).alias(column_name)

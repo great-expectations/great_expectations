@@ -1,11 +1,11 @@
-### Connect GX to filesystem source data
+### Connect GX to a filesystem Data Source
 
-- [Connect to filesystem source data](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
+- [Connect to a filesystem Data Source](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
 
-### Connect GX to in-memory source data
+### Connect to an in-memory Data Source
 
-- [Connect to in-memory source data](/docs/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data)
+- [Connect to an in-memory Data Source](/docs/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data)
 
-### Connect GX to SQL source data
+### Connect to a SQL Data Source
 
-- [How to connect to SQL data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
+- [Connect to a SQL Data Source](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)

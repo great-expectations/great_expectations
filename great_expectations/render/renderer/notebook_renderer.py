@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 import nbformat
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import (
     convert_json_string_to_be_python_compliant,
@@ -48,7 +49,7 @@ class BaseNotebookRenderer(Renderer):
             code = lint_code(code).rstrip("\n")
 
         cell = nbformat.v4.new_code_cell(code)
-        self._notebook["cells"].append(cell)
+        self._notebook["cells"].append(cell)  # type: ignore[index] # _notebook could be None
 
     def add_markdown_cell(self, markdown: str) -> None:
         """
@@ -60,7 +61,7 @@ class BaseNotebookRenderer(Renderer):
             Nothing, adds a cell to the class instance notebook
         """
         cell = nbformat.v4.new_markdown_cell(markdown)
-        self._notebook["cells"].append(cell)
+        self._notebook["cells"].append(cell)  # type: ignore[index] # _notebook could be None
 
     @classmethod
     def write_notebook_to_disk(
@@ -75,6 +76,7 @@ class BaseNotebookRenderer(Renderer):
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
+    @override
     def render(self, **kwargs: dict) -> nbformat.NotebookNode:
         """
         Render a notebook from parameters.

@@ -223,9 +223,7 @@ class ActionListValidationOperator(ValidationOperator):
             # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
                 raise KeyError(
-                    'Action config keys must be ("name", "action"). Instead got {}'.format(
-                        action_config.keys()
-                    )
+                    f'Action config keys must be ("name", "action"). Instead got {action_config.keys()}'
                 )
 
             if "class_name" in action_config["action"]:
@@ -241,7 +239,7 @@ class ActionListValidationOperator(ValidationOperator):
                     # We currently only support SlackNotifications but setting this for any notification.
                     notify_before_store = action_config["action"]["class_name"]
 
-            config = action_config["action"]
+            config = {**action_config["action"], "name": action_config["name"]}
             module_name = "great_expectations.validation_operators"
             new_action = instantiate_class_from_config(
                 config=config,
@@ -787,9 +785,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Learn about FailureVsWarning Validation Operators at {}".format(
-                        documentation_url
-                    ),
+                    "text": f"Learn about FailureVsWarning Validation Operators at {documentation_url}",
                 }
             ],
         }
@@ -797,7 +793,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(  # noqa: PLR0912, PLR0913
+    def run(  # noqa: PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -855,9 +851,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             # so that methods like this can catch and handle a single error type.
             except Exception:
                 logger.debug(
-                    "Failure expectation suite not found: {}".format(
-                        failure_expectation_suite_identifier
-                    )
+                    f"Failure expectation suite not found: {failure_expectation_suite_identifier}"
                 )
 
             if failure_expectation_suite:
@@ -902,9 +896,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 ].get(warning_expectation_suite_identifier)
             except Exception:
                 logger.debug(
-                    "Warning expectation suite not found: {}".format(
-                        warning_expectation_suite_identifier
-                    )
+                    f"Warning expectation suite not found: {warning_expectation_suite_identifier}"
                 )
 
             if warning_expectation_suite:

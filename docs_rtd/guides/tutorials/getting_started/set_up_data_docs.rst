@@ -87,4 +87,3 @@ You can see that the Expectation we just looked at is represented as ``expect_co
 How do we use this Expectation Suite to validate that **new** batch of data we have in our February dataset?
 
 In the next step, we will complete the Great Expectations workflow by showing you how to validate a new batch of data with the Expectation Suite you just created!
-

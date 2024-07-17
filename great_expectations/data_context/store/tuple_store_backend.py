@@ -86,23 +86,14 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             for substring in self.forbidden_substrings:
                 if substring in key_element:
                     raise ValueError(
-                        "Keys in {} must not contain substrings in {} : {}".format(
-                            self.__class__.__name__,
-                            self.forbidden_substrings,
-                            key,
-                        )
+                        f"Keys in {self.__class__.__name__} must not contain substrings in {self.forbidden_substrings} : {key}"
                     )
 
     @override
     def _validate_value(self, value) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
-                "Values in {} must be instances of {} or {}, not {}".format(
-                    self.__class__.__name__,
-                    str,
-                    bytes,
-                    type(value),
-                )
+                f"Values in {self.__class__.__name__} must be instances of {str} or {bytes}, not {type(value)}"
             )
 
     def _convert_key_to_filepath(self, key):
@@ -217,12 +208,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
             raise ValueError(
-                "filepath template {} for class {} is not reversible for a tuple of length {}. "
-                "Have you included all elements in the key tuple?".format(
-                    self.filepath_template,
-                    self.__class__.__name__,
-                    self.key_length,
-                )
+                f"filepath template {self.filepath_template} for class {self.__class__.__name__} is not reversible for a tuple of length {self.key_length}. "
+                "Have you included all elements in the key tuple?"
             )
 
     @property
@@ -275,9 +262,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 )
             elif not os.path.isabs(root_directory):  # noqa: PTH117
                 raise ValueError(
-                    "root_directory must be an absolute path. Got {} instead.".format(
-                        root_directory
-                    )
+                    f"root_directory must be an absolute path. Got {root_directory} instead."
                 )
             else:
                 self.full_base_directory = os.path.join(  # noqa: PTH118
@@ -328,7 +313,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = [
+            key for key in self.list_keys() if key != StoreBackend.STORE_BACKEND_ID_KEY
+        ]
+        return [self._get(key) for key in keys]
 
     def _set(self, key, value, **kwargs):
         if not isinstance(key, tuple):
@@ -561,13 +549,29 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return s3_object_key
 
     def _get(self, key):
+        client = self._create_client()
         s3_object_key = self._build_s3_object_key(key)
+        return self._get_by_s3_object_key(client, s3_object_key)
 
-        s3 = self._create_client()
+    @override
+    def _get_all(self) -> list[Any]:
+        """Get all objects from the store.
+        NOTE: This is non-performant because we download each object separately.
+        See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/bucket/objects.html#objects
+        for the docs.
+        """
+        client = self._create_client()
+        keys = self.list_keys()
+        keys = [k for k in keys if k != StoreBackend.STORE_BACKEND_ID_KEY]
+        s3_object_keys = [self._build_s3_object_key(key) for key in keys]
+        return [self._get_by_s3_object_key(client, key) for key in s3_object_keys]
 
+    def _get_by_s3_object_key(self, s3_client, s3_object_key):
         try:
-            s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
-        except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
+            s3_response_object = s3_client.get_object(
+                Bucket=self.bucket, Key=s3_object_key
+            )
+        except (s3_client.exceptions.NoSuchKey, s3_client.exceptions.NoSuchBucket):
             raise InvalidKeyError(
                 f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"
             )
@@ -577,10 +581,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
             .read()
             .decode(s3_response_object.get("ContentEncoding", "utf-8"))
         )
-
-    @override
-    def _get_all(self) -> list[Any]:
-        raise NotImplementedError
 
     def _set(
         self,
@@ -852,12 +852,26 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return gcs_object_key
 
     def _get(self, key):
-        gcs_object_key = self._build_gcs_object_key(key)
-
         from great_expectations.compatibility import google
 
         gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
+        return self._get_by_gcs_object_key(bucket, key)
+
+    @override
+    def _get_all(self) -> list[Any]:
+        from great_expectations.compatibility import google
+
+        gcs = google.storage.Client(project=self.project)
+        bucket = gcs.bucket(self.bucket)
+
+        keys = self.list_keys()
+        keys = [k for k in keys if k != StoreBackend.STORE_BACKEND_ID_KEY]
+
+        return [self._get_by_gcs_object_key(bucket, key) for key in keys]
+
+    def _get_by_gcs_object_key(self, bucket, key):
+        gcs_object_key = self._build_gcs_object_key(key)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
@@ -865,10 +879,6 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             )
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
-
-    @override
-    def _get_all(self) -> list[Any]:
-        raise NotImplementedError
 
     def _set(
         self,
@@ -1095,7 +1105,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = self.list_keys()
+        return [self._get(key) for key in keys]
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
         from great_expectations.compatibility.azure import ContentSettings
@@ -1132,7 +1143,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
-        for obj in self._container_client.list_blobs(name_starts_with=self.prefix):  # type: ignore[attr-defined]
+        for obj in self._container_client.list_blobs(name_starts_with=self.prefix):
             az_blob_key = os.path.relpath(obj.name)
             if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
@@ -1155,10 +1166,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             self.container, self.prefix, az_blob_key
         )
 
-        return "https://{}.blob.core.windows.net/{}".format(
-            self._container_client.account_name,
-            az_blob_path,
-        )
+        return f"https://{self._container_client.account_name}.blob.core.windows.net/{az_blob_path}"
 
     def _has_key(self, key):
         all_keys = self.list_keys()
@@ -1176,8 +1184,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             dest_blob_path = os.path.join(self.prefix, dest_blob_path)  # noqa: PTH118
 
         # azure storage sdk does not have _move method
-        source_blob = self._container_client.get_blob_client(source_blob_path)  # type: ignore[attr-defined]
-        dest_blob = self._container_client.get_blob_client(dest_blob_path)  # type: ignore[attr-defined]
+        source_blob = self._container_client.get_blob_client(source_blob_path)
+        dest_blob = self._container_client.get_blob_client(dest_blob_path)
 
         dest_blob.start_copy_from_url(source_blob.url, requires_sync=True)
         copy_properties = dest_blob.get_blob_properties().copy

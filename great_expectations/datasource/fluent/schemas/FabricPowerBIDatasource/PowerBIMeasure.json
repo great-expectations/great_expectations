@@ -1,6 +1,6 @@
 {
     "title": "PowerBIMeasure",
-    "description": "Microsoft PowerBI Measure.",
+    "description": "--Public API--Microsoft PowerBI Measure.",
     "type": "object",
     "properties": {
         "name": {
@@ -70,11 +70,6 @@
         "num_rows": {
             "title": "Num Rows",
             "type": "integer"
-        },
-        "pandas_convert_dtypes": {
-            "title": "Pandas Convert Dtypes",
-            "default": true,
-            "type": "boolean"
         },
         "use_xmla": {
             "title": "Use Xmla",

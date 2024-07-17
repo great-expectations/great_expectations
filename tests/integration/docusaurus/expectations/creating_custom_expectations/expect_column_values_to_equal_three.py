@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
@@ -18,11 +19,18 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.expectations.metrics.metric_provider import metric_partial
-from great_expectations.render import CollapseContent, RenderedStringTemplateContent
+from great_expectations.render import (
+    CollapseContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.util import num_to_str
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+# snippets reference this object without creating it
+result_dict = {}
 
 
 # This class defines a Metric to support your Expectation.
@@ -173,7 +181,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must provide a result object."
@@ -203,7 +211,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must provide a result object."
@@ -300,11 +308,11 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
     @renderer(renderer_type="renderer.diagnostic.unexpected_table")
     @render_evaluation_parameter_string
-    def _diagnostic_unexpected_table_renderer(
+    def _diagnostic_unexpected_table_renderer(  # noqa: PLR0912 # too complex
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         try:

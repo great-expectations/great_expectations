@@ -10,6 +10,8 @@ import click
 
 from great_expectations.cli.pretty_printing import cli_message
 
+EXAMPLES_NOT_AVAILABLE_ERROR = """Examples are available when installing GX by following the contributor guidelines (not via `pip install great-expectations`). Please see the reference environment readme for more instructions and links to the contributor guidelines: https://github.com/great-expectations/great_expectations/tree/develop/examples/reference_environments#reference-environments"""
+
 
 @click.group(short_help="Examples")
 def example() -> None:
@@ -73,7 +75,7 @@ def example_snowflake(
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "snowflake"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_snowflake_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -132,7 +134,7 @@ def example_postgres(
     """Start a postgres database example."""
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "postgres"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_postgres_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -266,7 +268,7 @@ def example_gcs(
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "gcs"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_gcs_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -325,7 +327,7 @@ def example_bigquery(
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "bigquery"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_bigquery_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -387,7 +389,7 @@ def example_abs(
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "abs"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_abs_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -448,7 +450,7 @@ def example_aws_postgres(
     example_directory = (
         repo_root / "examples" / "reference_environments" / "aws_postgres"
     )
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "aws_postgres_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -490,7 +492,7 @@ def example_airflow(
     example_directory = (
         repo_root / "examples" / "reference_environments" / "airflow_2_6_2"
     )
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     command_options = CommandOptions(stop, False, False, rebuild)
     executed_standard_function = _execute_standard_functions(
         command_options, example_directory, container_name="not_applicable"

@@ -168,7 +168,7 @@ def main() -> None:
     )
     if new_violations:
         print(
-            f"[ERROR] Found {len(new_violations)} test files which are not used in test suite."
+            f"[ERROR] Found {len(new_violations)} test files which are not used in test suite; please add to test script runner!"
         )
         for line in new_violations:
             print(line)

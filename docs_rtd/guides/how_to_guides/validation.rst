@@ -8,4 +8,3 @@ Validation
    :glob:
 
    /guides/how_to_guides/validation/*
-

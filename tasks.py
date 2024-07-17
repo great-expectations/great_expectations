@@ -8,9 +8,9 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+
 from __future__ import annotations
 
-import json
 import logging
 import os
 import pathlib
@@ -138,7 +138,7 @@ def lint(  # noqa: PLR0913
         fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
-    cmds = ["ruff", path]
+    cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
     if watch:
@@ -156,7 +156,7 @@ def fix(ctx: Context, path: str = "."):
 @invoke.task(help={"path": _PATH_HELP_DESC})
 def upgrade(ctx: Context, path: str = "."):
     """Run code syntax upgrades."""
-    cmds = ["ruff", path, "--select", "UP", "--fix"]
+    cmds = ["ruff", "check", path, "--select", "UP", "--fix"]
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
@@ -180,7 +180,7 @@ def hooks(
         # used in CI - runs faster and only checks files that have changed
         cmds.extend(["--from-ref", "origin/HEAD", "--to-ref", "HEAD"])
 
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
     if sync:
         print("  Re-installing hooks ...")
@@ -278,7 +278,7 @@ def type_check(  # noqa: PLR0913, PLR0912
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
-            print("✅"),
+            print("✅")
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
@@ -321,50 +321,6 @@ def type_check(  # noqa: PLR0913, PLR0912
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-@invoke.task(aliases=["get-stats"])
-def get_usage_stats_json(ctx: Context):
-    """
-    Dump usage stats event examples to json file
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    events = usage_stats_utils.get_usage_stats_example_events()
-    version = usage_stats_utils.get_gx_version()
-
-    outfile = f"v{version}_example_events.json"
-    with open(outfile, "w") as f:
-        json.dump(events, f)
-
-    print(f"File written to '{outfile}'.")
-
-
-@invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
-def mv_usage_stats_json(ctx: Context):
-    """
-    Use databricks-cli lib to move usage stats event examples to dbfs:/
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    version = usage_stats_utils.get_gx_version()
-    outfile = f"v{version}_example_events.json"
-    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
-    cmd = cmd.format(outfile)
-    ctx.run(cmd)
-    print(f"'{outfile}' copied to dbfs.")
-
-
 UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 
 
@@ -372,6 +328,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
     aliases=["test"],
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
+        "cloud": "Runs tests marked with the 'cloud' marker. Default behavior.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -805,7 +762,16 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "aws_deps": TestDependencies(("reqs/requirements-dev-lite.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
+        (
+            "reqs/requirements-dev-cloud.txt",
+            "reqs/requirements-dev-snowflake.txt",
+            "reqs/requirements-dev-spark.txt",
+        ),
+        services=(
+            "mercury",
+            "spark",
+        ),
+        extra_pytest_args=("--cloud",),
     ),
     "databricks": TestDependencies(
         requirement_files=("reqs/requirements-dev-databricks.txt",),
@@ -833,6 +799,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "docs-creds-needed": TestDependencies(
         # these installs are handled by the CI
         requirement_files=(
+            "reqs/requirements-dev-test.txt",
             "reqs/requirements-dev-azure.txt",
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-redshift.txt",
@@ -892,7 +859,13 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
 def _add_all_backends_marker(marker_string: str) -> bool:
     # We should generalize this, possibly leveraging MARKER_DEPENDENCY_MAP, but for now
     # right I've hardcoded all the containerized backend services we support in testing.
-    return marker_string in ["postgresql", "mssql", "mysql", "spark", "trino"]
+    return marker_string in [
+        "postgresql",
+        "mssql",
+        "mysql",
+        "spark",
+        "trino",
+    ]
 
 
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
@@ -938,7 +911,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud, etc. Can be specified multiple times.",
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
@@ -1023,18 +996,24 @@ def docs_snippet_tests(
 
 
 @invoke.task(
-    help={"pty": _PTY_HELP_DESC},
+    help={
+        "pty": _PTY_HELP_DESC,
+        "reports": "Generate coverage reports to be uploaded to codecov",
+        "W": "Warnings control",
+    },
     iterable=["service_names", "up_services", "verbose"],
 )
 def ci_tests(  # noqa: PLR0913
     ctx: Context,
     marker: str,
     up_services: bool = False,
+    restart_services: bool = False,
     verbose: bool = False,
     reports: bool = False,
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
     xdist: bool = False,
+    W: str | None = None,
     pty: bool = True,
 ):
     """
@@ -1046,6 +1025,8 @@ def ci_tests(  # noqa: PLR0913
 
     `up_services` is False by default to avoid starting services which may already be up
     when running tests locally.
+
+    `restart_services` is False by default to avoid always restarting the services.
 
     Defined this as a new invoke task to avoid some of the baggage of our old test setup.
     """
@@ -1063,9 +1044,19 @@ def ci_tests(  # noqa: PLR0913
     if verbose:
         pytest_options.append("-vv")
 
+    if W:
+        # https://docs.python.org/3/library/warnings.html#describing-warning-filters
+        pytest_options.append(f"-W={W}")
+
     for test_deps in _get_marker_dependencies(marker):
-        if up_services:
-            service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
+        if restart_services or up_services:
+            service(
+                ctx,
+                names=test_deps.services,
+                markers=test_deps.services,
+                restart_services=restart_services,
+                pty=pty,
+            )
 
         for extra_pytest_arg in test_deps.extra_pytest_args:
             pytest_options.append(extra_pytest_arg)
@@ -1086,12 +1077,18 @@ def ci_tests(  # noqa: PLR0913
     iterable=["names", "markers"],
 )
 def service(
-    ctx: Context, names: Sequence[str], markers: Sequence[str], pty: bool = True
+    ctx: Context,
+    names: Sequence[str],
+    markers: Sequence[str],
+    restart_services: bool = False,
+    pty: bool = True,
 ):
     """
     Startup a service, by referencing its name directly or by looking up a pytest marker.
 
     If a marker is specified, the services listed in `MARKER_DEPENDENCY_MAP` will be used.
+
+    If restart_services was passed, the containers will be stopped and re-built.
 
     Note:
         The main reason this is a separate task is to make it easy to start services
@@ -1106,18 +1103,69 @@ def service(
     if service_names:
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
-            cmds = [
-                "docker",
-                "compose",
-                "-f",
-                f"assets/docker/{service_name}/docker-compose.yml",
-                "up",
-                "-d",
-                "--quiet-pull",
-            ]
+            cmds = []
+
+            if (
+                service_name == "mercury"
+                and os.environ.get("CI") != "true"  # noqa: TID251
+            ):
+                cmds.extend(
+                    [
+                        "FORCE_NO_ALIAS=true",
+                        "assumego",
+                        "dev",
+                        "--exec",
+                        "'aws ecr get-login-password --region us-east-1'",
+                        "|",
+                        "docker",
+                        "login",
+                        "--username",
+                        "AWS",
+                        "--password-stdin",
+                        "258143015559.dkr.ecr.us-east-1.amazonaws.com",
+                        "&&",
+                    ]
+                )
+
+            if restart_services:
+                print(
+                    f"  Removing existing containers and building latest for {service_name} ..."
+                )
+                cmds.extend(
+                    [
+                        "docker",
+                        "compose",
+                        "-f",
+                        f"assets/docker/{service_name}/docker-compose.yml",
+                        "rm",
+                        "-fsv",
+                        "&&",
+                        "docker",
+                        "compose",
+                        "-f",
+                        f"assets/docker/{service_name}/docker-compose.yml",
+                        "build",
+                        "--pull",
+                        "&&",
+                    ]
+                )
+
+            cmds.extend(
+                [
+                    "docker",
+                    "compose",
+                    "-f",
+                    f"assets/docker/{service_name}/docker-compose.yml",
+                    "up",
+                    "-d",
+                    "--quiet-pull",
+                    "--wait",
+                    "--wait-timeout 120",
+                ]
+            )
             ctx.run(" ".join(cmds), echo=True, pty=pty)
-        # TODO: remove this sleep. This is a temporary hack to give services enough
-        #       time to come up to get ci merging again.
+        # TODO: Add healthchecks to services that require this sleep and then remove it.
+        #       This is a temporary hack to give services enough time to come up before moving on.
         ctx.run("sleep 15")
     else:
         print("  No matching services to start")

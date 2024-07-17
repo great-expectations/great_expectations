@@ -4,6 +4,7 @@ import logging
 import pathlib
 import re
 import urllib.parse
+import uuid
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -12,8 +13,13 @@ import pandas as pd
 import pytest
 import requests
 
+from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
+from great_expectations.datasource.fluent import (
+    GxInvalidDatasourceWarning,
+    InvalidDatasource,
+)
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
@@ -328,6 +334,87 @@ def test_cloud_context_delete_datasource(
     assert response2.status_code == 404
 
 
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "invalid_datasource_config",
+    [
+        pytest.param(
+            {"type": "not_a_real_datasource_type", "foo": "bar"},
+            id="invalid_type",
+        ),
+        pytest.param(
+            {"type": "postgres", "connection_string": "postmalone+pyscopg2://"},
+            id="invalid pg conn_string",
+        ),
+        pytest.param(
+            {
+                "type": "sqlite",
+                "connection_string": "sqlite:///",
+                "assets": [
+                    {
+                        "name": "bad_query_asset",
+                        "type": "query",
+                        "query": "select * from foo",
+                        "table_name": "this is not valid",
+                    }
+                ],
+            },
+            id="invalid asset",
+        ),
+        pytest.param(
+            {
+                "type": "sqlite",
+                "connection_string": "sqlite:///",
+                "assets": [
+                    {
+                        "name": "bad_asset_type",
+                        "type": "NOT_A_VALID_ASSET_TYPE",
+                    }
+                ],
+            },
+            id="invalid asset type",
+        ),
+    ],
+)
+def test_invalid_datasource_config_does_not_break_cloud_context(
+    cloud_api_fake: RequestsMock,
+    cloud_details: CloudDetails,
+    cloud_api_fake_db: dict,
+    invalid_datasource_config: dict,
+):
+    """
+    Ensure that a datasource with an invalid config does not break the cloud context
+    """
+    datasource_id: str = str(uuid.uuid4())
+    datasource_name: str = "invalid_datasource"
+    invalid_datasource_config["name"] = datasource_name
+    cloud_api_fake_db["datasources"][datasource_id] = {
+        "data": {
+            "id": datasource_id,
+            "type": "datasource",
+            "attributes": {
+                "name": datasource_name,
+                "datasource_config": invalid_datasource_config,
+            },
+        }
+    }
+    with pytest.warns(GxInvalidDatasourceWarning):
+        context = get_context(
+            cloud_base_url=cloud_details.base_url,
+            cloud_organization_id=cloud_details.org_id,
+            cloud_access_token=cloud_details.access_token,
+        )
+        assert datasource_name in context.datasources
+        bad_datasource = context.get_datasource(datasource_name)
+    # test __repr__ and __str__
+    print(f"{bad_datasource!r}\n{bad_datasource!s}")
+    assert isinstance(bad_datasource, InvalidDatasource)
+    assert bad_datasource.name == datasource_name
+    assert len(bad_datasource.assets) == len(
+        invalid_datasource_config.get("assets", [])
+    )
+
+
 @pytest.fixture
 def verify_asset_names_mock(
     cloud_api_fake: RequestsMock, cloud_details: CloudDetails, cloud_api_fake_db
@@ -425,6 +512,31 @@ def test_data_connectors_are_built_on_config_load(
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
     assert dc_datasources
+
+
+@pytest.fixture
+def valid_file_path(csv_path: pathlib.Path) -> pathlib.Path:
+    return csv_path / "yellow_tripdata_sample_2018-03.csv"
+
+
+@pytest.mark.cloud
+def test_run_checkpoint_minimizes_suite_request_count(
+    seeded_cloud_context: CloudDataContext,
+    cloud_api_fake_db: FakeDBTypedDict,
+    cloud_api_fake: RequestsMock,
+    mocker: MockerFixture,
+    valid_file_path,
+):
+    validator = seeded_cloud_context.sources.pandas_default.read_csv(valid_file_path)
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.save_expectation_suite()
+    checkpoint = seeded_cloud_context.add_or_update_checkpoint(
+        name="my_quickstart_chekpoint",
+        validator=validator,
+    )
+
+    checkpoint.run()
+    # TODO assert GET expectation-suites called
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import Datasource
+from great_expectations.exceptions import DatasourceNotFoundError
 
 
 @pytest.fixture
@@ -169,15 +170,14 @@ def test_BaseDataContext_add_datasource_updates_cache(
 
 
 @pytest.mark.unit
-def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
+def test_BaseDataContext_update_datasource_updates_existing_data_source(
     in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
     What does this test and why?
 
-    When save_changes is set to False, we should only update the cache upon
-    updating an existing datasource.
+    Updating a Data Source should update a Data Source
     """
     context = in_memory_runtime_context
 
@@ -191,28 +191,21 @@ def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
     cached_datasource = context.datasources[name]
     assert cached_datasource.data_connectors.keys() != data_connectors.keys()
 
-    with pytest.deprecated_call():
-        # Ensure that our cache value is updated to reflect changes
-        context.update_datasource(datasource, save_changes=False)
-
-    assert name in context.datasources
-    cached_datasource = context.datasources[name]
-    assert cached_datasource.data_connectors.keys() == data_connectors.keys()
+    context.update_datasource(datasource)
 
     retrieved_datasource = context.get_datasource(datasource_name=name)
     assert retrieved_datasource.data_connectors.keys() == data_connectors.keys()
 
 
 @pytest.mark.unit
-def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
+def test_BaseDataContext_update_datasource_fails_when_datsource_does_not_exist(
     in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
     What does this test and why?
 
-    When save_changes is set to False, we should only update the cache upon
-    using update to create a new datasource.
+    Updating a data source that does not exist should create a new data source.
     """
     context = in_memory_runtime_context
 
@@ -222,29 +215,8 @@ def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
 
     assert name not in context.datasources
 
-    # Ensure that a brand new cache value is added to reflect changes
-    with pytest.deprecated_call():
-        context.update_datasource(datasource, save_changes=False)
-
-    assert name in context.datasources
-
-
-@pytest.mark.unit
-def test_delete_datasource(
-    in_memory_runtime_context: EphemeralDataContext,
-) -> None:
-    """
-    What does this test and why?
-
-    When save_changes is set to False, we should only delete the value from
-    the cache.
-    """
-    context = in_memory_runtime_context
-
-    name = context.list_datasources()[0]["name"]
-    context.delete_datasource(name)
-
-    assert name not in context.datasources
+    with pytest.raises(DatasourceNotFoundError):
+        context.update_datasource(datasource)
 
 
 @pytest.mark.unit

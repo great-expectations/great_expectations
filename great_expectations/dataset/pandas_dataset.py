@@ -392,7 +392,7 @@ Notes:
     # to manipulation results, we would just use `_metadata = ['row_count', ...]` here. The most likely
     # case is that we want the former, but also want to re-initialize these values to None so we don't
     # get an attribute error when trying to access them (I think this could be done in __finalize__?)
-    _internal_names = pd.DataFrame._internal_names + [
+    _internal_names = pd.DataFrame._internal_names + [  # type: ignore[attr-defined]
         "_batch_kwargs",
         "_batch_markers",
         "_batch_parameters",
@@ -1018,7 +1018,7 @@ Notes:
         return res
 
     @MetaPandasDataset.expectation(["column", "type_list", "mostly"])
-    def _expect_column_values_to_be_in_type_list__aggregate(  # noqa: PLR0913, PLR0912
+    def _expect_column_values_to_be_in_type_list__aggregate(  # noqa: PLR0913
         self,
         column,
         type_list,

@@ -195,7 +195,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
     @override
     def load_batch_data(
-        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]
+        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]  # type: ignore[override]
     ) -> None:
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
@@ -270,7 +270,7 @@ class PandasExecutionEngine(ExecutionEngine):
             reader_fn: DataFrameFactoryFn = self._get_reader_fn(
                 reader_method, s3_url.key
             )
-            buf = BytesIO(s3_object["Body"].read())
+            buf = BytesIO(s3_object["Body"].read())  # type: ignore[possibly-undefined]
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
@@ -365,7 +365,7 @@ Bucket: {error}"""
 not {batch_spec.__class__.__name__}"""
             )
 
-        df = self._apply_splitting_and_sampling_methods(batch_spec, df)
+        df = self._apply_splitting_and_sampling_methods(batch_spec, df)  # type: ignore[arg-type]
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 

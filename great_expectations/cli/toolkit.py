@@ -594,7 +594,7 @@ To learn more about the upgrade process, visit \
     sys.exit(0)
 
 
-def upgrade_project_one_or_multiple_versions_increment(  # noqa: PLR0912
+def upgrade_project_one_or_multiple_versions_increment(
     directory: str,
     context: FileDataContext,
     ge_config_version: float,

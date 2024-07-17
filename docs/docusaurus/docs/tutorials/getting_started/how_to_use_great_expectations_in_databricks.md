@@ -77,7 +77,7 @@ DBFS is a distributed file system mounted in a Databricks workspace and availabl
   ]}>
   <TabItem value="file">
 
-Run the following command with [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html) to copy existing example csv taxi data to your DBFS folder:
+Run the following command with [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html) to copy existing example `.csv` taxi data to your DBFS folder:
 
 ```python
 # Copy 3 months of data
@@ -213,13 +213,17 @@ Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="
 
 Because you used the DBFS for your Data Docs store, you need to download your Data Docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your organization. 
 
-Run the following [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) command to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
+If you have the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) installed and configured locally, run the following commands from your local terminal to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
 
 ```bash
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
+
+cd great_expectations/uncommitted/data_docs/local_site
+
+open -a "<YOUR_PREFERRED_BROWSER_NAME_HERE>" index.html
 ```
 
-The `displayHTML` command is another option for displaying Data Docs in a Databricks notebook. There is a restriction, though, in that clicking a link in the displayed data documents returns an empty page. To view some validation results, use this method. For example:
+The `displayHTML` command is another option you can use to display Data Docs in a Databricks notebook. However, when you use this option, an empty page is returned when you click a link in the displayed data documents. To view validation results, use the following method:
 
 ```python 
 html = '/dbfs/great_expectations/uncommitted/data_docs/local_site/index.html'

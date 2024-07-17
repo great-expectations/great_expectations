@@ -366,7 +366,10 @@ class Expectation(metaclass=MetaExpectation):
         expectation_type: str = camel_to_snake(cls.__name__)
 
         for candidate_renderer_fn_name in dir(cls):
-            attr_obj: Callable = getattr(cls, candidate_renderer_fn_name)
+            attr_obj: Callable | None = getattr(cls, candidate_renderer_fn_name, None)
+            # attrs are not guaranteed to exist https://docs.python.org/3.10/library/functions.html#dir
+            if attr_obj is None:
+                continue
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
             register_renderer(
@@ -637,7 +640,15 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedStringTemplateContent:
         assert result, "Must provide a result object."
-        if result.exception_info["raised_exception"]:
+        raised_exception: bool = False
+        if "raised_exception" in result.exception_info:
+            raised_exception = result.exception_info["raised_exception"]
+        else:
+            for k, v in result.exception_info.items():
+                # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                raised_exception = v["raised_exception"]
+        if raised_exception:
             return RenderedStringTemplateContent(
                 **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
@@ -717,8 +728,28 @@ class Expectation(metaclass=MetaExpectation):
         assert result, "Must provide a result object."
         success: Optional[bool] = result.success
         result_dict: dict = result.result
+        exception = {
+            "raised_exception": False,
+            "exception_message": "",
+            "exception_traceback": "",
+        }
+        if "raised_exception" in result.exception_info:
+            exception["raised_exception"] = result.exception_info["raised_exception"]
+            exception["exception_message"] = result.exception_info["exception_message"]
+            exception["exception_traceback"] = result.exception_info[
+                "exception_traceback"
+            ]
+        else:
+            for k, v in result.exception_info.items():
+                # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                exception["raised_exception"] = v["raised_exception"]
+                exception["exception_message"] = v["exception_message"]
+                exception["exception_traceback"] = v["exception_traceback"]
+                # This only pulls the first exception message and traceback from a list of exceptions to render in the data docs.
+                break
 
-        if result.exception_info["raised_exception"]:
+        if exception["raised_exception"]:
             exception_message_template_str = (
                 "\n\n$expectation_type raised an exception:\n$exception_message"
             )
@@ -735,9 +766,7 @@ class Expectation(metaclass=MetaExpectation):
                         "template": exception_message_template_str,
                         "params": {
                             "expectation_type": expectation_type,
-                            "exception_message": result.exception_info[
-                                "exception_message"
-                            ],
+                            "exception_message": exception["exception_message"],
                         },
                         "tag": "strong",
                         "styling": {
@@ -761,9 +790,7 @@ class Expectation(metaclass=MetaExpectation):
                             **{  # type: ignore[arg-type]
                                 "content_block_type": "string_template",
                                 "string_template": {
-                                    "template": result.exception_info[
-                                        "exception_traceback"
-                                    ],
+                                    "template": exception["exception_traceback"],
                                     "tag": "code",
                                 },
                             }
@@ -1053,6 +1080,16 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
+
+        validation_dependencies_metric_configurations: List[
+            MetricConfiguration
+        ] = validation_dependencies.get_metric_configurations()
+
+        _validate_dependencies_against_available_metrics(
+            validation_dependencies=validation_dependencies_metric_configurations,
+            metrics=metrics,
+            configuration=configuration,
+        )
 
         metric_name: str
         metric_configuration: MetricConfiguration
@@ -3602,7 +3639,8 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         "unexpected_percent": unexpected_percent_nonmissing,
     }
 
-    if unexpected_list is not None:
+    exclude_unexpected_values = result_format.get("exclude_unexpected_values", False)
+    if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
         ]
@@ -3630,7 +3668,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if result_format["result_format"] == "BASIC":
         return return_obj
 
-    if unexpected_list is not None:
+    if unexpected_list is not None and not exclude_unexpected_values:
         if len(unexpected_list) and isinstance(unexpected_list[0], dict):
             # in the case of multicolumn map expectations `unexpected_list` contains dicts,
             # which will throw an exception when we hash it to count unique members.
@@ -3648,15 +3686,19 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
     if partial_unexpected_count is not None and 0 < partial_unexpected_count:
         try:
-            partial_unexpected_counts = [
-                {"value": key, "count": value}
-                for key, value in sorted(
-                    Counter(immutable_unexpected_list).most_common(
-                        result_format["partial_unexpected_count"]
-                    ),
-                    key=lambda x: (-x[1], x[0]),
+            if not exclude_unexpected_values:
+                partial_unexpected_counts = [
+                    {"value": key, "count": value}
+                    for key, value in sorted(
+                        Counter(immutable_unexpected_list).most_common(  # type: ignore[possibly-undefined]
+                            result_format["partial_unexpected_count"]
+                        ),
+                        key=lambda x: (-x[1], x[0]),
+                    )
+                ]
+                return_obj["result"].update(
+                    {"partial_unexpected_counts": partial_unexpected_counts}
                 )
-            ]
         except TypeError:
             partial_unexpected_counts = [
                 {"error": "partial_exception_counts requires a hashable type"}
@@ -3670,14 +3712,11 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                         ],
                     }
                 )
-            return_obj["result"].update(
-                {"partial_unexpected_counts": partial_unexpected_counts}
-            )
 
     if result_format["result_format"] == "SUMMARY":
         return return_obj
 
-    if unexpected_list is not None:
+    if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"].update({"unexpected_list": unexpected_list})
     if unexpected_index_list is not None:
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
@@ -3705,6 +3744,28 @@ def _validate_mostly_config(configuration: ExpectationConfiguration) -> None:
             mostly, (int, float)
         ), "'mostly' parameter must be an integer or float"
         assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+
+
+def _validate_dependencies_against_available_metrics(
+    validation_dependencies: List[MetricConfiguration],
+    metrics: dict,
+    configuration: ExpectationConfiguration,
+) -> None:
+    """Check that validation_dependencies for current Expectations are available as Metrics.
+
+    Args:
+        validation_dependencies_as_metric_configurations: dependencies calculated for current Expectation.
+        metrics: dict of metrics available to current Expectation.
+        configuration: current ExpectationConfiguration
+
+    Raises:
+        InvalidExpectationConfigurationError: If a validation dependency is not available as a Metric.
+    """
+    for metric_config in validation_dependencies:
+        if metric_config.id not in metrics:
+            raise InvalidExpectationConfigurationError(
+                f"Metric {metric_config.id} is not available for validation of {configuration}. Please check your configuration."
+            )
 
 
 def _mostly_success(

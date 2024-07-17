@@ -3,6 +3,7 @@ This is an example of a Custom QueryExpectation.
 For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
+from __future__ import annotations
 
 from typing import Optional, Union
 
@@ -71,8 +72,8 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: dict | None = None,
+        execution_engine: ExecutionEngine | None = None,
     ) -> Union[ExpectationValidationResult, dict]:
         # </snippet>
         metrics = convert_to_json_serializable(data=metrics)

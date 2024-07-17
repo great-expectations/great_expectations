@@ -1,7 +1,6 @@
 # <snippet name="tests/integration/docusaurus/template/script_example.py full">
 # <snippet name="tests/integration/docusaurus/template/script_example.py imports">
 # <snippet name="tests/integration/docusaurus/template/script_example.py first import">
-import os
 
 # </snippet>
 

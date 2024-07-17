@@ -298,6 +298,8 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
                 template_str = f"sum must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"sum must be {at_least_str} $min_value."
+            else:
+                raise ValueError("unresolvable template_str")
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"

@@ -75,6 +75,7 @@ def test_StoreAction():
 
     action = StoreValidationResultAction(
         data_context=data_context,
+        name="testing",
         target_store_name="fake_in_memory_store",
     )
     assert fake_in_memory_store.list_keys() == []
@@ -139,6 +140,7 @@ def test_SlackNotificationAction(
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
+        name="testing",
     )
 
     assert slack_action.run(
@@ -154,6 +156,7 @@ def test_SlackNotificationAction(
         slack_token=slack_token,
         slack_channel=slack_channel,
         notify_on=notify_on,
+        name="testing",
     )
 
     assert slack_action.run(
@@ -169,6 +172,7 @@ def test_SlackNotificationAction(
             renderer=renderer,
             slack_token=slack_token,
             notify_on=notify_on,
+            name="testing",
         )
 
     # Test with just slack_channel set; expect fail
@@ -178,6 +182,7 @@ def test_SlackNotificationAction(
             renderer=renderer,
             slack_channel=slack_channel,
             notify_on=notify_on,
+            name="testing",
         )
 
     # Test with slack_channel, slack_token, and slack_webhook set; expect fail
@@ -189,6 +194,7 @@ def test_SlackNotificationAction(
             slack_token=slack_token,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
+            name="testing",
         )
 
     # test notify on with failed run; expect pass
@@ -198,6 +204,7 @@ def test_SlackNotificationAction(
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
+        name="testing",
     )
 
     assert slack_action.run(
@@ -221,6 +228,7 @@ def test_SlackNotificationAction(
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
+        name="testing",
     )
 
     assert slack_action.run(
@@ -293,6 +301,7 @@ def test_OpsgenieAlertAction(
         region=None,
         priority="P3",
         notify_on="all",
+        name="testing",
     )
 
     # Make sure the alert is sent by default when the validation has success = False
@@ -332,6 +341,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
+        name="testing",
     )
 
     # validation_result_suite is None
@@ -369,6 +379,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
+        name="testing",
     )
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
@@ -383,6 +394,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
+        name="testing",
     )
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
@@ -401,6 +413,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
+        name="testing",
     )
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
@@ -417,6 +430,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
+        name="testing",
     )
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
@@ -447,6 +461,7 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
+        name="testing",
     )
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
@@ -576,6 +591,7 @@ def test_EmailAction(
             notify_on=notify_on,
             use_tls=use_tls,
             use_ssl=use_ssl,
+            name="Testing",
         )
         assert email_action.sender_login != email_action.sender_alias
         assert email_action.run(
@@ -591,7 +607,7 @@ def test_api_action_create_payload():
     mock_validation_results = []
     expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
     api_notification_action = APINotificationAction(
-        mock_data_context, "http://www.example.com"
+        data_context=mock_data_context, url="http://www.example.com", name="testing"
     )
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
@@ -611,7 +627,7 @@ def test_api_action_run(
     mock_response.status_code = 200
     mock_requests.post.return_value = mock_response
     api_notification_action = APINotificationAction(
-        data_context_simple_expectation_suite, "http://www.example.com"
+        data_context_simple_expectation_suite, "http://www.example.com", "testing"
     )
     response = api_notification_action.run(
         validation_result_suite, validation_result_suite_id, file_data_asset
@@ -673,6 +689,7 @@ def test_cloud_sns_notification_action(
         sns_topic_arn=arn,
         sns_message_subject="Subject",
         data_context=cloud_data_context_with_datasource_pandas_engine,
+        name="testing",
     )
     assert sns_action.run(
         validation_result_suite=validation_result_suite,

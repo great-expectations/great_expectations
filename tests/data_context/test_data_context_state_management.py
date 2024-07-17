@@ -807,7 +807,7 @@ def test_add_profiler_with_existing_profiler(
 
 
 @pytest.mark.unit
-def test_add_profiler_namespace_collision_raises_deprecation(
+def test_add_profiler_namespace_collision(
     in_memory_data_context: EphemeralDataContextSpy,
     profiler_rules: dict,
 ):
@@ -824,10 +824,10 @@ def test_add_profiler_namespace_collision_raises_deprecation(
     _ = context.add_profiler(profiler=profiler)
     assert context.profiler_store.save_count == 1
 
-    with pytest.deprecated_call():
+    with pytest.raises(gx_exceptions.ProfilerError):
         _ = context.add_profiler(profiler=profiler)
 
-    assert context.profiler_store.save_count == 2
+    assert context.profiler_store.save_count == 1
 
 
 @pytest.mark.unit
@@ -1039,19 +1039,19 @@ def test_add_checkpoint_with_existing_checkpoint(
 
 
 @pytest.mark.unit
-def test_add_checkpoint_namespace_collision_raises_deprecation(
+def test_add_checkpoint_namespace_collision(
     in_memory_data_context: EphemeralDataContextSpy,
 ):
     context = in_memory_data_context
     checkpoint_name = "my_checkpoint"
 
-    _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
+    _ = context.add_checkpoint(name=checkpoint_name)
     assert context.checkpoint_store.save_count == 1
 
-    with pytest.deprecated_call():
-        _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
+    with pytest.raises(gx_exceptions.CheckpointError):
+        _ = context.add_checkpoint(name=checkpoint_name)
 
-    assert context.checkpoint_store.save_count == 2
+    assert context.checkpoint_store.save_count == 1
 
 
 @pytest.mark.unit
@@ -1156,7 +1156,6 @@ def test_add_or_update_checkpoint_adds_successfully(
     context = in_memory_data_context
 
     if use_existing_checkpoint:
-        checkpoint_config.pop("class_name")
         checkpoint = Checkpoint(**checkpoint_config, data_context=context)
         checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
     else:
@@ -1318,7 +1317,6 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
     assert len(checkpoint.validations) == 0
     assert context.checkpoint_store.save_count == 1
 
-    checkpoint_config.pop("class_name")
     checkpoint = Checkpoint(**checkpoint_config, data_context=context)
     checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
 

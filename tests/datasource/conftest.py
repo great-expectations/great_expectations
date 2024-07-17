@@ -61,7 +61,6 @@ def test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine(
 ):
     return SparkDFExecutionEngine(
         name="test_spark_execution_engine",
-        force_reuse_spark_context=True,
     )
 
 

@@ -34,7 +34,7 @@ def public_api(func: F) -> F:
 def deprecated_method_or_class(
     version: str,
     message: str = "",
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
+) -> Callable[[F], F]:
     """Add a deprecation warning to the docstring of the decorated method or class.
 
     Used as a decorator:
@@ -56,7 +56,7 @@ def deprecated_method_or_class(
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: Callable[P, T]) -> Callable[P, T]:
+    def wrapper(func: F) -> F:
         """Wrapper method that accepts func, so we can modify the docstring."""
         return _add_text_to_function_docstring_after_summary(
             func=func,
@@ -105,7 +105,7 @@ def deprecated_argument(
     argument_name: str,
     version: str,
     message: str = "",
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
+) -> Callable[[F], F]:
     """Add an arg-specific deprecation warning to the decorated method or class.
 
     Used as a decorator:
@@ -130,7 +130,7 @@ def deprecated_argument(
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: Callable[P, T]) -> Callable[P, T]:
+    def wrapper(func: F) -> F:
         """Wrapper method that accepts func, so we can modify the docstring."""
         if not docstring_parser.docstring_parser:
             return func
@@ -148,7 +148,7 @@ def new_argument(
     argument_name: str,
     version: str,
     message: str = "",
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
+) -> Callable[[F], F]:
     """Add an arg-specific version added note to the decorated method or class.
 
     Used as a decorator:
@@ -173,7 +173,7 @@ def new_argument(
 
     text = f".. versionadded:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: Callable[P, T]) -> Callable[P, T]:
+    def wrapper(func: F) -> F:
         """Wrapper method that accepts func, so we can modify the docstring."""
         if not docstring_parser.docstring_parser:
             return func
@@ -187,9 +187,7 @@ def new_argument(
     return wrapper
 
 
-def _add_text_to_function_docstring_after_summary(
-    func: Callable[P, T], text: str
-) -> Callable[P, T]:
+def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
     """Insert text into docstring, e.g. rst directive.
 
     Args:
@@ -228,10 +226,10 @@ def _add_text_to_function_docstring_after_summary(
 
 
 def _add_text_below_function_docstring_argument(
-    func: Callable[P, T],
+    func: F,
     argument_name: str,
     text: str,
-) -> Callable[P, T]:
+) -> F:
     """Add text below specified docstring argument.
 
     Args:

@@ -318,6 +318,59 @@ def test_compile_evaluation_parameter_dependencies(
 
 
 @pytest.mark.filesystem
+def test_compile_evaluation_parameter_dependencies_broken_suite(
+    data_context_parameterized_expectation_suite: DataContext,
+):
+    broken_suite_path = pathlib.Path(
+        data_context_parameterized_expectation_suite.root_directory,
+        "expectations",
+        "broken_suite.json",
+    )
+    broken_suite_dict = {
+        "expectation_suite_name": "broken suite",
+        "expectations": [
+            {
+                "expectation_type": "expect_column_values_to_be_between",
+                "kwargs": {
+                    "column": "col_1",
+                    "max_value": 5,
+                    "min_value": 1,
+                    "mostly": 0.5,
+                },
+                "meta": {},
+                "not_a_valid_expectation_config_arg": "break it!",
+            },
+        ],
+        "meta": {"great_expectations_version": "0.18.8"},
+    }
+    with broken_suite_path.open("w", encoding="UTF-8") as fp:
+        json.dump(obj=broken_suite_dict, fp=fp)
+
+    assert (
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        == {}
+    )
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
+    assert (
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        == {
+            "source_diabetes_data.default": [
+                {
+                    "metric_kwargs_id": {
+                        "column=patient_nbr": [
+                            "expect_column_unique_value_count_to_be_between.result.observed_value"
+                        ]
+                    }
+                }
+            ],
+            "source_patient_data.default": [
+                "expect_table_row_count_to_equal.result.observed_value"
+            ],
+        }
+    )
+
+
+@pytest.mark.filesystem
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
 def test_update_datasource_persists_changes_with_store(
     mock_update_by_name: mock.MagicMock,

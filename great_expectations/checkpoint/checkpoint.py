@@ -143,7 +143,7 @@ class BaseCheckpoint(ConfigPeer):
         version="0.13.33",
         message="Used in cloud deployments.",
     )
-    def run(  # noqa: C901, PLR0913, PLR0915
+    def run(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         template_name: str | None = None,
         run_name_template: str | None = None,
@@ -354,7 +354,7 @@ class BaseCheckpoint(ConfigPeer):
                 checkpoint_run_results.update(run_results)
 
         return CheckpointResult(
-            validation_result_url=validation_result_url,
+            validation_result_url=validation_result_url,  # type: ignore[possibly-undefined]
             run_id=run_id,  # type: ignore[arg-type] # could be str
             run_results=checkpoint_run_results,
             checkpoint_config=self.config,
@@ -518,6 +518,7 @@ class BaseCheckpoint(ConfigPeer):
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
                     id=self.ge_cloud_id,
+                    resource_name=self.name,
                 )
 
             operator_run_kwargs = {}

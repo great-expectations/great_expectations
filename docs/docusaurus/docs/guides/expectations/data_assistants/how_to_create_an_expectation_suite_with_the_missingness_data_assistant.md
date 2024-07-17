@@ -20,16 +20,16 @@ All the code used in the examples is available in GitHub at this location: [how_
 <Prerequisites>
 
 - A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
-- An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_lp.md).
+- An understanding of how to [configure a Data Source](../../connecting_to_your_data/connect_to_data_lp.md).
 - An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 </Prerequisites>
 
-## Prepare your Datasource and Validator
+## Prepare your Data Source and Validator
 
 In the following examples, you'll be using existing New York taxi trip data to create a Validator.
 
-This is the `Datasource` configuration:
+This is the `Data Source` configuration:
  
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py datasource_config"
 ```
@@ -40,7 +40,7 @@ This is the `Validator` configuration:
 ```
 
 :::caution
-The Missingness Data Assistant runs multiple queries against your `Datasource`. Data Assistant performance can vary significantly depending on the number of Batches, the number of records per Batch, and network latency. If Data Assistant runtimes are too long, use a subset of your data when defining your `Datasource` and `Validator`.
+The Missingness Data Assistant runs multiple queries against your `Data Source`. Data Assistant performance can vary significantly depending on the number of Batches, the number of records per Batch, and network latency. If Data Assistant runtimes are too long, use a subset of your data when defining your `Data Source` and `Validator`.
 :::
 
 ## Run the Missingness Data Assistant

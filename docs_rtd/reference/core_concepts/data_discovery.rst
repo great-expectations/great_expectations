@@ -30,5 +30,3 @@ Warning: ``BasicDatasetProfiler`` will evaluate the entire batch without limits 
 consuming. As a rule of thumb, we recommend starting with small batches of data.
 
 See the :ref:`reference__core_concepts__profiling` for more information.
-
-

@@ -21,9 +21,9 @@ Steps
     .. code-block::
 
         This article is for comments to: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/{some_path}/{your_guide_name}.html
-        
+
         Please comment +1 if this How-to Guide is important to you.
-	
+
 2. After publishing the article, find the ``topic_id`` at the end of the article's URL: (Ex: ``219`` in ``/t/how-to-configure-an-actionlistvalidationoperator/219``). Please add this code to the bottom of your Guide, and replace ``{topic_id}`` with the real id.
 
 .. raw:: html
