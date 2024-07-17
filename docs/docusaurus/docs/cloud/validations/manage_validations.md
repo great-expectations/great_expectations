@@ -72,7 +72,11 @@ To make the identification of Data Assets containing partitions easier, partitio
     
     - To view the run history of all Validations, select **All Runs** to view a graph showing the Validation run history for all columns.
 
-    - Note: items in run history with a calendar icon are run on a GX-managed schedule.
+:::tip
+
+Items in run history with a calendar icon are run on a GX-managed schedule.
+
+:::
 
 6. Optional. Hover over a circle in the Validation timeline to view details about a specific Validation run, including the observed values.
 
