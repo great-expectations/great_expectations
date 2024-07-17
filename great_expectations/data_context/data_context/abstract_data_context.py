@@ -140,7 +140,6 @@ yaml = YAMLHandler()
 T = TypeVar("T", dict, list, str)
 
 
-@public_api
 class AbstractDataContext(ConfigPeer, ABC):
     """Base class for all Data Contexts that contains shared functionality.
 
