@@ -1,13 +1,17 @@
 const TITLE_MAX_CHARACTERS = 120;
-const DOCUMENTATION_BOARD_ID = 1001988888;
+const DOCUMENTATION_BOARD_ID = 10019;
 const STORY_ISSUETYPE_ID = 10011;
 
-function truncateDescription(description) {
+const truncateDescription = (description) => {
     return description.length > TITLE_MAX_CHARACTERS ? description.substring(0, TITLE_MAX_CHARACTERS) + "..." : description;
 }
 
+const fullDescription = (description, name, email) => {
+    return `Name: ${name || '-'}\nEmail: ${email || '-'}\n\n${description}`;
+}
+
 exports.handler = async (req, context) => {
-    const { description } = JSON.parse(req.body);
+    const { description, name, email } = JSON.parse(req.body);
     const response = await fetch("https://greatexpectations.atlassian.net/rest/api/2/issue", {
         method: "POST",
         headers: {
@@ -20,7 +24,7 @@ exports.handler = async (req, context) => {
                     "id": DOCUMENTATION_BOARD_ID
                 },
                 "summary": truncateDescription(description),
-                "description": description,
+                "description": fullDescription(description, name, email),
                 "issuetype": {
                     "id": STORY_ISSUETYPE_ID
                 }

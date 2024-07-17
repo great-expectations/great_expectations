@@ -64,7 +64,9 @@ export default function WasThisHelpful(){
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    description: formData.description
+                    description: formData.description,
+                    name: formData.name,
+                    email: formData.email
                 })
             });
             if (response.ok) {
