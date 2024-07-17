@@ -1918,12 +1918,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
         return self.variables.progress_bars
 
-    # @property
-    # def datasources(self) -> DatasourceDict:
-    #     """A single holder for all Datasources in this context"""
-    #     return self._datasources
-    #
-
     # TODO: All datasources should now be fluent so we should be able to delete this
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
