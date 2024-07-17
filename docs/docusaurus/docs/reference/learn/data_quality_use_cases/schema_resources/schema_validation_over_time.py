@@ -122,16 +122,18 @@ for x in context.validation_results_store.get_all():
 pd.DataFrame(validation_results)
 # </snippet>
 
-# Check output matches what is in the docs.
-first_validation = validation_results.iloc[0]
-second_validation = validation_results.iloc[1]
+df = pd.DataFrame(validation_results)
 
-assert first_validation["success"] == True
+# Check output matches what is in the docs.
+first_validation = df.iloc[0]
+second_validation = df.iloc[1]
+
+assert bool(first_validation["success"]) is True
 assert first_validation["evaluated_expectations"] == 2
 assert first_validation["passed_expectations"] == 2
 assert first_validation["failure_rate"] == 0
 
-assert second_validation["success"] == False
+assert bool(second_validation["success"]) is False
 assert second_validation["evaluated_expectations"] == 2
 assert second_validation["passed_expectations"] == 1
 assert second_validation["failure_rate"] == 0.5
