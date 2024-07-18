@@ -3,7 +3,6 @@
 # Do not add any dependencies here that are not compatible with sqlalchemy>=2.0
 
 --requirement requirements-dev-athena.txt
---requirement requirements-dev-lite.txt
 --requirement requirements-dev-bigquery.txt
 --requirement requirements-dev-mssql.txt
 --requirement requirements-dev-mysql.txt
