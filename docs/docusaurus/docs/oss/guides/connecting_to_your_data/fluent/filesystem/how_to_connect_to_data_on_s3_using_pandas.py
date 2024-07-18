@@ -25,7 +25,7 @@ datasource = context.data_sources.add_pandas_s3(
 )
 # </snippet>
 
-assert datasource_name in context.datasources
+assert datasource_name in context.data_sources.all()
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py add_asset">
