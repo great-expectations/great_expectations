@@ -3,7 +3,6 @@
 
 
 --requirement requirements-dev-athena.txt
---requirement requirements-dev-lite.txt
 --requirement requirements-dev-sqlalchemy1.txt
 --requirement requirements-dev-bigquery.txt
 --requirement requirements-dev-dremio.txt
