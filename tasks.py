@@ -29,6 +29,7 @@ from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBu
 
 if TYPE_CHECKING:
     from invoke.context import Context
+    from typing_extensions import Literal
 
 
 LOGGER = logging.getLogger(__name__)
@@ -138,6 +139,7 @@ def lint(
     fmt_: bool = True,
     fix: bool = False,
     unsafe_fixes: bool = False,
+    output_format: Literal["full", "concise", "github"] | None = None,
     watch: bool = False,
     pty: bool = True,
 ):
@@ -153,7 +155,9 @@ def lint(
         cmds.append("--unsafe-fixes")
     if watch:
         cmds.append("--watch")
-    if os.getenv("GITHUB_ACTIONS"):
+    if output_format:
+        cmds.append(f"--output-format={output_format}")
+    elif os.getenv("GITHUB_ACTIONS"):
         cmds.append("--output-format=github")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
