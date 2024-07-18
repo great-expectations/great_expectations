@@ -1186,7 +1186,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         pass  # no-op
 
     # Renamed from validate due to collision with Pydantic method of the same name
-    def validate_(  # noqa: PLR0913
+    def validate_(
         self,
         validator: Validator,
         suite_parameters: Optional[dict] = None,

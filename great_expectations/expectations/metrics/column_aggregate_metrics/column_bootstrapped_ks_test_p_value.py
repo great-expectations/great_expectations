@@ -28,7 +28,7 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
     value_keys = ("partition_object", "p", "bootstrap_sample", "bootstrap_sample_size")
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: C901, PLR0913
+    def _pandas(  # noqa: C901
         cls,
         column,
         partition_object=None,

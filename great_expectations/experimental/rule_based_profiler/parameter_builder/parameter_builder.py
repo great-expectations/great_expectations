@@ -199,7 +199,7 @@ class ParameterBuilder(ABC, Builder):
                 parameter_values=parameter_values,
             )
 
-    def resolve_evaluation_dependencies(  # noqa: PLR0913
+    def resolve_evaluation_dependencies(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,

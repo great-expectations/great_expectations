@@ -127,7 +127,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 asset.test_connection()
 
     @override
-    def _build_data_connector(  # noqa: PLR0913
+    def _build_data_connector(
         self,
         data_asset: FileDataAsset,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
