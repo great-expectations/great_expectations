@@ -166,21 +166,21 @@ class SlackRenderer(Renderer):
             logger.warning("No docs link found. Skipping data docs link in Slack message.")
         return report_element
 
-    def _build_report_element_block(
+    def _build_report_element_block(  # noqa: C901
         self, data_docs_pages: list[dict], notify_with: list[str]
     ) -> dict | None:
         if not data_docs_pages:
             return None
 
         if notify_with:
-            for docs_link_key in notify_with:
-                if docs_link_key in data_docs_pages:
-                    docs_link = data_docs_pages[docs_link_key]
+            for site_name in notify_with:
+                if site_name in data_docs_pages:
+                    docs_link = data_docs_pages[site_name]
                     report_element = self._get_report_element(docs_link)
                 else:
                     logger.critical(
                         f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `"
-                        f"{docs_link_key!s}`, but it is not configured under `data_docs_sites` in the "  # noqa: E501
+                        f"{site_name!s}`, but it is not configured under `data_docs_sites` in the "
                         f"`great_expectations.yml`\n"
                     )
                     report_element = {
@@ -188,17 +188,17 @@ class SlackRenderer(Renderer):
                         "text": {
                             "type": "mrkdwn",
                             "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: "  # noqa: E501
-                            f"`{docs_link_key!s}`, but it is not configured under "
+                            f"`{site_name!s}`, but it is not configured under "
                             f"`data_docs_sites` in the `great_expectations.yml`\n",
                         },
                     }
                 if report_element:
                     return report_element
         else:
-            for docs_link_key in data_docs_pages:
-                if docs_link_key == "class":
-                    continue
-                docs_link = data_docs_pages[docs_link_key]
+            for page in data_docs_pages:
+                for docs_link_key, docs_link in page.items():
+                    if docs_link_key == "class":
+                        continue
                 report_element = self._get_report_element(docs_link)
                 return report_element
 
