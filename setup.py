@@ -49,6 +49,7 @@ def get_extras_require():
     )
     ignore_keys = (
         "sqlalchemy",
+        "sqlalchemy2",
         "test",
         "tools",
         "all-contrib-expectations",
