@@ -51,7 +51,7 @@ class FilePathDataConnector(DataConnector):
 
     FILE_PATH_BATCH_SPEC_KEY = "path"
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         datasource_name: str,
         data_asset_name: str,
