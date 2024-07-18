@@ -34,7 +34,7 @@ load_data_into_test_database(
 
 
 def add_column_to_transfers_table() -> None:
-    connection = psycopg2.connect("host=db dbname=gx_example_db user=example_user")
+    connection = psycopg2.connect("host=localhost dbname=test_ci user=postgres")
     query = "ALTER TABLE transfers ADD COLUMN recipient_account_number INTEGER"
     cursor = connection.cursor()
     cursor.execute(query)
