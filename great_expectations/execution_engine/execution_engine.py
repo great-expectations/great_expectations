@@ -18,7 +18,6 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -77,7 +76,6 @@ class MetricComputationConfiguration(DictDot):
     compute_domain_kwargs: Optional[dict] = None
     accessor_domain_kwargs: Optional[dict] = None
 
-    @public_api
     @override
     def to_dict(self) -> dict:
         """Returns: this MetricComputationConfiguration as a Python dictionary
@@ -87,7 +85,6 @@ class MetricComputationConfiguration(DictDot):
         """
         return asdict(self)
 
-    @public_api
     def to_json_dict(self) -> dict:
         """Returns: this MetricComputationConfiguration as a JSON dictionary
 
@@ -108,7 +105,6 @@ class PartitionDomainKwargs:
     accessor: dict
 
 
-@public_api
 class ExecutionEngine(ABC):
     """ExecutionEngine defines interfaces and provides common methods for loading Batch of data and compute metrics.
 
@@ -289,7 +285,6 @@ class ExecutionEngine(ABC):
         """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""  # noqa: E501
         raise NotImplementedError
 
-    @public_api
     def get_domain_records(
         self,
         domain_kwargs: dict,
@@ -305,7 +300,6 @@ class ExecutionEngine(ABC):
 
         raise NotImplementedError
 
-    @public_api
     def get_compute_domain(
         self,
         domain_kwargs: dict,
