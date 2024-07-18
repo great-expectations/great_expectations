@@ -32,12 +32,8 @@ def test_datasource_store_get_by_id(
             {
                 "data": {
                     "id": id,
-                    "attributes": {
-                        "datasource_config": {
-                            "name": "my_datasource",
-                            "type": "pandas",
-                        }
-                    },
+                    "name": "my_datasource",
+                    "type": "pandas",
                 }
             },
             200,
@@ -49,7 +45,8 @@ def test_datasource_store_get_by_id(
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object
             urllib.parse.urljoin(
-                ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/datasources/{id}"
+                ge_cloud_base_url,
+                f"api/v1/organizations/{ge_cloud_organization_id}/datasources/{id}",
             ),
             params=None,
         )
@@ -74,12 +71,8 @@ def test_datasource_store_get_by_name(
             {
                 "data": {
                     "id": id,
-                    "attributes": {
-                        "datasource_config": {
-                            "name": "my_datasource",
-                            "type": "pandas",
-                        }
-                    },
+                    "name": "my_datasource",
+                    "type": "pandas",
                 }
             },
             200,
@@ -98,7 +91,7 @@ def test_datasource_store_get_by_name(
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object
             urllib.parse.urljoin(
-                ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/datasources"
+                ge_cloud_base_url, f"api/v1/organizations/{ge_cloud_organization_id}/datasources"
             ),
             params={"name": datasource_name},
         )
@@ -126,7 +119,8 @@ def test_datasource_store_delete_by_id(
         mock_delete.assert_called_once_with(
             mock.ANY,  # requests.Session object
             urllib.parse.urljoin(
-                ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/datasources/{id}"
+                ge_cloud_base_url,
+                f"api/v1/organizations/{ge_cloud_organization_id}/datasources/{id}",
             ),
         )
 
