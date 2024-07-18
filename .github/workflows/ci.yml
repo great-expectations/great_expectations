@@ -228,7 +228,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -381,7 +381,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -561,26 +561,6 @@ jobs:
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/pydantic-v1-install.txt -r reqs/requirements-dev-test.txt
-      - name: Run the tests
-        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
-
-  numpy-2:
-    needs: [unit-tests, static-analysis]
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.9"
-          cache: "pip"
-          cache-dependency-path: reqs/requirements-dev-test.txt
-      - name: Install dependencies
-        run: pip install . -r reqs/requirements-dev-test.txt
-      - name: Install numpy 2
-        run: pip install --pre "numpy>1.9999999999999"
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 

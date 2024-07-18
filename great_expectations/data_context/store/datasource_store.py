@@ -25,8 +25,6 @@ from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
-    from typing import Literal
-
     from typing_extensions import TypedDict
 
     from great_expectations.data_context.types.resource_identifiers import (
@@ -35,8 +33,8 @@ if TYPE_CHECKING:
 
     class DataPayload(TypedDict):
         id: str
-        attributes: dict
-        type: Literal["datasource"]
+        type: str
+        name: str
 
     class CloudResponsePayloadTD(TypedDict):
         data: DataPayload | list[DataPayload]
@@ -136,10 +134,7 @@ class DatasourceStore(Store):
     @override
     @staticmethod
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:  # type: ignore[override]
-        datasource_id: str = data["id"]
-        datasource_config_dict: dict = data["attributes"]["datasource_config"]
-        datasource_config_dict["id"] = datasource_id
-        return datasource_config_dict
+        return data  # type: ignore[return-value]
 
     def retrieve_by_name(self, datasource_name: str) -> FluentDatasource:
         """Retrieves a Datasource persisted in the store by it's given name.

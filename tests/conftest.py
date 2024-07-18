@@ -8,6 +8,7 @@ import os
 import pathlib
 import random
 import shutil
+import urllib.parse
 import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
@@ -1621,6 +1622,11 @@ def ge_cloud_id():
 @pytest.fixture
 def ge_cloud_base_url() -> str:
     return GX_CLOUD_MOCK_BASE_URL
+
+
+@pytest.fixture
+def v1_cloud_base_url(ge_cloud_base_url: str) -> str:
+    return urllib.parse.urljoin(ge_cloud_base_url, "api/v1/")
 
 
 @pytest.fixture

@@ -31,7 +31,7 @@ If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. 
 
   In this example the variable `context` is your Data Context.
 
-3. [Get the Validation Definition](/core/validate_data/validation_definitions/manage_validation_definitions.md#get-a-validation-definition-by-name) [or Definitions](/core/validate_data/validation_definitions/manage_validation_definitions.md#get-validation-definitions-by-attributes) to add to the Checkpoint.
+3. [Get the Validation Definition](/core/_validate_data/validation_definitions/manage_validation_definitions.md#get-a-validation-definition-by-name) [or Definitions](/core/validate_data/validation_definitions/manage_validation_definitions.md#get-validation-definitions-by-attributes) to add to the Checkpoint.
 
   In this example the variable `validation_definitions` is a list object containing a single Validation Definition.
 

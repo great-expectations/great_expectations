@@ -170,8 +170,32 @@ class PartitionerProtocol(PartitionerSortingProtocol, Protocol):
         ...
 
 
-class TestConnectionError(Exception):
-    pass
+class TestConnectionError(ConnectionError):
+    """
+    Raised if `.test_connection()` fails to connect to the datasource.
+    """
+
+    def __init__(
+        self,
+        message: str = "Attempt to connect to datasource failed",
+        *,
+        cause: Exception | None = None,
+        addendum: str | None = None,
+    ):
+        """
+        Args:
+            `message` base of the error message to be provided to the user.
+            `cause` is the original exception that caused the error, the repr of which will be added
+                to the error message.
+            `addendum` is optional additional information that can be added to the error message.
+        """
+        self.cause = cause  # not guaranteed to be the same as `self.__cause__`
+        self.addendum = addendum
+        if cause:
+            message += f": due to {cause!r}"
+        if addendum:
+            message += f": {addendum}"
+        super().__init__(message)
 
 
 class GxDatasourceWarning(UserWarning):
@@ -434,6 +458,13 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     ) -> bool:
         valid_options = self.get_batch_parameters_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))
+
+    @pydantic.validator("batch_metadata", pre=True)
+    def ensure_batch_metadata_is_not_none(cls, value: Any) -> Union[dict, Any]:
+        """If batch metadata is None, replace it with an empty dict."""
+        if value is None:
+            return {}
+        return value
 
     def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
         """Performs config variable substitution and populates batch parameters for

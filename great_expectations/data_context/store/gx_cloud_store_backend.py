@@ -101,9 +101,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     _ENDPOINT_VERSION_LOOKUP: dict[str, EndpointVersion] = {
         GXCloudRESTResource.CHECKPOINT: EndpointVersion.V0,
-        GXCloudRESTResource.DATASOURCE: EndpointVersion.V0,
-        GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V0,
-        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V0,
+        GXCloudRESTResource.DATASOURCE: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_ASSET: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V1,
         GXCloudRESTResource.EXPECTATION_SUITE: EndpointVersion.V1,
         GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V0,
         GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,

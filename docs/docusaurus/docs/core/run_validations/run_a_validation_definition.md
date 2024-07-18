@@ -44,7 +44,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 
    :::tip
 
-   You can set the level of detail returned in a Validation Definition's results by passing a Result Format configuration as the `result_format` parameter of your Validation Definition's `run(...)` method.  For more information on Result Formats, see [Choose a result format](./choose_result_format.md).
+   You can set the level of detail returned in a Validation Definition's results by passing a Result Format configuration as the `result_format` parameter of your Validation Definition's `run(...)` method.  For more information on Result Formats, see [Choose a result format](/core/trigger_actions_based_on_results/choose_a_result_format/choose_a_result_format.md).
 
    :::
 

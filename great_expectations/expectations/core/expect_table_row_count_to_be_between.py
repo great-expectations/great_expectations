@@ -183,6 +183,8 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     )
 
     class Config:
+        title = "Expect table row count to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectTableRowCountToBeBetween]

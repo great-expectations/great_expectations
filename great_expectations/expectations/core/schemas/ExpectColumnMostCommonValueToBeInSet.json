@@ -1,5 +1,5 @@
 {
-    "title": "Expect Column Most Common Value To Be In Set",
+    "title": "Expect column most common value to be in set",
     "description": "Expect the most common value to be within the designated value set.\n\nexpect_column_most_common_value_to_be_in_set is a     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).\n\nColumn Aggregate Expectations are one of the most common types of Expectation.\nThey are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.\nIf that Metric meets the conditions you set, the Expectation considers that data valid.\n\nArgs:\n    column (str):             The column name.\n    value_set (set-like):             A list of potential values to match.\n    ties_okay (boolean or None):             If True, then the expectation will still succeed if values outside the designated set are as common (but not more common) than designated values. Default False.\n\nOther Parameters:\n    result_format (str or None):             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY.             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).\n    catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).\n    meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).\n\nReturns:\n    An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)\n\n    Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.\n\nNotes:\n    * observed_value field in the result object is customized for this expectation to be a list           representing the most common values in the column, which is often a single element... if there           is a tie for most common among multiple values, observed_value will contain a single copy of each           most common value\n\nSupported Datasources:\n    [Pandas](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Spark](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [SQLite](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [MySQL](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [MSSQL](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Redshift](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [BigQuery](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)\n\nData Quality Category:\n    Sets\n\nExample Data:\n            test    test2\n        0   1       1\n        1   2       1\n        2   4       1\n\nCode Examples:\n    Passing Case:\n        Input:\n            ExpectColumnMostCommonValueToBeInSet(\n                column=\"test2\",\n                value_set=[1, 2, 4],\n                ties_okay=True\n            )\n\n        Output:\n            {\n              \"exception_info\": {\n                \"raised_exception\": false,\n                \"exception_traceback\": null,\n                \"exception_message\": null\n              },\n              \"result\": {\n                \"observed_value\": [\n                  1\n                ]\n              },\n              \"meta\": {},\n              \"success\": true\n            }\n\n    Failing Case:\n        Input:\n            ExpectColumnMostCommonValueToBeInSet(\n                column=\"test\",\n                value_set=[1, 2, 4]\n            )\n\n        Output:\n            {\n              \"exception_info\": {\n                \"raised_exception\": false,\n                \"exception_traceback\": null,\n                \"exception_message\": null\n              },\n              \"result\": {\n                \"observed_value\": [\n                  1,\n                  2,\n                  4\n                ]\n              },\n              \"meta\": {},\n              \"success\": false\n            }",
     "type": "object",
     "properties": {
@@ -143,26 +143,19 @@
             "description": "If True, then the expectation will still succeed if values outside the designated set are as common (but not more common) than designated values.",
             "type": "boolean"
         },
-        "library_metadata": {
-            "title": "Library Metadata",
-            "default": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "column aggregate expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
-            },
-            "type": "object"
-        },
         "metadata": {
             "type": "object",
             "properties": {
+                "expectation_class": {
+                    "title": "Expectation Class",
+                    "type": "string",
+                    "const": "ExpectColumnMostCommonValueToBeInSet"
+                },
+                "expectation_type": {
+                    "title": "Expectation Type",
+                    "type": "string",
+                    "const": "expect_column_most_common_value_to_be_in_set"
+                },
                 "domain_type": {
                     "title": "Domain Type",
                     "type": "string",

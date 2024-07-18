@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility.pydantic import Field, StrictStr
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
@@ -134,8 +135,10 @@ class ExpectColumnToExist(BatchExpectation):
             }}
     """  # noqa: E501
 
-    column: str
-    column_index: Union[int, SuiteParameterDict, None] = None
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
+    column_index: Union[int, SuiteParameterDict, None] = Field(
+        default=None, description=COLUMN_INDEX_DESCRIPTION
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
@@ -160,6 +163,8 @@ class ExpectColumnToExist(BatchExpectation):
     args_keys = ("column", "column_index")
 
     class Config:
+        title = "Expect column to exist"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnToExist]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

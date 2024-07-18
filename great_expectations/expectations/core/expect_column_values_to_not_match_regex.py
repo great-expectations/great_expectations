@@ -48,7 +48,7 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column entries to be strings that do NOT match a given regular expression."
 )
 REGEX_DESCRIPTION = "The regular expression the column entries should NOT match."
-DATA_QUALITY_ISSUES = ["Pattern Matching"]
+DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
 
 
@@ -206,6 +206,8 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to not match regex"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotMatchRegex]

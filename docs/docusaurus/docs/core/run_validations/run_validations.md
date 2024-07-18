@@ -23,14 +23,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
     to="/core/run_validations/create_a_validation_definition" 
     icon="/img/expectation_icon.svg" 
   />
-  
-  <LinkCard 
-    topIcon 
-    label="Choose result format"
-    description="Set the level of detail for the results of a Validation Definition."
-    to="/core/run_validations/choose_result_format" 
-    icon="/img/expectation_icon.svg" 
-  />
 
   <LinkCard 
     topIcon 
