@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -165,8 +166,10 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    column_set: Union[list, set, SuiteParameterDict, None]
-    exact_match: Union[bool, None]
+    column_set: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
+        description=COLUMN_SET_DESCRIPTION
+    )
+    exact_match: Union[bool, None] = pydantic.Field(description=EXACT_MATCH_DESCRIPTION)
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -191,6 +194,8 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     )
 
     class Config:
+        title = "Expect table columns to match set"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchSet]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

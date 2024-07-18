@@ -200,6 +200,8 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     args_keys = ("column", "threshold")
 
     class Config:
+        title = "Expect column value z-scores to be less than"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValueZScoresToBeLessThan]
@@ -252,8 +254,15 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         else:
             template_str = "Value z-scores must be "
 
-        if params.double_sided is True:
-            template_str += "greater than -$threshold and less than $threshold"
+        if params.double_sided.value is True:
+            inverse_threshold = params.threshold.value * -1
+            renderer_configuration.add_param(
+                name="inverse_threshold", param_type=RendererValueType.NUMBER
+            )
+            if inverse_threshold < params.threshold.value:
+                template_str += "greater than $inverse_threshold and less than $threshold"
+            else:
+                template_str += "greater than $threshold and less than $inverse_threshold"
         else:
             template_str += "less than $threshold"
 
