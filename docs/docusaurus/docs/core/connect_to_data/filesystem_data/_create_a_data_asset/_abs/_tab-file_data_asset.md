@@ -10,7 +10,7 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 - <PrereqGxInstall/>.
 - <PrereqDataContext/>.
 - Access to data files in Azure Blob Storage.
-- A pandas or Spark [Filesystem Data Source configured for Azure Blob Storage data files](/core/connect_to_data/filesystem_data/?environment=abs#create-a-data-source).
+- A pandas or Spark [Filesystem Data Source configured for Azure Blob Storage data files](/core/connect_to_data/filesystem_data/filesystem_data.md?data_source_type=spark&environment=abs#create-a-data-source).
 
 <Tabs>
 

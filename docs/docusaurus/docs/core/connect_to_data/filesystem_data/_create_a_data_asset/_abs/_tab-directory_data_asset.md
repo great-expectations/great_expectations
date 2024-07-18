@@ -10,7 +10,7 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
 - <PrereqPythonInstall/>.
 - <PrereqGxInstall/> and [Spark dependencies](/core/set_up_a_gx_environment/install_additional_dependencies.md?dependencies=spark).
 - <PrereqDataContext/>.
-- [A Filesystem Data Source configured to access data files in Azure Blob Storage](/core/connect_to_data/filesystem_data/filesystem_data.md?data_source_type=spark&environment=filesystem#create-a-data-source).
+- [A Filesystem Data Source configured to access data files in Azure Blob Storage](/core/connect_to_data/filesystem_data/filesystem_data.md?data_source_type=spark&environment=abs#create-a-data-source).
 
 <Tabs>
 
