@@ -3,6 +3,7 @@ title: Connect to Filesystem data
 description: Connect to data stored as files in a folder hierarchy and organize that data into Batches for retrieval and validation.
 hide_feedback_survey: false
 hide_title: false
+toc_max_heading_level: 2
 ---
 
 import TabItem from '@theme/TabItem';
