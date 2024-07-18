@@ -52,7 +52,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         return column.quantile(quantiles, interpolation=allow_relative_error).tolist()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: C901, PLR0911, PLR0913
+    def _sqlalchemy(  # noqa: C901, PLR0911
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -149,7 +149,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             )
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: PLR0913
+    def _spark(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,

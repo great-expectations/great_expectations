@@ -2063,7 +2063,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             return self.variables.data_context_id
 
-    def get_validation_result(  # noqa: C901, PLR0913
+    def get_validation_result(  # noqa: C901
         self,
         expectation_suite_name,
         run_id=None,
