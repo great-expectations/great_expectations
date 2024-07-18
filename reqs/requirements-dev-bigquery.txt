@@ -6,4 +6,4 @@ google-cloud-secret-manager>=1.0.0
 # needed to prevent excessive pip backtracking on python 3.11
 google-cloud-storage>=2.10.0;python_version >= '3.11'
 google-cloud-storage>=1.28.0;python_version < '3.11'
-sqlalchemy-bigquery>=1.3.0
+sqlalchemy-bigquery>=1.11.0
