@@ -176,7 +176,7 @@ def test_context_add_or_update_datasource(
     datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
     context.data_sources.add_or_update_sqlite(datasource)
 
-    updated_datasource: SqliteDatasource = context.data_sources.all()[datasource.name]  # type: ignore[assignment]
+    updated_datasource: SqliteDatasource = context.data_sources.all()[datasource.name]
     assert updated_datasource.connection_string == "sqlite:///"
 
 
