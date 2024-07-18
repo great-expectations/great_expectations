@@ -125,15 +125,15 @@ pd.DataFrame(validation_results)
 df = pd.DataFrame(validation_results)
 
 # Check output matches what is in the docs.
-# first_validation = df.iloc[0]
-# second_validation = df.iloc[1]
+first_validation = df.iloc[0]
+second_validation = df.iloc[1]
 
-# assert bool(first_validation["success"]) is True
-# assert first_validation["evaluated_expectations"] == 2
-# assert first_validation["passed_expectations"] == 2
-# assert first_validation["failure_rate"] == 0
+assert bool(first_validation["success"]) is True
+assert first_validation["evaluated_expectations"] == 2
+assert first_validation["passed_expectations"] == 2
+assert first_validation["failure_rate"] == 0
 
-# assert bool(second_validation["success"]) is False
-# assert second_validation["evaluated_expectations"] == 2
-# assert second_validation["passed_expectations"] == 1
-# assert second_validation["failure_rate"] == 0.5
+assert bool(second_validation["success"]) is False
+assert second_validation["evaluated_expectations"] == 2
+assert second_validation["passed_expectations"] == 1
+assert second_validation["failure_rate"] == 0.5
