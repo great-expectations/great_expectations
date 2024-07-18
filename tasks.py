@@ -153,6 +153,8 @@ def lint(
         cmds.append("--unsafe-fixes")
     if watch:
         cmds.append("--watch")
+    if os.getenv("GITHUB_ACTIONS"):
+        cmds.append("--output-format=github")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
