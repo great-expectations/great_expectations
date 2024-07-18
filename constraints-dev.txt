@@ -29,3 +29,4 @@
 # protobuf 3.19.5, 3.19.6, and 3.20.2 were released in September 2022
 # https://pypi.org/project/protobuf/#history
 protobuf!=3.20.0,!=3.20.1,<3.21
+setuptools>=70.0.0,<71.0.0 # lower bound required for python 3.12, upper bound required for how we use pkg_resources in scripts
