@@ -459,6 +459,13 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         valid_options = self.get_batch_parameters_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))
 
+    @pydantic.validator("batch_metadata", pre=True)
+    def ensure_batch_metadata_is_not_none(cls, value: Any) -> Union[dict, Any]:
+        """If batch metadata is None, replace it with an empty dict."""
+        if value is None:
+            return {}
+        return value
+
     def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
         """Performs config variable substitution and populates batch parameters for
         Batch.metadata at runtime.
