@@ -22,7 +22,7 @@ from typing import (
 
 from dateutil.parser import parse
 
-from great_expectations._docs_decorators import deprecated_argument, public_api
+from great_expectations._docs_decorators import deprecated_argument
 from great_expectations.compatibility import py4j, pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
@@ -91,7 +91,6 @@ def apply_dateutil_parse(column):
     "The existing Spark context will be reused if possible. If a spark_config is passed that doesn't match "  # noqa: E501
     "the existing config, the context will be stopped and restarted in local environments only.",
 )
-@public_api
 class SparkDFExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
 
@@ -620,7 +619,6 @@ illegal.  Please check your config."""  # noqa: E501
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
-    @public_api
     @override
     def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
@@ -752,7 +750,6 @@ illegal.  Please check your config."""  # noqa: E501
             condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
         )
 
-    @public_api
     @override
     def get_compute_domain(
         self,
