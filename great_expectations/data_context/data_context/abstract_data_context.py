@@ -549,7 +549,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         # We currently don't allow one to overwrite a datasource with this internal method
-        if datasource_name in self.datasources:
+        if datasource_name in self.data_sources.all():
             raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"Can not write the fluent datasource {datasource_name} because a datasource of that "  # noqa: E501
                 "name already exists in the data context."
@@ -560,7 +560,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource = ds_type(**kwargs)
         assert isinstance(datasource, FluentDatasource)
 
-        return_obj = self.datasources.set_datasource(name=datasource_name, ds=datasource)
+        return_obj = self.data_sources.all().set_datasource(name=datasource_name, ds=datasource)
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
         if save_changes:
@@ -589,7 +589,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         updated_datasource._rebuild_asset_data_connectors()
 
-        updated_datasource = self.datasources.set_datasource(
+        updated_datasource = self.data_sources.all().set_datasource(
             name=datasource_name, ds=updated_datasource
         )
         updated_datasource._data_context = self  # TODO: move from here?
@@ -604,14 +604,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         This should generally be avoided.
         """  # noqa: E501
         self.fluent_config.pop(datasource_name, None)
-        datasource = self.datasources.get(datasource_name)
+        datasource = self.data_sources.all().get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
                 self._datasource_store.delete(datasource)
         else:
             # Raise key error instead?
             logger.info(f"No Datasource '{datasource_name}' to delete")
-        self.datasources.pop(datasource_name, None)
+        self.data_sources.all().pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -783,19 +783,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         if "type" in kwargs:
             assert name, 'Fluent Datasource kwargs must include the keyword "name"'
             kwargs["name"] = name
-            if name in self.datasources:
+            if name in self.data_sources.all():
                 self._update_fluent_datasource(**kwargs)
             else:
                 self._add_fluent_datasource(**kwargs)
-            return_datasource = self.datasources[name]
+            return_datasource = self.data_sources.all()[name]
         else:
             if datasource is None:
                 raise ValueError("Either datasource or kwargs are required")  # noqa: TRY003
-            if datasource.name in self.datasources:
+            if datasource.name in self.data_sources.all():
                 self._update_fluent_datasource(datasource=datasource)
             else:
                 self._add_fluent_datasource(datasource=datasource)
-            return_datasource = self.datasources[datasource.name]
+            return_datasource = self.data_sources.all()[datasource.name]
 
         return return_datasource
 
@@ -870,7 +870,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")  # noqa: TRY003
 
         try:
-            datasource = self.datasources[datasource_name]
+            datasource = self.data_sources.all()[datasource_name]
         except KeyError as e:
             raise ValueError(str(e)) from e
 
@@ -1002,7 +1002,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A list of dictionaries representing datasource configurations.
         """
-        return [ds.dict() for ds in self.datasources.values()]
+        return [ds.dict() for ds in self.data_sources.all().values()]
 
     def delete_datasource(self, datasource_name: Optional[str]) -> None:
         """Delete a given Datasource by name.
@@ -1463,7 +1463,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         datasource_name = result.datasource_name
 
-        datasource = self.datasources.get(datasource_name)
+        datasource = self.data_sources.all().get(datasource_name)
         if not datasource:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
@@ -1918,15 +1918,13 @@ class AbstractDataContext(ConfigPeer, ABC):
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
         return self.variables.progress_bars
 
-    @property
-    def datasources(self) -> DatasourceDict:
-        """A single holder for all Datasources in this context"""
-        return self._datasources
-
+    # TODO: All datasources should now be fluent so we should be able to delete this
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
         return {
-            name: ds for (name, ds) in self.datasources.items() if isinstance(ds, FluentDatasource)
+            name: ds
+            for (name, ds) in self.data_sources.all().items()
+            if isinstance(ds, FluentDatasource)
         }
 
     @property
