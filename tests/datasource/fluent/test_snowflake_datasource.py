@@ -77,8 +77,8 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                 "user": "my_user",
                 "password": "password",
                 "account": "my_account",
-                "schema": "s_public",
-                "database": "d_public",
+                "schema": "S_PUBLIC",
+                "database": "D_PUBLIC",
                 "role": "my_role",
                 "warehouse": "my_wh",
             }
@@ -820,7 +820,7 @@ def test_get_execution_engine_succeeds():
         param(
             {
                 "name": "std connection_str",
-                "connection_string": "snowflake://user:password@account/db/schema?warehouse=wh&role=role",
+                "connection_string": "snowflake://user:password@account/db/SCHEMA?warehouse=wh&role=role",
             },
             {"url": ANY},
             id="std connection_string str",
@@ -915,7 +915,7 @@ class TestConvenienceProperties:
             datasource._data_context = ephemeral_context_with_defaults
             _ = datasource.schema_
         else:
-            assert datasource.schema_ == datasource.connection_string.schema_
+            assert datasource.schema_ == datasource.connection_string.schema_.lower()
 
     def test_database(
         self,
