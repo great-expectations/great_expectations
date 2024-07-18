@@ -1,7 +1,6 @@
 # Do not `pip install -r` this file locally or in CI (outside of StaticTypeCheck).
 # It only exists to be included in requirements-dev.txt, which should only be used in the Dockerfile.tests file.
 # Do not add any dependencies here that are not compatible with sqlalchemy>=2.0
-
 --requirement requirements-dev-athena.txt
 --requirement requirements-dev-bigquery.txt
 --requirement requirements-dev-mssql.txt
