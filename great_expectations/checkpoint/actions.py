@@ -707,7 +707,7 @@ class UpdateDataDocsAction(DataDocsAction):
 
         return action_results
 
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],

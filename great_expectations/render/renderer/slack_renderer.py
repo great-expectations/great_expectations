@@ -84,7 +84,7 @@ class SlackRenderer(Renderer):
             },
         }
 
-    def concatenate_text_blocks(  # noqa: PLR0913
+    def concatenate_text_blocks(
         self,
         action_name: str,
         text_blocks: list[dict],
