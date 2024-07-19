@@ -332,7 +332,7 @@ class BaseDatasourceNewYamlHelper:
 class FilesYamlHelper(BaseDatasourceNewYamlHelper):
     """The base class for pandas/spark helpers used in the datasource new flow."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         datasource_type: DatasourceTypes,
         usage_stats_payload: dict,

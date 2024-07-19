@@ -69,7 +69,7 @@ class JsonSiteStore(Store):
 
     @override
     def self_check(self, pretty_print) -> None:
-        NotImplementedError(
+        NotImplementedError(  # noqa: PLW0133
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )
 

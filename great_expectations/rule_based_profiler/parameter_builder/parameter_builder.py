@@ -207,7 +207,7 @@ class ParameterBuilder(ABC, Builder):
                 parameter_values=parameter_values,
             )
 
-    def resolve_evaluation_dependencies(  # noqa: PLR0913
+    def resolve_evaluation_dependencies(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -667,7 +667,7 @@ specified (empty "metric_name" value detected)."""
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        (  # noqa: PLR1701
+                        (
                             isinstance(metric_value, (str, np.str_))
                             and is_parseable_date(value=metric_value)
                         )

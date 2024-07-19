@@ -73,7 +73,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_list(  # noqa: PLR0913, PLR0912
+    def _render_list(  # noqa: PLR0912
         cls,
         render_object: list,
         exception_list_content_block: bool,
@@ -209,7 +209,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(  # noqa: PLR0913
+    def _render_other(
         cls,
         render_object: Any,
         exception_list_content_block: bool,

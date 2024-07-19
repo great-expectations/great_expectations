@@ -387,7 +387,7 @@ class Dataset(MetaDataset):
         Returns: List[int], a list of counts corresponding to bins"""
         raise NotImplementedError
 
-    def get_column_count_in_range(  # noqa: PLR0913
+    def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ) -> None:
         """Returns: int"""
@@ -512,7 +512,7 @@ class Dataset(MetaDataset):
 
     @DocInherit
     @DataAsset.expectation(["column_list"])
-    def expect_table_columns_to_match_ordered_list(  # noqa: PLR0913
+    def expect_table_columns_to_match_ordered_list(
         self,
         column_list,
         result_format=None,
@@ -757,7 +757,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["value"])
-    def expect_table_column_count_to_equal(  # noqa: PLR0913
+    def expect_table_column_count_to_equal(
         self,
         value,
         result_format=None,
@@ -901,7 +901,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["value"])
-    def expect_table_row_count_to_equal(  # noqa: PLR0913
+    def expect_table_row_count_to_equal(
         self,
         value,
         result_format=None,

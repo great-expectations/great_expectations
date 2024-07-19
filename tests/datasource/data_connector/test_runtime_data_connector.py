@@ -1115,7 +1115,7 @@ def test__build_batch_spec(basic_datasource):
             "batch_data": pd.DataFrame({"x": range(10)}),
         },
     )
-    assert type(batch_spec) == RuntimeDataBatchSpec
+    assert type(batch_spec) == RuntimeDataBatchSpec  # noqa: E721
     assert set(batch_spec.keys()) == {"batch_data", "data_asset_name"}
     assert batch_spec["batch_data"].shape == (10, 1)
 
@@ -1125,24 +1125,24 @@ def test__build_batch_spec(basic_datasource):
             "query": "my_query",
         },
     )
-    assert type(batch_spec) == RuntimeQueryBatchSpec
+    assert type(batch_spec) == RuntimeQueryBatchSpec  # noqa: E721
 
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
         batch_definition=batch_definition, runtime_parameters={"path": "my_path"}
     )
-    assert type(batch_spec) == PathBatchSpec
+    assert type(batch_spec) == PathBatchSpec  # noqa: E721
 
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
         batch_definition=batch_definition,
         runtime_parameters={"path": "s3://my.s3.path"},
     )
-    assert type(batch_spec) == S3BatchSpec
+    assert type(batch_spec) == S3BatchSpec  # noqa: E721
 
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
         batch_definition=batch_definition,
         runtime_parameters={"path": "s3a://my.s3.path"},
     )
-    assert type(batch_spec) == S3BatchSpec
+    assert type(batch_spec) == S3BatchSpec  # noqa: E721
 
 
 @pytest.mark.unit
@@ -1247,5 +1247,5 @@ def test_temp_table_schema_name_included_in_batch_spec(basic_datasource):
         batch_definition=batch_definition,
         runtime_parameters={"query": "my_query", "temp_table_schema_name": "my_schema"},
     )
-    assert type(batch_spec) == RuntimeQueryBatchSpec
+    assert type(batch_spec) == RuntimeQueryBatchSpec  # noqa: E721
     assert batch_spec["temp_table_schema_name"] == "my_schema"

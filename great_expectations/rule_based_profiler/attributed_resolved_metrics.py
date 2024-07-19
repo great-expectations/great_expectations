@@ -58,7 +58,7 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                     first_value_type: type = type(next(values_iterator))
                     current_type: type
                     if not all(
-                        type(current_value) == first_value_type
+                        type(current_value) == first_value_type  # noqa: E721
                         for current_value in values_iterator
                     ):
                         return True

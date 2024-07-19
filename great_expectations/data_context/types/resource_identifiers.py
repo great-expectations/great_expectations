@@ -223,7 +223,7 @@ class MetricIdentifier(DataContextKey):
 
 
 class ValidationMetricIdentifier(MetricIdentifier):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         run_id,
         data_asset_name,

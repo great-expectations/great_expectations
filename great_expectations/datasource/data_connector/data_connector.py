@@ -53,7 +53,7 @@ class DataConnector:
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         name: str,
         datasource_name: str,

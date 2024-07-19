@@ -26,7 +26,7 @@ class ColumnTypes(TableMetricProvider):
     default_kwarg_values = {"include_nested": True}
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: PLR0913
+    def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -43,7 +43,7 @@ class ColumnTypes(TableMetricProvider):
         ]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913
+    def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -73,7 +73,7 @@ class ColumnTypes(TableMetricProvider):
         return _get_sqlalchemy_column_metadata(execution_engine, batch_data)
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: PLR0913
+    def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

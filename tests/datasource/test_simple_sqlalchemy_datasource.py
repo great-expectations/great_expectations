@@ -96,7 +96,7 @@ def _datasource_asserts(
     # their types are correct.
     assert ds.data_connectors.keys() == expected_data_connector_types.keys()
     for name, expected_type in expected_data_connector_types.items():
-        assert type(ds.data_connectors[name]) == expected_type
+        assert type(ds.data_connectors[name]) == expected_type  # noqa: E721
     # We assert the data assets and types are exactly what we expect. Then we
     # extract the names from `expected_data_assets_with_types` and verify the
     # names match what is returned from ds.get_available_data_asset_names()

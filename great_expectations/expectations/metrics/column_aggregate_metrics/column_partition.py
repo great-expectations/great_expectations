@@ -34,7 +34,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     }
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: PLR0913
+    def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -49,7 +49,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         )
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913
+    def _sqlalchemy(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -64,7 +64,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         )
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: PLR0913
+    def _spark(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,

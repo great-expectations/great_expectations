@@ -508,7 +508,7 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success, "result": {"observed_value": size}}
 
     @DataAsset.expectation(["filepath"])
-    def expect_file_to_exist(  # noqa: PLR0913
+    def expect_file_to_exist(
         self,
         filepath=None,
         result_format=None,
@@ -638,7 +638,7 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success}
 
     @DataAsset.expectation([])
-    def expect_file_to_be_valid_json(  # noqa: PLR0913
+    def expect_file_to_be_valid_json(
         self,
         schema=None,
         result_format=None,

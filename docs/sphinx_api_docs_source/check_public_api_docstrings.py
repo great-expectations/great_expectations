@@ -106,7 +106,9 @@ def run_ruff(paths: List[pathlib.Path]) -> List[str]:
     _log_with_timestamp("Running ruff")
     # --select D option to enable pydocstyle errors in ruff
     # https://github.com/charliermarsh/ruff#pydocstyle-d
-    cmds = ["ruff", "check", "--select", "D"] + [str(p) for p in paths]
+    ruff_cmds = ["ruff", "check", "--select", "D", "--output-format=concise"]
+    cmds = ruff_cmds + [str(p) for p in paths]
+    logger.info(f"Running ruff: {' '.join(ruff_cmds)}")
     raw_results: subprocess.CompletedProcess = subprocess.run(
         cmds,
         capture_output=True,

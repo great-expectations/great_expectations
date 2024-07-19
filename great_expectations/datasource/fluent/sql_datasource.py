@@ -1185,7 +1185,7 @@ class SQLDatasource(Datasource):
                 asset.test_connection()
 
     @public_api
-    def add_table_asset(  # noqa: PLR0913
+    def add_table_asset(
         self,
         name: str,
         table_name: str = "",

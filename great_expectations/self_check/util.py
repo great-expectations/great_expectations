@@ -2291,7 +2291,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
                 key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
             )
         # if python built-in class has __lt__ then sorting can always work this way
-        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(
+        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(  # noqa: E721
             NotImplemented
         ):
             test_value_list = sorted(test_value_list, key=lambda x: str(x))

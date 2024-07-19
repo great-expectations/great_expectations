@@ -55,7 +55,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         "reduce_scalar_metric",
     }
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,

@@ -154,7 +154,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         return temp_column.map(is_between)
 
     @classmethod
-    def _pandas_vectorized(  # noqa: PLR0911, PLR0913
+    def _pandas_vectorized(  # noqa: PLR0911
         cls,
         column: pd.Series,
         min_value: Optional[Union[int, float, datetime.datetime]],

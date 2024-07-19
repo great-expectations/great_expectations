@@ -390,7 +390,7 @@ class DataAssistantRunner:
     ) -> List[str]:
         if rule is None:
             domain_type_attributes: List[str] = []
-            for rule in self._profiler.rules:
+            for rule in self._profiler.rules:  # noqa: PLR1704
                 domain_type_attributes.extend(
                     self._get_rule_domain_type_attributes(rule=rule)
                 )

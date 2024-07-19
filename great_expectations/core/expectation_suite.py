@@ -547,7 +547,7 @@ class ExpectationSuite(SerializableDictDot):
 
         self.expectations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
-    def patch_expectation(  # noqa: PLR0913
+    def patch_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
         op: str,
