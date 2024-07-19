@@ -2371,7 +2371,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if not batch_request_list:
                 batch_request_list = [batch_request]  # type: ignore[list-item]
 
-            for batch_request in batch_request_list:
+            for batch_request in batch_request_list:  # noqa: PLR1704
                 batch_list.extend(
                     self.get_batch_list(
                         datasource_name=datasource_name,

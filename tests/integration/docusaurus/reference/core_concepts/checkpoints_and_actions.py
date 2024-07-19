@@ -71,7 +71,8 @@ validation_result_id_type = next(iter(validation_result_id_type_set))
 assert validation_result_id_type == ValidationResultIdentifier
 validation_result_id = results.run_results[[k for k in results.run_results.keys()][0]]
 assert (
-    type(validation_result_id["validation_result"]) == ExpectationSuiteValidationResult
+    type(validation_result_id["validation_result"])  # noqa: E721
+    == ExpectationSuiteValidationResult
 )
 assert isinstance(results.checkpoint_config, CheckpointConfig)
 

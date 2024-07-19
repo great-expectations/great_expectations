@@ -392,10 +392,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_metric_expectation_map(self) -> dict[tuple[str, ...], str]:
         if not all(
-            [
-                isinstance(metric_names, str)
-                or isinstance(metric_names, tuple)
-            ]
+            [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
             for metric_names in self.metric_expectation_map.keys()
         ):
             raise gx_exceptions.DataAssistantResultExecutionError(
@@ -926,7 +923,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         col_has_list: pd.DataFrame = pd.DataFrame(
             {
                 "column_name": df.columns,
-                "has_list": (pandas_map(df)(type) == list).any(),
+                "has_list": (pandas_map(df)(type) == list).any(),  # noqa: E721
             }
         )
         list_column_names: List[str] = list(
@@ -3879,7 +3876,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 return pd.DataFrame()
 
         # if there are any lists in the dataframe
-        if (pandas_map(df)(type) == list).any().any():
+        if (pandas_map(df)(type) == list).any().any():  # noqa: E721
             df = DataAssistantResult._transform_column_lists_to_rows(
                 df=df,
             )

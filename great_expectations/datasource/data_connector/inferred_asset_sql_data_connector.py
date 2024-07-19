@@ -206,7 +206,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
         tables: List[Dict[str, str]] = []
         schema_names: List[str] = inspector.get_schema_names()
-        for schema_name in schema_names:
+        for schema_name in schema_names:  # noqa: PLR1704
             if (
                 ignore_information_schemas_and_system_tables
                 and schema_name in information_schemas

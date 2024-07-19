@@ -117,7 +117,7 @@ class BatchDefinition(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
 
-        assert type(batch_identifiers) == IDDict
+        assert type(batch_identifiers) == IDDict  # noqa: E721
 
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
