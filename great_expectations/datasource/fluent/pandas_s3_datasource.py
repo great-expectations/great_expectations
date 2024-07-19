@@ -101,7 +101,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 asset.test_connection()
 
     @override
-    def _build_data_connector(  # noqa: PLR0913
+    def _build_data_connector(
         self,
         data_asset: FileDataAsset,
         s3_prefix: str = "",

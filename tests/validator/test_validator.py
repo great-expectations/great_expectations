@@ -488,7 +488,7 @@ def test__get_attr___raises_attribute_error_with_invalid_attr(
 def test_graph_validate_with_two_expectations_and_first_expectation_without_additional_configuration(  # noqa: E501
     in_memory_runtime_context, basic_datasource: PandasDatasource
 ):
-    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    in_memory_runtime_context.data_sources.all()["my_datasource"] = basic_datasource
     df = pd.DataFrame(
         [
             "A",
@@ -636,7 +636,7 @@ def test_graph_validate_with_two_expectations_and_first_expectation_without_addi
 def test_graph_validate_with_two_expectations_and_first_expectation_with_result_format_complete(
     in_memory_runtime_context, basic_datasource: PandasDatasource
 ):
-    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    in_memory_runtime_context.data_sources.all()["my_datasource"] = basic_datasource
     df = pd.DataFrame(
         [
             "A",

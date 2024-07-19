@@ -125,7 +125,7 @@ def in_memory_data_context(
     fluent_datasources = {
         fluent_datasource_config["name"]: ds_type(**fluent_datasource_config),
     }
-    context.datasources.update(fluent_datasources)
+    context.data_sources.all().update(fluent_datasources)
     set_context(context)
     return context
 

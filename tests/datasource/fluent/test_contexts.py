@@ -398,7 +398,7 @@ def test_invalid_datasource_config_does_not_break_cloud_context(
             cloud_organization_id=cloud_details.org_id,
             cloud_access_token=cloud_details.access_token,
         )
-        assert datasource_name in context.datasources
+        assert datasource_name in context.data_sources.all()
         bad_datasource = context.get_datasource(datasource_name)
     # test __repr__ and __str__
     print(f"{bad_datasource!r}\n{bad_datasource!s}")

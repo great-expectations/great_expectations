@@ -15,7 +15,7 @@ class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
     options: BatchParameters
     partitioner: Optional[PartitionerT] = None
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         datasource_name: StrictStr,
         data_asset_name: StrictStr,
