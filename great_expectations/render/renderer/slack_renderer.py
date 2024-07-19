@@ -69,7 +69,9 @@ class SlackRenderer(Renderer):
         expectation_suite_name = validation_result.suite_name
         data_asset_name = validation_result.asset_name or "__no_data_asset_name__"
         summary_text += f"*Asset*: {data_asset_name}  "
-        if validation_link is not None:
+        # Slack does not allow links to local files due to security risks
+        # DataDocs links will be added in a block after this summary text when applicable
+        if validation_link is not None and "file://" not in validation_link:
             summary_text += (
                 f"*Expectation Suite*: {expectation_suite_name}  <{validation_link}|View Results>"
             )
@@ -137,8 +139,8 @@ class SlackRenderer(Renderer):
         report_element = None
         if docs_link:
             try:
+                # Slack does not allow links to local files due to security risks
                 if "file://" in docs_link:
-                    # handle special case since Slack does not render these links
                     report_element = {
                         "type": "section",
                         "text": {
