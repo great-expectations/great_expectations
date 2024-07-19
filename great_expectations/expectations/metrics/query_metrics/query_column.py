@@ -28,7 +28,7 @@ class QueryColumn(QueryMetricProvider):
     )
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913
+    def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -65,7 +65,7 @@ class QueryColumn(QueryMetricProvider):
         return [element._asdict() for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: PLR0913
+    def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

@@ -35,7 +35,7 @@ datasource = context.data_sources.add_pandas_filesystem(
 )
 # </snippet>
 
-assert datasource_name in context.datasources
+assert datasource_name in context.data_sources.all()
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py define_add_csv_asset_args">
