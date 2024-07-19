@@ -79,6 +79,7 @@ class SlackRenderer(Renderer):
                             """
 
             summary_text += f"*Asset*: {data_asset_name}  "
+            # Slack does not allow links to local files due to security risks
             if validation_link is not None and "file://" not in validation_link:
                 summary_text += f"*Expectation Suite*: {expectation_suite_name}  <{validation_link}|View Results>"
             else:
@@ -148,8 +149,8 @@ class SlackRenderer(Renderer):
         report_element = None
         if docs_link:
             try:
+                # Slack does not allow links to local files due to security risks
                 if "file://" in docs_link:
-                    # handle special case since Slack does not render these links
                     report_element = {
                         "type": "section",
                         "text": {
