@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.datasource.fluent.fluent_base_model import MappingIntStrAny
 
     class DataPayload(TypedDict):
         id: str
@@ -85,7 +86,20 @@ class DatasourceStore(Store):
         """
         See parent 'Store.serialize()' for more information
         """
-        return value._json_dict()
+        # DataAsset.order_by is not supported by v1, but has not yet been removed,
+        # so we drop it before serialization and alert the user with a warning.
+        if any(asset.order_by for asset in value.assets):
+            asset_names = [asset.name for asset in value.assets if asset.order_by]
+
+            warnings.warn(
+                f"Datasource {value.name} has one or more DataAssets that define a non-empty "
+                "order_by field. This property is no longer supported, and will be "
+                "silently dropped during serialization. The following DataAsset(s) are affected: "
+                + ", ".join(asset_names),
+                category=DeprecationWarning,
+            )
+        exclude: MappingIntStrAny = {"assets": {"__all__": {"order_by"}}}
+        return value._json_dict(exclude=exclude)
 
     @override
     def deserialize(self, value: dict | FluentDatasource) -> FluentDatasource:
