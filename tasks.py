@@ -47,41 +47,26 @@ _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
         "check": _CHECK_HELP_DESC,
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
-        "isort": "Use `isort` to sort packages. Default behavior.",
-        "ruff": (
-            "Use `ruff` instead of `isort` to sort imports."
-            " This will eventually become the default."
-        ),
         "pty": _PTY_HELP_DESC,
     }
 )
-def sort(  # noqa: PLR0913
+def sort(
     ctx: Context,
     path: str = ".",
     check: bool = False,
     exclude: str | None = None,
-    ruff: bool = False,  # isort is the current default
-    isort: bool = False,
     pty: bool = True,
 ):
     """Sort module imports."""
-    if ruff and isort:
-        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
-    if not isort:
-        cmds = [
-            "ruff",
-            path,
-            "--select I",
-            "--diff" if check else "--fix",
-        ]
-        if exclude:
-            cmds.extend(["--extend-exclude", exclude])
-    else:
-        cmds = ["isort", path]
-        if check:
-            cmds.append("--check-only")
-        if exclude:
-            cmds.extend(["--skip", exclude])
+    cmds = [
+        "ruff",
+        "check",
+        path,
+        "--select I",
+        "--diff" if check else "--fix",
+    ]
+    if exclude:
+        cmds.extend(["--extend-exclude", exclude])
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
