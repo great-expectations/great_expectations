@@ -71,7 +71,7 @@ class SlackRenderer(Renderer):
         summary_text += f"*Asset*: {data_asset_name}  "
         # Slack does not allow links to local files due to security risks
         # DataDocs links will be added in a block after this summary text when applicable
-        if validation_link is not None and "file://" not in validation_link:
+        if validation_link and "file://" not in validation_link:
             summary_text += (
                 f"*Expectation Suite*: {expectation_suite_name}  <{validation_link}|View Results>"
             )
