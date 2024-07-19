@@ -96,7 +96,7 @@ class DatasourceStore(Store):
                 "order_by field. This property is no longer supported, and will be "
                 "silently dropped during serialization. The following DataAsset(s) are affected: "
                 + ", ".join(asset_names),
-                category=DeprecationWarning,
+                category=UserWarning,
             )
         exclude: MappingIntStrAny = {"assets": {"__all__": {"order_by"}}}
         return value._json_dict(exclude=exclude)
