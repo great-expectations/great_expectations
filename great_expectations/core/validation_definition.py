@@ -7,6 +7,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    Extra,
     Field,
     PrivateAttr,
     ValidationError,
@@ -53,6 +54,7 @@ class ValidationDefinition(BaseModel):
     """
 
     class Config:
+        extra = Extra.forbid
         arbitrary_types_allowed = True  # Necessary for compatibility with suite's Marshmallow dep
         validate_assignment = True
         """
