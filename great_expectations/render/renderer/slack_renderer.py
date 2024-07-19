@@ -79,7 +79,7 @@ class SlackRenderer(Renderer):
                             """
 
             summary_text += f"*Asset*: {data_asset_name}  "
-            if validation_link is not None:
+            if validation_link is not None and "file://" not in validation_link:
                 summary_text += f"*Expectation Suite*: {expectation_suite_name}  <{validation_link}|View Results>"
             else:
                 summary_text += f"*Expectation Suite*: {expectation_suite_name}"
