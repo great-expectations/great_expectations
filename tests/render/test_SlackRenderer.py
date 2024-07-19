@@ -95,6 +95,7 @@ def test_SlackRenderer_validation_results_with_datadocs(
         validation_result=validation_result_suite,
         checkpoint_name="checkpoint_name_testing",
         name="testing",
+        validation_result_urls=["file:///localsite/index.html"],
     )
 
     expected_output = {
