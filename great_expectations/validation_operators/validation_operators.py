@@ -74,7 +74,7 @@ class ValidationOperator:
 
         raise NotImplementedError
 
-    def run(  # noqa: PLR0913
+    def run(
         self,
         assets_to_validate,
         run_id=None,

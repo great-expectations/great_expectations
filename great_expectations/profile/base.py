@@ -223,7 +223,7 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite
 
     @classmethod
-    def profile(  # noqa: PLR0913
+    def profile(
         cls,
         data_asset,
         run_id=None,

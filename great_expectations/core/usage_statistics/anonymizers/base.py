@@ -120,7 +120,7 @@ class BaseAnonymizer(ABC):
         salted = self._salt + string_
         return md5(salted.encode("utf-8")).hexdigest()
 
-    def _anonymize_object_info(  # noqa: PLR0913
+    def _anonymize_object_info(
         self,
         anonymized_info_dict: dict,
         object_: Optional[object] = None,

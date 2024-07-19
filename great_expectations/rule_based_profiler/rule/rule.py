@@ -44,7 +44,7 @@ from great_expectations.util import (
 
 
 class Rule(SerializableDictDot):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         name: str,
         variables: Optional[Union[ParameterContainer, Dict[str, Any]]] = None,
@@ -328,7 +328,7 @@ class Rule(SerializableDictDot):
         execution_time_property_name="rule_domain_builder_execution_time",
         pretty_print=False,
     )
-    def _get_rule_domains(  # noqa: PLR0913
+    def _get_rule_domains(
         self,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,

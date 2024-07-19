@@ -102,7 +102,7 @@ class BatchDefinition(SerializableDictDot):
         BatchDefinition
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         datasource_name: str,
         data_connector_name: str,

@@ -933,7 +933,7 @@ class DataAsset:
             {parameter_name: parameter_value}
         )
 
-    def add_citation(  # noqa: PLR0913
+    def add_citation(
         self,
         comment,
         batch_kwargs=None,

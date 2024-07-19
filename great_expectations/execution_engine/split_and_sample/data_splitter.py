@@ -140,7 +140,7 @@ class DataSplitter(abc.ABC):  # noqa: B024
                 "date_parts are required when using split_on_date_parts."
             )
         if not all(
-            (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701
+            (isinstance(dp, DatePart)) or (isinstance(dp, str))
             for dp in date_parts
         ):
             raise gx_exceptions.InvalidConfigError(

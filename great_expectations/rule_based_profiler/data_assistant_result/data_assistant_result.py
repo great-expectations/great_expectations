@@ -393,7 +393,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_metric_expectation_map(self) -> dict[tuple[str, ...], str]:
         if not all(
             [
-                isinstance(metric_names, str)  # noqa: PLR1701
+                isinstance(metric_names, str)
                 or isinstance(metric_names, tuple)
             ]
             for metric_names in self.metric_expectation_map.keys()
@@ -621,7 +621,7 @@ class DataAssistantResult(SerializableDictDot):
             exclude_column_names=exclude_column_names,
         )
 
-    def _plot(  # noqa: PLR0913
+    def _plot(
         self,
         plot_mode: PlotMode,
         sequential: bool,
@@ -3159,7 +3159,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         else:
             return default_theme
 
-    def _plot_table_domain_charts(  # noqa: PLR0913
+    def _plot_table_domain_charts(
         self,
         expectation_configurations: List[ExpectationConfiguration],
         include_column_names: Optional[List[str]],
@@ -3267,7 +3267,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return sorted_charts
 
-    def _plot_column_domain_charts(  # noqa: PLR0913
+    def _plot_column_domain_charts(
         self,
         expectation_configurations: List[ExpectationConfiguration],
         include_column_names: Optional[List[str]],
@@ -3660,7 +3660,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return return_charts
 
-    def _chart_column_values(  # noqa: PLR0913
+    def _chart_column_values(
         self,
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],

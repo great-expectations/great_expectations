@@ -140,7 +140,7 @@ class ExecutionEngine(ABC):
 
     recognized_batch_spec_defaults: Set[str] = set()
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         name: Optional[str] = None,
         caching: bool = True,

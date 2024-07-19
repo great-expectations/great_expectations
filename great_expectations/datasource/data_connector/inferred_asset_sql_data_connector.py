@@ -179,7 +179,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             introspected_assets[data_asset_name] = data_asset_config
             self.add_data_asset(name=table_name, config=data_asset_config)
 
-    def _introspect_db(  # noqa: C901, PLR0912, PLR0913
+    def _introspect_db(  # noqa: C901, PLR0912
         self,
         schema_name: Union[str, None] = None,
         ignore_information_schemas_and_system_tables: bool = True,
