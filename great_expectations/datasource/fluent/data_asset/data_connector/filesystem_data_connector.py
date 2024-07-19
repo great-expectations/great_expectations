@@ -148,7 +148,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         )
 
     @classmethod
-    def build_test_connection_error_message(  # noqa: PLR0913
+    def build_test_connection_error_message(
         cls,
         data_asset_name: str,
         batching_regex: re.Pattern,

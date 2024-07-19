@@ -599,7 +599,7 @@ class Validator:
 
         return inst_expectation
 
-    def _build_expectation_configuration(  # noqa: PLR0913
+    def _build_expectation_configuration(
         self,
         expectation_type: str,
         expectation_kwargs: dict,
@@ -801,7 +801,7 @@ class Validator:
 
         return inst_rule_based_profiler
 
-    def _build_rule_based_profiler_from_config_and_runtime_args(  # noqa: PLR0913
+    def _build_rule_based_profiler_from_config_and_runtime_args(
         self,
         expectation_type: str,
         expectation_kwargs: dict,
@@ -1762,7 +1762,7 @@ class Validator:
             {parameter_name: convert_to_json_serializable(parameter_value)}
         )
 
-    def add_citation(  # noqa: PLR0913
+    def add_citation(
         self,
         comment: str,
         batch_spec: Optional[dict] = None,

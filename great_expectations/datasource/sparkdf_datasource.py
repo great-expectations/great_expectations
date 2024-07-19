@@ -50,7 +50,7 @@ class SparkDFDatasource(LegacyDatasource):
     }
 
     @classmethod
-    def build_configuration(  # noqa: PLR0913
+    def build_configuration(
         cls,
         data_asset_type=None,
         batch_kwargs_generators=None,

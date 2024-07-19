@@ -532,7 +532,7 @@ Notes:
         hist, bin_edges = np.histogram(self[column], bins, density=False)
         return list(hist)
 
-    def get_column_count_in_range(  # noqa: PLR0913
+    def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
         # TODO this logic could probably go in the non-underscore version if we want to cache

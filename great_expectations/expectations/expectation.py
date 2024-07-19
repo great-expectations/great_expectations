@@ -2257,7 +2257,7 @@ class Expectation(metaclass=MetaExpectation):
         augmented_library_metadata["problems"] = problems
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
 
-    def _get_maturity_checklist(  # noqa: PLR0913
+    def _get_maturity_checklist(
         self,
         library_metadata: Union[
             AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
@@ -2452,7 +2452,7 @@ class BatchExpectation(Expectation, ABC):
 
         return True
 
-    def _validate_metric_value_between(  # noqa: C901, PLR0912, PLR0913
+    def _validate_metric_value_between(  # noqa: C901, PLR0912
         self,
         metric_name,
         configuration: ExpectationConfiguration,

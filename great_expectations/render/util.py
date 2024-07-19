@@ -99,7 +99,7 @@ def ordinal(num):
 
 
 def resource_key_passes_run_name_filter(resource_key, run_name_filter):
-    if type(resource_key) == ValidationResultIdentifier:
+    if type(resource_key) == ValidationResultIdentifier:  # noqa: E721
         run_name = resource_key.run_id.run_name
     else:
         raise TypeError(

@@ -209,7 +209,7 @@ class RenderedComponentContent(RenderedContent):
 
 
 class RenderedHeaderContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         header,
         subheader=None,
@@ -246,7 +246,7 @@ class RenderedHeaderContent(RenderedComponentContent):
 
 
 class RenderedGraphContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         graph,
         header=None,
@@ -355,7 +355,7 @@ class RenderedTableContent(RenderedComponentContent):
 
 
 class RenderedTabsContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
@@ -531,7 +531,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
 
 
 class RenderedBulletListContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         bullet_list,
         header=None,
@@ -570,7 +570,7 @@ class RenderedBulletListContent(RenderedComponentContent):
 
 
 class ValueListContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         value_list,
         header=None,
@@ -607,7 +607,7 @@ class ValueListContent(RenderedComponentContent):
 
 
 class TextContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)

@@ -71,7 +71,7 @@ class ValidationAction:
         return isinstance(self.data_context, CloudDataContext)
 
     @public_api
-    def run(  # noqa: PLR0913
+    def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -108,7 +108,7 @@ class ValidationAction:
         )
 
     @public_api
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -144,7 +144,7 @@ class NoOpAction(ValidationAction):
         super().__init__(data_context=data_context, name=name)
 
     @override
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -471,7 +471,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         data_context: AbstractDataContext,
         name: str,
@@ -1251,7 +1251,7 @@ class SNSNotificationAction(ValidationAction):
         self.sns_message_subject = sns_message_subject
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
@@ -1293,7 +1293,7 @@ class APINotificationAction(ValidationAction):
         self.url = url
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,

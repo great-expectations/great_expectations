@@ -211,7 +211,7 @@ class SqliteDatasource(SQLDatasource):
 
     @public_api
     @override
-    def add_table_asset(  # noqa: PLR0913
+    def add_table_asset(
         self,
         name: str,
         table_name: str = "",

@@ -280,7 +280,7 @@ class Store:
             return self._store_backend.has_key(key.to_tuple())
 
     def self_check(self, pretty_print: bool) -> None:
-        NotImplementedError(
+        NotImplementedError(  # noqa: PLW0133
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )
 

@@ -59,7 +59,7 @@ class TestPublicMethodsAreOverridden:
     @pytest.mark.parametrize("base_ds_method_name", DATASOURCE_PUBLIC_METHODS)
     def test_datasource_methods(self, base_ds_method_name: str):
         """Ensure that InvalidDatasource overrides the applicable Datasource methods."""
-        for base_ds_method_name in DATASOURCE_PUBLIC_METHODS:
+        for base_ds_method_name in DATASOURCE_PUBLIC_METHODS:  # noqa: PLR1704
             method = getattr(InvalidDatasource, base_ds_method_name, None)
             assert (
                 method
@@ -70,7 +70,7 @@ class TestPublicMethodsAreOverridden:
     @pytest.mark.parametrize("base_ds_method_name", DATA_ASSET_PUBLIC_METHODS)
     def test_data_asset(self, base_ds_method_name: str):
         """Ensure that InvalidAsset overrides the applicable DataAsset methods."""
-        for base_ds_method_name in DATA_ASSET_PUBLIC_METHODS:
+        for base_ds_method_name in DATA_ASSET_PUBLIC_METHODS:  # noqa: PLR1704
             method = getattr(InvalidAsset, base_ds_method_name, None)
             assert (
                 method

@@ -73,7 +73,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         domain_type=MetricDomainTypes.COLUMN,
     )
-    def _spark(  # noqa: PLR0913
+    def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

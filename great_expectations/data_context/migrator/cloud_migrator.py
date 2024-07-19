@@ -94,7 +94,7 @@ class CloudMigrator:
         self._unsuccessful_validations: Dict[str, dict] = {}
 
     @classmethod
-    def migrate(  # noqa: PLR0913
+    def migrate(
         cls,
         context: AbstractDataContext,
         test_migrate: bool,

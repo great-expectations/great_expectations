@@ -786,7 +786,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         return hist
 
-    def get_column_count_in_range(  # noqa: PLR0913
+    def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
         if min_val is None and max_val is None:

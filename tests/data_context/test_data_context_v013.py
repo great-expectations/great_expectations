@@ -214,8 +214,11 @@ def test_get_config(empty_data_context):
     context = empty_data_context
 
     # We can call get_config in several different modes
-    assert type(context.get_config()) == DataContextConfig
-    assert type(context.get_config(mode=ConfigOutputModes.TYPED)) == DataContextConfig
+    assert type(context.get_config()) == DataContextConfig  # noqa: E721
+    assert (
+        type(context.get_config(mode=ConfigOutputModes.TYPED))  # noqa: E721
+        == DataContextConfig
+    )
     assert type(context.get_config(mode=ConfigOutputModes.DICT)) == dict  # noqa: E721
     assert type(context.get_config(mode=ConfigOutputModes.YAML)) == str  # noqa: E721
     assert type(context.get_config(mode="yaml")) == str  # noqa: E721

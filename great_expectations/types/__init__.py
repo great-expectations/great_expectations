@@ -118,7 +118,7 @@ class DictDot:
                 new_dict[key] = value.value
 
             # ...and when DictDots and Enums are nested one layer deeper in lists or tuples
-            if isinstance(value, list) or isinstance(value, tuple):  # noqa: PLR1701
+            if isinstance(value, list) or isinstance(value, tuple):
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
@@ -149,7 +149,7 @@ class DictDot:
             if isinstance(value, Enum):
                 new_dict[key] = value.value
 
-            if isinstance(value, list) or isinstance(value, tuple):  # noqa: PLR1701
+            if isinstance(value, list) or isinstance(value, tuple):
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
                     if isinstance(value, pydantic.BaseModel):

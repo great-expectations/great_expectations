@@ -140,7 +140,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 asset.test_connection()
 
     @override
-    def _build_data_connector(  # noqa: PLR0913
+    def _build_data_connector(
         self,
         data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value

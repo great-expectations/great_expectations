@@ -2371,7 +2371,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if not batch_request_list:
                 batch_request_list = [batch_request]  # type: ignore[list-item]
 
-            for batch_request in batch_request_list:
+            for batch_request in batch_request_list:  # noqa: PLR1704
                 batch_list.extend(
                     self.get_batch_list(
                         datasource_name=datasource_name,
@@ -3071,7 +3071,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="Pass in an existing profiler instead of individual constructor args",
     )
-    def add_profiler(  # noqa: PLR0913
+    def add_profiler(
         self,
         name: str | None = None,
         config_version: float | None = None,
@@ -3318,7 +3318,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
     )
-    def run_profiler_on_data(  # noqa: PLR0913
+    def run_profiler_on_data(
         self,
         batch_list: list[Batch] | None = None,
         batch_request: BatchRequestBase | None = None,
@@ -5427,7 +5427,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             input value with all `$` characters replaced with the escape string
         """
-        if isinstance(value, dict) or isinstance(value, OrderedDict):  # noqa: PLR1701
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
             return {
                 k: self.escape_all_config_variables(
                     value=v,

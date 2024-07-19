@@ -392,10 +392,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_metric_expectation_map(self) -> dict[tuple[str, ...], str]:
         if not all(
-            [
-                isinstance(metric_names, str)  # noqa: PLR1701
-                or isinstance(metric_names, tuple)
-            ]
+            [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
             for metric_names in self.metric_expectation_map.keys()
         ):
             raise gx_exceptions.DataAssistantResultExecutionError(
@@ -621,7 +618,7 @@ class DataAssistantResult(SerializableDictDot):
             exclude_column_names=exclude_column_names,
         )
 
-    def _plot(  # noqa: PLR0913
+    def _plot(
         self,
         plot_mode: PlotMode,
         sequential: bool,
@@ -926,7 +923,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         col_has_list: pd.DataFrame = pd.DataFrame(
             {
                 "column_name": df.columns,
-                "has_list": (pandas_map(df)(type) == list).any(),
+                "has_list": (pandas_map(df)(type) == list).any(),  # noqa: E721
             }
         )
         list_column_names: List[str] = list(
@@ -3159,7 +3156,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         else:
             return default_theme
 
-    def _plot_table_domain_charts(  # noqa: PLR0913
+    def _plot_table_domain_charts(
         self,
         expectation_configurations: List[ExpectationConfiguration],
         include_column_names: Optional[List[str]],
@@ -3267,7 +3264,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return sorted_charts
 
-    def _plot_column_domain_charts(  # noqa: PLR0913
+    def _plot_column_domain_charts(
         self,
         expectation_configurations: List[ExpectationConfiguration],
         include_column_names: Optional[List[str]],
@@ -3660,7 +3657,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return return_charts
 
-    def _chart_column_values(  # noqa: PLR0913
+    def _chart_column_values(
         self,
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
@@ -3879,7 +3876,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 return pd.DataFrame()
 
         # if there are any lists in the dataframe
-        if (pandas_map(df)(type) == list).any().any():
+        if (pandas_map(df)(type) == list).any().any():  # noqa: E721
             df = DataAssistantResult._transform_column_lists_to_rows(
                 df=df,
             )
