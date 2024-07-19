@@ -18,7 +18,7 @@ import shutil
 import sys
 from collections.abc import Generator, Mapping, Sequence
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Final, NamedTuple, Union
+from typing import TYPE_CHECKING, Final, Literal, NamedTuple, Union
 
 import invoke
 
@@ -130,6 +130,7 @@ def lint(  # noqa: PLR0913
     path: str = ".",
     fmt_: bool = True,
     fix: bool = False,
+    output_format: Literal["full", "concise", "github"] | None = None,
     watch: bool = False,
     pty: bool = True,
 ):
@@ -143,6 +144,10 @@ def lint(  # noqa: PLR0913
         cmds.append("--fix")
     if watch:
         cmds.append("--watch")
+    if output_format:
+        cmds.append(f"--output-format={output_format}")
+    elif os.getenv("GITHUB_ACTIONS"):
+        cmds.append("--output-format=github")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
