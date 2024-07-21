@@ -30,12 +30,12 @@ This guide assumes a basic familiarity with GX components and workflows. Refer t
 
 Below is a sample of the dataset referenced throughout this guide:
 
-| user_id | event_timestamp     | geolocation_city | closing_price | last_visited |  errors |
-|---------|---------------------|------------------|---------------|--------------|---------|
-| 101     | 2023-09-01 12:00    | San Francisco    | 150.00        | 2023-09-01   |         |
-| 102     | 2023-09-01 12:05    | NULL             | 152.50        | NULL         |         |
+| type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_date       | errors |
+|----------|------------------------|--------------------|-----------------|---------------------|--------|
+| domestic | 244084670977           | Jaxson Duke        | 9143.40         | 2024-05-01 01:12    | NULL   |
+| NULL     | 123456789012           | Jane Smith         | 5000.00         | NULL                | NULL   |
 
-This dataset includes potential for missing data in `geolocation_city` and `last_visited` columns.
+This dataset includes potential for missing data in `type` and `transfer_date` columns.
 
 ## Key missingness Expectations
 
@@ -62,10 +62,10 @@ gxe.ExpectColumnValuesToBeNull('errors')
 
 Ensures that values within a specific column are not `NULL`.
 
-**Use Case**: Ensure critical columns are consistently populated, such as `closing_price`.
+**Use Case**: Ensure critical columns are consistently populated, such as `transfer_amount`.
 
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missing_expectations.py ExpectColumnValuesToNotBeNull"
-gxe.ExpectColumnValuesToNotBeNull('closing_price')
+gxe.ExpectColumnValuesToNotBeNull('transfer_amount')
 ```
 
 <sup>View `ExpectColumnValuesToNotBeNull` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null).</sup>
@@ -77,13 +77,13 @@ gxe.ExpectColumnValuesToNotBeNull('closing_price')
 Certain values may intermittently be missing, often due to system or network issues.
 
 #### Example problem scenarios
-- An enrichment system outage resulting in missing geolocation data.
+- A temporary outage in the transaction processing system resulting in missing `transfer_date` data.
 
 #### GX solution
-Ensure values are populated at least 99% of the time.
+Ensure values are populated at least 99.9% of the time.
 
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_intermit_values.py"
-validator.expect_column_values_to_not_be_null('geolocation_city', mostly=0.99)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py intermittent_missing_values"
+gxe.ExpectColumnValuesToNotBeNull('transfer_date', mostly=0.999)
 ```
 
 ### Missing critical data
@@ -91,13 +91,13 @@ validator.expect_column_values_to_not_be_null('geolocation_city', mostly=0.99)
 Critical data fields might be missing due to upstream issues or changes in data collection processes.
 
 #### Example Problem Scenarios
-- An important field, like `closing_price`, was not populated due to a temporary upstream system outage.
+- An important field, like `transfer_amount`, was not populated due to a temporary upstream system outage.
 
 #### GX Solution
 Ensure critical fields are always present.
 
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_critical_data.py"
-gxe.ExpectColumnValuesToNotBeNull('closing_price')
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py missing_critical_data"
+gxe.ExpectColumnValuesToNotBeNull('transfer_amount')
 ```
 
 ### New cases appear
@@ -108,11 +108,11 @@ New events or cases might introduce `NULL` values in fields that previously had 
 - The `last_visited` field, which should typically be populated, now has `NULL` values for some users.
 
 #### GX solution
-Define an expectation to ensure the `last_visited` field is populated for most entries.
+Define an expectation to ensure the `type` field is populated for most entries.
 
-```python title="Python"
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py new_cases_appear"
 gxe.ExpectColumnValuesToNotBeNull(
-    'last_visited',
+    'type',
     mostly=0.95  # Allows for up to 5% of values to be NULL
 )
 ```
@@ -127,7 +127,7 @@ This use case differs significantly from the others as it reflects an expectatio
 #### GX solution
 Ensure fields that should typically be `NULL` remain unpopulated under normal circumstances.
 
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_system_anomalies.py"
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py system_anomalies"
 gxe.ExpectColumnValuesToBeNull('errors')
 ```
 
