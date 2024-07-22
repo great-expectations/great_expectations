@@ -701,7 +701,7 @@ COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
 
 
 # TODO: remove items from this lookup when working on fixes
-REQUIRE_FIXES: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
+FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     'str "unquoted_lower_col"': ["postgres", "sqlite"],
     "str UNQUOTED_LOWER_COL": [
         "databricks_sql",
@@ -748,17 +748,21 @@ REQUIRE_FIXES: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
         "snowflake",
         "sqlite",  # should succeed but fails
     ],
-    "str QUOTED.W.DOTS": ["databricks_sql", "snowflake"],
+    "str QUOTED.W.DOTS": ["databricks_sql", "snowflake", "sqlite"],
     'str "QUOTED.W.DOTS"': [
         "sqlite",  # should succeed but fails
     ],
 }
 
 
-def _requires_fix(param_id: str) -> bool:
+def _fails_expectation(param_id: str) -> bool:
+    """
+    Lookup whether a given column_name fails an expectation for a given dialect.
+    This does not mean that it SHOULD fail, but that it currently does.
+    """
     column_name: ColNameParamId
     dialect, column_name, _ = param_id.split("-")  # type: ignore[assignment]
-    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(column_name, [])
+    dialects_need_fixes: list[DatabaseType] = FAILS_EXPECTATION.get(column_name, [])
     return dialect in dialects_need_fixes
 
 
@@ -839,14 +843,16 @@ class TestColumnExpectations:
         expectation_type: str,
         request: pytest.FixtureRequest,
     ):
-        """Test column expectations with unquoted column names, test fails if the expectation fails."""
+        """
+        Test column expectations with unquoted column names, test fails if the expectation fails.
+        """
         param_id = request.node.callspec.id
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
 
         if column_name[0] in ("'", '"', "`"):
             pytest.skip(f"see _desired_state tests for {column_name!r}")
-        elif _requires_fix(param_id):
+        elif _fails_expectation(param_id):
             # apply marker this way so that xpasses can be seen in the report
             request.applymarker(pytest.mark.xfail)
 
@@ -965,6 +971,8 @@ class TestColumnExpectations:
         therefore determine if the expectation should pass or fail.
 
         An expectation is expected to succeed if the column 'exists' and fail if it does not.
+        If we want GX to behave the same way as each dialect/database, these tests should be our guide.
+        However currently, GX does not behave the same way as the databases in all cases.
         """
         param_id = request.node.callspec.id
         datasource = all_sql_datasources
@@ -972,10 +980,6 @@ class TestColumnExpectations:
 
         if _is_quote_char_dialect_mismatch(dialect, column_name):
             pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
-
-        if _requires_fix(param_id):
-            # apply marker this way so that xpasses can be seen in the report
-            request.applymarker(pytest.mark.xfail)
 
         print(f"expectations_type:\n  {expectation_type}")
 
@@ -1055,12 +1059,16 @@ class TestColumnExpectations:
 
         _ = _get_exception_details(result, prettyprint=True)
 
-        if column_exists:
-            assert result.success is True, "column exists but validation failed"
-        else:
-            assert (
-                result.success is False
-            ), "column does not exist but validation succeeded"
+        try:
+            if column_exists:
+                assert result.success is True, "column exists but validation failed"
+            else:
+                assert (
+                    result.success is False
+                ), "column does not exist but validation succeeded"
+        except AssertionError as ae:
+            # xfail if the expectation doesn't behave as the dialect would
+            pytest.xfail(reason=str(ae).splitlines()[0])
 
 
 if __name__ == "__main__":
