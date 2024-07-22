@@ -844,7 +844,8 @@ class TestColumnExpectations:
         request: pytest.FixtureRequest,
     ):
         """
-        Test column expectations with unquoted column names, test fails if the expectation fails.
+        Test column expectations with unquoted column name parameters (actual column may have DDL with quotes).
+        Test fails if the expectation fails regardless of dialect.
         """
         param_id = request.node.callspec.id
         datasource = all_sql_datasources
