@@ -37,6 +37,9 @@ Below is a sample of the dataset referenced throughout this guide:
 
 This dataset includes potential for missing data in `type` and `transfer_date` columns.
 
+You can [access this dataset](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/missingness.csv) from the `great_expectations` GitHub repo in order to reproduce the code recipes provided in this article.
+
+
 ## Key missingness Expectations
 
 GX provides a suite of missingness-focused Expectations to manage missing data in your datasets. These Expectations can be added to an Expectation Suite via the GX Cloud UI or using the GX Core Python library.
