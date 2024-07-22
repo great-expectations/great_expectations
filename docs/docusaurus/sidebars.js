@@ -62,7 +62,12 @@ module.exports = {
           {
             type: 'doc',
             id: 'core/connect_to_data/sql_data/sql_data',
-            label: 'Connect to data using SQL'
+            label: 'Connect to SQL data'
+          },
+          {
+            type: 'doc',
+            id: 'core/connect_to_data/dataframes/dataframes',
+            label: 'Connect to data in Dataframes'
           },
       ]
     },
