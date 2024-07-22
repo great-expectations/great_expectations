@@ -3,6 +3,7 @@ title: Connect to data in dataframes
 description: Follow this guide to connect to a pandas or Spark dataframe in GX.
 hide_feedback_survey: false
 hide_title: false
+toc_max_heading_level: 2
 ---
 
 import TabItem from '@theme/TabItem';
@@ -13,11 +14,11 @@ import PrereqGxInstalled from '../../_core_components/prerequisites/_gx_installa
 import PrereqSparkIfNecessary from '../../_core_components/prerequisites/_optional_spark_installation.md'
 import PrereqDataContext from '../../_core_components/prerequisites/_preconfigured_data_context.md'
 
-A dataframe is a set of data that resides in-memory and is represented in your code by a variable to which it is assigned.  Great Expectations has methods for connecting to both pandas and Spark dataframes.
+A dataframe is a set of data that resides in-memory and is represented in your code by a variable to which it is assigned.  To connect to this in-memory data you will define a Data Source based on the type of dataframe you are connecting to, a Data Asset that connects to the dataframe in question, and a Batch Definition that will return all of the records in the dataframe as a single Batch of data.
 
 ## Create a Data Source
 
-
+Because the dataframes reside in memory you do not need to specify the location of the data when you create your Data Source.  Instead, the type of Data Source you create depends on the type of dataframe containing your data. Great Expectations has methods for connecting to both pandas and Spark dataframes.  
 
 ### Prerequisites
 
@@ -36,8 +37,6 @@ A dataframe is a set of data that resides in-memory and is represented in your c
    A dataframe Data Source requires the following information:
 
    - `name`: A name by which to reference the Data Source.  This should be unique among all Data Sources on the Data Context.
-
-   Because the dataframe itself resides in memory and is referenced in your code by the variable it is assigned to you do not need to specify the location of the data when you create your Data Source or provide any other parameters.
 
    Update `data_source_name` in the following code with a descriptive name for your Data Source:
 
@@ -101,6 +100,8 @@ A dataframe is a set of data that resides in-memory and is represented in your c
 To access data from your dataframe in GX you will connect to the dataframe with a Data Asset.  Then you will define a Batch Definition with which the data can be retrieved.
 
 Because dataframes exist in memory and cease to exist when the Python session ends a dataframe Data Asset will need to be created anew in every Python session that utilizes it.
+
+In a File Data Context previous dataframe Data Asset and Batch Definition configurations will persist between sessions.  However, since the dataframe they connected to will not also persist between Python sessions those configurations will only be useable for reference purposes.  
 
 ### Prerequisites
 
