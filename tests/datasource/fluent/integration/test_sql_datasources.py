@@ -839,6 +839,7 @@ class TestColumnExpectations:
         expectation_type: str,
         request: pytest.FixtureRequest,
     ):
+        """Test column expectations with unquoted column names, test fails if the expectation fails."""
         param_id = request.node.callspec.id
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
@@ -958,6 +959,13 @@ class TestColumnExpectations:
         expectation_type: str,
         request: pytest.FixtureRequest,
     ):
+        """
+        Perform a raw query to check if the column exists before running the expectation.
+        This is used to determine how the identifier behaves natively in the database and
+        therefore determine if the expectation should pass or fail.
+
+        An expectation is expected to succeed if the column 'exists' and fail if it does not.
+        """
         param_id = request.node.callspec.id
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
