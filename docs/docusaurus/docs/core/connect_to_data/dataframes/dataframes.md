@@ -1,5 +1,5 @@
 ---
-title: Connect to data in dataframes
+title: Connect to dataframe data
 description: Follow this guide to connect to a pandas or Spark dataframe in GX.
 hide_feedback_survey: false
 hide_title: false
