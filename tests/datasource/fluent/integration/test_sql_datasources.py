@@ -631,11 +631,15 @@ ColNameParams: TypeAlias = Literal[
     '"quoted_lower_col"',
     "QUOTED_LOWER_COL",
     '"QUOTED_LOWER_COL"',
-    # DDl: "QUOTED_UPPER_COL" ----
+    # DDL: "QUOTED_UPPER_COL" ----
     "quoted_upper_col",
     '"quoted_upper_col"',
     "QUOTED_UPPER_COL",
     '"QUOTED_UPPER_COL"',
+    # DDL: unquotedMixed ------
+    # TODO: add tests for these
+    # DDL: "quotedMixed" -----
+    # TODO: add tests for these
     # DDL: "quoted.w.dots" -------
     "quoted.w.dots",
     '"quoted.w.dots"',
@@ -729,9 +733,10 @@ FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     "str quoted_upper_col": [
         "databricks_sql",
         "sqlite",
+        "postgres",
     ],
     'str "quoted_upper_col"': ["sqlite"],
-    "str QUOTED_UPPER_COL": ["postgres"],
+    "str QUOTED_UPPER_COL": [],
     'str "QUOTED_UPPER_COL"': [
         "postgres",
         "snowflake",
@@ -739,7 +744,6 @@ FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     ],
     "str quoted.w.dots": [
         "databricks_sql",
-        "postgres",  # should fail but succeeds
         "snowflake",  # should fail but succeeds
         "sqlite",  # should fail but succeeds
     ],
@@ -748,7 +752,7 @@ FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
         "snowflake",
         "sqlite",  # should succeed but fails
     ],
-    "str QUOTED.W.DOTS": ["databricks_sql", "snowflake", "sqlite"],
+    "str QUOTED.W.DOTS": ["databricks_sql", "snowflake", "sqlite", "postgres"],
     'str "QUOTED.W.DOTS"': [
         "sqlite",  # should succeed but fails
     ],
@@ -1057,8 +1061,6 @@ class TestColumnExpectations:
             **checkpoint_config,
         )
         result = checkpoint.run()
-
-        _ = _get_exception_details(result, prettyprint=True)
 
         try:
             if column_exists:
