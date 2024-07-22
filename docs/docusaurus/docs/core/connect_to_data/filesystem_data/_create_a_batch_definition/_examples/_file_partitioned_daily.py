@@ -14,9 +14,7 @@ batch_definition_name = "daily_yellow_tripdata_sample"
 batch_definition_regex = (
     r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv"
 )
-# </snippet>
 
-# <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_daily.py - add Batch Definition">
 batch_definition = file_data_asset.add_batch_definition_daily(
     name=batch_definition_name, regex=batch_definition_regex
 )

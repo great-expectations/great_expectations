@@ -12,9 +12,7 @@ file_data_asset = context.get_data_source(data_source_name).get_asset(data_asset
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_monthly.py - define Batch Definition parameters">
 batch_definition_name = "monthly_yellow_tripdata_sample"
 batch_definition_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-# </snippet>
 
-# <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_monthly.py - add Batch Definition">
 batch_definition = file_data_asset.add_batch_definition_monthly(
     name=batch_definition_name, regex=batch_definition_regex
 )
