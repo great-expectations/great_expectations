@@ -73,6 +73,14 @@ gxe.ExpectColumnValuesToNotBeNull('transfer_amount')
 
 <sup>View `ExpectColumnValuesToNotBeNull` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null).</sup>
 
+<br/>
+<br/>
+
+:::tip[GX tips for missingness Expectations]
+- Set different tolerance levels for `ExpectColumnValuesToBeNull` and `ExpectColumnValuesToNotBeNull`. This allows for nuanced data quality checks that align with your specific data patterns and business needs. For example, you might allow up to 20% nulls in a 'customer_feedback' column, but want to be alerted if more than 1% of values are unexpectedly non-null in an 'errors' column.
+- Use these Expectations to track data as it progresses through your pipeline. Apply `ExpectColumnValuesToBeNull` to fields expected to be empty in early stages, and `ExpectColumnValuesToNotBeNull` to those same fields in later stages.
+:::
+
 ## Managing types of missing data
 
 ### Intermittent missing values
