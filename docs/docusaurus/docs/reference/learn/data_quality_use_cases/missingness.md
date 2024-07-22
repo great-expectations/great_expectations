@@ -85,10 +85,7 @@ gxe.ExpectColumnValuesToNotBeNull('transfer_amount')
 
 ### Intermittent missing values
 
-Certain values may intermittently be missing, often due to system or network issues.
-
-#### Example problem scenarios
-- A temporary outage in the transaction processing system resulting in missing `transfer_date` data.
+Certain values may intermittently be missing, often due to system or network issues. For example, a temporary outage in the transaction processing system could result in missing `transfer_date` data.
 
 #### GX solution
 Ensure values are populated at least 99.9% of the time.
@@ -99,12 +96,9 @@ gxe.ExpectColumnValuesToNotBeNull('transfer_date', mostly=0.999)
 
 ### Missing critical data
 
-Critical data fields might be missing due to upstream issues or changes in data collection processes.
+Critical data fields might be missing due to upstream issues or changes in data collection processes. An important field, like `transfer_amount`, could be unpopulated due to a temporary upstream system outage.
 
-#### Example Problem Scenarios
-- An important field, like `transfer_amount`, was not populated due to a temporary upstream system outage.
-
-#### GX Solution
+#### GX solution
 Ensure critical fields are always present.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py missing_critical_data"
@@ -113,10 +107,7 @@ gxe.ExpectColumnValuesToNotBeNull('transfer_amount')
 
 ### New cases appear
 
-New events or cases might introduce `NULL` values in fields that previously had no missing data.
-
-#### Example problem scenarios
-- The `last_visited` field, which should typically be populated, now has `NULL` values for some users.
+New events or cases might introduce `NULL` values in fields that previously had no missing data. For instance, the `last_visited` field, which should typically be populated, might now have `NULL` values for some users.
 
 #### GX solution
 Define an expectation to ensure the `type` field is populated for most entries.
@@ -130,10 +121,7 @@ gxe.ExpectColumnValuesToNotBeNull(
 
 ### System anomalies
 
-This use case differs significantly from the others as it reflects an expectation about the system being monitored rather than just data quality. Here, GX serves a dual role: ensuring data quality and performing a more classical alerting/observability function.
-
-#### Example problem scenarios
-- An increase in error rates leads to the `errors` field being unexpectedly populated.
+This use case differs significantly from the others as it reflects an expectation about the system being monitored rather than just data quality. Here, GX serves a dual role: ensuring data quality and performing a more classical alerting/observability function. For example, an increase in error rates might lead to the `errors` field being unexpectedly populated.
 
 #### GX solution
 Ensure fields that should typically be `NULL` remain unpopulated under normal circumstances.
