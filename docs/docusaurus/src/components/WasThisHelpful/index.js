@@ -4,6 +4,7 @@ import {useLocation} from "@docusaurus/router";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import { posthog as posthogJS } from 'posthog-js';
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+const CREATE_JIRA_TICKET_IN_DOCS_BOARD_ENDPOINT_URL = "/.netlify/functions/createJiraTicketInDocsBoard";
 
 export default function WasThisHelpful(){
     const { pathname } = useLocation();
@@ -58,18 +59,23 @@ export default function WasThisHelpful(){
     const sendReview = async (e) => {
         e.preventDefault()
         if (formData.description) {
-            const response = await fetch("/.netlify/functions/createJiraTicketInDocsBoard", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData)
-            });
-            if (response.ok) {
-                setIsOpen(false)
-            } else {
+            try {
+                const response = await fetch(CREATE_JIRA_TICKET_IN_DOCS_BOARD_ENDPOINT_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData)
+                });
+                if (response.ok) {
+                    setIsOpen(false)
+                } else {
+                    setError(true)
+                }
+            } catch (error) {
                 setError(true)
             }
+
         }
     }
 
@@ -178,7 +184,7 @@ export default function WasThisHelpful(){
                         />
                     }
 
-                    {error && <p className={styles.errorMessage}>An error occured, please try again</p>}
+                    {error && <p className={styles.errorMessage}>An error occurred, please try again later.</p>}
 
                     <input type="submit" disabled={!formData.description} className={styles.submitButton}
                            value="Submit"/>
