@@ -47,7 +47,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerDaily(column_name=column),
+            partitioner=ColumnPartitionerDaily(
+                method_name="partition_on_year_and_month_and_day", column_name=column
+            ),
         )
 
     @public_api
@@ -55,7 +57,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerMonthly(column_name=column),
+            partitioner=ColumnPartitionerMonthly(
+                method_name="partition_on_year_and_month", column_name=column
+            ),
         )
 
     @public_api
@@ -63,7 +67,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerYearly(column_name=column),
+            partitioner=ColumnPartitionerYearly(
+                method_name="partition_on_year", column_name=column
+            ),
         )
 
     @public_api
