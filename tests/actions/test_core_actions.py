@@ -530,9 +530,7 @@ class TestV1ActionRun:
     def test_OpsgenieAlertAction_run(
         self, checkpoint_result: CheckpointResult, success: bool, message: str
     ):
-        action = OpsgenieAlertAction(
-            name="my_action", api_key="test", routing_key="test", notify_on="all"
-        )
+        action = OpsgenieAlertAction(name="my_action", api_key="test", notify_on="all")
         checkpoint_result.success = success
 
         with mock.patch.object(Session, "post") as mock_post:

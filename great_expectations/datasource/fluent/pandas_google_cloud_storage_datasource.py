@@ -121,7 +121,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                 asset.test_connection()
 
     @override
-    def _build_data_connector(  # noqa: PLR0913
+    def _build_data_connector(
         self,
         data_asset: FileDataAsset,
         gcs_prefix: str = "",

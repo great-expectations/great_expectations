@@ -25,7 +25,7 @@ datasource = context.data_sources.add_spark_gcs(
 )
 # </snippet>
 
-assert datasource_name in context.datasources
+assert datasource_name in context.data_sources.all()
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_spark.py add_asset">
