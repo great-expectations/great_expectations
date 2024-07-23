@@ -17,7 +17,6 @@ from great_expectations.util import is_ndarray_datetime_dtype
 
 if TYPE_CHECKING:
     import numpy as np
-
     from great_expectations.core.domain import Domain
     from great_expectations.experimental.rule_based_profiler.estimators.numeric_range_estimation_result import (  # noqa: E501
         NumericRangeEstimationResult,

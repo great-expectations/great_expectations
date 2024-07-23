@@ -4,9 +4,9 @@ import logging
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Sized
 
-import numpy as np
 import pandas as pd
 
+import numpy as np
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.types import SerializableDictDot

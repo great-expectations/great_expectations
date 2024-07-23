@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Option
 from urllib.parse import urlparse
 
 import dateutil.parser
-import numpy as np
 from IPython import get_ipython
 
+import numpy as np
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import SQLALCHEMY_NOT_IMPORTED, LegacyRow, Row
 

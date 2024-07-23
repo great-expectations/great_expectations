@@ -23,10 +23,10 @@ from typing import (
     Union,
 )
 
-import numpy as np
 from scipy import stats
 
 import great_expectations.exceptions as gx_exceptions
+import numpy as np
 from great_expectations.compatibility import numpy
 from great_expectations.core import Domain, ExpectationSuite
 from great_expectations.core.batch import (

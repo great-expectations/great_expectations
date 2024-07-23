@@ -5,7 +5,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,

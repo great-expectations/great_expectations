@@ -15,8 +15,9 @@ from great_expectations.expectations.metrics.util import (
 logger = logging.getLogger(__name__)
 
 
-import numpy as np
 from scipy import stats
+
+import numpy as np
 
 NP_RANDOM_GENERATOR: Final = np.random.default_rng()
 
