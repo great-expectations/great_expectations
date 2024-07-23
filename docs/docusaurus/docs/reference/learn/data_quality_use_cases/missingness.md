@@ -3,10 +3,9 @@ sidebar_label: 'Missingness'
 title: 'Manage missing data with GX'
 ---
 
+If you've ever struggled with missing data messing up your reports or skewing your machine learning models, this guide will show you how to leverage Great Expectations (GX) to keep your data clean and reliable.
 
-**Missing data**, or **missingness**, refers to the absence of expected information within a dataset. These absences can be represented by `NULL` values in SQL databases or appear differently in various systems.
-
-Maintaining the integrity of your data involves effectively managing missing data points. Missing data can interfere with calculations, skew reports, and produce inaccurate outputs in machine learning models. Thus, identifying and resolving missing data is paramount to ensure data reliability and utility.
+**Missing data**, often referred to as **missingness**, denotes the absence of expected information in a dataset. These gaps can be represented by `NULL` values in SQL databases or manifest differently across systems, impacting data quality. Missing data poses challenges such as disrupting calculations, skewing analyses, and compromising machine learning models. Given the critical role of data quality, managing missing data effectively is essential to ensure accurate, reliable, and actionable datasets.
 
 Managing missing data involves:
 
@@ -14,17 +13,13 @@ Managing missing data involves:
 2. Understanding the causes of the missing data
 3. Deciding on appropriate remedial actions
 
-Great Expectations (GX) offers robust tools for managing missing data. By leveraging GX Expectations, you can define rules to:
+GX is an open-source data quality tool that provides powerful features for managing and validating data integrity, including handling missing data. Supported by an active community, GX allows you to create customizable checks, known as Expectations, that help maintain high data quality standards across diverse workflows.
 
-- Detect instances where data should not be missing
-- Ensure the proportion of missing data remains within acceptable limits
-- Analyze patterns in data missingness
-
-In this guide, we will walk you through utilizing Great Expectations to proficiently handle missing data, ensuring your datasets remain clean, consistent, and ready for analysis or machine learning applications. You will learn step-by-step methods for writing Expectations, setting up automated checks, and making informed decisions about managing various types of missing data.
+In this guide, we will walk you through utilizing GX to proficiently handle missing data, ensuring your datasets remain clean, consistent, and ready for analysis or machine learning applications. You will learn step-by-step methods for writing Expectations, setting up automated checks, and making informed decisions about managing various types of missing data.
 
 ## Prerequisite knowledge
 
-This guide assumes a basic familiarity with GX components and workflows. Refer to the [GX Overview](/core/introduction/gx_overview.md) for foundational concepts.
+Before diving into this guide, ensure you have a basic understanding of GX components and workflows. If you're new to GX, we recommend starting with our [GX Overview](/core/introduction/gx_overview.md) to familiarize yourself with key concepts and setup procedures.
 
 ## Data preview
 
@@ -46,7 +41,7 @@ GX provides a suite of missingness-focused Expectations to manage missing data i
 
 
 :::[TODO]
-> add animated gif
+> Add animated GIF demonstrating how to create Expectations using the GX Cloud UI.
 :::
 
 ### Expect Column Values To Be Null
@@ -85,7 +80,7 @@ gxe.ExpectColumnValuesToNotBeNull('transfer_amount')
 
 ### Intermittent missing values
 
-Certain values may intermittently be missing, often due to system or network issues. For example, a temporary outage in the transaction processing system could result in missing `transfer_date` data.
+Imagine you operate a transaction processing system. Due to a momentary server outage, `transfer_date` values may intermittently be missing. Ensuring that these values are populated at least 99.9% of the time can help maintain the reliability of your analyses.
 
 #### GX solution
 Ensure values are populated at least 99.9% of the time.
@@ -96,7 +91,7 @@ gxe.ExpectColumnValuesToNotBeNull('transfer_date', mostly=0.999)
 
 ### Missing critical data
 
-Critical data fields might be missing due to upstream issues or changes in data collection processes. An important field, like `transfer_amount`, could be unpopulated due to a temporary upstream system outage.
+Consider an essential financial reporting system where the `transfer_amount` field is crucial for accurate analysis. This field might remain unpopulated due to an upstream system failure. Ensuring this field is always populated prevents significant discrepancies in reports.
 
 #### GX solution
 Ensure critical fields are always present.
@@ -140,16 +135,19 @@ This Expectation serves as an early warning system for potential issues in your 
 - **Manual Handling**: Manually addressing missing data can introduce errors and is unsustainable for large datasets. Automate data quality checks and remediation.
 - **Ignoring Root Causes**: Addressing symptoms without understanding the root causes can lead to recurring problems. Conduct root cause analyses and implement relevant Expectations early in your data stream.
 
-## Next steps: implementing missingness strategies
+## Next Steps: Implementing Missingness Strategies
 
-In this guide, we have explored methods for managing missing data using Great Expectations. From detecting unexpected `NULL` values to handling seasonal anomalies, GX provides comprehensive tools to ensure data quality. Apply the Expectations discussed here to build cleaner, more reliable datasets.
+Through this guide, we explored effective strategies for managing missing data with Great Expectations. Here's how you can take these practices forward:
 
-### Further learning
+1. Integrate the discussed Expectations into your current projects.
+2. Use the [Expectation Gallery](https://greatexpectations.io/expectations/) to explore more detailed Expectations and tailor them to your needs.
+3. Join the [GX Community](https://discourse.greatexpectations.io/c/share/18) to exchange experiences and solutions with fellow developers.
+4. Proceed with our comprehensive [GX data quality series](#) for deeper insights and advanced techniques.
 
-We encourage you to integrate these practices into your data quality workflows:
+:::[TODO]
+> Update link above
+:::
 
-- Explore more detailed expectations in the [Expectation Gallery](https://greatexpectations.io/expectations/)
-- Join the [GX Community](https://discourse.greatexpectations.io/c/share/18) for discussions and shared experiences.
-- Continue to the [GX series on data quality](#) for other insights.
+We'd love to hear how you are using Great Expectations to handle missing data in your projects. Share your stories, questions, or tips in the [GX Community](https://discourse.greatexpectations.io/c/share/18), and let's continue building a robust and supportive data quality ecosystem together.
 
-By consistently applying these practices, you will enhance the integrity and reliability of your data, fostering greater confidence in your datasets.
+By embedding these methodologies in your workflow, you can significantly bolster your data's integrity, fostering enhanced reliability and trustworthiness.
