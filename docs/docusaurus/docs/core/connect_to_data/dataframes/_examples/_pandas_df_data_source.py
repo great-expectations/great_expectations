@@ -1,7 +1,6 @@
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_source.py - full example">
 import great_expectations as gx
 
-# Create Data Source
 context = gx.get_context(mode="file")
 
 # Define the Data Source parameters
