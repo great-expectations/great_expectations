@@ -50,9 +50,9 @@ from great_expectations.core import (
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
-    IDDict,
 )
 from great_expectations.core.batch import Batch, LegacyBatchDefinition
+from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )

@@ -95,7 +95,7 @@ class ExpectationSuite(SerializableDictDot):
         self.meta = meta
         self.notes = notes
 
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         self._store = project_manager.get_expectations_store()
 

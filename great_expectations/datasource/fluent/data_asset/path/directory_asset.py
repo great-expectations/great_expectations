@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Generic, Optional
 from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.id_dict import IDDict
 from great_expectations.core.partitioners import (
     ColumnPartitioner,
     ColumnPartitionerDaily,

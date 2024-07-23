@@ -22,7 +22,7 @@ from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.core import IDDict
+    from great_expectations.core.id_dict import IDDict
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,

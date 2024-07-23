@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, List, Union
 import pytest
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.id_dict import IDDict
 from great_expectations.core.partitioners import FileNamePartitionerPath, FileNamePartitionerYearly
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN

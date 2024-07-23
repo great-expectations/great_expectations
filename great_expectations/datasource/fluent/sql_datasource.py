@@ -69,12 +69,14 @@ from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
     TestConnectionError,
 )
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
 )
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
     SqlAlchemyDataPartitioner,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
 )
 
 if TYPE_CHECKING:
@@ -626,8 +628,8 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             # legacy constraint when computing usage statistics in a validator. We hope to remove
             # it in the future.
             # imports are done inline to prevent a circular dependency with core/batch.py
-            from great_expectations.core import IDDict
             from great_expectations.core.batch import LegacyBatchDefinition
+            from great_expectations.core.id_dict import IDDict
 
             batch_definition = LegacyBatchDefinition(
                 datasource_name=self.datasource.name,

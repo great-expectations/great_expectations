@@ -102,8 +102,8 @@ class _PowerBIAsset(DataAsset):
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core import IDDict
         from great_expectations.core.batch import LegacyBatchDefinition
+        from great_expectations.core.id_dict import IDDict
 
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,

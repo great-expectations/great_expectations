@@ -7,8 +7,8 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
-from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.id_dict import IDDict
 from great_expectations.core.partitioners import FileNamePartitionerPath, FileNamePartitionerYearly
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import BatchRequest

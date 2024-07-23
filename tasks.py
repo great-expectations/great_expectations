@@ -500,7 +500,7 @@ def docker(
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
-def type_schema(  # noqa: C901 - too complex
+def type_schema(  # noqa: C901, PLR0915 - too complex
     ctx: Context,
     sync: bool = False,
     clean: bool = False,
@@ -513,15 +513,13 @@ def type_schema(  # noqa: C901 - too complex
     """
     import pandas
 
-    from great_expectations.datasource.fluent import (
-        _PANDAS_SCHEMA_VERSION,
-        BatchRequest,
+    from great_expectations.datasource.fluent import _PANDAS_SCHEMA_VERSION
+    from great_expectations.datasource.fluent.batch_request import BatchRequest
+    from great_expectations.datasource.fluent.interfaces import (
         DataAsset,
         Datasource,
     )
-    from great_expectations.datasource.fluent.sources import (
-        _iter_all_registered_types,
-    )
+    from great_expectations.datasource.fluent.sources import _iter_all_registered_types
     from great_expectations.expectations import core
 
     data_source_schema_dir_root: Final[pathlib.Path] = (
