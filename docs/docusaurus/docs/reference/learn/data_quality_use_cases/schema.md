@@ -176,28 +176,30 @@ Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_
 
 ## Examples and scenarios
 
-Successful schema validation can be accomplished using either GX Cloud or the GX Python library. The examples and scenarios in this section are presented using the GX Python library, but can be implemented as Cloud workflows to achieve the same result.
+**GX Cloud** provides a visual interface to create and run schema validation workflows. The GX Cloud workflow to validate data schema is intuitive and straightforward: create a Data Asset, define an Expectation Suite, run a Checkpoint, and review Validation Results.
 
 ![Validate schema Expectations in GX Cloud](./schema_resources/gx_cloud_schema_expectations_validate.gif)
+
+**GX Core** can be used to complement and extend the capabilities of GX Cloud to programmatically implement custom validation workflows. The examples provided in this section feature use cases that leverage GX Core to achieve schema validation.
 
 ### Schema consistency over time
 
 **Context**: Upstream changes to data can have disruptive downstream effects if not managed correctly and explicitly. Data consumers need to have confidence that changes to upstream data sources do not violate the assumptions that govern the intent and actuality of how the data is used downstream. Proactively monitoring adherence to schema Expectations over time enables data users to proactively catch changes that might introduce breaking - or subtle, non-breaking - changes that affect their use of the data.
 
-**Goal**: Validate a table's schema over time with a defined Expectation Suite of schema Expectations, and use Validation Result history to determine when breaking changes were made to a table.
+**Goal**: Validate a table's schema over time with a defined Expectation Suite of schema Expectations, and use Checkpoint results and Validation history to determine when breaking changes were made to a table.
 
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full sample code"
 ```
 
 **Result**:
 
-| validation_timestamp | success | evaluated_expectations | passed_expectations | failure_rate |
+| timestamp | success | evaluated expectations | successful expectations | unsuccessful expectations |
 | :- | :- | :- | :- | :- |
 | timestamp of first Validation | True | 2 | 2 | 0 |
-| timestamp of second Validation | False | 2 | 1 | 0.5 |
+| timestamp of second Validation | False | 2 | 1 | 1 |
 
 
-**Insight**: A subsequent run of a Checkpoint after table schema is modified highlights when the upstream change was caught, as well as the failure rate of Expectations violated by the change.
+**Insight**: A subsequent run of a Checkpoint after table schema is modified highlights when the upstream schema change was caught and the affected Expectations. Checkpoint results can be accessed programmatically using GX Core, and the Validation Result history can also be viewed visually in the GX Cloud UI.
 
 ### Strict vs. relaxed schema validation
 
