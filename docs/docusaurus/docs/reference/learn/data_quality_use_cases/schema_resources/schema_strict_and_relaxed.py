@@ -98,6 +98,5 @@ relaxed_results = batch.validate(relaxed_suite)
 
 # Check output matches what is in the docs.
 
-assert strict_suite["success"] is False
-
-assert relaxed_suite["success"] is True
+assert strict_results["success"] is False
+assert relaxed_results["success"] is True
