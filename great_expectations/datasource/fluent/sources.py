@@ -594,6 +594,9 @@ class _SourceFactories:
     def all(self) -> DatasourceDict:
         return self._data_context._datasources
 
+    def get(self, datasource_name: str) -> Datasource:
+        return self.all()[datasource_name]
+
     def __getattr__(self, attr_name: str):
         try:
             crud_method_info = self.__crud_registry[attr_name]

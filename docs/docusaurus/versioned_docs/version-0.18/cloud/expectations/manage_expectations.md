@@ -74,7 +74,7 @@ The following table lists the available GX Cloud Expectations.
 
 - **Batch column** - Select a name column from a prefilled list of DATE and DATETIME columns containing the date and time data.
 
-7. Complete the mandatory and optional fields for expectation.
+7. Complete the mandatory and optional fields for the Expectation. A recurring validation schedule will be applied automatically to your Expectation, based on the settings of your Expectation Suite.
 
 8. Click **Save** or click **Save & Add More** and then repeat steps 4 and 5 to add additional Expectations.
 

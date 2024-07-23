@@ -93,6 +93,14 @@ def test_list_datasources() -> None:
     assert len(context.list_datasources()) == 2
 
 
+@pytest.mark.unit
+def test_get_data_source() -> None:
+    context = gx.get_context(mode="ephemeral")
+    context.data_sources.add_pandas("a")
+    ds = context.data_sources.get("a")
+    assert ds.name == "a"
+
+
 @pytest.mark.filesystem
 def test_get_available_data_assets_names(empty_data_context) -> None:
     datasource_name = "my_fluent_pandas_datasource"
