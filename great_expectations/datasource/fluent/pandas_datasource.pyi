@@ -384,7 +384,7 @@ class PandasDatasource(_PandasDatasource):
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
     ) -> JSONAsset: ...
-    def add_orc_asset(  # noqa: PLR0913
+    def add_orc_asset(
         self,
         name: str,
         path: pydantic.FilePath | pydantic.AnyUrl,
@@ -405,7 +405,7 @@ class PandasDatasource(_PandasDatasource):
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> Optional[ParquetAsset]: ...
-    def add_pickle_asset(  # noqa: PLR0913
+    def add_pickle_asset(
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -427,7 +427,7 @@ class PandasDatasource(_PandasDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
     ) -> SASAsset: ...
-    def add_spss_asset(  # noqa: PLR0913
+    def add_spss_asset(
         self,
         name: str,
         path: pydantic.FilePath,
@@ -765,7 +765,7 @@ class PandasDatasource(_PandasDatasource):
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
     ) -> Batch: ...
-    def read_orc(  # noqa: PLR0913
+    def read_orc(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         *,
@@ -786,7 +786,7 @@ class PandasDatasource(_PandasDatasource):
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> Batch: ...
-    def read_pickle(  # noqa: PLR0913
+    def read_pickle(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         *,
@@ -808,7 +808,7 @@ class PandasDatasource(_PandasDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
     ) -> Batch: ...
-    def read_spss(  # noqa: PLR0913
+    def read_spss(
         self,
         path: pydantic.FilePath,
         *,

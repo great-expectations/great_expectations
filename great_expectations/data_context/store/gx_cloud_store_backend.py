@@ -62,6 +62,8 @@ def get_user_friendly_error_message(
             errors = error_json.get("errors")
         if errors:
             support_message.append(json.dumps(errors))
+        else:
+            support_message.append(json.dumps(error_json))
 
     except json.JSONDecodeError:
         support_message.append(f"Please contact the Great Expectations team at {SUPPORT_EMAIL}")
@@ -650,7 +652,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return url
 
     @classmethod
-    def construct_versioned_payload(  # noqa: PLR0913
+    def construct_versioned_payload(
         cls,
         resource_type: str,
         organization_id: str,
@@ -688,7 +690,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @classmethod
-    def _construct_json_payload_v0(  # noqa: PLR0913
+    def _construct_json_payload_v0(
         cls,
         resource_type: str,
         organization_id: str,
