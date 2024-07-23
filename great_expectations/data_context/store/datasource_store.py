@@ -16,8 +16,8 @@ from great_expectations.core.data_context_key import (
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.datasource.fluent import Datasource as FluentDatasource
-from great_expectations.datasource.fluent import (
+from great_expectations.datasource.fluent.interfaces import Datasource as FluentDatasource
+from great_expectations.datasource.fluent.invalid_datasource import (
     GxInvalidDatasourceWarning,
     InvalidDatasource,
 )

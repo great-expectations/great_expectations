@@ -46,13 +46,18 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.render.renderer import (
-    EmailRenderer,
-    MicrosoftTeamsRenderer,
-    OpsgenieRenderer,
-    SlackRenderer,
-)
+
+# from great_expectations.render.renderer import (
+#     EmailRenderer,
+#     MicrosoftTeamsRenderer,
+#     OpsgenieRenderer,
+#     SlackRenderer,
+# )
+from great_expectations.render.renderer.email_renderer import EmailRenderer
+from great_expectations.render.renderer.microsoft_teams_renderer import MicrosoftTeamsRenderer
+from great_expectations.render.renderer.opsgenie_renderer import OpsgenieRenderer
 from great_expectations.render.renderer.renderer import Renderer
+from great_expectations.render.renderer.slack_renderer import SlackRenderer
 from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:

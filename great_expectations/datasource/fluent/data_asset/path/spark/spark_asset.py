@@ -28,7 +28,7 @@ from great_expectations.datasource.fluent.data_asset.path.spark.text_asset impor
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent import DataAsset
+    from great_expectations.datasource.fluent.interfaces import DataAsset
 
 # New asset types should be added to the SPARK_PATH_ASSET_TYPES tuple,
 # and to SPARK_PATH_ASSET_UNION

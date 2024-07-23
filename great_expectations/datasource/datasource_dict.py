@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
+from great_expectations.datasource.fluent.interfaces import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:

@@ -15,7 +15,6 @@ from great_expectations.core.partitioners import (
     FileNamePartitionerPath,
     FileNamePartitionerYearly,
 )
-from great_expectations.datasource.fluent import Datasource
 from great_expectations.datasource.fluent.data_asset.path.file_asset import (
     AmbiguousPathError,
     PathNotFoundError,
@@ -74,6 +73,7 @@ from great_expectations.datasource.fluent.data_asset.path.spark.text_asset impor
     TextAsset,
 )
 from great_expectations.datasource.fluent.data_connector import FilePathDataConnector
+from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )

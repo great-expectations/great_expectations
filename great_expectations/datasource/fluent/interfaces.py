@@ -58,7 +58,7 @@ from great_expectations.exceptions.exceptions import (
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
-from great_expectations.datasource.fluent.data_connector import (
+from great_expectations.datasource.fluent.data_connector.data_connector import (
     DataConnector,
 )
 

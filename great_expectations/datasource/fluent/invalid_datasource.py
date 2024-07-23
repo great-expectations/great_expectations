@@ -16,7 +16,7 @@ from typing import (
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.datasource.fluent import (
+from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
     GxDatasourceWarning,

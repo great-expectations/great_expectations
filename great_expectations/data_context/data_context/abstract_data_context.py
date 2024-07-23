@@ -54,13 +54,22 @@ from great_expectations.core.config_provider import (
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
-from great_expectations.core.factory import (
-    CheckpointFactory,
-    SuiteFactory,
+
+# from great_expectations.core.factory import (
+#     CheckpointFactory,
+#     SuiteFactory,
+#     ValidationDefinitionFactory,
+# )
+from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
+from great_expectations.core.factory.suite_factory import SuiteFactory
+from great_expectations.core.factory.validation_definition_factory import (
     ValidationDefinitionFactory,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.store import Store, TupleStoreBackend
+
+# from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     DataContextConfig,
