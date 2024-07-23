@@ -9,7 +9,7 @@ from great_expectations.expectations.expectation import (
     render_suite_parameter_string,
 )
 from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
-from great_expectations.render import (
+from great_expectations.render.components import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
     RenderedStringTemplateContent,

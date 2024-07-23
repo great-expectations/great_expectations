@@ -13,7 +13,7 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render import (
+from great_expectations.render.components import (
     LegacyDescriptiveRendererType,
     RenderedBulletListContent,
     RenderedHeaderContent,

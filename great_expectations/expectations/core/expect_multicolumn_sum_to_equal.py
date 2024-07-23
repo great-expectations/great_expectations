@@ -12,8 +12,7 @@ from great_expectations.expectations.model_field_descriptions import (
     IGNORE_ROW_IF_DESCRIPTION,
     MOSTLY_DESCRIPTION,
 )
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.components import LegacyRendererType
+from great_expectations.render.components import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,

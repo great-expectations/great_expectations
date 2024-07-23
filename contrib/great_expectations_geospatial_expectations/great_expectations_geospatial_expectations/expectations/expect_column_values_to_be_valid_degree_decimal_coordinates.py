@@ -23,7 +23,7 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 

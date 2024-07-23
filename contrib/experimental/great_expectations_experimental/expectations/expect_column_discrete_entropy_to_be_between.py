@@ -26,7 +26,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     handle_strict_min_max,

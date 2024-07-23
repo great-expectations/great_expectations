@@ -16,7 +16,9 @@ from great_expectations.experimental.datasource.fabric import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 param = pytest.param
 

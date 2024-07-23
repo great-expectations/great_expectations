@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.expectations as gxe
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
 
 

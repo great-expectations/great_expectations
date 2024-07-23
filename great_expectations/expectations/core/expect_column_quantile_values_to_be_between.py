@@ -4,7 +4,6 @@ from numbers import Number
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
 import numpy as np
-
 from great_expectations.compatibility import pydantic
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
@@ -12,7 +11,7 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
     LegacyDescriptiveRendererType,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations.render import (
+from great_expectations.render.components import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
 )

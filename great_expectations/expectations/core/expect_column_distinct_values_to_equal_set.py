@@ -18,7 +18,7 @@ from great_expectations.expectations.model_field_descriptions import (
 from great_expectations.expectations.model_field_types import (
     ValueSet,  # noqa: TCH001  # type needed in pydantic validation
 )
-from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,

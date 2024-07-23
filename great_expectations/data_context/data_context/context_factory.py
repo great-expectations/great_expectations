@@ -27,20 +27,35 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.alias_types import PathStr
-    from great_expectations.data_context import (
+
+    # from great_expectations.data_context import (
+    #     AbstractDataContext,
+    #     CloudDataContext,
+    #     EphemeralDataContext,
+    #     FileDataContext,
+    # )
+    from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
-        CloudDataContext,
+    )
+    from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
+    from great_expectations.data_context.data_context.ephemeral_data_context import (
         EphemeralDataContext,
-        FileDataContext,
     )
-    from great_expectations.data_context.store import (
-        ExpectationsStore,
-        SuiteParameterStore,
-        ValidationResultsStore,
-    )
+    from great_expectations.data_context.data_context.file_data_context import FileDataContext
     from great_expectations.data_context.store.checkpoint_store import CheckpointStore
+
+    # from great_expectations.data_context.store import (
+    #     ExpectationsStore,
+    #     SuiteParameterStore,
+    #     ValidationResultsStore,
+    # )
+    from great_expectations.data_context.store.expectations_store import ExpectationsStore
+    from great_expectations.data_context.store.metric_store import SuiteParameterStore
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
+    )
+    from great_expectations.data_context.store.validation_results_store import (
+        ValidationResultsStore,
     )
     from great_expectations.data_context.types.base import DataContextConfig
     from great_expectations.datasource.datasource_dict import DatasourceDict
@@ -283,7 +298,9 @@ class ProjectManager:
         self,
         project_config: DataContextConfig | Mapping | None,
     ) -> DataContextConfig | None:
-        from great_expectations.data_context.data_context import AbstractDataContext
+        from great_expectations.data_context.data_context.abstract_data_context import (
+            AbstractDataContext,
+        )
         from great_expectations.data_context.types.base import DataContextConfig
 
         # If available and applicable, convert project_config mapping into a rich config type

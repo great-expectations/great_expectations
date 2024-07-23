@@ -13,7 +13,7 @@ from great_expectations.expectations.expectation import (
     render_suite_parameter_string,
 )
 from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
-from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,

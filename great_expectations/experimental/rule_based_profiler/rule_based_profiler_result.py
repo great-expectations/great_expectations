@@ -4,10 +4,10 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.expectation_suite import (
     ExpectationSuite,  # noqa: TCH001
 )
-from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )

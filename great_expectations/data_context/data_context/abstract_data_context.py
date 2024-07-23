@@ -39,7 +39,6 @@ from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.analytics.events import DataContextInitializedEvent
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -53,6 +52,7 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.factory import (
     CheckpointFactory,

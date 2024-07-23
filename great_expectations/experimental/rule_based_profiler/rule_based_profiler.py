@@ -69,7 +69,9 @@ from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:
     from great_expectations.core.domain import Domain
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
     from great_expectations.data_context.store.profiler_store import ProfilerStore
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,

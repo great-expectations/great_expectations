@@ -7,7 +7,7 @@ from great_expectations.core import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     RenderedDocumentContent,
     RenderedHeaderContent,
     RenderedSectionContent,

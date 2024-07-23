@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Callable
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render import (
+from great_expectations.render.components import (
     LegacyDiagnosticRendererType,
     RenderedTableContent,
 )

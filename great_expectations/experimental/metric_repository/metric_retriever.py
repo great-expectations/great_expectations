@@ -23,7 +23,9 @@ from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
     from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.experimental.metric_repository.metrics import Metric
     from great_expectations.validator.metrics_calculator import (

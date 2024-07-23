@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,

@@ -34,7 +34,7 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
-from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import RenderedStringTemplateContent
 from great_expectations.self_check.util import (
     build_sa_validator_with_data,
     generate_expectation_tests,

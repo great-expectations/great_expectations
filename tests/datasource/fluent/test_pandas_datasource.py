@@ -35,7 +35,9 @@ from great_expectations.util import camel_to_snake
 if TYPE_CHECKING:
     import pandas as pd
 
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 logger = logging.getLogger(__file__)

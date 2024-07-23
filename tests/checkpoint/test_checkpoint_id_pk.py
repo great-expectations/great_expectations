@@ -15,7 +15,10 @@ from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.data_context import AbstractDataContext, FileDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.data_context.data_context.file_data_context import FileDataContext
 
 DATASOURCE_NAME = "my_datasource"
 ANIMAL_ASSET = "animals_names_asset"

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
-    from great_expectations.render import (
+    from great_expectations.render.components import (
         AtomicDiagnosticRendererType,
         AtomicPrescriptiveRendererType,
         AtomicRendererType,

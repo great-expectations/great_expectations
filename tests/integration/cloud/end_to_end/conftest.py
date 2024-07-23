@@ -13,7 +13,7 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import (

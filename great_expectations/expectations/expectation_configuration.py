@@ -30,7 +30,7 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
 )
 from great_expectations.expectations.registry import get_expectation_impl
-from great_expectations.render import RenderedAtomicContent, RenderedAtomicContentSchema
+from great_expectations.render.components import RenderedAtomicContent, RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     convert_to_json_serializable,  # noqa: TID251
@@ -39,7 +39,9 @@ from great_expectations.util import (
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
     from great_expectations.expectations.expectation import Expectation
 logger = logging.getLogger(__name__)
 

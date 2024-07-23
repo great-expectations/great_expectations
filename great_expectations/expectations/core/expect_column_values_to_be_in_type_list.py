@@ -4,10 +4,10 @@ import inspect
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
-import numpy as np
 import pandas as pd
 from packaging import version
 
+import numpy as np
 from great_expectations.compatibility import pydantic, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (  # noqa: TCH001
@@ -23,7 +23,7 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,

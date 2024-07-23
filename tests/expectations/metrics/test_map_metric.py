@@ -17,7 +17,7 @@ from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     PandasExecutionEngine,

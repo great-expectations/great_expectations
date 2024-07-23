@@ -14,7 +14,7 @@ from great_expectations.expectations.registry import (
     _registered_renderers,
     get_renderer_impl,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     CollapseContent,
     LegacyRendererType,
     RenderedComponentContent,

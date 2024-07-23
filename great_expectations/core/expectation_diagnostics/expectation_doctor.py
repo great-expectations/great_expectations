@@ -38,7 +38,7 @@ from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     CollapseContent,
     LegacyDiagnosticRendererType,
     LegacyRendererType,

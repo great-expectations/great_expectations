@@ -2,7 +2,7 @@ from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.context_factory import ProjectManager
 from great_expectations.exceptions.exceptions import DataContextRequiredError
 

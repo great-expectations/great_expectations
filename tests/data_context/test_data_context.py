@@ -28,7 +28,7 @@ from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
     RenderedAtomicContent,

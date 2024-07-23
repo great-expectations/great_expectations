@@ -34,7 +34,9 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.compatibility import pydantic
-    from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext as GXDataContext,
+    )
     from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent import PandasDatasource
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource

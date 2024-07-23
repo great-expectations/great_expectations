@@ -1103,7 +1103,7 @@ class Batch:
     def validate(
         self, expect: Expectation | ExpectationSuite
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
-        from great_expectations.core import ExpectationSuite
+        from great_expectations.core.expectation_suite import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
 
         if isinstance(expect, Expectation):

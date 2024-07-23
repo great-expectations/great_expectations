@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.render import (
+from great_expectations.render.components import (
     CollapseContent,
     LegacyDiagnosticRendererType,
     RenderedComponentContent,

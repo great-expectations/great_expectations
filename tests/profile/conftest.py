@@ -5,7 +5,7 @@ from typing import Set, Tuple
 import pytest
 
 import great_expectations as gx
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )

@@ -12,7 +12,7 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
     RenderedStringTemplateContent,

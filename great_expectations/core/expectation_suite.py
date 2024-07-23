@@ -30,7 +30,7 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.render import (
+from great_expectations.render.components import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
 )

@@ -6,7 +6,7 @@ from typing import Dict
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.util import load_class
-from great_expectations.render import RenderedDocumentContent
+from great_expectations.render.components import RenderedDocumentContent
 from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,

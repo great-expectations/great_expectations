@@ -3,7 +3,7 @@ import pytest
 
 import great_expectations.exceptions.exceptions
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
     ExpectColumnValuesToBeInSet,
 )

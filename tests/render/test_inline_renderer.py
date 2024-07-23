@@ -9,7 +9,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,

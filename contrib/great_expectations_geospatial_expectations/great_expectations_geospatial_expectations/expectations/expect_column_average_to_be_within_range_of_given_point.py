@@ -21,7 +21,7 @@ from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.render import (
+from great_expectations.render.components import (
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,

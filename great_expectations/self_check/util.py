@@ -29,12 +29,12 @@ from typing import (
     cast,
 )
 
-import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from typing_extensions import ParamSpec
 
 import great_expectations.compatibility.bigquery as BigQueryDialect
+import numpy as np
 from great_expectations.compatibility import aws, pyspark, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
@@ -92,7 +92,9 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.supporting_types import (
         ExpectationExecutionEngineDiagnostics,
     )
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 P = ParamSpec("P")
 T = TypeVar("T")
