@@ -48,32 +48,32 @@ suite = context.suites.add(
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py ExpectColumnValuesToBeNull">
-    gxe.ExpectColumnValuesToBeNull("errors")
+    gxe.ExpectColumnValuesToBeNull(column="errors")
     # </snippet>
 )
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missing_expectations.py ExpectColumnValuesToNotBeNull">
-    gxe.ExpectColumnValuesToNotBeNull("transfer_amount")
+    gxe.ExpectColumnValuesToNotBeNull(column="transfer_amount")
     # </snippet>
 )
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py intermittent_missing_values">
-    gxe.ExpectColumnValuesToNotBeNull("transfer_date", mostly=0.999)
+    gxe.ExpectColumnValuesToNotBeNull(column="transfer_date", mostly=0.999)
     # </snippet>
 )
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py missing_critical_data">
-    gxe.ExpectColumnValuesToNotBeNull("transfer_amount")
+    gxe.ExpectColumnValuesToNotBeNull(column="transfer_amount")
     # </snippet>
 )
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py new_cases_appear">
     gxe.ExpectColumnValuesToNotBeNull(
-        "type",
+        column="type",
         mostly=0.95,  # Allows for up to 5% of values to be NULL
     )
     # </snippet>
@@ -81,7 +81,7 @@ suite.add_expectation(
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py system_anomalies">
-    gxe.ExpectColumnValuesToBeNull("errors")
+    gxe.ExpectColumnValuesToBeNull(column="errors")
     # </snippet>
 )
 
