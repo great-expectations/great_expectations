@@ -11,7 +11,13 @@ from great_expectations.checkpoint.actions import (
     CheckpointAction,
     UpdateDataDocsAction,
 )
-from great_expectations.compatibility.pydantic import BaseModel, Field, root_validator, validator
+from great_expectations.compatibility.pydantic import (
+    BaseModel,
+    Extra,
+    Field,
+    root_validator,
+    validator,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -88,6 +94,7 @@ class Checkpoint(BaseModel):
         }
         """  # noqa: E501
 
+        extra = Extra.forbid
         arbitrary_types_allowed = (
             True  # Necessary for compatibility with ValidationAction's Marshmallow dep
         )
@@ -274,6 +281,7 @@ class CheckpointResult(BaseModel):
     success: Optional[bool] = None
 
     class Config:
+        extra = Extra.forbid
         arbitrary_types_allowed = True
 
     @root_validator

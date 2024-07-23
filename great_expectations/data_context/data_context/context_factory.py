@@ -108,7 +108,7 @@ class ProjectManager:
         return self._project.suite_parameter_store
 
     def get_datasources(self) -> DatasourceDict:
-        return self._project.datasources
+        return self._project.data_sources.all()
 
     def get_validator(self, batch_request: BatchRequest) -> Validator:
         return self._project.get_validator(batch_request=batch_request)

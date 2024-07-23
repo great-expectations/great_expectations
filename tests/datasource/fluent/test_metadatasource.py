@@ -411,13 +411,13 @@ def context_with_fluent_datasource(
     context_config_data: Tuple[AbstractDataContext, pathlib.Path, pathlib.Path],
 ) -> Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]:
     context, config_file_path, data_dir = context_config_data
-    assert len(context.datasources) == 0
+    assert len(context.data_sources.all()) == 0
     context.data_sources.add_pandas_filesystem(
         name=DEFAULT_CRUD_DATASOURCE_NAME,
         base_directory=data_dir,
         data_context_root_directory=config_file_path.parent,
     )
-    assert len(context.datasources) == 1
+    assert len(context.data_sources.all()) == 1
     assert_fluent_datasource_content(
         config_file_path=config_file_path,
         fluent_datasource_config={
@@ -446,7 +446,7 @@ def test_add_datasource_with_datasource_object(context_with_fluent_datasource, u
         context.data_sources.add_pandas_filesystem(new_datasource)
     else:
         context.data_sources.add_pandas_filesystem(datasource=new_datasource)
-    assert len(context.datasources) == 2
+    assert len(context.data_sources.all()) == 2
     assert_fluent_datasource_content(
         config_file_path=config_file_path,
         fluent_datasource_config={

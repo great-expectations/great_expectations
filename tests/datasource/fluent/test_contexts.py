@@ -73,7 +73,9 @@ def test_add_fluent_datasource_are_persisted(
     assert datasource.id
     assert set_spy.call_count == 1
     cloud_api_fake.assert_call_count(
-        urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"),
+        urllib.parse.urljoin(
+            GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"
+        ),
         2,
     )
 
@@ -113,9 +115,7 @@ def test_partitioners_are_persisted_on_creation(
     partitioner = ColumnPartitionerYearly(column_name="date")
     my_asset.add_batch_definition(name="cloud partitioner test", partitioner=partitioner)
 
-    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
-        "datasource_config"
-    ]
+    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]
 
     # partitioners should be present
     assert datasource_config["assets"][0]["batch_definitions"][0]["partitioner"]
@@ -167,7 +167,7 @@ def test_delete_asset_with_cloud_data_context(
 
     cloud_api_fake.assert_call_count(
         urllib.parse.urljoin(
-            GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/data-assets/{asset.id}"
+            GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/data-assets/{asset.id}"
         ),
         1,
     )
@@ -175,9 +175,7 @@ def test_delete_asset_with_cloud_data_context(
 
     asset_names = [
         asset["name"]
-        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
-            "datasource_config"
-        ]["assets"]
+        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["assets"]
     ]
     assert asset_name not in asset_names
 
@@ -203,7 +201,7 @@ def test_context_add_or_update_datasource(
     if isinstance(empty_contexts, CloudDataContext):
         # TODO: adjust call counts as needed
         datasources_url = urllib.parse.urljoin(
-            GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"
+            GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"
         )
         cloud_api_fake.assert_call_count(
             datasources_url,
@@ -217,7 +215,7 @@ def test_context_add_or_update_datasource(
         response = requests.get(f"{datasources_url}/{datasource.id}")
         response.raise_for_status()
         print(pf(response.json(), depth=4))
-        assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
+        assert response.json()["data"].get("assets")
 
     # add_or_update should be idempotent
     datasource = context.data_sources.add_or_update_pandas_filesystem(
@@ -305,7 +303,7 @@ def test_cloud_context_delete_datasource(
         name="delete_ds_test", base_directory=taxi_data_samples_dir
     )
     datasources_url = urllib.parse.urljoin(
-        GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"
+        GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"
     )
 
     # check cloud_api_fake items
@@ -391,11 +389,7 @@ def test_invalid_datasource_config_does_not_break_cloud_context(
     cloud_api_fake_db["datasources"][datasource_id] = {
         "data": {
             "id": datasource_id,
-            "type": "datasource",
-            "attributes": {
-                "name": datasource_name,
-                "datasource_config": invalid_datasource_config,
-            },
+            **invalid_datasource_config,
         }
     }
     with pytest.warns(GxInvalidDatasourceWarning):
@@ -404,7 +398,7 @@ def test_invalid_datasource_config_does_not_break_cloud_context(
             cloud_organization_id=cloud_details.org_id,
             cloud_access_token=cloud_details.access_token,
         )
-        assert datasource_name in context.datasources
+        assert datasource_name in context.data_sources.all()
         bad_datasource = context.get_datasource(datasource_name)
     # test __repr__ and __str__
     print(f"{bad_datasource!r}\n{bad_datasource!s}")
@@ -424,19 +418,16 @@ def verify_asset_names_mock(
 
             payload = CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
-            assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
+            assets = payload.data["assets"]  # type: ignore[index]
             assert assets, "No assets found"
             for asset in assets:
-                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:  # type: ignore[index]
+                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
             old_datasource: dict | None = cloud_api_fake_db["datasources"].get(datasource_id)
             if old_datasource:
-                if (
-                    payload.data.name
-                    != old_datasource["data"]["attributes"]["datasource_config"]["name"]
-                ):
+                if payload.data.name != old_datasource["data"]["name"]:
                     raise NotImplementedError("Unsure how to handle name change")
                 cloud_api_fake_db["datasources"][datasource_id] = payload.dict()
             return CallbackResult(
@@ -475,7 +466,7 @@ class TestPandasDefaultWithCloud:
         assert verify_asset_names_mock.assert_call_count(
             urllib.parse.urljoin(
                 cloud_details.base_url,
-                f"organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
+                f"api/v1/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
             ),
             1,
         )
