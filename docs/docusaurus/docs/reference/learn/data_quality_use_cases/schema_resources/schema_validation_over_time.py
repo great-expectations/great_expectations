@@ -107,15 +107,25 @@ checkpoint_result_2 = checkpoint.run()
 results = []
 
 for checkpoint_result in [checkpoint_result_1, checkpoint_result_2]:
-    run_result = checkpoint_result.run_results[list(checkpoint_result.run_results.keys())[0]]
+    run_result = checkpoint_result.run_results[
+        list(checkpoint_result.run_results.keys())[0]
+    ]
 
     results.append(
         {
-            "timestamp" : run_result["meta"]["run_id"].run_time.strftime("%Y-%m-%d %H:%M:%S"),
-            "success" : run_result["success"],
-            "evaluated_expectations" : run_result["statistics"]["evaluated_expectations"],
-            "successful_expectations" : run_result["statistics"]["successful_expectations"],
-            "unsuccessful_expectations" : run_result["statistics"]["unsuccessful_expectations"],
+            "timestamp": run_result["meta"]["run_id"].run_time.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
+            "success": run_result["success"],
+            "evaluated_expectations": run_result["statistics"][
+                "evaluated_expectations"
+            ],
+            "successful_expectations": run_result["statistics"][
+                "successful_expectations"
+            ],
+            "unsuccessful_expectations": run_result["statistics"][
+                "unsuccessful_expectations"
+            ],
         }
     )
 
