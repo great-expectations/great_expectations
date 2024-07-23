@@ -54,7 +54,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
    Update the `batch_definition_name` and `batch_definition_column` variables in the following code, then execute it to create a Batch Definition that subdivides the records in a directory by year:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_yearly.py - define Batch Definition parameters"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_yearly.py - add Batch Definition"
    ```
 
    </TabItem>
@@ -63,7 +63,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
    
    Update the `batch_definition_name` and `batch_definition_column` variables in the following code, then execute it to create a Batch Definition that subdivides the records in a directory by month:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_monthly.py - define Batch Definition parameters"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_monthly.py - add Batch Definition"
    ```
 
    </TabItem>
@@ -72,7 +72,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
    
    Update the `batch_definition_name` and `batch_definition_column` variables in the following code, then execute it to create a Batch Definition that subdivides the records in a directory by day:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py - define Batch Definition parameters"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py - add Batch Definition"
    ```
 
    </TabItem>
