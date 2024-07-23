@@ -66,9 +66,14 @@ module.exports = {
           },
           {
             type: 'doc',
+            id: 'core/connect_to_data/filesystem_data/filesystem_data',
+            label: 'Connect to Filesystem data'
+          },
+          {
+            type: 'doc',
             id: 'core/connect_to_data/dataframes/dataframes',
             label: 'Connect to dataframe data'
-          },
+          }
       ]
     },
     {

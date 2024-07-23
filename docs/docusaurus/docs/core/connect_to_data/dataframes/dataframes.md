@@ -1,6 +1,6 @@
 ---
 title: Connect to dataframe data
-description: Follow this guide to connect to a pandas or Spark dataframe in GX.
+description: Connect to data in pandas or Spark Dataframes organize that data into Batches for retrieval and validation.
 hide_feedback_survey: false
 hide_title: false
 toc_max_heading_level: 2
@@ -196,4 +196,3 @@ In a File Data Context previous dataframe Data Asset and Batch Definition config
 </TabItem>
 
 </Tabs>
-

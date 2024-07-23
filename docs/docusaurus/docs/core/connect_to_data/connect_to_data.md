@@ -10,7 +10,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Connect to data in various source formats.  Organize that data into Batches for validation.
+      {frontMatter.description}
 </OverviewCard>
 
 
@@ -23,5 +23,18 @@ import OverviewCard from '@site/src/components/OverviewCard';
       to="/core/connect_to_data/sql_data" 
       icon="/img/expectation_icon.svg" 
   />
-  
+  <LinkCard 
+      topIcon 
+      label="Filesystem Data"
+      description="Connect to data stored as files in a folder hierarchy and organize it into Batches for validation."
+      to="/core/connect_to_data/filesystem_data" 
+      icon="/img/expectation_icon.svg" 
+  />
+  <LinkCard 
+      topIcon 
+      label="Dataframes"
+      description="Connect to data in pandas or Spark Dataframes and organize it into Batches for validation."
+      to="/core/connect_to_data/dataframes" 
+      icon="/img/expectation_icon.svg" 
+  />
 </LinkCardGrid>
