@@ -20,21 +20,33 @@ import PrereqDataSourceAndAssetConnectedToData from '../../_core_components/prer
 
 1. Retrieve your Batch Definition.
 
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve Batch Definition"
+   ```
+
+3. Optional. Specify the Batch to retrieve.
 
 
-2. Optional. Specify the Batch to retrieve.
+
+3. Retrieve a Batch of data.
+
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve most recent Batch"
+   ```
+
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve specific Batch"
+   ```
+
+5. Optional. Verify that the returned Batch is populated with records.
 
 
-
-3. Retrieve and Verify a Batch of data.
-
-
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - verify populated Batch"
+   ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-
+```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - full example"
+```
 
 </TabItem>
 

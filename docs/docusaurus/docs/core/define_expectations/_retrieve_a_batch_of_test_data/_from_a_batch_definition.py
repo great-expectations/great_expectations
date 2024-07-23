@@ -1,7 +1,10 @@
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - full example">
 from great_expectations import gx
 
 context = gx.get_context()
 
+# Retrieve the Batch Definition from the Data Context
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve Batch Definition">
 data_source_name = "my_filesystem_data_source"
 data_asset_name = "my_file_data_asset"
 batch_definition_name = "yellow_tripdata_sample_daily"
@@ -10,9 +13,22 @@ batch_definition = (
     .get_asset(data_asset_name)
     .get_batch_definition(batch_definition_name)
 )
+# </snippet>
 
-# <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py - retrieve and verify Batch">
+# Retrieve the most recent batch of data from the Batch Definition
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve most recent Batch">
+batch = batch_definition.get_batch()
+# </snippet>
+
+# ...or retrieve a specific Batch by providing Batch Parameters
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve specific Batch">
 batch = batch_definition.get_batch(
     batch_parameters={"year": 2020, "month": 1, "day": 14}
 )
+# </snippet>
+
+# Verify that the Batch contains records
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - verify populated Batch">
 batch.head()
+# </snippet>
+# </snippet>
