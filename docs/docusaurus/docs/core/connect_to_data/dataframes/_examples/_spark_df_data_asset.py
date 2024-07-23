@@ -32,7 +32,8 @@ batch_definition_name = "dataframe_batch"
 batch_definition = data_asset.add_batch_definition(name=batch_definition_name)
 # </snippet>
 
-# Verify the Batch Definition
+# Verify the Batch Definition can read data
+#  and return records as a Batch
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - verify Batch Definition">
 batch = batch_definition.get_batch()
 print(batch.head())
