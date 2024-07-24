@@ -296,19 +296,10 @@ FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     "str QUOTED_UPPER_COL": [],
     'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
     # DDL: "quotedMixed" -----
-    "str quotedmixed": [
-        # "postgres",
-        # "sqlite",
-    ],
-    "str quotedMixed": [
-        # "sqlite",
-    ],
-    'str "quotedMixed"': [
-        # "sqlite",
-    ],
-    "str QUOTEDMIXED": [
-        # "sqlite",
-    ],
+    "str quotedmixed": ["postgres", "sqlite", "snowflake"],
+    "str quotedMixed": ["snowflake"],
+    'str "quotedMixed"': ["postgres", "sqlite", "snowflake"],
+    "str QUOTEDMIXED": ["postgres", "sqlite", "snowflake"],
     # DDL: "quoted.w.dots" -------
     "str quoted.w.dots": ["databricks_sql"],
     'str "quoted.w.dots"': ["postgres", "snowflake", "sqlite"],
@@ -1218,8 +1209,10 @@ class TestColumnExpectations:
                     result.success is False
                 ), "column does not exist but validation succeeded"
         except AssertionError as ae:
+            reason = str(ae).splitlines()[0]
+            print(reason)
             # xfail if the expectation doesn't behave as the dialect would
-            pytest.xfail(reason=str(ae).splitlines()[0])
+            pytest.xfail(reason=reason)
 
 
 if __name__ == "__main__":
