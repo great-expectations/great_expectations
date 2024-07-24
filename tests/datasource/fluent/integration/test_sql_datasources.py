@@ -988,6 +988,7 @@ class TestColumnExpectations:
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
 
+        original_column_name = column_name
         if column_name.startswith('"') and column_name.endswith('"'):
             # databricks uses backticks for quoting
             column_name = quote_str(column_name[1:-1], dialect=dialect)
@@ -1001,7 +1002,7 @@ class TestColumnExpectations:
             else None
         )
 
-        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")  # type: ignore[index] # FIXME
+        print(f"\ncolumn DDL:\n  {COLUMN_DDL[original_column_name]}")  # type: ignore[index] # FIXME
         print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
         print(f"type:\n  {type(column_name)}\n")
 
