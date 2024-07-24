@@ -158,53 +158,124 @@ def get_random_identifier_name() -> str:
 
 RAND_SCHEMA: Final[str] = f"{PYTHON_VERSION}_{get_random_identifier_name()}"
 
+ColNameParams: TypeAlias = Literal[
+    # DDL: unquoted_lower_col ------
+    "unquoted_lower_col",
+    '"unquoted_lower_col"',
+    "UNQUOTED_LOWER_COL",
+    '"UNQUOTED_LOWER_COL"',
+    # DDL: UNQUOTED_UPPER_COL ------
+    "unquoted_upper_col",
+    '"unquoted_upper_col"',
+    "UNQUOTED_UPPER_COL",
+    '"UNQUOTED_UPPER_COL"',
+    # DDL: "quoted_lower_col" -----
+    "quoted_lower_col",
+    '"quoted_lower_col"',
+    "QUOTED_LOWER_COL",
+    '"QUOTED_LOWER_COL"',
+    # DDL: "QUOTED_UPPER_COL" ----
+    "quoted_upper_col",
+    '"quoted_upper_col"',
+    "QUOTED_UPPER_COL",
+    '"QUOTED_UPPER_COL"',
+    # DDL: unquotedMixed ------
+    # TODO: add tests for these
+    # DDL: "quotedMixed" -----
+    # TODO: add tests for these
+    # DDL: "quoted.w.dots" -------
+    "quoted.w.dots",
+    '"quoted.w.dots"',
+    "QUOTED.W.DOTS",
+    '"QUOTED.W.DOTS"',
+]
 
-def _get_exception_details(
-    result: CheckpointResult,
-    prettyprint: bool = False,
-) -> list[
-    dict[
-        Literal["exception_message", "exception_traceback", "raised_exception"],
-        str,
-    ]
-]:
-    """Extract a list of exception_info dicts from a CheckpointResult."""
-    validation_results: list[
-        dict[
-            Literal[
-                "exception_info", "expectation_config", "meta", "result", "success"
-            ],
-            dict,
-        ]
-    ] = next(  # type: ignore[index, assignment]
-        iter(result.to_json_dict()["run_results"].values())  # type: ignore[call-overload,union-attr]
-    )[
-        "validation_result"  # type: ignore[index]
-    ][
-        "results"  # type: ignore[index]
-    ]
-    if prettyprint:
-        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
+ColNameParamId: TypeAlias = Literal[
+    # DDL: unquoted_lower_col ------
+    "str unquoted_lower_col",
+    'str "unquoted_lower_col"',
+    "str UNQUOTED_LOWER_COL",
+    'str "UNQUOTED_LOWER_COL"',
+    # DDL: UNQUOTED_UPPER_COL ------
+    "str unquoted_upper_col",
+    'str "unquoted_upper_col"',
+    "str UNQUOTED_UPPER_COL",
+    'str "UNQUOTED_UPPER_COL"',
+    # DDL: "quoted_lower_col" -----
+    "str quoted_lower_col",
+    'str "quoted_lower_col"',
+    "str QUOTED_LOWER_COL",
+    'str "QUOTED_LOWER_COL"',
+    # DDl: "QUOTED_UPPER_COL" ----
+    "str quoted_upper_col",
+    'str "quoted_upper_col"',
+    "str QUOTED_UPPER_COL",
+    'str "QUOTED_UPPER_COL"',
+    # DDL: "quoted.w.dots" -------
+    "str quoted.w.dots",
+    'str "quoted.w.dots"',
+    "str QUOTED.W.DOTS",
+    'str "QUOTED.W.DOTS"',
+]
 
-    exc_details = [
-        r["exception_info"]
-        for r in validation_results
-        if r["exception_info"]["raised_exception"]
-    ]
-    if exc_details and prettyprint:
-        print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
-        for i, exc_info in enumerate(exc_details, start=1):
-            print(
-                f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
-            )
-    return exc_details
+COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
+    # DDL: unquoted_lower_col ------
+    "unquoted_lower_col": UNQUOTED_LOWER_COL,
+    '"unquoted_lower_col"': UNQUOTED_LOWER_COL,
+    "UNQUOTED_LOWER_COL": UNQUOTED_LOWER_COL,
+    '"UNQUOTED_LOWER_COL"': UNQUOTED_LOWER_COL,
+    # DDL: UNQUOTED_UPPER_COL ------
+    "unquoted_upper_col": UNQUOTED_UPPER_COL,
+    '"unquoted_upper_col"': UNQUOTED_UPPER_COL,
+    "UNQUOTED_UPPER_COL": UNQUOTED_UPPER_COL,
+    '"UNQUOTED_UPPER_COL"': UNQUOTED_UPPER_COL,
+    # DDL: "quoted_lower_col" -----
+    "quoted_lower_col": f'"{QUOTED_LOWER_COL}"',
+    '"quoted_lower_col"': f'"{QUOTED_LOWER_COL}"',
+    "QUOTED_LOWER_COL": f'"{QUOTED_LOWER_COL}"',
+    '"QUOTED_LOWER_COL"': f'"{QUOTED_LOWER_COL}"',
+    # DDl: "QUOTED_UPPER_COL" ----
+    "quoted_upper_col": f'"{QUOTED_UPPER_COL}"',
+    '"quoted_upper_col"': f'"{QUOTED_UPPER_COL}"',
+    "QUOTED_UPPER_COL": f'"{QUOTED_UPPER_COL}"',
+    '"QUOTED_UPPER_COL"': f'"{QUOTED_UPPER_COL}"',
+    # DDL: "quoted.w.dots" -------
+    "quoted.w.dots": f'"{QUOTED_W_DOTS}"',
+    '"quoted.w.dots"': f'"{QUOTED_W_DOTS}"',
+    "QUOTED.W.DOTS": f'"{QUOTED_W_DOTS}"',
+    '"QUOTED.W.DOTS"': f'"{QUOTED_W_DOTS}"',
+}
 
 
-@pytest.fixture
-def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
-    """Capture SQLAlchemy engine logs and display them if the test fails."""
-    caplog.set_level(logging.INFO, logger="sqlalchemy.engine")
-    return caplog
+# TODO: remove items from this lookup when working on fixes
+# The presence of a database type in the list indicates that this specific value fails when used as the `column_name` value.
+# It does not mean that it SHOULD or SHOULD NOT fail, but that it currently does.
+FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
+    # DDL: unquoted_lower_col ------
+    'str "unquoted_lower_col"': ["postgres", "sqlite"],
+    "str UNQUOTED_LOWER_COL": ["databricks_sql", "postgres", "sqlite"],
+    'str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
+    # DDL: UNQUOTED_UPPER_COL ------
+    "str unquoted_upper_col": ["databricks_sql", "sqlite"],
+    'str "unquoted_upper_col"': ["postgres", "sqlite"],
+    "str UNQUOTED_UPPER_COL": ["postgres"],
+    'str "UNQUOTED_UPPER_COL"': ["snowflake", "sqlite"],
+    # DDL: "quoted_lower_col" -----
+    'str "quoted_lower_col"': ["postgres", "snowflake", "sqlite"],
+    "str quoted_lower_col": ["snowflake"],
+    "str QUOTED_LOWER_COL": ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    'str "QUOTED_LOWER_COL"': ["sqlite"],
+    # DDl: "QUOTED_UPPER_COL" ----
+    "str quoted_upper_col": ["databricks_sql", "sqlite", "postgres"],
+    'str "quoted_upper_col"': ["sqlite"],
+    "str QUOTED_UPPER_COL": [],
+    'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
+    # DDL: "quoted.w.dots" -------
+    "str quoted.w.dots": ["databricks_sql"],
+    'str "quoted.w.dots"': ["postgres", "snowflake", "sqlite"],
+    "str QUOTED.W.DOTS": ["databricks_sql", "snowflake", "sqlite", "postgres"],
+    'str "QUOTED.W.DOTS"': ["sqlite"],
+}
 
 
 class Row(TypedDict):
@@ -315,6 +386,54 @@ def table_factory() -> Generator[TableFactory, None, None]:
             if schema:
                 conn.execute(TextClause(f"DROP SCHEMA IF EXISTS {schema}"))
             transaction.commit()
+
+
+def _get_exception_details(
+    result: CheckpointResult,
+    prettyprint: bool = False,
+) -> list[
+    dict[
+        Literal["exception_message", "exception_traceback", "raised_exception"],
+        str,
+    ]
+]:
+    """Extract a list of exception_info dicts from a CheckpointResult."""
+    validation_results: list[
+        dict[
+            Literal[
+                "exception_info", "expectation_config", "meta", "result", "success"
+            ],
+            dict,
+        ]
+    ] = next(  # type: ignore[index, assignment]
+        iter(result.to_json_dict()["run_results"].values())  # type: ignore[call-overload,union-attr]
+    )[
+        "validation_result"  # type: ignore[index]
+    ][
+        "results"  # type: ignore[index]
+    ]
+    if prettyprint:
+        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
+
+    exc_details = [
+        r["exception_info"]
+        for r in validation_results
+        if r["exception_info"]["raised_exception"]
+    ]
+    if exc_details and prettyprint:
+        print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
+        for i, exc_info in enumerate(exc_details, start=1):
+            print(
+                f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
+            )
+    return exc_details
+
+
+@pytest.fixture
+def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
+    """Capture SQLAlchemy engine logs and display them if the test fails."""
+    caplog.set_level(logging.INFO, logger="sqlalchemy.engine")
+    return caplog
 
 
 @pytest.fixture
@@ -616,148 +735,6 @@ class TestTableIdentifiers:
 
         _ = _get_exception_details(result, prettyprint=True)
         assert result.success is True
-
-
-ColNameParams: TypeAlias = Literal[
-    # DDL: unquoted_lower_col ------
-    "unquoted_lower_col",
-    '"unquoted_lower_col"',
-    "UNQUOTED_LOWER_COL",
-    '"UNQUOTED_LOWER_COL"',
-    # DDL: UNQUOTED_UPPER_COL ------
-    "unquoted_upper_col",
-    '"unquoted_upper_col"',
-    "UNQUOTED_UPPER_COL",
-    '"UNQUOTED_UPPER_COL"',
-    # DDL: "quoted_lower_col" -----
-    "quoted_lower_col",
-    '"quoted_lower_col"',
-    "QUOTED_LOWER_COL",
-    '"QUOTED_LOWER_COL"',
-    # DDL: "QUOTED_UPPER_COL" ----
-    "quoted_upper_col",
-    '"quoted_upper_col"',
-    "QUOTED_UPPER_COL",
-    '"QUOTED_UPPER_COL"',
-    # DDL: unquotedMixed ------
-    # TODO: add tests for these
-    # DDL: "quotedMixed" -----
-    # TODO: add tests for these
-    # DDL: "quoted.w.dots" -------
-    "quoted.w.dots",
-    '"quoted.w.dots"',
-    "QUOTED.W.DOTS",
-    '"QUOTED.W.DOTS"',
-]
-
-ColNameParamId: TypeAlias = Literal[
-    # DDL: unquoted_lower_col ------
-    "str unquoted_lower_col",
-    'str "unquoted_lower_col"',
-    "str UNQUOTED_LOWER_COL",
-    'str "UNQUOTED_LOWER_COL"',
-    # DDL: UNQUOTED_UPPER_COL ------
-    "str unquoted_upper_col",
-    'str "unquoted_upper_col"',
-    "str UNQUOTED_UPPER_COL",
-    'str "UNQUOTED_UPPER_COL"',
-    # DDL: "quoted_lower_col" -----
-    "str quoted_lower_col",
-    'str "quoted_lower_col"',
-    "str QUOTED_LOWER_COL",
-    'str "QUOTED_LOWER_COL"',
-    # DDl: "QUOTED_UPPER_COL" ----
-    "str quoted_upper_col",
-    'str "quoted_upper_col"',
-    "str QUOTED_UPPER_COL",
-    'str "QUOTED_UPPER_COL"',
-    # DDL: "quoted.w.dots" -------
-    "str quoted.w.dots",
-    'str "quoted.w.dots"',
-    "str QUOTED.W.DOTS",
-    'str "QUOTED.W.DOTS"',
-]
-
-COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
-    # DDL: unquoted_lower_col ------
-    "unquoted_lower_col": UNQUOTED_LOWER_COL,
-    '"unquoted_lower_col"': UNQUOTED_LOWER_COL,
-    "UNQUOTED_LOWER_COL": UNQUOTED_LOWER_COL,
-    '"UNQUOTED_LOWER_COL"': UNQUOTED_LOWER_COL,
-    # DDL: UNQUOTED_UPPER_COL ------
-    "unquoted_upper_col": UNQUOTED_UPPER_COL,
-    '"unquoted_upper_col"': UNQUOTED_UPPER_COL,
-    "UNQUOTED_UPPER_COL": UNQUOTED_UPPER_COL,
-    '"UNQUOTED_UPPER_COL"': UNQUOTED_UPPER_COL,
-    # DDL: "quoted_lower_col" -----
-    "quoted_lower_col": f'"{QUOTED_LOWER_COL}"',
-    '"quoted_lower_col"': f'"{QUOTED_LOWER_COL}"',
-    "QUOTED_LOWER_COL": f'"{QUOTED_LOWER_COL}"',
-    '"QUOTED_LOWER_COL"': f'"{QUOTED_LOWER_COL}"',
-    # DDl: "QUOTED_UPPER_COL" ----
-    "quoted_upper_col": f'"{QUOTED_UPPER_COL}"',
-    '"quoted_upper_col"': f'"{QUOTED_UPPER_COL}"',
-    "QUOTED_UPPER_COL": f'"{QUOTED_UPPER_COL}"',
-    '"QUOTED_UPPER_COL"': f'"{QUOTED_UPPER_COL}"',
-    # DDL: "quoted.w.dots" -------
-    "quoted.w.dots": f'"{QUOTED_W_DOTS}"',
-    '"quoted.w.dots"': f'"{QUOTED_W_DOTS}"',
-    "QUOTED.W.DOTS": f'"{QUOTED_W_DOTS}"',
-    '"QUOTED.W.DOTS"': f'"{QUOTED_W_DOTS}"',
-}
-
-
-# TODO: remove items from this lookup when working on fixes
-FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
-    'str "unquoted_lower_col"': ["postgres", "sqlite"],
-    "str UNQUOTED_LOWER_COL": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
-    "str unquoted_upper_col": ["databricks_sql", "sqlite"],
-    'str "unquoted_upper_col"': ["postgres", "sqlite"],
-    "str UNQUOTED_UPPER_COL": ["postgres"],
-    'str "UNQUOTED_UPPER_COL"': ["snowflake", "sqlite"],
-    'str "quoted_lower_col"': [
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    "str quoted_lower_col": ["snowflake"],
-    "str QUOTED_LOWER_COL": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    'str "QUOTED_LOWER_COL"': ["sqlite"],
-    "str quoted_upper_col": [
-        "databricks_sql",
-        "sqlite",
-        "postgres",
-    ],
-    'str "quoted_upper_col"': ["sqlite"],
-    "str QUOTED_UPPER_COL": [],
-    'str "QUOTED_UPPER_COL"': [
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    "str quoted.w.dots": [
-        "databricks_sql",
-    ],
-    'str "quoted.w.dots"': [
-        "postgres",  # should succeed but fails
-        "snowflake",
-        "sqlite",  # should succeed but fails
-    ],
-    "str QUOTED.W.DOTS": ["databricks_sql", "snowflake", "sqlite", "postgres"],
-    'str "QUOTED.W.DOTS"': [
-        "sqlite",  # should succeed but fails
-    ],
-}
 
 
 def _fails_expectation(param_id: str) -> bool:
