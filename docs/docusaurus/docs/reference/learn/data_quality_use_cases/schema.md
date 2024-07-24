@@ -210,7 +210,13 @@ Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_strict_and_relaxed.py full sample code"
 ```
 
-**Insight**: The strict Expectation Suite ensures that columns appear in the specified order and are of the required data type, crucial in contexts where order matters for processing logic. The relaxed Expectation Suite allows flexibility of column order and typing but ensures all required columns are present.
+**Result**:
+```
+Strict validation passes: True
+Relaxed validation passes: True
+```
+
+**Insight**: Both Validations pass. The strict Expectation Suite ensures that columns appear in the specified order and are of the required data type, crucial in contexts where order matters for processing logic. The relaxed Expectation Suite allows flexibility of column order and typing but ensures all required columns are present.
 
 ## Avoid common schema validation pitfalls
 

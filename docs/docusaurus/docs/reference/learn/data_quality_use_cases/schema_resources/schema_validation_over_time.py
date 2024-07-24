@@ -32,7 +32,6 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
-
 def add_column_to_transfers_table() -> None:
     connection = psycopg2.connect("host=localhost dbname=test_ci user=postgres")
     query = "ALTER TABLE transfers ADD COLUMN recipient_account_number INTEGER"
@@ -40,7 +39,6 @@ def add_column_to_transfers_table() -> None:
     cursor.execute(query)
     connection.commit()
     connection.close()
-
 
 # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full sample code">
 import pandas as pd
@@ -68,7 +66,7 @@ suite.add_expectation(
         column_set=[
             "type",
             "sender_account_number",
-            "recipient_account_number",
+            "recipient_fullname",
             "transfer_amount",
             "transfer_date",
         ]

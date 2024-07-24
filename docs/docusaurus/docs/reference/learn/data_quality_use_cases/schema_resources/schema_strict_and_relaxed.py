@@ -65,7 +65,7 @@ strict_suite.add_expectation(
 )
 
 strict_suite.add_expectation(
-    gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="double precision")
+    gxe.ExpectColumnValuesToBeOfType(column="transfer_amount", type_="DOUBLE_PRECISION")
 )
 
 strict_results = batch.validate(strict_suite)
@@ -89,14 +89,16 @@ relaxed_suite.add_expectation(
 
 relaxed_suite.add_expectation(
     gxe.ExpectColumnValuesToBeInTypeList(
-        column="transfer_amount", type_list=["double precision", "text"]
+        column="transfer_amount", type_list=["DOUBLE_PRECISION", "STRING"]
     )
 )
 
 relaxed_results = batch.validate(relaxed_suite)
+
+print(f"Strict validation passes: {strict_results['success']}")
+print(f"Relaxed validation passes: {relaxed_results['success']}")
 # </snippet>
 
 # Check output matches what is in the docs.
-
-assert strict_results["success"] is False
+assert strict_results["success"] is True
 assert relaxed_results["success"] is True
