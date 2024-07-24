@@ -30,7 +30,7 @@ Batch Definitions both organize a Data Asset's records into Batches and provide 
 
    Some Batch Definitions can only provide a single Batch.  Whole table batch definitions on SQL Data Assets, file path and whole directory Batch Definitions on filesystem Data Assets, and all Batch Definitions for dataframe Data Assets will provide all of the Data Asset's records as a single Batch.  For these Batch Definitions there is no need to specify which Batch to retrieve because there is only one available.
 
-   Yearly, monthly, and daily Batch Definitions subdivide the Data Asset's records by date.  This allows you to retrieve the data corresponding to a specific date from the Data Asset.  If you do not specify a Batch to retireve, these Batch Definitions will return the first valid Batch they find.  By default, this will be the most recent Batch (sort ascending) or the oldest Batch if the Batch Definition has been configured to sort descending.
+   Yearly, monthly, and daily Batch Definitions subdivide the Data Asset's records by date.  This allows you to retrieve the data corresponding to a specific date from the Data Asset.  If you do not specify a Batch to retrieve, these Batch Definitions will return the first valid Batch they find.  By default, this will be the most recent Batch (sort ascending) or the oldest Batch if the Batch Definition has been configured to sort descending.
 
    :::note Sorting of records with invalid dates
    
