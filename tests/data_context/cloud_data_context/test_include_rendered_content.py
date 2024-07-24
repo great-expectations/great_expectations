@@ -4,9 +4,7 @@ import string
 import pandas as pd
 import pytest
 
-from great_expectations.core import (
-    ExpectationValidationResult,
-)
+from great_expectations.core.expectation_validation_result import ExpectationValidationResult
 from great_expectations.data_context import CloudDataContext
 from great_expectations.render.components import RenderedAtomicContent
 from great_expectations.validator.validator import Validator

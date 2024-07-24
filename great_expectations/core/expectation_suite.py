@@ -591,7 +591,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         if not self.id:
             expectation_store = project_manager.get_expectations_store()

@@ -42,7 +42,6 @@ from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_definition import BatchDefinition, PartitionerT
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
 )
@@ -55,6 +54,7 @@ from great_expectations.exceptions.exceptions import (
     DataContextError,
     MissingDataContextError,
 )
+from great_expectations.result_format import ResultFormat
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
@@ -68,6 +68,7 @@ if TYPE_CHECKING:
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
+
     from great_expectations.core import (
         ExpectationSuite,
         ExpectationSuiteValidationResult,

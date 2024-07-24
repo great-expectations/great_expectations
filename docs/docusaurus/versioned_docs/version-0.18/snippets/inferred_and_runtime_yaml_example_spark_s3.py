@@ -8,7 +8,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 yaml = YAMLHandler()
 # </snippet>
 
-from great_expectations.data_context import get_context
+from great_expectations import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,

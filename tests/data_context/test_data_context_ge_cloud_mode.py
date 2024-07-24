@@ -4,7 +4,7 @@ import pytest
 import responses
 from requests import Response
 
-from great_expectations.data_context import get_context
+from great_expectations import get_context
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,

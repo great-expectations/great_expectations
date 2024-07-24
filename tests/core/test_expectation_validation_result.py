@@ -5,7 +5,7 @@ import json
 import pytest
 
 import great_expectations.expectations as gxe
-from great_expectations.core import (
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )

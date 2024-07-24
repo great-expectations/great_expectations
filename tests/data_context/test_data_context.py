@@ -12,9 +12,9 @@ from typing_extensions import override
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
+from great_expectations import get_context
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,

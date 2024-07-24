@@ -5,7 +5,7 @@ import pathlib
 import pytest
 
 import great_expectations as gx
-from great_expectations.data_context import get_context
+from great_expectations import get_context
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )

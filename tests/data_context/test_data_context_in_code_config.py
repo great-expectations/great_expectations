@@ -6,7 +6,7 @@ import pyparsing as pp
 import pytest
 from moto import mock_s3
 
-from great_expectations.data_context import get_context
+from great_expectations import get_context
 from great_expectations.data_context.store import StoreBackend, TupleS3StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
 

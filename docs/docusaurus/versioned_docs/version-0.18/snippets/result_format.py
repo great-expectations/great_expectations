@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 import pandas as pd
 
 import great_expectations as gx
-from great_expectations.checkpoint import Checkpoint
+from great_expectations import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     ExpectationSuiteValidationResult,

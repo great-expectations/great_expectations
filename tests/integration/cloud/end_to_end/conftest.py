@@ -22,7 +22,7 @@ from great_expectations.execution_engine import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
+    from great_expectations import Checkpoint
     from great_expectations.compatibility import pyspark, sqlalchemy
     from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.validator.validator import Validator

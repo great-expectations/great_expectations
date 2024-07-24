@@ -1,7 +1,7 @@
 # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/postgres_deployment_patterns.py imports">
 import great_expectations as gx
 
-from great_expectations.checkpoint import Checkpoint
+from great_expectations import Checkpoint
 
 # </snippet>
 

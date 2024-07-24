@@ -7,10 +7,10 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from great_expectations import project_manager
-from great_expectations.checkpoint import Checkpoint
+from great_expectations import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:

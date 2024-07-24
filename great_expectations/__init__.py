@@ -1,3 +1,5 @@
+# isort:skip_file
+
 # Set up version information immediately
 from ._version import get_versions  # isort:skip
 
@@ -5,6 +7,10 @@ __version__ = get_versions()["version"]  # isort:skip
 
 # This brings in compatibility, data_context, exceptions, get_context
 from great_expectations.data_context.data_context.context_factory import get_context
+import great_expectations.core
+
+# Checkpoint must be imported after get_context and great_expectations.core
+from great_expectations.checkpoint.checkpoint import Checkpoint
 
 # from great_expectations.data_context.migrator.cloud_migrator import CloudMigrator
 # from great_expectations.expectations.registry import (
@@ -15,7 +21,7 @@ from great_expectations.data_context.data_context.context_factory import get_con
 del get_versions  # isort:skip
 
 # from great_expectations.core.expectation_suite import ExpectationSuite
-# from great_expectations.data_context import get_context, project_manager, set_context
+# from great_expectations import get_context, project_manager, set_context
 #
 # # By placing this registry function in our top-level __init__,  we ensure that all
 # # GX workflows have populated expectation registries before they are used.

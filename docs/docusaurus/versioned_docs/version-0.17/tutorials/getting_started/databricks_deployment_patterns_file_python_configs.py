@@ -4,7 +4,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 
 # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/tutorials/getting_started/databricks_deployment_patterns_file_python_configs.py imports">
 import great_expectations as gx
-from great_expectations.checkpoint import Checkpoint
+from great_expectations import Checkpoint
 
 # </snippet>
 

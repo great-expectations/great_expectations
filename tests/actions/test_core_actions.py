@@ -12,7 +12,6 @@ import pytest
 import requests
 from requests import Session
 
-from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     APINotificationAction,
     EmailAction,
@@ -35,6 +34,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,

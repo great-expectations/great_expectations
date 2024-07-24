@@ -12,7 +12,7 @@ import great_expectations as gx
 import great_expectations.exceptions.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
-from great_expectations import get_context, set_context
+from great_expectations import get_context
 from great_expectations.analytics.events import (
     ExpectationSuiteExpectationCreatedEvent,
     ExpectationSuiteExpectationDeletedEvent,
@@ -23,6 +23,7 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.expectation_configuration import (

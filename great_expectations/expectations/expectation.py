@@ -44,7 +44,6 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.suite_parameters import (
     get_suite_parameter_key,
     is_suite_parameter,
@@ -98,6 +97,7 @@ from great_expectations.render.util import (
     build_count_table,
     num_to_str,
 )
+from great_expectations.result_format import ResultFormat
 from great_expectations.util import camel_to_snake
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration

@@ -9,9 +9,9 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
 )
 from great_expectations.core import (
     ExpectationValidationResult,
-    IDDict,
 )
 from great_expectations.core.batch import Batch, LegacyBatchDefinition
+from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
