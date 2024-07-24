@@ -259,7 +259,7 @@ FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     "str unquoted_upper_col": ["databricks_sql", "sqlite"],
     'str "unquoted_upper_col"': ["postgres", "sqlite"],
     "str UNQUOTED_UPPER_COL": ["postgres"],
-    'str "UNQUOTED_UPPER_COL"': ["snowflake", "sqlite"],
+    'str "UNQUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
     # DDL: "quoted_lower_col" -----
     'str "quoted_lower_col"': ["postgres", "snowflake", "sqlite"],
     "str quoted_lower_col": ["snowflake"],
