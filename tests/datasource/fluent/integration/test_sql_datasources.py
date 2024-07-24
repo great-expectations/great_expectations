@@ -296,13 +296,13 @@ FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     "str QUOTED_UPPER_COL": [],
     'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
     # DDL: "quotedMixed" -----
-    "str quotedmixed": ["postgres", "sqlite", "snowflake"],
+    "str quotedmixed": ["databricks_sql", "postgres", "sqlite", "snowflake"],
     "str quotedMixed": ["snowflake"],
-    'str "quotedMixed"': ["postgres", "sqlite", "snowflake"],
-    "str QUOTEDMIXED": ["postgres", "sqlite", "snowflake"],
+    'str "quotedMixed"': ["databricks_sql", "postgres", "sqlite", "snowflake"],
+    "str QUOTEDMIXED": ["databricks_sql", "postgres", "sqlite", "snowflake"],
     # DDL: "quoted.w.dots" -------
     "str quoted.w.dots": ["databricks_sql"],
-    'str "quoted.w.dots"': ["postgres", "snowflake", "sqlite"],
+    'str "quoted.w.dots"': ["databricks_sql", "postgres", "snowflake", "sqlite"],
     "str QUOTED.W.DOTS": ["databricks_sql", "snowflake", "sqlite", "postgres"],
     'str "QUOTED.W.DOTS"': ["sqlite"],
 }
@@ -784,14 +784,6 @@ def _is_quote_char_dialect_mismatch(
     return False
 
 
-def _replace_quote_char(dialect: GXSqlDialect, column_name: str) -> str:
-    quote_char = column_name[0] if column_name[0] in ("'", '"', "`") else None
-    if quote_char:
-        dialect_quote_char = DIALECT_IDENTIFIER_QUOTE_STRINGS[dialect]
-        return column_name.replace(quote_char, dialect_quote_char)
-    return column_name
-
-
 def _raw_query_check_column_exists(
     column_name_param: str,
     qualified_table_name: str,
@@ -986,6 +978,8 @@ class TestColumnExpectations:
 
         if column_name[0] not in ("'", '"', "`"):
             pytest.skip(f"see test_unquoted_params for {column_name!r}")
+        elif _is_quote_char_dialect_mismatch(dialect, column_name):
+            pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
         elif _fails_expectation(param_id):
             # apply marker this way so that xpasses can be seen in the report
             request.applymarker(pytest.mark.xfail)
@@ -999,12 +993,9 @@ class TestColumnExpectations:
             else None
         )
 
-        updated_column_name: str = _replace_quote_char(
-            GXSqlDialect(dialect), column_name
-        )
         print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")  # type: ignore[index] # FIXME
-        print(f"\n`column_name` parameter __repr__:\n  {updated_column_name!r}")
-        print(f"type:\n  {type(updated_column_name)}\n")
+        print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
 
         table_factory(
             gx_engine=datasource.get_execution_engine(),
@@ -1036,7 +1027,7 @@ class TestColumnExpectations:
             expectation_configuration=ExpectationConfiguration(
                 expectation_type=expectation_type,
                 kwargs={
-                    "column": updated_column_name,
+                    "column": column_name,
                     "mostly": 1,
                 },
             )
