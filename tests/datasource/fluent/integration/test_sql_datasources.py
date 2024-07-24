@@ -248,7 +248,8 @@ COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
 
 
 # TODO: remove items from this lookup when working on fixes
-# The presence of a database type in the list indicates that this specific value fails when used as the `column_name` value.
+# The presence of a database type in the list indicates that this specific value fails when
+# used as the `column_name` value for at least one expectation.
 # It does not mean that it SHOULD or SHOULD NOT fail, but that it currently does.
 FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     # DDL: unquoted_lower_col ------
