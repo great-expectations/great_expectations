@@ -253,6 +253,7 @@ COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
 # It does not mean that it SHOULD or SHOULD NOT fail, but that it currently does.
 FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     # DDL: unquoted_lower_col ------
+    "str unquoted_lower_col": [],
     'str "unquoted_lower_col"': ["postgres", "snowflake", "sqlite"],
     "str UNQUOTED_LOWER_COL": ["databricks_sql", "postgres", "sqlite"],
     'str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
