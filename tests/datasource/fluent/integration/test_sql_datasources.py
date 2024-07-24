@@ -744,7 +744,6 @@ FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     ],
     "str quoted.w.dots": [
         "databricks_sql",
-        "snowflake",  # should fail but succeeds
     ],
     'str "quoted.w.dots"': [
         "postgres",  # should succeed but fails
