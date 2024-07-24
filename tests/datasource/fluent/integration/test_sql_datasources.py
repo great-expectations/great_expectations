@@ -1028,8 +1028,6 @@ class TestColumnExpectations:
         )
         result = checkpoint.run()
 
-        _ = _get_exception_details(result, prettyprint=True)
-
         assert result.success is True, "validation failed"
 
     @pytest.mark.parametrize(
