@@ -11,7 +11,7 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
 )
 
