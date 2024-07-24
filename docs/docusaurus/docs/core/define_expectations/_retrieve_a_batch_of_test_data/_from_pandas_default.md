@@ -44,6 +44,8 @@ Because the `pandas_default` Data Source's `.read_*(...)` methods only return a 
    sample_batch = context.data_sources.pandas_default.read_csv(file_path)
    ```
 
+   GX supports all of the pandas `.read_*(...)` methods.  For more information on which Pandas `read_*` methods are available, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html) for the version of Pandas that you have installed.
+
 3. Optional. Verify that the returned Batch is populated with records.
 
    You can verify that your Batch Definition was able to read in data and return a populated Batch by printing the header and first few records of the returned Batch:
