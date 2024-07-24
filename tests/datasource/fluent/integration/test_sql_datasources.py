@@ -981,8 +981,9 @@ class TestColumnExpectations:
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
 
-        if _is_quote_char_dialect_mismatch(dialect, column_name):
-            pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
+        if column_name.startswith('"') and column_name.endswith('"'):
+            # databricks uses backticks for quoting
+            column_name = quote_str(column_name[1:-1], dialect=dialect)
 
         print(f"expectations_type:\n  {expectation_type}")
 
