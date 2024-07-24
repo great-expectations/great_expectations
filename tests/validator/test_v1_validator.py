@@ -8,12 +8,12 @@ import great_expectations.expectations as gxe
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.partitioners import PartitionerColumnValue
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 from great_expectations.expectations.expectation import Expectation
-from great_expectations.result_format import ResultFormat
 from great_expectations.validator.v1_validator import Validator
 
 

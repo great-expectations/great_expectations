@@ -30,6 +30,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
@@ -41,7 +42,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
-from great_expectations.result_format import ResultFormat
 from tests.test_utils import working_directory
 
 if TYPE_CHECKING:

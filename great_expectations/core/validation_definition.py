@@ -17,6 +17,7 @@ from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -27,7 +28,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.result_format import ResultFormat
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:

@@ -1,4 +1,5 @@
 import copy
+import logging
 from enum import Enum
 from typing import ClassVar, Dict, Optional, Set
 
@@ -7,9 +8,12 @@ import pandas as pd
 from great_expectations.compatibility import pydantic, pyspark
 
 from ..alias_types import JSONValues
+from .base import SerializableDotDict
 from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
 from .fonts import FontFamily, FontFamilyURL
+
+logger = logging.getLogger(__name__)
 
 
 class DictDot:

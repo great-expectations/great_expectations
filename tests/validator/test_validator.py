@@ -19,6 +19,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -28,7 +29,6 @@ from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.result_format import ResultFormat
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.validator import Validator
 
