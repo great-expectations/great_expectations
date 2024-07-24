@@ -44,7 +44,9 @@ Because the `pandas_default` Data Source's `.read_*(...)` methods only return a 
    sample_batch = context.data_sources.pandas_default.read_csv(file_path)
    ```
 
-3. Verify the content of your returned Batch.
+3. Optional. Verify that the returned Batch is populated with records.
+
+   You can verify that your Batch Definition was able to read in data and return a populated Batch by printing the header and first few records of the returned Batch:
 
    ```python title="Python"
    sample_batch.head()

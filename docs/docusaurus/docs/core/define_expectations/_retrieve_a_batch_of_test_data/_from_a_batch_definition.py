@@ -15,12 +15,20 @@ batch_definition = (
 )
 # </snippet>
 
-# Retrieve the most recent batch of data from the Batch Definition
+# Retrieve the first valid Batch of data from the Batch Definition
 # <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve most recent Batch">
 batch = batch_definition.get_batch()
 # </snippet>
 
-# ...or retrieve a specific Batch by providing Batch Parameters
+# Or use a Batch Parameter dictionary to specify a Batch to retrieve
+# These are sample Batch Parameter dictionaries:
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - example Batch Parameters">
+yearly_batch_parameters = {"year": 2020}
+monthly_batch_parameters = {"year": 2020, "month": 1}
+daily_batch_parameters = {"year": 2020, "month": 1, "day": 14}
+# </snippet>
+
+# This code retrieves the Batch:
 # <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve specific Batch">
 batch = batch_definition.get_batch(
     batch_parameters={"year": 2020, "month": 1, "day": 14}
