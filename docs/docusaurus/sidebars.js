@@ -72,8 +72,8 @@ module.exports = {
           {
             type: 'doc',
             id: 'core/connect_to_data/dataframes/dataframes',
-            label: 'Connect to data in Dataframes'
-          },
+            label: 'Connect to dataframe data'
+          }
       ]
     },
     {
