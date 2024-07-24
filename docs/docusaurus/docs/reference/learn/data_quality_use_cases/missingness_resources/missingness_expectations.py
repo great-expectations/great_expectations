@@ -6,7 +6,7 @@ cd assets/docker/postgresql
 docker compose up
 
 2. Run the following command from the repo root dir in a second terminal:
-pytest --postgresql --docs-tests -k "data_quality_use_case_schema" tests/integration/test_script_runner.py
+pytest --postgresql --docs-tests -k "data_quality_use_case_missingness_expectations" tests/integration/test_script_runner.py
 """
 
 # This section loads sample data to use for CI testing of the script.
