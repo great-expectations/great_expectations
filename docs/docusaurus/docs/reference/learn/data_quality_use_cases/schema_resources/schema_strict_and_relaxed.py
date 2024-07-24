@@ -53,8 +53,8 @@ strict_suite = context.suites.add(
 )
 
 strict_suite.add_expectation(
-    gxe.ExpectTableColumnsToMatchSet(
-        column_set=[
+    gxe.ExpectTableColumnsToMatchOrderedList(
+        column_list=[
             "type",
             "sender_account_number",
             "recipient_fullname",

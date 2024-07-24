@@ -205,7 +205,7 @@ Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_
 
 **Context**: Requirements for column names, types, and ordering vary depending on the context. For instance, when application code references columns by ordinal position instead of name, it is essential to retain a defined column ordering. In other cases, it may be sufficient to only check for the presence of a column in a dataset. Using different Expectation Suites to enforce these aspects can help maintain schema consistency.
 
-**Goal**: Validate the same dataset using two separate Expectation Suites to demonstrate the difference in results using strict approach to schema validation vs. a relaxed approach.
+**Goal**: Validate the same dataset using two separate Expectation Suites to demonstrate the difference in approach of strict schema requirements vs. relaxed schema requirements.
 
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_strict_and_relaxed.py full sample code"
 ```
