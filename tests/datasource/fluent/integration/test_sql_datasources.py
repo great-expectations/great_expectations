@@ -148,7 +148,19 @@ UNQUOTED_UPPER_COL: Final[Literal["UNQUOTED_UPPER_COL"]] = "UNQUOTED_UPPER_COL"
 UNQUOTED_LOWER_COL: Final[Literal["unquoted_lower_col"]] = "unquoted_lower_col"
 QUOTED_UPPER_COL: Final[Literal["QUOTED_UPPER_COL"]] = "QUOTED_UPPER_COL"
 QUOTED_LOWER_COL: Final[Literal["quoted_lower_col"]] = "quoted_lower_col"
+QUOTED_MIXED_CASE: Final[Literal["quotedMixed"]] = "quotedMixed"
 QUOTED_W_DOTS: Final[Literal["quoted.w.dots"]] = "quoted.w.dots"
+
+
+class Row(TypedDict):
+    id: int
+    name: str
+    quoted_upper_col: str
+    quoted_lower_col: str
+    quoted_mixed_case: str
+    quoted_w_dots: str
+    unquoted_upper_col: str
+    unquoted_lower_col: str
 
 
 def get_random_identifier_name() -> str:
@@ -179,10 +191,11 @@ ColNameParams: TypeAlias = Literal[
     '"quoted_upper_col"',
     "QUOTED_UPPER_COL",
     '"QUOTED_UPPER_COL"',
-    # DDL: unquotedMixed ------
-    # TODO: add tests for these
     # DDL: "quotedMixed" -----
-    # TODO: add tests for these
+    "quotedmixed",
+    "quotedMixed",
+    '"quotedMixed"',
+    "QUOTEDMIXED",
     # DDL: "quoted.w.dots" -------
     "quoted.w.dots",
     '"quoted.w.dots"',
@@ -211,6 +224,11 @@ ColNameParamId: TypeAlias = Literal[
     'str "quoted_upper_col"',
     "str QUOTED_UPPER_COL",
     'str "QUOTED_UPPER_COL"',
+    # DDL: "quotedMixed" -----
+    "str quotedmixed",
+    "str quotedMixed",
+    'str "quotedMixed"',
+    "str QUOTEDMIXED",
     # DDL: "quoted.w.dots" -------
     "str quoted.w.dots",
     'str "quoted.w.dots"',
@@ -239,6 +257,11 @@ COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
     '"quoted_upper_col"': f'"{QUOTED_UPPER_COL}"',
     "QUOTED_UPPER_COL": f'"{QUOTED_UPPER_COL}"',
     '"QUOTED_UPPER_COL"': f'"{QUOTED_UPPER_COL}"',
+    # DDL: "quotedMixed" -----
+    "quotedmixed": f"{QUOTED_MIXED_CASE.lower()}",
+    "quotedMixed": f"{QUOTED_MIXED_CASE}",
+    '"quotedMixed"': f'"{QUOTED_MIXED_CASE}"',
+    "QUOTEDMIXED": f"{QUOTED_MIXED_CASE.upper()}",
     # DDL: "quoted.w.dots" -------
     "quoted.w.dots": f'"{QUOTED_W_DOTS}"',
     '"quoted.w.dots"': f'"{QUOTED_W_DOTS}"',
@@ -272,22 +295,26 @@ FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
     'str "quoted_upper_col"': ["sqlite"],
     "str QUOTED_UPPER_COL": [],
     'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
+    # DDL: "quotedMixed" -----
+    "str quotedmixed": [
+        # "postgres",
+        # "sqlite",
+    ],
+    "str quotedMixed": [
+        # "sqlite",
+    ],
+    'str "quotedMixed"': [
+        # "sqlite",
+    ],
+    "str QUOTEDMIXED": [
+        # "sqlite",
+    ],
     # DDL: "quoted.w.dots" -------
     "str quoted.w.dots": ["databricks_sql"],
     'str "quoted.w.dots"': ["postgres", "snowflake", "sqlite"],
     "str QUOTED.W.DOTS": ["databricks_sql", "snowflake", "sqlite", "postgres"],
     'str "QUOTED.W.DOTS"': ["sqlite"],
 }
-
-
-class Row(TypedDict):
-    id: int
-    name: str
-    quoted_upper_col: str
-    quoted_lower_col: str
-    quoted_w_dots: str
-    unquoted_upper_col: str
-    unquoted_lower_col: str
 
 
 class TableFactory(Protocol):
@@ -342,6 +369,9 @@ def table_factory() -> Generator[TableFactory, None, None]:
             quoted_w_dots: str = quote_str(
                 QUOTED_W_DOTS, dialect=sa_engine.dialect.name
             )
+            quoted_mixed_case: str = quote_str(
+                QUOTED_MIXED_CASE, dialect=sa_engine.dialect.name
+            )
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
@@ -351,15 +381,16 @@ def table_factory() -> Generator[TableFactory, None, None]:
                 create_tables: str = (
                     f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
                     f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"
-                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255), {quoted_w_dots} VARCHAR(255))"
+                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255),"
+                    f" {quoted_mixed_case} VARCHAR(255), {quoted_w_dots} VARCHAR(255))"
                 )
                 conn.execute(TextClause(create_tables))
                 if data:
                     insert_data = (
                         f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col},"
-                        f" {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL}, {quoted_w_dots})"
+                        f" {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL}, {quoted_mixed_case}, {quoted_w_dots})"
                         " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col,"
-                        " :unquoted_upper_col, :unquoted_lower_col, :quoted_w_dots)"
+                        " :unquoted_upper_col, :unquoted_lower_col, :quoted_mixed_case, :quoted_w_dots)"
                     )
                     conn.execute(TextClause(insert_data), data)
 
@@ -825,6 +856,10 @@ class TestColumnExpectations:
             # DDL: "QUOTED_UPPER_COL" ----------------------------------
             param("quoted_upper_col", id="str quoted_upper_col"),
             param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+            # DDL: "quotedMixed" -------------------------------------
+            param("quotedmixed", id="str quotedmixed"),
+            param("quotedMixed", id="str quotedMixed"),
+            param("QUOTEDMIXED", id="str QUOTEDMIXED"),
             # DDL: "quoted.w.dots" -------------------------------------
             param("quoted.w.dots", id="str quoted.w.dots"),
             param("QUOTED.W.DOTS", id="str QUOTED.W.DOTS"),
@@ -878,6 +913,7 @@ class TestColumnExpectations:
                     "quoted_lower_col": "my column is lowercase",
                     "unquoted_upper_col": "whatever",
                     "unquoted_lower_col": "whatever",
+                    "quoted_mixed_case": "Whatever",
                     "quoted_w_dots": "what.ever",
                 },
             ],
@@ -934,6 +970,8 @@ class TestColumnExpectations:
             param('"quoted_lower_col"', id='str "quoted_lower_col"'),
             # DDL: "QUOTED_UPPER_COL" ----------------------------------
             param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
+            # DDL: "quotedMixed" -------------------------------------
+            param('"quotedMixed"', id='str "quotedMixed"'),
             # DDL: "quoted.w.dots" -------------------------------------
             param('"quoted.w.dots"', id='str "quoted.w.dots"'),
         ],
@@ -989,6 +1027,7 @@ class TestColumnExpectations:
                     "quoted_lower_col": "my column is lowercase",
                     "unquoted_upper_col": "whatever",
                     "unquoted_lower_col": "whatever",
+                    "quoted_mixed_case": "Whatever",
                     "quoted_w_dots": "what.ever",
                 },
             ],
@@ -1055,6 +1094,11 @@ class TestColumnExpectations:
             param('"quoted_upper_col"', id='str "quoted_upper_col"'),
             param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
             param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
+            # DDL: "quotedMixed" ---------------------------------------
+            param("quotedmixed", id="str quotedmixed"),
+            param("quotedMixed", id="str quotedMixed"),
+            param('"quotedMixed"', id='str "quotedMixed"'),
+            param("QUOTEDMIXED", id="str QUOTEDMIXED"),
             # DDL: "quoted.w.dots" -------------------------------------
             param("quoted.w.dots", id="str quoted.w.dots"),
             param('"quoted.w.dots"', id='str "quoted.w.dots"'),  # TODO: fix me
@@ -1114,6 +1158,7 @@ class TestColumnExpectations:
                     "quoted_lower_col": "my column is lowercase",
                     "unquoted_upper_col": "whatever",
                     "unquoted_lower_col": "whatever",
+                    "quoted_mixed_case": "Whatever",
                     "quoted_w_dots": "what.ever",
                 },
             ],
