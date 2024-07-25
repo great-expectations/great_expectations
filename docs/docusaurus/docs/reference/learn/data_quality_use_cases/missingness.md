@@ -45,7 +45,6 @@ Ensures that values within a column are `NULL`.
 **Use Case**: Handle columns that should typically be populated but might be left null due to specific conditions.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py ExpectColumnValuesToBeNull"
-gxe.ExpectColumnValuesToBeNull('errors')
 ```
 
 <sup>View `ExpectColumnValuesToBeNull` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_null).</sup>
@@ -57,7 +56,6 @@ Ensures that values within a specific column are not `NULL`.
 **Use Case**: Ensure critical columns are consistently populated, such as `transfer_amount`.
 
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missing_expectations.py ExpectColumnValuesToNotBeNull"
-gxe.ExpectColumnValuesToNotBeNull('transfer_amount')
 ```
 
 <sup>View `ExpectColumnValuesToNotBeNull` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null).</sup>
@@ -80,7 +78,6 @@ Imagine you operate a transaction processing system. Due to a momentary server o
 Ensure values are populated at least 99.9% of the time.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py intermittent_missing_values"
-gxe.ExpectColumnValuesToNotBeNull('transfer_date', mostly=0.999)
 ```
 
 ### Missing critical data
@@ -91,7 +88,6 @@ Consider an essential financial reporting system where the `transfer_amount` fie
 Ensure critical fields are always present.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py missing_critical_data"
-gxe.ExpectColumnValuesToNotBeNull('transfer_amount')
 ```
 
 ### New cases appear
@@ -102,10 +98,6 @@ New events or cases might introduce `NULL` values in fields that previously had 
 Define an expectation to ensure the `type` field is populated for most entries.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py new_cases_appear"
-gxe.ExpectColumnValuesToNotBeNull(
-    'type',
-    mostly=0.95  # Allows for up to 5% of values to be NULL
-)
 ```
 
 ### System anomalies
@@ -116,7 +108,6 @@ This use case differs significantly from the others as it reflects an expectatio
 Ensure fields that should typically be `NULL` remain unpopulated under normal circumstances.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py system_anomalies"
-gxe.ExpectColumnValuesToBeNull('errors')
 ```
 
 This Expectation serves as an early warning system for potential issues in your monitored environment. By alerting you when the `errors` field is unexpectedly populated, it allows for prompt investigation and resolution of underlying system problems, going beyond traditional data quality checks.
