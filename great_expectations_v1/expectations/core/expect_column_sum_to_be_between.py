@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = (
-    "Expect the column to sum to be between a minimum value and a maximum value."
+    "Expect the column sum to be between a minimum value and a maximum value."
 )
 MIN_VALUE_DESCRIPTION = "The minimal sum allowed."
 MAX_VALUE_DESCRIPTION = "The maximal sum allowed."
