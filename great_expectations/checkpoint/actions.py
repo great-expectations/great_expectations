@@ -31,6 +31,7 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    Extra,
     Field,
     root_validator,
     validator,
@@ -108,6 +109,7 @@ class ValidationAction(BaseModel):
     """  # noqa: E501
 
     class Config:
+        extra = Extra.forbid
         arbitrary_types_allowed = True
         # Due to legacy pattern of instantiate_class_from_config, we need a custom serializer
         json_encoders = {Renderer: lambda r: r.serialize()}
@@ -707,7 +709,7 @@ class UpdateDataDocsAction(DataDocsAction):
 
         return action_results
 
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],

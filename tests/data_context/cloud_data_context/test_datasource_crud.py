@@ -35,7 +35,8 @@ def test_cloud_context_add_datasource_with_fds(
     name = "my_pandas_ds"
 
     post_url = urllib.parse.urljoin(
-        ge_cloud_config.base_url, f"organizations/{ge_cloud_config.organization_id}/datasources"
+        ge_cloud_config.base_url,
+        f"api/v1/organizations/{ge_cloud_config.organization_id}/datasources",
     )
 
     fds = PandasDatasource(name=name)

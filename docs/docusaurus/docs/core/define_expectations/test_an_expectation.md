@@ -18,35 +18,22 @@ Data can be validated against individual Expectations.  This workflow is general
 - <PrereqPython/>.
 - <PrereqGxInstallation/>.
 - <PrereqDatacontext/>.
-- <PrereqDataSourceAndAssetConnectedToData/>.
-- <PrereqExpectation/>.
+- [A Batch of sample data](/core/define_expectations/retrieve_a_batch_of_test_data.md).  This guide assumes the variable `batch` contains your sample data.
+- <PrereqExpectation/>.  This guide assumes the variable `expectation` contains the Expectation to be tested.
 
 <Tabs>
 
 <TabItem value="procedure" label="Procedure">
 
-1. Retrieve your Batch Definition.
+1. Run the Expectation on the Batch of data.
 
-   In this example your Data Context is stored in the variable `context`.
-
-   To retrieve your Batch Definition from your Data Context, update the `data_source_name`, `data_asset_name`, and `batch_definition_name` in the following code and execute it:
-
-   ```python title="Python"
-   data_source_name = "my_taxi_data"
-   asset_name = "2018_taxi_data"
-   batch_definition_name = "all_records_in_asset"
-   batch = context.get_datasource(datasource_name).get_asset(asset_name).get_batch_definition(batch_definition_name=batch_definition_name).get_batch()
-   ```
-
-2. Run the Expectation on the Batch of data.
-
-   In this example, the Expectation to test is already stored in the variable `expectation`:
+   In this example, the Expectation to test is already stored in the variable `expectation` and the variable `batch` contains a Batch that was retrieved from a Batch Definition:
 
    ```python title="Python"
    validation_results = batch.validate(expectation)
    ```
 
-3. Evaluate the returned Validation Results.
+2. Evaluate the returned Validation Results.
 
    ```python title="Python"
    print(validation_results)
@@ -92,7 +79,7 @@ Data can be validated against individual Expectations.  This workflow is general
    }
    ```
 
-4. Optional. Adjust the Expectation's parameters and retest.
+3. Optional. Adjust the Expectation's parameters and retest.
 
    If the Expectation did not return the results you anticipated you can update it to reflect the actual state of your data, rather than recreating it from scratch. An Expectation object stores the parameters that were provided to initialize it as attributes.  To modify an Expectation you overwrite those attributes.
 

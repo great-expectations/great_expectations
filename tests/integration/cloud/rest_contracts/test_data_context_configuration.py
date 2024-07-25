@@ -64,4 +64,4 @@ def test_data_context_configuration(
         )
 
     # assert
-    assert ctx.datasources is not None
+    assert ctx.data_sources.all() is not None

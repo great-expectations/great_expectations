@@ -149,7 +149,7 @@ class FileMigrator:
         # If no sites to migrate, don't touch config defaults
         if updated_data_docs_config:
             target_variables.data_docs_sites = updated_data_docs_config
-            target_variables.save_config()
+            target_variables.save()
 
     def _migrate_data_docs_site_config(
         self, site_name: str, site_config: dict, target_base_directory: pathlib.Path

@@ -706,7 +706,9 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerYearly(column_name=column, sort_ascending=sort_ascending),
+            partitioner=ColumnPartitionerYearly(
+                method_name="partition_on_year", column_name=column, sort_ascending=sort_ascending
+            ),
         )
 
     @public_api
@@ -715,7 +717,11 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerMonthly(column_name=column, sort_ascending=sort_ascending),
+            partitioner=ColumnPartitionerMonthly(
+                method_name="partition_on_year_and_month",
+                column_name=column,
+                sort_ascending=sort_ascending,
+            ),
         )
 
     @public_api
@@ -724,7 +730,11 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerDaily(column_name=column, sort_ascending=sort_ascending),
+            partitioner=ColumnPartitionerDaily(
+                method_name="partition_on_year_and_month_and_day",
+                column_name=column,
+                sort_ascending=sort_ascending,
+            ),
         )
 
     @override
@@ -1104,7 +1114,7 @@ class SQLDatasource(Datasource):
                 asset.test_connection()
 
     @public_api
-    def add_table_asset(  # noqa: PLR0913
+    def add_table_asset(
         self,
         name: str,
         table_name: str = "",
