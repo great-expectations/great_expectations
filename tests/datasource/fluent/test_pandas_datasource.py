@@ -134,7 +134,6 @@ class TestDynamicPandasAssets:
         asset_class_names: set[str] = {
             camel_to_snake(t.__name__).split("_asset")[0] for t in PandasDatasource.asset_types
         }
-        print(asset_class_names)
 
         assert type_name in PandasDatasource._type_lookup
         assert type_name in asset_class_names
@@ -427,7 +426,7 @@ def test_default_pandas_datasource_name_conflict(
         _ = empty_data_context.data_sources.pandas_default
 
     # the datasource name is available
-    empty_data_context.datasources.pop(DEFAULT_PANDAS_DATASOURCE_NAME)
+    empty_data_context.data_sources.all().pop(DEFAULT_PANDAS_DATASOURCE_NAME)
     pandas_datasource = empty_data_context.data_sources.pandas_default
     assert isinstance(pandas_datasource, PandasDatasource)
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
@@ -483,7 +482,7 @@ def test_cloud_get_csv_asset_not_in_memory(valid_file_path: pathlib.Path):
     csv_asset = datasource.get_asset(asset_name=csv_asset_name)
     csv_asset.build_batch_request()
 
-    assert csv_asset_name not in context.datasources._in_memory_data_assets
+    assert csv_asset_name not in context.data_sources.all()._in_memory_data_assets
 
 
 @pytest.mark.filesystem

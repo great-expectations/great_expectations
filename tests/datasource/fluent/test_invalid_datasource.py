@@ -50,29 +50,28 @@ DATA_ASSET_PUBLIC_METHODS: Final[list[str]] = [
 class TestPublicMethodsAreOverridden:
     """
     Ensure that applicable Datasource/DataAsset public methods are overridden.
-    Applicable public methods are those that would typically be called when a users is trying to run some action on a Datasource
-    and would want to know if the Datasource is invalid.
+    Applicable public methods are those that would typically be called when a users is trying to run
+    some action on a Datasource and would want to know if the Datasource is invalid.
 
-    If a method is not overridden, it will be inherited from the base class and will not be present in the InvalidDatasource.__dict__.
-    """  # noqa: E501
+    If a method is not overridden, it will be inherited from the base class and will not be present
+    in the InvalidDatasource.__dict__.
+    """
 
     @pytest.mark.parametrize("base_ds_method_name", DATASOURCE_PUBLIC_METHODS)
     def test_datasource_methods(self, base_ds_method_name: str):
         """Ensure that InvalidDatasource overrides the applicable Datasource methods."""
-        for base_ds_method_name in DATASOURCE_PUBLIC_METHODS:
-            method = getattr(InvalidDatasource, base_ds_method_name, None)
-            assert method, f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
-            with pytest.raises(TypeError):
-                method()
+        method = getattr(InvalidDatasource, base_ds_method_name, None)
+        assert method, f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
+        with pytest.raises(TypeError):
+            method()
 
     @pytest.mark.parametrize("base_ds_method_name", DATA_ASSET_PUBLIC_METHODS)
     def test_data_asset(self, base_ds_method_name: str):
         """Ensure that InvalidAsset overrides the applicable DataAsset methods."""
-        for base_ds_method_name in DATA_ASSET_PUBLIC_METHODS:
-            method = getattr(InvalidAsset, base_ds_method_name, None)
-            assert method, f"Expected {base_ds_method_name} to be defined on InvalidAsset"
-            with pytest.raises(TypeError):
-                method()
+        method = getattr(InvalidAsset, base_ds_method_name, None)
+        assert method, f"Expected {base_ds_method_name} to be defined on InvalidAsset"
+        with pytest.raises(TypeError):
+            method()
 
 
 @pytest.fixture(scope="module")

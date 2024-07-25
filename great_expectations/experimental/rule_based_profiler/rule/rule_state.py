@@ -21,7 +21,7 @@ class RuleState:
     outputs for different purposes (in raw and aggregated form) from available "Domain" objects and computed parameters.
     """  # noqa: E501
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         rule: Optional[Rule] = None,
         domains: Optional[List[Domain]] = None,

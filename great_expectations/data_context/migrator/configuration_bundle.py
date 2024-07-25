@@ -75,7 +75,7 @@ class ConfigurationBundle:
         return self._validation_results
 
     def _get_all_datasources(self) -> List[FluentDatasource]:
-        datasource_names: List[str] = list(self._context.datasources.keys())
+        datasource_names: List[str] = list(self._context.data_sources.all().keys())
 
         # Note: we are accessing the protected _datasource_store to not add a public property
         # to all Data Contexts.

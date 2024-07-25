@@ -62,6 +62,8 @@ def get_user_friendly_error_message(
             errors = error_json.get("errors")
         if errors:
             support_message.append(json.dumps(errors))
+        else:
+            support_message.append(json.dumps(error_json))
 
     except json.JSONDecodeError:
         support_message.append(f"Please contact the Great Expectations team at {SUPPORT_EMAIL}")
@@ -101,9 +103,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     _ENDPOINT_VERSION_LOOKUP: dict[str, EndpointVersion] = {
         GXCloudRESTResource.CHECKPOINT: EndpointVersion.V0,
-        GXCloudRESTResource.DATASOURCE: EndpointVersion.V0,
-        GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V0,
-        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V0,
+        GXCloudRESTResource.DATASOURCE: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_ASSET: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V1,
         GXCloudRESTResource.EXPECTATION_SUITE: EndpointVersion.V1,
         GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V0,
         GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
@@ -649,7 +652,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return url
 
     @classmethod
-    def construct_versioned_payload(  # noqa: PLR0913
+    def construct_versioned_payload(
         cls,
         resource_type: str,
         organization_id: str,
@@ -687,7 +690,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @classmethod
-    def _construct_json_payload_v0(  # noqa: PLR0913
+    def _construct_json_payload_v0(
         cls,
         resource_type: str,
         organization_id: str,

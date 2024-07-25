@@ -29,7 +29,7 @@ class SqlAlchemyQueryStore(Store):
 
     _key_class: ClassVar[Type] = StringKey
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         credentials,
         queries=None,
