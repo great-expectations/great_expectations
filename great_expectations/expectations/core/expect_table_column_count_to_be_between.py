@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
-EXPECTATION_SHORT_DESCRIPTION = "Expect the number of columns to be between two values."
+EXPECTATION_SHORT_DESCRIPTION = "Expect the number of columns in a table to be between two values."
 MIN_VALUE_DESCRIPTION = "The minimum number of columns, inclusive."
 MAX_VALUE_DESCRIPTION = "The maximum number of columns, inclusive."
 SUPPORTED_DATA_SOURCES = [
