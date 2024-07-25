@@ -63,7 +63,17 @@ Ensures that values within a specific column are not `NULL`.
 - Use these Expectations to track data as it progresses through your pipeline. Apply `ExpectColumnValuesToBeNull` to fields expected to be empty in early stages, and `ExpectColumnValuesToNotBeNull` to those same fields in later stages.
 :::
 
-## Managing types of missing data
+## Examples and scenarios
+
+**GX Cloud** provides a visual interface to create and run workflows for managing missing data. The GX Cloud workflow to handle data missingness is intuitive and straightforward: create a Data Asset, define Expectations for missing values, run a Checkpoint, and review Validation Results.
+
+:::note
+> TODO add animated gif
+:::
+
+![Validate missingness Expectations in GX Cloud](#)
+
+**GX Core** can be used to complement and extend the capabilities of GX Cloud to programmatically implement custom workflows for handling missing data. The examples provided in this section feature use cases that leverage GX Core to achieve effective management of missing values.
 
 ### Intermittent missing values
 
