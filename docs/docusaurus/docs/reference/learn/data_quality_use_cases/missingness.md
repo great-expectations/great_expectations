@@ -24,7 +24,7 @@ Below is a sample of the dataset referenced throughout this guide:
 | domestic | 244084670977           | Jaxson Duke        | 9143.40         | 2024-05-01 01:12    | NULL   |
 | NULL     | 123456789012           | Jane Smith         | 5000.00         | NULL                | NULL   |
 
-This dataset includes potential for missing data in `type` and `transfer_date` columns.
+This dataset may have missing data in the `type` and `transfer_date` columns. The `errors` column is assumed to be populated by a separate monitoring system, not by GX. It shows any issues found during data processing. A `NULL` value in the `errors` column means no errors were detected for that record.
 
 You can [access this dataset](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/missingness.csv) from the `great_expectations` GitHub repo in order to reproduce the code recipes provided in this article.
 
