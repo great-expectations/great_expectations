@@ -5,11 +5,11 @@ title: 'Manage missing data with GX'
 
 Missing data, or **missingness**, is a critical issue in data quality management. It refers to the absence of expected information in a dataset, often appearing as NULL values in databases or manifesting differently across systems.
 
-Effectively managing missing data is crucial for maintaining data integrity and reliability. This process involves identifying gaps, understanding their causes, and determining appropriate remedial actions. Unaddressed missing data can disrupt calculations, skew analyses, and compromise machine learning models.
+Effectively managing missing data is crucial for maintaining data integrity and reliability. This process involves identifying gaps, understanding their causes, and determining appropriate remedial actions. Unaddressed missing data can disrupt calculations, skew analyses, and compromise various data analytics tasks.
 
 Great Expectations (GX) provides a suite of powerful Expectations that allow you to define and enforce data quality rules, including those for missing data. These tools enable you to establish robust validation processes within your data pipelines, catching issues before they propagate through your data ecosystem.
 
-This guide will walk you through leveraging GX to handle missing data effectively. You'll learn to write Expectations, set up automated checks, and make informed decisions about managing various types of missingness. By following these steps, you'll ensure your datasets remain clean, consistent, and ready for analysis or machine learning applications.
+This guide will walk you through leveraging GX to handle missing data effectively. You'll learn to write Expectations, set up automated checks, and make informed decisions about managing various types of missingness. By following these steps, you'll ensure your datasets remain clean, consistent, and ready for accurate reporting, predictive modeling, and other advanced analytics applications.
 
 ## Prerequisite knowledge
 
