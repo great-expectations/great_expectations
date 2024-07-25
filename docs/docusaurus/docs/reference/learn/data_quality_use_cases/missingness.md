@@ -3,23 +3,13 @@ sidebar_label: 'Missingness'
 title: 'Manage missing data with GX'
 ---
 
-If you've ever struggled with missing data messing up your reports or skewing your machine learning models, this guide will show you how to leverage Great Expectations (GX) to keep your data clean and reliable.
+Missing data, or **missingness**, is a critical issue in data quality management. It refers to the absence of expected information in a dataset, often appearing as NULL values in databases or manifesting differently across systems.
 
-**Missing data**, often referred to as **missingness**, denotes the absence of expected information in a dataset. These gaps can be represented by `NULL` values in SQL databases or manifest differently across systems, impacting data quality. Missing data poses challenges such as disrupting calculations, skewing analyses, and compromising machine learning models. Given the critical role of data quality, managing missing data effectively is essential to ensure accurate, reliable, and actionable datasets.
+Effectively managing missing data is crucial for maintaining data integrity and reliability. This process involves identifying gaps, understanding their causes, and determining appropriate remedial actions. Unaddressed missing data can disrupt calculations, skew analyses, and compromise machine learning models.
 
-Managing missing data involves:
+Great Expectations (GX) provides a suite of powerful Expectations that allow you to define and enforce data quality rules, including those for missing data. These tools enable you to establish robust validation processes within your data pipelines, catching issues before they propagate through your data ecosystem.
 
-1. Identifying where data is missing
-2. Understanding the causes of the missing data
-3. Deciding on appropriate remedial actions
-
-Great Expectations (GX) provides a powerful suite of schema-focused **Expectations** that allow you
-to define and enforce the structural integrity of your datasets. These tools enable you to establish
-robust schema validation within your data pipelines, helping to catch and address schema-related
-issues before they propagate through your data ecosystem. This guide will walk you through
-leveraging these Expectations to implement effective schema validation in your data workflows.
-
-In this guide, we will walk you through utilizing GX to proficiently handle missing data, ensuring your datasets remain clean, consistent, and ready for analysis or machine learning applications. You will learn step-by-step methods for writing Expectations, setting up automated checks, and making informed decisions about managing various types of missing data.
+This guide will walk you through leveraging GX to handle missing data effectively. You'll learn to write Expectations, set up automated checks, and make informed decisions about managing various types of missingness. By following these steps, you'll ensure your datasets remain clean, consistent, and ready for analysis or machine learning applications.
 
 ## Prerequisite knowledge
 
