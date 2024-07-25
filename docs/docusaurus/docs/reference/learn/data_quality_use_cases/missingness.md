@@ -64,7 +64,7 @@ Ensures that values within a specific column are not `NULL`.
 <br/>
 
 :::tip[GX tips for missingness Expectations]
-- Set different tolerance levels for `ExpectColumnValuesToBeNull` and `ExpectColumnValuesToNotBeNull`. This allows for nuanced data quality checks that align with your specific data patterns and business needs. For example, you might allow up to 20% nulls in a 'customer_feedback' column, but want to be alerted if more than 1% of values are unexpectedly non-null in an 'errors' column.
+- Use the `mostly` argument in `ExpectColumnValuesToBeNull` and `ExpectColumnValuesToNotBeNull` to set different tolerance levels for null and non-null values. This allows you to tailor your data quality checks to different columns. For example, you might allow more null values in a 'customer_feedback' column than in an 'errors' column. Adjust these levels based on your data patterns and business needs to create more flexible and appropriate checks.
 - Use these Expectations to track data as it progresses through your pipeline. Apply `ExpectColumnValuesToBeNull` to fields expected to be empty in early stages, and `ExpectColumnValuesToNotBeNull` to those same fields in later stages.
 :::
 
