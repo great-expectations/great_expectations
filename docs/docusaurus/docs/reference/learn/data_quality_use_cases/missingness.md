@@ -3,31 +3,26 @@ sidebar_label: 'Missingness'
 title: 'Manage missing data with GX'
 ---
 
-Missing data, or **missingness**, is a critical issue in data quality management. It refers to the absence of expected information in a dataset, often appearing as NULL values in databases or manifesting differently across systems.
+Missing data, also known as **missingness**, poses a significant challenge in data quality management. Missing data occurs when expected information is absent from a dataset, often appearing as `NULL` values in databases or manifesting differently across various systems. Effectively managing this issue is crucial for maintaining data integrity and reliability since unaddressed missing data can lead to disrupted calculations, skewed analyses, and compromised data analytics tasks.
 
-Effectively managing missing data is crucial for maintaining data integrity and reliability. This process involves identifying gaps, understanding their causes, and determining appropriate remedial actions. Unaddressed missing data can disrupt calculations, skew analyses, and compromise various data analytics tasks.
+Great Expectations (GX) offers a robust solution for addressing missing data through a comprehensive suite of Expectations that allow users to define and enforce data quality rules. By integrating GX into your data pipelines, you can establish robust validation processes that catch issues early, ensuring your dataset remains clean, consistent, and ready for accurate reporting, predictive modeling, and other advanced analytics applications.
 
-Great Expectations (GX) provides a suite of powerful Expectations that allow you to define and enforce data quality rules, including those for missing data. These tools enable you to establish robust validation processes within your data pipelines, catching issues before they propagate through your data ecosystem.
-
-This guide will walk you through leveraging GX to handle missing data effectively. You'll learn to write Expectations, set up automated checks, and make informed decisions about managing various types of missingness. By following these steps, you'll ensure your datasets remain clean, consistent, and ready for accurate reporting, predictive modeling, and other advanced analytics applications.
+In this guide, you will learn how to leverage GX to effectively handle missing data. This includes writing Expectations, setting up automated checks, and making informed decisions about managing various types of missingness. By following these steps, you can ensure your datasets maintain high quality, thus enabling more accurate and reliable data-driven insights.
 
 ## Prerequisite knowledge
 
-Before diving into this guide, ensure you have a basic understanding of GX components and workflows. If you're new to GX, consider starting with the [GX Overview](/core/introduction/gx_overview.md) to familiarize yourself with key concepts and setup procedures.
+Before diving into this guide, ensure you have a basic understanding of GX components and workflows. If you're new to GX, start with the [GX Overview](https://docs.greatexpectations.io/docs/guides/overview) to familiarize yourself with key concepts and setup procedures.
 
 ## Data preview
 
-Below is a sample of the dataset referenced throughout this guide:
+The examples in this guide use a sample transaction dataset, available as a [CSV file on GitHub](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/missingness.csv). This dataset contains fields prone to missing data, ideal for demonstrating GX's capabilities.
 
 | type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_date       | errors |
 |----------|------------------------|--------------------|-----------------|---------------------|--------|
 | domestic | 244084670977           | Jaxson Duke        | 9143.40         | 2024-05-01 01:12    | NULL   |
 | NULL     | 123456789012           | Jane Smith         | 5000.00         | NULL                | NULL   |
 
-This dataset may have missing data in the `type` and `transfer_date` columns. The `errors` column is assumed to be populated by a separate monitoring system, not by GX. It shows any issues found during data processing. A `NULL` value in the `errors` column means no errors were detected for that record.
-
-You can [access this dataset](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/missingness.csv) from the `great_expectations` GitHub repo in order to reproduce the code recipes provided in this article.
-
+In this dataset, you'll notice missing data in the `type` and `transfer_date` columns. The `errors` column, populated by a separate monitoring system, indicates issues found during data processing. A `NULL` value in the `errors` column means no errors were detected for that record.
 
 ## Key missingness Expectations
 
