@@ -13,7 +13,7 @@ This guide will walk you through leveraging GX to handle missing data effectivel
 
 ## Prerequisite knowledge
 
-Before diving into this guide, ensure you have a basic understanding of GX components and workflows. If you're new to GX, we recommend starting with our [GX Overview](/core/introduction/gx_overview.md) to familiarize yourself with key concepts and setup procedures.
+Before diving into this guide, ensure you have a basic understanding of GX components and workflows. If you're new to GX, consider starting with the [GX Overview](/core/introduction/gx_overview.md) to familiarize yourself with key concepts and setup procedures.
 
 ## Data preview
 
@@ -131,7 +131,7 @@ This Expectation serves as an early warning system for potential issues in your 
 
 ## Next Steps: Implementing Missingness Strategies
 
-Through this guide, we explored effective strategies for managing missing data with Great Expectations. Here's how you can take these practices forward:
+Through this guide, you explored effective strategies for managing missing data with Great Expectations. Here's how you can take these practices forward:
 
 1. Integrate the discussed Expectations into your current projects.
 2. Use the [Expectation Gallery](https://greatexpectations.io/expectations/) to explore more detailed Expectations and tailor them to your needs.
