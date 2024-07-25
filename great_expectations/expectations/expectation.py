@@ -2698,7 +2698,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 partial_unexpected_counts = [
                     {"value": key, "count": value}
                     for key, value in sorted(
-                        Counter(immutable_unexpected_list).most_common(
+                        Counter(immutable_unexpected_list).most_common(  # type: ignore[possibly-undefined] # FIXME
                             result_format["partial_unexpected_count"]
                         ),
                         key=lambda x: (-x[1], x[0]),
