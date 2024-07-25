@@ -13,7 +13,11 @@ Managing missing data involves:
 2. Understanding the causes of the missing data
 3. Deciding on appropriate remedial actions
 
-GX is an open-source data quality tool that provides powerful features for managing and validating data integrity, including handling missing data. Supported by an active community, GX allows you to create customizable checks, known as Expectations, that help maintain high data quality standards across diverse workflows.
+Great Expectations (GX) provides a powerful suite of schema-focused **Expectations** that allow you
+to define and enforce the structural integrity of your datasets. These tools enable you to establish
+robust schema validation within your data pipelines, helping to catch and address schema-related
+issues before they propagate through your data ecosystem. This guide will walk you through
+leveraging these Expectations to implement effective schema validation in your data workflows.
 
 In this guide, we will walk you through utilizing GX to proficiently handle missing data, ensuring your datasets remain clean, consistent, and ready for analysis or machine learning applications. You will learn step-by-step methods for writing Expectations, setting up automated checks, and making informed decisions about managing various types of missing data.
 
