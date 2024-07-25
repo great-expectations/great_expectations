@@ -340,14 +340,11 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
+        styling = runtime_configuration.get("styling") if runtime_configuration else None
         return [
             RenderedStringTemplateContent(
                 content_block_type="string_template",
-                string_template={
-                    "template": template_str,
-                    "params": params,
-                    "styling": runtime_configuration.get("styling"),
-                },
+                string_template={"template": template_str, "params": params, "styling": styling},
             )
         ]
 
