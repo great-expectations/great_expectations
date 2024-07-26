@@ -258,7 +258,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 )
             logger.debug(f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}")
             reader_fn: DataFrameFactoryFn = self._get_reader_fn(reader_method, s3_url.key)
-            buf = BytesIO(s3_object["Body"].read())
+            buf = BytesIO(s3_object["Body"].read())  # type: ignore[possibly-undefined] # FIXME
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 

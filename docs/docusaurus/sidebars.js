@@ -59,11 +59,21 @@ module.exports = {
       label: 'Connect to data',
       link: {type: 'doc', id: 'core/connect_to_data/connect_to_data'},
       items: [
-          {
-            type: 'doc',
-            id: 'core/connect_to_data/sql_data/sql_data',
-            label: 'Connect to data using SQL'
-          },
+        {
+          type: 'doc',
+          id: 'core/connect_to_data/sql_data/sql_data',
+          label: 'Connect to SQL data'
+        },
+        {
+          type: 'doc',
+          id: 'core/connect_to_data/filesystem_data/filesystem_data',
+          label: 'Connect to Filesystem data'
+        },
+        {
+          type: 'doc',
+          id: 'core/connect_to_data/dataframes/dataframes',
+          label: 'Connect to data in Dataframes'
+        },
       ]
     },
     {
@@ -75,6 +85,11 @@ module.exports = {
           type: 'doc',
           id: 'core/define_expectations/create_an_expectation',
           label: 'Create an Expectation'
+        },
+        {
+          type: 'doc',
+          id: 'core/define_expectations/retrieve_a_batch_of_test_data',
+          label: 'Retrieve a Batch of sample data'
         },
         {
           type: 'doc',
@@ -422,7 +437,10 @@ module.exports = {
       link: { type: 'doc', id: 'reference/learn/data_quality_use_cases/dq_use_cases_lp' },
       items: [
         'reference/learn/data_quality_use_cases/schema',
-        'reference/learn/data_quality_use_cases/missingness'
+        'reference/learn/data_quality_use_cases/missingness',
+        'reference/learn/data_quality_use_cases/distribution',
+        'reference/learn/data_quality_use_cases/freshness',
+        'reference/learn/data_quality_use_cases/volume'
       ]
     },
       'reference/learn/usage_statistics',

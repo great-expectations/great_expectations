@@ -70,12 +70,12 @@ class DatasourceDict(UserDict):
 
         configs = self._datasource_store.get_all()
         for config in configs:
+            if isinstance(config, FluentDatasource):
+                name = config.name
+            else:
+                raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
             try:
-                if isinstance(config, FluentDatasource):
-                    name = config.name
-                    datasources[name] = self._init_fluent_datasource(name=name, ds=config)
-                else:
-                    raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
+                datasources[name] = self._init_fluent_datasource(name=name, ds=config)
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
