@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
+
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.experimental.rule_based_profiler.estimators.numeric_range_estimation_result import (  # noqa: E501

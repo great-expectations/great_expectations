@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
-import numpy as np
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core.expect_column_values_to_be_of_type import (
     _native_type_type_map,

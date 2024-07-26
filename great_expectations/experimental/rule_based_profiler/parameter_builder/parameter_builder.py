@@ -20,10 +20,10 @@ from typing import (
     Union,
 )
 
+import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-import numpy as np
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.data_context.util import instantiate_class_from_config

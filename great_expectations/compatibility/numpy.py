@@ -5,9 +5,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from packaging import version
-
 import numpy as np
+from packaging import version
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20

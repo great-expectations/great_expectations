@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, Literal, Optional
 
 import numpy as np
+
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -19,6 +20,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     import numpy.typing as npt
+
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )

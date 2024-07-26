@@ -41,11 +41,11 @@ from typing import (
     overload,
 )
 
+import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
-import numpy as np
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import LegacyRow, Row
@@ -64,10 +64,10 @@ from great_expectations.types.base import SerializableDotDict
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
+    import numpy.typing as npt
     from ruamel.yaml.comments import CommentedMap
     from typing_extensions import TypeAlias, TypeGuard
 
-    import numpy.typing as npt
     from great_expectations.alias_types import JSONValues, PathStr
     from great_expectations.data_context import (
         AbstractDataContext,

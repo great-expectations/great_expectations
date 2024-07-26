@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import numpy as np
+
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,

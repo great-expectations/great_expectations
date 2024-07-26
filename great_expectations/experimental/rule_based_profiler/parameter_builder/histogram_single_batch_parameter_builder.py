@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
-import great_expectations.exceptions as gx_exceptions
 import numpy as np
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes

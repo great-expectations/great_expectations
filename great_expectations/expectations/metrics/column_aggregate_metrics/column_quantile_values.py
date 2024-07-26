@@ -8,6 +8,7 @@ from collections.abc import Iterable
 from typing import Any
 
 import numpy as np
+
 from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,

@@ -4,9 +4,9 @@ import inspect
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type, Union
 
+import numpy as np
 import pandas as pd
 
-import numpy as np
 from great_expectations.compatibility import aws, pydantic, pyspark, trino
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override

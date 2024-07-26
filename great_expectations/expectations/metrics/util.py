@@ -15,11 +15,11 @@ from typing import (
     overload,
 )
 
+import numpy as np
 from dateutil.parser import parse
 from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
-import numpy as np
 from great_expectations.compatibility import aws, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,

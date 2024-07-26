@@ -4,10 +4,10 @@ import inspect
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
+import numpy as np
 import pandas as pd
 from packaging import version
 
-import numpy as np
 from great_expectations.compatibility import pydantic, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (  # noqa: TCH001

@@ -10,6 +10,7 @@ from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     import numpy as np
+
     from great_expectations.core.domain import Domain
     from great_expectations.experimental.rule_based_profiler.estimators.numeric_range_estimation_result import (  # noqa: E501
         NumericRangeEstimationResult,

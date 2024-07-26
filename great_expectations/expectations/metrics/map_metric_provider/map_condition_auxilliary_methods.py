@@ -10,8 +10,9 @@ from typing import (
     Union,
 )
 
-import great_expectations.exceptions as gx_exceptions
 import numpy as np
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import pyspark
