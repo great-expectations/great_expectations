@@ -11,7 +11,7 @@ const formatOptionalValue = (value) => value || '-';
 
 const fullDescription = (description, name, email, selectedValue) => {
     const formattedSelectedValue = selectedValue.replaceAll("-"," ");
-    return `Name: ${formatOptionalValue(name)}\nEmail: ${formatOptionalValue(email)}\nSelected feedback type: ${formattedSelectedValue}\n\n${description}`;
+    return `*Name:* ${formatOptionalValue(name)}\n*Email:* ${formatOptionalValue(email)}\n*Selected feedback type:* ${formattedSelectedValue}\n\n*Description:* ${description}`;
 }
 
 exports.handler = async (req, context) => {
