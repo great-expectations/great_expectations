@@ -133,6 +133,18 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Configure project settings',
+      link: {type: 'doc', id: 'core/configure_project_settings/configure_project_settings'},
+      items: [
+        {type: 'doc', id: 'core/configure_project_settings/configure_metadata_stores/configure_metadata_stores'},
+        {type: 'doc', id: 'core/configure_project_settings/configure_data_docs/configure_data_docs'},
+        {type: 'doc', id: 'core/configure_project_settings/configure_credentials/configure_credentials'},
+        {type: 'doc', id: 'core/configure_project_settings/access_secrets_managers/access_secrets_managers'},
+        {type: 'doc', id: 'core/configure_project_settings/toggle_analytics_events/toggle_analytics_events'}
+      ]
+    },
+    {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
