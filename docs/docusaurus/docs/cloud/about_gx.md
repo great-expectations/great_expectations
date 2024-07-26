@@ -18,7 +18,7 @@ GX Cloud includes the following features and functionality:
 
 - Scheduling your Validations in GX Cloud helps you get set up with production data quailty checks within minutes.
 
-- GX's fully managed Cloud solution makes connecting to your data straightforward and secure.
+- As a fully managed solution, GX Cloud makes connecting to your data straightforward and secure.
 
 ## GX Cloud architecture
 
@@ -34,17 +34,17 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 - **GX Cloud API** - Provides a REST API to programmatically access and manage GX Cloud data and configurations. Both the GX open source software (OSS) client and the GX Agent use the GX Cloud API to query data from and send data to GX Cloud.
 
-### Deployment components
 
-- **Fully hosted** - GX manages a fully hosted Cloud environment that requires no code to get started with. Connections to your data are read-only, and use secure, encypted methods.
-
-- **GX OSS client** - The Python library that powers GX Cloud and provides a Python client for programmatic access to GX Cloud. GX OSS contains the logic needed to test and document your organization's data, and you can also use it to create, manage, and interact with GX Cloud components.
-
-- **GX Agent** - A utility that runs in your organization's deployment environment. While running, the GX Agent can receive tasks generated from the GX Cloud web UI, such as running a Checkpoint or fetching Metrics, and execute these tasks against your Data Assets.
-
-## GX Cloud deployment patterns
+## GX Cloud deployment options
 
 GX Cloud deployments can be tailored to meet your specific business requirements. How your data is accessed and how you want your users to interact with GX Cloud determine which deployment pattern and GX architectural components are suitable for your organization.
+
+| Deployment pattern               | Description                               | When to use                    |
+|----------------------------------|-------------------------------------------|--------------------------------|
+| [Fully hosted](#fully-hosted) | GX manages a fully hosted Cloud environment that requires no code to get started with. Connections to your data are read-only, and use secure, encypted methods. | You want to get started quickly and securely with GX Cloud using direct cloud-to-cloud data source connection. |
+| [Org-hosted GX Agent](#org-hosted-gx-agent) | A utility that runs in your organization's deployment environment. While running, the GX Agent can receive tasks generated from the GX Cloud web UI, such as running a Validation or fetching Metrics, and execute these tasks against your Data Assets. | You want to connect to data sources using your organization's cloud infrastructure, for enhanced control and security. |
+| [Self-hosted GX Agent](#self-hosted-gx-agent) | A utility that runs on your local machine. While running, the GX Agent can receive tasks generated from the GX Cloud web UI, such as running a Validation or fetching Metrics, and execute these tasks against your Data Assets. |  You want to test the Agent setup on your own machine, before moving to a shared production Agent deployment. |
+| [API-only](#api-only)  | Integrate with GX Cloud using Python scripts, the GX OSS client, and an orchestrator. | You want to use GX Cloud as a data store for Expectations and Validation results only. |
 
 ### Fully hosted
 In a fully hosted deployment, you get started with GX Cloud by connecting directly to your organizations's cloud data stores via the GX Cloud UI. This is the fastest path to setup.

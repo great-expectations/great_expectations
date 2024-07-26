@@ -175,9 +175,12 @@ module.exports = {
               label: 'Supported browsers',
               href: '/docs/cloud/about_gx#supported-browsers',
             },
+            { 
+              type: 'doc', 
+              id: 'cloud/deploy_gx_agent' 
+            },
           ]
         },
-        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',

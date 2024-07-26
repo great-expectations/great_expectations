@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Deploy the GX Agent'
-title: 'Deploy the GX Agent'
+sidebar_label: '(Optional) Deploy the GX Agent'
+title: '(Optional) Deploy the GX Agent'
 id: deploy_gx_agent
 description: Deploy the GX Agent to use GX Cloud features and functionality.
 toc_min_heading_level: 2
@@ -10,13 +10,23 @@ toc_max_heading_level: 2
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-To use GX Cloud features and functionality, you need to deploy the GX Agent. The GX Agent is an intermediary between GX Cloud and your organization's data stores. GX Cloud does not connect directly to your data, all data access occurs within the GX Agent. GX Cloud sends jobs to the GX Agent, the GX Agent executes these jobs against your data, and then sends the job results to GX Cloud.
+:::info
 
-To test GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. When you've finished testing GX Cloud, you move to an [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern) and deploy the GX Agent to your organization's development, staging, or production cloud services environment. The GX Agent serves all GX Cloud users within your organization. It can be run as part of your development or production workflows. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
+For access to the GX Agent, reach out to Support at support@greatexpectations.io.
+
+:::
+
+To use GX Cloud features and functionality, you may want to deploy the GX Agent. The GX Agent is an intermediary between GX Cloud and your organization's data stores. GX Cloud does not connect directly to your data with this deployment option, and all data access occurs within the GX Agent. GX Cloud sends jobs to the GX Agent, the GX Agent executes these jobs against your data, and then sends the job results to GX Cloud.
+
+To test GX Cloud, you may use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. When you'ready to move to your organization's development, staging, or production cloud services environment, switch to an [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern). The GX Agent serves all GX Cloud users within your organization. To learn more about GX Cloud deployment patterns, see [About GX Cloud](./about_gx.md).
+
+### GX Agent versioning
+GX uses a date-based versioning format for its weekly GX Agent Docker image releases: `YYYYMMMDD.#` for stable releases and `YYYYMMDD.#.dev#` for pre-releases. GX uses the `stable` and `dev` Docker image tags to identify the release type. The `stable` tag indicates the image is fully tested and ready for use. The `dev` tag indicates a pre-release image. This documentation assumes you're using the latest `stable` GX Agent Docker image.
 
 ## Prerequisites
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud).
+- You have reached out to Support at support@greatexpectations.io to request a GX Agent deployment.
 
 ## Get your access token and organization ID
 
