@@ -26,11 +26,11 @@ _register_core_expectations()
 del _register_core_metrics
 del _register_core_expectations
 
-from great_expectations.checkpoint import actions
 from great_expectations import exceptions
 from great_expectations import expectations
+from great_expectations import checkpoint
 
-from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
