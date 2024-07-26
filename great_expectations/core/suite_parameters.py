@@ -32,9 +32,7 @@ from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias, TypeGuard
 
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12

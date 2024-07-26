@@ -16,9 +16,7 @@ from great_expectations.datasource.fluent import (
 if TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext as DataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext as DataContext
 
 
 @pytest.mark.snowflake

@@ -10,16 +10,16 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
+from great_expectations.datasource.fluent.data_connector import (
+    DataConnector,
+)
 from great_expectations.datasource.fluent.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
-)
-from great_expectations.datasource.fluent.data_connector.data_connector import (
-    DataConnector,
 )
 from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,

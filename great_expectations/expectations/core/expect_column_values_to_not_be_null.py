@@ -18,7 +18,7 @@ from great_expectations.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
     MOSTLY_DESCRIPTION,
 )
-from great_expectations.render.components import (
+from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyDiagnosticRendererType,
     LegacyRendererType,

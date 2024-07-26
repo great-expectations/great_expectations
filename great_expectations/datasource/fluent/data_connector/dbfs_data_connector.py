@@ -5,7 +5,7 @@ import pathlib
 from typing import TYPE_CHECKING, Callable, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.datasource.fluent.data_connector.filesystem_data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
 

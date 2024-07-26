@@ -10,8 +10,7 @@ import pandas as pd
 
 import numpy as np
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.types import SerializableDictDot
-from great_expectations.types.base import SerializableDotDict
+from great_expectations.types import SerializableDictDot, SerializableDotDict
 
 
 def recursively_convert_to_json_serializable(

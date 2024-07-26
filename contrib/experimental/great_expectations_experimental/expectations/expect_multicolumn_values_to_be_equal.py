@@ -36,7 +36,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
 )
-from great_expectations.render.components import (
+from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyDiagnosticRendererType,
     LegacyRendererType,

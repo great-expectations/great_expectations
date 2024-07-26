@@ -11,7 +11,7 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render.components import RenderedAtomicContent
+from great_expectations.render import RenderedAtomicContent
 
 PYTHON_VERSION: Final[Version] = Version(
     f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"

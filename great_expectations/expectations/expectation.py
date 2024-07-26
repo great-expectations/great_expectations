@@ -76,7 +76,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.expectations.sql_tokens_and_types import (
     valid_sql_tokens_and_types,
 )
-from great_expectations.render.components import (
+from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
     CollapseContent,
@@ -106,9 +106,7 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
         ExpectationDiagnostics,
     )
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import (
         ExecutionEngine,
     )

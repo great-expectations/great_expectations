@@ -58,7 +58,7 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
-from great_expectations.render.components import RenderedContent
+from great_expectations.render import RenderedContent
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 

@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.expectation_suite import ExpectationSuite, ExpectationSuiteSchema
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,

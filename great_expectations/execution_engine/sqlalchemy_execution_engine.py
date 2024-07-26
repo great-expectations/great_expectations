@@ -59,12 +59,12 @@ from great_expectations.validator.computed_metric import MetricValue  # noqa: TC
 del get_versions  # isort:skip
 
 
+from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.core.id_dict import IDDict
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
     ExecutionEngineError,
@@ -73,7 +73,7 @@ from great_expectations.exceptions import (
     InvalidConfigError,
 )
 from great_expectations.exceptions import exceptions as gx_exceptions
-from great_expectations.execution_engine.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )

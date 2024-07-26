@@ -8,8 +8,10 @@ from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Generator, List
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.fluent.data_connector.file_path_data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.file_path_data_connector import (
     sanitize_prefix_for_gcs_and_s3,
 )
 

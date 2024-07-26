@@ -10,16 +10,16 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
-from great_expectations import get_context
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchRequest,
 )
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
 from great_expectations.core.result_format import ResultFormat
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )

@@ -4,7 +4,7 @@ import warnings
 from collections import Counter, defaultdict
 
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.render.components import (
+from great_expectations.render import (
     CollapseContent,
     RenderedBulletListContent,
     RenderedHeaderContent,

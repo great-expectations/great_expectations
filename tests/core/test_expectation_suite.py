@@ -22,7 +22,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
 )
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import Expectation

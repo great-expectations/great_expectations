@@ -12,9 +12,9 @@ from contrib.experimental.great_expectations_experimental.tests.test_utils impor
     CONNECTION_STRING,
     load_data_into_postgres_database,
 )
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.rule_based_profiler.data_assistant_result import (

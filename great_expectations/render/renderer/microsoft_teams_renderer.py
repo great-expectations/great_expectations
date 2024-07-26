@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core import RunIdentifier
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:

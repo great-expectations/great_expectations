@@ -9,7 +9,7 @@ from great_expectations.analytics.events import (
     ExpectationSuiteDeletedEvent,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.factory.factory import Factory
 from great_expectations.exceptions import DataContextError
 

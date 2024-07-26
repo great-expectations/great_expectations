@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.datasource.fluent.interfaces import Datasource
+    from great_expectations.datasource.fluent import Datasource
 
 LOGGER = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.render.components import (
+from great_expectations.render import (
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedStringTemplateContent,

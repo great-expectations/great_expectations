@@ -27,35 +27,20 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.alias_types import PathStr
-
-    # from great_expectations.data_context import (
-    #     AbstractDataContext,
-    #     CloudDataContext,
-    #     EphemeralDataContext,
-    #     FileDataContext,
-    # )
-    from great_expectations.data_context.data_context.abstract_data_context import (
+    from great_expectations.data_context import (
         AbstractDataContext,
-    )
-    from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
-    from great_expectations.data_context.data_context.ephemeral_data_context import (
+        CloudDataContext,
         EphemeralDataContext,
+        FileDataContext,
     )
-    from great_expectations.data_context.data_context.file_data_context import FileDataContext
+    from great_expectations.data_context.store import (
+        ExpectationsStore,
+        SuiteParameterStore,
+        ValidationResultsStore,
+    )
     from great_expectations.data_context.store.checkpoint_store import CheckpointStore
-
-    # from great_expectations.data_context.store import (
-    #     ExpectationsStore,
-    #     SuiteParameterStore,
-    #     ValidationResultsStore,
-    # )
-    from great_expectations.data_context.store.expectations_store import ExpectationsStore
-    from great_expectations.data_context.store.metric_store import SuiteParameterStore
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
-    )
-    from great_expectations.data_context.store.validation_results_store import (
-        ValidationResultsStore,
     )
     from great_expectations.data_context.types.base import DataContextConfig
     from great_expectations.datasource.datasource_dict import DatasourceDict
@@ -211,20 +196,12 @@ class ProjectManager:
         except KeyError:
             raise ValueError(f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud.")  # noqa: TRY003
 
-        # from great_expectations.data_context.data_context import (
-        #     AbstractDataContext,
-        #     CloudDataContext,
-        #     EphemeralDataContext,
-        #     FileDataContext,
-        # )
-        from great_expectations.data_context.data_context.abstract_data_context import (
+        from great_expectations.data_context.data_context import (
             AbstractDataContext,
-        )
-        from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
-        from great_expectations.data_context.data_context.ephemeral_data_context import (
+            CloudDataContext,
             EphemeralDataContext,
+            FileDataContext,
         )
-        from great_expectations.data_context.data_context.file_data_context import FileDataContext
 
         expected_ctx_types: dict[
             ContextModes | None,
@@ -306,9 +283,7 @@ class ProjectManager:
         self,
         project_config: DataContextConfig | Mapping | None,
     ) -> DataContextConfig | None:
-        from great_expectations.data_context.data_context.abstract_data_context import (
-            AbstractDataContext,
-        )
+        from great_expectations.data_context.data_context import AbstractDataContext
         from great_expectations.data_context.types.base import DataContextConfig
 
         # If available and applicable, convert project_config mapping into a rich config type
@@ -331,7 +306,7 @@ class ProjectManager:
         cloud_organization_id: str | None = None,
         cloud_mode: bool | None = None,
     ) -> CloudDataContext | None:
-        from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
+        from great_expectations.data_context.data_context import CloudDataContext
 
         config_available = CloudDataContext.is_cloud_config_available(
             cloud_base_url=cloud_base_url,
@@ -365,7 +340,7 @@ class ProjectManager:
         project_root_dir: PathStr | None = None,
         runtime_environment: dict | None = None,
     ) -> FileDataContext | None:
-        from great_expectations.data_context.data_context.file_data_context import FileDataContext
+        from great_expectations.data_context.data_context import FileDataContext
 
         try:
             return FileDataContext(
@@ -383,9 +358,7 @@ class ProjectManager:
         project_config: DataContextConfig | None = None,
         runtime_environment: dict | None = None,
     ) -> EphemeralDataContext:
-        from great_expectations.data_context.data_context.ephemeral_data_context import (
-            EphemeralDataContext,
-        )
+        from great_expectations.data_context.data_context import EphemeralDataContext
         from great_expectations.data_context.types.base import (
             DataContextConfig,
             InMemoryStoreBackendDefaults,

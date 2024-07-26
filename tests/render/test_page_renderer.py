@@ -9,8 +9,8 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render.components import RenderedContent, RenderedDocumentContent
-from great_expectations.render.renderer.page_renderer import (
+from great_expectations.render import RenderedContent, RenderedDocumentContent
+from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,

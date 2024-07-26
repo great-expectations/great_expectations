@@ -13,7 +13,7 @@ from pytest import param
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import (
     GxContextWarning,
     SQLDatasource,

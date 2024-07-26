@@ -58,7 +58,7 @@ from great_expectations.exceptions.exceptions import (
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
-from great_expectations.datasource.fluent.data_connector.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     DataConnector,
 )
 
@@ -68,7 +68,6 @@ if TYPE_CHECKING:
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
-
     from great_expectations.core import (
         ExpectationSuite,
         ExpectationSuiteValidationResult,
@@ -84,7 +83,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context import (
         AbstractDataContext as GXDataContext,
     )
-    from great_expectations.datasource.fluent.batch_request import (
+    from great_expectations.datasource.fluent import (
         BatchParameters,
         BatchRequest,
     )
@@ -1104,7 +1103,7 @@ class Batch:
     def validate(
         self, expect: Expectation | ExpectationSuite
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
-        from great_expectations.core.expectation_suite import ExpectationSuite
+        from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
 
         if isinstance(expect, Expectation):

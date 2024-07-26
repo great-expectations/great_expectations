@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.render.components import RenderedStringTemplateContent
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )

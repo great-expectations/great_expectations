@@ -8,7 +8,7 @@ import pytest
 import great_expectations as gx
 import great_expectations.expectations as gxe
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.interfaces import Batch, Datasource
 
 DATASOURCE_NAME = "my_pandas"

@@ -9,6 +9,9 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult
@@ -44,10 +47,6 @@ class Renderer:
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
-        from great_expectations.expectations.expectation_configuration import (
-            ExpectationConfiguration,
-        )
-
         if isinstance(ge_object, ExpectationConfiguration):
             return ge_object.type
 

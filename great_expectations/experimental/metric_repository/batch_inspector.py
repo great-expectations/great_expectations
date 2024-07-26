@@ -10,9 +10,7 @@ from great_expectations.experimental.metric_repository.metrics import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import BatchRequest
     from great_expectations.experimental.metric_repository.metric_retriever import (
         MetricRetriever,

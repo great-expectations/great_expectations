@@ -14,9 +14,7 @@ from great_expectations.datasource.fluent import SqliteDatasource
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext
 
 
 @pytest.fixture

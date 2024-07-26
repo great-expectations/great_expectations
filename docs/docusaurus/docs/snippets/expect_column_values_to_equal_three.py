@@ -22,7 +22,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_partial
-from great_expectations.render.components import (
+from great_expectations.render import (
     CollapseContent,
     RenderedStringTemplateContent,
     RenderedTableContent,

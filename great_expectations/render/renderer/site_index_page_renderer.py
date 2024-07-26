@@ -8,7 +8,7 @@ import traceback
 import tzlocal
 from dateutil.parser import parse
 
-from great_expectations.render.components import (
+from great_expectations.render import (
     RenderedBootstrapTableContent,
     RenderedDocumentContent,
     RenderedHeaderContent,

@@ -24,7 +24,7 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
 )
-from great_expectations.render.components import (
+from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyDiagnosticRendererType,
     LegacyRendererType,

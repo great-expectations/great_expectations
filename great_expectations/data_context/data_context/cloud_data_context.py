@@ -38,7 +38,7 @@ from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariableSchema,
 )
-from great_expectations.data_context.store.data_asset_store import DataAssetStore
+from great_expectations.data_context.store import DataAssetStore
 from great_expectations.data_context.store.datasource_store import (
     DatasourceStore,
 )
@@ -56,13 +56,13 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.datasource_dict import DatasourceDict
-from great_expectations.datasource.fluent.interfaces import Datasource as FluentDatasource
+from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.datasource.fluent.interfaces import Datasource as FluentDatasource
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)

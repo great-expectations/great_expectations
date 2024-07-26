@@ -11,15 +11,13 @@ from unittest.mock import patch as mock_patch
 
 import pytest
 
+from great_expectations import get_context
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.data_context.context_factory import (
-    get_context,
-    project_manager,
-)
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )

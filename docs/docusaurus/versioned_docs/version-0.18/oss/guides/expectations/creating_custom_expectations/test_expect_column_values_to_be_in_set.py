@@ -6,7 +6,7 @@ import pytest
 import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext
 
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def">

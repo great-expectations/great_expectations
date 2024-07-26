@@ -8,7 +8,7 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     IDDict,
 )
-from great_expectations import Checkpoint
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.util import filter_properties_dict

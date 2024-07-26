@@ -9,15 +9,15 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
 )
 from great_expectations.core import (
     ExpectationValidationResult,
+    IDDict,
 )
 from great_expectations.core.batch import Batch, LegacyBatchDefinition
-from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     PandasExecutionEngine,

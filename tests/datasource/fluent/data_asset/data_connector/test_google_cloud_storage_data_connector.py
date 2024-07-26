@@ -6,8 +6,8 @@ from unittest import mock
 import pytest
 
 from great_expectations.compatibility import google
+from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_connector import (

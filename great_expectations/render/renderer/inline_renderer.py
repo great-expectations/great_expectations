@@ -16,7 +16,7 @@ from great_expectations.expectations.registry import (
     get_renderer_impl,
     get_renderer_names_with_renderer_types,
 )
-from great_expectations.render.components import (
+from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
@@ -26,7 +26,7 @@ from great_expectations.render.exceptions import InlineRendererError
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.render.components import RenderedContent
+    from great_expectations.render import RenderedContent
 
 logger = logging.getLogger(__name__)
 

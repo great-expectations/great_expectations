@@ -21,7 +21,7 @@ from great_expectations.core.batch_definition import PartitionerT
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
-from great_expectations.datasource.fluent.data_connector.file_path_data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,  # noqa: TCH001  # pydantic uses type at runtime
 )
 from great_expectations.datasource.fluent.interfaces import (

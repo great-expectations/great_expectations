@@ -36,7 +36,7 @@ from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
-from great_expectations.datasource.fluent.batch_request import BatchParameters, BatchRequest
+from great_expectations.datasource.fluent import BatchParameters, BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -142,8 +142,8 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
+        from great_expectations.core import IDDict
         from great_expectations.core.batch import LegacyBatchDefinition
-        from great_expectations.core.id_dict import IDDict
 
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
@@ -447,8 +447,8 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
+        from great_expectations.core import IDDict
         from great_expectations.core.batch import LegacyBatchDefinition
-        from great_expectations.core.id_dict import IDDict
 
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,

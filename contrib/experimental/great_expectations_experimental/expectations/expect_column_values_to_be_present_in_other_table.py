@@ -9,7 +9,7 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
-from great_expectations.render.components import (
+from great_expectations.render import (
     RenderedStringTemplateContent,
     RenderedTableContent,
 )

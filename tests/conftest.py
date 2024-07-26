@@ -30,14 +30,16 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import (
+    AbstractDataContext,
+    CloudDataContext,
+    get_context,
+)
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
 )
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
-from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.data_context.context_factory import (
-    get_context,
     project_manager,
     set_context,
 )
@@ -61,9 +63,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import (
     file_relative_path,
 )
-from great_expectations.datasource.fluent.interfaces import GxDatasourceWarning
-from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
-from great_expectations.execution_engine.sparkdf_execution_engine import SparkDFExecutionEngine
+from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

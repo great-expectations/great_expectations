@@ -50,9 +50,9 @@ from great_expectations.core import (
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
+    IDDict,
 )
 from great_expectations.core.batch import Batch, LegacyBatchDefinition
-from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
@@ -92,9 +92,7 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.supporting_types import (
         ExpectationExecutionEngineDiagnostics,
     )
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext
 
 P = ParamSpec("P")
 T = TypeVar("T")
