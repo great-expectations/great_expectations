@@ -1,4 +1,5 @@
-from contrib.experimental.metrics.datasource import MPDataSource
+import uuid
+from contrib.experimental.metrics.data_source import MPDataSource
 from contrib.experimental.metrics.snowflake_provider import SnowflakeConnectionMetricProvider
 from contrib.experimental.metrics.snowflake_provider_asset import SnowflakeMPTableAsset
 from contrib.experimental.metrics.snowflake_provider_batch_definition import SnowflakeMPBatchDefinition, SnowflakeTableAssetColumnDailyPartitioner
@@ -91,11 +92,14 @@ def build_MetricProviderSnowflakeDatasource_from_SnowflakeDatasource(datasource:
     )
     for asset in datasource.assets:
         if isinstance(asset, TableAsset):
-            new_asset = SnowflakeMPTableAsset(name=asset.name, table_name=asset.table_name)
+            asset_id = asset.id.hex if asset.id else uuid.uuid4().hex
+            new_asset = SnowflakeMPTableAsset(id=asset_id, name=asset.name, table_name=asset.table_name)
             for batch_definition in asset.batch_definitions:
                 if isinstance(batch_definition.partitioner, ColumnPartitionerDaily):
+                    batch_definition_id = batch_definition.id if batch_definition.id else uuid.uuid4().hex
                     new_asset.add_batch_definition(
                         SnowflakeMPBatchDefinition(
+                            id=batch_definition_id,
                             name=batch_definition.name,
                             data_asset=new_asset,
                             partitioner=SnowflakeTableAssetColumnDailyPartitioner(column=batch_definition.partitioner.column_name),
