@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to match an unordered set."
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns in a table to match an unordered set."
 COLUMN_SET_DESCRIPTION = "The column names, in any order."
 EXACT_MATCH_DESCRIPTION = (
     "If True, the list of columns must exactly match the observed columns. "
