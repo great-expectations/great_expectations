@@ -7,7 +7,6 @@ __version__ = _get_versions()["version"]
 del _get_versions
 
 # great_expectations.data_context must be imported first or we will have circular dependency issues
-# I believe this is a bad import interplay between of Checkpoints and Renderers.
 import great_expectations.data_context  # isort:skip
 import great_expectations.core
 
