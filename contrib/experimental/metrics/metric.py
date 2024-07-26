@@ -1,4 +1,3 @@
-from abc import ABC
 from typing import Literal
 from contrib.experimental.metrics.metric_provider import Metric
 

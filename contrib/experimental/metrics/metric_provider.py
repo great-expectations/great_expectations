@@ -7,7 +7,7 @@ from pydantic import ConfigDict, StrictStr
 from great_expectations.compatibility import pydantic
 
 MetricT = TypeVar("MetricT", bound="Metric")
-MetricReturnT = TypeVar("MetricReturnT", bound="MetricValue")
+MetricValueT = TypeVar("MetricValueT", bound="MetricValue")
 MetricProviderT = TypeVar("MetricProviderT", bound="MetricProvider")
 MPPartitionerT = TypeVar("MPPartitionerT", bound="MPPartitioner")
 MPAssetT = TypeVar("MPAssetT", bound="MPAsset")
@@ -102,12 +102,15 @@ class MetricProvider(ABC):
         metric_impl = self._metric_implementations.get_metric_implementation(self, metric)
         return metric_impl(metric=metric, provider=self)
     
+    def get_supported_metrics(self) -> list[type[Metric]]:
+        return list(self._metric_implementations._metric_implementations.keys())
+    
     @property
     @abstractmethod
     def supported_batch_definition_types(self) -> list[type[MPBatchDefinition]]:
         raise NotImplementedError
 
-class MetricImplementation(ABC, Generic[MetricT, MetricProviderT, MetricReturnT]):
+class MetricImplementation(ABC, Generic[MetricT, MetricProviderT, MetricValueT]):
     """
     Q: is MetricReturnT useful here?
     """
@@ -119,5 +122,5 @@ class MetricImplementation(ABC, Generic[MetricT, MetricProviderT, MetricReturnT]
         self._provider = provider
 
     @abstractmethod
-    def compute(self) -> MetricReturnT:
+    def compute(self) -> MetricValueT:
         pass
