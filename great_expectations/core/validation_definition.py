@@ -8,7 +8,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Extra,
-    Field,
     PrivateAttr,
     ValidationError,
     validator,
@@ -90,9 +89,9 @@ class ValidationDefinition(BaseModel):
             BatchDefinition: lambda b: b.identifier_bundle(),
         }
 
-    name: str = Field(..., allow_mutation=False)
-    data: BatchDefinition = Field(..., allow_mutation=False)
-    suite: ExpectationSuite = Field(..., allow_mutation=False)
+    name: str
+    data: BatchDefinition
+    suite: ExpectationSuite
     id: Union[str, None] = None
     _validation_results_store: ValidationResultsStore = PrivateAttr()
 
