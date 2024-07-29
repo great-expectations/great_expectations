@@ -180,7 +180,7 @@ class DatabricksSQLDatasource(SQLDatasource):
 
     Args:
         name: The name of this DatabricksSQL datasource.
-        connection_string: The SQLAlchemy connection string used to connect to the postgres database.
+        connection_string: The SQLAlchemy connection string used to connect to the Databricks SQL database.
             For example: "databricks://token:<token>@<host>:<port>/<database>?http_path=<http_path>&catalog=<catalog>&schema=<schema>""
         assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values
             are TableAsset or QueryAsset objects.
