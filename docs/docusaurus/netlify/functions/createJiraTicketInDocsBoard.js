@@ -32,7 +32,10 @@ exports.handler = async (req, context) => {
                     "description": fullDescription(description, name, email, selectedValue),
                     "issuetype": {
                         "id": STORY_ISSUETYPE_ID
-                    }
+                    },
+                    "labels": [
+                        "feedback_modal"
+                    ],
                 }
             })
         })
