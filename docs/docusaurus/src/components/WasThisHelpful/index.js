@@ -59,6 +59,15 @@ export default function WasThisHelpful(){
     const sendReview = async (e) => {
         e.preventDefault()
         if (formData.description) {
+            setError(false)
+            posthog.capture("survey sent", {
+                $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0',
+                $survey_response: formData.name,
+                $survey_response_1: formData.email,
+                $survey_response_2: formData.description,
+                $survey_response_3: pathname,
+                $survey_response_4: formData.selectedValue.replaceAll('-', ' ')
+            })
             try {
                 const response = await fetch(CREATE_JIRA_TICKET_IN_DOCS_BOARD_ENDPOINT_URL, {
                     method: "POST",
