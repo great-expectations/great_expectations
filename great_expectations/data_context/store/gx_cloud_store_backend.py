@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABCMeta
-from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
@@ -34,11 +33,6 @@ class ErrorDetail(TypedDict):
 
 class ErrorPayload(TypedDict):
     errors: List[ErrorDetail]
-
-
-class EndpointVersion(str, Enum):
-    V0 = "V0"
-    V1 = "V1"
 
 
 def get_user_friendly_error_message(
@@ -100,23 +94,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             GXCloudRESTResource.VALIDATION_RESULT: "validation_results",
         }
     )
-
-    _ENDPOINT_VERSION_LOOKUP: dict[str, EndpointVersion] = {
-        GXCloudRESTResource.CHECKPOINT: EndpointVersion.V0,
-        GXCloudRESTResource.DATASOURCE: EndpointVersion.V1,
-        GXCloudRESTResource.DATA_ASSET: EndpointVersion.V1,
-        GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V1,
-        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V1,
-        GXCloudRESTResource.EXPECTATION_SUITE: EndpointVersion.V1,
-        GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V0,
-        GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
-    }
-    # we want to support looking up EndpointVersion from either GXCloudRESTResource
-    # or a pluralized version of it, as defined by RESOURCE_PLURALITY_LOOKUP_DICT.
-    for key, value in RESOURCE_PLURALITY_LOOKUP_DICT.items():
-        # try to set the pluralized GXCloudRESTResource to the same endpoint as its singular,
-        # with a fallback default of EndpointVersion.V0.
-        _ENDPOINT_VERSION_LOOKUP[value] = _ENDPOINT_VERSION_LOOKUP.get(key, EndpointVersion.V0)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -258,14 +235,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
-        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         data = self.construct_versioned_payload(
-            resource_type=resource_type.value,
-            attributes_key=attributes_key,
             attributes_value=value,
-            organization_id=organization_id,
-            resource_id=id or None,  # filter out empty string
         )
 
         url = self.construct_versioned_url(
@@ -363,14 +335,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         resource_name = self.ge_cloud_resource_name
         organization_id = self.ge_cloud_credentials["organization_id"]
 
-        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
-
         kwargs = kwargs if self.validate_set_kwargs(kwargs) else {}
         data = self.construct_versioned_payload(
-            resource_type=resource_type,
-            attributes_key=attributes_key,
             attributes_value=value,
-            organization_id=organization_id,
             **kwargs,
         )
 
@@ -633,19 +600,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         id: Optional[str] = None,
     ) -> str:
         """Construct the correct url for a given resource."""
-        version = cls._ENDPOINT_VERSION_LOOKUP.get(resource_name, EndpointVersion.V0)
-
-        if version == EndpointVersion.V1:
-            url = urljoin(
-                base_url,
-                f"api/v1/organizations/{organization_id}/{hyphen(resource_name)}",
-            )
-        else:  # default to EndpointVersion.V0
-            url = urljoin(
-                base_url,
-                f"organizations/{organization_id}/{hyphen(resource_name)}",
-            )
-
+        url = urljoin(
+            base_url,
+            f"api/v1/organizations/{organization_id}/{hyphen(resource_name)}",
+        )
         if id:
             url = f"{url}/{id}"
 
@@ -654,11 +612,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @classmethod
     def construct_versioned_payload(
         cls,
-        resource_type: str,
-        organization_id: str,
-        attributes_key: str,
         attributes_value: Union[dict, Any],
-        resource_id: str | None = None,
         **kwargs: dict,
     ) -> dict:
         """Construct the correct payload for the cloud backend.
@@ -666,64 +620,18 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         Arguments `resource_type`, `resource_id`, and `attributes_value` of type Any
         are deprecated in GX V1, and are only required for resources still using V0 endpoints.
         """
-        version = cls._ENDPOINT_VERSION_LOOKUP.get(resource_type, EndpointVersion.V0)
-        if version == EndpointVersion.V1:
-            if isinstance(attributes_value, dict):
-                payload = {**attributes_value, **kwargs}
-            elif attributes_value is None:
-                payload = kwargs
-            else:
-                raise TypeError(  # noqa: TRY003
-                    f"Parameter attributes_value of type {type(attributes_value)}"
-                    f" is unsupported in GX V1."
-                )
-
-            return cls._construct_json_payload_v1(payload=payload)
+        if isinstance(attributes_value, dict):
+            payload = {**attributes_value, **kwargs}
+        elif attributes_value is None:
+            payload = kwargs
         else:
-            return cls._construct_json_payload_v0(
-                resource_type=resource_type,
-                organization_id=organization_id,
-                attributes_key=attributes_key,
-                attributes_value=attributes_value,
-                resource_id=resource_id,
-                **kwargs,
+            raise TypeError(  # noqa: TRY003
+                f"Parameter attributes_value of type {type(attributes_value)}"
+                f" is unsupported in GX V1."
             )
 
-    @classmethod
-    def _construct_json_payload_v0(
-        cls,
-        resource_type: str,
-        organization_id: str,
-        attributes_key: str,
-        attributes_value: Any,
-        resource_id: str | None,
-        **kwargs: dict,
-    ) -> dict:
-        data = {
-            "data": {
-                "type": resource_type,
-                "attributes": {
-                    "organization_id": organization_id,
-                    attributes_key: attributes_value,
-                    **kwargs,
-                },
-            }
-        }
-        if resource_id:
-            data["data"]["id"] = resource_id
-        return data
-
-    @classmethod
-    def _construct_json_payload_v1(
-        cls,
-        payload: dict,
-    ) -> dict:
         return {
             "data": {
                 **payload,
             }
         }
-
-    @property
-    def _is_v1_resource(self) -> bool:
-        return self._ENDPOINT_VERSION_LOOKUP.get(self.ge_cloud_resource_type) == EndpointVersion.V1
