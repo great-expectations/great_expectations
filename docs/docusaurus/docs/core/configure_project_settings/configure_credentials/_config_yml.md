@@ -2,7 +2,9 @@ YAML files make variables more visible, are easier to edit, and allow for modula
 
 A File Data Context is required before you can configure credentials in a YAML file.  By default, the credentials file in a File Data Context is located at `/great_expectations/uncommitted/config_variables.yml`.  The `uncommitted/` directory is included in a default `.gitignore` and will be excluded from version control.
 
-Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
+These examples demonstrate how to save credentials in the form of a connection string for a database.  However, the same process can be used for things such as web app tokens or any other credential that can be stored in string format.
+
+Each entry in `config_variables.yml` should consist of two parts.  The first is a variable which you will reference in the place of the credential.  The second is the value that should be substituted for that variable when it is referenced.  For example:
 
 ```bash title="config_variables.yml"
 MY_POSTGRES_USERNAME: <USERNAME>

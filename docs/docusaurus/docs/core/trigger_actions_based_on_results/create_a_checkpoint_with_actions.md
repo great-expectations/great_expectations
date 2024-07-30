@@ -37,7 +37,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
 
    After a Checkpoint receives Validation Results from running a Validation Definition, it executes a list of Actions. The returned Validation Results determine what task is performed for each Action. Actions can include updating Data Docs with the new Validation Results or sending alerts when validations fail.  The Actions list is executed once for each Validation Definition in a Checkpoint.
 
-   You can find the available Actions that come with GX in the [GX API documenation alongside the Checkpoint class](/reference/api/Checkpoint_class.mdx).
+   You can find the available Actions that come with GX in the [GX API documenation alongside the Checkpoint class](reference/api/checkpoint/Checkpoint_class.mdx).
 
    Actions can be imported from the `great_expectations.checkpoint.actions` module:
 
