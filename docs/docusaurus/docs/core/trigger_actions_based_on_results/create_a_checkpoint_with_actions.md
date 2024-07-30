@@ -61,7 +61,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
    ]
    ```
 
-   In the above example, string substitution is used to pull the value of `slack_token` from an environment variable.  For more information on securely storing credentials and access tokens see [Connect to Data using SQL: Configure Credentials](/core/connect_to_data/sql_data/sql_data.md#configure-credentials).
+   In the above example, string substitution is used to pull the value of `slack_token` from an environment variable.  For more information on securely storing credentials and access tokens see [Configure credentials](/core/configure_project_settings/configure_credentials/configure_credentials.md).
 
    If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. Its Validation Results are saved to the Data Context, but no tasks are executed.
 
