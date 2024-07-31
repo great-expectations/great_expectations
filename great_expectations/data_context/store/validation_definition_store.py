@@ -46,6 +46,7 @@ class ValidationDefinitionStore(Store):
         else:
             validation_data = response_data
 
+        # NOTE: we probably just want to return `validation_data` here and skip the next few lines
         id: str = validation_data["id"]
         validation_definition_dict: dict = validation_data["attributes"]["validation_definition"]
         validation_definition_dict["id"] = id
