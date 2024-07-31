@@ -46,12 +46,7 @@ class ValidationDefinitionStore(Store):
         else:
             validation_data = response_data
 
-        # NOTE: we probably just want to return `validation_data` here and skip the next few lines
-        id: str = validation_data["id"]
-        validation_definition_dict: dict = validation_data["attributes"]["validation_definition"]
-        validation_definition_dict["id"] = id
-
-        return validation_definition_dict
+        return validation_data
 
     @override
     def serialize(self, value):
@@ -67,6 +62,9 @@ class ValidationDefinitionStore(Store):
     @override
     def deserialize(self, value):
         from great_expectations.core.validation_definition import ValidationDefinition
+
+        if self.cloud_mode:
+            return ValidationDefinition.parse_obj(value)
 
         return ValidationDefinition.parse_raw(value)
 
