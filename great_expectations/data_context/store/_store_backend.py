@@ -33,7 +33,7 @@ class StoreBackend(metaclass=ABCMeta):
         self,
         fixed_length_key=False,
         suppress_store_backend_id=False,
-        manually_initialize_store_backend_id: str = "",
+        manually_initialize_store_backend_id: str | uuid.UUID | None = "",
         store_name="no_store_name",
     ) -> None:
         """
@@ -46,7 +46,11 @@ class StoreBackend(metaclass=ABCMeta):
         """  # noqa: E501
         self._fixed_length_key = fixed_length_key
         self._suppress_store_backend_id = suppress_store_backend_id
-        self._manually_initialize_store_backend_id = manually_initialize_store_backend_id
+        self._manually_initialize_store_backend_id: str = (
+            str(manually_initialize_store_backend_id)
+            if manually_initialize_store_backend_id
+            else ""
+        )
         self._store_name = store_name
 
     @property
@@ -97,6 +101,7 @@ class StoreBackend(metaclass=ABCMeta):
                 )
                 return uuid.UUID(store_id)
         except Exception as e:
+            breakpoint()
             if not suppress_warning:
                 logger.warning(
                     f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}. Exception was: \n {e}"  # noqa: E501
