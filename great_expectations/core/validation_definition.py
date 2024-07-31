@@ -194,6 +194,7 @@ class ValidationDefinition(BaseModel):
     def run(
         self,
         *,
+        checkpoint_id: Optional[str] = None,
         batch_parameters: Optional[BatchParameters] = None,
         suite_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
@@ -209,6 +210,7 @@ class ValidationDefinition(BaseModel):
         )
         results = validator.validate_expectation_suite(self.suite, suite_parameters)
         results.meta["validation_id"] = self.id
+        results.meta["checkpoint_id"] = checkpoint_id
 
         # NOTE: We should promote this to a top-level field of the result.
         #       Meta should be reserved for user-defined information.
