@@ -101,7 +101,6 @@ class StoreBackend(metaclass=ABCMeta):
                 )
                 return uuid.UUID(store_id)
         except Exception as e:
-            breakpoint()
             if not suppress_warning:
                 logger.warning(
                     f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}. Exception was: \n {e}"  # noqa: E501
