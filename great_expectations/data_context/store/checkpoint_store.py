@@ -57,11 +57,7 @@ class CheckpointStore(Store):
     @override
     @staticmethod
     def _convert_raw_json_to_object_dict(data: dict) -> dict:
-        id: str = data["id"]
-        checkpoint_config_dict: dict = data["attributes"]["checkpoint_config"]
-        checkpoint_config_dict["id"] = id
-
-        return checkpoint_config_dict
+        return data
 
     @override
     def serialize(self, value):
