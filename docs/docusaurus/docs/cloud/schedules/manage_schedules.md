@@ -4,7 +4,7 @@ title: 'Manage schedules'
 description: Create and manage schedules for Validations in GX Cloud.
 ---
 
-Add schedules to your GX Cloud Expectation Suites to take advantage of automated data quality checks. Schedules are automatically enabled when you add your first Expectation to and Expectation Suite in the Cloud UI.
+Add schedules to your GX Cloud Expectation Suites to take advantage of automated data quality checks. Schedules are automatically enabled when you add your first Expectation to an Expectation Suite in the Cloud UI.
 
 ## Create a schedule for an existing Expectation Suite
 
