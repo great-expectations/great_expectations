@@ -145,10 +145,6 @@ def test_interactive_validator(
     assert expectation_validation_result.success
 
 
-@pytest.mark.xfail(
-    reason="Fails due to a V1 change in the Checkpoint shape.",
-    strict=True,
-)
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""

@@ -170,7 +170,6 @@ def test_get_non_existent_expectation_suite(
             cloud_data_context.suites.get(name="non_existent")
 
 
-@pytest.mark.xfail(strict=True, reason="TODO: Fix in V1-331")
 @pytest.mark.cloud
 def test_get_expectation_suites(
     pact_test: pact.Pact,
