@@ -198,6 +198,16 @@
     &:disabled {
         background-color: var(--gray-400);
     }
+
+    .errorMessage + & {
+        margin-top: 0;
+    }
+}
+
+.errorMessage {
+    color: var(--ifm-color-danger-dark);
+    font-size: var(--p-md-font-size);
+    margin: 0;
 }
 
 @media (max-width: $mobile-sm-breakpoint) {

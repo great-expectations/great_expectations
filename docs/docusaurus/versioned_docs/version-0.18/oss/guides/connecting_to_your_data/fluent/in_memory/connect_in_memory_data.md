@@ -3,8 +3,7 @@ sidebar_label: "Connect to in-memory Data Assets"
 title: "Connect to in-memory Data Assets"
 id: connect_in_memory_data
 description: Connect to in-memory Data Assets.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 ---
 
 import Prerequisites from '../../../../../components/_prerequisites.jsx'
