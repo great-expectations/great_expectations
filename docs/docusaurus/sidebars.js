@@ -354,6 +354,28 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Manage schedules',
+          link: { type: 'doc', id: 'cloud/schedules/manage_schedules' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#create-a-schedule-for-an-existing-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Edit a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#edit-a-schedule',
+            },
+            {
+              type: 'link',
+              label: 'Disable a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#disable-a-schedule',
+            },
+          ]
+        },
+        {
+          type: 'category',
           label: 'Manage alerts',
           link: { type: 'doc', id: 'cloud/alerts/manage_alerts' },
           items: [
