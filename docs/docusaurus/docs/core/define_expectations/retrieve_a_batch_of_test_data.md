@@ -1,6 +1,7 @@
 ---
 title: Retrieve a Batch of sample data
 description: Retrieve a Batch of data for testing Expectations or engaging in data exploration.
+hide_table_of_contents: true
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';

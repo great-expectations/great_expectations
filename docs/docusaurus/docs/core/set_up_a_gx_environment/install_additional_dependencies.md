@@ -1,5 +1,6 @@
 ---
 title: Install additional dependencies
+hide_table_of_contents: true
 ---
 import GxData from '../_core_components/_data.jsx';
 import TabItem from '@theme/TabItem';
