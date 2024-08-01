@@ -367,16 +367,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     class Config:
         extra = pydantic.Extra.forbid
 
-    @classmethod
-    def _is_pandas_dataframe(cls, dataframe: Any) -> bool:
-        return isinstance(dataframe, pd.DataFrame)
-
-    @pydantic.validator("dataframe")
-    def _validate_dataframe(cls, dataframe: pd.DataFrame) -> pd.DataFrame:
-        if not cls._is_pandas_dataframe(dataframe):
-            raise ValueError("dataframe must be of type pandas.DataFrame")  # noqa: TRY003
-        return dataframe
-
     @override
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
@@ -432,7 +422,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         if not (options is not None and "dataframe" in options and len(options) == 1):
             raise BuildBatchRequestError(reason="options must contain exactly 1 key, 'dataframe'.")
 
-        if not self._is_pandas_dataframe(options["dataframe"]):
+        if not isinstance(options["dataframe"], pd.DataFrame):
             raise BuildBatchRequestError(
                 reason="Cannot build batch request for dataframe asset without a dataframe"
             )
