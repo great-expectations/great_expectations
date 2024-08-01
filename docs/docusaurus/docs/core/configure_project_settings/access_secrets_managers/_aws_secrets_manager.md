@@ -25,13 +25,13 @@ import PreReqFileDataContext from '../../_core_components/prerequisites/_file_da
 
    You can reference other stored credentials within the keywords by wrapping their corresponding variable in `${` and `}`.  When multiple references are present in a value, the secrets manager substitution takes place after all other substitutions have occurred.
 
-   An entire connection string can be referenced from the secrets manager:
+   An entire connection string can be referenced from the secrets manager.  In this example, `dev_db_credentials` is the Secret Name in AWS Secrets Manager, and `connection_string` is the Secret Key that corresponds to the value to be retrieved:
 
    ```yaml title="config_variables.yml"
     my_aws_creds:  secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|connection_string
    ```
 
-   Or each component of the connection string can be referenced separately:
+   Or each component of the connection string can be referenced separately.  In these examples, `dev_db_credentials` remains the Secret Name in AWS Secrets Manager. However, rather than retrieving the value of the Secret Key `connection_string`, Secret Keys for individual parts of the connection string are provided for retrieval:
    
    ```yaml title="config_variables.yml"
     drivername: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|drivername
