@@ -373,6 +373,7 @@ class DataFrameAsset(_PandasDataAsset):
         )
 
     @public_api
+    @override
     def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
@@ -380,7 +381,7 @@ class DataFrameAsset(_PandasDataAsset):
         )
 
     @override
-    def build_batch_request(  # type: ignore[override]
+    def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
