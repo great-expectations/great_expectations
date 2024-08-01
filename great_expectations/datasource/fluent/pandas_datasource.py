@@ -355,6 +355,11 @@ def _short_id() -> str:
     return str(uuid.uuid4()).replace("-", "")[:11]
 
 
+class BuildBatchRequestError(ValueError):
+    def __init__(self, reason: str):
+        super().__init__(f"Bad input to build_batch_request: {reason}")
+
+
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
@@ -415,20 +420,22 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             get_batch_list_from_batch_request method.
         """  # noqa: E501
         if batch_slice is not None:
-            raise ValueError(  # noqa: TRY003
-                "batch_slice is not currently supported and must be None for this DataAsset."
+            raise BuildBatchRequestError(
+                reason="batch_slice is not currently supported and must be None for this DataAsset."
             )
 
         if partitioner is not None:
-            raise ValueError(  # noqa: TRY003
-                "partitioner is not currently supported and must be None for this DataAsset."
+            raise BuildBatchRequestError(
+                reason="partitioner is not currently supported and must be None for this DataAsset."
             )
 
         if not (options is not None and "dataframe" in options and len(options) == 1):
-            raise ValueError("options must contain exactly 1 key, 'dataframe'.")  # noqa: TRY003
+            raise BuildBatchRequestError(reason="options must contain exactly 1 key, 'dataframe'.")
 
         if not self._is_pandas_dataframe(options["dataframe"]):
-            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")  # noqa: TRY003
+            raise BuildBatchRequestError(
+                reason="Cannot build batch request for dataframe asset without a dataframe"
+            )
 
         return BatchRequest(
             datasource_name=self.datasource.name,
