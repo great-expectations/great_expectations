@@ -245,18 +245,18 @@
         {
           "type": "link",
           "label": "Add a schedule",
-          "href": "/docs/cloud/schedules/manage_schedules#create-a-schedule-for-an-existing-expectation-suite",
+          "href": "/docs/cloud/schedules/manage_schedules#create-a-schedule-for-an-existing-expectation-suite"
         },
         {
           "type": "link",
           "label": "Edit a schedule",
-          "href": "/docs/cloud/schedules/manage_schedules#edit-a-schedule",
+          "href": "/docs/cloud/schedules/manage_schedules#edit-a-schedule"
         },
         {
           "type": "link",
           "label": "Disable a schedule",
-          "href": "/docs/cloud/schedules/manage_schedules#disable-a-schedule",
-        },
+          "href": "/docs/cloud/schedules/manage_schedules#disable-a-schedule"
+        }
       ]
     },
     {
