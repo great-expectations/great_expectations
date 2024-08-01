@@ -20,7 +20,6 @@ from typing import (
     Set,
     Tuple,
     Type,
-    TypeVar,
     Union,
 )
 
@@ -74,10 +73,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-# this enables us to include dataframe in the json schema
-_PandasDataFrameT = TypeVar("_PandasDataFrameT")
 
 
 class PandasDatasourceError(Exception):
@@ -359,7 +354,7 @@ class BuildBatchRequestError(ValueError):
         super().__init__(f"Bad input to build_batch_request: {reason}")
 
 
-class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
+class DataFrameAsset(_PandasDataAsset):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
 
