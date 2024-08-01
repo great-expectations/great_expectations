@@ -152,13 +152,8 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'GX Agent',
-              href: '/docs/cloud/about_gx#gx-agent',
-            },
-            {
-              type: 'link',
-              label: 'GX Cloud deployment patterns',
-              href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
+              label: 'GX Cloud deployment options',
+              href: '/docs/cloud/about_gx#gx-cloud-deployment-options',
             },
             {
               type: 'link',
@@ -175,9 +170,12 @@ module.exports = {
               label: 'Supported browsers',
               href: '/docs/cloud/about_gx#supported-browsers',
             },
+            { 
+              type: 'doc', 
+              id: 'cloud/deploy_gx_agent' 
+            },
           ]
         },
-        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',
@@ -437,7 +435,10 @@ module.exports = {
       link: { type: 'doc', id: 'reference/learn/data_quality_use_cases/dq_use_cases_lp' },
       items: [
         'reference/learn/data_quality_use_cases/schema',
-        'reference/learn/data_quality_use_cases/missingness'
+        'reference/learn/data_quality_use_cases/missingness',
+        'reference/learn/data_quality_use_cases/distribution',
+        'reference/learn/data_quality_use_cases/freshness',
+        'reference/learn/data_quality_use_cases/volume'
       ]
     },
       'reference/learn/usage_statistics',

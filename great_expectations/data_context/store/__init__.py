@@ -1,5 +1,3 @@
-from great_expectations.util import verify_dynamic_loading_support
-
 from .store import Store  # isort:skip
 from .store_backend import (  # isort:skip
     StoreBackend,

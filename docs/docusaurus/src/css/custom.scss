@@ -242,6 +242,10 @@ table.borderless tr:nth-child(2n) {
   position: relative;
   display: inline-block;
   border-bottom: 1px dotted black;
+
+  &:has(a) {
+    border-bottom: none;
+  }
 }
 
 .tooltip .tooltiptext {

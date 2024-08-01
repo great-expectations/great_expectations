@@ -226,7 +226,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
-                str(response.text),
+                str(response.text),  # type: ignore[possibly-undefined] # will be present for json error
                 str(jsonError),
             )
             raise StoreBackendError(  # noqa: TRY003

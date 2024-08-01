@@ -4,11 +4,13 @@ import {useLocation} from "@docusaurus/router";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import { posthog as posthogJS } from 'posthog-js';
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+const CREATE_JIRA_TICKET_IN_DOCS_BOARD_ENDPOINT_URL = "/.netlify/functions/createJiraTicketInDocsBoard";
 
 export default function WasThisHelpful(){
     const { pathname } = useLocation();
     const [feedbackSent, setFeedbackSent] = useState(false)
     const [isOpen, setIsOpen] = useState(false);
+    const [error, setError] = useState(false);
     const config = useDocusaurusContext()
 
     useEffect(() => {
@@ -51,11 +53,13 @@ export default function WasThisHelpful(){
             $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0'
         })
         setIsOpen(false)
+        setError(false)
     }
 
-    const sendReview = (e) => {
+    const sendReview = async (e) => {
         e.preventDefault()
-        if(formData.description){
+        if (formData.description) {
+            setError(false)
             posthog.capture("survey sent", {
                 $survey_id: '018dd725-c595-0000-00c6-6eec1b197fd0',
                 $survey_response: formData.name,
@@ -64,7 +68,23 @@ export default function WasThisHelpful(){
                 $survey_response_3: pathname,
                 $survey_response_4: formData.selectedValue.replaceAll('-', ' ')
             })
-            setIsOpen(false)
+            try {
+                const response = await fetch(CREATE_JIRA_TICKET_IN_DOCS_BOARD_ENDPOINT_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData)
+                });
+                if (response.ok) {
+                    setIsOpen(false)
+                } else {
+                    setError(true)
+                }
+            } catch (error) {
+                setError(true)
+            }
+
         }
     }
 
@@ -172,6 +192,8 @@ export default function WasThisHelpful(){
                             placeholder={formData.selectedValue === 'language-typo' ? "Describe the typo that you've found." : "Try to be specific and detailed."}
                         />
                     }
+
+                    {error && <p className={styles.errorMessage}>An error occurred, please try again later.</p>}
 
                     <input type="submit" disabled={!formData.description} className={styles.submitButton}
                            value="Submit"/>

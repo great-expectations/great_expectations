@@ -10,8 +10,6 @@ When you run a validation on an Expectation, a Checkpoint is added. The Checkpoi
 
 ## Prerequisites
 
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 - You have created an [Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 ## Run a Validation

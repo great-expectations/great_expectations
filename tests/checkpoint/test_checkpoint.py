@@ -10,7 +10,6 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import expectations as gxe
-from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -35,6 +34,7 @@ from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )

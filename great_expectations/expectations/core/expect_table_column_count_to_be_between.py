@@ -288,6 +288,8 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
                 template_str = f"Must have {at_most_str} $max_value columns."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value columns."
+            else:
+                raise ValueError("unresolvable template_str")  # noqa: TRY003
 
         return [
             RenderedStringTemplateContent(

@@ -107,7 +107,7 @@ class Checkpoint(BaseModel):
     def _validate_validation_definitions(
         cls, validation_definitions: list[ValidationDefinition] | list[dict]
     ) -> list[ValidationDefinition]:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         if len(validation_definitions) == 0:
             raise ValueError("Checkpoint must contain at least one validation definition")  # noqa: TRY003
@@ -252,7 +252,7 @@ class Checkpoint(BaseModel):
 
     @public_api
     def save(self) -> None:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
@@ -265,7 +265,7 @@ class Checkpoint(BaseModel):
         We need to persist a checkpoint before it can be run. If user calls runs but hasn't
         persisted it we add it for them.
         """
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
