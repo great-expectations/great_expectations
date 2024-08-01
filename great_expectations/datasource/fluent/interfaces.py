@@ -994,7 +994,7 @@ class Batch:
     def _create_id(self) -> str:
         options_list = []
         for key, value in self.batch_request.options.items():
-            if key != "path":
+            if key not in ("path", "dataframe"):
                 options_list.append(f"{key}_{value}")
         return "-".join([self.datasource.name, self.data_asset.name, *options_list])
 
