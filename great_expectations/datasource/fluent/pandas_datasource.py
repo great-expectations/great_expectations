@@ -28,7 +28,6 @@ import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
-    new_argument,
     public_api,
 )
 from great_expectations.compatibility import pydantic, sqlalchemy
@@ -385,12 +384,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             partitioner=None,
         )
 
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>  # noqa: E501
-    @new_argument(
-        argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
-        version="0.16.15",
-    )
     @override
     def build_batch_request(  # type: ignore[override]
         self,
@@ -432,6 +425,33 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             data_asset_name=self.name,
             options=options,
         )
+
+    @override
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and batch_request.options
+            and len(batch_request.options) == 1
+            and "dataframe" in batch_request.options
+            and isinstance(batch_request.options["dataframe"], pd.DataFrame)
+        ):
+            expect_batch_request_form = BatchRequest[None](
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options={"dataframe": pd.DataFrame()},
+                batch_slice=batch_request._batch_slice_input,
+            )
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
+                "BatchRequest should have form:\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
+            )
 
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
