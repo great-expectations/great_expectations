@@ -45,17 +45,17 @@ By default, Store files are created in folders within the `base_folder` of the F
 
 2. Determine the Store to update.
 
-   GX utilizes 5 Stores for different types of data and metadata.  These Stores are the Expectations Store, Validation Definitions Store, Checkpoint Store, Validation Results Store, and the Suite Parameter Store.  All Stores can be accessed by passing a corresponding key to a Data Context's `variables.stores` attribute.  The following code shows how to print the configuration for each of these stores:
+   GX utilizes 5 Stores for different types of data and metadata.  These Stores are the Expectations Store, Validation Definitions Store, Checkpoint Store, Validation Results Store, and the Suite Parameter Store.  All Stores can be accessed by passing a corresponding key to a Data Context's `variables.config.stores` attribute.  The following code shows how to print the configuration for each of these stores:
 
    ```python title="Python"
-   print(context.variables.stores['expectations_store'])
-   print(context.variables.stores['validation_definition_store'])
-   print(context.variables.stores['checkpoint_store'])
-   print(context.variables.stores['suite_parameter_store'])
-   print(context.variables.stores['validation_results_store'])
+   print(context.variables.config.stores['expectations_store'])
+   print(context.variables.config.stores['validation_definition_store'])
+   print(context.variables.config.stores['checkpoint_store'])
+   print(context.variables.config.stores['suite_parameter_store'])
+   print(context.variables.config.stores['validation_results_store'])
    ```
    
-   When updating a Store configuration you will use the same key to access it from your Data Context's `variables.stores` attribute as was used to print it in the above example.
+   When updating a Store configuration you will use the same key to access it from your Data Context's `variables.config.stores` attribute as was used to print it in the above example.
    
 3. Update the `base_path` of the Store to change.
 
@@ -63,7 +63,7 @@ By default, Store files are created in folders within the `base_folder` of the F
 
    ```pyhton title="Python"
    expectation_store_directory = "my_expectations_store/"
-   context.variables.stores['expectations_store']['store_backend']['base_directory'] = expectation_store_directory
+   context.variables.config.stores['expectations_store']['store_backend']['base_directory'] = expectation_store_directory
    ```
 
    The path provided for the `base_directory` should be either be an absolute path, or a path relative to the File Data Context's `project_root_dir`.
@@ -95,15 +95,15 @@ import great_expectations as gx
 context = gx.get_context(mode="file")
 
 # Access the Stores through the Data Context's `variables` attribute:
-print(context.variables.stores['expectations_store'])
-print(context.variables.stores['validation_definition_store'])
-print(context.variables.stores['checkpoint_store'])
-print(context.variables.stores['suite_parameter_store'])
-print(context.variables.stores['validation_results_store'])
+print(context.variables.config.stores['expectations_store'])
+print(context.variables.config.stores['validation_definition_store'])
+print(context.variables.config.stores['checkpoint_store'])
+print(context.variables.config.stores['suite_parameter_store'])
+print(context.variables.config.stores['validation_results_store'])
 
 # Update the path of the Data Context's Expectations Store:
 expectation_store_directory = "my_expectations_store/"
-context.variables.stores['expectations_store']['store_backend']['base_directory'] = expectation_store_directory
+context.variables.config.stores['expectations_store']['store_backend']['base_directory'] = expectation_store_directory
 
 # Save changes to the Data Context's configuration:
 context.variables.save()
