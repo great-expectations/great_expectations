@@ -490,7 +490,7 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
         asset_name="my_df_asset"
     )
-    _ = dataframe_asset.build_batch_request(dataframe=df)
+    _ = dataframe_asset.build_batch_request(options={"dataframe": df})
     assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
 
