@@ -462,7 +462,7 @@ def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas:
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.data_sources.pandas_default.assets) == 2
-    _ = dataframe_asset.build_batch_request(dataframe=test_df_pandas)
+    _ = dataframe_asset.build_batch_request(options={"dataframe": test_df_pandas})
     assert all(
         asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
         for asset in empty_data_context.data_sources.pandas_default.assets

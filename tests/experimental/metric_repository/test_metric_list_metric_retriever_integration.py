@@ -43,7 +43,7 @@ def cloud_context_and_batch_request_with_simple_dataframe(
 
     name = "dataframe"
     data_asset = datasource.add_dataframe_asset(name=name)
-    batch_request = data_asset.build_batch_request(dataframe=df)
+    batch_request = data_asset.build_batch_request(options={"dataframe": df})
     return context, batch_request
 
 

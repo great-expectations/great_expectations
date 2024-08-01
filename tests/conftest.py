@@ -943,7 +943,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
     dataframe_asset_name = "my_dataframe_asset"
     asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
-    _ = asset.build_batch_request(dataframe=df)
+    _ = asset.build_batch_request(options={"dataframe": df})
 
     # noinspection PyProtectedMember
     context._save_project_config()

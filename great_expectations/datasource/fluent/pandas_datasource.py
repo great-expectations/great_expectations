@@ -28,7 +28,6 @@ import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
-    deprecated_argument,
     new_argument,
     public_api,
 )
@@ -359,16 +358,18 @@ def _short_id() -> str:
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>  # noqa: E501
-    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(default=None, exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
 
+    @classmethod
+    def _is_pandas_dataframe(cls, dataframe: Any) -> bool:
+        return isinstance(dataframe, pd.DataFrame)
+
     @pydantic.validator("dataframe")
     def _validate_dataframe(cls, dataframe: pd.DataFrame) -> pd.DataFrame:
-        if not isinstance(dataframe, pd.DataFrame):
-            raise ValueError("dataframe must be of type pandas.DataFrame")  # noqa: TRY003, TRY004
+        if not cls._is_pandas_dataframe(dataframe):
+            raise ValueError("dataframe must be of type pandas.DataFrame")  # noqa: TRY003
         return dataframe
 
     @override
@@ -382,6 +383,13 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
+    @public_api
+    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+        )
+
     # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>  # noqa: E501
     @new_argument(
         argument_name="dataframe",
@@ -391,7 +399,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     @override
     def build_batch_request(  # type: ignore[override]
         self,
-        dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[ColumnPartitioner] = None,
@@ -399,8 +406,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
-            options: This is not currently supported and must be {}/None for this data asset.
+            options: This should have 1 key, 'dataframe', whose value is the datafame to validate.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
 
@@ -408,11 +414,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """  # noqa: E501
-        if options:
-            raise ValueError(  # noqa: TRY003
-                "options is not currently supported for this DataAssets and must be None or {}."
-            )
-
         if batch_slice is not None:
             raise ValueError(  # noqa: TRY003
                 "batch_slice is not currently supported and must be None for this DataAsset."
@@ -423,23 +424,23 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
 
-        if dataframe is None:
-            df = self.dataframe
-        else:
-            df = dataframe  # type: ignore[assignment]
+        if not (options is not None and "dataframe" in options and len(options) == 1):
+            raise ValueError("options must contain exactly 1 key, 'dataframe'.")  # noqa: TRY003
 
-        if df is None:
+        if not self._is_pandas_dataframe(options["dataframe"]):
             raise ValueError("Cannot build batch request for dataframe asset without a dataframe")  # noqa: TRY003
 
-        self.dataframe = df
-
-        return super().build_batch_request()
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options=options,
+        )
 
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
 
-        batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
+        batch_spec = RuntimeDataBatchSpec(batch_data=batch_request.options["dataframe"])
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
         data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
@@ -651,29 +652,22 @@ class PandasDatasource(_PandasDatasource):
                     'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'  # noqa: E501
                 )
 
-            batch_request = asset.build_batch_request(dataframe=dataframe)
+            batch_request = asset.build_batch_request(options={"dataframe": dataframe})
         else:
             batch_request = asset.build_batch_request()
 
         return asset.get_batch_list_from_batch_request(batch_request)[-1]
 
     @public_api
-    @deprecated_argument(
-        argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
-        version="0.16.15",
-    )
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: Optional[pd.DataFrame] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this PandasDatasource object.
 
         Args:
             name: The name of the Dataframe asset. This can be any arbitrary string.
-            dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 
@@ -684,7 +678,6 @@ class PandasDatasource(_PandasDatasource):
             name=name,
             batch_metadata=batch_metadata or {},
         )
-        asset.dataframe = dataframe
         return self._add_asset(asset=asset)
 
     @public_api

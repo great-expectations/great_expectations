@@ -29,10 +29,9 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
 
     data_asset = context.data_sources.pandas_default.add_dataframe_asset(
         name="my_dataframe_asset",
-        dataframe=df,
     )
     validator: Validator = context.get_validator(
-        batch_request=data_asset.build_batch_request(),
+        batch_request=data_asset.build_batch_request(options={"dataframe": df}),
         create_expectation_suite_with_name=suite_name,
     )
 
