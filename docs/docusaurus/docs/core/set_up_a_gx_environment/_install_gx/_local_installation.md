@@ -3,7 +3,7 @@ import GxData from '../../_core_components/_data.jsx'
 
 {GxData.product_name} is a Python library and as such can be used with a local Python installation to access the functionality of GX through Python scripts.
 
-## Installation and setup
+### Installation and setup
 
 1. Optional. Activate your virtual environment.
 

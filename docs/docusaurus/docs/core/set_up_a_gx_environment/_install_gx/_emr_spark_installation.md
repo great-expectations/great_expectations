@@ -1,11 +1,11 @@
 Use the information provided here to install GX on an EMR Spark cluster and instantiate a Data Context without a full configuration directory.
 
-## Additional prerequisites
+### Additional prerequisites
 
 - An EMR Spark cluster.
 - Access to the EMR Spark notebook.
 
-## Installation and setup
+### Installation and setup
 
 1. To install GX on your EMR Spark cluster copy this code snippet into a cell in your EMR Spark notebook and then run it:
 

@@ -1,5 +1,6 @@
 ---
 title: Create a Data Context
+hide_table_of_contents: true
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
