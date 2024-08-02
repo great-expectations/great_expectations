@@ -156,8 +156,6 @@ class Checkpoint(BaseModel):
             self._add_to_store()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
-        # TODO: Currently not providing checkpoint_id to result - is that okay?
-        #       If the result has an FK to the validation, it's enough to trace back to the checkpoint?  # noqa: E501
         run_results = self._run_validation_definitions(
             batch_parameters=batch_parameters,
             expectation_parameters=expectation_parameters,
