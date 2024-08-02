@@ -1,6 +1,6 @@
 import uuid
 from dataclasses import dataclass, replace
-from typing import Any
+from typing import Any, Optional
 from unittest import mock
 
 import pytest
@@ -15,7 +15,7 @@ from great_expectations.exceptions.exceptions import StoreBackendError
 
 @dataclass
 class DummyModel:
-    id: str | None
+    id: Optional[str]
     foo: str
 
 
