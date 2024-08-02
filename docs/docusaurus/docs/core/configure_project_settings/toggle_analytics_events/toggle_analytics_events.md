@@ -1,3 +1,11 @@
+---
+title: Toggle analytics events
+description: Enable or disable the collection of analytics events within GX.
+hide_feedback_survey: false
+hide_title: false
+---
+
+
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
