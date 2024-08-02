@@ -3,6 +3,9 @@ This file contains the integration test fixtures for documentation example scrip
 under CI test.
 """
 
+from tests.integration.backend_dependencies import BackendDependencies
+from tests.integration.integration_test_fixture import IntegrationTestFixture
+
 docs_tests = []
 
 # TODO: As we get these example tests working, uncomment/update to add them to CI.
@@ -146,5 +149,6 @@ airflow_tests = [
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
 # into `test_script_runner.py` and actually used in CI checks).
 docs_tests.extend(connecting_to_a_datasource)
+docs_tests.extend(learn_data_quality_use_cases)
 docs_tests.extend(expectation_tests)
 docs_tests.extend(airflow_tests)

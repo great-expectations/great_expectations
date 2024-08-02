@@ -1,5 +1,6 @@
 ---
 title: Install GX
+toc_max_heading_level: 2
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';

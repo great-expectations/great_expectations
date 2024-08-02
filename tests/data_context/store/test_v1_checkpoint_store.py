@@ -6,7 +6,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import set_context
 from great_expectations.checkpoint.actions import SlackNotificationAction
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.batch_definition import BatchDefinition
@@ -15,6 +14,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
