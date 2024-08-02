@@ -183,8 +183,7 @@ def test_delete_asset_with_cloud_data_context(
     assert asset_name not in asset_names
 
 
-# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
-# cloud or filesystem as appropriate
+@pytest.mark.cloud
 def test_context_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
