@@ -24,6 +24,9 @@ from great_expectations.datasource.fluent import (
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
+from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
+    PandasFilesystemDatasource,
+)
 from tests.datasource.fluent._fake_cloud_api import (
     DEFAULT_HEADERS,
     FAKE_ORG_ID,
@@ -178,6 +181,47 @@ def test_delete_asset_with_cloud_data_context(
         for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["assets"]
     ]
     assert asset_name not in asset_names
+
+
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
+def test_context_update_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_cloud_context_fluent: CloudDataContext,
+    # db_file: pathlib.Path, TODO: sqlite deser broken
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_cloud_context_fluent
+
+    datasource = context.data_sources.add_pandas_filesystem(
+        name="save_ds_test", base_directory=taxi_data_samples_dir
+    )
+    datasource.add_csv_asset(name="my_asset")
+
+    # TODO: adjust call counts as needed
+    datasources_url = urllib.parse.urljoin(
+        GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"
+    )
+    cloud_api_fake.assert_call_count(
+        datasources_url,
+        2,
+    )
+    cloud_api_fake.assert_call_count(
+        f"{datasources_url}/{datasource.id}?name={datasource.name}",
+        2,
+    )
+
+    response = requests.get(f"{datasources_url}/{datasource.id}")
+    response.raise_for_status()
+    assert response.json()["data"].get("assets")
+
+    # update an arbitrary field
+    datasource.base_directory = taxi_data_samples_dir / "foo"
+
+    updated_datasource = context.update_datasource(datasource)
+    assert isinstance(updated_datasource, PandasFilesystemDatasource)
+    assert updated_datasource.base_directory == datasource.base_directory
+    assert updated_datasource is not datasource  # we should return the new one
 
 
 # This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
