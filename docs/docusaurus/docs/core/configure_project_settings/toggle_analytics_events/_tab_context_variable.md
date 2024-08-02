@@ -1,3 +1,6 @@
+import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs';
+
 import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_installation.md';
 import PrereqGxInstalled from '../../_core_components/prerequisites/_gx_installation.md';
 import PrereqFileDataContext from '../../_core_components/prerequisites/_file_data_context.md';
