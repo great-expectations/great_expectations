@@ -11,7 +11,11 @@ The Data Context variable `analytics_enabled` can be used to toggle the collecti
 - <PrereqGxInstalled/>.
 - <PrereqFileDataContext/>.
 
-### Procedure
+### Guide
+
+<Tabs>
+
+<TabItem value="procedure" label="Procedure">
 
 1. Set the Data Context variable `analytics_enabled`.
 
@@ -46,3 +50,30 @@ The Data Context variable `analytics_enabled` can be used to toggle the collecti
    ```
 
    For more information on initializing a Data Context, see [Create a Data Context](/core/set_up_a_gx_environment/create_a_data_context.md).
+
+</TabItem>
+
+<TabItem value="sample_code" label="Sample code">
+
+   ```python title="Python"
+   import great_expectations as gx
+   
+   # Get a File Data Context:
+   context = gx.get_context(mode="file")
+   
+   # Set the `analytics_enabled` Data Context variable:
+   context.variables.analytics_enabled = True
+   # or:
+   context.variables.analytics_enabled = False
+   
+   # Save the change to the Data Context's config file:
+   context.variables.save_config()
+   
+   # Re-initialize the Data Context using the updated
+   # `analytics_enabled` configuration:
+   context = gx.get_context(mode="file")
+   ```
+
+</TabItem>
+
+</Tabs>
