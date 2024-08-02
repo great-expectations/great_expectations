@@ -45,7 +45,11 @@ By default, Store files are created in folders within the `base_folder` of the F
 
 2. Determine the Store to update.
 
-   GX utilizes 5 Stores for different types of data and metadata.  These Stores are the Expectations Store, Validation Definitions Store, Checkpoint Store, Validation Results Store, and the Suite Parameter Store.  All Stores can be accessed by passing a corresponding key to a Data Context's `variables.config.stores` attribute.  The following code shows how to print the configuration for each of these stores:
+   GX utilizes 5 Stores for different types of data and metadata.  These Stores are the Expectations Store, Validation Definitions Store, Checkpoint Store, Validation Results Store, and the Suite Parameter Store.  All Stores can be accessed by passing a corresponding key to a Data Context's `variables.config.stores` attribute.  
+
+   The `variables.config.stores` attribute gives access to the configuration values prior to any string substitution that may take palce, which also allows you to include string substitution references in your configuration.  To view the resolved path after string substitution takes place, use `variables.stores`.  For more information on how to configure string substitution references and values see [Configure credentials](/core/configure_project_settings/configure_credentials/configure_credentials.md).
+
+   The following code shows how to print the configuration for each of these stores:
 
    ```python title="Python"
    print(context.variables.config.stores['expectations_store'])
