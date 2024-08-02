@@ -1,8 +1,10 @@
 # <snippet name="cloud/connect/airflow_example_dag.py full example code">
 import os
-import great_expectations as gx
+
 import pendulum
 from airflow.decorators import dag, task
+
+import great_expectations as gx
 
 
 @dag(
@@ -11,7 +13,7 @@ from airflow.decorators import dag, task
     catchup=False,
 )
 def gx_dag_with_deco():
-    os.environ["NO_PROXY"] = "*" #https://github.com/apache/airflow/discussions/24463
+    os.environ["NO_PROXY"] = "*"  # https://github.com/apache/airflow/discussions/24463
     print("Great Expectations DAG Started")
 
     @task
