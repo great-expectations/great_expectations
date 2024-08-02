@@ -11,11 +11,11 @@ The Data Context variable `analytics_enabled` can be used to toggle the collecti
 - <PrereqGxInstalled/>.
 - <PrereqFileDataContext/>.
 
-### Guide
+### Procedure
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="tutorial" label="Tutorial">
 
 1. Set the Data Context variable `analytics_enabled`.
 
