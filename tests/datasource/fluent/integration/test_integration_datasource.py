@@ -483,15 +483,15 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
 
     datasource = context.data_sources.add_or_update_pandas(name="fluent_pandas_datasource")
     dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(options={"dataframe": df})
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
+    batch_request = dataframe_asset.build_batch_request(options={"dataframe": df})
+    assert batch_request.options["dataframe"].equals(df)
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
         asset_name="my_df_asset"
     )
-    _ = dataframe_asset.build_batch_request(options={"dataframe": df})
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
+    batch_request = dataframe_asset.build_batch_request(options={"dataframe": df})
+    assert batch_request.options["dataframe"].equals(df)
 
 
 @pytest.mark.spark

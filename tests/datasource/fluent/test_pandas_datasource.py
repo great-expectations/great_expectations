@@ -19,6 +19,7 @@ from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.datasource.fluent.pandas_datasource import (
     _DYNAMIC_ASSET_TYPES,
+    BuildBatchRequestError,
     CSVAsset,
     DataFrameAsset,
     TableAsset,
@@ -462,11 +463,9 @@ def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas:
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.data_sources.pandas_default.assets) == 2
-    _ = dataframe_asset.build_batch_request(options={"dataframe": test_df_pandas})
-    assert all(
-        asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-        for asset in empty_data_context.data_sources.pandas_default.assets
-    )
+    bd = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    bd_batch = bd.get_batch(batch_parameters={"dataframe": test_df_pandas})
+    assert all(b.data.dataframe.equals(test_df_pandas) for b in [batch, bd_batch])
 
 
 @pytest.mark.cloud
@@ -532,7 +531,7 @@ def test_build_batch_request_raises_if_missing_dataframe(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(BuildBatchRequestError) as e:
         dataframe_asset.build_batch_request()
 
-    assert "Cannot build batch request for dataframe asset without a dataframe" in str(e.value)
+    assert str(e.value).startswith("Bad input to build_batch_request:")

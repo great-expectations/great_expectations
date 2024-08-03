@@ -129,13 +129,7 @@ class DatasourceDict(UserDict):
                         datasource_name=name,
                         data_asset_name=asset.name,
                     )
-                    cached_data_asset = self._in_memory_data_assets.get(in_memory_asset_name)
-                    if cached_data_asset:
-                        asset.dataframe = cached_data_asset.dataframe
-                    else:
-                        # Asset is loaded into cache here (even without df) to enable loading of df at a later  # noqa: E501
-                        # time when DataframeAsset.build_batch_request(dataframe=df) is called
-                        self._in_memory_data_assets[in_memory_asset_name] = asset
+                    self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
 
