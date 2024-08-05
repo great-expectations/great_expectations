@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Callable
 from unittest import mock
 
 import pandas as pd
@@ -45,12 +46,16 @@ from tests.datasource.fluent.integration.integration_test_utils import (
 if TYPE_CHECKING:
     from responses import RequestsMock
 
+    from great_expectations.compatibility.pyspark import DataFrame as PySparkDataFrame
+    from great_expectations.compatibility.pyspark import SparkSession
     from great_expectations.datasource.fluent.pandas_datasource import (
         DataFrameAsset as PandasDataFrameAsset,
     )
+    from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
     from great_expectations.datasource.fluent.spark_datasource import (
         DataFrameAsset as SparkDataFrameAsset,
     )
+    from great_expectations.datasource.fluent.spark_datasource import SparkDatasource
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
@@ -552,3 +557,108 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
     new_batch = retrieved_bd.get_batch(batch_parameters={"dataframe": spark_df})
     assert isinstance(new_batch.data, SparkDFBatchData)
     assert new_batch.data.dataframe.toPandas().equals(df)
+
+
+@dataclass
+class PandasDataSourceAndFrame:
+    datasource: PandasDatasource
+    dataframe: pd.DataFrame
+
+
+@dataclass
+class SparkDataSourceAndFrame:
+    datasource: SparkDatasource
+    dataframe: PySparkDataFrame
+
+
+def _validate_whole_dataframe_batch(
+    source_and_frame: PandasDataSourceAndFrame | SparkDataSourceAndFrame,
+):
+    my_expectation = gxe.ExpectColumnMeanToBeBetween(
+        column="column_name", min_value=2.5, max_value=3.5
+    )
+    asset = source_and_frame.datasource.add_dataframe_asset(name="asset")
+    bd = asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = bd.get_batch(batch_parameters={"dataframe": source_and_frame.dataframe})
+    result = batch.validate(my_expectation)
+    assert result.success
+
+
+@pytest.mark.unit
+def test_validate_pandas_batch():
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_pandas(name="ds")
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    _validate_whole_dataframe_batch(PandasDataSourceAndFrame(datasource=datasource, dataframe=df))
+
+
+@pytest.mark.spark
+def test_validate_spark_batch(
+    spark_session: SparkSession,
+    spark_df_from_pandas_df: Callable[[SparkSession, pd.DataFrame], PySparkDataFrame],
+):
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_spark(name="ds")
+    spark_df = spark_df_from_pandas_df(
+        spark_session, pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    )
+    _validate_whole_dataframe_batch(
+        SparkDataSourceAndFrame(datasource=datasource, dataframe=spark_df)
+    )
+
+
+@dataclass
+class ContextPandasDataSourceAndFrame:
+    context: gx.EphemeralDataContext
+    datasource: PandasDatasource
+    dataframe: pd.DataFrame
+
+
+@dataclass
+class ContextSparkDataSourceAndFrame:
+    context: gx.EphemeralDataContext
+    datasource: SparkDatasource
+    dataframe: PySparkDataFrame
+
+
+def _validate_whole_dataframe_batch_definition(
+    context_source_frame: ContextPandasDataSourceAndFrame | ContextSparkDataSourceAndFrame,
+):
+    asset = context_source_frame.datasource.add_dataframe_asset(name="asset")
+    bd = asset.add_batch_definition_whole_dataframe(name="bd")
+    suite = context_source_frame.context.suites.add(gx.ExpectationSuite(name="suite"))
+    suite.add_expectation(
+        gxe.ExpectColumnMeanToBeBetween(column="column_name", min_value=2.5, max_value=3.5)
+    )
+    validation_def = gx.ValidationDefinition(
+        name="vd",
+        data=bd,
+        suite=suite,
+    )
+    result = validation_def.run(batch_parameters={"dataframe": context_source_frame.dataframe})
+    assert result.success
+
+
+@pytest.mark.unit
+def test_validate_pandas_batch_definition():
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_pandas(name="ds")
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    _validate_whole_dataframe_batch_definition(
+        ContextPandasDataSourceAndFrame(context=context, datasource=datasource, dataframe=df)
+    )
+
+
+@pytest.mark.spark
+def test_validate_spark_batch_definition(
+    spark_session: SparkSession,
+    spark_df_from_pandas_df: Callable[[SparkSession, pd.DataFrame], PySparkDataFrame],
+):
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_spark(name="ds")
+    spark_df = spark_df_from_pandas_df(
+        spark_session, pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    )
+    _validate_whole_dataframe_batch_definition(
+        ContextSparkDataSourceAndFrame(context=context, datasource=datasource, dataframe=spark_df)
+    )
