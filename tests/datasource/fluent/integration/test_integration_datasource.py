@@ -497,7 +497,7 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
         asset_name="my_df_asset"
     )
-    reloaded_batch_def = dataframe_asset.get_batch_definition(name="bd")
+    reloaded_batch_def = dataframe_asset.get_batch_definition(batch_definition_name="bd")
     batch = reloaded_batch_def.get_batch(batch_parameters={"dataframe": df})
     assert isinstance(batch.data, PandasBatchData)
     assert batch.data.dataframe.equals(df)
