@@ -727,11 +727,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The updated Datasource.
         """
-        if isinstance(datasource, FluentDatasource):
-            self._update_fluent_datasource(datasource=datasource)
-        else:
-            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
-        return datasource
+        return self._update_fluent_datasource(datasource=datasource)
 
     @overload
     def add_or_update_datasource(
