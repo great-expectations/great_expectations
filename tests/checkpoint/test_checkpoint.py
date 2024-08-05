@@ -550,8 +550,11 @@ class TestCheckpointResult:
     def test_checkpoint_run_passes_through_runtime_params(
         self, validation_definition: ValidationDefinition
     ):
+        checkpoint_id = str(uuid.uuid4())
         checkpoint = Checkpoint(
-            name=self.checkpoint_name, validation_definitions=[validation_definition]
+            id=checkpoint_id,
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
         )
         batch_parameters = {"my_param": "my_value"}
         expectation_parameters = {"my_other_param": "my_other_value"}
@@ -560,6 +563,7 @@ class TestCheckpointResult:
         )
 
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
+            checkpoint_id=checkpoint_id,
             batch_parameters=batch_parameters,
             suite_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
