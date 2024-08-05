@@ -31,6 +31,7 @@ from great_expectations.datasource.fluent.sources import (
     DefaultPandasDatasourceError,
     _get_field_details,
 )
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
@@ -465,7 +466,9 @@ def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas:
     assert len(empty_data_context.data_sources.pandas_default.assets) == 2
     bd = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
     bd_batch = bd.get_batch(batch_parameters={"dataframe": test_df_pandas})
-    assert all(b.data.dataframe.equals(test_df_pandas) for b in [batch, bd_batch])
+    for b in [batch, bd_batch]:
+        assert isinstance(b.data, PandasBatchData)
+        b.data.dataframe.equals(test_df_pandas)
 
 
 @pytest.mark.cloud

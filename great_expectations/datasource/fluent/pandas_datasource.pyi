@@ -61,6 +61,7 @@ AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 logger: Logger
 
 class PandasDatasourceError(Exception): ...
+class BuildBatchRequestError(ValueError): ...
 
 class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]]
