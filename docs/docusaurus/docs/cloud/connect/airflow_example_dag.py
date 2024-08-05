@@ -21,10 +21,10 @@ def gx_dag_with_deco():
         print("Running Checkpoint")
         # Replace <YOUR_ACCESS_TOKEN>, <YOUR_CLOUD_ORGANIZATION_ID>, and <CHECKPOINT_NAME> with your credentials
         # You can also set GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID as environment variables
-        GX_CLOUD_ACCESS_TOKEN = ""
-        GX_CLOUD_ORGANIZATION_ID = ""
+        GX_CLOUD_ACCESS_TOKEN = "<YOUR_ACCESS_TOKEN>"
+        GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"
         # alternativey set CHECKPOINT_NAME to be a runtime parameter
-        CHECKPOINT_NAME = ""
+        CHECKPOINT_NAME = "<CHECKPOINT_NAME>"
         context = gx.get_context(
             cloud_access_token=GX_CLOUD_ACCESS_TOKEN,
             cloud_organization_id=GX_CLOUD_ORGANIZATION_ID,
