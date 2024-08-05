@@ -19,7 +19,6 @@ from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.datasource.fluent.pandas_datasource import (
     _DYNAMIC_ASSET_TYPES,
-    BuildBatchRequestError,
     CSVAsset,
     DataFrameAsset,
     TableAsset,
@@ -31,6 +30,7 @@ from great_expectations.datasource.fluent.sources import (
     DefaultPandasDatasourceError,
     _get_field_details,
 )
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.util import camel_to_snake
 

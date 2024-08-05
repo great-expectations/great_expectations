@@ -49,6 +49,7 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import DEFAULT_PANDAS_DATA_ASSET_NAME
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
 
@@ -112,7 +113,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     def get_batch_parameters_keys(
         self, partitioner: Optional[ColumnPartitioner] = None
     ) -> Tuple[str, ...]:
-        return tuple()
+        return tuple(
+            "dataframe",
+        )
 
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
@@ -183,18 +186,21 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             get_batch_list_from_batch_request method.
         """  # noqa: E501
         if options:
-            raise ValueError(  # noqa: TRY003
-                "options is not currently supported for this DataAssets and must be None or {}."
+            raise BuildBatchRequestError(
+                message="options is not currently supported for this DataAsset "
+                "and must be None or {}."
             )
 
         if batch_slice is not None:
-            raise ValueError(  # noqa: TRY003
-                "batch_slice is not currently supported and must be None for this DataAsset."
+            raise BuildBatchRequestError(
+                message="batch_slice is not currently supported for this DataAsset "
+                "and must be None."
             )
 
         if partitioner is not None:
-            raise ValueError(  # noqa: TRY003
-                "partitioner is not currently supported and must be None for this DataAsset."
+            raise BuildBatchRequestError(
+                message="partitioner is not currently supported for this DataAsset "
+                "and must be None."
             )
 
         return BatchRequest(
@@ -349,11 +355,6 @@ def _short_id() -> str:
     return str(uuid.uuid4()).replace("-", "")[:11]
 
 
-class BuildBatchRequestError(ValueError):
-    def __init__(self, reason: str):
-        super().__init__(f"Bad input to build_batch_request: {reason}")
-
-
 class DataFrameAsset(_PandasDataAsset):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
@@ -400,20 +401,22 @@ class DataFrameAsset(_PandasDataAsset):
         """  # noqa: E501
         if batch_slice is not None:
             raise BuildBatchRequestError(
-                reason="batch_slice is not currently supported and must be None for this DataAsset."
+                message="batch_slice is not currently supported for this DataAsset "
+                "and must be None."
             )
 
         if partitioner is not None:
             raise BuildBatchRequestError(
-                reason="partitioner is not currently supported and must be None for this DataAsset."
+                message="partitioner is not currently supported  for this DataAsset"
+                "and must be None."
             )
 
         if not (options is not None and "dataframe" in options and len(options) == 1):
-            raise BuildBatchRequestError(reason="options must contain exactly 1 key, 'dataframe'.")
+            raise BuildBatchRequestError(message="options must contain exactly 1 key, 'dataframe'.")
 
         if not isinstance(options["dataframe"], pd.DataFrame):
             raise BuildBatchRequestError(
-                reason="Cannot build batch request for dataframe asset without a dataframe"
+                message="Cannot build batch request for dataframe asset without a dataframe"
             )
 
         return BatchRequest(
