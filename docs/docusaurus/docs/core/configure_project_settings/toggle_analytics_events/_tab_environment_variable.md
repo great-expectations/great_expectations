@@ -33,4 +33,11 @@ The environment variable `GX_ANALYTICS_ENABLED` can be used to toggle the collec
 
    Analytics settings are checked when a Data Context is initialized.  Therefore, for a change to `GX_ANALYTICS_ENABLED` to take effect, the Data Context must be initialized *after* the environment variable has been set.
 
+   If you already have a Data Context in a Python environment when you make a change to `GX_ANALYTICS_ENABLED`, you can re-initialize it by updating the value of `my_mode` with `ephemeral`, `file`, or `cloud` and executing the following code:
+
+   ```python title="Python"
+   my_mode = "file"
+   context = gx.get_context(mode=my_mode)
+   ```
+
    For more information on initializing a Data Context, see [Create a Data Context](/core/set_up_a_gx_environment/create_a_data_context.md).
