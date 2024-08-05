@@ -1,10 +1,22 @@
+import uuid
+from dataclasses import dataclass, replace
+from typing import Any, Optional
+from unittest import mock
+
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.configuration import AbstractConfig
-from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.data_context_key import DataContextKey, StringKey
+from great_expectations.data_context.store.in_memory_store_backend import InMemoryStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.exceptions.exceptions import StoreBackendError
+
+
+@dataclass
+class DummyModel:
+    id: Optional[str]
+    foo: str
 
 
 @pytest.mark.unit
@@ -80,6 +92,42 @@ def test_store_add_success():
 
     store.add(key=key, value=value)
     assert store.has_key(key)
+
+
+@pytest.mark.unit
+@mock.patch.object(InMemoryStoreBackend, "add")
+def test_store_add_success__adds_id(mock_store_backend_add):
+    """Ensure that if we get an id on the new object, we add an id to the input value"""
+    new_id = str(uuid.uuid4())
+
+    def mock_add(key: DataContextKey, value: Any, **kwargs):
+        # our backends currently return new objects, and in the case of cloud, they will have an id
+        return replace(value, id=new_id)
+
+    mock_store_backend_add.side_effect = mock_add
+    store = Store()
+    key = StringKey("foo")
+    original_value = DummyModel(id=None, foo="bar")
+
+    store.add(key=key, value=original_value)
+    assert original_value.id == new_id
+
+
+@pytest.mark.unit
+@mock.patch.object(InMemoryStoreBackend, "add")
+def test_store_add_success__no_id(mock_store_backend_add):
+    """Ensure that if we get an id on the new object, we add an id to the input value"""
+
+    def mock_add(key: DataContextKey, value: Any, **kwargs):
+        return replace(value)
+
+    mock_store_backend_add.side_effect = mock_add
+    store = Store()
+    key = StringKey("foo")
+    original_value = DummyModel(id=None, foo="bar")
+
+    store.add(key=key, value=original_value)
+    assert original_value.id is None
 
 
 @pytest.mark.unit

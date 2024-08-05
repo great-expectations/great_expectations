@@ -248,9 +248,12 @@ class Store:
         """
         return self._add(key=key, value=value, **kwargs)
 
-    def _add(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def _add(self, key: DataContextKey, value: Any, **kwargs) -> Any:
         self._validate_key(key)
-        return self._store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
+        output = self._store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
+        if hasattr(value, "id") and hasattr(output, "id"):
+            value.id = output.id
+        return output
 
     def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
