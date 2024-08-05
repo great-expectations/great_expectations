@@ -487,15 +487,20 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
 
     datasource = context.data_sources.add_or_update_pandas(name="fluent_pandas_datasource")
     dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(name="my_df_asset")
-    batch_request = dataframe_asset.build_batch_request(options={"dataframe": df})
-    assert batch_request.options["dataframe"].equals(df)
+    batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = batch_def.get_batch(batch_parameters={"dataframe": df})
+    assert isinstance(batch.data, PandasBatchData)
+    assert batch.data.dataframe.equals(df)
 
+    # Reload the asset and see that we can re-add the df to the batch definition
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
         asset_name="my_df_asset"
     )
-    batch_request = dataframe_asset.build_batch_request(options={"dataframe": df})
-    assert batch_request.options["dataframe"].equals(df)
+    reloaded_batch_def = dataframe_asset.get_batch_definition(name="bd")
+    batch = reloaded_batch_def.get_batch(batch_parameters={"dataframe": df})
+    assert isinstance(batch.data, PandasBatchData)
+    assert batch.data.dataframe.equals(df)
 
 
 @pytest.mark.spark
