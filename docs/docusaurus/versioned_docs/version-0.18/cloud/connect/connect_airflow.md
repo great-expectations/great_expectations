@@ -56,7 +56,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 2. Open the `gx_dag.py` DAG file and add the following code:
 
-    ```python title="Python code" name="cloud/connect/airflow_example_dag.py full example code"
+    ```python title="Python code" name="cloud/connect/0.18-airflow_example_dag.py full example code"
     ``` 
 
 3. Save your changes and close the `gx_dag.py` DAG file.
