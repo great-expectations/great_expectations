@@ -18,7 +18,6 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
-    new_argument,
     public_api,
 )
 from great_expectations.compatibility import pydantic
@@ -48,6 +47,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.compatibility.pyspark import SparkSession
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.partitioners import ColumnPartitioner
     from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
@@ -194,13 +194,8 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
-    @new_argument(
-        argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
-        version="0.16.15",
-    )
     @override
-    def build_batch_request(  # type: ignore[override]
+    def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
@@ -310,6 +305,13 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
                 batch_definition=batch_definition,
             )
         ]
+
+    @public_api
+    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+        )
 
 
 @public_api

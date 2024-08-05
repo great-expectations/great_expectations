@@ -373,14 +373,6 @@ class DataFrameAsset(_PandasDataAsset):
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
-    @public_api
-    @override
-    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:
-        return self.add_batch_definition(
-            name=name,
-            partitioner=None,
-        )
-
     @override
     def build_batch_request(
         self,

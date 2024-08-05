@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import TestConnectionError
 from great_expectations.datasource.fluent.spark_datasource import (
     DataFrameAsset,
     SparkConfig,
 )
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.util import is_candidate_subset_of_target
 
 if TYPE_CHECKING:
@@ -36,13 +36,6 @@ def test_dataframe_asset(
     spark_df_from_pandas_df,
     test_df_pandas,
 ):
-    # validates that a dataframe object is passed
-    with pytest.raises(pydantic.ValidationError) as exc_info:
-        _ = DataFrameAsset(name="malformed_asset", dataframe={})
-
-    errors_dict = exc_info.value.errors()[0]
-    assert errors_dict["loc"][0] == "dataframe"
-
     datasource = empty_data_context.data_sources.add_spark(name="my_spark_datasource")
 
     pandas_df = test_df_pandas
@@ -55,19 +48,16 @@ def test_dataframe_asset(
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(datasource.assets) == 1
 
-    _ = dataframe_asset.build_batch_request(options={"dataframe": spark_df})
-
-    dataframe_asset = datasource.add_dataframe_asset(
+    datasource.add_dataframe_asset(
         name="my_second_dataframe_asset",
     )
     assert len(datasource.assets) == 2
 
-    _ = dataframe_asset.build_batch_request(options={"dataframe": spark_df})
-
-    assert all(
-        asset.dataframe is not None and asset.dataframe.toPandas().equals(pandas_df)
-        for asset in datasource.assets
-    )
+    for i, asset in enumerate(datasource.assets):
+        bd = asset.add_batch_definition_whole_dataframe(name=f"bd_{i}")
+        batch = bd.get_batch(batch_parameters={"dataframe": spark_df})
+        assert isinstance(batch.data, SparkDFBatchData)
+        assert batch.data.dataframe.toPandas().equals(pandas_df)
 
 
 @pytest.mark.spark

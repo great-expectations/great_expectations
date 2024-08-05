@@ -33,6 +33,8 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.validator.v1_validator import Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
@@ -469,8 +471,10 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
     dataframe_asset: PandasDataFrameAsset = context.data_sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(options={"dataframe": df})
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
+    batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = batch_def.get_batch(batch_parameters={"dataframe": df})
+    assert isinstance(batch.data, PandasBatchData)
+    assert batch.data.dataframe.toPandas().equals(df)
 
 
 @pytest.mark.filesystem
@@ -507,10 +511,12 @@ def test_spark_data_adding_dataframe_in_cloud_context(
     context = empty_cloud_context_fluent
 
     dataframe_asset: SparkDataFrameAsset = context.data_sources.add_or_update_spark(
-        name="fluent_pandas_datasource"
+        name="fluent_spark_datasource"
     ).add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(options={"dataframe": spark_df})
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = batch_def.get_batch(batch_parameters={"dataframe": spark_df})
+    assert isinstance(batch.data, SparkDFBatchData)
+    assert batch.data.dataframe.toPandas().equals(df)
 
 
 @pytest.mark.spark
@@ -525,19 +531,19 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
     context = empty_file_context
 
     dataframe_asset: SparkDataFrameAsset = context.data_sources.add_or_update_spark(
-        name="fluent_pandas_datasource"
+        name="fluent_spark_datasource"
     ).add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(options={"dataframe": spark_df})
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
-
-    datasource = context.data_sources.add_or_update_spark(name="fluent_pandas_datasource")
-    dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(options={"dataframe": spark_df})
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = batch_def.get_batch(batch_parameters={"dataframe": spark_df})
+    assert isinstance(batch.data, SparkDFBatchData)
+    assert batch.data.dataframe.toPandas().equals(df)
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
-    dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
-        asset_name="my_df_asset"
+    retrieved_bd = (
+        context.get_datasource(datasource_name="fluent_spark_datasource")
+        .get_asset(asset_name="my_df_asset")
+        .get_batch_definition(name="bd")
     )
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    new_batch = retrieved_bd.get_batch(batch_parameters={"dataframe": spark_df})
+    assert isinstance(new_batch.data, SparkDFBatchData)
+    assert new_batch.data.dataframe.toPandas().equals(df)
