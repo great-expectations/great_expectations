@@ -24,13 +24,11 @@ If you have specific business requirements, or you want to examine specific data
 
 4. Enter a name for the Expectation Suite in the **Expectation Suite name** field.
 
-5. Select a validation schedule frequency and start time for your Expectation Suite.
+5. Click **Create**. 
 
-6. Click **Create Suite**. 
+6. Add Expectations to the Expectation Suite. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
-7. Add Expectations to the Expectation Suite. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
-
-8. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
+7. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
 ## Edit an Expectation Suite
 
