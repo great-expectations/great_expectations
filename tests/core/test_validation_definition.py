@@ -196,20 +196,25 @@ class TestValidationRun:
             meta={},
         )
 
+    @pytest.mark.parametrize("checkpoint_id", [None, "my_checkpoint_id"])
     @pytest.mark.unit
     def test_adds_requisite_ids(
         self,
         mock_validator: MagicMock,
         validation_definition: ValidationDefinition,
+        checkpoint_id: str | None,
     ):
         mock_validator.graph_validate.return_value = []
 
         assert validation_definition.id is None
 
-        output = validation_definition.run()
+        output = validation_definition.run(checkpoint_id=checkpoint_id)
 
         assert validation_definition.id is not None
-        assert output.meta == {"validation_id": validation_definition.id}
+        assert output.meta == {
+            "validation_id": validation_definition.id,
+            "checkpoint_id": checkpoint_id,
+        }
 
     @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
