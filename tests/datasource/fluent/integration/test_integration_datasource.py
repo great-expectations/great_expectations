@@ -547,7 +547,7 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
     retrieved_bd = (
         context.get_datasource(datasource_name="fluent_spark_datasource")
         .get_asset(asset_name="my_df_asset")
-        .get_batch_definition(name="bd")
+        .get_batch_definition(batch_definition_name="bd")
     )
     new_batch = retrieved_bd.get_batch(batch_parameters={"dataframe": spark_df})
     assert isinstance(new_batch.data, SparkDFBatchData)

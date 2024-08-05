@@ -12,6 +12,7 @@ from great_expectations.datasource.fluent.spark_datasource import (
     DataFrameAsset,
     SparkConfig,
 )
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.util import is_candidate_subset_of_target
 
@@ -134,10 +135,10 @@ def test_build_batch_request_raises_if_missing_dataframe(
         name="my_spark_datasource"
     ).add_dataframe_asset(name="my_dataframe_asset")
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(BuildBatchRequestError) as e:
         dataframe_asset.build_batch_request()
 
-    assert "Cannot build batch request for dataframe asset without a dataframe" in str(e.value)
+    assert "options must contain exactly 1 key, 'dataframe'" in str(e.value)
 
 
 @pytest.mark.spark
