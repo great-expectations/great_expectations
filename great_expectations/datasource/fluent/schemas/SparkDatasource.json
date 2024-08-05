@@ -548,9 +548,6 @@
                     "items": {
                         "$ref": "#/definitions/BatchDefinition"
                     }
-                },
-                "dataframe": {
-                    "title": "Dataframe"
                 }
             },
             "required": [
