@@ -55,14 +55,14 @@ def test_dataframe_asset(
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(datasource.assets) == 1
 
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
+    _ = dataframe_asset.build_batch_request(options={"dataframe": spark_df})
 
     dataframe_asset = datasource.add_dataframe_asset(
         name="my_second_dataframe_asset",
     )
     assert len(datasource.assets) == 2
 
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
+    _ = dataframe_asset.build_batch_request(options={"dataframe": spark_df})
 
     assert all(
         asset.dataframe is not None and asset.dataframe.toPandas().equals(pandas_df)
@@ -98,7 +98,7 @@ def test_spark_data_asset_batch_metadata(
     assert dataframe_asset.batch_metadata == batch_metadata
 
     batch_list = dataframe_asset.get_batch_list_from_batch_request(
-        dataframe_asset.build_batch_request(dataframe=spark_df)
+        dataframe_asset.build_batch_request(options={"dataframe": spark_df})
     )
     assert len(batch_list) == 1
     substituted_batch_metadata = copy.deepcopy(batch_metadata)
