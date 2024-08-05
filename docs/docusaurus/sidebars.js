@@ -133,6 +133,18 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Configure project settings',
+      link: {type: 'doc', id: 'core/configure_project_settings/configure_project_settings'},
+      items: [
+        {type: 'doc', id: 'core/configure_project_settings/configure_metadata_stores/configure_metadata_stores'},
+        {type: 'doc', id: 'core/configure_project_settings/configure_data_docs/configure_data_docs'},
+        {type: 'doc', id: 'core/configure_project_settings/configure_credentials/configure_credentials'},
+        {type: 'doc', id: 'core/configure_project_settings/access_secrets_managers/access_secrets_managers'},
+        {type: 'doc', id: 'core/configure_project_settings/toggle_analytics_events/toggle_analytics_events'}
+      ]
+    },
+    {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
@@ -349,6 +361,28 @@ module.exports = {
               type: 'link',
               label: 'Delete a Checkpoint',
               href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage schedules',
+          link: { type: 'doc', id: 'cloud/schedules/manage_schedules' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#create-a-schedule-for-an-existing-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Edit a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#edit-a-schedule',
+            },
+            {
+              type: 'link',
+              label: 'Disable a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#disable-a-schedule',
             },
           ]
         },

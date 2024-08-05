@@ -300,10 +300,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         try:
             with open(filepath) as infile:
                 contents: str = infile.read().rstrip("\n")
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             raise InvalidKeyError(  # noqa: TRY003
                 f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {filepath!s}"  # noqa: E501
-            )
+            ) from e
 
         return contents
 
@@ -559,10 +559,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _get_by_s3_object_key(self, s3_client, s3_object_key):
         try:
             s3_response_object = s3_client.get_object(Bucket=self.bucket, Key=s3_object_key)
-        except (s3_client.exceptions.NoSuchKey, s3_client.exceptions.NoSuchBucket):
+        except (s3_client.exceptions.NoSuchKey, s3_client.exceptions.NoSuchBucket) as e:
             raise InvalidKeyError(  # noqa: TRY003
                 f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"  # noqa: E501
-            )
+            ) from e
 
         return (
             s3_response_object["Body"]
@@ -595,7 +595,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 result_s3.put(Body=value, ContentType=content_type, **self.s3_put_options)
         except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
-            raise StoreBackendError("Unable to set object in s3.")  # noqa: TRY003
+            raise StoreBackendError("Unable to set object in s3.") from e  # noqa: TRY003
 
         return s3_object_key
 
