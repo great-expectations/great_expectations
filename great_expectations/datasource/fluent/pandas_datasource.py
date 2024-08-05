@@ -150,7 +150,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
         batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request
+            batch_request=batch_request, ignore_options=("dataframe",)
         )
 
         batch_list.append(
@@ -468,7 +468,7 @@ class DataFrameAsset(_PandasDataAsset):
         )
 
         batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request
+            batch_request=batch_request, ignore_options=("dataframe",)
         )
 
         return [

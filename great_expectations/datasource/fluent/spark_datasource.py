@@ -290,7 +290,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
         batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request
+            batch_request=batch_request, ignore_options=("dataframe",)
         )
 
         return [

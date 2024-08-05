@@ -466,7 +466,9 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
             return {}
         return value
 
-    def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
+    def _get_batch_metadata_from_batch_request(
+        self, batch_request: BatchRequest, ignore_options: Sequence = ()
+    ) -> BatchMetadata:
         """Performs config variable substitution and populates batch parameters for
         Batch.metadata at runtime.
         """
@@ -477,7 +479,11 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
             data=batch_metadata, replace_variables_dict=config_variables
         )
-        batch_metadata.update(copy.deepcopy(batch_request.options))
+        batch_metadata.update(
+            copy.deepcopy(
+                {k: v for k, v in batch_request.options.items() if k not in ignore_options}
+            )
+        )
         return batch_metadata
 
     # Sorter methods
