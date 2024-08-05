@@ -19,13 +19,8 @@
         },
         {
           "type": "link",
-          "label": "GX Agent",
-          "href": "/docs/cloud/about_gx#gx-agent"
-        },
-        {
-          "type": "link",
-          "label": "GX Cloud deployment patterns",
-          "href": "/docs/cloud/about_gx#gx-cloud-deployment-patterns"
+          "label": "GX Cloud deployment options",
+          "href": "/docs/cloud/about_gx#gx-cloud-deployment-options"
         },
         {
           "type": "link",
@@ -41,12 +36,12 @@
           "type": "link",
           "label": "Supported browsers",
           "href": "/docs/cloud/about_gx#supported-browsers"
+        },
+        {
+          "type": "doc",
+          "id": "cloud/deploy_gx_agent"
         }
       ]
-    },
-    {
-      "type": "doc",
-      "id": "cloud/deploy_gx_agent"
     },
     {
       "type": "category",
@@ -239,6 +234,28 @@
           "type": "link",
           "label": "Delete a Checkpoint",
           "href": "/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Manage schedules",
+      "link": { "type": "doc", "id": "cloud/schedules/manage_schedules" },
+      "items": [
+        {
+          "type": "link",
+          "label": "Add a schedule",
+          "href": "/docs/cloud/schedules/manage_schedules#create-a-schedule-for-an-existing-expectation-suite"
+        },
+        {
+          "type": "link",
+          "label": "Edit a schedule",
+          "href": "/docs/cloud/schedules/manage_schedules#edit-a-schedule"
+        },
+        {
+          "type": "link",
+          "label": "Disable a schedule",
+          "href": "/docs/cloud/schedules/manage_schedules#disable-a-schedule"
         }
       ]
     },

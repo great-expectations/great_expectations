@@ -20,7 +20,6 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations import project_manager, set_context
 from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -39,6 +38,10 @@ from great_expectations.data_context import (
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
+)
+from great_expectations.data_context.data_context.context_factory import (
+    project_manager,
+    set_context,
 )
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
