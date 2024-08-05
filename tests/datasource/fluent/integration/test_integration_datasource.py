@@ -474,7 +474,7 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
     batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
     batch = batch_def.get_batch(batch_parameters={"dataframe": df})
     assert isinstance(batch.data, PandasBatchData)
-    assert batch.data.dataframe.toPandas().equals(df)
+    assert batch.data.dataframe.equals(df)
 
 
 @pytest.mark.filesystem
