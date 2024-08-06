@@ -39,7 +39,7 @@ core:
   - "@sujensen" # Susan Jensen
   - "@tyler-hoffman" # Tyler Hoffman
   - "@wookasz" # Łukasz Lempart
-  - "@annabar" # Anna Bar
+  - "@annabar" # Anna Barr
 
 bot:
   - "@dependabot"
