@@ -1,60 +1,16 @@
 from abc import ABC, abstractmethod
-import hashlib
-import json
-from typing import Any, Generic, TypeVar, Union
+from typing import Generic, TypeVar, Union
 
-from pydantic import ConfigDict, StrictStr
+from pydantic import ConfigDict
+from contrib.experimental.metrics.mp_asset import MPBatchDefinition, MPBatchParameters
 from great_expectations.compatibility import pydantic
 
 MetricT = TypeVar("MetricT", bound="Metric")
 MetricValueT = TypeVar("MetricValueT", bound="MetricValue")
 MetricProviderT = TypeVar("MetricProviderT", bound="MetricProvider")
-MPPartitionerT = TypeVar("MPPartitionerT", bound="MPPartitioner")
-MPAssetT = TypeVar("MPAssetT", bound="MPAsset")
 
 
 MetricValue = Union[str, int, float, list[str], list[int], list[float], None]
-
-class MPPartitioner(pydantic.BaseModel):
-    model_config = ConfigDict(frozen=True)
-
-
-class MPAsset(pydantic.BaseModel):
-    model_config = ConfigDict(frozen=True)
-
-    id: str
-    name: str
-    _batch_definitions: list["MPBatchDefinition"] = pydantic.PrivateAttr(default_factory=list)
-
-    def add_batch_definition(self, batch_definition: "MPBatchDefinition") -> None:
-        self._batch_definitions.append(batch_definition)
-
-    def get_batch_definition(self, name: str) -> "MPBatchDefinition":
-        return next(batch_definition for batch_definition in self._batch_definitions if batch_definition.name == name)
-
-class MPBatchParameters(dict[StrictStr, Any]):
-    @property
-    def id(self) -> str:
-        return hashlib.md5(json.dumps(self, sort_keys=True).encode("utf-8")).hexdigest()
-
-class MPTableAsset(MPAsset):
-    table_name: str
-
-class MPBatchDefinition(pydantic.GenericModel, Generic[MPAssetT, MPPartitionerT]):
-    model_config = ConfigDict(frozen=True)
-
-    id: str
-    name: str
-    data_asset: MPAssetT
-    partitioner: MPPartitionerT
-
-    def get_id(self, batch_parameters: MPBatchParameters) -> str:
-        # TODO: quick-and-dirty naive implementation
-        return "__".join((
-            self.data_asset.id,
-            self.id,
-            batch_parameters.id
-        ))
 
 class Metric(ABC, pydantic.BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -63,16 +19,27 @@ class Metric(ABC, pydantic.BaseModel):
     Implementation notes:
     Why a batch_definition here and not a batch? Because the batch is a runtime concept, 
     while the batch_definition is a configuration concept. That way, we know how to
-    store/retrieve the metric.
+    store/retrieve the metric. When paired with the batch_parameters, the batch is
+    uniquely identified.
 
     Question: should we annotate the return type in some way here? Currently it's only
     part of the MetricImplementation
+    Bill - THe MetricImplementation makes sense as the thing that does that joining, since it consumes the metric
+    maybe the current "Metric" type is a "MetricRequest" or "MetricSpecification" or "MetricKey" or similar
     """
     name: str
 
+    # TODO: does it make more sense to have just batch_definition & batch_parameters
+    # here, or would it be better to group these into a single object that is the
+    # metric domain, which can then be extended to include the column, column pair,
+    # table, and multicolumn cases...and critically perhaps also the case of the
+    # row condition.
+
+    # I am leaning to thinking of this as a "domain" because that would also replace the
+    # concept of just the batch definition that is currently in the metric domain.
     batch_definition: MPBatchDefinition
     batch_parameters: MPBatchParameters
-
+    
     @property
     @abstractmethod
     def id(self):
@@ -111,9 +78,6 @@ class MetricProvider(ABC):
         raise NotImplementedError
 
 class MetricImplementation(ABC, Generic[MetricT, MetricProviderT, MetricValueT]):
-    """
-    Q: is MetricReturnT useful here?
-    """
     def __init_subclass__(cls, metric_t: type[Metric], metric_provider_t: type[MetricProvider]) -> None:
         metric_provider_t._metric_implementations.register_metric(metric_t = metric_t, metric_impl_t = cls)
 

@@ -1,5 +1,5 @@
 
-from contrib.experimental.metrics.metric_provider import MPTableAsset
+from contrib.experimental.metrics.mp_asset import MPTableAsset
 
 
 class SnowflakeMPTableAsset(MPTableAsset):

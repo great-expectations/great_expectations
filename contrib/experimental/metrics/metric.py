@@ -11,7 +11,7 @@ class ColumnMeanMetric(Metric):
             self.batch_definition.get_id(self.batch_parameters),
             self.column
         ))
-    
+
 
 class ColumnValuesMatchRegexMetric(Metric):
     name: Literal["ColumnValuesMatchRegexMetric"] = "ColumnValuesMatchRegexMetric"

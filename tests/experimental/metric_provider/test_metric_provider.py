@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 from contrib.experimental.metrics.metric import ColumnMeanMetric
-from contrib.experimental.metrics.metric_provider import MPBatchParameters
+from contrib.experimental.metrics.mp_asset import MPBatchParameters
 from contrib.experimental.metrics.provider_controller import InMemoryMPCache, MetricProviderController
 from contrib.experimental.metrics.snowflake_provider import SnowflakeConnectionMetricProvider
 from contrib.experimental.metrics.snowflake_provider_data_source import build_MetricProviderSnowflakeDatasource_from_SnowflakeDatasource

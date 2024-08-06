@@ -4,10 +4,10 @@ from contrib.experimental.metrics.metric import (
     ColumnValuesMatchRegexUnexpectedValuesMetric,
 )
 from contrib.experimental.metrics.metric_provider import (
-    MPBatchParameters,
     MetricImplementation,
     MetricProvider,
 )
+from contrib.experimental.metrics.mp_asset import MPBatchParameters
 from contrib.experimental.metrics.snowflake_provider_batch_definition import (
     SnowflakeMPBatchDefinition,
 )

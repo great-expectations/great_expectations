@@ -1,6 +1,7 @@
 
 from typing import TypeVar, Union
-from contrib.experimental.metrics.metric_provider import MPBatchDefinition, MPPartitioner, MPTableAsset, MPBatchParameters
+from contrib.experimental.metrics.mp_asset import MPBatchDefinition
+from contrib.experimental.metrics.mp_asset import MPBatchParameters, MPPartitioner, MPTableAsset
 
 
 SnowflakeAssetPartitionerT = TypeVar("SnowflakeAssetPartitionerT", bound=Union["SnowflakeTableAssetColumnYearlyPartitioner", "SnowflakeTableAssetColumnDailyPartitioner"])
