@@ -232,10 +232,8 @@ _CHECKPOINT_CONFIG = _create_checkpoint_config("my_checkpoint", _CHECKPOINT_ID)
         pytest.param(
             {
                 "data": {
+                    **_CHECKPOINT_CONFIG,
                     "id": _CHECKPOINT_ID,
-                    "attributes": {
-                        "checkpoint_config": _CHECKPOINT_CONFIG,
-                    },
                 }
             },
             id="single_checkpoint_config",
@@ -244,10 +242,8 @@ _CHECKPOINT_CONFIG = _create_checkpoint_config("my_checkpoint", _CHECKPOINT_ID)
             {
                 "data": [
                     {
+                        **_CHECKPOINT_CONFIG,
                         "id": _CHECKPOINT_ID,
-                        "attributes": {
-                            "checkpoint_config": _CHECKPOINT_CONFIG,
-                        },
                     }
                 ]
             },
@@ -268,20 +264,7 @@ def test_gx_cloud_response_json_to_object_collection():
     config_a = _create_checkpoint_config("my_checkpoint_a", "something else?")
     config_b = _create_checkpoint_config("my_checkpoint_b", id_b)
     response_json = {
-        "data": [
-            {
-                "id": id_a,
-                "attributes": {
-                    "checkpoint_config": config_a,
-                },
-            },
-            {
-                "id": id_b,
-                "attributes": {
-                    "checkpoint_config": config_b,
-                },
-            },
-        ],
+        "data": [{**config_a, "id": id_a}, {**config_b, "id": id_b}],
     }
 
     result = CheckpointStore.gx_cloud_response_json_to_object_collection(response_json)

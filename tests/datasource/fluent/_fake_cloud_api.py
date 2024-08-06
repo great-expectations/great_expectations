@@ -773,7 +773,7 @@ def post_validation_definitions_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["validation_definition"]["name"]
+    name = payload["data"]["name"]
 
     validation_definitions: dict[str, dict] = _CLOUD_API_FAKE_DB["validation_definitions"]
     validation_definition_names: set[str] = _CLOUD_API_FAKE_DB["VALIDATION_DEFINITION_NAMES"]
@@ -891,37 +891,37 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.GET,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             get_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             post_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"checkpoints/{UUID_REGEX}")),
             delete_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             delete_checkpoint_by_name_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"checkpoints/{UUID_REGEX}")),
             get_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "validation-results"),
+            urllib.parse.urljoin(org_url_base_V1, "validation-results"),
             post_validation_results_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "validation-definitions"),
+            urllib.parse.urljoin(org_url_base_V1, "validation-definitions"),
             post_validation_definitions_cb,
         )
 
