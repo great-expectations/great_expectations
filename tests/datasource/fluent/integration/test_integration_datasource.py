@@ -25,6 +25,7 @@ from great_expectations.core.partitioners import (
 from great_expectations.data_context import (
     AbstractDataContext,
     CloudDataContext,
+    EphemeralDataContext,
     FileDataContext,
 )
 from great_expectations.datasource.fluent import (
@@ -609,14 +610,14 @@ def test_validate_spark_batch(
 
 @dataclass
 class ContextPandasDataSourceAndFrame:
-    context: gx.EphemeralDataContext
+    context: EphemeralDataContext
     datasource: PandasDatasource
     dataframe: pd.DataFrame
 
 
 @dataclass
 class ContextSparkDataSourceAndFrame:
-    context: gx.EphemeralDataContext
+    context: EphemeralDataContext
     datasource: SparkDatasource
     dataframe: PySparkDataFrame
 
