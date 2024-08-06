@@ -47,7 +47,7 @@ from tests.datasource.fluent.integration.integration_test_utils import (
 if TYPE_CHECKING:
     from responses import RequestsMock
 
-    from great_expectations.compatibility.pyspark import DataFrame as PySparkDataFrame
+    from great_expectations.compatibility.pyspark import DataFrame as SparkDataFrame
     from great_expectations.compatibility.pyspark import SparkSession
     from great_expectations.datasource.fluent.pandas_datasource import (
         DataFrameAsset as PandasDataFrameAsset,
@@ -569,7 +569,7 @@ class PandasDataSourceAndFrame:
 @dataclass
 class SparkDataSourceAndFrame:
     datasource: SparkDatasource
-    dataframe: PySparkDataFrame
+    dataframe: SparkDataFrame
 
 
 def _validate_whole_dataframe_batch(
@@ -596,7 +596,7 @@ def test_validate_pandas_batch():
 @pytest.mark.spark
 def test_validate_spark_batch(
     spark_session: SparkSession,
-    spark_df_from_pandas_df: Callable[[SparkSession, pd.DataFrame], PySparkDataFrame],
+    spark_df_from_pandas_df: Callable[[SparkSession, pd.DataFrame], SparkDataFrame],
 ):
     context = gx.get_context(mode="ephemeral")
     datasource = context.data_sources.add_spark(name="ds")
@@ -619,7 +619,7 @@ class ContextPandasDataSourceAndFrame:
 class ContextSparkDataSourceAndFrame:
     context: EphemeralDataContext
     datasource: SparkDatasource
-    dataframe: PySparkDataFrame
+    dataframe: SparkDataFrame
 
 
 def _validate_whole_dataframe_batch_definition(
@@ -653,7 +653,7 @@ def test_validate_pandas_batch_definition():
 @pytest.mark.spark
 def test_validate_spark_batch_definition(
     spark_session: SparkSession,
-    spark_df_from_pandas_df: Callable[[SparkSession, pd.DataFrame], PySparkDataFrame],
+    spark_df_from_pandas_df: Callable[[SparkSession, pd.DataFrame], SparkDataFrame],
 ):
     context = gx.get_context(mode="ephemeral")
     datasource = context.data_sources.add_spark(name="ds")
