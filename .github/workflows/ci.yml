@@ -386,7 +386,7 @@ jobs:
       fail-fast: false
       matrix:
         markers:
-          # - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
+          - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
           - aws_deps
           - big
           - databricks
@@ -410,8 +410,8 @@ jobs:
           - python-version: ${{ github.event_name == 'merge_group' && '3.11' }}
           - python-version: "3.12" # need sqlalchemy 2.0 support
             markers: snowflake
-          # - python-version: "3.12" # clickhouse/pyathena need dependency update
-          #   markers: athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
+          - python-version: "3.12" # clickhouse/pyathena need dependency update
+            markers: athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
           - python-version: "3.12" # numpy related issue
             markers: databricks
 
