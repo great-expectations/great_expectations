@@ -101,31 +101,22 @@ def test_add_cloud(
 
     mock_put.assert_called_once_with(
         mock.ANY,  # requests Session
-        f"https://api.greatexpectations.io/organizations/12345678-1234-5678-1234-567812345678/validation-definitions/{id}",
+        f"https://api.greatexpectations.io/api/v1/organizations/12345678-1234-5678-1234-567812345678/validation-definitions/{id}",
         json={
             "data": {
-                "type": "validation_definition",
-                "id": id,
-                "attributes": {
-                    "organization_id": "12345678-1234-5678-1234-567812345678",
-                    "validation_definition": {
-                        "name": name,
-                        "id": None,
-                        "data": {
-                            "id": None,
-                            "name": "my_batch_definition",
-                            "partitioner": None,
-                        },
-                        "suite": {
-                            "name": "my_suite",
-                            "id": None,
-                            "expectations": [],
-                            "meta": mock.ANY,  # GX version information
-                            "notes": None,
-                        },
-                    },
+                "name": name,
+                "data": {
+                    # NOTE: IDs here are unrealistic because the validation_definition
+                    # was created via the in-memory store
+                    "batch_definition": {"id": mock.ANY, "name": "my_batch_definition"},
+                    "asset": {"id": mock.ANY, "name": "my_asset"},
+                    "datasource": {"id": mock.ANY, "name": "my_datasource"},
                 },
-            }
+                "suite": {
+                    "name": "my_suite",
+                    "id": mock.ANY,
+                },
+            },
         },
     )
 
