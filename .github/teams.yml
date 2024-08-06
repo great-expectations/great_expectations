@@ -7,17 +7,13 @@ dx:
 
 devrel:
   - "@Rachel-Reverie" # Rachel Reverie
-  - "@austiezr" # Austin Robinson
-  - "@kwcanuck" # Rob Gray
   - "@kyleaton" # Kyle Eaton
   - "@rachhouse" # Rachel House
-  - "@talagluck" # Tal Gluck
   - "@r34ctor" # Nevin Tan
 
 core:
   - "@DrewHoo" # Drew Hoover
   - "@Erin-GX" # Erin Kapp
-  - "@HaebichanGX" # Haebichan Jung
   - "@JennyTee" # Jenny Terlinden
   - "@Kilo59" # Gabriel Gore
   - "@NathanFarmer" # Nathan Farmer
@@ -36,7 +32,6 @@ core:
   - "@josectobar" # José Tobar
   - "@joshua-stauffer" # Josh Stauffer
   - "@joshzzheng" # Josh Zheng
-  - "@jshaikGX" # Javed Shaik
   - "@lockettks" # Kim Mathieu
   - "@nicgrayson" # Nic Grayson
   - "@roblim" # Rob Lim
@@ -44,6 +39,7 @@ core:
   - "@sujensen" # Susan Jensen
   - "@tyler-hoffman" # Tyler Hoffman
   - "@wookasz" # Łukasz Lempart
+  - "@annabar" # Anna Bar
 
 bot:
   - "@dependabot"
