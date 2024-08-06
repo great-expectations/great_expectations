@@ -177,10 +177,8 @@ _VALIDATION_DEFINITION = {
         pytest.param(
             {
                 "data": {
+                    **_VALIDATION_DEFINITION,
                     "id": _VALIDATION_ID,
-                    "attributes": {
-                        "validation_definition": _VALIDATION_DEFINITION,
-                    },
                 }
             },
             id="single_validation_definition",
@@ -189,10 +187,8 @@ _VALIDATION_DEFINITION = {
             {
                 "data": [
                     {
+                        **_VALIDATION_DEFINITION,
                         "id": _VALIDATION_ID,
-                        "attributes": {
-                            "validation_definition": _VALIDATION_DEFINITION,
-                        },
                     }
                 ]
             },
