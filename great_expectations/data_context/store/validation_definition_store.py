@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import uuid
 from typing import TYPE_CHECKING
 
@@ -45,26 +46,27 @@ class ValidationDefinitionStore(Store):
         else:
             validation_data = response_data
 
-        id: str = validation_data["id"]
-        validation_definition_dict: dict = validation_data["attributes"]["validation_definition"]
-        validation_definition_dict["id"] = id
-
-        return validation_definition_dict
+        return validation_data
 
     @override
     def serialize(self, value):
-        if self.cloud_mode:
-            data = value.dict()
-            data["suite"] = data["suite"].to_json_dict()
-            return data
-
         # In order to enable the custom json_encoders in ValidationDefinition, we need to set `models_as_dict` off  # noqa: E501
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
-        return value.json(models_as_dict=False, indent=2, sort_keys=True)
+        output = value.json(models_as_dict=False, indent=2, sort_keys=True)
+
+        if self.cloud_mode:
+            output_dict = json.loads(output)
+            output_dict.pop("id", None)
+            return output_dict
+        else:
+            return output
 
     @override
     def deserialize(self, value):
         from great_expectations.core.validation_definition import ValidationDefinition
+
+        if self.cloud_mode:
+            return ValidationDefinition.parse_obj(value)
 
         return ValidationDefinition.parse_raw(value)
 

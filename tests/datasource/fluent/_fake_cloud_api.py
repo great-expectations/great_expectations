@@ -602,11 +602,7 @@ def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
     checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
     checkpoint_list: list[dict] = list(checkpoints.values())
     if queried_names:
-        checkpoint_list = [
-            d
-            for d in checkpoint_list
-            if d["attributes"]["checkpoint_config"]["name"] in queried_names
-        ]
+        checkpoint_list = [d for d in checkpoint_list if d["name"] in queried_names]
 
     resp_body = {"data": checkpoint_list}
 
@@ -649,7 +645,7 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["checkpoint_config"]["name"]
+    name = payload["data"]["name"]
 
     checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
     checkpoint_names: set[str] = _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"]
@@ -696,7 +692,7 @@ def delete_checkpoint_by_id_cb(
         return CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
 
     print(pf(deleted_cp, depth=5))
-    cp_name = deleted_cp["attributes"]["checkpoint_config"]["name"]
+    cp_name = deleted_cp["name"]
     _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"].remove(cp_name)
     LOGGER.debug(f"Deleted checkpoint '{cp_name}'")
     return CallbackResult(204, headers={}, body="")
@@ -719,7 +715,7 @@ def delete_checkpoint_by_name_cb(
 
     checkpoint_id: str | None = None
     for checkpoint in checkpoints.values():
-        if checkpoint["attributes"]["checkpoint_config"]["name"] == cp_name:
+        if checkpoint["name"] == cp_name:
             checkpoint_id = checkpoint["id"]
             break
 
@@ -773,7 +769,7 @@ def post_validation_definitions_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["validation_definition"]["name"]
+    name = payload["data"]["name"]
 
     validation_definitions: dict[str, dict] = _CLOUD_API_FAKE_DB["validation_definitions"]
     validation_definition_names: set[str] = _CLOUD_API_FAKE_DB["VALIDATION_DEFINITION_NAMES"]
@@ -891,37 +887,37 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.GET,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             get_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             post_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"checkpoints/{UUID_REGEX}")),
             delete_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             delete_checkpoint_by_name_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"checkpoints/{UUID_REGEX}")),
             get_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "validation-results"),
+            urllib.parse.urljoin(org_url_base_V1, "validation-results"),
             post_validation_results_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "validation-definitions"),
+            urllib.parse.urljoin(org_url_base_V1, "validation-definitions"),
             post_validation_definitions_cb,
         )
 
