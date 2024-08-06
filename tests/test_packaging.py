@@ -191,7 +191,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 47
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 48
     assert set(sorted_packages_with_pins_or_upper_bounds) == {
         (
             "requirements-dev-api-docs-test.txt",
@@ -258,6 +258,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
         ("requirements.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
+        ("requirements.txt", "pandas", (("<", "2.2"),)),
         ("requirements.txt", "posthog", (("<", "3"), (">=", "2.1.0"))),
         ("requirements.txt", "ruamel.yaml", (("<", "0.18"), (">=", "0.16"))),
     }
