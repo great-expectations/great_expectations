@@ -140,6 +140,11 @@ class InvalidBatchRequestError(GreatExpectationsError):
     pass
 
 
+class BuildBatchRequestError(GreatExpectationsError):
+    def __init__(self, message: str):
+        super().__init__(f"Bad input to build_batch_request: {message}")
+
+
 class InvalidBatchIdError(GreatExpectationsError):
     pass
 

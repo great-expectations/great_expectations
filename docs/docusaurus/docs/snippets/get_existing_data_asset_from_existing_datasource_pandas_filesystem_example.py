@@ -44,7 +44,7 @@ my_asset = my_ephemeral_datasource.add_dataframe_asset(name="my_ephemeral_asset"
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe">
-my_batch_request = my_asset.build_batch_request(dataframe=dataframe)
+my_batch_request = my_asset.build_batch_request(options={"dataframe": dataframe})
 # </snippet>
 
 # Python
