@@ -289,6 +289,7 @@ class TestValidationRun:
         result = cloud_validation_definition.run()
 
         assert len(result.results) == 1
+        assert result.results[0].expectation_config is not None
         assert result.results[0].expectation_config.rendered_content is not None
         assert result.results[0].rendered_content is not None
 

@@ -247,7 +247,7 @@ def test_list_keys(
         store_backend.list_keys()
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
-            url=f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            url=f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             params=None,
         )
 
@@ -340,7 +340,7 @@ def test_remove_key_with_only_id(
         )
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
+            f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
         )
@@ -360,7 +360,7 @@ def test_remove_key_with_id_and_name(
         )
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
+            f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
         )
@@ -378,7 +378,7 @@ def test_remove_key_with_only_name(
         store_backend.remove_key(("checkpoint", "", "checkpoint_name"))
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             params={"name": "checkpoint_name"},
         )
 
