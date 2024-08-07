@@ -116,7 +116,6 @@ class ValidationAction(BaseModel):
 
     type: str
     name: str
-    notify_on: Literal["all", "failure", "success"] = "all"
 
     @property
     def _using_cloud_context(self) -> bool:
@@ -130,13 +129,15 @@ class ValidationAction(BaseModel):
         raise NotImplementedError
 
     def _is_enabled(self, success: bool) -> bool:
-        return (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and success
-            or self.notify_on == "failure"
-            and not success
-        )
+        if hasattr(self, "notify_on"):
+            return (
+                self.notify_on == "all"
+                or self.notify_on == "success"
+                and success
+                or self.notify_on == "failure"
+                and not success
+            )
+        return True
 
     def _get_data_docs_pages_from_prior_action(
         self, action_context: ActionContext | None
