@@ -527,8 +527,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     def checkpoint_store(self) -> CheckpointStore:
         return self.stores[self.checkpoint_store_name]
 
-    @public_api
     @property
+    @public_api
     def data_sources(self) -> _SourceFactories:
         return self._data_sources
 
