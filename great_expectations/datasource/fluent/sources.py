@@ -594,6 +594,7 @@ class _SourceFactories:
     def all(self) -> DatasourceDict:
         return self._data_context._datasources
 
+    @public_api
     def get(self, datasource_name: str) -> Datasource:
         return self.all()[datasource_name]
 
