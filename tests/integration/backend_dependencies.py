@@ -2,6 +2,7 @@ import enum
 
 
 class BackendDependencies(enum.Enum):
+    AIRFLOW = "AIRFLOW"
     AWS = "AWS"
     AWS_GLUE = "AWS_GLUE"
     ATHENA = "ATHENA"
@@ -11,6 +12,7 @@ class BackendDependencies(enum.Enum):
     MYSQL = "MYSQL"
     MSSQL = "MSSQL"
     PANDAS = "PANDAS"
+    PENDULUM = "PENDULUM"
     POSTGRESQL = "POSTGRESQL"
     REDSHIFT = "REDSHIFT"
     SPARK = "SPARK"
