@@ -21,7 +21,7 @@ from great_expectations.datasource.fluent import (
     GxInvalidDatasourceWarning,
     InvalidDatasource,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import SourceFactories
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -114,7 +114,7 @@ class DatasourceStore(Store):
             if not type_:
                 raise ValueError("Datasource type is missing")  # noqa: TRY003
             try:
-                datasource_model = _SourceFactories.type_lookup[type_]
+                datasource_model = SourceFactories.type_lookup[type_]
                 return datasource_model(**value)
             except (PydanticValidationError, LookupError) as config_error:
                 warnings.warn(

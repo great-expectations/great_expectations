@@ -47,7 +47,7 @@ from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
 from great_expectations.datasource.fluent.postgres_datasource import PostgresDatasource
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import SourceFactories
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -146,7 +146,7 @@ def inject_engine_lookup_double(
     Dynamically create a new subclass so that runtime type validation does not fail.
     """
     original_engine_override: dict[Type[Datasource], Type[ExecutionEngine]] = {}
-    for key in _SourceFactories.type_lookup:
+    for key in SourceFactories.type_lookup:
         if issubclass(type(key), Datasource):
             original_engine_override[key] = key.execution_engine_override
 

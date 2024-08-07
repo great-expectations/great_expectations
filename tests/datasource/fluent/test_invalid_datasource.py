@@ -16,7 +16,7 @@ from great_expectations.datasource.fluent import (
     InvalidDatasource,
     TestConnectionError,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import SourceFactories
 
 pytestmark = pytest.mark.unit
 
@@ -101,7 +101,7 @@ class InvalidDSFactory(Protocol):
 def invalid_datasource_factory() -> InvalidDSFactory:
     def _invalid_ds_fct(config: dict) -> InvalidDatasource:
         try:
-            ds_type: type[Datasource] = _SourceFactories.type_lookup[config["type"]]
+            ds_type: type[Datasource] = SourceFactories.type_lookup[config["type"]]
             ds_type(**config)
         except (pydantic.ValidationError, LookupError) as config_error:
             return InvalidDatasource(**config, config_error=config_error)
@@ -270,7 +270,7 @@ class TestInvalidDatasource:
 def rand_invalid_datasource_with_assets(
     invalid_datasource_factory: InvalidDSFactory,
 ) -> InvalidDatasource:
-    random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
+    random_ds_type = random.choice([t for t in SourceFactories.type_lookup.type_names()])
     invalid_ds = invalid_datasource_factory(
         {
             "name": "my invalid ds",
@@ -291,7 +291,7 @@ class TestInvalidDataAsset:
     def test_connection_raises_informative_error(
         self, invalid_datasource_factory: InvalidDSFactory
     ):
-        random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
+        random_ds_type = random.choice([t for t in SourceFactories.type_lookup.type_names()])
         print(f"{random_ds_type=}")
         invalid_datasource: InvalidDatasource = invalid_datasource_factory(
             {

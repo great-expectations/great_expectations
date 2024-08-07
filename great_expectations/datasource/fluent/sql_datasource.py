@@ -964,13 +964,12 @@ def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
     """
     Warns if a more specific datasource type may be more appropriate based on the connection string connector prefix.
     """  # noqa: E501
-    from great_expectations.datasource.fluent.sources import _SourceFactories
+    from great_expectations.datasource.fluent.sources import SourceFactories
 
     connector: str = connection_string.split("://")[0].split("+")[0]
 
     type_lookup_plus: dict[str, str] = {
-        n: _SourceFactories.type_lookup[n].__name__
-        for n in _SourceFactories.type_lookup.type_names()
+        n: SourceFactories.type_lookup[n].__name__ for n in SourceFactories.type_lookup.type_names()
     }
     # type names are not always exact match to connector strings
     type_lookup_plus.update(
