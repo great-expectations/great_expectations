@@ -56,18 +56,10 @@ def construct_ge_cloud_store_backend(
         pytest.param(
             "https://app.test.greatexpectations.io",
             "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-            "my_resource",
+            "expectation_suites",
             None,
-            "https://app.test.greatexpectations.io/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/my-resource",
-            id="no id",
-        ),
-        pytest.param(
-            "https://app.test.greatexpectations.io",
-            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-            "my_resource",
-            "8746e25c-de4d-450d-967b-df0d5546590d",
-            "https://app.test.greatexpectations.io/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/my-resource/8746e25c-de4d-450d-967b-df0d5546590d",
-            id="with id",
+            "https://app.test.greatexpectations.io/api/v1/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/expectation-suites",
+            id="no_id",
         ),
         pytest.param(
             "https://app.test.greatexpectations.io",
@@ -75,7 +67,7 @@ def construct_ge_cloud_store_backend(
             "expectation_suites",
             "8746e25c-de4d-450d-967b-df0d5546590d",
             "https://app.test.greatexpectations.io/api/v1/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/expectation-suites/8746e25c-de4d-450d-967b-df0d5546590d",
-            id="expectation-suites V1",
+            id="with_id",
         ),
     ],
 )
@@ -98,123 +90,41 @@ def test_construct_url(
 
 
 @pytest.mark.parametrize(
-    "resource_type,organization_id,attributes_key,attributes_value,kwargs,expected",
+    "attributes_value,kwargs,expected",
     [
         pytest.param(
-            "my_resource",
-            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-            "my_attribute",
-            "my_value",
-            {},
-            {
-                "data": {
-                    "type": "my_resource",
-                    "attributes": {
-                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-                        "my_attribute": "my_value",
-                    },
-                },
-            },
-            id="no kwargs",
-        ),
-        pytest.param(
-            "my_resource",
-            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-            "my_attribute",
-            {"key1": {"nested_key1": 1}, "key2": {"nested_key2": 2}},
-            {},
-            {
-                "data": {
-                    "type": "my_resource",
-                    "attributes": {
-                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-                        "my_attribute": {
-                            "key1": {"nested_key1": 1},
-                            "key2": {"nested_key2": 2},
-                        },
-                    },
-                },
-            },
-            id="with nested value",
-        ),
-        pytest.param(
-            "my_resource",
-            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-            "my_attribute",
-            "my_value",
-            {
-                "kwarg1": 1,
-                "kwarg2": 2,
-            },
-            {
-                "data": {
-                    "type": "my_resource",
-                    "attributes": {
-                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-                        "my_attribute": "my_value",
-                        "kwarg1": 1,
-                        "kwarg2": 2,
-                    },
-                },
-            },
-            id="with basic kwargs",
-        ),
-        pytest.param(
-            "my_resource",
-            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-            "my_attribute",
-            "my_value",
-            {
-                "kwarg1": {
-                    "nested1": 1,
-                },
-                "kwarg2": {
-                    "nested2": 2,
-                },
-            },
-            {
-                "data": {
-                    "type": "my_resource",
-                    "attributes": {
-                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-                        "my_attribute": "my_value",
-                        "kwarg1": {
-                            "nested1": 1,
-                        },
-                        "kwarg2": {
-                            "nested2": 2,
-                        },
-                    },
-                },
-            },
-            id="with nested kwargs",
-        ),
-        pytest.param(
-            "expectation_suite",
-            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-            "v1_configs_dont_use_attribute_key",
             {"expectations": [], "meta": None, "notes": None},
             {},
             {
                 "data": {"expectations": [], "meta": None, "notes": None},
             },
-            id="V1 expectation suite",
+            id="only_attributes_value",
+        ),
+        pytest.param(
+            {},
+            {"expectations": [], "meta": None, "notes": None},
+            {
+                "data": {"expectations": [], "meta": None, "notes": None},
+            },
+            id="only_kwargs",
+        ),
+        pytest.param(
+            {"expectations": [], "meta": None, "notes": None},
+            {"foo": "bar"},
+            {
+                "data": {"expectations": [], "meta": None, "notes": None, "foo": "bar"},
+            },
+            id="both_attributes_value_and_kwargs",
         ),
     ],
 )
 def test_construct_json_payload(
-    resource_type: str,
-    organization_id: str,
-    attributes_key: str,
     attributes_value: str,
     kwargs: dict,
     expected: dict,
 ) -> None:
     assert (
         GXCloudStoreBackend.construct_versioned_payload(
-            resource_type=resource_type,
-            organization_id=organization_id,
-            attributes_key=attributes_key,
             attributes_value=attributes_value,
             **kwargs,
         )
