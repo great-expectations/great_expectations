@@ -1,10 +1,14 @@
 
-from typing import TypeVar, Union
+from typing import Protocol, TypeVar, Union, runtime_checkable
 from contrib.experimental.metrics.mp_asset import MPBatchDefinition
 from contrib.experimental.metrics.mp_asset import MPBatchParameters, MPPartitioner, MPTableAsset
 
 
 SnowflakeAssetPartitionerT = TypeVar("SnowflakeAssetPartitionerT", bound=Union["SnowflakeTableAssetColumnYearlyPartitioner", "SnowflakeTableAssetColumnDailyPartitioner"])
+
+class SnowflakeMPTableAsset(MPTableAsset):
+    pass
+
 
 class SnowflakeTableAssetColumnYearlyPartitioner(MPPartitioner):
     column: str
@@ -25,4 +29,10 @@ class SnowflakeMPBatchDefinition(MPBatchDefinition[MPTableAsset, SnowflakeAssetP
     def get_selectable_str(self, batch_parameters: MPBatchParameters) -> str:
         return f"{self.data_asset.table_name} WHERE {self.partitioner.get_where_clause_str(batch_parameters=batch_parameters)}"
 
+@runtime_checkable
+class SnowflakeSelectableDomain(Protocol):
+    batch_definition: SnowflakeMPBatchDefinition
+    batch_parameters: MPBatchParameters
 
+    def get_selectable_str(self, batch_parameters: MPBatchParameters) -> str:
+        ...

@@ -1,8 +1,8 @@
 import uuid
 from contrib.experimental.metrics.data_source import MPDataSource
 from contrib.experimental.metrics.snowflake_provider import SnowflakeConnectionMetricProvider
-from contrib.experimental.metrics.snowflake_provider_asset import SnowflakeMPTableAsset
-from contrib.experimental.metrics.snowflake_provider_batch_definition import SnowflakeMPBatchDefinition, SnowflakeTableAssetColumnDailyPartitioner
+from contrib.experimental.metrics.snowflake_provider_domain import SnowflakeMPTableAsset
+from contrib.experimental.metrics.snowflake_provider_domain import SnowflakeMPBatchDefinition, SnowflakeTableAssetColumnDailyPartitioner
 from great_expectations.compatibility import pydantic
 
 from great_expectations.core.partitioners import ColumnPartitionerDaily

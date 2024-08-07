@@ -1,15 +1,14 @@
-from contrib.experimental.metrics.metric import (
-    ColumnMeanMetric,
-    ColumnValuesMatchRegexMetric,
+from contrib.experimental.metrics.column_metric import ColumnMeanMetric, ColumnValuesMatchRegexMetric
+from contrib.experimental.metrics.column_metric import (
     ColumnValuesMatchRegexUnexpectedValuesMetric,
 )
 from contrib.experimental.metrics.metric_provider import (
     MetricImplementation,
     MetricProvider,
 )
-from contrib.experimental.metrics.mp_asset import MPBatchParameters
-from contrib.experimental.metrics.snowflake_provider_batch_definition import (
-    SnowflakeMPBatchDefinition,
+from contrib.experimental.metrics.domain import MetricDomain
+from contrib.experimental.metrics.snowflake_provider_domain import (
+    SnowflakeSelectableDomain,
 )
 
 # TODO: maybe replace with gx compatibility layer, but I think that may be anchored to sqlalchemy
@@ -36,18 +35,12 @@ class SnowflakeConnectionMetricProvider(
 
     def get_selectable(
         self,
-        batch_definition: SnowflakeMPBatchDefinition,
-        batch_parameters: MPBatchParameters,
+        domain: SnowflakeSelectableDomain
     ) -> str:
-        return batch_definition.get_selectable_str(
-            batch_parameters=batch_parameters
+        return domain.get_selectable_str(
+            batch_parameters=domain.batch_parameters,
         )
 
-    @property
-    def supported_batch_definition_types(
-        self,
-    ) -> list[type]:
-        return [SnowflakeMPBatchDefinition]
 
 class SnowflakeColumnMeanMetricImplementation(
     MetricImplementation[
@@ -60,12 +53,11 @@ class SnowflakeColumnMeanMetricImplementation(
 ):
     def compute(self) -> float | None:
         selectable = self._provider.get_selectable(
-            self._metric.batch_definition,
-            self._metric.batch_parameters,
+            self._metric.domain,
         )
         with self._provider.get_connection().cursor() as cursor:
             cursor.execute(
-                f"SELECT AVG({self._metric.column}) FROM {selectable}"
+                f"SELECT AVG({self._metric.domain.column}) FROM {selectable}"
             )
             res = cursor.fetchone()
             if res is None:
@@ -85,15 +77,14 @@ class SnowflakeColumnValuesMatchRegexMetricImplementation(
 ):
     def compute(self) -> int:
         selectable = self._provider.get_selectable(
-            self._metric.batch_definition,
-            self._metric.batch_parameters,
+            self._metric.domain
         )
         # TODO: This highlights where we might want to use a metric dependency
         # e.g. on value counts -- otherwise we have a separate metric for the
         # count, for the ratio, etc.
         with self._provider.get_connection().cursor() as cursor:
             cursor.execute(
-                f"SELECT COUNT(*) FROM {selectable} WHERE {self._metric.column} REGEXP '{self._metric.regex}'"
+                f"SELECT COUNT(*) FROM {selectable} WHERE {self._metric.domain.column} NOT REGEXP '{self._metric.regex}'"
             )
             res = cursor.fetchone()
             if res is None:
@@ -112,12 +103,11 @@ class SnowflakeColumnValuesMatchRegexUnexpectedValuesMetricImplementation(
 ):
     def compute(self) -> list[str]:
         selectable = self._provider.get_selectable(
-            self._metric.batch_definition,
-            self._metric.batch_parameters,
+            self._metric.domain
         )
         with self._provider.get_connection().cursor() as cursor:
             cursor.execute(
-                f"SELECT {self._metric.column} FROM {selectable} WHERE {self._metric.column} REGEXP '{self._metric.regex}' LIMIT {self._metric.limit}"
+                f"SELECT {self._metric.domain.column} FROM {selectable} WHERE {self._metric.domain.column} NOT REGEXP '{self._metric.regex}' LIMIT {self._metric.limit}"
             )
             res = cursor.fetchall()
             if res is None:

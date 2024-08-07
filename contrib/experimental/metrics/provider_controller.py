@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from contrib.experimental.metrics.metric_provider import Metric, MetricProvider, MetricValue
+from contrib.experimental.metrics.metric import Metric
+from contrib.experimental.metrics.metric_provider import MetricProvider, MetricValue
 
 
 class MPCache(ABC):
@@ -40,7 +41,7 @@ class MetricProviderController:
 
         # if it's not in the cache, find a data source that can provide it
         for metric_provider in self._metric_providers:
-            if metric_provider.is_supported_batch_definition(metric.batch_definition):
+            if metric_provider.is_supported_domain(metric.batch_definition):
                 metric_impl = metric_provider.get_metric_implementation(metric)
                 try:
                     value = metric_impl.compute()

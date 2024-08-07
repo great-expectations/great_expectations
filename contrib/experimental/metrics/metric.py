@@ -1,42 +1,31 @@
-from typing import Literal
-from contrib.experimental.metrics.metric_provider import Metric
-
-class ColumnMeanMetric(Metric):
-    name: Literal["ColumnMeanMetric"] = "ColumnMeanMetric"
-    column: str
-
-    def id(self):
-        return "__".join((
-            self.name,
-            self.batch_definition.get_id(self.batch_parameters),
-            self.column
-        ))
+from typing import Protocol
+from contrib.experimental.metrics.domain import MetricDomain
+from contrib.experimental.metrics.domain import ColumnMetricDomain
+from great_expectations.compatibility import pydantic
 
 
-class ColumnValuesMatchRegexMetric(Metric):
-    name: Literal["ColumnValuesMatchRegexMetric"] = "ColumnValuesMatchRegexMetric"
-    column: str
-    regex: str
 
-    def id(self):
-        return "__".join((
-            self.name,
-            self.batch_definition.get_id(self.batch_parameters),
-            self.column,
-            self.regex
-        ))
+from abc import ABC, abstractmethod
 
-class ColumnValuesMatchRegexUnexpectedValuesMetric(Metric):
-    name: Literal["ColumnValuesMatchRegexUnexpectedValuesMetric"] = "ColumnValuesMatchRegexUnexpectedValuesMetric"
 
-    column: str
-    regex: str
-    limit: int = 20
+class Metric(Protocol):
+    @property
+    def name(self) -> str:
+        ...
 
-    def id(self):
-        return "__".join((
-            self.name,
-            self.batch_definition.get_id(self.batch_parameters),
-            self.column,
-            self.regex
-        ))
+    @property
+    def domain(self) -> MetricDomain:
+        ...    
+
+    @property
+    def id(self) -> str:
+        ...
+
+
+class ColumnMetric(ABC, pydantic.BaseModel):
+    domain: ColumnMetricDomain
+
+    @property
+    @abstractmethod
+    def id(self) -> str:
+        pass
