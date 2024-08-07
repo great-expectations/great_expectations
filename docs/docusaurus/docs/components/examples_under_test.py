@@ -143,7 +143,10 @@ airflow_tests = [
     IntegrationTestFixture(
         name="connect_airflow",
         user_flow_script="docs/docusaurus/docs/cloud/connect/airflow_example_dag.py",
-        backend_dependencies=[BackendDependencies.AIRFLOW, BackendDependencies.PENDULUM],
+        backend_dependencies=[
+            BackendDependencies.AIRFLOW,
+            BackendDependencies.PENDULUM,
+        ],
     )
 ]
 
