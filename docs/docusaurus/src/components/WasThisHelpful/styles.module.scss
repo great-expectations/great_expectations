@@ -216,3 +216,35 @@
         max-height: unset;
     }
 }
+
+[data-theme='dark'] {
+    .feedbackCard {
+        background-color: #404041;
+        border-color: #404041;
+        box-shadow: 0 3px 6px #00000029;
+    }
+
+    .feedbackCardTitle {
+        color: var(--ifm-font-color-base);
+    }
+
+    .feedbackButton:enabled:hover {
+        background-color: #66371D;
+    }
+
+    .feedbackDivider {
+        border-color: #6E6E6E;
+    }
+
+    .modal {
+        background-color: #222222;
+    }
+
+    .modalTextInput {
+        border-color: #F4F4F7;
+    }
+
+    .modalTextLabel {
+        color: var(--ifm-font-color-base);
+    }
+}
