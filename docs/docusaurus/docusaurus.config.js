@@ -90,7 +90,7 @@ module.exports = {
       ]
     },
     colorMode: {
-      disableSwitch: true,
+      disableSwitch: false,
     },
     zoomSelector: '.markdown :not(em) > img',
     // announcementBar: {
@@ -126,6 +126,10 @@ module.exports = {
           type: 'search',
           position: 'left',
           className: 'custom-search-bar',
+        },
+        {
+          type: 'custom-colorModeToggle',
+          position: 'left',
         },
         {
           type: 'custom-githubNavbarItem',

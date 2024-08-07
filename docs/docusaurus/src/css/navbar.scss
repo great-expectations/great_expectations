@@ -92,6 +92,11 @@
   }
 }
 
+[data-theme='dark'] .navbar__items--right {
+  background-color: #727272;
+  border-bottom: 1px solid #6E6E6E;
+}
+
 .navbar__inner > div:first-child .navbar__item.dropdown {
   border: 1px solid var(--ifm-color-primary);
   border-radius: 6px;
@@ -114,6 +119,10 @@
     border-bottom: none;
     color: var(--ifm-navbar-link-color);
   }
+}
+
+[data-theme='dark'] .navbar__link--active {
+  color: var(--ifm-color-primary);
 }
 
 .header-cloud-link {

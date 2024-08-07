@@ -296,3 +296,11 @@ li p + ol {
 .code-block-hide-line {
   display:none;
 }
+
+[data-theme='dark'] {
+  --ifm-font-color-base: #FAFAFA;
+  --ifm-navbar-link-color: #FAFAFA;
+  --ifm-menu-color: #FAFAFA;
+  --ifm-background-color: #262626;
+  --ifm-navbar-background-color: #262626;
+}
