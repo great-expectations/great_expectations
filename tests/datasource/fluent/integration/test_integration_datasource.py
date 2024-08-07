@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Callable
 from unittest import mock
 
 import pandas as pd
@@ -24,6 +25,7 @@ from great_expectations.core.partitioners import (
 from great_expectations.data_context import (
     AbstractDataContext,
     CloudDataContext,
+    EphemeralDataContext,
     FileDataContext,
 )
 from great_expectations.datasource.fluent import (
@@ -33,6 +35,8 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.validator.v1_validator import Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
@@ -43,12 +47,16 @@ from tests.datasource.fluent.integration.integration_test_utils import (
 if TYPE_CHECKING:
     from responses import RequestsMock
 
+    from great_expectations.compatibility.pyspark import DataFrame as SparkDataFrame
+    from great_expectations.compatibility.pyspark import SparkSession
     from great_expectations.datasource.fluent.pandas_datasource import (
         DataFrameAsset as PandasDataFrameAsset,
     )
+    from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
     from great_expectations.datasource.fluent.spark_datasource import (
         DataFrameAsset as SparkDataFrameAsset,
     )
+    from great_expectations.datasource.fluent.spark_datasource import SparkDatasource
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
@@ -469,8 +477,10 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
     dataframe_asset: PandasDataFrameAsset = context.data_sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
+    batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = batch_def.get_batch(batch_parameters={"dataframe": df})
+    assert isinstance(batch.data, PandasBatchData)
+    assert batch.data.dataframe.equals(df)
 
 
 @pytest.mark.filesystem
@@ -483,15 +493,20 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
 
     datasource = context.data_sources.add_or_update_pandas(name="fluent_pandas_datasource")
     dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
+    batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = batch_def.get_batch(batch_parameters={"dataframe": df})
+    assert isinstance(batch.data, PandasBatchData)
+    assert batch.data.dataframe.equals(df)
 
+    # Reload the asset and see that we can re-add the df to the batch definition
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
         asset_name="my_df_asset"
     )
-    _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
+    reloaded_batch_def = dataframe_asset.get_batch_definition(batch_definition_name="bd")
+    batch = reloaded_batch_def.get_batch(batch_parameters={"dataframe": df})
+    assert isinstance(batch.data, PandasBatchData)
+    assert batch.data.dataframe.equals(df)
 
 
 @pytest.mark.spark
@@ -507,10 +522,12 @@ def test_spark_data_adding_dataframe_in_cloud_context(
     context = empty_cloud_context_fluent
 
     dataframe_asset: SparkDataFrameAsset = context.data_sources.add_or_update_spark(
-        name="fluent_pandas_datasource"
+        name="fluent_spark_datasource"
     ).add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = batch_def.get_batch(batch_parameters={"dataframe": spark_df})
+    assert isinstance(batch.data, SparkDFBatchData)
+    assert batch.data.dataframe.toPandas().equals(df)
 
 
 @pytest.mark.spark
@@ -525,19 +542,124 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
     context = empty_file_context
 
     dataframe_asset: SparkDataFrameAsset = context.data_sources.add_or_update_spark(
-        name="fluent_pandas_datasource"
+        name="fluent_spark_datasource"
     ).add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
-
-    datasource = context.data_sources.add_or_update_spark(name="fluent_pandas_datasource")
-    dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    batch_def = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = batch_def.get_batch(batch_parameters={"dataframe": spark_df})
+    assert isinstance(batch.data, SparkDFBatchData)
+    assert batch.data.dataframe.toPandas().equals(df)
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
-    dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
-        asset_name="my_df_asset"
+    retrieved_bd = (
+        context.get_datasource(datasource_name="fluent_spark_datasource")
+        .get_asset(asset_name="my_df_asset")
+        .get_batch_definition(batch_definition_name="bd")
     )
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    new_batch = retrieved_bd.get_batch(batch_parameters={"dataframe": spark_df})
+    assert isinstance(new_batch.data, SparkDFBatchData)
+    assert new_batch.data.dataframe.toPandas().equals(df)
+
+
+@dataclass
+class PandasDataSourceAndFrame:
+    datasource: PandasDatasource
+    dataframe: pd.DataFrame
+
+
+@dataclass
+class SparkDataSourceAndFrame:
+    datasource: SparkDatasource
+    dataframe: SparkDataFrame
+
+
+def _validate_whole_dataframe_batch(
+    source_and_frame: PandasDataSourceAndFrame | SparkDataSourceAndFrame,
+):
+    my_expectation = gxe.ExpectColumnMeanToBeBetween(
+        column="column_name", min_value=2.5, max_value=3.5
+    )
+    asset = source_and_frame.datasource.add_dataframe_asset(name="asset")
+    bd = asset.add_batch_definition_whole_dataframe(name="bd")
+    batch = bd.get_batch(batch_parameters={"dataframe": source_and_frame.dataframe})
+    result = batch.validate(my_expectation)
+    assert result.success
+
+
+@pytest.mark.unit
+def test_validate_pandas_batch():
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_pandas(name="ds")
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    _validate_whole_dataframe_batch(PandasDataSourceAndFrame(datasource=datasource, dataframe=df))
+
+
+@pytest.mark.spark
+def test_validate_spark_batch(
+    spark_session: SparkSession,
+    spark_df_from_pandas_df: Callable[[SparkSession, pd.DataFrame], SparkDataFrame],
+):
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_spark(name="ds")
+    spark_df = spark_df_from_pandas_df(
+        spark_session, pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    )
+    _validate_whole_dataframe_batch(
+        SparkDataSourceAndFrame(datasource=datasource, dataframe=spark_df)
+    )
+
+
+@dataclass
+class ContextPandasDataSourceAndFrame:
+    context: EphemeralDataContext
+    datasource: PandasDatasource
+    dataframe: pd.DataFrame
+
+
+@dataclass
+class ContextSparkDataSourceAndFrame:
+    context: EphemeralDataContext
+    datasource: SparkDatasource
+    dataframe: SparkDataFrame
+
+
+def _validate_whole_dataframe_batch_definition(
+    context_source_frame: ContextPandasDataSourceAndFrame | ContextSparkDataSourceAndFrame,
+):
+    asset = context_source_frame.datasource.add_dataframe_asset(name="asset")
+    bd = asset.add_batch_definition_whole_dataframe(name="bd")
+    suite = context_source_frame.context.suites.add(gx.ExpectationSuite(name="suite"))
+    suite.add_expectation(
+        gxe.ExpectColumnMeanToBeBetween(column="column_name", min_value=2.5, max_value=3.5)
+    )
+    validation_def = gx.ValidationDefinition(
+        name="vd",
+        data=bd,
+        suite=suite,
+    )
+    result = validation_def.run(batch_parameters={"dataframe": context_source_frame.dataframe})
+    assert result.success
+
+
+@pytest.mark.unit
+def test_validate_pandas_batch_definition():
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_pandas(name="ds")
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    _validate_whole_dataframe_batch_definition(
+        ContextPandasDataSourceAndFrame(context=context, datasource=datasource, dataframe=df)
+    )
+
+
+@pytest.mark.spark
+def test_validate_spark_batch_definition(
+    spark_session: SparkSession,
+    spark_df_from_pandas_df: Callable[[SparkSession, pd.DataFrame], SparkDataFrame],
+):
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_spark(name="ds")
+    spark_df = spark_df_from_pandas_df(
+        spark_session, pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    )
+    _validate_whole_dataframe_batch_definition(
+        ContextSparkDataSourceAndFrame(context=context, datasource=datasource, dataframe=spark_df)
+    )
