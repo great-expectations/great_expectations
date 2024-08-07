@@ -101,7 +101,7 @@ def batch_request(
             },
         )
         spark_df: pyspark.DataFrame = spark_df_from_pandas_df(spark_session, pandas_df)
-        batch_request = data_asset.build_batch_request(dataframe=spark_df)
+        batch_request = data_asset.build_batch_request(options={"dataframe": spark_df})
     else:
         batch_request = data_asset.build_batch_request()
     return batch_request

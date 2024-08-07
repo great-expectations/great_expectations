@@ -103,7 +103,7 @@ def batch_request(
     if isinstance(data_asset, DataFrameAsset):
         with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
             data_asset.build_batch_request()
-        batch_request = data_asset.build_batch_request(dataframe=pandas_test_df)
+        batch_request = data_asset.build_batch_request(options={"dataframe": pandas_test_df})
     else:
         batch_request = data_asset.build_batch_request()
     return batch_request
