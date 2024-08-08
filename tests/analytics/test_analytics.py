@@ -5,7 +5,6 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.analytics.config import (
-    DUMMY_UUID,
     ENV_CONFIG,
     Config,
     get_config,
@@ -24,23 +23,23 @@ TESTING_UUID = UUID("00000000-c000-0000-0000-000000000000")
             Config(
                 organization_id=TESTING_UUID,
                 user_id=TESTING_UUID,
-                data_context_id=DUMMY_UUID,
-                oss_id=DUMMY_UUID,
+                data_context_id=None,
+                oss_id=None,
                 cloud_mode=False,
             ),
             TESTING_UUID,
             {
                 "user_id": TESTING_UUID,
                 "organization_id": TESTING_UUID,
-                "data_context_id": DUMMY_UUID,
-                "oss_id": DUMMY_UUID,
+                "data_context_id": None,
+                "oss_id": None,
                 "service": "gx-core",
             },
         ),
         (
             Config(),
-            DUMMY_UUID,
-            {"data_context_id": DUMMY_UUID, "oss_id": DUMMY_UUID, "service": "gx-core"},
+            None,
+            {"data_context_id": None, "oss_id": None, "service": "gx-core"},
         ),
     ],
 )
