@@ -137,7 +137,7 @@ class ValidationAction(BaseModel):
         return None
 
 
-def _is_enabled(success: bool, notify_on: Literal["all", "failure", "success"]) -> bool:
+def _should_notify(success: bool, notify_on: Literal["all", "failure", "success"]) -> bool:
     return (
         notify_on == "all"
         or notify_on == "success"
@@ -257,7 +257,7 @@ class SlackNotificationAction(DataDocsAction):
         checkpoint_name = checkpoint_result.checkpoint_config.name
         result = {"slack_notification_result": "none required"}
 
-        if not _is_enabled(success=success, notify_on=self.notify_on):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return result
 
         checkpoint_text_blocks: list[dict] = []
@@ -367,7 +367,7 @@ class PagerdutyAlertAction(ValidationAction):
         return self._run_pypd_alert(dedup_key=checkpoint_name, message=summary, success=success)
 
     def _run_pypd_alert(self, dedup_key: str, message: str, success: bool):
-        if _is_enabled(success=success, notify_on=self.notify_on):
+        if _should_notify(success=success, notify_on=self.notify_on):
             pypd.api_key = self.api_key
             pypd.EventV2.create(
                 data={
@@ -439,7 +439,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     @override
     def run(self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None):
         success = checkpoint_result.success or False
-        if not _is_enabled(success=success, notify_on=self.notify_on):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return {"microsoft_teams_notification_result": None}
 
         data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
@@ -506,7 +506,7 @@ class OpsgenieAlertAction(ValidationAction):
         validation_success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
 
-        if _is_enabled(success=validation_success, notify_on=self.notify_on):
+        if _should_notify(success=validation_success, notify_on=self.notify_on):
             settings = {
                 "api_key": self.api_key,
                 "region": self.region,
@@ -629,7 +629,7 @@ class EmailAction(ValidationAction):
         action_context: ActionContext | None = None,
     ) -> dict:
         success = checkpoint_result.success or False
-        if not _is_enabled(success=success, notify_on=self.notify_on):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return {"email_result": ""}
 
         title, html = self.renderer.render(checkpoint_result=checkpoint_result)
@@ -782,7 +782,6 @@ class SNSNotificationAction(ValidationAction):
 
     type: Literal["sns"] = "sns"
 
-    notify_on: Literal["all", "failure", "success"] = "all"
     sns_topic_arn: str
     sns_message_subject: Optional[str]
 
@@ -804,7 +803,6 @@ class SNSNotificationAction(ValidationAction):
 class APINotificationAction(ValidationAction):
     type: Literal["api"] = "api"
 
-    notify_on: Literal["all", "failure", "success"] = "all"
     url: str
 
     @override
