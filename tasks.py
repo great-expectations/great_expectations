@@ -904,7 +904,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         requirement_files=(
             "reqs/requirements-dev-test.txt",
             "reqs/requirements-dev-spark.txt",
-            "reqs/requirements-dev-airflow.txt"
+            "reqs/requirements-dev-airflow.txt",
         ),
         services=("spark",),
         extra_pytest_args=("--spark", "--docs-tests"),
