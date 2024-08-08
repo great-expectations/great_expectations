@@ -25,7 +25,7 @@ class MetricStore(Store):
 
     _key_class: ClassVar[Type] = ValidationMetricIdentifier
 
-    def __init__(self, store_backend=None, store_name=None) -> None:
+    def __init__(self, store_backend=None, runtime_environment=None, store_name=None) -> None:
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -51,7 +51,11 @@ class MetricStore(Store):
                         ],
                     )
 
-        super().__init__(store_backend=store_backend, store_name=store_name)
+        super().__init__(
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            store_name=store_name,
+        )
 
     def serialize(self, value):
         return json.dumps({"value": value})
@@ -62,7 +66,12 @@ class MetricStore(Store):
 
 
 class SuiteParameterStore(MetricStore):
-    def __init__(self, store_backend=None, store_name=None) -> None:
+    def __init__(
+        self,
+        store_backend=None,
+        runtime_environment=None,
+        store_name=None,
+    ):
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -75,7 +84,11 @@ class SuiteParameterStore(MetricStore):
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 store_backend["table_name"] = store_backend.get("table_name", "ge_suite_parameters")
-        super().__init__(store_backend=store_backend, store_name=store_name)
+        super().__init__(
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            store_name=store_name,
+        )
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501

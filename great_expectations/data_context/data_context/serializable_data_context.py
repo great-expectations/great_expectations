@@ -47,6 +47,7 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.VALIDATION_DEFINITIONS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.SUITE_PARAMETERS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
     GX_DIR: ClassVar[str] = "gx"

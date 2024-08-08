@@ -1211,7 +1211,11 @@ class DataContextConfigDefaults(enum.Enum):
     )
 
     DEFAULT_SUITE_PARAMETER_STORE_NAME = "suite_parameter_store"
-    DEFAULT_SUITE_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = "suite_parameters/"
+    SUITE_PARAMETERS_BASE_DIRECTORY = "suite_parameters"
+    DEFAULT_SUITE_PARAMETERS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"{SUITE_PARAMETERS_BASE_DIRECTORY}/"
+    )
+
     DATA_DOCS_BASE_DIRECTORY = "data_docs"
     DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
 
@@ -1261,7 +1265,13 @@ class DataContextConfigDefaults(enum.Enum):
             "base_directory": DEFAULT_VALIDATION_DEFINITION_STORE_BASE_DIRECTORY_RELATIVE_NAME,
         },
     }
-    DEFAULT_SUITE_PARAMETER_STORE = {"class_name": "SuiteParameterStore"}
+    DEFAULT_SUITE_PARAMETER_STORE = {
+        "class_name": "SuiteParameterStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": DEFAULT_SUITE_PARAMETERS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+        },
+    }
     DEFAULT_CHECKPOINT_STORE = {
         "class_name": "CheckpointStore",
         "store_backend": {
@@ -1469,6 +1479,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
                 "root_directory"
             ] = root_directory
             self.stores[self.validation_definition_store_name]["store_backend"][  # type: ignore[index]
+                "root_directory"
+            ] = root_directory
+            self.stores[self.suite_parameter_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
             self.data_docs_sites[self.data_docs_site_name]["store_backend"][  # type: ignore[index]

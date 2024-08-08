@@ -82,8 +82,12 @@ VALIDATIONS_STORE_STRING = yaml.dump(
     }
 ).replace("\n", "\n  ")[:-2]
 SUITE_PARAMETER_STORE_STRING = yaml.dump(
-    DataContextConfigDefaults.DEFAULT_STORES.value["suite_parameter_store"]
-)
+    {
+        "suite_parameter_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "suite_parameter_store"
+        ]
+    }
+).replace("\n", "\n  ")[:-2]
 CHECKPOINT_STORE_STRING = yaml.dump(
     {"checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]}
 ).replace("\n", "\n  ")[:-2]
@@ -109,15 +113,10 @@ stores:
 # Data Docs, and more. These are for advanced users only - most users can simply
 # leave this section alone.
 #
-# Three stores are required: expectations, validations, and
-# suite_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, etc.
+# Additional stores can be configured for uses such as data_docs, etc.
   {EXPECTATIONS_STORE_STRING}
   {VALIDATIONS_STORE_STRING}
-  suite_parameter_store:
-    # Suite Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/docs/reference/suite_parameters/
-    {SUITE_PARAMETER_STORE_STRING}
+  {SUITE_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
   {VALIDATION_DEFINITION_STORE_STRING}
 expectations_store_name: expectations_store
