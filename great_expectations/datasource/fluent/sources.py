@@ -77,7 +77,7 @@ CrudMethodInfoFn: TypeAlias = Callable[..., Tuple[CrudMethodType, Type["Datasour
 
 
 @public_api
-class SourceFactories:
+class DataSourceManager:
     """
     Contains methods to interact with data sources from the gx context
 
@@ -642,8 +642,8 @@ def _iter_all_registered_types(
     Iterate through all registered Datasource and DataAsset types.
     Returns tuples of the registered type name and the actual type/class.
     """
-    for ds_name in SourceFactories.type_lookup.type_names():
-        ds_type: Type[Datasource] = SourceFactories.type_lookup[ds_name]
+    for ds_name in DataSourceManager.type_lookup.type_names():
+        ds_type: Type[Datasource] = DataSourceManager.type_lookup[ds_name]
         if include_datasource:
             yield ds_name, ds_type
 

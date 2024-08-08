@@ -30,7 +30,7 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
 from great_expectations.datasource.fluent.sources import (
-    SourceFactories,
+    DataSourceManager,
     TypeRegistrationError,
 )
 from great_expectations.execution_engine import ExecutionEngine
@@ -74,14 +74,14 @@ class DataContext:
     @validate_arguments
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
         self.root_directory = context_root_dir
-        self._data_sources: SourceFactories = SourceFactories(self)  # type: ignore[arg-type]
+        self._data_sources: DataSourceManager = DataSourceManager(self)  # type: ignore[arg-type]
         self._datasources: Dict[str, Datasource] = {}
         self.config_provider: _ConfigurationProvider | None = None
         logger.info(f"Available Factories - {self._data_sources.factories}")
         logger.debug(f"`type_lookup` mapping ->\n{pf(self._data_sources.type_lookup)}")
 
     @property
-    def data_sources(self) -> SourceFactories:
+    def data_sources(self) -> DataSourceManager:
         return self._data_sources
 
     @property
@@ -130,12 +130,12 @@ class DummyDataAsset(DataAsset):
 
 
 @pytest.fixture(scope="function")
-def context_sources_cleanup() -> Generator[SourceFactories, None, None]:
+def context_sources_cleanup() -> Generator[DataSourceManager, None, None]:
     """Return the sources object and reset types/factories on teardown"""
     try:
         # setup
-        sources_copy = copy.deepcopy(SourceFactories._SourceFactories__crud_registry)  # type: ignore[attr-defined]
-        type_lookup_copy = copy.deepcopy(SourceFactories.type_lookup)
+        sources_copy = copy.deepcopy(DataSourceManager._DataSourceManager__crud_registry)  # type: ignore[attr-defined]
+        type_lookup_copy = copy.deepcopy(DataSourceManager.type_lookup)
         sources = get_context().data_sources
 
         assert (
@@ -144,15 +144,15 @@ def context_sources_cleanup() -> Generator[SourceFactories, None, None]:
 
         yield sources
     finally:
-        SourceFactories._SourceFactories__crud_registry = sources_copy  # type: ignore[attr-defined]
-        SourceFactories.type_lookup = type_lookup_copy
+        DataSourceManager._DataSourceManager__crud_registry = sources_copy  # type: ignore[attr-defined]
+        DataSourceManager.type_lookup = type_lookup_copy
 
 
 @pytest.fixture(scope="function")
-def empty_sources(context_sources_cleanup) -> Generator[SourceFactories, None, None]:
-    SourceFactories._SourceFactories__crud_registry.clear()  # type: ignore[attr-defined]
-    SourceFactories.type_lookup.clear()
-    assert not SourceFactories.type_lookup
+def empty_sources(context_sources_cleanup) -> Generator[DataSourceManager, None, None]:
+    DataSourceManager._DataSourceManager__crud_registry.clear()  # type: ignore[attr-defined]
+    DataSourceManager.type_lookup.clear()
+    assert not DataSourceManager.type_lookup
     yield context_sources_cleanup
 
 
@@ -164,7 +164,7 @@ class DummyExecutionEngine(ExecutionEngine):
 @pytest.mark.unit
 class TestMetaDatasource:
     def test__new__only_registers_expected_number_of_datasources_factories_and_types(
-        self, empty_sources: SourceFactories
+        self, empty_sources: DataSourceManager
     ):
         assert len(empty_sources.factories) == 0
         assert len(empty_sources.type_lookup) == 0
@@ -184,7 +184,9 @@ class TestMetaDatasource:
         assert len(empty_sources.type_lookup) == 2
         assert "my_test" in empty_sources.type_lookup
 
-    def test__new__registers_sources_factory_method(self, context_sources_cleanup: SourceFactories):
+    def test__new__registers_sources_factory_method(
+        self, context_sources_cleanup: DataSourceManager
+    ):
         expected_method_name = "add_my_test"
 
         ds_factory_method_initial = getattr(context_sources_cleanup, expected_method_name, None)
@@ -206,7 +208,7 @@ class TestMetaDatasource:
         ), f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
 
     def test_registered_sources_factory_method_has_correct_signature(
-        self, context_sources_cleanup: SourceFactories
+        self, context_sources_cleanup: DataSourceManager
     ):
         expected_method_name = "add_my_test"
 
@@ -240,7 +242,7 @@ class TestMetaDatasource:
             assert param_name in ds_factory_method_sig.parameters
             print("✅")
 
-    def test__new__updates_asset_type_lookup(self, context_sources_cleanup: SourceFactories):
+    def test__new__updates_asset_type_lookup(self, context_sources_cleanup: DataSourceManager):
         class FooAsset(DummyDataAsset):
             type: str = "foo"
 
@@ -270,7 +272,7 @@ class TestMetaDatasource:
 
 @pytest.mark.unit
 class TestMisconfiguredMetaDatasource:
-    def test_ds_type_field_not_set(self, empty_sources: SourceFactories):
+    def test_ds_type_field_not_set(self, empty_sources: DataSourceManager):
         with pytest.raises(
             TypeRegistrationError,
             match=r"`MissingTypeDatasource` is missing a `type` attribute",
@@ -288,7 +290,7 @@ class TestMisconfiguredMetaDatasource:
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
 
-    def test_ds_execution_engine_type_not_defined(self, empty_sources: SourceFactories):
+    def test_ds_execution_engine_type_not_defined(self, empty_sources: DataSourceManager):
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
 
@@ -298,7 +300,7 @@ class TestMisconfiguredMetaDatasource:
         with pytest.raises(NotImplementedError):
             MissingExecEngineTypeDatasource(name="name").get_execution_engine()
 
-    def test_ds_assets_type_field_not_set(self, empty_sources: SourceFactories):
+    def test_ds_assets_type_field_not_set(self, empty_sources: DataSourceManager):
         with pytest.raises(
             TypeRegistrationError,
             match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",  # noqa: E501
@@ -322,7 +324,7 @@ class TestMisconfiguredMetaDatasource:
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
 
-    def test_ds_test_connection_not_defined(self, empty_sources: SourceFactories):
+    def test_ds_test_connection_not_defined(self, empty_sources: DataSourceManager):
         class MissingTestConnectionDatasource(Datasource):
             type: str = "valid"
 

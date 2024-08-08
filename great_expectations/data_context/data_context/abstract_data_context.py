@@ -84,7 +84,7 @@ from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
 from great_expectations.datasource.fluent.interfaces import (
     Datasource as FluentDatasource,
 )
-from great_expectations.datasource.fluent.sources import SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.validator import Validator
 
@@ -251,7 +251,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         submit_event(event=DataContextInitializedEvent())
 
     def _init_factories(self) -> None:
-        self._data_sources: SourceFactories = SourceFactories(self)
+        self._data_sources: DataSourceManager = DataSourceManager(self)
 
         self._suites: SuiteFactory | None = None
         if expectations_store := self.stores.get(self.expectations_store_name):
@@ -529,7 +529,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     @public_api
-    def data_sources(self) -> SourceFactories:
+    def data_sources(self) -> DataSourceManager:
         return self._data_sources
 
     @property
@@ -557,7 +557,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if not datasource:
-            ds_type = SourceFactories.type_lookup[kwargs["type"]]
+            ds_type = DataSourceManager.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
         assert isinstance(datasource, FluentDatasource)
 
@@ -583,7 +583,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if not datasource:
-            ds_type = SourceFactories.type_lookup[kwargs["type"]]
+            ds_type = DataSourceManager.type_lookup[kwargs["type"]]
             updated_datasource = ds_type(**kwargs)
         else:
             updated_datasource = datasource

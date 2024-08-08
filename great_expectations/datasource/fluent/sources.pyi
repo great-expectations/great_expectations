@@ -71,7 +71,7 @@ class _FieldDetails(NamedTuple):
 
 def _get_field_details(model: Type[pydantic.BaseModel], field_name: str) -> _FieldDetails: ...
 
-class SourceFactories:
+class DataSourceManager:
     type_lookup: ClassVar[TypeLookup]
     def __init__(self, data_context: GXDataContext) -> None: ...
     @classmethod

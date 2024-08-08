@@ -16,7 +16,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
     ProgressBarsConfig,
 )
-from great_expectations.datasource.fluent.sources import SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 
 
@@ -121,7 +121,7 @@ def in_memory_data_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
     context = EphemeralDataContextSpy(project_config=config)
-    ds_type = SourceFactories.type_lookup[fluent_datasource_config["type"]]
+    ds_type = DataSourceManager.type_lookup[fluent_datasource_config["type"]]
     fluent_datasources = {
         fluent_datasource_config["name"]: ds_type(**fluent_datasource_config),
     }
