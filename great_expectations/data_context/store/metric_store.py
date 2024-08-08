@@ -25,7 +25,12 @@ class MetricStore(Store):
 
     _key_class: ClassVar[Type] = ValidationMetricIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None, store_name=None) -> None:
+    def __init__(
+        self,
+        store_backend: dict | None = None,
+        runtime_environment: dict | None = None,
+        store_name: str | None = None,
+    ) -> None:
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -68,10 +73,10 @@ class MetricStore(Store):
 class SuiteParameterStore(MetricStore):
     def __init__(
         self,
-        store_backend=None,
-        runtime_environment=None,
-        store_name=None,
-    ):
+        store_backend: dict | None = None,
+        runtime_environment: dict | None = None,
+        store_name: str | None = None,
+    ) -> None:
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
