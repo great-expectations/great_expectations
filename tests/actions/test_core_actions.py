@@ -194,7 +194,6 @@ class TestActionSerialization:
         },
         UpdateDataDocsAction: {
             "name": "my_data_docs_action",
-            "notify_on": "all",
             "site_names": EXAMPLE_SITE_NAMES,
             "type": "update_data_docs",
         },

@@ -782,6 +782,7 @@ class SNSNotificationAction(ValidationAction):
 
     type: Literal["sns"] = "sns"
 
+    notify_on: Literal["all", "failure", "success"] = "all"
     sns_topic_arn: str
     sns_message_subject: Optional[str]
 
@@ -803,6 +804,7 @@ class SNSNotificationAction(ValidationAction):
 class APINotificationAction(ValidationAction):
     type: Literal["api"] = "api"
 
+    notify_on: Literal["all", "failure", "success"] = "all"
     url: str
 
     @override
