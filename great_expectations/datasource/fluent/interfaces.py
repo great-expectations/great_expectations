@@ -322,6 +322,9 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
             """One needs to implement "get_batch_parameters_keys" on a DataAsset subclass."""
         )
 
+    def save(self) -> None:
+        self.datasource.save()
+
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
@@ -636,6 +639,14 @@ class Datasource(
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
+
+    def save(self) -> None:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        store = project_manager.get_datasources().store
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.update(key=key, value=self)
 
     def add_batch_definition(
         self, batch_definition: BatchDefinition[PartitionerT]

@@ -81,6 +81,10 @@ class DatasourceDict(UserDict):
 
         return datasources
 
+    @property
+    def store(self) -> DatasourceStore:
+        return self._datasource_store
+
     def set_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource | None:
         config = self._prep_fds_config_for_set(name=name, ds=ds)
 
