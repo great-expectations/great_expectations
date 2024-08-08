@@ -47,11 +47,6 @@ fluent_datasources:
     assets:
       yellow_tripdata:
         type: csv
-        order_by:
-          - key: year
-            reverse: true
-          - key: month
-            reverse: false
         batching_regex: yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv
     base_directory: data
   taxi_frame_source:
