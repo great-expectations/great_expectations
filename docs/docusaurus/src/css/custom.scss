@@ -304,3 +304,7 @@ li p + ol {
   --ifm-background-color: #262626;
   --ifm-navbar-background-color: #262626;
 }
+
+[data-theme='dark'] .markdown h3{
+  color: var(--ifm-font-color-base);
+}
