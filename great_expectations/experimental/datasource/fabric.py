@@ -285,7 +285,6 @@ class FabricPowerBIDatasource(Datasource):
         self,
         name: str,
         dax_string: str,
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> PowerBIDax:
         """Adds a PowerBIDax asset to this datasource.
@@ -293,16 +292,13 @@ class FabricPowerBIDatasource(Datasource):
         Args:
             name: The name of this asset.
             TODO: other args
-            order_by: A list of Sorters or Sorter strings.
             batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The asset that is added to the datasource.
         """  # noqa: E501
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBIDax(
             name=name,
-            order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
             dax_string=dax_string,
         )
@@ -313,7 +309,6 @@ class FabricPowerBIDatasource(Datasource):
         self,
         name: str,
         measure: Union[str, List[str]],
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         groupby_columns: Optional[List[str]] = None,
         filters: Optional[Dict[str, List[str]]] = None,
@@ -325,16 +320,13 @@ class FabricPowerBIDatasource(Datasource):
 
         Args:
             name: The name of this asset.
-            order_by: A list of Sorters or Sorter strings.
             batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The asset that is added to the datasource.
         """  # noqa: E501
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBIMeasure(
             name=name,
-            order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
             groupby_columns=groupby_columns,
             measure=measure,
@@ -351,7 +343,6 @@ class FabricPowerBIDatasource(Datasource):
         self,
         name: str,
         table: str,
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         fully_qualified_columns: bool = False,
         num_rows: Optional[int] = None,
@@ -364,16 +355,13 @@ class FabricPowerBIDatasource(Datasource):
             name: The name of this table asset.
             table_name: The table where the data resides.
             schema: The schema that holds the table.
-            order_by: A list of Sorters or Sorter strings.
             batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The asset that is added to the datasource.
         """  # noqa: E501
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBITable(
             name=name,
-            order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
             table=table,
             fully_qualified_columns=fully_qualified_columns,

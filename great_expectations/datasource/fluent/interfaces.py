@@ -52,6 +52,7 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
 from great_expectations.exceptions.exceptions import (
+    DataAssetInitializationError,
     DataContextError,
     MissingDataContextError,
 )
@@ -291,6 +292,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     type: str
     id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
 
+    # TODO: order_by should no longer be used and should be removed
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
     batch_definitions: List[BatchDefinition] = Field(default_factory=list)
@@ -488,10 +490,15 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
-    def _parse_order_by_sorters(
+    def _order_by_validator(
         cls, order_by: Optional[List[Union[Sorter, str, dict]]] = None
     ) -> List[Sorter]:
-        return Datasource.parse_order_by_sorters(order_by=order_by)
+        if order_by:
+            raise DataAssetInitializationError(
+                message="'order_by' is no longer a valid argument. "
+                "Sorting should be configured in a batch definition."
+            )
+        return []
 
     def sort_batches(
         self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
@@ -847,34 +854,6 @@ class Datasource(
                 f"data_connector build failure for {self.name} assets - {', '.join(names_and_error)}",  # noqa: E501
                 category=RuntimeWarning,
             )
-
-    @staticmethod
-    def parse_order_by_sorters(
-        order_by: Optional[List[Union[Sorter, str, dict]]] = None,
-    ) -> List[Sorter]:
-        order_by_sorters: list[Sorter] = []
-        if order_by:
-            for idx, sorter in enumerate(order_by):
-                if isinstance(sorter, str):
-                    if not sorter:
-                        raise ValueError(  # noqa: TRY003
-                            '"order_by" list cannot contain an empty string'
-                        )
-                    order_by_sorters.append(_sorter_from_str(sorter))
-                elif isinstance(sorter, dict):
-                    key: Optional[Any] = sorter.get("key")
-                    reverse: Optional[Any] = sorter.get("reverse")
-                    if key and reverse:
-                        order_by_sorters.append(Sorter(key=key, reverse=reverse))
-                    elif key:
-                        order_by_sorters.append(Sorter(key=key))
-                    else:
-                        raise ValueError(  # noqa: TRY003
-                            '"order_by" list dict must have a key named "key"'
-                        )
-                else:
-                    order_by_sorters.append(sorter)
-        return order_by_sorters
 
     @staticmethod
     def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:

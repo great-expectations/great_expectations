@@ -12,7 +12,6 @@ from great_expectations.datasource.fluent.data_connector import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     BatchMetadata,
-    SortersDefinition,
 )
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
@@ -44,5 +43,4 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         abs_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
-        order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...

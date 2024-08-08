@@ -33,7 +33,6 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0)
         # path: PathOrPaths,
         # NA - path determined by asset
