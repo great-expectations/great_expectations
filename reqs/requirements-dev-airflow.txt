@@ -1,0 +1,2 @@
+airflow>=2.8.2
+pendulum>=3.0.0
