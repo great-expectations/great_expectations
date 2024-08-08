@@ -1,5 +1,5 @@
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_pandas.py - full example">
-import great_epectations as gx
+import great_expectations as gx
 
 context = gx.get_context()
 
@@ -10,7 +10,7 @@ gcs_options = {}
 
 # Create the Data Source:
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_pandas.py - add Data Source">
-data_source = gx.data_sources.add_pandas_gcs(
+data_source = context.data_sources.add_pandas_gcs(
     name=data_source_name, bucket_or_name=bucket_or_name, gcs_options=gcs_options
 )
 # </snippet>

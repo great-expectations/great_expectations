@@ -24,19 +24,25 @@ connect_to_filesystem_data_create_a_data_source = [
         name="create_a_datasource_filesystem_local_spark",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_spark.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        backend_dependencies=[],
+        backend_dependencies=[BackendDependencies.SPARK],
     ),
-    # # ABS, pandas/spark
-    # IntegrationTestFixture(
-    #     name="create_a_datasource_filesystem_abs_pandas",
-    #     user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_spark.py",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    # ),
-    # IntegrationTestFixture(
-    #     name="create_a_datasource_filesystem_local_spark",
-    #     user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_spark.py",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    # ),
+    # ABS, pandas/spark
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "create_a_datasource_filesystem_abs_pandas" tests/integration/test_script_runner.py
+        name="create_a_datasource_filesystem_abs_pandas",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_pandas.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "create_a_datasource_filesystem_abs_spark" tests/integration/test_script_runner.py
+        name="create_a_datasource_filesystem_abs_spark",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_spark.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        backend_dependencies=[BackendDependencies.AZURE, BackendDependencies.SPARK],
+    ),
     # # GCS, pandas/spark
     # IntegrationTestFixture(
     #     name="create_a_datasource_filesystem_gcs_pandas",
