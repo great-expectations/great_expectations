@@ -22,9 +22,7 @@ stores:
 # Data Docs, and more. These are for advanced users only - most users can simply
 # leave this section alone.
 #
-# Three stores are required: expectations, validations, and
-# suite_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, etc.
+# Additional stores can be configured for uses such as data_docs, etc.
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
@@ -38,9 +36,10 @@ stores:
       base_directory: uncommitted/validations/
 
   suite_parameter_store:
-    # Suite Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/docs/reference/suite_parameters/
     class_name: SuiteParameterStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: suite_parameters/
 
   checkpoint_store:
     class_name: CheckpointStore

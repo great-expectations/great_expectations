@@ -434,6 +434,8 @@ gx/
             styles/
                 data_docs_custom_styles.css
             views/
+    suite_parameters/
+        .ge_store_backend_id
     uncommitted/
         config_variables.yml
         data_docs/
@@ -461,6 +463,8 @@ gx/
             styles/
                 data_docs_custom_styles.css
             views/
+    suite_parameters/
+        .ge_store_backend_id
     uncommitted/
         config_variables.yml
         data_docs/
@@ -563,6 +567,7 @@ def test_scaffold_directories(tmp_path_factory):
         ".gitignore",
         "uncommitted",
         "validation_definitions",
+        "suite_parameters",
     }
     assert set(
         os.listdir(os.path.join(empty_directory, "uncommitted"))  # noqa: PTH118
