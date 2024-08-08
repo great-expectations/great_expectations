@@ -33,7 +33,7 @@ class Event:
     action: Action
 
     @property
-    def data_context_id(self) -> UUID:
+    def data_context_id(self) -> UUID | None:
         return get_config().data_context_id
 
     @property
@@ -41,7 +41,7 @@ class Event:
         return get_config().organization_id
 
     @property
-    def oss_id(self) -> UUID:
+    def oss_id(self) -> UUID | None:
         return get_config().oss_id
 
     @property
