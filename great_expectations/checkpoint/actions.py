@@ -31,6 +31,7 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    Extra,
     Field,
     root_validator,
     validator,
@@ -108,6 +109,7 @@ class ValidationAction(BaseModel):
     """  # noqa: E501
 
     class Config:
+        extra = Extra.forbid
         arbitrary_types_allowed = True
         # Due to legacy pattern of instantiate_class_from_config, we need a custom serializer
         json_encoders = {Renderer: lambda r: r.serialize()}
@@ -118,7 +120,7 @@ class ValidationAction(BaseModel):
 
     @property
     def _using_cloud_context(self) -> bool:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         return project_manager.is_using_cloud()
 
@@ -151,7 +153,7 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifiers: list | None = None,
     ) -> dict:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         return project_manager.build_data_docs(
             site_names=site_names, resource_identifiers=resource_identifiers
@@ -162,7 +164,7 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifier: Any | None = None,
     ):
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         return project_manager.get_docs_sites_urls(
             site_names=site_names, resource_identifier=resource_identifier
@@ -707,7 +709,7 @@ class UpdateDataDocsAction(DataDocsAction):
 
         return action_results
 
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],

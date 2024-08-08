@@ -12,7 +12,6 @@ import pytest
 import requests
 from requests import Session
 
-from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     APINotificationAction,
     EmailAction,
@@ -35,6 +34,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -530,9 +530,7 @@ class TestV1ActionRun:
     def test_OpsgenieAlertAction_run(
         self, checkpoint_result: CheckpointResult, success: bool, message: str
     ):
-        action = OpsgenieAlertAction(
-            name="my_action", api_key="test", routing_key="test", notify_on="all"
-        )
+        action = OpsgenieAlertAction(name="my_action", api_key="test", notify_on="all")
         checkpoint_result.success = success
 
         with mock.patch.object(Session, "post") as mock_post:

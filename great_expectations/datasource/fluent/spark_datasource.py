@@ -18,8 +18,6 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
-    deprecated_argument,
-    new_argument,
     public_api,
 )
 from great_expectations.compatibility import pydantic
@@ -43,11 +41,13 @@ from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError,
     _DataAssetT,
 )
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.compatibility.pyspark import SparkSession
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.partitioners import ColumnPartitioner
     from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
@@ -161,7 +161,7 @@ class _SparkDatasource(Datasource):
         try:
             self.get_spark()
         except Exception as e:
-            raise TestConnectionError(e) from e
+            raise TestConnectionError(cause=e) from e
 
     # End Abstract Methods
 
@@ -169,17 +169,9 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(default=None, exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
-
-    @pydantic.validator("dataframe")
-    def _validate_dataframe(cls, dataframe: DataFrame) -> DataFrame:
-        if not (DataFrame and isinstance(dataframe, DataFrame)):  # type: ignore[truthy-function]
-            raise ValueError("dataframe must be of type pyspark.sql.DataFrame")  # noqa: TRY003
-
-        return dataframe
 
     @override
     def test_connection(self) -> None: ...
@@ -188,7 +180,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def get_batch_parameters_keys(
         self, partitioner: Optional[ColumnPartitioner] = None
     ) -> tuple[str, ...]:
-        return tuple()
+        return tuple(
+            "dataframe",
+        )
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
@@ -200,15 +194,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
-    @new_argument(
-        argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
-        version="0.16.15",
-    )
     @override
-    def build_batch_request(  # type: ignore[override]
+    def build_batch_request(
         self,
-        dataframe: Optional[_SparkDataFrameT] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[ColumnPartitioner] = None,
@@ -216,8 +204,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            dataframe: The Spark Dataframe containing the data for this DataFrame data asset.
-            options: This is not currently supported and must be {}/None for this data asset.
+            options: This should have 1 key, 'dataframe', whose value is the datafame to validate.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
 
@@ -226,35 +213,30 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """  # noqa: E501
-        if options:
-            raise ValueError(  # noqa: TRY003
-                "options is not currently supported for this DataAssets and must be None or {}."
-            )
-
         if batch_slice is not None:
-            raise ValueError(  # noqa: TRY003
-                "batch_slice is not currently supported and must be None for this DataAsset."
+            raise BuildBatchRequestError(
+                message="batch_slice is not currently supported for this DataAsset "
+                "and must be None."
             )
 
         if partitioner is not None:
-            raise ValueError(  # noqa: TRY003
-                "partitioner is not currently supported and must be None for this DataAsset."
+            raise BuildBatchRequestError(
+                message="partitioner is not currently supported for this DataAsset "
+                "and must be None."
             )
 
-        if dataframe is None:
-            df = self.dataframe
-        else:
-            df = dataframe
+        if not (options is not None and "dataframe" in options and len(options) == 1):
+            raise BuildBatchRequestError(message="options must contain exactly 1 key, 'dataframe'.")
 
-        if df is None:
-            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")  # noqa: TRY003
-
-        self.dataframe = df
+        if not isinstance(options["dataframe"], DataFrame):
+            raise BuildBatchRequestError(
+                message="Can not build batch request for dataframe asset " "without a dataframe."
+            )
 
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
-            options={},
+            options=options,
         )
 
     @override
@@ -267,7 +249,10 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and not batch_request.options
+            and batch_request.options
+            and len(batch_request.options) == 1
+            and "dataframe" in batch_request.options
+            and isinstance(batch_request.options["dataframe"], DataFrame)
         ):
             expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
@@ -285,7 +270,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
 
-        batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
+        batch_spec = RuntimeDataBatchSpec(batch_data=batch_request.options["dataframe"])
         execution_engine: SparkDFExecutionEngine = self.datasource.get_execution_engine()
         data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
@@ -305,7 +290,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
         batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request
+            batch_request=batch_request, ignore_options=("dataframe",)
         )
 
         return [
@@ -321,6 +306,13 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             )
         ]
 
+    @public_api
+    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+        )
+
 
 @public_api
 class SparkDatasource(_SparkDatasource):
@@ -333,15 +325,9 @@ class SparkDatasource(_SparkDatasource):
     assets: List[DataFrameAsset] = []
 
     @public_api
-    @deprecated_argument(
-        argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
-        version="0.16.15",
-    )
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: Optional[_SparkDataFrameT] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this SparkDatasource object.
@@ -359,5 +345,4 @@ class SparkDatasource(_SparkDatasource):
             name=name,
             batch_metadata=batch_metadata or {},
         )
-        asset.dataframe = dataframe
         return self._add_asset(asset=asset)

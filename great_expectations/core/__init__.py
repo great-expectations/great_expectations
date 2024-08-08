@@ -16,6 +16,7 @@ from .expectation_validation_result import (
     get_metric_kwargs_id,
 )
 from .id_dict import IDDict
+from .result_format import ResultFormat
 from .run_identifier import RunIdentifier, RunIdentifierSchema
 from .validation_definition import ValidationDefinition
 
@@ -39,4 +40,4 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-RESULT_FORMATS = ["BOOLEAN_ONLY", "BASIC", "COMPLETE", "SUMMARY"]
+RESULT_FORMATS = [fmt.value for fmt in ResultFormat]

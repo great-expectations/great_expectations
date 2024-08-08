@@ -84,10 +84,10 @@ def test_save_project_does_not_break(seeded_file_context: FileDataContext):
 
 
 @pytest.mark.filesystem
-def test_variables_save_config_does_not_break(seeded_file_context: FileDataContext):
+def test_variables_save_does_not_break(seeded_file_context: FileDataContext):
     print(f"\tcontext.fluent_config ->\n{seeded_file_context.fluent_config}\n")
     print(f"\tcontext.variables ->\n{seeded_file_context.variables}")
-    seeded_file_context.variables.save_config()
+    seeded_file_context.variables.save()
 
 
 @pytest.mark.filesystem
@@ -156,7 +156,7 @@ def test_context_add_and_save_fluent_datasource(
         name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
     )
 
-    assert datasource_name in context.datasources
+    assert datasource_name in context.data_sources.all()
 
 
 # Test markers come from empty_contexts fixture
@@ -176,7 +176,7 @@ def test_context_add_or_update_datasource(
     datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
     context.data_sources.add_or_update_sqlite(datasource)
 
-    updated_datasource: SqliteDatasource = context.datasources[datasource.name]  # type: ignore[assignment]
+    updated_datasource: SqliteDatasource = context.data_sources.all()[datasource.name]
     assert updated_datasource.connection_string == "sqlite:///"
 
 

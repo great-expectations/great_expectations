@@ -3,8 +3,7 @@ sidebar_label: 'Identify failed table rows in an Expectation'
 title: 'Identify failed rows in an Expectation'
 id: identify_failed_rows_expectations
 description: Use 'unexpected_index_column_names' in the 'result_format' parameter to identify failed table rows in an Expectation.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 ---
 
 import TabItem from '@theme/TabItem';

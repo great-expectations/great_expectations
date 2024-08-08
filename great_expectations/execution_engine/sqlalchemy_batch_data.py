@@ -198,7 +198,7 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(  # noqa: C901, PLR0912, PLR0915
+    def _create_temporary_table(  # noqa: C901, PLR0912
         self,
         dialect: GXSqlDialect,
         query: str,
@@ -264,28 +264,39 @@ class SqlAlchemyBatchData(BatchData):
         # Similar message may be needed in the future for Trino backend.
         elif dialect in (GXSqlDialect.TRINO, GXSqlDialect.CLICKHOUSE):
             logger.warning(
-                f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."  # noqa: E501
+                f"GX has created permanent view {temp_table_name}"
+                " as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif dialect == GXSqlDialect.AWSATHENA:
             logger.warning(
-                f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."  # noqa: E501
+                f"GX has created permanent TABLE {temp_table_name}"
+                " as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
-        elif dialect == GXSqlDialect.ORACLE:
-            # oracle 18c introduced PRIVATE temp tables which are transient objects
-            stmt_1 = f"CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}"  # noqa: E501
-            # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
-            # this means an empty table will persist after the db session
-            stmt_2 = f"CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}"  # noqa: E501
         # Please note that Teradata is currently experimental (as of 0.13.43)
         elif dialect == GXSqlDialect.TERADATASQL:
-            stmt = f'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'  # noqa: E501
+            stmt = (
+                f'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query})'
+                " WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS"
+            )
         elif dialect == GXSqlDialect.VERTICA:
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}"
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
+
         if dialect == GXSqlDialect.ORACLE:
+            # oracle 18c introduced PRIVATE temp tables which are transient objects
+            stmt_1 = (
+                f"CREATE PRIVATE TEMPORARY TABLE {temp_table_name}"
+                f" ON COMMIT PRESERVE DEFINITION AS {query}"
+            )
+            # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
+            # this means an empty table will persist after the db session
+            stmt_2 = (
+                f"CREATE GLOBAL TEMPORARY TABLE {temp_table_name}"
+                f" ON COMMIT PRESERVE ROWS AS {query}"
+            )
             try:
                 self.execution_engine.execute_query_in_transaction(sa.text(stmt_1))
             except sqlalchemy.DatabaseError:

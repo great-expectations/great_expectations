@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     )
 
 
-EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to exactly match a specified list."
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns in a table to exactly match a specified list."
 COLUMN_LIST_DESCRIPTION = "The column names, in the correct order."
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
@@ -187,6 +187,8 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     args_keys = ("column_list",)
 
     class Config:
+        title = "Expect table columns to match ordered list"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchOrderedList]

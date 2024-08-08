@@ -204,6 +204,8 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to not be in set"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotBeInSet]

@@ -3,8 +3,7 @@ sidebar_label: "Host and share Data Docs"
 title: "Host and share Data Docs"
 id: host_and_share_data_docs
 description: Host and share Data Docs stored on a filesystem or a Data Source.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 ---
 
 import Preface from './components_how_to_host_and_share_data_docs_on_amazon_s3/_preface.mdx'

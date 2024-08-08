@@ -22,6 +22,7 @@ def test_SlackRenderer_render():
         validation_result=validation_result,
         data_docs_pages=data_docs_pages,
         notify_with=notify_with,
+        validation_result_urls=["file:///localsite/index.html"],
     )
 
     assert output == [

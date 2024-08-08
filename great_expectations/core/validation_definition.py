@@ -7,7 +7,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
-    Field,
+    Extra,
     PrivateAttr,
     ValidationError,
     validator,
@@ -53,6 +53,7 @@ class ValidationDefinition(BaseModel):
     """
 
     class Config:
+        extra = Extra.forbid
         arbitrary_types_allowed = True  # Necessary for compatibility with suite's Marshmallow dep
         validate_assignment = True
         """
@@ -88,9 +89,9 @@ class ValidationDefinition(BaseModel):
             BatchDefinition: lambda b: b.identifier_bundle(),
         }
 
-    name: str = Field(..., allow_mutation=False)
-    data: BatchDefinition = Field(..., allow_mutation=False)
-    suite: ExpectationSuite = Field(..., allow_mutation=False)
+    name: str
+    data: BatchDefinition
+    suite: ExpectationSuite
     id: Union[str, None] = None
     _validation_results_store: ValidationResultsStore = PrivateAttr()
 
@@ -193,6 +194,7 @@ class ValidationDefinition(BaseModel):
     def run(
         self,
         *,
+        checkpoint_id: Optional[str] = None,
         batch_parameters: Optional[BatchParameters] = None,
         suite_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
@@ -208,6 +210,7 @@ class ValidationDefinition(BaseModel):
         )
         results = validator.validate_expectation_suite(self.suite, suite_parameters)
         results.meta["validation_id"] = self.id
+        results.meta["checkpoint_id"] = checkpoint_id
 
         # NOTE: We should promote this to a top-level field of the result.
         #       Meta should be reserved for user-defined information.
@@ -280,7 +283,7 @@ class ValidationDefinition(BaseModel):
 
     @public_api
     def save(self) -> None:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
@@ -293,7 +296,7 @@ class ValidationDefinition(BaseModel):
         We need to persist a validation_definition before it can be run. If user calls runs but
         hasn't persisted it we add it for them."""
 
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)

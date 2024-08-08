@@ -76,7 +76,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         }
     )
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,

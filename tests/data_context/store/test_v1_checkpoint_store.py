@@ -6,7 +6,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import set_context
 from great_expectations.checkpoint.actions import SlackNotificationAction
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.batch_definition import BatchDefinition
@@ -15,6 +14,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
@@ -133,6 +133,7 @@ def test_add_cloud(cloud_backed_store: CheckpointStore, checkpoint: Checkpoint):
     store = cloud_backed_store
 
     id = "5a8ada9f-5b71-461b-b1af-f1d93602a156"
+
     name = "my_checkpoint"
     key = GXCloudIdentifier(
         resource_type=GXCloudRESTResource.CHECKPOINT,
@@ -145,38 +146,31 @@ def test_add_cloud(cloud_backed_store: CheckpointStore, checkpoint: Checkpoint):
 
     mock_put.assert_called_once_with(
         mock.ANY,  # requests Session
-        f"https://api.greatexpectations.io/organizations/12345678-1234-5678-1234-567812345678/checkpoints/{id}",
+        f"https://api.greatexpectations.io/api/v1/organizations/12345678-1234-5678-1234-567812345678/checkpoints/{id}",
         json={
             "data": {
-                "type": "checkpoint",
-                "id": id,
-                "attributes": {
-                    "organization_id": "12345678-1234-5678-1234-567812345678",
-                    "checkpoint_config": {
-                        "name": name,
-                        "id": None,
-                        "result_format": "SUMMARY",
-                        "validation_definitions": [
-                            {
-                                "id": "a58816-64c8-46cb-8f7e-03c12cea1d67",
-                                "name": "my_first_validation",
-                            },
-                            {
-                                "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67",
-                                "name": "my_second_validation",
-                            },
-                        ],
-                        "actions": [
-                            {
-                                "name": "my_slack_action",
-                                "notify_on": "all",
-                                "notify_with": ["my_data_docs_site"],
-                                "renderer": {"class_name": "SlackRenderer"},
-                                "slack_webhook": "https://hooks.slack.com/services/ABC123/DEF456/XYZ789",
-                            },
-                        ],
+                "name": name,
+                "id": None,
+                "result_format": "SUMMARY",
+                "validation_definitions": [
+                    {
+                        "id": "a58816-64c8-46cb-8f7e-03c12cea1d67",
+                        "name": "my_first_validation",
                     },
-                },
+                    {
+                        "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67",
+                        "name": "my_second_validation",
+                    },
+                ],
+                "actions": [
+                    {
+                        "name": "my_slack_action",
+                        "notify_on": "all",
+                        "notify_with": ["my_data_docs_site"],
+                        "renderer": {"class_name": "SlackRenderer"},
+                        "slack_webhook": "https://hooks.slack.com/services/ABC123/DEF456/XYZ789",
+                    },
+                ],
             }
         },
     )
@@ -232,10 +226,8 @@ _CHECKPOINT_CONFIG = _create_checkpoint_config("my_checkpoint", _CHECKPOINT_ID)
         pytest.param(
             {
                 "data": {
+                    **_CHECKPOINT_CONFIG,
                     "id": _CHECKPOINT_ID,
-                    "attributes": {
-                        "checkpoint_config": _CHECKPOINT_CONFIG,
-                    },
                 }
             },
             id="single_checkpoint_config",
@@ -244,10 +236,8 @@ _CHECKPOINT_CONFIG = _create_checkpoint_config("my_checkpoint", _CHECKPOINT_ID)
             {
                 "data": [
                     {
+                        **_CHECKPOINT_CONFIG,
                         "id": _CHECKPOINT_ID,
-                        "attributes": {
-                            "checkpoint_config": _CHECKPOINT_CONFIG,
-                        },
                     }
                 ]
             },
@@ -268,20 +258,7 @@ def test_gx_cloud_response_json_to_object_collection():
     config_a = _create_checkpoint_config("my_checkpoint_a", "something else?")
     config_b = _create_checkpoint_config("my_checkpoint_b", id_b)
     response_json = {
-        "data": [
-            {
-                "id": id_a,
-                "attributes": {
-                    "checkpoint_config": config_a,
-                },
-            },
-            {
-                "id": id_b,
-                "attributes": {
-                    "checkpoint_config": config_b,
-                },
-            },
-        ],
+        "data": [{**config_a, "id": id_a}, {**config_b, "id": id_b}],
     }
 
     result = CheckpointStore.gx_cloud_response_json_to_object_collection(response_json)

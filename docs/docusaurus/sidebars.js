@@ -59,11 +59,21 @@ module.exports = {
       label: 'Connect to data',
       link: {type: 'doc', id: 'core/connect_to_data/connect_to_data'},
       items: [
-          {
-            type: 'doc',
-            id: 'core/connect_to_data/sql_data/sql_data',
-            label: 'Connect to data using SQL'
-          },
+        {
+          type: 'doc',
+          id: 'core/connect_to_data/sql_data/sql_data',
+          label: 'Connect to SQL data'
+        },
+        {
+          type: 'doc',
+          id: 'core/connect_to_data/filesystem_data/filesystem_data',
+          label: 'Connect to Filesystem data'
+        },
+        {
+          type: 'doc',
+          id: 'core/connect_to_data/dataframes/dataframes',
+          label: 'Connect to data in Dataframes'
+        },
       ]
     },
     {
@@ -75,6 +85,11 @@ module.exports = {
           type: 'doc',
           id: 'core/define_expectations/create_an_expectation',
           label: 'Create an Expectation'
+        },
+        {
+          type: 'doc',
+          id: 'core/define_expectations/retrieve_a_batch_of_test_data',
+          label: 'Retrieve a Batch of sample data'
         },
         {
           type: 'doc',
@@ -118,6 +133,18 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Configure project settings',
+      link: {type: 'doc', id: 'core/configure_project_settings/configure_project_settings'},
+      items: [
+        {type: 'doc', id: 'core/configure_project_settings/configure_metadata_stores/configure_metadata_stores'},
+        {type: 'doc', id: 'core/configure_project_settings/configure_data_docs/configure_data_docs'},
+        {type: 'doc', id: 'core/configure_project_settings/configure_credentials/configure_credentials'},
+        {type: 'doc', id: 'core/configure_project_settings/access_secrets_managers/access_secrets_managers'},
+        {type: 'doc', id: 'core/configure_project_settings/toggle_analytics_events/toggle_analytics_events'}
+      ]
+    },
+    {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
@@ -137,13 +164,8 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'GX Agent',
-              href: '/docs/cloud/about_gx#gx-agent',
-            },
-            {
-              type: 'link',
-              label: 'GX Cloud deployment patterns',
-              href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
+              label: 'GX Cloud deployment options',
+              href: '/docs/cloud/about_gx#gx-cloud-deployment-options',
             },
             {
               type: 'link',
@@ -160,9 +182,12 @@ module.exports = {
               label: 'Supported browsers',
               href: '/docs/cloud/about_gx#supported-browsers',
             },
+            { 
+              type: 'doc', 
+              id: 'cloud/deploy_gx_agent' 
+            },
           ]
         },
-        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',
@@ -341,6 +366,28 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Manage schedules',
+          link: { type: 'doc', id: 'cloud/schedules/manage_schedules' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#create-a-schedule-for-an-existing-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Edit a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#edit-a-schedule',
+            },
+            {
+              type: 'link',
+              label: 'Disable a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#disable-a-schedule',
+            },
+          ]
+        },
+        {
+          type: 'category',
           label: 'Manage alerts',
           link: { type: 'doc', id: 'cloud/alerts/manage_alerts' },
           items: [
@@ -422,7 +469,10 @@ module.exports = {
       link: { type: 'doc', id: 'reference/learn/data_quality_use_cases/dq_use_cases_lp' },
       items: [
         'reference/learn/data_quality_use_cases/schema',
-        'reference/learn/data_quality_use_cases/missingness'
+        'reference/learn/data_quality_use_cases/missingness',
+        'reference/learn/data_quality_use_cases/distribution',
+        'reference/learn/data_quality_use_cases/freshness',
+        'reference/learn/data_quality_use_cases/volume'
       ]
     },
       'reference/learn/usage_statistics',

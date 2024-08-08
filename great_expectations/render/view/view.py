@@ -129,7 +129,7 @@ class DefaultJinjaView:
         return url
 
     @contextfilter  # type: ignore[misc] # untyped 3rd party decorator
-    def render_content_block(  # noqa: C901, PLR0911, PLR0912, PLR0913
+    def render_content_block(  # noqa: C901, PLR0911, PLR0912
         self,
         jinja_context: Any,
         content_block: str | list | dict | RenderedComponentContent,
@@ -534,7 +534,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
 
     @override
     @contextfilter  # type: ignore[misc] # untyped 3rd party decorator
-    def render_content_block(  # noqa: PLR0913
+    def render_content_block(
         self,
         jinja_context: Any,
         content_block: Any,

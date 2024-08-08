@@ -4,7 +4,7 @@ from typing import Mapping
 
 import pytest
 
-from great_expectations import set_context
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -125,7 +125,7 @@ def in_memory_data_context(
     fluent_datasources = {
         fluent_datasource_config["name"]: ds_type(**fluent_datasource_config),
     }
-    context.datasources.update(fluent_datasources)
+    context.data_sources.all().update(fluent_datasources)
     set_context(context)
     return context
 

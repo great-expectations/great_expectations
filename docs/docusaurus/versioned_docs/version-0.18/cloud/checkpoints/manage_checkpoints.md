@@ -10,8 +10,6 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
 
 ## Prerequisites
 
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 - You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
 - You have created an [Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).

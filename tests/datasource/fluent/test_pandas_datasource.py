@@ -30,6 +30,8 @@ from great_expectations.datasource.fluent.sources import (
     DefaultPandasDatasourceError,
     _get_field_details,
 )
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
@@ -134,7 +136,6 @@ class TestDynamicPandasAssets:
         asset_class_names: set[str] = {
             camel_to_snake(t.__name__).split("_asset")[0] for t in PandasDatasource.asset_types
         }
-        print(asset_class_names)
 
         assert type_name in PandasDatasource._type_lookup
         assert type_name in asset_class_names
@@ -427,7 +428,7 @@ def test_default_pandas_datasource_name_conflict(
         _ = empty_data_context.data_sources.pandas_default
 
     # the datasource name is available
-    empty_data_context.datasources.pop(DEFAULT_PANDAS_DATASOURCE_NAME)
+    empty_data_context.data_sources.all().pop(DEFAULT_PANDAS_DATASOURCE_NAME)
     pandas_datasource = empty_data_context.data_sources.pandas_default
     assert isinstance(pandas_datasource, PandasDatasource)
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
@@ -463,11 +464,11 @@ def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas:
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.data_sources.pandas_default.assets) == 2
-    _ = dataframe_asset.build_batch_request(dataframe=test_df_pandas)
-    assert all(
-        asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-        for asset in empty_data_context.data_sources.pandas_default.assets
-    )
+    bd = dataframe_asset.add_batch_definition_whole_dataframe(name="bd")
+    bd_batch = bd.get_batch(batch_parameters={"dataframe": test_df_pandas})
+    for b in [batch, bd_batch]:
+        assert isinstance(b.data, PandasBatchData)
+        b.data.dataframe.equals(test_df_pandas)
 
 
 @pytest.mark.cloud
@@ -483,7 +484,7 @@ def test_cloud_get_csv_asset_not_in_memory(valid_file_path: pathlib.Path):
     csv_asset = datasource.get_asset(asset_name=csv_asset_name)
     csv_asset.build_batch_request()
 
-    assert csv_asset_name not in context.datasources._in_memory_data_assets
+    assert csv_asset_name not in context.data_sources.all()._in_memory_data_assets
 
 
 @pytest.mark.filesystem
@@ -533,7 +534,7 @@ def test_build_batch_request_raises_if_missing_dataframe(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(BuildBatchRequestError) as e:
         dataframe_asset.build_batch_request()
 
-    assert "Cannot build batch request for dataframe asset without a dataframe" in str(e.value)
+    assert str(e.value).startswith("Bad input to build_batch_request:")

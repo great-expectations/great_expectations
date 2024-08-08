@@ -44,3 +44,7 @@ To connect GX to your SQL data, you will first need your connection string and c
 3. Access your credentials in Python strings.
 
    <AccessCredentials/>
+
+4. Optional. Access credentials stored in a secret manager.
+
+   {GxData.product_name} supports the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers.  For more information on how to set up string substitutions that pull credentials from these sources, see [Access secrets managers](core/configure_project_settings/access_secrets_managers/access_secrets_managers.md).

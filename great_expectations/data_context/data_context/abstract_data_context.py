@@ -140,7 +140,6 @@ yaml = YAMLHandler()
 T = TypeVar("T", dict, list, str)
 
 
-@public_api
 class AbstractDataContext(ConfigPeer, ABC):
     """Base class for all Data Contexts that contains shared functionality.
 
@@ -339,7 +338,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """  # noqa: E501
-        return self.variables.save_config()
+        return self.variables.save()
 
     @public_api
     def update_project_config(
@@ -450,7 +449,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.variables.expectations_store_name
 
     @expectations_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def expectations_store_name(self, value: str) -> None:
         """Set the name of the expectations store.
@@ -479,7 +477,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.variables.validation_results_store_name
 
     @validation_results_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def validation_results_store_name(self, value: str) -> None:
         """Set the name of the validations store.
@@ -516,7 +513,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return None
 
     @checkpoint_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def checkpoint_store_name(self, value: str) -> None:
         """Set the name of the checkpoint store.
@@ -553,7 +549,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         # We currently don't allow one to overwrite a datasource with this internal method
-        if datasource_name in self.datasources:
+        if datasource_name in self.data_sources.all():
             raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"Can not write the fluent datasource {datasource_name} because a datasource of that "  # noqa: E501
                 "name already exists in the data context."
@@ -564,7 +560,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource = ds_type(**kwargs)
         assert isinstance(datasource, FluentDatasource)
 
-        return_obj = self.datasources.set_datasource(name=datasource_name, ds=datasource)
+        return_obj = self.data_sources.all().set_datasource(name=datasource_name, ds=datasource)
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
         if save_changes:
@@ -593,7 +589,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         updated_datasource._rebuild_asset_data_connectors()
 
-        updated_datasource = self.datasources.set_datasource(
+        updated_datasource = self.data_sources.all().set_datasource(
             name=datasource_name, ds=updated_datasource
         )
         updated_datasource._data_context = self  # TODO: move from here?
@@ -608,14 +604,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         This should generally be avoided.
         """  # noqa: E501
         self.fluent_config.pop(datasource_name, None)
-        datasource = self.datasources.get(datasource_name)
+        datasource = self.data_sources.all().get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
                 self._datasource_store.delete(datasource)
         else:
             # Raise key error instead?
             logger.info(f"No Datasource '{datasource_name}' to delete")
-        self.datasources.pop(datasource_name, None)
+        self.data_sources.all().pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -649,7 +645,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_argument(
         argument_name="datasource",
         version="0.15.49",
@@ -720,7 +715,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
         return datasource
 
-    @public_api
     def update_datasource(
         self,
         datasource: FluentDatasource,
@@ -733,11 +727,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The updated Datasource.
         """
-        if isinstance(datasource, FluentDatasource):
-            self._update_fluent_datasource(datasource=datasource)
-        else:
-            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
-        return datasource
+        return self._update_fluent_datasource(datasource=datasource)
 
     @overload
     def add_or_update_datasource(
@@ -765,7 +755,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_datasource(
         self,
@@ -790,19 +779,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         if "type" in kwargs:
             assert name, 'Fluent Datasource kwargs must include the keyword "name"'
             kwargs["name"] = name
-            if name in self.datasources:
+            if name in self.data_sources.all():
                 self._update_fluent_datasource(**kwargs)
             else:
                 self._add_fluent_datasource(**kwargs)
-            return_datasource = self.datasources[name]
+            return_datasource = self.data_sources.all()[name]
         else:
             if datasource is None:
                 raise ValueError("Either datasource or kwargs are required")  # noqa: TRY003
-            if datasource.name in self.datasources:
+            if datasource.name in self.data_sources.all():
                 self._update_fluent_datasource(datasource=datasource)
             else:
                 self._add_fluent_datasource(datasource=datasource)
-            return_datasource = self.datasources[datasource.name]
+            return_datasource = self.data_sources.all()[datasource.name]
 
         return return_datasource
 
@@ -861,7 +850,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
-    @public_api
     def get_datasource(self, datasource_name: str = "default") -> FluentDatasource:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
@@ -878,14 +866,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")  # noqa: TRY003
 
         try:
-            datasource = self.datasources[datasource_name]
+            datasource = self.data_sources.all()[datasource_name]
         except KeyError as e:
             raise ValueError(str(e)) from e
 
         datasource._data_context = self
         return datasource
 
-    @public_api
     def add_store(self, store_name: str, store_config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.
 
@@ -982,7 +969,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.variables.data_docs_sites = sites
             self._save_project_config()
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def delete_store(self, store_name: str) -> None:
         """Delete an existing Store from the DataContext.
@@ -1004,7 +990,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
-    @public_api
     def list_datasources(self) -> List[dict]:
         """List the configurations of the datasources associated with this context.
 
@@ -1013,9 +998,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A list of dictionaries representing datasource configurations.
         """
-        return [ds.dict() for ds in self.datasources.values()]
+        return [ds.dict() for ds in self.data_sources.all().values()]
 
-    @public_api
     def delete_datasource(self, datasource_name: Optional[str]) -> None:
         """Delete a given Datasource by name.
 
@@ -1035,7 +1019,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
-    @public_api
     def get_validator(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -1208,13 +1191,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             # batch_request could actually be None here since we do explicit None checks in the
             # sum check above while here we do a truthy check.
             batch_request_list = [batch_request]  # type: ignore[list-item]
-        for batch_request in batch_request_list:
+        for batch_req in batch_request_list:
             computed_batch_list.extend(
                 self.get_batch_list(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
                     data_asset_name=data_asset_name,
-                    batch_request=batch_request,
+                    batch_request=batch_req,
                     batch_data=batch_data,
                     data_connector_query=data_connector_query,
                     batch_identifiers=batch_identifiers,
@@ -1330,7 +1313,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return validator
 
-    @public_api
     def get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -1477,7 +1459,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         datasource_name = result.datasource_name
 
-        datasource = self.datasources.get(datasource_name)
+        datasource = self.data_sources.all().get(datasource_name)
         if not datasource:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
@@ -1498,7 +1480,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return datasource_names
 
-    @public_api
     def get_available_data_asset_names(
         self,
         datasource_names: str | list[str] | None = None,
@@ -1933,15 +1914,13 @@ class AbstractDataContext(ConfigPeer, ABC):
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
         return self.variables.progress_bars
 
-    @property
-    def datasources(self) -> DatasourceDict:
-        """A single holder for all Datasources in this context"""
-        return self._datasources
-
+    # TODO: All datasources should now be fluent so we should be able to delete this
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
         return {
-            name: ds for (name, ds) in self.datasources.items() if isinstance(ds, FluentDatasource)
+            name: ds
+            for (name, ds) in self.data_sources.all().items()
+            if isinstance(ds, FluentDatasource)
         }
 
     @property
@@ -2078,7 +2057,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             return self.variables.data_context_id
 
-    def get_validation_result(  # noqa: C901, PLR0913
+    def get_validation_result(  # noqa: C901
         self,
         expectation_suite_name,
         run_id=None,

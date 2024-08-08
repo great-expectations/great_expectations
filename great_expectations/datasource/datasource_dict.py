@@ -70,12 +70,12 @@ class DatasourceDict(UserDict):
 
         configs = self._datasource_store.get_all()
         for config in configs:
+            if isinstance(config, FluentDatasource):
+                name = config.name
+            else:
+                raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
             try:
-                if isinstance(config, FluentDatasource):
-                    name = config.name
-                    datasources[name] = self._init_fluent_datasource(name=name, ds=config)
-                else:
-                    raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
+                datasources[name] = self._init_fluent_datasource(name=name, ds=config)
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
@@ -129,13 +129,7 @@ class DatasourceDict(UserDict):
                         datasource_name=name,
                         data_asset_name=asset.name,
                     )
-                    cached_data_asset = self._in_memory_data_assets.get(in_memory_asset_name)
-                    if cached_data_asset:
-                        asset.dataframe = cached_data_asset.dataframe
-                    else:
-                        # Asset is loaded into cache here (even without df) to enable loading of df at a later  # noqa: E501
-                        # time when DataframeAsset.build_batch_request(dataframe=df) is called
-                        self._in_memory_data_assets[in_memory_asset_name] = asset
+                    self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
 

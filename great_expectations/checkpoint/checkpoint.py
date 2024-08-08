@@ -11,7 +11,13 @@ from great_expectations.checkpoint.actions import (
     CheckpointAction,
     UpdateDataDocsAction,
 )
-from great_expectations.compatibility.pydantic import BaseModel, Field, root_validator, validator
+from great_expectations.compatibility.pydantic import (
+    BaseModel,
+    Extra,
+    Field,
+    root_validator,
+    validator,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -88,6 +94,7 @@ class Checkpoint(BaseModel):
         }
         """  # noqa: E501
 
+        extra = Extra.forbid
         arbitrary_types_allowed = (
             True  # Necessary for compatibility with ValidationAction's Marshmallow dep
         )
@@ -100,7 +107,7 @@ class Checkpoint(BaseModel):
     def _validate_validation_definitions(
         cls, validation_definitions: list[ValidationDefinition] | list[dict]
     ) -> list[ValidationDefinition]:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         if len(validation_definitions) == 0:
             raise ValueError("Checkpoint must contain at least one validation definition")  # noqa: TRY003
@@ -171,6 +178,7 @@ class Checkpoint(BaseModel):
         run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
         for validation_definition in self.validation_definitions:
             validation_result = validation_definition.run(
+                checkpoint_id=self.id,
                 batch_parameters=batch_parameters,
                 suite_parameters=expectation_parameters,
                 result_format=result_format,
@@ -245,7 +253,7 @@ class Checkpoint(BaseModel):
 
     @public_api
     def save(self) -> None:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
@@ -258,7 +266,7 @@ class Checkpoint(BaseModel):
         We need to persist a checkpoint before it can be run. If user calls runs but hasn't
         persisted it we add it for them.
         """
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
@@ -274,6 +282,7 @@ class CheckpointResult(BaseModel):
     success: Optional[bool] = None
 
     class Config:
+        extra = Extra.forbid
         arbitrary_types_allowed = True
 
     @root_validator

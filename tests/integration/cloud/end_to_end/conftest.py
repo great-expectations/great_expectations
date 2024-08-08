@@ -16,6 +16,7 @@ from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import CloudDataContext
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -124,7 +125,7 @@ def get_missing_data_asset_error_type() -> type[Exception]:
 
 @pytest.fixture(scope="package")
 def in_memory_batch_request_missing_dataframe_error_type() -> type[Exception]:
-    return ValueError
+    return BuildBatchRequestError
 
 
 class TableFactory(Protocol):
@@ -181,6 +182,7 @@ def table_factory() -> Iterator[TableFactory]:
         engine = engines[dialect]
         with engine.connect() as conn:
             transaction = conn.begin()
+            schema: str | None = None
             for table in tables:
                 name = table["table_name"]
                 schema = table["schema_name"]

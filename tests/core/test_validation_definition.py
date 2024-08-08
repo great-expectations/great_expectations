@@ -9,7 +9,6 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from great_expectations import set_context
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -25,6 +24,7 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.data_context.context_factory import (
     ProjectManager,
+    set_context,
 )
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -196,20 +196,25 @@ class TestValidationRun:
             meta={},
         )
 
+    @pytest.mark.parametrize("checkpoint_id", [None, "my_checkpoint_id"])
     @pytest.mark.unit
     def test_adds_requisite_ids(
         self,
         mock_validator: MagicMock,
         validation_definition: ValidationDefinition,
+        checkpoint_id: str | None,
     ):
         mock_validator.graph_validate.return_value = []
 
         assert validation_definition.id is None
 
-        output = validation_definition.run()
+        output = validation_definition.run(checkpoint_id=checkpoint_id)
 
         assert validation_definition.id is not None
-        assert output.meta == {"validation_id": validation_definition.id}
+        assert output.meta == {
+            "validation_id": validation_definition.id,
+            "checkpoint_id": checkpoint_id,
+        }
 
     @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
@@ -284,6 +289,7 @@ class TestValidationRun:
         result = cloud_validation_definition.run()
 
         assert len(result.results) == 1
+        assert result.results[0].expectation_config is not None
         assert result.results[0].expectation_config.rendered_content is not None
         assert result.results[0].rendered_content is not None
 
