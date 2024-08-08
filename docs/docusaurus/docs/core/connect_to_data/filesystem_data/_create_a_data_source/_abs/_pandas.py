@@ -1,3 +1,7 @@
+import os
+
+os.environ["AZURE_STORAGE_ACCOUNT_URL"] = "superconductivetesting.blob.core.windows.net"
+
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_pandas.py - full example">
 import great_expectations as gx
 
@@ -6,7 +10,7 @@ context = gx.get_context()
 # Define the Data Source's parameters:
 data_source_name = "my_filesystem_data_source"
 azure_options = {
-    "account_url": "${AZURE_ACCESS_KEY}",
+    "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
     "credential": "${AZURE_CREDENTIAL}",
 }
 
