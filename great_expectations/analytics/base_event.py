@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import ClassVar, List, Optional
 from uuid import UUID
 
+from great_expectations import __version__ as gx_version
 from great_expectations.analytics.config import get_config
 
 
@@ -70,6 +71,7 @@ class Event:
         props = {
             "data_context_id": self.data_context_id,
             "oss_id": self.oss_id,
+            "gx_version": gx_version,
             "service": "gx-core",
         }
         if self.user_id is not None:

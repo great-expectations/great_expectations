@@ -93,7 +93,12 @@ def test_ephemeral_context_init(monkeypatch):
     mock_submit.assert_called_once_with(
         mock.ANY,
         "data_context.initialized",
-        {"data_context_id": mock.ANY, "oss_id": mock.ANY, "service": "gx-core"},
+        {
+            "data_context_id": mock.ANY,
+            "oss_id": mock.ANY,
+            "service": "gx-core",
+            "gx_version": mock.ANY,
+        },
         groups={"data_context": mock.ANY},
     )
 
@@ -123,6 +128,11 @@ def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
     mock_submit.assert_called_once_with(
         mock.ANY,
         "data_context.initialized",
-        {"data_context_id": mock.ANY, "oss_id": mock.ANY, "service": "gx-core"},
+        {
+            "data_context_id": mock.ANY,
+            "oss_id": mock.ANY,
+            "service": "gx-core",
+            "gx_version": mock.ANY,
+        },
         groups={"data_context": mock.ANY},
     )
