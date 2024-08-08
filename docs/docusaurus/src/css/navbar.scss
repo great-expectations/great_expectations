@@ -125,6 +125,10 @@
   color: var(--ifm-color-primary);
 }
 
+[data-theme='dark'] .navbar__link::after {
+  filter: invert(1);
+}
+
 .header-cloud-link {
   border: none;
   border-radius: 35px;

@@ -107,6 +107,7 @@ module.exports = {
       logo: {
         alt: 'Great Expectations',
         src: 'img/GXDocs.svg',
+        srcDark: 'img/GXDocs-dark.svg',
         href: 'https://greatexpectations.io',
       },
       items: [

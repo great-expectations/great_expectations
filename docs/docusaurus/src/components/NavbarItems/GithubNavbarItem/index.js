@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import styles from './styles.module.scss';
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import {useColorMode} from '@docusaurus/theme-common';
 
 export default function GithubNavbarItem({ owner, repository, className }) {
 
+    const {colorMode, setColorMode} = useColorMode();
     const [starsCount, setStarsCount] = useState('0');
     const [forksCount, setForksCount] = useState('0');
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
@@ -25,10 +27,11 @@ export default function GithubNavbarItem({ owner, repository, className }) {
         return formatter.format(number).toLowerCase();
     }
 
-    const githubMarkImg = useBaseUrl(`img/github-mark.svg`);
-    const githubLogoImg = useBaseUrl(`img/github.svg`);
-    const starIcon = useBaseUrl(`img/star.svg`);
-    const forkIcon = useBaseUrl(`img/code-branch.svg`);
+    const colorCode = colorMode === 'dark' ? '-dark' : '';
+    const githubMarkImg = useBaseUrl(`img/github-mark${colorCode}.svg`);
+    const githubLogoImg = useBaseUrl(`img/github${colorCode}.svg`);
+    const starIcon = useBaseUrl(`img/star${colorCode}.svg`);
+    const forkIcon = useBaseUrl(`img/code-branch${colorCode}.svg`);
 
     return repository && (
         <a href={`https://github.com/${owner}/${repository}`} target="_blank"
