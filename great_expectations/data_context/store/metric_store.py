@@ -29,7 +29,7 @@ class MetricStore(Store):
         self,
         store_backend: dict | None = None,
         runtime_environment: dict | None = None,
-        store_name: str | None = None,
+        store_name: str = "no_store_name",  # Consistent with parent
     ) -> None:
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
@@ -75,7 +75,7 @@ class SuiteParameterStore(MetricStore):
         self,
         store_backend: dict | None = None,
         runtime_environment: dict | None = None,
-        store_name: str | None = None,
+        store_name: str = "no_store_name",  # Consistent with parent
     ) -> None:
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
