@@ -244,13 +244,13 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._suite_parameter_dependencies: dict = {}
 
-        self._init_factories()
+        self._init_data_source_manager()
 
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
 
-    def _init_factories(self) -> None:
+    def _init_data_source_manager(self) -> None:
         self._data_sources: DataSourceManager = DataSourceManager(self)
 
         self._suites: SuiteFactory | None = None
