@@ -40,7 +40,7 @@ from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
-    _SourceFactories,
+    DataSourceManager,
 )
 
 if TYPE_CHECKING:
@@ -200,7 +200,7 @@ class GxConfig(FluentBaseModel):
                 raise ValueError(f"'{ds_name}' is missing a 'type' entry")  # noqa: TRY003
 
             try:
-                ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
+                ds_type: Type[Datasource] = DataSourceManager.type_lookup[ds_type_name]
                 logger.debug(f"Instantiating '{ds_name}' as {ds_type}")
             except KeyError as type_lookup_err:
                 raise ValueError(  # noqa: TRY003

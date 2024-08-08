@@ -84,7 +84,7 @@ from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
 from great_expectations.datasource.fluent.interfaces import (
     Datasource as FluentDatasource,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.validator import Validator
 
@@ -244,14 +244,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._suite_parameter_dependencies: dict = {}
 
-        self._init_factories()
+        self._init_data_source_manager()
 
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
 
-    def _init_factories(self) -> None:
-        self._data_sources: _SourceFactories = _SourceFactories(self)
+    def _init_data_source_manager(self) -> None:
+        self._data_sources: DataSourceManager = DataSourceManager(self)
 
         self._suites: SuiteFactory | None = None
         if expectations_store := self.stores.get(self.expectations_store_name):
@@ -528,7 +528,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.checkpoint_store_name]
 
     @property
-    def data_sources(self) -> _SourceFactories:
+    @public_api
+    def data_sources(self) -> DataSourceManager:
         return self._data_sources
 
     @property
@@ -556,7 +557,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if not datasource:
-            ds_type = _SourceFactories.type_lookup[kwargs["type"]]
+            ds_type = DataSourceManager.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
         assert isinstance(datasource, FluentDatasource)
 
@@ -582,7 +583,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if not datasource:
-            ds_type = _SourceFactories.type_lookup[kwargs["type"]]
+            ds_type = DataSourceManager.type_lookup[kwargs["type"]]
             updated_datasource = ds_type(**kwargs)
         else:
             updated_datasource = datasource

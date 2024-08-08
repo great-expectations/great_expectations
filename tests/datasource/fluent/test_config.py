@@ -41,7 +41,7 @@ from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
-    _SourceFactories,
+    DataSourceManager,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
     SqlPartitionerYearAndMonth,
@@ -238,7 +238,7 @@ class TestExcludeUnsetAssetFields:
         ds_mapping = {"csv": "pandas_filesystem", "json": "pandas_filesystem"}
 
         ds_type_: str = ds_mapping[asset_dict_config["type"]]
-        ds_class = _SourceFactories.type_lookup[ds_type_]
+        ds_class = DataSourceManager.type_lookup[ds_type_]
 
         # fill in required args
         asset_dict_config.update(
