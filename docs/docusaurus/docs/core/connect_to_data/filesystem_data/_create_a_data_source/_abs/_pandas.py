@@ -12,7 +12,7 @@ azure_options = {
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_pandas.py - add Data Source">
 # Create the Data Source:
-data_source = gx.data_sources.add_pandas_abs(
+data_source = context.data_sources.add_pandas_abs(
     name=data_source_name, azure_options=azure_options
 )
 # </snippet>
