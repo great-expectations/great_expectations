@@ -57,7 +57,7 @@ class CheckpointStoreSpy(CheckpointStore):
 
     def __init__(self) -> None:
         self.save_count = 0
-        super().__init__(name=CheckpointStoreSpy.STORE_NAME)
+        super().__init__(store_name=CheckpointStoreSpy.STORE_NAME)
 
     def add(self, key, value, **kwargs):
         ret = super().add(key=key, value=value, **kwargs)

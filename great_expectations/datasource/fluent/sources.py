@@ -578,7 +578,7 @@ class DataSourceManager:
         def delete_datasource(name: str) -> None:
             logger.debug(f"Delete {datasource_type} with {name}")
             self._validate_current_datasource_type(name, datasource_type)
-            self._data_context._delete_fluent_datasource(datasource_name=name)
+            self._data_context._delete_fluent_datasource(name=name)
             self._data_context._save_project_config()
 
         delete_datasource.__doc__ = doc_string
@@ -594,7 +594,7 @@ class DataSourceManager:
         Args:
             name: The name of the given datasource.
         """
-        self._data_context.delete_datasource(datasource_name=name)
+        self._data_context.delete_datasource(name=name)
 
     @public_api
     def all(self) -> DatasourceDict:

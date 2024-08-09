@@ -600,7 +600,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
                 )
                 asset.name = asset_name
             elif asset_name in asset_names:
-                self.delete_asset(asset_name=asset_name)
+                self.delete_asset(name=asset_name)
 
         return super()._add_asset(asset=asset, connect_options=connect_options)
 
