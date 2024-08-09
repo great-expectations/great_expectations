@@ -745,8 +745,8 @@ def test_assets_key_presence(inject_engine_lookup_double, from_yaml_gx_config: G
 
 # Marked via from_all_config fixture
 def test_partitioners_deserialization(inject_engine_lookup_double, from_all_config: GxConfig):
-    table_asset: TableAsset = from_all_config.get_datasource(datasource_name="my_pg_ds").get_asset(
-        asset_name="with_partitioner"
+    table_asset: TableAsset = from_all_config.get_datasource(name="my_pg_ds").get_asset(
+        name="with_partitioner"
     )
     partitioner = table_asset.batch_definitions[0].partitioner
     assert isinstance(partitioner, ColumnPartitionerMonthly)
@@ -796,7 +796,7 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     assert (
         DEFAULT_PANDAS_DATA_ASSET_NAME
         not in from_dict_default_pandas_config.get_datasource(
-            datasource_name=DEFAULT_PANDAS_DATASOURCE_NAME
+            name=DEFAULT_PANDAS_DATASOURCE_NAME
         ).get_asset_names()
     )
 
@@ -898,9 +898,7 @@ def test_config_substitution_retains_original_value_on_save(
 
     print(context.fluent_config)
 
-    ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(
-        datasource_name="my_sqlite_ds_w_subs"
-    )  # type: ignore[assignment]
+    ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(name="my_sqlite_ds_w_subs")  # type: ignore[assignment]
 
     assert str(ds_w_subs.connection_string) == r"${MY_CONN_STR}"
     assert (

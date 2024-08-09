@@ -365,7 +365,7 @@ class TestDynamicPandasAssets:
         # We are calling it here for it's side effect on the default asset so get and inspect that afterwards.  # noqa: E501
         _ = read_method(*positional_args.values())
         default_asset = empty_data_context.data_sources.pandas_default.get_asset(
-            asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
+            name=DEFAULT_PANDAS_DATA_ASSET_NAME
         )
         for positional_arg_name, positional_arg in positional_args.items():
             assert getattr(default_asset, positional_arg_name) == positional_arg
@@ -384,7 +384,7 @@ def test_default_pandas_datasource_get_and_set(
         filepath_or_buffer=valid_file_path,
     )
     assert isinstance(batch, Batch)
-    csv_data_asset_1 = pandas_datasource.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
+    csv_data_asset_1 = pandas_datasource.get_asset(name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     assert isinstance(csv_data_asset_1, _PandasDataAsset)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
     assert len(pandas_datasource.assets) == 1
@@ -393,7 +393,7 @@ def test_default_pandas_datasource_get_and_set(
     pandas_datasource = empty_data_context.data_sources.pandas_default
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
     assert len(pandas_datasource.assets) == 1
-    assert pandas_datasource.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
+    assert pandas_datasource.get_asset(name=DEFAULT_PANDAS_DATA_ASSET_NAME)
 
     # ensure we overwrite the ephemeral data asset if no name is passed
     _ = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
@@ -406,7 +406,7 @@ def test_default_pandas_datasource_get_and_set(
         asset_name=expected_csv_data_asset_name,
         filepath_or_buffer=valid_file_path,
     )
-    csv_data_asset_2 = pandas_datasource.get_asset(asset_name=expected_csv_data_asset_name)
+    csv_data_asset_2 = pandas_datasource.get_asset(name=expected_csv_data_asset_name)
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
 
@@ -451,7 +451,7 @@ def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas:
     assert isinstance(batch, Batch)
     assert isinstance(
         empty_data_context.data_sources.pandas_default.get_asset(
-            asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
+            name=DEFAULT_PANDAS_DATA_ASSET_NAME
         ),
         DataFrameAsset,
     )
@@ -481,7 +481,7 @@ def test_cloud_get_csv_asset_not_in_memory(valid_file_path: pathlib.Path):
         name=csv_asset_name,
         filepath_or_buffer=valid_file_path,
     )
-    csv_asset = datasource.get_asset(asset_name=csv_asset_name)
+    csv_asset = datasource.get_asset(name=csv_asset_name)
     csv_asset.build_batch_request()
 
     assert csv_asset_name not in context.data_sources.all()._in_memory_data_assets

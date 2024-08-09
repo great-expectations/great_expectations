@@ -166,7 +166,7 @@ def test_delete_asset_with_cloud_data_context(
     datasource = context.fluent_datasources[datasource_name]
     asset_name = "my_table_asset_wo_partitioners"
     asset = [asset for asset in datasource.assets if asset.name == asset_name][0]
-    datasource.delete_asset(asset_name=asset_name)
+    datasource.delete_asset(name=asset_name)
 
     cloud_api_fake.assert_call_count(
         urllib.parse.urljoin(

@@ -214,7 +214,7 @@ class GxConfig(FluentBaseModel):
 
             # the ephemeral asset should never be serialized
             if DEFAULT_PANDAS_DATA_ASSET_NAME in datasource.get_assets_as_dict():
-                datasource.delete_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
+                datasource.delete_asset(name=DEFAULT_PANDAS_DATA_ASSET_NAME)
 
             # if the default pandas datasource has no assets, it should not be serialized
             if datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME or len(datasource.assets) > 0:

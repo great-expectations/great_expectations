@@ -762,7 +762,7 @@ class Datasource(
         from great_expectations.data_context import CloudDataContext
 
         asset: _DataAssetT
-        asset = self.get_asset(asset_name=name)
+        asset = self.get_asset(name=name)
 
         if self._data_context and isinstance(self._data_context, CloudDataContext):
             self._data_context._delete_asset(id=str(asset.id))
@@ -799,7 +799,7 @@ class Datasource(
         if self._data_context:
             updated_datasource = self._data_context._update_fluent_datasource(datasource=self)
             assert isinstance(updated_datasource, Datasource)
-            if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
+            if asset_id := updated_datasource.get_asset(name=asset.name).id:
                 asset.id = asset_id
 
         return asset

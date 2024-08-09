@@ -82,7 +82,7 @@ class ConfigurationBundle:
         datasource_configs: List[FluentDatasource] = []
         for datasource_name in datasource_names:
             datasource_config = self._context._datasource_store.retrieve_by_name(
-                datasource_name=datasource_name
+                name=datasource_name
             )
             datasource_config.name = datasource_name
             datasource_configs.append(datasource_config)
