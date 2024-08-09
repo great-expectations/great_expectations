@@ -2225,7 +2225,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ClassInstantiationError: Site config in your Data Context config is not valid.
         """  # noqa: E501
         return self._build_data_docs(
-            names=site_names,
+            site_names=site_names,
             resource_identifiers=resource_identifiers,
             dry_run=dry_run,
             build_index=build_index,
