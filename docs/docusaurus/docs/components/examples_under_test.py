@@ -53,16 +53,20 @@ connect_to_filesystem_data_create_a_data_source = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
     # ),
     # # S3, pandas/spark
-    # IntegrationTestFixture(
-    #     name="create_a_datasource_filesystem_s3_pandas",
-    #     user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_s3/_spark.py",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    # ),
-    # IntegrationTestFixture(
-    #     name="create_a_datasource_filesystem_s3_spark",
-    #     user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_s3/_spark.py",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    # ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --aws -k "create_a_data_source_filesystem_s3_pandas" tests/integration/test_script_runner.py
+        name="create_a_data_source_filesystem_s3_pandas",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_s3/_pandas.py",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --aws --spark -k "create_a_datasource_filesystem_s3_spark" tests/integration/test_script_runner.py
+        name="create_a_datasource_filesystem_s3_spark",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_s3/_spark.py",
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
+    ),
 ]
 
 connect_to_filesystem_data_create_a_data_asset = [
@@ -100,6 +104,20 @@ connect_to_filesystem_data_create_a_data_asset = [
     ),
     # GCS, directory asset/file asset
     # S3, directory asset/file asset
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --aws -k "create_a_data_asset_filesystem_s3_file_asset" tests/integration/test_script_runner.py
+        name="create_a_data_asset_filesystem_s3_file_asset",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_s3/_file_asset.py",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --aws --spark -k "create_a_data_asset_filesystem_s3_directory_asset" tests/integration/test_script_runner.py
+        name="create_a_data_asset_filesystem_s3_directory_asset",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_s3/_directory_asset.py",
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
+    ),
 ]
 
 connect_to_filesystem_data_create_a_batch_definition = [
