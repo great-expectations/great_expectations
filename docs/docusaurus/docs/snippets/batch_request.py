@@ -27,7 +27,6 @@ datasource = context.data_sources.add_pandas_filesystem(
 # The batching_regex should max file names in the data_directory
 asset = datasource.add_csv_asset(
     name="csv_asset",
-    order_by=["year", "month"],
 )
 
 batch_definition = asset.add_batch_definition_monthly(
