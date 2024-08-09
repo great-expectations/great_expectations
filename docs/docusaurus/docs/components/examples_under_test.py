@@ -51,7 +51,7 @@ connect_to_filesystem_data_create_a_data_source = [
     ),
     IntegrationTestFixture(
         # To test, run:
-        # pytest --docs-tests --bigquery -k "create_a_data_source_filesystem_gcs_spark" tests/integration/test_script_runner.py
+        # pytest --docs-tests --bigquery --spark -k "create_a_data_source_filesystem_gcs_spark" tests/integration/test_script_runner.py
         name="create_a_data_source_filesystem_gcs_spark",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_spark.py",
         backend_dependencies=[BackendDependencies.GCS, BackendDependencies.SPARK],
