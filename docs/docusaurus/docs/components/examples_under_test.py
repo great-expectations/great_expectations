@@ -99,6 +99,7 @@ connect_to_filesystem_data_create_a_data_asset = [
         # pytest --docs-tests --azure -k "create_a_data_asset_filesystem_abs_file_asset" tests/integration/test_script_runner.py
         name="create_a_data_asset_filesystem_abs_file_asset",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_abs/_file_asset.py",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_azure_pandas_no_assets/gx",
         backend_dependencies=[BackendDependencies.AZURE],
     ),
     IntegrationTestFixture(
@@ -114,6 +115,7 @@ connect_to_filesystem_data_create_a_data_asset = [
         # pytest --docs-tests --bigquery -k "create_a_data_asset_filesystem_gcs_file_asset" tests/integration/test_script_runner.py
         name="create_a_data_asset_filesystem_gcs_file_asset",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_gcs/_file_asset.py",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_gcs_pandas_no_assets/gx",
         backend_dependencies=[BackendDependencies.GCS],
     ),
     IntegrationTestFixture(
@@ -121,6 +123,7 @@ connect_to_filesystem_data_create_a_data_asset = [
         # pytest --docs-tests --bigquery --spark -k "create_a_data_asset_filesystem_gcs_directory_asset" tests/integration/test_script_runner.py
         name="create_a_data_asset_filesystem_gcs_directory_asset",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_gcs/_directory_asset.py",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_gcs_spark_no_assets/gx",
         backend_dependencies=[BackendDependencies.GCS, BackendDependencies.SPARK],
     ),
     # S3, directory asset/file asset

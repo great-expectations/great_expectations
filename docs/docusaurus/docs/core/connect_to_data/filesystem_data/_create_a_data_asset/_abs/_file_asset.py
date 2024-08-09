@@ -12,10 +12,14 @@ data_source = context.get_datasource(data_source_name)
 # Define the Data Asset's parameters:
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_abs/_file_asset.py - define Data Asset parameters">
 asset_name = "abs_file_csv_asset"
+abs_container = "${ABS_CONTAINER}"
 # </snippet>
 
 # Add the Data Asset to the Data Source:
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_abs/_file_asset.py - add Data Asset">
-file_asset = data_source.add_csv_asset(name=asset_name)
+file_asset = data_source.add_csv_asset(
+    name=asset_name,
+    abs_container=abs_container,
+)
 # </snippet>
 # </snippet>
