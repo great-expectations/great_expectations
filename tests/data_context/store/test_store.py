@@ -53,8 +53,8 @@ def test_build_store_from_config_success():
         "class_name": "ExpectationsStore",
     }
     store = Store.build_store_from_config(
-        store_name=store_name,
-        store_config=store_config,
+        name=store_name,
+        config=store_config,
     )
     assert isinstance(store, Store)
 
@@ -78,8 +78,8 @@ def test_build_store_from_config_success():
 def test_build_store_from_config_failure(store_config: dict, module_name: str):
     with pytest.raises(gx_exceptions.StoreConfigurationError):
         Store.build_store_from_config(
-            store_name="my_new_store",
-            store_config=store_config,
+            name="my_new_store",
+            config=store_config,
             module_name=module_name,
         )
 

@@ -310,30 +310,30 @@ class Store:
 
     @staticmethod
     def build_store_from_config(
-        store_name: Optional[str] = None,
-        store_config: StoreConfigTypedDict | dict | None = None,
+        name: Optional[str] = None,
+        config: StoreConfigTypedDict | dict | None = None,
         module_name: str = "great_expectations.data_context.store",
         runtime_environment: Optional[dict] = None,
     ) -> Store:
-        if store_config is None or module_name is None:
+        if config is None or module_name is None:
             raise gx_exceptions.StoreConfigurationError(  # noqa: TRY003
                 "Cannot build a store without both a store_config and a module_name"
             )
 
         try:
             config_defaults: dict = {
-                "store_name": store_name,
+                "store_name": name,
                 "module_name": module_name,
             }
             new_store = instantiate_class_from_config(
-                config=store_config,
+                config=config,
                 runtime_environment=runtime_environment,
                 config_defaults=config_defaults,
             )
         except gx_exceptions.DataContextError as e:
             logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
-            class_name: str = store_config["class_name"]
-            module_name = store_config.get("module_name", module_name)
+            class_name: str = config["class_name"]
+            module_name = config.get("module_name", module_name)
             raise gx_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,

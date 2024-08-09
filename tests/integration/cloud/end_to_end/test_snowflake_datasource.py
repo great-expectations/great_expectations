@@ -85,7 +85,7 @@ def datasource(
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    datasource = context.get_datasource(name=datasource_name)  # type: ignore[assignment]
     assert (
         datasource.connection_string == connection_string
     ), "The datasource was not updated in the previous method call."
@@ -124,9 +124,9 @@ def data_asset(
         asset_name=asset_name,
         table_factory=table_factory,
     )
-    datasource.delete_asset(asset_name=asset_name)
+    datasource.delete_asset(name=asset_name)
     with pytest.raises(get_missing_data_asset_error_type):
-        datasource.get_asset(asset_name=asset_name)
+        datasource.get_asset(name=asset_name)
 
 
 @pytest.fixture(scope="module")

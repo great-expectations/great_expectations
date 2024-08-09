@@ -437,19 +437,19 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
-    def get_batch_definition(self, batch_definition_name: str) -> BatchDefinition[PartitionerT]:
+    def get_batch_definition(self, name: str) -> BatchDefinition[PartitionerT]:
         batch_definitions = [
             batch_definition
             for batch_definition in self.batch_definitions
-            if batch_definition.name == batch_definition_name
+            if batch_definition.name == name
         ]
         if len(batch_definitions) == 0:
             raise KeyError(  # noqa: TRY003
-                f"BatchDefinition {batch_definition_name} not found"
+                f"BatchDefinition {name} not found"
             )
         elif len(batch_definitions) > 1:
             raise KeyError(  # noqa: TRY003
-                f"Multiple keys for {batch_definition_name} found"
+                f"Multiple keys for {name} found"
             )
         return batch_definitions[0]
 
@@ -731,11 +731,11 @@ class Datasource(
         asset: _DataAssetT
         return {asset.name for asset in self.assets}
 
-    def get_asset(self, asset_name: str) -> _DataAssetT:
+    def get_asset(self, name: str) -> _DataAssetT:
         """Returns the DataAsset referred to by asset_name
 
         Args:
-            asset_name: name of DataAsset sought.
+            name: name of DataAsset sought.
 
         Returns:
             _DataAssetT -- if named "DataAsset" object exists; otherwise, exception is raised.
@@ -743,31 +743,31 @@ class Datasource(
         # This default implementation will be used if protocol is inherited
         try:
             asset: _DataAssetT
-            found_asset: _DataAssetT = list(
-                filter(lambda asset: asset.name == asset_name, self.assets)
-            )[0]
+            found_asset: _DataAssetT = list(filter(lambda asset: asset.name == name, self.assets))[
+                0
+            ]
             found_asset._datasource = self
             return found_asset
         except IndexError as exc:
             raise LookupError(  # noqa: TRY003
-                f'"{asset_name}" not found. Available assets are ({", ".join(self.get_asset_names())})'  # noqa: E501
+                f'"{name}" not found. Available assets are ({", ".join(self.get_asset_names())})'
             ) from exc
 
-    def delete_asset(self, asset_name: str) -> None:
+    def delete_asset(self, name: str) -> None:
         """Removes the DataAsset referred to by asset_name from internal list of available DataAsset objects.
 
         Args:
-            asset_name: name of DataAsset to be deleted.
+            name: name of DataAsset to be deleted.
         """  # noqa: E501
         from great_expectations.data_context import CloudDataContext
 
         asset: _DataAssetT
-        asset = self.get_asset(asset_name=asset_name)
+        asset = self.get_asset(name=name)
 
         if self._data_context and isinstance(self._data_context, CloudDataContext):
             self._data_context._delete_asset(id=str(asset.id))
 
-        self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
+        self.assets = list(filter(lambda asset: asset.name != name, self.assets))
         self._save_context_project_config()
 
     def _add_asset(self, asset: _DataAssetT, connect_options: dict | None = None) -> _DataAssetT:
@@ -799,7 +799,7 @@ class Datasource(
         if self._data_context:
             updated_datasource = self._data_context._update_fluent_datasource(datasource=self)
             assert isinstance(updated_datasource, Datasource)
-            if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
+            if asset_id := updated_datasource.get_asset(name=asset.name).id:
                 asset.id = asset_id
 
         return asset
