@@ -95,21 +95,6 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                         }
                     ],
                 },
-                {
-                    "order_by": [
-                        {"key": "year"},
-                        {"key": "month", "reverse": True},
-                    ],
-                    "table_name": "yet_another_table",
-                    "name": "with_sorters",
-                    "type": "table",
-                },
-                {
-                    "order_by": ["year", "-month"],
-                    "table_name": "yet_another_table",
-                    "name": "with_dslish_sorters",
-                    "type": "table",
-                },
             ],
         },
         {
@@ -764,23 +749,6 @@ def test_yaml_config_round_trip_ordering(
     dumped: str = from_yaml_gx_config.yaml()
 
     assert dumped == PG_CONFIG_YAML_STR
-
-
-@pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
-@pytest.mark.big
-def test_custom_sorter_serialization(inject_engine_lookup_double, from_json_gx_config: GxConfig):
-    dumped: str = from_json_gx_config.json(indent=2)
-    print(f"  Dumped JSON ->\n\n{dumped}\n")
-
-    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT[_FLUENT_DATASOURCES_KEY]["my_pg_ds"][
-        "assets"
-    ]["with_dslish_sorters"]["order_by"]
-
-    assert '"reverse": True' not in dumped
-    assert '{"key":' not in dumped
-
-    for sorter_str in expected_sorter_strings:
-        assert sorter_str in dumped, f"`{sorter_str}` not found in dumped json"
 
 
 @pytest.mark.big

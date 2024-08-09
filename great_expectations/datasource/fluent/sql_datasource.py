@@ -65,8 +65,6 @@ from great_expectations.datasource.fluent.interfaces import (
     DatasourceT,
     GxDatasourceWarning,
     PartitionerProtocol,
-    Sorter,
-    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -1119,7 +1117,6 @@ class SQLDatasource(Datasource):
         name: str,
         table_name: str = "",
         schema_name: Optional[str] = None,
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -1128,7 +1125,6 @@ class SQLDatasource(Datasource):
             name: The name of this table asset.
             table_name: The table where the data resides.
             schema_name: The schema that holds the table.
-            order_by: A list of Sorters or Sorter strings.
             batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
@@ -1136,14 +1132,12 @@ class SQLDatasource(Datasource):
             The type of this object will match the necessary type for this datasource.
             eg, it could be a TableAsset or a SqliteTableAsset.
         """  # noqa: E501
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         if schema_name:
             schema_name = self._TableAsset._to_lower_if_not_bracketed_by_quotes(schema_name)
         asset = self._TableAsset(
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)
@@ -1153,7 +1147,6 @@ class SQLDatasource(Datasource):
         self,
         name: str,
         query: str,
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> QueryAsset:
         """Adds a query asset to this datasource.
@@ -1161,7 +1154,6 @@ class SQLDatasource(Datasource):
         Args:
             name: The name of this table asset.
             query: The SELECT query to selects the data to validate. It must begin with the "SELECT".
-            order_by: A list of Sorters or Sorter strings.
             batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
@@ -1169,11 +1161,9 @@ class SQLDatasource(Datasource):
             The type of this object will match the necessary type for this datasource.
             eg, it could be a QueryAsset or a SqliteQueryAsset.
         """  # noqa: E501
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = self._QueryAsset(
             name=name,
             query=query,
-            order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)

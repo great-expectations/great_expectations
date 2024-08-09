@@ -416,6 +416,12 @@ class DatasourceNotFoundError(DataContextError):
     pass
 
 
+class DataAssetInitializationError(GreatExpectationsError):
+    def __init__(self, message: str) -> None:
+        self.message = f"Cannot initialize data asset: {message}"
+        super().__init__(self.message)
+
+
 class InvalidConfigValueTypeError(DataContextError):
     pass
 

@@ -31,7 +31,6 @@ _EXCLUDE_METHODS: Final[set[str]] = {
     "get_batch_definition",  # DataAsset
     "get_execution_engine",
     "json",
-    "parse_order_by_sorters",
     "update_batch_definition_field_set",  # DataAsset
     "yaml",
 }
