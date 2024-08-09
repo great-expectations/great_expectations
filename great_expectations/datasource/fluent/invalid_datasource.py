@@ -164,7 +164,7 @@ class InvalidDatasource(Datasource):
         ) from self.config_error
 
     @override
-    def get_asset(self, asset_name: str) -> InvalidAsset:
+    def get_asset(self, name: str) -> InvalidAsset:
         """
         Always raise a warning and return an InvalidAsset.
         Don't raise an error because the users may want to inspect the asset config.
@@ -173,7 +173,7 @@ class InvalidDatasource(Datasource):
             f"The {self.name} Datasource configuration is invalid and cannot be used. Please fix the error and try again",  # noqa: E501
             GxInvalidDatasourceWarning,
         )
-        return super().get_asset(asset_name)
+        return super().get_asset(name)
 
     def _raise_type_error(self, *args, **kwargs) -> NoReturn:
         """

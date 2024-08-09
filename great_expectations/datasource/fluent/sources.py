@@ -601,8 +601,8 @@ class DataSourceManager:
         return self._data_context._datasources
 
     @public_api
-    def get(self, datasource_name: str) -> Datasource:
-        return self.all()[datasource_name]
+    def get(self, name: str) -> Datasource:
+        return self.all()[name]
 
     def __getattr__(self, attr_name: str):
         try:
