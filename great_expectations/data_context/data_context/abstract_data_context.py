@@ -895,14 +895,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.17.2")
-    def add_data_docs_site(self, site_name: str, config: DataDocsSiteConfigTypedDict) -> None:
+    def add_data_docs_site(self, site_name: str, site_config: DataDocsSiteConfigTypedDict) -> None:
         """Add a new Data Docs Site to the DataContext.
 
         Example site config dicts can be found in our "Host and share Data Docs" guides.
 
         Args:
-            name: New site name to add.
-            config: Config dict for the new site.
+            site_name: New site name to add.
+            site_config: Config dict for the new site.
         """
         if self.config.data_docs_sites is not None:
             if site_name in self.config.data_docs_sites:
@@ -911,7 +911,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
 
             sites = self.config.data_docs_sites
-            sites[site_name] = config
+            sites[site_name] = site_config
             self.variables.data_docs_sites = sites
             self._save_project_config()
 
@@ -929,14 +929,16 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.17.2")
-    def update_data_docs_site(self, site_name: str, config: DataDocsSiteConfigTypedDict) -> None:
+    def update_data_docs_site(
+        self, site_name: str, site_config: DataDocsSiteConfigTypedDict
+    ) -> None:
         """Update an existing Data Docs Site.
 
         Example site config dicts can be found in our "Host and share Data Docs" guides.
 
         Args:
-            name: Site name to update.
-            config: Config dict that replaces the existing.
+            site_name: Site name to update.
+            site_config: Config dict that replaces the existing.
         """
         if self.config.data_docs_sites is not None:
             if site_name not in self.config.data_docs_sites:
@@ -945,7 +947,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
 
             sites = self.config.data_docs_sites
-            sites[site_name] = config
+            sites[site_name] = site_config
             self.variables.data_docs_sites = sites
             self._save_project_config()
 
