@@ -57,7 +57,7 @@ class CheckpointStoreSpy(CheckpointStore):
 
     def __init__(self) -> None:
         self.save_count = 0
-        super().__init__(store_name=CheckpointStoreSpy.STORE_NAME)
+        super().__init__(name=CheckpointStoreSpy.STORE_NAME)
 
     def add(self, key, value, **kwargs):
         ret = super().add(key=key, value=value, **kwargs)
@@ -138,8 +138,8 @@ def test_add_store(in_memory_data_context: EphemeralDataContextSpy):
     num_store_configs_before = len(context.config.stores)
 
     context.add_store(
-        store_name="my_new_store",
-        store_config={
+        name="my_new_store",
+        config={
             "module_name": "great_expectations.data_context.store",
             "class_name": "ExpectationsStore",
         },
