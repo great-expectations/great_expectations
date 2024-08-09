@@ -6,7 +6,7 @@ context = gx.get_context()
 # Define the Data Source's parameters:
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_gcs/_spark.py - define Data Source parameters">
 data_source_name = "my_filesystem_data_source"
-bucket_or_name = "my_bucket"
+bucket_or_name = "test_docs_data"
 gcs_options = {}
 # </snippet>
 

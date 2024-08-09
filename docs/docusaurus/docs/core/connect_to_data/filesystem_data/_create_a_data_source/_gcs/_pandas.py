@@ -5,7 +5,7 @@ context = gx.get_context()
 
 # Define the Data Source's parameters:
 data_source_name = "my_filesystem_data_source"
-bucket_or_name = "my_bucket"
+bucket_or_name = "test_docs_data"
 gcs_options = {}
 
 # Create the Data Source:

@@ -2,9 +2,16 @@
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_s3/_file_asset.py - retrieve Data Source">
 import great_expectations as gx
 
+context = gx.get_context()
+data_source_name = "my_filesystem_data_source"
+bucket_name = "superconductive-docs-test"
+boto3_options = {}
+data_source = context.data_sources.add_pandas_s3(
+    name=data_source_name, bucket=bucket_name, boto3_options=boto3_options
+)
+
 # This example uses a File Data Context which already has
 #  a Data Source defined.
-context = gx.get_context()
 data_source_name = "my_filesystem_data_source"
 data_source = context.get_datasource(data_source_name)
 # </snippet>
