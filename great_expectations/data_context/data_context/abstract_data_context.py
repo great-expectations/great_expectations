@@ -1576,7 +1576,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 ValidationResultIdentifier or any other type's identifier. The
                 argument is optional - when not supplied, the method returns the
                 URL of the index page.
-            name: Optionally specify which site to open. If not specified,
+            site_name: Optionally specify which site to open. If not specified,
                 open all docs found in the project.
             only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
         """

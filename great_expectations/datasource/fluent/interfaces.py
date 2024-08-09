@@ -1152,12 +1152,3 @@ class Batch:
             batch_definition=batch_definition,
             batch_parameters=self.batch_request.options,
         )
-
-
-# BDIRKS follow up on these files
-# datasource/fluent/pandas_datasource.py - OK
-# datasource/fluent/pandas_datasource.pyi - OK
-# datasource/fluent/config.py - DONE, some fallout
-# datasource/fluent/sources.py - DONE
-# datasource/fluent/sources.pyi - OK
-# data_context/data_context/abstract_data_context.py - DONE, some fallout
