@@ -283,7 +283,7 @@ def build_configuration_store(
         "store_backend": store_backend,
     }
     configuration_store: ConfigurationStore = Store.build_store_from_config(  # type: ignore[assignment]
-        store_config=store_config,
+        config=store_config,
         module_name=module_name,
         runtime_environment=None,
     )
