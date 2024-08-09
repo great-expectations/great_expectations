@@ -195,7 +195,7 @@ def build_tuple_filesystem_store_backend(
     }
     store_backend_config.update(**kwargs)
     return Store.build_store_from_config(
-        store_config=store_backend_config,
+        config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
     )
