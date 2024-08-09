@@ -79,8 +79,9 @@ connect_to_filesystem_data_create_a_data_asset = [
         # To test, run:
         # pytest --docs-tests -k "create_a_data_asset_filesystem_local_file_asset" tests/integration/test_script_runner.py
         name="create_a_data_asset_filesystem_local_file_asset",
-        user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_file_asset.py",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_file_asset.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_no_assets/gx",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -89,6 +90,7 @@ connect_to_filesystem_data_create_a_data_asset = [
         name="create_a_data_asset_filesystem_local_directory_asset",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_local_or_networked/_directory_asset.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/three_test_files",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_spark_no_assets/gx",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
     # ABS, directory asset/file asset
