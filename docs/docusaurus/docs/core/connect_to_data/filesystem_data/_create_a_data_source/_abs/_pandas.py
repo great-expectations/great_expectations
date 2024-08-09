@@ -1,7 +1,3 @@
-import os
-
-os.environ["AZURE_STORAGE_ACCOUNT_URL"] = "superconductivetesting.blob.core.windows.net"
-
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_pandas.py - full example">
 import great_expectations as gx
 
@@ -23,4 +19,4 @@ data_source = context.data_sources.add_pandas_abs(
 # </snippet>
 
 # Retrieve the Data Source:
-data_source = context.data_sources.get("nyc_taxi_data")
+data_source = context.data_sources.get(data_source_name)
