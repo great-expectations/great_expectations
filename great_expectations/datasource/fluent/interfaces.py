@@ -411,21 +411,18 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         Args:
             name (str): Name of the BatchDefinition to delete.
         """
-        batch_def = self.get_batch_definition(name)
+        try:
+            batch_def = self.get_batch_definition(name)
+        except KeyError as err:
+            # We collect the names as a list because while we shouldn't have more than 1
+            # batch definition with the same name, we want to represent it if it does occur.
+            batch_definition_names = [bc.name for bc in self.batch_definitions]
+            raise ValueError(  # noqa: TRY003
+                f'"{name}" does not exist. Existing batch_definition names are {batch_definition_names})'  # noqa: E501
+            ) from err
         self._delete_batch_definition(batch_def)
 
     def _delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
-        """Delete a batch definition.
-
-        Args:
-            batch_definition (BatchDefinition): BatchDefinition to delete.
-        """
-        batch_definition_names = {bc.name for bc in self.batch_definitions}
-        if batch_definition not in self.batch_definitions:
-            raise ValueError(  # noqa: TRY003
-                f'"{batch_definition.name}" does not exist (all existing batch_definition names are {batch_definition_names})'  # noqa: E501
-            )
-
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
@@ -459,6 +456,8 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
                 f"BatchDefinition {name} not found"
             )
         elif len(batch_definitions) > 1:
+            # Our add_batch_definition() method should enforce that different
+            # batch definitions do not share a name.
             raise KeyError(  # noqa: TRY003
                 f"Multiple keys for {name} found"
             )
