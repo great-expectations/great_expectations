@@ -84,6 +84,7 @@ fluent_datasources:
     assets:
       my_directory_data_asset:
         type: directory_csv
+        header: true
         data_directory: folder_with_data
     base_directory: data
 data_context_id: 219f28d9-dbab-4e20-95a0-a838ccfe34a0

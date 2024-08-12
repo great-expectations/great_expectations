@@ -161,7 +161,8 @@ connect_to_filesystem_data_create_a_batch_definition = [
         # pytest --docs-tests --spark -k "create_a_batch_definition_filesystem_directory_daily" tests/integration/test_script_runner.py
         name="create_a_batch_definition_filesystem_directory_daily",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_daily.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/three_test_files",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/daily_file_sample_data",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_spark_directory_asset/gx",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
@@ -169,7 +170,8 @@ connect_to_filesystem_data_create_a_batch_definition = [
         # pytest --docs-tests --spark -k "create_a_batch_definition_filesystem_directory_monthly" tests/integration/test_script_runner.py
         name="create_a_batch_definition_filesystem_directory_monthly",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_monthly.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/three_test_files",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/monthly_file_sample_data",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_spark_directory_asset/gx",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
@@ -177,7 +179,8 @@ connect_to_filesystem_data_create_a_batch_definition = [
         # pytest --docs-tests --spark -k "create_a_batch_definition_filesystem_directory_yearly" tests/integration/test_script_runner.py
         name="create_a_batch_definition_filesystem_directory_yearly",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_partitioned_yearly.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/three_test_files",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/yearly_file_sample_data",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_spark_directory_asset/gx",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
     # file, path/daily/monthly/yearly
@@ -187,6 +190,7 @@ connect_to_filesystem_data_create_a_batch_definition = [
         name="create_a_batch_definition_filesystem_file_path",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_path.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_file_asset/gx",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -194,7 +198,8 @@ connect_to_filesystem_data_create_a_batch_definition = [
         # pytest --docs-tests -k "create_a_batch_definition_filesystem_file_daily" tests/integration/test_script_runner.py
         name="create_a_batch_definition_filesystem_file_daily",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_daily.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/daily_file_sample_data",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_file_asset/gx",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -202,7 +207,8 @@ connect_to_filesystem_data_create_a_batch_definition = [
         # pytest --docs-tests -k "create_a_batch_definition_filesystem_file_monthly" tests/integration/test_script_runner.py
         name="create_a_batch_definition_filesystem_file_monthly",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_monthly.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/monthly_file_sample_data",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_file_asset/gx",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -210,7 +216,8 @@ connect_to_filesystem_data_create_a_batch_definition = [
         # pytest --docs-tests -k "create_a_batch_definition_filesystem_file_yearly" tests/integration/test_script_runner.py
         name="create_a_batch_definition_filesystem_file_yearly",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_yearly.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/yearly_file_sample_data",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_file_asset/gx",
         backend_dependencies=[],
     ),
 ]
