@@ -85,7 +85,7 @@ def datasource(
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(name=datasource_name)  # type: ignore[assignment]
+    datasource = context.data_sources.get(name=datasource_name)  # type: ignore[assignment]
     assert (
         datasource.connection_string == connection_string
     ), "The datasource was not updated in the previous method call."

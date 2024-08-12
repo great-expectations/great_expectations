@@ -4,7 +4,7 @@ from great_expectations.datasource.fluent import DataAsset, Datasource
 context = gx.get_context()
 
 # to open data docs, we need validation results which we get by creating a suite and running a checkpoint
-datasource: Datasource = context.get_datasource("taxi_datasource")
+datasource: Datasource = context.data_sources.get("taxi_datasource")
 asset: DataAsset = datasource.get_asset("yellow_tripdata")
 batch_request = asset.build_batch_request()
 validator = context.get_validator(batch_request=batch_request)

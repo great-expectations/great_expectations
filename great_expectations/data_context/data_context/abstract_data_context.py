@@ -838,29 +838,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
-    def get_datasource(self, name: str = "default") -> FluentDatasource:
-        """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
-
-        Args:
-            name: The name of the target datasource.
-
-        Returns:
-            The target datasource.
-
-        Raises:
-            ValueError: The input `datasource_name` is None.
-        """
-        if name is None:
-            raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")  # noqa: TRY003
-
-        try:
-            datasource = self.data_sources.all()[name]
-        except KeyError as e:
-            raise ValueError(str(e)) from e
-
-        datasource._data_context = self
-        return datasource
-
     def add_store(self, name: str, config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.
 
@@ -1496,11 +1473,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 batch_kwargs_generator_names = [batch_kwargs_generator_names]
             if len(batch_kwargs_generator_names) == len(datasource_names):
                 for datasource_name in datasource_names:
-                    datasource = self.get_datasource(datasource_name)
+                    datasource = self.data_sources.get(datasource_name)
                     fluent_data_asset_names[datasource_name] = sorted(datasource.get_asset_names())
 
             elif len(batch_kwargs_generator_names) == 1:
-                datasource = self.get_datasource(datasource_names[0])
+                datasource = self.data_sources.get(datasource_names[0])
                 fluent_data_asset_names[datasource_names[0]] = sorted(datasource.get_asset_names())
 
             else:
@@ -1511,7 +1488,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:  # generator_names is None
             for datasource_name in datasource_names:
                 try:
-                    datasource = self.get_datasource(datasource_name)
+                    datasource = self.data_sources.get(datasource_name)
                     fluent_data_asset_names[datasource_name] = sorted(datasource.get_asset_names())
 
                 except ValueError:
@@ -1540,7 +1517,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             BatchKwargs
 
         """  # noqa: E501
-        datasource_obj = self.get_datasource(datasource)
+        datasource_obj = self.data_sources.get(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
             data_asset_name=data_asset_name,

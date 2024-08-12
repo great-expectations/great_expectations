@@ -60,7 +60,7 @@ A Validation Definition is a fixed reference that links a Batch of data to an Ex
    data_asset_name = "my_data_asset"
    batch_definition_name = "my_batch_definition"
 
-   batch_definition = context.get_datasource(data_source_name).get_asset(data_asset_name).get_batch_definition(batch_definition_name)
+   batch_definition = context.data_sources.get(data_source_name).get_asset(data_asset_name).get_batch_definition(batch_definition_name)
    ```
 
 5. Create a `ValidationDefinition` instance using the Batch Definition, Expectation Suite, and a unique name.
@@ -105,7 +105,7 @@ suite = context.suites.get(name=suite_name)
 data_source_name = "my_datasource"
 data_asset_name = "my_data_asset"
 batch_definition_name = "my_batch_definition"
-batch_definition = context.get_datasource(data_source_name).get_asset(data_asset_name).get_batch_definition(batch_definition_name)
+batch_definition = context.data_sources.get(data_source_name).get_asset(data_asset_name).get_batch_definition(batch_definition_name)
 
 # highlight-start
 definition_name = "My Validation Definition"

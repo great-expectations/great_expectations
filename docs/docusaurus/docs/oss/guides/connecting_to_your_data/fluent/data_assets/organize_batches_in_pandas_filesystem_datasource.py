@@ -26,7 +26,7 @@ context.data_sources.add_pandas_filesystem(
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_datasource">
-my_datasource = context.get_datasource("my_datasource")
+my_datasource = context.data_sources.get("my_datasource")
 # </snippet>
 
 # Python

@@ -49,7 +49,7 @@ def fds_data_asset(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
 ) -> DataAsset:
-    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
+    datasource = fds_data_context.data_sources.get(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
     return datasource.get_asset("trip_asset")
 
@@ -59,7 +59,7 @@ def fds_data_asset_with_event_type_partitioner(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
 ) -> DataAsset:
-    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
+    datasource = fds_data_context.data_sources.get(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
     return datasource.get_asset("trip_asset_partition_by_event_type")
 

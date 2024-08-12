@@ -364,7 +364,7 @@ class DataSourceManager:
         self, name: str, datasource_type: Type[Datasource], raise_if_none: bool = True
     ) -> None:
         try:
-            current_datasource = self._data_context.get_datasource(name)
+            current_datasource = self._data_context.data_sources.get(name)
         except ValueError as e:
             if raise_if_none:
                 raise ValueError(f"There is no datasource {name} in the data context.") from e  # noqa: TRY003

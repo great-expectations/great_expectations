@@ -111,7 +111,7 @@ def _build_checkpoint_and_run(
         suite=ExpectationSuite(name="metrics_exp", expectations=expectations)
     )
 
-    ds = context.get_datasource("my_datasource")
+    ds = context.data_sources.get("my_datasource")
     assert isinstance(ds, Datasource)
     asset = ds.get_asset(asset_name)
     batch_definition = asset.add_batch_definition(name="my_batch_def")

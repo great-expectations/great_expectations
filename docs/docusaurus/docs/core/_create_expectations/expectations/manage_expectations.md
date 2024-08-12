@@ -92,7 +92,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
   import great_expectations.expectations as gxe
   
   context = gx.get_context()
-  data_asset = context.get_datasource("my_datasource").get_asset("my_asset")
+  data_asset = context.data_sources.get("my_datasource").get_asset("my_asset")
   batch =
 
   expectation = gxe.ExpectColumnValuesToBeInSet(

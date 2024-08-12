@@ -6,7 +6,7 @@ import great_expectations as gx
 #  which already has a Data Source configured.
 context = gx.get_context()
 data_source_name = "my_filesystem_data_source"
-data_source = context.get_datasource(data_source_name)
+data_source = context.data_sources.get(data_source_name)
 # </snippet>
 
 # Define the Data Asset's parameters:

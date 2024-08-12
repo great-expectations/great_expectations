@@ -109,7 +109,7 @@ expectation2 = ExpectValidPassengerCount(column="occupied_seats")  # Uses a diff
 data_source_name = "my_taxi_data"
 asset_name = "2018_taxi_data"
 batch_definition_name = "all_records_in_asset"
-batch = context.get_datasource(datasource_name).get_asset(asset_name).get_batch_definition(batch_definition_name=batch_definition_name).get_batch()
+batch = context.data_sources.get(datasource_name).get_asset(asset_name).get_batch_definition(batch_definition_name=batch_definition_name).get_batch()
 
 batch.validate(expectation1)
 batch.validate(expectation2)

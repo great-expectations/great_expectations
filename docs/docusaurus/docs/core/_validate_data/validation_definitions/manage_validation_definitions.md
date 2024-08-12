@@ -87,7 +87,7 @@ suite = context.suites.get(name=existing_suite_name)
 existing_data_source_name = "my_datasource"
 existing_data_asset_name = "my_data_asset"
 existing_batch_definition_name = "my_batch_definition"
-batch_definition = context.get_datasource(existing_data_source_name).get(existing_data_asset_name).get(existing_batch_definition_name)
+batch_definition = context.data_sources.get(existing_data_source_name).get(existing_data_asset_name).get(existing_batch_definition_name)
 
 # highlight-start
 definition_name = "My Validation Definition"

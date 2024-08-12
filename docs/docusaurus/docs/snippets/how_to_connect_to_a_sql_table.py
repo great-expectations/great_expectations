@@ -40,7 +40,7 @@ with warnings.catch_warnings():
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py datasource">
-datasource = context.get_datasource("my_datasource")
+datasource = context.data_sources.get("my_datasource")
 # </snippet>
 
 # Python

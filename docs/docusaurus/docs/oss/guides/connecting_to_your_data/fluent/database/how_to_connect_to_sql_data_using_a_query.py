@@ -39,7 +39,7 @@ with warnings.catch_warnings():
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.py datasource">
-datasource = context.get_datasource("my_datasource")
+datasource = context.data_sources.get("my_datasource")
 # </snippet>
 
 # Python

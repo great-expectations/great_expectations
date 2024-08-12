@@ -153,7 +153,7 @@ Data can be validated against individual Expectations.  This workflow is general
    datasource_name = "all_csv_files"
    asset_name = "csv_files"
    batch_definition_name = "2018-06_taxi"
-   batch = context.get_datasource(datasource_name).get_asset(asset_name).get_batch_definition(batch_definition_name=batch_definition_name).get_batch()
+   batch = context.data_sources.get(datasource_name).get_asset(asset_name).get_batch_definition(batch_definition_name=batch_definition_name).get_batch()
    
    # Test the Expectation:
    validation_results = batch.validate(expectation)

@@ -167,7 +167,7 @@ def test_batch_validate_expectation_does_not_persist_a_batch_definition(
     pandas_setup: Tuple[AbstractDataContext, Batch],
 ):
     context, batch = pandas_setup
-    datasource = context.get_datasource(DATASOURCE_NAME)
+    datasource = context.data_sources.get(DATASOURCE_NAME)
     assert isinstance(datasource, Datasource)
     asset = datasource.get_asset(ASSET_NAME)
 
@@ -186,7 +186,7 @@ def test_batch_validate_expectation_suite_does_not_persist_a_batch_definition(
     pandas_setup: Tuple[AbstractDataContext, Batch],
 ):
     context, batch = pandas_setup
-    datasource = context.get_datasource(DATASOURCE_NAME)
+    datasource = context.data_sources.get(DATASOURCE_NAME)
     assert isinstance(datasource, Datasource)
     asset = datasource.get_asset(ASSET_NAME)
 

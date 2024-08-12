@@ -32,7 +32,7 @@ my_datasource.add_table_asset(
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_datasource">
-my_datasource = context.get_datasource("my_datasource")
+my_datasource = context.data_sources.get("my_datasource")
 my_table_asset = my_datasource.get_asset(name="my_table_asset")
 # </snippet>
 
