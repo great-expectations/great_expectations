@@ -41,6 +41,7 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import CheckpointRunWithoutValidationDefinitionError
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
 
@@ -49,11 +50,9 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.unit
-def test_checkpoint_no_validation_definitions_raises_error():
-    with pytest.raises(ValueError) as e:
-        Checkpoint(name="my_checkpoint", validation_definitions=[])
-
-    assert "Checkpoint must contain at least one validation definition" in str(e.value)
+def test_checkpoint_no_validation_definitions_does_not_raise():
+    Checkpoint(name="my_checkpoint", validation_definitions=[])
+    # see, no errors!
 
 
 @pytest.mark.unit
@@ -333,16 +332,6 @@ class TestCheckpointSerialization:
             pytest.param(
                 {
                     "name": "my_checkpoint",
-                    "validation_definitions": [],
-                    "actions": [],
-                    "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
-                },
-                "Checkpoint must contain at least one validation definition",
-                id="missing_validations",
-            ),
-            pytest.param(
-                {
-                    "name": "my_checkpoint",
                     "validation_definitions": [
                         {
                             "name": "i_do_not_exist",
@@ -480,6 +469,15 @@ class TestCheckpointResult:
 
         with mock.patch.object(ValidationDefinition, "run", return_value=mock_run_result):
             yield validation_definition
+
+    @pytest.mark.unit
+    def test_checkpoint_run_no_validation_definitions(self, mocker):
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        checkpoint = Checkpoint(name=self.checkpoint_name, validation_definitions=[])
+
+        with pytest.raises(CheckpointRunWithoutValidationDefinitionError):
+            checkpoint.run()
 
     @pytest.mark.unit
     def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
