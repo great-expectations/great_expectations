@@ -132,6 +132,7 @@ connect_to_filesystem_data_create_a_data_asset = [
         # pytest --docs-tests --aws -k "create_a_data_asset_filesystem_s3_file_asset" tests/integration/test_script_runner.py
         name="create_a_data_asset_filesystem_s3_file_asset",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_s3/_file_asset.py",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_aws_pandas_no_assets/gx",
         backend_dependencies=[BackendDependencies.AWS],
     ),
     IntegrationTestFixture(
@@ -139,6 +140,7 @@ connect_to_filesystem_data_create_a_data_asset = [
         # pytest --docs-tests --aws --spark -k "create_a_data_asset_filesystem_s3_directory_asset" tests/integration/test_script_runner.py
         name="create_a_data_asset_filesystem_s3_directory_asset",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_s3/_directory_asset.py",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_aws_spark_no_assets/gx",
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
     ),
 ]

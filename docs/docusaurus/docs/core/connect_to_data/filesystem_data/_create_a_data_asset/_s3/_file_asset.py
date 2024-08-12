@@ -3,12 +3,6 @@
 import great_expectations as gx
 
 context = gx.get_context()
-data_source_name = "my_filesystem_data_source"
-bucket_name = "superconductive-docs-test"
-boto3_options = {}
-data_source = context.data_sources.add_pandas_s3(
-    name=data_source_name, bucket=bucket_name, boto3_options=boto3_options
-)
 
 # This example uses a File Data Context which already has
 #  a Data Source defined.
