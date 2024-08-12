@@ -41,10 +41,6 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                     "class_name": "TupleFilesystemStoreBackend",
                 },
             },
-            "suite_parameter_store": {
-                "class_name": "SuiteParameterStore",
-                "module_name": "great_expectations.data_context.store",
-            },
             "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {

@@ -149,10 +149,8 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
             "datasources": datasource_config,
             "checkpoint_store_name": "default_checkpoint_store",
             "expectations_store_name": "default_expectations_store",
-            "suite_parameter_store_name": "default_suite_parameter_store",
             "validation_results_store_name": "default_validation_results_store",
             "stores": {
-                "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {

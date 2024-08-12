@@ -101,7 +101,6 @@ def _cloud_config(data_dir):
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
         "data_docs_sites": {},
-        "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "default_expectations_store",
         "plugins_directory": "plugins/",
         "progress_bars": {
@@ -123,7 +122,6 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "default_expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
@@ -149,10 +147,6 @@ def _cloud_config(data_dir):
                     "ge_cloud_resource_type": "validation_result",
                     "suppress_store_backend_id": True,
                 },
-            },
-            "suite_parameter_store": {
-                "class_name": "SuiteParameterStore",
-                "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
                 "class_name": "ExpectationsStore",

@@ -1666,9 +1666,6 @@ def empty_ge_cloud_data_context_config(
 ):
     config_yaml_str = f"""
 stores:
-  default_suite_parameter_store:
-    class_name: SuiteParameterStore
-
   default_expectations_store:
     class_name: ExpectationsStore
     store_backend:
@@ -1713,7 +1710,6 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
-suite_parameter_store_name: default_suite_parameter_store
 expectations_store_name: default_expectations_store
 validation_results_store_name: default_validation_results_store
 checkpoint_store_name: default_checkpoint_store
