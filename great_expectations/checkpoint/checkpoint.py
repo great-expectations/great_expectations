@@ -180,7 +180,7 @@ class Checkpoint(BaseModel):
             validation_result = validation_definition.run(
                 checkpoint_id=self.id,
                 batch_parameters=batch_parameters,
-                suite_parameters=expectation_parameters,
+                expectation_parameters=expectation_parameters,
                 result_format=result_format,
                 run_id=run_id,
             )
