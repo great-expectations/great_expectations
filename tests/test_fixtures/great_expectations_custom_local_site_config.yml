@@ -5,7 +5,6 @@ plugins_directory: plugins/
 
 expectations_store_name: expectations_store
 checkpoint_store_name: checkpoint_store
-suite_parameter_store_name: suite_parameter_store
 validation_results_store_name: validation_results_store
 
 stores:
@@ -54,10 +53,6 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: fixtures/validations
-
-  suite_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: SuiteParameterStore
 
 data_docs_sites:
   local_site: # site name

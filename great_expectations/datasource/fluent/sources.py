@@ -76,14 +76,20 @@ class CrudMethodType(str, Enum):
 CrudMethodInfoFn: TypeAlias = Callable[..., Tuple[CrudMethodType, Type["Datasource"]]]
 
 
-class _SourceFactories:
+@public_api
+class DataSourceManager:
     """
-    Contains a collection of datasource factory methods in the format `.add_<TYPE_NAME>()`
+    Contains methods to interact with data sources from the gx context
 
-    Contains a `.type_lookup` dict-like two way mapping between previously registered `Datasource`
-    or `DataAsset` types and a simplified name for those types.
+    This contains a collection of dynamically generated datasource factory methods in the format
+    `.add_<TYPE_NAME>()`.
+
+    It also contains general data source manipulation methods such as `all()`, `get()` and
+    `delete()`.
     """
 
+    # A dict-like two way mapping between previously registered `Datasource` or `DataAsset` types
+    # and a simplified name for those types.
     type_lookup: ClassVar = TypeLookup()
     __crud_registry: ClassVar[Dict[str, CrudMethodInfoFn]] = {}
 
@@ -572,7 +578,7 @@ class _SourceFactories:
         def delete_datasource(name: str) -> None:
             logger.debug(f"Delete {datasource_type} with {name}")
             self._validate_current_datasource_type(name, datasource_type)
-            self._data_context._delete_fluent_datasource(datasource_name=name)
+            self._data_context._delete_fluent_datasource(name=name)
             self._data_context._save_project_config()
 
         delete_datasource.__doc__ = doc_string
@@ -588,14 +594,15 @@ class _SourceFactories:
         Args:
             name: The name of the given datasource.
         """
-        self._data_context.delete_datasource(datasource_name=name)
+        self._data_context.delete_datasource(name=name)
 
     @public_api
     def all(self) -> DatasourceDict:
         return self._data_context._datasources
 
-    def get(self, datasource_name: str) -> Datasource:
-        return self.all()[datasource_name]
+    @public_api
+    def get(self, name: str) -> Datasource:
+        return self.all()[name]
 
     def __getattr__(self, attr_name: str):
         try:
@@ -635,8 +642,8 @@ def _iter_all_registered_types(
     Iterate through all registered Datasource and DataAsset types.
     Returns tuples of the registered type name and the actual type/class.
     """
-    for ds_name in _SourceFactories.type_lookup.type_names():
-        ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
+    for ds_name in DataSourceManager.type_lookup.type_names():
+        ds_type: Type[Datasource] = DataSourceManager.type_lookup[ds_name]
         if include_datasource:
             yield ds_name, ds_type
 

@@ -82,7 +82,6 @@ assert context.list_datasources() == [
             {
                 "name": "postgres_taxi_data",
                 "type": "table",
-                "order_by": [],
                 "batch_metadata": {},
                 "table_name": "postgres_taxi_data",
                 "schema_name": None,
@@ -110,7 +109,6 @@ assert context.list_datasources() == [
             {
                 "name": "postgres_taxi_data",
                 "type": "table",
-                "order_by": [],
                 "batch_metadata": {},
                 "table_name": "postgres_taxi_data",
                 "schema_name": None,

@@ -52,7 +52,6 @@ if TYPE_CHECKING:
     from great_expectations.compatibility.pydantic.networks import Parts
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
-        SortersDefinition,
     )
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
@@ -534,7 +533,6 @@ class SnowflakeDatasource(SQLDatasource):
         name: str,
         table_name: str = "",
         schema_name: Optional[str] = MISSING,  # type: ignore[assignment] # sentinel value
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -544,7 +542,6 @@ class SnowflakeDatasource(SQLDatasource):
             table_name: The table where the data resides.
             schema_name: The schema that holds the table. Will use the datasource schema if not
                 provided.
-            order_by: A list of Sorters or Sorter strings.
             batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches
                 derived from it.
 
@@ -572,7 +569,6 @@ class SnowflakeDatasource(SQLDatasource):
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=order_by,
             batch_metadata=batch_metadata,
         )
 
