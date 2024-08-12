@@ -65,6 +65,14 @@ class CheckpointNotFoundError(CheckpointError):
     pass
 
 
+class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
+    def __init__(self) -> None:
+        super().__init__(
+            "Checkpoint.run() requires at least one validation definition. "
+            "Please add one and try your action again."
+        )
+
+
 class StoreBackendError(DataContextError):
     pass
 
