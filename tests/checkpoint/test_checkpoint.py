@@ -563,7 +563,7 @@ class TestCheckpointResult:
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             checkpoint_id=checkpoint_id,
             batch_parameters=batch_parameters,
-            suite_parameters=expectation_parameters,
+            expectation_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
             run_id=mock.ANY,
         )

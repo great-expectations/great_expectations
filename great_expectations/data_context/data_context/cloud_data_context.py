@@ -45,7 +45,9 @@ from great_expectations.data_context.store.datasource_store import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
+from great_expectations.data_context.store.validation_results_store import (
+    ValidationResultsStore,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
@@ -275,7 +277,9 @@ class CloudDataContext(SerializableDataContext):
         # V1 renamed Validations to ValidationResults
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
         cls._change_key_from_v0_to_v1(
-            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
+            config,
+            "validations_store_name",
+            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
         )
 
         config = cls._prepare_stores_config(config=config)
@@ -333,9 +337,9 @@ class CloudDataContext(SerializableDataContext):
         if not organization_id:
             raise OrganizationIdNotSpecifiedError()
 
-        session = create_session(access_token=access_token)
-        url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
-        response = session.get(url)
+        with create_session(access_token=access_token) as session:
+            url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
+            response = session.get(url)
 
         try:
             response.raise_for_status()
