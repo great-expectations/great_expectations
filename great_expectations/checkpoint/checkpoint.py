@@ -29,6 +29,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import CheckpointRunWithoutValidationDefinitionError
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -149,6 +150,9 @@ class Checkpoint(BaseModel):
         expectation_parameters: Dict[str, Any] | None = None,
         run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
+        if not self.validation_definitions:
+            raise CheckpointRunWithoutValidationDefinitionError()
+
         if not self.id:
             self._add_to_store()
 

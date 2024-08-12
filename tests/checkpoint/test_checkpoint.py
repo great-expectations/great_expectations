@@ -41,6 +41,7 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import CheckpointRunWithoutValidationDefinitionError
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
 
@@ -468,6 +469,15 @@ class TestCheckpointResult:
 
         with mock.patch.object(ValidationDefinition, "run", return_value=mock_run_result):
             yield validation_definition
+
+    @pytest.mark.unit
+    def test_checkpoint_run_no_validation_definitions(self, mocker):
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        checkpoint = Checkpoint(name=self.checkpoint_name, validation_definitions=[])
+
+        with pytest.raises(CheckpointRunWithoutValidationDefinitionError):
+            checkpoint.run()
 
     @pytest.mark.unit
     def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
