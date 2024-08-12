@@ -405,7 +405,16 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         return batch_definition
 
     @public_api
-    def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
+    def delete_batch_definition(self, name: str) -> None:
+        """Delete a batch definition.
+
+        Args:
+            name (str): Name of the BatchDefinition to delete.
+        """
+        batch_def = self.get_batch_definition(name)
+        self._delete_batch_definition(batch_def)
+
+    def _delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         """Delete a batch definition.
 
         Args:
