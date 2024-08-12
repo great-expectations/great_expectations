@@ -153,6 +153,7 @@ connect_to_filesystem_data_create_a_batch_definition = [
         name="create_a_batch_definition_filesystem_directory_whole",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_whole_directory.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/three_test_files",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_spark_directory_asset/gx",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(

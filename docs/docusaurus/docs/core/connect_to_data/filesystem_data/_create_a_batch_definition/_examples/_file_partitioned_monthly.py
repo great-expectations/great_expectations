@@ -1,12 +1,12 @@
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_monthly.py - full_example">
-from great_expectations import gx
+import great_expectations as gx
 
 context = gx.get_context()
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_monthly.py - retrieve Data Asset">
 data_source_name = "my_filesystem_data_source"
 data_asset_name = "my_file_data_asset"
-file_data_asset = context.get_data_source(data_source_name).get_asset(data_asset_name)
+file_data_asset = context.data_sources.get(data_source_name).get_asset(data_asset_name)
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_monthly.py - add Batch Definition">
