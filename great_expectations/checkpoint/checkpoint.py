@@ -109,10 +109,7 @@ class Checkpoint(BaseModel):
     ) -> list[ValidationDefinition]:
         from great_expectations.data_context.data_context.context_factory import project_manager
 
-        if len(validation_definitions) == 0:
-            raise ValueError("Checkpoint must contain at least one validation definition")  # noqa: TRY003
-
-        if isinstance(validation_definitions[0], dict):
+        if validation_definitions and isinstance(validation_definitions[0], dict):
             validation_definition_store = project_manager.get_validation_definition_store()
             identifier_bundles = [
                 _IdentifierBundle(**v)  # type: ignore[arg-type] # All validation configs are dicts if the first one is

@@ -49,11 +49,9 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.unit
-def test_checkpoint_no_validation_definitions_raises_error():
-    with pytest.raises(ValueError) as e:
-        Checkpoint(name="my_checkpoint", validation_definitions=[])
-
-    assert "Checkpoint must contain at least one validation definition" in str(e.value)
+def test_checkpoint_no_validation_definitions_does_not_raise():
+    Checkpoint(name="my_checkpoint", validation_definitions=[])
+    # see, no errors!
 
 
 @pytest.mark.unit
@@ -330,16 +328,6 @@ class TestCheckpointSerialization:
     @pytest.mark.parametrize(
         "serialized_checkpoint, expected_error",
         [
-            pytest.param(
-                {
-                    "name": "my_checkpoint",
-                    "validation_definitions": [],
-                    "actions": [],
-                    "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
-                },
-                "Checkpoint must contain at least one validation definition",
-                id="missing_validations",
-            ),
             pytest.param(
                 {
                     "name": "my_checkpoint",
