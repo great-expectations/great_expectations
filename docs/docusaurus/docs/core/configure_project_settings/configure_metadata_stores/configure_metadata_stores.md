@@ -55,7 +55,6 @@ By default, Store files are created in folders within the `base_folder` of the F
    print(context.variables.config.stores['expectations_store'])
    print(context.variables.config.stores['validation_definition_store'])
    print(context.variables.config.stores['checkpoint_store'])
-   print(context.variables.config.stores['suite_parameter_store'])
    print(context.variables.config.stores['validation_results_store'])
    ```
    
@@ -102,7 +101,6 @@ context = gx.get_context(mode="file")
 print(context.variables.config.stores['expectations_store'])
 print(context.variables.config.stores['validation_definition_store'])
 print(context.variables.config.stores['checkpoint_store'])
-print(context.variables.config.stores['suite_parameter_store'])
 print(context.variables.config.stores['validation_results_store'])
 
 # Update the path of the Data Context's Expectations Store:

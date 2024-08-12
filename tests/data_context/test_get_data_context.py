@@ -50,13 +50,11 @@ def test_base_context(clear_env_vars):
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
-        suite_parameter_store_name="suite_parameter_store",
         expectations_store_name="expectations_store",
         checkpoint_store_name="checkpoint_store",
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "validation_result_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
@@ -78,13 +76,11 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
-        suite_parameter_store_name="new_suite_parameter_store",
         expectations_store_name="new_expectations_store",
         checkpoint_store_name="new_checkpoint_store",
         stores={
             "new_expectations_store": {"class_name": "ExpectationsStore"},
             "new_checkpoint_store": {"class_name": "CheckpointStore"},
-            "new_suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "new_validation_result_store": {"class_name": "ValidationResultsStore"},
         },
         validation_results_store_name="new_validation_result_store",
@@ -111,13 +107,11 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
-        suite_parameter_store_name="suite_parameter_store",
         expectations_store_name="expectations_store",
         checkpoint_store_name="checkpoint_store",
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "validation_result_store": {"class_name": "ValidationResultsStore"},
         },
         validation_results_store_name="validation_result_store",
@@ -186,13 +180,11 @@ def test_cloud_context_with_in_memory_config_overrides(
         config: DataContextConfig = DataContextConfig(
             config_version=3.0,
             plugins_directory=None,
-            suite_parameter_store_name="new_suite_parameter_store",
             expectations_store_name="new_expectations_store",
             checkpoint_store_name="new_checkpoint_store",
             stores={
                 "new_expectations_store": {"class_name": "ExpectationsStore"},
                 "new_checkpoint_store": {"class_name": "CheckpointStore"},
-                "new_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "new_validation_result_store": {"class_name": "ValidationResultsStore"},
             },
             validation_results_store_name="new_validation_result_store",

@@ -39,7 +39,6 @@ great_expectations_yaml = yaml.load(great_expectations_yaml_file_path.read_text(
 stores = great_expectations_yaml["stores"]
 pop_stores = [
     "checkpoint_store",
-    "suite_parameter_store",
     "validation_results_store",
     "validation_definition_store",
 ]
@@ -122,7 +121,6 @@ stores = great_expectations_yaml["stores"]
 # popping the rest out so taht we can do the comparison. They aren't going anywhere dont worry
 pop_stores = [
     "checkpoint_store",
-    "suite_parameter_store",
     "expectations_store",
     "expectations_GCS_store",
     "validation_definition_store",

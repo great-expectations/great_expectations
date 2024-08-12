@@ -102,9 +102,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
-    from great_expectations.data_context.store import (
-        SuiteParameterStore,
-    )
     from great_expectations.data_context.store.checkpoint_store import CheckpointStore
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.expectations_store import (
@@ -465,14 +462,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.expectations_store_name]
 
     @property
-    def suite_parameter_store_name(self) -> Optional[str]:
-        return self.variables.suite_parameter_store_name
-
-    @property
-    def suite_parameter_store(self) -> SuiteParameterStore:
-        return self.stores[self.suite_parameter_store_name]
-
-    @property
     def validation_results_store_name(self) -> Optional[str]:
         return self.variables.validation_results_store_name
 
@@ -831,13 +820,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
             validation_results_store_name,
-            suite_parameter_store_name,
             checkpoint_store_name
         """  # noqa: E501
         active_store_names: List[str] = [
             self.expectations_store_name,  # type: ignore[list-item]
             self.validation_results_store_name,  # type: ignore[list-item]
-            self.suite_parameter_store_name,  # type: ignore[list-item]
         ]
 
         try:

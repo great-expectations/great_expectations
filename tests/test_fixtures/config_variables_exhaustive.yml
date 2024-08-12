@@ -16,7 +16,6 @@ k:
   password: ""
   database: postgres
 l: plugins/
-m: suite_parameter_store
 n: expectations_store
 o: validation_results_store
 p: SiteBuilder
@@ -28,7 +27,6 @@ u: ExpectationsStore
 v: TupleFilesystemStoreBackend
 w: expectations/
 x: great_expectations.data_context.store
-y: SuiteParameterStore
 z: ValidationResultsStore
 aa: ActionListValidationOperator
 bb: store_validation_result
@@ -41,7 +39,6 @@ hh: all
 ii: great_expectations.render.renderer.slack_renderer
 jj: SlackRenderer
 kk: store_evaluation_params
-mm: suite_parameter_store
 ###
 cps: checkpoint_store
 cpu: CheckpointStore
