@@ -65,6 +65,6 @@ The following table defines the Python versions supported by GX Cloud and GX Cor
 
 The following table defines the GX versions supported by GX Cloud and GX Core.
 
-| GX Cloud | GX Core | Community     |
-| -------- | ------- | ------------- |
-| >1.0     | >1.0    | 0.17<br/>0.18 |
+| GX Cloud | GX Core | Community |
+| -------- | ------- | --------- |
+| >1.0     | >1.0    | >1.0      |
