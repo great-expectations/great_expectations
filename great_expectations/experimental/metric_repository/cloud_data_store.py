@@ -11,7 +11,6 @@ from great_expectations.experimental.metric_repository.data_store import DataSto
 from great_expectations.experimental.metric_repository.metrics import MetricRun
 
 if TYPE_CHECKING:
-    import requests
     from typing_extensions import TypeAlias
 
     from great_expectations.data_context import CloudDataContext
@@ -62,22 +61,15 @@ class CloudDataStore(DataStore[StorableTypes]):
     Uses JSON:API https://jsonapi.org/
     """
 
-    # TODO: Will dependency injection work here? I.e. can we inject the session in the constructor?
     @override
-    def __init__(self, context: CloudDataContext, session: requests.Session = None):
+    def __init__(self, context: CloudDataContext):
         super().__init__(context=context)
         assert context.ge_cloud_config is not None
         assert self._context.ge_cloud_config is not None
-        if session:
-            self._session = session
-        else:
-            # Avoid this pattern as it is not recommended to create a session per request.
-            # It is here for backward compatibility with the existing code.
-            create_session(
-                access_token=context.ge_cloud_config.access_token,
-                retry_count=0,  # Do not retry on authentication errors
-            )
-            self._session = session
+        self._session = create_session(
+            access_token=context.ge_cloud_config.access_token,
+            retry_count=0,  # Do not retry on authentication errors
+        )
 
     def _map_to_url(self, value: StorableTypes) -> str:
         if isinstance(value, MetricRun):
@@ -100,8 +92,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         assert self._context.ge_cloud_config is not None
         config = self._context.ge_cloud_config
         return urllib.parse.urljoin(
-            config.base_url,
-            f"organizations/{config.organization_id}{self._map_to_url(value)}",
+            config.base_url, f"organizations/{config.organization_id}{self._map_to_url(value)}"
         )
 
     @override
