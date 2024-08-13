@@ -68,13 +68,13 @@ class CloudDataStore(DataStore[StorableTypes]):
         super().__init__(context=context)
         assert context.ge_cloud_config is not None
         assert self._context.ge_cloud_config is not None
-        self.session = create_session(
+        self._session = create_session(
             access_token=context.ge_cloud_config.access_token,
             retry_count=0,  # Do not retry on authentication errors
         )
         # Finalizer to close the session when the object is garbage collected.
         # https://docs.python.org/3.11/library/weakref.html#weakref.finalize
-        self._finalizer = weakref.finalize(self, close_session, self.session)
+        self._finalizer = weakref.finalize(self, close_session, self._session)
 
     def _map_to_url(self, value: StorableTypes) -> str:
         if isinstance(value, MetricRun):
@@ -113,7 +113,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         """
         url = self._build_url(value)
         payload = self._build_payload(value)
-        response = self.session.post(url=url, data=payload)
+        response = self._session.post(url=url, data=payload)
         response.raise_for_status()
 
         response_json = response.json()
