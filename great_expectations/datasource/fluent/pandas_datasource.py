@@ -618,6 +618,9 @@ class PandasDatasource(_PandasDatasource):
             are Pandas DataAsset objects.
     """
 
+    # class directive to automatically generate read_* methods for assets
+    ADD_READER_METHODS: ClassVar[bool] = True
+
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [DataFrameAsset]
 
