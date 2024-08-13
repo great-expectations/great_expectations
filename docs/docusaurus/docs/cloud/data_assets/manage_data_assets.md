@@ -77,11 +77,14 @@ Define the data you want GX Cloud to access within Snowflake.
 
 8. Select tables to import as Data Assets:
 
-    - If you want to add all tables, check the box for "All Tables"
+    - Check the box next to a table name to add that table as an asset.
+    
+    - At least one table must be added.
 
-    - You must select at least one table to add as an asset, by checking the box next to its name
-  
-    - You can search for a table name by typing in the Search box located above the list of tables
+    - To search for a specific table type the table's name in the **Search** box above the list of tables.
+            
+    - To add all of the available tables check the box for **All Tables**.
+
 
 
 10. Click **Add Asset**.
