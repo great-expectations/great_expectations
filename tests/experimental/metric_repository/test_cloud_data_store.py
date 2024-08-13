@@ -236,6 +236,7 @@ class TestCloudDataStoreMetricRun:
         assert uuid_from_add == response_metric_run_id
 
 
+@pytest.mark.cloud
 def test_closes_session(
     empty_cloud_context_fluent: CloudDataContext,  # used as a fixture
 ):
