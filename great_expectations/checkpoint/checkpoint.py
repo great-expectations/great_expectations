@@ -29,6 +29,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import CheckpointRunWithoutValidationDefinitionError
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -109,10 +110,7 @@ class Checkpoint(BaseModel):
     ) -> list[ValidationDefinition]:
         from great_expectations.data_context.data_context.context_factory import project_manager
 
-        if len(validation_definitions) == 0:
-            raise ValueError("Checkpoint must contain at least one validation definition")  # noqa: TRY003
-
-        if isinstance(validation_definitions[0], dict):
+        if validation_definitions and isinstance(validation_definitions[0], dict):
             validation_definition_store = project_manager.get_validation_definition_store()
             identifier_bundles = [
                 _IdentifierBundle(**v)  # type: ignore[arg-type] # All validation configs are dicts if the first one is
@@ -152,6 +150,9 @@ class Checkpoint(BaseModel):
         expectation_parameters: Dict[str, Any] | None = None,
         run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
+        if not self.validation_definitions:
+            raise CheckpointRunWithoutValidationDefinitionError()
+
         if not self.id:
             self._add_to_store()
 
@@ -180,7 +181,7 @@ class Checkpoint(BaseModel):
             validation_result = validation_definition.run(
                 checkpoint_id=self.id,
                 batch_parameters=batch_parameters,
-                suite_parameters=expectation_parameters,
+                expectation_parameters=expectation_parameters,
                 result_format=result_format,
                 run_id=run_id,
             )
