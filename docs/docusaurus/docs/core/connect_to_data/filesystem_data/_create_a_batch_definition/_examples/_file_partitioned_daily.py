@@ -22,7 +22,7 @@ batch_definition = file_data_asset.add_batch_definition_daily(
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_daily.py - retrieve Batch and verify">
 batch = batch_definition.get_batch(
-    batch_parameters={"year": "2020", "month": "01", "day": "14"}
+    batch_parameters={"year": "2019", "month": "01", "day": "01"}
 )
 batch.head()
 # </snippet>
