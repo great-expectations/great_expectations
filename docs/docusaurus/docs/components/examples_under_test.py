@@ -37,7 +37,7 @@ connecting_to_a_datasource = [
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_batch_definition/create_a_batch_definition.py",
         data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/postgres_datasource_credentials_in_file/great_expectations/",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
-        util_script="docs/docusaurus/docs/components/_testing/utility_scripts/postgres_data_setup.py",
+        util_script="docs/docusaurus/docs/components/_testing/utility_scripts/postgres_preconfigured_data_asset.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
 ]

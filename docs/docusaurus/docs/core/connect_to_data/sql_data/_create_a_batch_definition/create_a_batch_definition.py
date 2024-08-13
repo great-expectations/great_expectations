@@ -9,26 +9,6 @@ pytest  --postgresql --docs-tests -k "create_a_batch_definition_postgres" tests/
 # It can be disregarded by anyone using referencing this script as an example of a
 # GX workflow.
 
-# This section is setup for the environment used in the example script.
-import great_expectations as gx
-
-# Set up the Data Source and a Data Asset
-context = gx.get_context()
-
-datasource_name = "my_datasource"
-my_connection_string = "${POSTGRESQL_CONNECTION_STRING}"
-
-data_source = context.data_sources.add_postgres(
-    name=datasource_name, connection_string=my_connection_string
-)
-
-asset_name = "MY_TABLE_ASSET"
-database_table_name = "postgres_taxi_data"
-table_data_asset = data_source.add_table_asset(
-    table_name=database_table_name, name=asset_name
-)
-
-# The example starts here
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_batch_definition/_create_a_batch_definition.md full example">
 import great_expectations as gx
 
