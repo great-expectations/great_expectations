@@ -75,15 +75,16 @@ Define the data you want GX Cloud to access within Snowflake.
 
 7. Click **Connect**.
 
-8. Complete the following fields:
+8. Select tables to import as Data Assets:
 
-    - **Table name**: Enter the name of the Data Source table you're connecting to.
-    
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
+    - If you want to add all tables, check the box for "All Tables"
 
-9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 8.
+    - You must select at least one table to add as an asset, by checking the box next to its name
+  
+    - You can search for a table name by typing in the Search box located above the list of tables
 
-10. Click **Finish**.
+
+10. Click **Add Asset**.
 
 11. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
@@ -120,16 +121,18 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 6. Click **Connect**.
 
-7. Complete the following fields:
+7. Select tables to import as Data Assets:
 
-    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    - If you want to add all tables, check the box for "All Tables"
 
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique across all Data Sources in GX Cloud.
+    - You must select at least one table to add as an asset, by checking the box next to its name
+  
+    - You can search for a table name by typing in the Search box located above the list of tables
 
-8. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 7.
-9. Click **Finish**.
 
-10. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+8. Click **Add Asset**.
+
+9. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 </Tabs>
@@ -207,15 +210,16 @@ Additional Data Assets can only be added to Data Sources created in GX Cloud.
 
 3. Click **Add Data Asset**.
 
-4. Complete the following fields:
+4. Select tables to import as Data Assets:
 
-    - **Table name**: Enter the name of the Data Source table you're connecting to.
+    - If you want to add all tables, check the box for "All Tables"
 
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
+    - You must select at least one table to add as an asset, by checking the box next to its name
+  
+    - You can search for a table name by typing in the Search box located above the list of tables
 
-5. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 4.
 
-6. Click **Finish**.
+5. Click **Add Asset**.
 
 
 ## Edit Data Source settings
