@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import urllib.parse
 import uuid
+import weakref
 from typing import TYPE_CHECKING, Any, Dict, TypeVar
 
 from great_expectations.compatibility.pydantic import BaseModel
@@ -11,6 +12,7 @@ from great_expectations.experimental.metric_repository.data_store import DataSto
 from great_expectations.experimental.metric_repository.metrics import MetricRun
 
 if TYPE_CHECKING:
+    import requests
     from typing_extensions import TypeAlias
 
     from great_expectations.data_context import CloudDataContext
@@ -66,10 +68,13 @@ class CloudDataStore(DataStore[StorableTypes]):
         super().__init__(context=context)
         assert context.ge_cloud_config is not None
         assert self._context.ge_cloud_config is not None
-        self._session = create_session(
+        self.session = create_session(
             access_token=context.ge_cloud_config.access_token,
             retry_count=0,  # Do not retry on authentication errors
         )
+        # Finalizer to close the session when the object is garbage collected.
+        # https://docs.python.org/3.11/library/weakref.html#weakref.finalize
+        self._finalizer = weakref.finalize(self, close_session, self.session)
 
     def _map_to_url(self, value: StorableTypes) -> str:
         if isinstance(value, MetricRun):
@@ -92,7 +97,8 @@ class CloudDataStore(DataStore[StorableTypes]):
         assert self._context.ge_cloud_config is not None
         config = self._context.ge_cloud_config
         return urllib.parse.urljoin(
-            config.base_url, f"organizations/{config.organization_id}{self._map_to_url(value)}"
+            config.base_url,
+            f"organizations/{config.organization_id}{self._map_to_url(value)}",
         )
 
     @override
@@ -107,8 +113,22 @@ class CloudDataStore(DataStore[StorableTypes]):
         """
         url = self._build_url(value)
         payload = self._build_payload(value)
-        response = self._session.post(url=url, data=payload)
+        response = self.session.post(url=url, data=payload)
         response.raise_for_status()
 
         response_json = response.json()
         return uuid.UUID(response_json["id"])
+
+
+def close_session(session: requests.Session):
+    """Close the session.
+    Used by a finalizer to close the session when the CloudDataStore is garbage collected.
+
+    This is not a bound method on the CloudDataStore class because of this note
+    in the Python docs (https://docs.python.org/3.11/library/weakref.html#weakref.finalize):
+    Note It is important to ensure that func, args and kwargs do not own any references to obj,
+    either directly or indirectly, since otherwise obj will never be garbage collected.
+    In particular, func should not be a bound method of obj.
+
+    """
+    session.close()
