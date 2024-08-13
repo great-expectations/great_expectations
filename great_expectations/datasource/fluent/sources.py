@@ -114,7 +114,7 @@ class DataSourceManager:
 
         An `.add_pandas_filesystem()` pandas_filesystem factory method will be added to `context.sources`.
 
-        >>> class PandasFilesystemDatasource(_PandasDatasource):
+        >>> class PandasFilesystemDatasource(_PandasFilePathDatasource):
         >>>     type: str = 'pandas_filesystem'
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
@@ -313,21 +313,23 @@ class DataSourceManager:
             # add the public api decorator
             public_api(getattr(ds_type, add_asset_factory_method_name))
 
-            def _read_asset_factory(
-                self: Datasource, asset_name: str | None = None, **kwargs
-            ) -> Validator:
-                name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
-                asset = asset_type(name=name, **kwargs)
-                self._add_asset(asset)
-                batch_request = asset.build_batch_request()
-                # TODO: raise error if `_data_context` not set
-                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
+            if getattr(ds_type, "ADD_READER_METHODS", False):
 
-            _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
-                _read_asset_factory, asset_type, exclude={"type"}
-            )
-            read_asset_factory_method_name = f"read_{asset_type_name}"
-            setattr(ds_type, read_asset_factory_method_name, _read_asset_factory)
+                def _read_asset_factory(
+                    self: Datasource, asset_name: str | None = None, **kwargs
+                ) -> Validator:
+                    name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
+                    asset = asset_type(name=name, **kwargs)
+                    self._add_asset(asset)
+                    batch_request = asset.build_batch_request()
+                    # TODO: raise error if `_data_context` not set
+                    return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
+
+                _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+                    _read_asset_factory, asset_type, exclude={"type"}
+                )
+                read_asset_factory_method_name = f"read_{asset_type_name}"
+                setattr(ds_type, read_asset_factory_method_name, _read_asset_factory)
 
         else:
             logger.debug(

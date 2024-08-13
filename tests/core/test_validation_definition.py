@@ -156,7 +156,7 @@ class TestValidationRun:
 
         validation_definition.run(
             batch_parameters={"year": 2024},
-            suite_parameters={"max_value": 9000},
+            expectation_parameters={"max_value": 9000},
             result_format=ResultFormat.COMPLETE,
         )
 
