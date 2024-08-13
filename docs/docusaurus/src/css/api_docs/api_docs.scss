@@ -34,26 +34,83 @@
       background-color: #1e1e1e;
     }
 
+    div.deprecated,
+    div.versionadded {
+      box-shadow: none !important;
+
+      p:before {
+        background-color: transparent;
+      }
+
+      cite {
+        [data-theme='dark'] & {
+          color: var(--ifm-font-color-base);
+        }
+      }
+
+      .deprecated:before,
+      .added:before {
+        background-color: var(--ifm-font-color-base);
+        content: '';
+        display: inline-block;
+        mask-size: cover;
+        height: 1em;
+        width: 1em;
+      }
+    }
+
     div.deprecated {
       background-color: #FEF6F9;
-      border-color: #E54F54;
-      box-shadow: none;
+      border: 1px solid #E54F54;
+      border-left-width: 6px;
+
+      .deprecated:before {
+        mask: url("/static/img/admonition-info-icon.svg");
+      }
+
+      cite {
+        background-color: #FEF6F9;
+        border-color: #E54F54;
+      }
     }
 
     div.versionadded {
       background-color: #F8F9EC;
-      border-color: #B6C647;
-      box-shadow: none;
+      border: 1px solid #B6C647;
+      border-left-width: 6px;
+
+      cite {
+        background-color: #b6c64733;
+        border-color: #b6c647;
+      }
+
+      .added:before {
+        mask: url("/static/img/admonition-info-icon.svg");
+      }
     }
 
     [data-theme='dark'] & {
-      p {
-        color: var(--ifm-font-color-base);
-      }
+        p {
+          color: var(--ifm-font-color-base);
+        }
 
-      .deprecated, .versionadded {
-        background-color: #3C3C3C;
-        box-shadow: none;
-      }
+        .deprecated, .versionadded {
+          background-color: #3C3C3C;
+          box-shadow: none;
+
+          .deprecated:before {
+            fill: #FEF6F9;
+          }
+
+          .added:before {
+            fill: #F8F9EC;
+          }
+        }
+
+        cite {
+          background-color: var(--gray-800);
+          border: none;
+          color: var(--ifm-font-color-base);
+        }
     }
 }

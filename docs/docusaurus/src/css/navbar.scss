@@ -93,8 +93,8 @@
 }
 
 [data-theme='dark'] .navbar__items--right {
-  background-color: #727272;
-  border-bottom: 1px solid #6E6E6E;
+  background-color: var(--gray-800);
+  border-bottom: 1px solid var(--gray-900);
 }
 
 .navbar__inner > div:first-child .navbar__item.dropdown {
