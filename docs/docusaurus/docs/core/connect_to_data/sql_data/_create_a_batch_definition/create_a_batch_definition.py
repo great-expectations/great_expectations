@@ -5,17 +5,12 @@ To run this test locally, run:
 
 pytest  --postgresql --docs-tests -k "create_a_batch_definition_postgres" tests/integration/test_script_runner.py
 """
+# The following import sets up the data and environment used to test this example.
+# It can be disregarded by anyone using referencing this script as an example of a
+# GX workflow.
 
 # This section is setup for the environment used in the example script.
 import great_expectations as gx
-from tests.integration.db.taxi_data_utils import load_data_into_test_database
-
-# add test_data to database for testing
-load_data_into_test_database(
-    table_name="postgres_taxi_data",
-    csv_path="./data/yellow_tripdata_sample_2020-01.csv",
-    connection_string="postgresql+psycopg2://postgres:@localhost/test_ci",
-)
 
 # Set up the Data Source and a Data Asset
 context = gx.get_context()
