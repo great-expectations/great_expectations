@@ -341,8 +341,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return True
         if not (kwarg_names <= self.allowed_set_kwargs):
             extra_kwargs = kwarg_names - self.allowed_set_kwargs
-            error_text = f'Invalid kwargs: {(", ").join(extra_kwargs)}'
-            raise ValueError(error_text)
+            raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')  # noqa: TRY003
         return None
 
     @override
@@ -415,8 +414,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ) from timeout_exc
         except Exception as e:
             logger.debug(str(e))
-            error_text = f"Unable to set object in GX Cloud Store Backend: {e}"
-            raise StoreBackendError(error_text) from e
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to set object in GX Cloud Store Backend: {e}"
+            ) from e
 
     @property
     def ge_cloud_base_url(self) -> str:
@@ -463,8 +463,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return keys
         except Exception as e:
             logger.debug(str(e))
-            error_text = f"Unable to list keys in GX Cloud Store Backend: {e}"
-            raise StoreBackendError(error_text) from e
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to list keys in GX Cloud Store Backend: {e}"
+            ) from e
 
     @override
     def get_url_for_key(  # type: ignore[override]
