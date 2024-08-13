@@ -196,7 +196,7 @@ class ValidationDefinition(BaseModel):
         *,
         checkpoint_id: Optional[str] = None,
         batch_parameters: Optional[BatchParameters] = None,
-        suite_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
@@ -208,7 +208,7 @@ class ValidationDefinition(BaseModel):
             batch_parameters=batch_parameters,
             result_format=result_format,
         )
-        results = validator.validate_expectation_suite(self.suite, suite_parameters)
+        results = validator.validate_expectation_suite(self.suite, expectation_parameters)
         results.meta["validation_id"] = self.id
         results.meta["checkpoint_id"] = checkpoint_id
 
