@@ -111,14 +111,13 @@ def get_user_friendly_error_message(
 
     try:
         error_json: ErrorPayload = http_exc.response.json()
-        errors = error_json.get("errors")
+        if isinstance(error_json, list):
+            errors = error_json
+        else:
+            errors = error_json.get("errors")
         if errors:
             support_message.append(json.dumps(errors))
-        elif (  # error doesn't conform to the standard format but we still want to expose it
-            # TODO: consider removing this once our error format has stabilized
-            response.status_code
-            in (400, 409, 422)
-        ):
+        else:
             support_message.append(json.dumps(error_json))
 
     except json.JSONDecodeError:
