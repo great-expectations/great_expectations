@@ -87,9 +87,9 @@ Define the data you want GX Cloud to access within Snowflake.
 
 
 
-10. Click **Add Asset**.
+9. Click **Add Asset**.
 
-11. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+10. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -126,11 +126,13 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 7. Select tables to import as Data Assets:
 
-    - If you want to add all tables, check the box for "All Tables"
+    - Check the box next to a table name to add that table as an asset.
 
-    - You must select at least one table to add as an asset, by checking the box next to its name
-  
-    - You can search for a table name by typing in the Search box located above the list of tables
+    - At least one table must be added.
+
+    - To search for a specific table type the table's name in the **Search** box above the list of tables.
+
+    - To add all of the available tables check the box for **All Tables**.
 
 
 8. Click **Add Asset**.
@@ -215,11 +217,13 @@ Additional Data Assets can only be added to Data Sources created in GX Cloud.
 
 4. Select tables to import as Data Assets:
 
-    - If you want to add all tables, check the box for "All Tables"
+    - Check the box next to a table name to add that table as an asset.
 
-    - You must select at least one table to add as an asset, by checking the box next to its name
-  
-    - You can search for a table name by typing in the Search box located above the list of tables
+    - At least one table must be added.
+
+    - To search for a specific table type the table's name in the **Search** box above the list of tables.
+
+    - To add all of the available tables check the box for **All Tables**.
 
 
 5. Click **Add Asset**.
