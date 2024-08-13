@@ -5,9 +5,15 @@ To run this test locally, run:
 
 pytest  --postgresql --docs-tests -k "create_a_batch_definition_postgres" tests/integration/test_script_runner.py
 """
-# The following import sets up the data and environment used to test this example.
+
+# The following import and setup method sets up the data and environment used to test this example.
 # It can be disregarded by anyone using referencing this script as an example of a
 # GX workflow.
+from docs.docusaurus.docs.components._testing.utility_scripts.postgres_preconfigured_data_asset import (
+    setup,
+)
+
+setup()
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_batch_definition/_create_a_batch_definition.md full example">
 import great_expectations as gx
