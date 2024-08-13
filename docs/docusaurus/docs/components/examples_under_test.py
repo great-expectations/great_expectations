@@ -15,7 +15,7 @@ connect_to_filesystem_data_create_a_data_source = [
         # pytest --docs-tests -k "create_a_data_source_filesystem_local_pandas" tests/integration/test_script_runner.py
         name="create_a_data_source_filesystem_local_pandas",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_pandas.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/empty_data_folder",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
@@ -23,7 +23,7 @@ connect_to_filesystem_data_create_a_data_source = [
         # pytest --docs-tests --spark -k "create_a_data_source_filesystem_local_spark" tests/integration/test_script_runner.py
         name="create_a_data_source_filesystem_local_spark",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_spark.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/empty_data_folder",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
     # ABS, pandas/spark
