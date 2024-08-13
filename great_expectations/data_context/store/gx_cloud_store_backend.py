@@ -161,13 +161,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        self._session = create_session(access_token=self._ge_cloud_credentials["access_token"])
+        self.session = create_session(access_token=self._ge_cloud_credentials["access_token"])
         # Finalizer to close the session when the object is garbage collected.
         # https://docs.python.org/3.11/library/weakref.html#weakref.finalize
-        self._finalizer = weakref.finalize(
-            self,
-            self._close_session,
-        )
+        self._finalizer = weakref.finalize(self, close_session, self.session)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
@@ -223,7 +220,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _send_get_request_to_api(self, url: str, params: dict | None = None) -> dict:
         try:
-            response = self._session.get(
+            response = self.session.get(
                 url=url,
                 params=params,
             )
@@ -285,7 +282,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             url = urljoin(f"{url}/", id)
 
         try:
-            response = self._session.put(url, json=data)
+            response = self.session.put(url, json=data)
             response_status_code = response.status_code
 
             # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
@@ -295,7 +292,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code == 405  # noqa: PLR2004
                 and resource_type is GXCloudRESTResource.EXPECTATION_SUITE
             ):
-                response = self._session.patch(url, json=data)
+                response = self.session.patch(url, json=data)
                 response_status_code = response.status_code
 
             response.raise_for_status()
@@ -341,7 +338,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return True
         if not (kwarg_names <= self.allowed_set_kwargs):
             extra_kwargs = kwarg_names - self.allowed_set_kwargs
-            raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')  # noqa: TRY003
+            raise ValueError(  # noqa: TRY003
+                f'Invalid kwargs: {(", ").join(extra_kwargs)}'
+            )
         return None
 
     @override
@@ -388,7 +387,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
 
         try:
-            response = self._session.post(url, json=data)
+            response = self.session.post(url, json=data)
             response.raise_for_status()
             response_json = response.json()
 
@@ -501,7 +500,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                     resource_name=self.ge_cloud_resource_name,
                     id=id,
                 )
-                response = self._session.delete(url)
+                response = self.session.delete(url)
                 response.raise_for_status()
                 return True
             # delete by name
@@ -511,7 +510,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                     organization_id=self.ge_cloud_credentials["organization_id"],
                     resource_name=self.ge_cloud_resource_name,
                 )
-                response = self._session.delete(url, params={"name": resource_object_name})
+                response = self.session.delete(url, params={"name": resource_object_name})
                 response.raise_for_status()
                 return True
         except requests.HTTPError as http_exc:
@@ -739,5 +738,16 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _is_v1_resource(self) -> bool:
         return self._ENDPOINT_VERSION_LOOKUP.get(self.ge_cloud_resource_type) == EndpointVersion.V1
 
-    def _close_session(self):
-        self._session.close()
+
+def close_session(session: requests.Session):
+    """Close the session.
+    Used by a finalizer to close the session when the GXCloudStoreBackend is garbage collected.
+
+    This is not a bound method on the GXCloudStoreBackend class because of this note
+    in the Python docs (https://docs.python.org/3.11/library/weakref.html#weakref.finalize):
+    Note It is important to ensure that func, args and kwargs do not own any references to obj,
+    either directly or indirectly, since otherwise obj will never be garbage collected.
+    In particular, func should not be a bound method of obj.
+
+    """
+    session.close()
