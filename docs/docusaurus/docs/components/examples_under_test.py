@@ -8,26 +8,25 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 docs_tests = []
 
-# TODO: As we get these example tests working, uncomment/update to add them to CI.
 connecting_to_a_datasource = [
     # # Create a Data Source
     IntegrationTestFixture(
         # To test, run:
-        # pytest --docs-tests -k "create_a_datasource_postgres" tests/integration/test_script_runner.py
+        # pytest --docs-tests --postgresql -k "create_a_datasource_postgres" tests/integration/test_script_runner.py
         name="create_a_datasource_postgres",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py",
-        data_context_dir="docs/docusaurus/docs/components/_testing/create_datasource/great_expectations/",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="docs/docusaurus/docs/components/utility_scripts/postgres_data_setup.py",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/postgres_datasource_credentials_in_file/great_expectations/",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
     # Create a Data Asset
     IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --postgresql -k "create_a_data_asset_postgres" tests/integration/test_script_runner.py
         name="create_a_data_asset_postgres",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py",
-        data_context_dir="docs/docusaurus/docs/components/_testing/create_datasource/great_expectations/",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/postgres_datasource_credentials_in_file/great_expectations/",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="docs/docusaurus/docs/components/utility_scripts/postgres_data_setup.py",
+        util_script="docs/docusaurus/docs/components/_testing/utility_scripts/postgres_data_setup.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
     # Create a Batch Definition
@@ -36,9 +35,9 @@ connecting_to_a_datasource = [
         # pytest --docs-tests --postgresql -k "create_a_batch_definition_postgres" tests/integration/test_script_runner.py
         name="create_a_batch_definition_postgres",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_batch_definition/create_a_batch_definition.py",
-        data_context_dir="docs/docusaurus/docs/components/_testing/create_datasource/great_expectations/",
+        data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/postgres_datasource_credentials_in_file/great_expectations/",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
-        util_script="docs/docusaurus/docs/components/utility_scripts/postgres_data_setup.py",
+        util_script="docs/docusaurus/docs/components/_testing/utility_scripts/postgres_data_setup.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
 ]

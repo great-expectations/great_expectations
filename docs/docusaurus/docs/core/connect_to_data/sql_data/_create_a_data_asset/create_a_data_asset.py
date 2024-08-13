@@ -5,16 +5,11 @@ To run this test locally, run:
 
 pytest  --postgresql --docs-tests -k "create_a_data_asset_postgres" tests/integration/test_script_runner.py
 """
+# The following import sets up the data and environment used to test this example.
+# It can be disregarded by anyone using referencing this script as an example of a
+# GX workflow.
 
 # This section is setup for the environment used in the example script.
-from tests.integration.db.taxi_data_utils import load_data_into_test_database
-
-# add test_data to database for testing
-load_data_into_test_database(
-    table_name="postgres_taxi_data",
-    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
-    connection_string="postgresql+psycopg2://postgres:@localhost/test_ci",
-)
 
 # The example starts here
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py full code">
