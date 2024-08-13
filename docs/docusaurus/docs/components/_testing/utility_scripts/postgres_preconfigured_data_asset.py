@@ -1,6 +1,6 @@
 import great_expectations as gx
 
-context = gx.get_context()
+context = gx.get_context(mode="file")
 
 datasource_name = "my_datasource"
 my_connection_string = "${POSTGRESQL_CONNECTION_STRING}"
