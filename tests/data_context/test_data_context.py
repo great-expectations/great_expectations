@@ -691,46 +691,78 @@ class ExpectSkyToBeColor(BatchExpectation):
         }
 
 
+class TestRenderedContent:
+    @pytest.mark.filesystem
+    def test_no_rendered_content_for_file_data_context(self, empty_data_context: FileDataContext):
+        suite_name = "test_suite"
+        empty_data_context.suites.add(
+            ExpectationSuite(
+                name=suite_name,
+                expectations=[gx.expectations.ExpectTableRowCountToEqual(value=0)],
+            )
+        )
+        expectation_suite = empty_data_context.suites.get(name=suite_name)
+
+        assert all(
+            expectation_configuration.rendered_content is None
+            for expectation_configuration in expectation_suite.expectation_configurations
+        )
+
+        assert all(
+            expectation.rendered_content is None for expectation in expectation_suite.expectations
+        )
+
+    @pytest.mark.cloud
+    def test_rendered_content_for_cloud(self, empty_cloud_data_context: CloudDataContext) -> None:
+        suite_name = "test_suite"
+        empty_cloud_data_context.suites.add(
+            ExpectationSuite(
+                name=suite_name,
+                expectations=[gx.expectations.ExpectTableRowCountToEqual(value=0)],
+            )
+        )
+        expectation_suite = empty_cloud_data_context.suites.get(name=suite_name)
+
+        rendered_content_blocks: list = []
+        for expectation in expectation_suite.expectations:
+            assert expectation.rendered_content is not None
+            rendered_content_blocks.extend(expectation.rendered_content)
+        assert rendered_content_blocks
+
+        rendered_content_blocks: list = []
+        for expectation_configuration in expectation_suite.expectation_configurations:
+            assert expectation_configuration.rendered_content is not None
+            rendered_content_blocks.extend(expectation_configuration.rendered_content)
+        assert rendered_content_blocks
+
+
 @pytest.mark.xfail(
     reason="Uses unsupported expectation but tests required behavior - fix this test as part of V1-117"  # noqa: E501
 )
 @pytest.mark.filesystem
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
-    empty_data_context,
+    empty_data_context: FileDataContext,
 ):
     context = empty_data_context
 
     expectation_suite_name: str = "test_suite"
 
-    expectation_suite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name,
-        data_context=context,
-        expectations=[
-            ExpectationConfiguration(type="expect_table_row_count_to_equal", kwargs={"value": 0}),
-        ],
-    )
-    context.suites.add(expectation_suite)
-
-    # Without include_rendered_content set, all legacy rendered_content was None.
-    expectation_suite = context.suites.get(name=expectation_suite_name)
-    assert not any(
-        expectation_configuration.rendered_content
-        for expectation_configuration in expectation_suite.expectation_configurations
-    )
-
-    # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.  # noqa: E501
-    expectation_suite = context.suites.get(name=expectation_suite_name)
-    for expectation_configuration in expectation_suite.expectation_configurations:
-        assert all(
-            isinstance(rendered_content_block, RenderedAtomicContent)
-            for rendered_content_block in expectation_configuration.rendered_content
+    context.suites.add(
+        ExpectationSuite(
+            name=expectation_suite_name,
+            expectations=[
+                ExpectationConfiguration(
+                    type="expect_table_row_count_to_equal", kwargs={"value": 0}
+                ),
+            ],
         )
+    )
+    expectation_suite = context.suites.get(name=expectation_suite_name)
 
     # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is  # noqa: E501
     # broken, we should get the failure message for one of the content blocks.
     expectation_suite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name,
-        data_context=context,
+        name=expectation_suite_name,
         expectations=[
             ExpectationConfiguration(type="expect_sky_to_be_color", kwargs={"color": "blue"}),
         ],
