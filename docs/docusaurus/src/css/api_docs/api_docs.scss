@@ -33,8 +33,29 @@
     pre.prism-code {
       background-color: #1e1e1e;
     }
-
 }
 
+.markdown div.sphinx-api-doc {
+  div.deprecated {
+    background-color: #FEF6F9;
+    border-color: #E54F54;
+    box-shadow: none;
+  }
 
+  div.versionadded {
+    background-color: #F8F9EC;
+    border-color: #B6C647;
+    box-shadow: none;
+  }
 
+  [data-theme='dark'] & {
+    p {
+      color: var(--ifm-font-color-base);
+    }
+
+    .deprecated, .versionadded {
+      background-color: #3C3C3C;
+      box-shadow: none;
+    }
+  }
+}

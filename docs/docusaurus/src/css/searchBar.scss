@@ -18,3 +18,11 @@ div .custom-search-bar {
     display: none;
   }
 }
+
+[data-theme='dark'] .custom-search-bar .DocSearch-Button:hover {
+  background: none;
+}
+
+[data-theme='dark'] .DocSearch-Form {
+  background: none;
+}
