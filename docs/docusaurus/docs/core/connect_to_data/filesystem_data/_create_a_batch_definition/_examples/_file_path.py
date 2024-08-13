@@ -11,7 +11,7 @@ file_data_asset = context.data_sources.get(data_source_name).get_asset(data_asse
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_path.py - add Batch Definition">
 batch_definition_name = "yellow_tripdata_sample_2019-01.csv"
-batch_definition_path = "first_3_files/yellow_tripdata_sample_2019-01.csv"
+batch_definition_path = "folder_with_data/yellow_tripdata_sample_2019-01.csv"
 
 batch_definition = file_data_asset.add_batch_definition_path(
     name=batch_definition_name, path=batch_definition_path
