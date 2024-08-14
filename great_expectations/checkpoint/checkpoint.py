@@ -30,8 +30,12 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.exceptions.exceptions import (
+    CheckpointRelatedResourceSaveError,
     CheckpointRunWithoutValidationDefinitionError,
+    CheckpointSaveError,
     StoreBackendError,
+    ValidationDefinitionRelatedResourceSaveError,
+    ValidationDefinitionSaveError,
 )
 from great_expectations.render.renderer.renderer import Renderer
 
@@ -262,9 +266,14 @@ class Checkpoint(BaseModel):
         for validation in self.validation_definitions:
             try:
                 validation.save()
-            except ValueError as e:
-                raise ValueError(
-                    f"Could not save Checkpoint due to failure to save child ValidationDefinition '{validation.name}'"
+            except (
+                ValidationDefinitionSaveError,
+                ValidationDefinitionRelatedResourceSaveError,
+            ) as e:
+                raise CheckpointRelatedResourceSaveError(
+                    name=self.name,
+                    related_resource_type="ValidationDefinition",
+                    related_resource_name=validation.name,
                 ) from e
 
         store = project_manager.get_checkpoints_store()
@@ -276,7 +285,7 @@ class Checkpoint(BaseModel):
             else:
                 store.add(key=key, value=self)
         except (ValueError, StoreBackendError) as e:
-            raise ValueError(f"Could not save Checkpoint '{self.name}'") from e
+            raise CheckpointSaveError(name=self.name) from e
 
 
 class CheckpointResult(BaseModel):

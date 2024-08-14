@@ -33,6 +33,7 @@ from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
     ExpectationSuiteError,
     ExpectationSuiteNotAddedToStoreError,
+    ExpectationSuiteSaveError,
     StoreBackendError,
 )
 from great_expectations.render import (
@@ -247,7 +248,7 @@ class ExpectationSuite(SerializableDictDot):
             ExpectationSuiteError,  # Raised by failure in ExpectationsStore._add
             StoreBackendError,  # Generic error based by store backends (namely GXCloudStoreBackend)
         ) as e:
-            raise ValueError(f"Could not save ExpectationSuite '{self.name}'") from e
+            raise ExpectationSuiteSaveError(name=self.name) from e
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""

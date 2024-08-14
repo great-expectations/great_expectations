@@ -48,6 +48,11 @@ class ExpectationSuiteError(DataContextError):
     pass
 
 
+class ExpectationSuiteSaveError(ExpectationSuiteError):
+    def __init__(self, name: str) -> None:
+        super().__init__(message=f"Could not save ExpectationSuite '{name}'")
+
+
 class ExpectationSuiteNotAddedToStoreError(DataContextError):
     def __init__(self) -> None:
         super().__init__(
@@ -57,8 +62,45 @@ class ExpectationSuiteNotAddedToStoreError(DataContextError):
         )
 
 
+class ValidationDefinitionError(DataContextError):
+    pass
+
+
+class ValidationDefinitionSaveError(ValidationDefinitionError):
+    def __init__(self, name: str) -> None:
+        super().__init__(message=f"Could not save ValidationDefinition '{name}'")
+
+
+class ValidationDefinitionRelatedResourceSaveError(ValidationDefinitionError):
+    def __init__(
+        self,
+        validation_definition_name: str,
+        related_resource_type: str,
+        related_resource_name: str,
+    ) -> None:
+        super().__init__(
+            message=f"Could not save ValidationDefinition '{validation_definition_name}' \
+                due to failure to save child {related_resource_type} '{related_resource_name}'"
+        )
+
+
 class CheckpointError(DataContextError):
     pass
+
+
+class CheckpointSaveError(CheckpointError):
+    def __init__(self, name: str) -> None:
+        super().__init__(message=f"Could not save Checkpoint '{name}'")
+
+
+class CheckpointRelatedResourceSaveError(CheckpointSaveError):
+    def __init__(
+        self, checkpoint_name: str, related_resource_type: str, related_resource_name: str
+    ) -> None:
+        super().__init__(
+            message=f"Could not save Checkpoint '{checkpoint_name}' due to failure \
+                to save child {related_resource_type} '{related_resource_name}'"
+        )
 
 
 class CheckpointNotFoundError(CheckpointError):

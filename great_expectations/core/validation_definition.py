@@ -27,7 +27,12 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import StoreBackendError
+from great_expectations.exceptions.exceptions import (
+    ExpectationSuiteSaveError,
+    StoreBackendError,
+    ValidationDefinitionRelatedResourceSaveError,
+    ValidationDefinitionSaveError,
+)
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
@@ -288,9 +293,11 @@ class ValidationDefinition(BaseModel):
 
         try:
             self.suite.save()
-        except ValueError as e:
-            raise ValueError(
-                f"Could not save ValidationDefinition '{self.name}' due to failure to save child ExpectationSuite '{self.suite.name}'"
+        except ExpectationSuiteSaveError as e:
+            raise ValidationDefinitionRelatedResourceSaveError(
+                validation_definition_name=self.name,
+                related_resource_type="ExpectationSuite",
+                related_resource_name=self.suite.name,
             ) from e
 
         try:
@@ -298,9 +305,11 @@ class ValidationDefinition(BaseModel):
         except (
             AttributeError,  # Raised if the data asset does not have a save method
             StoreBackendError,  # Generic error based by store backends (namely GXCloudStoreBackend)
-        ):
-            raise ValueError(
-                f"Could not save ValidationDefinition '{self.name}' due to failure to save child BatchDefinition '{self.data.name}'"
+        ) as e:
+            raise ValidationDefinitionRelatedResourceSaveError(
+                validation_definition_name=self.name,
+                related_resource_type="BatchDefinition",
+                related_resource_name=self.data.name,
             ) from e
 
         store = project_manager.get_validation_definition_store()
@@ -312,4 +321,4 @@ class ValidationDefinition(BaseModel):
             else:
                 store.add(key=key, value=self)
         except StoreBackendError as e:
-            raise ValueError(f"Could not save ValidationDefinition '{self.name}'") from e
+            raise ValidationDefinitionSaveError(name=self.name) from e
