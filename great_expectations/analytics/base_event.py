@@ -22,6 +22,11 @@ class Action:
         return self.name
 
 
+class NoConfigurationIdError(Exception):
+    def __init__(self, msg: str):
+        super("Invalid GX configuration: no id")
+
+
 @dataclass
 class Event:
     """Details of an analytics event.
@@ -51,10 +56,13 @@ class Event:
     @property
     def distinct_id(self) -> UUID:
         """The distinct_id is the primary key for identifying
-        anlaytics events. It is the user_id if it is set
+        analytics events. It is the user_id if it is set
         (e.g. in a Cloud context), otherwise the oss_id.
         """
-        return self.user_id or self.oss_id
+        distinct_id = self.user_id or self.oss_id
+        if not distinct_id:
+            raise NoConfigurationIdError()
+        return distinct_id
 
     _allowed_actions: ClassVar[Optional[List[Action]]] = None
 
