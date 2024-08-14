@@ -185,6 +185,14 @@ jobs:
           slug: great-expectations/great_expectations
           flags: ${{ matrix.doc-step }}
 
+      # upload test results to codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.doc-step }}
+
   unit-tests:
     env:
       GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
