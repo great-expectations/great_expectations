@@ -79,8 +79,7 @@ class ValidationDefinitionRelatedResourceSaveError(ValidationDefinitionError):
         related_resource_name: str,
     ) -> None:
         super().__init__(
-            message=f"Could not save ValidationDefinition '{validation_definition_name}' \
-                due to failure to save child {related_resource_type} '{related_resource_name}'"
+            message=f"Could not save ValidationDefinition '{validation_definition_name}' due to failure to save child {related_resource_type} '{related_resource_name}'"  # noqa: E501
         )
 
 
@@ -98,8 +97,7 @@ class CheckpointRelatedResourceSaveError(CheckpointSaveError):
         self, checkpoint_name: str, related_resource_type: str, related_resource_name: str
     ) -> None:
         super().__init__(
-            message=f"Could not save Checkpoint '{checkpoint_name}' due to failure \
-                to save child {related_resource_type} '{related_resource_name}'"
+            message=f"Could not save Checkpoint '{checkpoint_name}' due to failure to save child {related_resource_type} '{related_resource_name}'"  # noqa: E501
         )
 
 
