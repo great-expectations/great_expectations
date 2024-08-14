@@ -202,7 +202,7 @@ class ValidationDefinition(BaseModel):
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         if not self.id:
-            self._add_to_store()
+            self.save()
 
         validator = Validator(
             batch_definition=self.batch_definition,
@@ -313,16 +313,3 @@ class ValidationDefinition(BaseModel):
                 store.add(key=key, value=self)
         except StoreBackendError as e:
             raise ValueError(f"Could not save ValidationDefinition '{self.name}'") from e
-
-    def _add_to_store(self) -> None:
-        """This is used to persist a validation_definition before we run it.
-
-        We need to persist a validation_definition before it can be run. If user calls runs but
-        hasn't persisted it we add it for them."""
-
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
-        store = project_manager.get_validation_definition_store()
-        key = store.get_key(name=self.name, id=self.id)
-
-        store.add(key=key, value=self)

@@ -157,7 +157,7 @@ class Checkpoint(BaseModel):
             raise CheckpointRunWithoutValidationDefinitionError()
 
         if not self.id:
-            self._add_to_store()
+            self.save()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -277,19 +277,6 @@ class Checkpoint(BaseModel):
                 store.add(key=key, value=self)
         except (ValueError, StoreBackendError) as e:
             raise ValueError(f"Could not save Checkpoint '{self.name}'") from e
-
-    def _add_to_store(self) -> None:
-        """This is used to persist a checkpoint before we run it.
-
-        We need to persist a checkpoint before it can be run. If user calls runs but hasn't
-        persisted it we add it for them.
-        """
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
-        store = project_manager.get_checkpoints_store()
-        key = store.get_key(name=self.name, id=self.id)
-
-        store.add(key=key, value=self)
 
 
 class CheckpointResult(BaseModel):
