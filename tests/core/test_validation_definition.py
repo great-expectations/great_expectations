@@ -9,6 +9,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations import __version__ as GX_VERSION
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -56,6 +57,22 @@ BATCH_ID = "my_batch_id"
 DATA_SOURCE_NAME = "my_datasource"
 ASSET_NAME = "csv_asset"
 BATCH_DEFINITION_NAME = "my_batch_definition"
+ACTIVE_BATCH_SPEC = {
+    "type": "table",
+    "data_asset_name": ASSET_NAME,
+    "table_name": "test_table",
+    "schema_name": "test_schema",
+    "batch_identifiers": {"date": {"year": 2017, "month": 12, "day": 3}},
+    "partitioner_method": "partition_on_year_and_month_and_day",
+    "partitioner_kwargs": {"column_name": "date"},
+}
+ACTIVE_BATCH_DEFINITION = {
+    "datasource_name": DATA_SOURCE_NAME,
+    "data_connector_name": "fluent",
+    "data_asset_name": ASSET_NAME,
+    "batch_identifiers": {"date": {"year": 2017, "month": 12, "day": 3}},
+}
+BATCH_MARKERS = {"ge_load_time": "20240814T172846.050804Z"}
 
 
 @pytest.fixture
@@ -111,7 +128,12 @@ class TestValidationRun:
                 gx.get_context()
                 mock_execution_engine = mocker.MagicMock(
                     spec=ExecutionEngine,
-                    batch_manager=mocker.MagicMock(active_batch_id=BATCH_ID),
+                    batch_manager=mocker.MagicMock(
+                        active_batch_id=BATCH_ID,
+                        active_batch_spec=ACTIVE_BATCH_SPEC,
+                        active_batch_definition=ACTIVE_BATCH_DEFINITION,
+                        active_batch_markers=BATCH_MARKERS,
+                    ),
                 )
                 mock_validator = OldValidator(execution_engine=mock_execution_engine)
                 mock_get_validator.return_value = mock_validator
@@ -214,6 +236,10 @@ class TestValidationRun:
         assert output.meta == {
             "validation_id": validation_definition.id,
             "checkpoint_id": checkpoint_id,
+            "batch_spec": ACTIVE_BATCH_SPEC,
+            "batch_markers": BATCH_MARKERS,
+            "active_batch_definition": ACTIVE_BATCH_DEFINITION,
+            "great_expectations_version": GX_VERSION,
         }
 
     @mock.patch.object(ValidationResultsStore, "set")
