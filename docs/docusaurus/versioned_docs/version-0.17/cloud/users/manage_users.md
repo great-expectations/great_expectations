@@ -14,7 +14,7 @@ With Admin permissions, you can add users, edit organization roles, and delete u
 
     - **Email** - Enter the user's email address.
 
-    - **Organization Role** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Checkpoints and Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
+    - **Organization Role** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
 
 3. Click **Invite**.
 
@@ -50,7 +50,7 @@ Access tokens shouldn't be committed to version control software.
 
     - **Token name** - Enter a name for the user access token that will help you quickly identify it.
 
-    - **Role** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Checkpoints and Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
+    - **Role** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
 
 4. Click **Create**.
 
@@ -70,7 +70,7 @@ Organization access tokens are typically required for external application authe
 
     - **Token name** - Enter a name for the organization access token that will help you quickly identify it.
 
-    - **Role level** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Checkpoints and Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
+    - **Role level** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
 
 4. Click **Create**.
 
