@@ -152,36 +152,6 @@
         },
         {
           "type": "category",
-          "label": "Manage Checkpoints",
-          "link": {
-            "type": "doc",
-            "id": "cloud/checkpoints/manage_checkpoints"
-          },
-          "items": [
-            {
-              "type": "link",
-              "label": "Add a Checkpoint",
-              "href": "/docs/0.17.23/cloud/checkpoints/manage_checkpoints#add-a-checkpoint"
-            },
-            {
-              "type": "link",
-              "label": "Run a Checkpoint",
-              "href": "/docs/0.17.23/cloud/checkpoints/manage_checkpoints#run-a-checkpoint"
-            },
-            {
-              "type": "link",
-              "label": "Edit a Checkpoint configuration",
-              "href": "/docs/0.17.23/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration"
-            },
-            {
-              "type": "link",
-              "label": "Delete a Checkpoint",
-              "href": "/docs/0.17.23/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint"
-            }
-          ]
-        },
-        {
-          "type": "category",
           "label": "Manage users and access tokens",
           "link": {
             "type": "doc",
