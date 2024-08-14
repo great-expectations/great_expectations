@@ -19,8 +19,6 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 - You have [created an Expectation Suite](/cloud/expectation_suites/manage_expectation_suites.md) and [added Expectations](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
-- You have added a Checkpoint to your Expectation.
-
 
 ## Create a local Airflow project and set dependencies
 
