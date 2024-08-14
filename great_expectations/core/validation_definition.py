@@ -27,6 +27,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
@@ -285,10 +286,33 @@ class ValidationDefinition(BaseModel):
     def save(self) -> None:
         from great_expectations.data_context.data_context.context_factory import project_manager
 
+        try:
+            self.suite.save()
+        except ValueError as e:
+            raise ValueError(
+                f"Could not save ValidationDefinition '{self.name}' due to failure to save child ExpectationSuite '{self.suite.name}'"
+            ) from e
+
+        try:
+            self.data.save()
+        except (
+            AttributeError,  # Raised if the data asset does not have a save method
+            StoreBackendError,  # Generic error based by store backends (namely GXCloudStoreBackend)
+        ):
+            raise ValueError(
+                f"Could not save ValidationDefinition '{self.name}' due to failure to save child BatchDefinition '{self.data.name}'"
+            ) from e
+
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
 
-        store.update(key=key, value=self)
+        try:
+            if store.has_key(key):
+                store.update(key=key, value=self)
+            else:
+                store.add(key=key, value=self)
+        except StoreBackendError as e:
+            raise ValueError(f"Could not save ValidationDefinition '{self.name}'") from e
 
     def _add_to_store(self) -> None:
         """This is used to persist a validation_definition before we run it.

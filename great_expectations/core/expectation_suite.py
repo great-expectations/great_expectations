@@ -30,6 +30,11 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
+from great_expectations.exceptions.exceptions import (
+    ExpectationSuiteError,
+    ExpectationSuiteNotAddedToStoreError,
+    StoreBackendError,
+)
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
@@ -232,7 +237,17 @@ class ExpectationSuite(SerializableDictDot):
         """Save this ExpectationSuite."""
         # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now  # noqa: E501
         key = self._store.get_key(name=self.name, id=self.id)
-        self._store.update(key=key, value=self)
+        try:
+            if self._store.has_key(key):
+                self._store.update(key=key, value=self)
+            else:
+                self._store.add(key=key, value=self)
+        except (
+            ExpectationSuiteNotAddedToStoreError,  # Raised by failure in ExpectationsStore._update
+            ExpectationSuiteError,  # Raised by failure in ExpectationsStore._add
+            StoreBackendError,  # Generic error based by store backends (namely GXCloudStoreBackend)
+        ) as e:
+            raise ValueError(f"Could not save ExpectationSuite '{self.name}'") from e
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""

@@ -29,7 +29,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import CheckpointRunWithoutValidationDefinitionError
+from great_expectations.exceptions.exceptions import (
+    CheckpointRunWithoutValidationDefinitionError,
+    StoreBackendError,
+)
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -256,10 +259,24 @@ class Checkpoint(BaseModel):
     def save(self) -> None:
         from great_expectations.data_context.data_context.context_factory import project_manager
 
+        for validation in self.validation_definitions:
+            try:
+                validation.save()
+            except ValueError as e:
+                raise ValueError(
+                    f"Could not save Checkpoint due to failure to save child ValidationDefinition '{validation.name}'"
+                ) from e
+
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
 
-        store.update(key=key, value=self)
+        try:
+            if store.has_key(key):
+                store.update(key=key, value=self)
+            else:
+                store.add(key=key, value=self)
+        except (ValueError, StoreBackendError) as e:
+            raise ValueError(f"Could not save Checkpoint '{self.name}'") from e
 
     def _add_to_store(self) -> None:
         """This is used to persist a checkpoint before we run it.
