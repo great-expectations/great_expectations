@@ -74,8 +74,6 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         return batch_list[-1]
 
     def save(self) -> None:
-        # Use global project manager
-        # Grab data source store and persist grandparent
         from great_expectations.data_context.data_context.context_factory import project_manager
 
         datasource = self.data_asset.datasource
