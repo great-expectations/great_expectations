@@ -216,6 +216,7 @@ class ValidationDefinition(BaseModel):
         #       Meta should be reserved for user-defined information.
         if run_id:
             results.meta["run_id"] = run_id
+            results.meta["validation_time"] = run_id.run_time
 
         (
             expectation_suite_identifier,

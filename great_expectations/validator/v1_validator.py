@@ -3,11 +3,13 @@ from __future__ import annotations
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Optional
 
+from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
 from great_expectations.core.result_format import ResultFormat
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 from great_expectations.validator.validator import Validator as OldValidator
 from great_expectations.validator.validator import calc_validation_statistics
 
@@ -64,7 +66,6 @@ class Validator:
         )
         statistics = calc_validation_statistics(results)
 
-        # TODO: This was copy/pasted from Validator, but many fields were removed
         return ExpectationSuiteValidationResult(
             results=results,
             success=statistics.success,
@@ -74,6 +75,16 @@ class Validator:
                 "successful_expectations": statistics.successful_expectations,
                 "unsuccessful_expectations": statistics.unsuccessful_expectations,
                 "success_percent": statistics.success_percent,
+            },
+            meta={
+                # run_id, validation_time, and fkeys are added to this dict
+                # in ValidationDefinition.run
+                "great_expectations_version": ge_version,
+                "batch_spec": convert_to_json_serializable(
+                    self._wrapped_validator.active_batch_spec
+                ),
+                "batch_markers": self._wrapped_validator.active_batch_markers,
+                "active_batch_definition": self._wrapped_validator.active_batch_definition,
             },
             batch_id=self.active_batch_id,
         )
