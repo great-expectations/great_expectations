@@ -284,7 +284,10 @@ class Checkpoint(BaseModel):
                 store.update(key=key, value=self)
             else:
                 store.add(key=key, value=self)
-        except (ValueError, StoreBackendError) as e:
+        except (
+            StoreBackendError,  # Generic error raised by store backends (namely GXCloudStoreBackend) # noqa: E501
+            ValueError,  # Generic error by certain stores/store backends
+        ) as e:
             raise CheckpointSaveError(name=self.name) from e
 
 

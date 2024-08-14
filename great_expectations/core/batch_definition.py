@@ -83,7 +83,10 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         try:
             datasource_dict[datasource.name] = datasource
-        except StoreBackendError as e:
+        except (
+            StoreBackendError,  # Generic error raised by store backends (namely GXCloudStoreBackend) # noqa: E501
+            ValueError,  # Generic error by certain stores/store backends
+        ) as e:
             raise BatchDefinitionSaveError(name=self.name) from e
 
     def identifier_bundle(self) -> _EncodedValidationData:
