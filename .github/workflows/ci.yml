@@ -114,7 +114,6 @@ jobs:
       # azure
       AZURE_ACCESS_KEY: ${{secrets.AZURE_ACCESS_KEY}}
       AZURE_CREDENTIAL: ${{secrets.AZURE_CREDENTIAL}}
-      AZURE_CONTAINER: ${{secrets.AZURE_CONTAINER}}
       # snowflake
       SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
       SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
