@@ -10,16 +10,7 @@ Often, open source (OSS) applications have a reputation for being unfriendly and
 
 ## Ask a question
 
-GX has a [Discourse community forum](https://discourse.greatexpectations.io/) that includes categories for [GX OSS Support](https://discourse.greatexpectations.io/c/oss-support/) and [GX Cloud Support](https://discourse.greatexpectations.io/c/cloud-support/). Here you'll find guidance on [what information to provide to get your questions answered quickly](https://discourse.greatexpectations.io/t/how-to-get-your-questions-answered/1191).  
-
-<!--
-You can also use [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions/4951).
--->
-
-<!--
-## File a bug report or feature request
-If you've discovered a bug or want to request a new feature, see [upvote an existing issue](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new).
--->
+Knowing where and how to ask questions will help you get the answers you need.  GX provides channels for [getting support with GX Cloud](/resources/get_support.md#gx-cloud-support) and [getting support with GX 1.0](/resources/get_support.md#gx-oss-support).
 
 ## Contribute code or documentation
 

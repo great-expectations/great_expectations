@@ -32,7 +32,7 @@ Search the docs you're using currently for an answer to your issue or question.
 
 If you're new to GX Cloud, review [About GX Cloud](/cloud/about_gx.md).
 
-If you're new to GX OSS, try the [Quickstart](/oss/tutorials/quickstart.md) or one of the specific getting started guides such as [Get started with Great Expectations and Databricks](/oss/tutorials/getting_started/how_to_use_great_expectations_in_databricks.md) or [Get started with Great Expectations and SQL](/oss/tutorials/getting_started/how_to_use_great_expectations_with_sql.md).
+If you're new to GX OSS, try the [Quickstart](/oss/tutorials/quickstart.md) or one of the specific getting started guides such as [Get started with Great Expectations and Databricks](/oss/get_started/get_started_with_gx_and_databricks.md) or [Get started with Great Expectations and SQL](/oss/get_started/get_started_with_gx_and_sql.md).
 
 ### Include all the relevant information
 
