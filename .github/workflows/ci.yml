@@ -222,6 +222,14 @@ jobs:
           slug: great-expectations/great_expectations
           flags: ${{ matrix.python-version }}
 
+      # upload test results to codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.python-version }}
+
   doc-checks:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
@@ -357,6 +365,14 @@ jobs:
           slug: great-expectations/great_expectations
           flags: cloud
 
+      # upload test results to codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: cloud
+
   marker-tests:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
@@ -452,6 +468,14 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: great-expectations/great_expectations
+          flags: "${{ matrix.python-version }} ${{ matrix.markers }}"
+
+      # upload test results to codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           flags: "${{ matrix.python-version }} ${{ matrix.markers }}"
 
   py38-min-versions:
