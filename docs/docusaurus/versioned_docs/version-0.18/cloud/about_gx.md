@@ -89,7 +89,6 @@ The following table lists the sequence of tasks that you complete in a typical G
 | [Invite users](./users/manage_users.md#invite-a-user)    | Invite users to your GX Cloud organization.                       |
 | [Create an Expectation](./expectations/manage_expectations.md)    | Define verifiable assertions about your data.                       |  
 | [Run Validations](./validations/manage_validations.md)                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       |
-| (Optional) [Add and run Checkpoints](./checkpoints/manage_checkpoints.md)       | Add and run Checkpoints to refine and confirm your Data Validations. |
 
 ## Roles and responsibilities
 
@@ -97,8 +96,8 @@ How you interact with GX Cloud is dependent on the role you're assigned by your 
 
 | Role          | Responsibilities                                  |
 |---------------|---------------------------------------------------|
-| Viewer        | View Checkpoints and Validation Results           | 
-| Editor        | Create Data Assets<br/>Create and edit Expectations<br/>Create access tokens<br/>Create and edit Checkpoints |
+| Viewer        | View Validation Results           | 
+| Editor        | Create Data Assets<br/>Create and edit Expectations<br/>Create access tokens |
 | Admin         | Full access<br/>Perform all GX Cloud administrative functions including user and role assignment |
 
 ## Supported browsers

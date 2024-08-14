@@ -324,48 +324,6 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Manage Checkpoints',
-          link: { type: 'doc', id: 'cloud/checkpoints/manage_checkpoints' },
-          items: [
-            {
-              type: 'link',
-              label: 'Add a Checkpoint',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint',
-            },
-            {
-              type: 'link',
-              label: 'Run a Checkpoint',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#run-a-checkpoint',
-            },
-            {
-              "type": "link",
-              "label": "Add a Validation to a Checkpoint",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-to-a-checkpoint"
-            },
-            {
-              type: 'link',
-              label: 'Edit a Checkpoint name',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-name',
-            },
-            {
-              type: 'link',
-              label: 'Edit a Checkpoint configuration',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration',
-            },
-            {
-              "type": "link",
-              "label": "Configure the Checkpoint result format parameter",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#configure-the-checkpoint-result-format-parameter"
-            },
-            {
-              type: 'link',
-              label: 'Delete a Checkpoint',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
-            },
-          ]
-        },
-        {
-          type: 'category',
           label: 'Manage schedules',
           link: { type: 'doc', id: 'cloud/schedules/manage_schedules' },
           items: [
