@@ -67,4 +67,4 @@ The following table defines the GX versions supported by GX Cloud and GX Core.
 
 | GX Cloud | GX Core | Community |
 | -------- | ------- | --------- |
-| >1.0     | >1.0    | >1.0      |
+| ≥1.0     | ≥1.0    | ≥1.0      |
