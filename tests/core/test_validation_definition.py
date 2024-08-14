@@ -206,7 +206,7 @@ class TestValidationRun:
     ):
         mock_validator.graph_validate.return_value = []
 
-        validation_definition.id = None
+        assert validation_definition.id is None
 
         output = validation_definition.run(checkpoint_id=checkpoint_id)
 
