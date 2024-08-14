@@ -84,7 +84,9 @@ class Validator:
                     self._wrapped_validator.active_batch_spec
                 ),
                 "batch_markers": self._wrapped_validator.active_batch_markers,
-                "active_batch_definition": self._wrapped_validator.active_batch_definition,
+                "active_batch_definition": convert_to_json_serializable(
+                    self._wrapped_validator.active_batch_definition
+                ),
             },
             batch_id=self.active_batch_id,
         )
