@@ -706,11 +706,6 @@ class TestRenderedContent:
         expectation_suite = empty_data_context.suites.get(name=suite_name)
 
         assert all(
-            expectation_configuration.rendered_content is None
-            for expectation_configuration in expectation_suite.expectation_configurations
-        )
-
-        assert all(
             expectation.rendered_content is None for expectation in expectation_suite.expectations
         )
 
@@ -729,12 +724,6 @@ class TestRenderedContent:
         for expectation in expectation_suite.expectations:
             assert expectation.rendered_content is not None
             rendered_content_blocks.extend(expectation.rendered_content)
-        assert rendered_content_blocks
-
-        rendered_content_blocks: list = []
-        for expectation_configuration in expectation_suite.expectation_configurations:
-            assert expectation_configuration.rendered_content is not None
-            rendered_content_blocks.extend(expectation_configuration.rendered_content)
         assert rendered_content_blocks
 
     @pytest.mark.cloud
@@ -798,13 +787,6 @@ class TestRenderedContent:
                 value_type="StringValueType",
             ),
         ]
-
-        actual_rendered_content: List[RenderedAtomicContent] = []
-        for expectation_configuration in expectation_suite.expectation_configurations:
-            assert expectation_configuration.rendered_content is not None
-            actual_rendered_content.extend(expectation_configuration.rendered_content)
-
-        assert actual_rendered_content == expected_rendered_content
 
         actual_rendered_content: List[RenderedAtomicContent] = []
         for expectation in expectation_suite.expectations:
