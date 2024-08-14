@@ -28,6 +28,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.exceptions.exceptions import (
+    BatchDefinitionSaveError,
     ExpectationSuiteSaveError,
     StoreBackendError,
     ValidationDefinitionRelatedResourceSaveError,
@@ -296,19 +297,16 @@ class ValidationDefinition(BaseModel):
         except ExpectationSuiteSaveError as e:
             raise ValidationDefinitionRelatedResourceSaveError(
                 validation_definition_name=self.name,
-                related_resource_type="ExpectationSuite",
+                related_resource_type=ExpectationSuite.__class__.__name__,
                 related_resource_name=self.suite.name,
             ) from e
 
         try:
             self.data.save()
-        except (
-            AttributeError,  # Raised if the data asset does not have a save method
-            StoreBackendError,  # Generic error based by store backends (namely GXCloudStoreBackend)
-        ) as e:
+        except BatchDefinitionSaveError as e:
             raise ValidationDefinitionRelatedResourceSaveError(
                 validation_definition_name=self.name,
-                related_resource_type="BatchDefinition",
+                related_resource_type=BatchDefinition.__class__.__name__,
                 related_resource_name=self.data.name,
             ) from e
 

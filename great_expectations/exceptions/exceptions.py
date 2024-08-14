@@ -439,6 +439,11 @@ class BatchDefinitionError(DataContextError):
         super().__init__(self.message)
 
 
+class BatchDefinitionSaveError(BatchDefinitionError):
+    def __init__(self, name: str) -> None:
+        super().__init__(message=f"Could not save BatchDefinition '{name}'")
+
+
 class BatchSpecError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message

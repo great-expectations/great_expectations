@@ -272,7 +272,7 @@ class Checkpoint(BaseModel):
             ) as e:
                 raise CheckpointRelatedResourceSaveError(
                     name=self.name,
-                    related_resource_type="ValidationDefinition",
+                    related_resource_type=ValidationDefinition.__class__.__name__,
                     related_resource_name=validation.name,
                 ) from e
 

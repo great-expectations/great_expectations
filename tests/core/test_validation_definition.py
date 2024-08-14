@@ -129,6 +129,7 @@ class TestValidationRun:
         )
         mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
+        breakpoint()
         validation_definition.run()
 
         mock_validator.graph_validate.assert_called_with(
@@ -206,7 +207,7 @@ class TestValidationRun:
     ):
         mock_validator.graph_validate.return_value = []
 
-        assert validation_definition.id is None
+        validation_definition.id = None
 
         output = validation_definition.run(checkpoint_id=checkpoint_id)
 

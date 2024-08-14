@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 def mock_data_asset(monkeypatch) -> DataAsset:
     monkeypatch.setattr(DataAsset, "build_batch_request", Mock())
     data_asset: DataAsset = DataAsset(name="my_data_asset", type="table")
-    data_asset._save_batch_definition = Mock()
 
     return data_asset
 
