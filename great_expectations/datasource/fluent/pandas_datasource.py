@@ -600,7 +600,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
                 )
                 asset.name = asset_name
             elif asset_name in asset_names:
-                self.delete_asset(asset_name=asset_name)
+                self.delete_asset(name=asset_name)
 
         return super()._add_asset(asset=asset, connect_options=connect_options)
 
@@ -617,6 +617,9 @@ class PandasDatasource(_PandasDatasource):
         assets: An optional dictionary whose keys are Pandas DataAsset names and whose values
             are Pandas DataAsset objects.
     """
+
+    # class directive to automatically generate read_* methods for assets
+    ADD_READER_METHODS: ClassVar[bool] = True
 
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [DataFrameAsset]

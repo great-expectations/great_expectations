@@ -74,6 +74,7 @@ module.exports = {
       contextualSearch: true,
     },
     prism: {
+      additionalLanguages: ['bash'],
       theme: require('./src/theme/CodeBlock/theme'),
     },
     colorMode: {

@@ -65,6 +65,14 @@ class CheckpointNotFoundError(CheckpointError):
     pass
 
 
+class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
+    def __init__(self) -> None:
+        super().__init__(
+            "Checkpoint.run() requires at least one validation definition. "
+            "Please add one and try your action again."
+        )
+
+
 class StoreBackendError(DataContextError):
     pass
 
@@ -313,7 +321,6 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleFilesystemStoreBackend": "TupleFilesystemStoreBackend",
             "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
-            "InMemorySuiteParameterStore": "SuiteParameterStore",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
             "ExtractAndStoreSuiteParamsAction": "StoreSuiteParametersAction",
             "StoreAction": "StoreValidationResultAction",
@@ -414,6 +421,12 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 class DatasourceNotFoundError(DataContextError):
     pass
+
+
+class DataAssetInitializationError(GreatExpectationsError):
+    def __init__(self, message: str) -> None:
+        self.message = f"Cannot initialize data asset: {message}"
+        super().__init__(self.message)
 
 
 class InvalidConfigValueTypeError(DataContextError):

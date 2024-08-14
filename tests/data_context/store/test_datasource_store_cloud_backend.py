@@ -86,7 +86,7 @@ def test_datasource_store_get_by_name(
         # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.  # noqa: E501
         mock_has_key.return_value = True
 
-        datasource_store_ge_cloud_backend.retrieve_by_name(datasource_name=datasource_name)
+        datasource_store_ge_cloud_backend.retrieve_by_name(name=datasource_name)
 
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object

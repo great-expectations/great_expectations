@@ -662,7 +662,7 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     config_var_value: str = "my_patched_value"
 
     context.variables.config.plugins_directory = f"${config_var_name}"
-    context.save_config_variable(config_variable_name=config_var_name, value=config_var_value)
+    context.save_config_variable(name=config_var_name, value=config_var_value)
 
     assert context.plugins_directory and context.plugins_directory.endswith(config_var_value)
 
