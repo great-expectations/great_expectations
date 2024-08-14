@@ -129,7 +129,6 @@ class TestValidationRun:
         )
         mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
-        breakpoint()
         validation_definition.run()
 
         mock_validator.graph_validate.assert_called_with(
