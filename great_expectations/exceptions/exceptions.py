@@ -44,7 +44,28 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
+class ResourceNotSavedError(DataContextError):
+    def __init__(self, resource_type: str, resource_name: str) -> None:
+        super().__init__(
+            f"Please save {resource_type} '{resource_name}' before continuing (use `save()`)."
+        )
+
+
+class RelatedResourcesNotSavedError(ValueError):
+    def __init__(self, errors: list[ResourceNotSavedError]) -> None:
+        self._errors = errors
+        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
+
+    @property
+    def errors(self) -> list[ResourceNotSavedError]:
+        return self._errors
+
+
 class ExpectationSuiteError(DataContextError):
+    pass
+
+
+class ExpectationSuiteSaveError(ExpectationSuiteError):
     pass
 
 
@@ -71,6 +92,14 @@ class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
             "Checkpoint.run() requires at least one validation definition. "
             "Please add one and try your action again."
         )
+
+
+class CheckpointRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):
+    pass
+
+
+class ValidationDefinitionRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):
+    pass
 
 
 class StoreBackendError(DataContextError):
@@ -399,6 +428,10 @@ class BatchDefinitionError(DataContextError):
         super().__init__(self.message)
 
 
+class BatchDefinitionSaveError(BatchDefinitionError):
+    pass
+
+
 class BatchSpecError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message
@@ -513,28 +546,3 @@ class DatabaseConnectionError(GreatExpectationsError):
 
 class MigrationError(GreatExpectationsError):
     """Error when using the migration tool."""
-
-
-class ResourceNotSavedError(DataContextError):
-    def __init__(self, resource_type: str, resource_name: str) -> None:
-        super().__init__(
-            f"Please save {resource_type} '{resource_name}' before continuing (use `save()`)."
-        )
-
-
-class RelatedResourcesNotSavedError(ValueError):
-    def __init__(self, errors: list[ResourceNotSavedError]) -> None:
-        self._errors = errors
-        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
-
-    @property
-    def errors(self) -> list[ResourceNotSavedError]:
-        return self._errors
-
-
-class CheckpointRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):
-    pass
-
-
-class ValidationDefinitionRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):
-    pass

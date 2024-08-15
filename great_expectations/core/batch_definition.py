@@ -9,7 +9,9 @@ from great_expectations.compatibility import pydantic
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
+    BatchDefinitionSaveError,
     ResourceNotSavedError,
+    StoreBackendError,
 )
 
 if TYPE_CHECKING:
@@ -76,7 +78,15 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         return batch_list[-1]
 
     def save(self) -> None:
-        pass
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        datasource = self.data_asset.datasource
+        datasource_dict = project_manager.get_datasources()
+
+        try:
+            datasource_dict.set_datasource(name=datasource.name, ds=datasource)
+        except StoreBackendError as e:
+            raise BatchDefinitionSaveError(name=self.name) from e
 
     def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
         if self.id:
