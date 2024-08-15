@@ -65,7 +65,7 @@ class ValidationDefinitionError(DataContextError):
     pass
 
 
-class ValidationDefinitionNotAdded(ValidationDefinitionError):
+class ValidationDefinitionNotAddedError(ValidationDefinitionError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
