@@ -89,7 +89,7 @@ class CheckpointError(DataContextError):
 
 class CheckpointSaveError(CheckpointError):
     def __init__(self, name: str) -> None:
-        super().__init__(message=f"Could not save Checkpoint '{name}'")
+        super().__init__(message=f"Could not save Checkpoint '{name}'")  # type: ignore[call-arg]
 
 
 class CheckpointRelatedResourceSaveError(CheckpointSaveError):
