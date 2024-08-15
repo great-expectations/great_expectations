@@ -131,6 +131,7 @@ module.exports = {
         {
           type: 'custom-colorModeToggle',
           position: 'left',
+          className: 'color-mode-toggle',
         },
         {
           type: 'custom-githubNavbarItem',

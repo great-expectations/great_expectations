@@ -156,7 +156,15 @@
     box-shadow: 0 3px 6px -1px var(--orange-300);
   }
 
+  [data-theme='dark'] .navbar-sidebar .header-cloud-link {
+    box-shadow: none;
+  }
+
   .navbar-sidebar .github-badge {
+    display: none;
+  }
+
+  .navbar-sidebar .color-mode-toggle {
     display: none;
   }
 }
