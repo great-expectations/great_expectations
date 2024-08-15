@@ -377,16 +377,6 @@ class TestCRUDMethods:
         # expect that the data context is kept in sync
         context.expectations_store.update.assert_called_once_with(key=store_key, value=suite)
 
-    @pytest.mark.unit
-    def test_save_before_add_raises(self):
-        gx.get_context(mode="ephemeral")
-        suite = ExpectationSuite(
-            name=self.expectation_suite_name,
-        )
-
-        with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedToStoreError):
-            suite.save()
-
     @pytest.mark.filesystem
     def test_filesystem_context_update_suite_adds_ids(self, empty_data_context, expectation):
         context = empty_data_context

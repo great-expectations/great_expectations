@@ -20,7 +20,8 @@ if TYPE_CHECKING:
 @pytest.fixture
 def mock_data_asset(monkeypatch) -> DataAsset:
     monkeypatch.setattr(DataAsset, "build_batch_request", Mock())
-    data_asset: DataAsset = DataAsset(name="my_data_asset", type="table")
+    data_asset = DataAsset(name="my_data_asset", type="table")
+    data_asset._datasource = Mock()
 
     return data_asset
 
