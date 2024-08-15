@@ -392,7 +392,7 @@ def test_validation_definition_factory_all_with_bad_config(
 
     # Make validation_definition_2 invalid. Pydantic will validate the object at creation time
     # but we can invalidate via assignment because of the monkeypatch at the top of this test.
-    validation_definition_2.suite = None  # type: ignore[assignment], done intentionally for test
+    validation_definition_2.suite = None  # type: ignore[assignment] # done intentionally for test
     validation_definition_2.save()
 
     # Act
