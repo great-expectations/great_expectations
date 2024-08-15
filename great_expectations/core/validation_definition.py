@@ -316,12 +316,12 @@ class ValidationDefinition(BaseModel):
         saved, errors = self.is_saved()
         if saved:
             store.update(key=key, value=self)
-
-        # If not saved, one of three possibilities:
-        # - Child components not saved
-        # - Self (validation definition) not saved
-        # - Both
-        print(errors)
+        elif (
+            len(errors) == 1 and not self.id
+        ):  # All child components are saved but self is not saved
+            store.add(key=key, value=self)
+        else:
+            raise ValidationDefinitionRelatedResourcesNotSavedError(errors=errors)
 
     def _add_to_store(self) -> None:
         """This is used to persist a validation_definition before we run it.
