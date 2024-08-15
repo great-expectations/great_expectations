@@ -31,7 +31,7 @@ from great_expectations.analytics.events import (
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
-    ExpectationSuiteNotAddedToStoreError,
+    ExpectationSuiteNotAddedError,
 )
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
@@ -595,7 +595,7 @@ class ExpectationSuite(SerializableDictDot):
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         if not self.id:
-            raise ExpectationSuiteNotAddedToStoreError(name=self.name)
+            raise ExpectationSuiteNotAddedError(name=self.name)
 
         return _IdentifierBundle(name=self.name, id=self.id)
 
