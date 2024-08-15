@@ -245,7 +245,7 @@ def test_suite_factory_all_with_bad_config(in_memory_runtime_context: AbstractDa
     suite_2 = context.suites.add(suite=ExpectationSuite(name="suite2"))
 
     # Assert both suites are added
-    # assert sorted(context.suites.all(), key=lambda x: x.name) == [suite_1, suite_2]
+    assert sorted(context.suites.all(), key=lambda x: x.name) == [suite_1, suite_2]
 
     # Put suite_2 into an invalid state
     suite_2.expectations = [BadExpectation(id=1), BadExpectation(id=2)]
