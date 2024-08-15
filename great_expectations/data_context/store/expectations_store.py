@@ -263,7 +263,7 @@ class ExpectationsStore(Store):
         except gx_exceptions.StoreBackendError as e:
             # todo: this generic error clobbers more informative errors coming from the store
 
-            raise gx_exceptions.ExpectationSuiteNotAddedToStoreError() from e
+            raise gx_exceptions.ExpectationSuiteNotAddedError(name=value.name) from e
 
     def _add_ids_on_create(self, suite: ExpectationSuite) -> ExpectationSuite:
         """This method handles adding IDs to suites and expectations for non-cloud backends.

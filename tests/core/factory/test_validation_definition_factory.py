@@ -332,7 +332,7 @@ def test_validation_definition_factory_all(
     # Arrange
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
-    suite = ExpectationSuite(name="my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     validation_definition_a = ValidationDefinition(
         name="validation definition a",
         data=asset.add_batch_definition("a"),
@@ -418,16 +418,20 @@ def test_validation_definition_factory_round_trip(
     asset = ds.add_csv_asset("my_asset", filepath_or_buffer=csv_path)
 
     batch_definition = asset.add_batch_definition("my_batch_def")
-    suite = ExpectationSuite(
-        name="my_suite",
-        expectations=[
-            gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=10),
-            gxe.ExpectColumnMeanToBeBetween(
-                column="passenger_count",
-                min_value=0,
-                max_value=1,
-            ),
-        ],
+    suite = context.suites.add(
+        ExpectationSuite(
+            name="my_suite",
+            expectations=[
+                gxe.ExpectColumnValuesToBeBetween(
+                    column="passenger_count", min_value=0, max_value=10
+                ),
+                gxe.ExpectColumnMeanToBeBetween(
+                    column="passenger_count",
+                    min_value=0,
+                    max_value=1,
+                ),
+            ],
+        )
     )
 
     # Act
@@ -460,7 +464,7 @@ class TestValidationDefinitionFactoryAnalytics:
         ds = context.data_sources.add_pandas("my_datasource")
         asset = ds.add_csv_asset("my_asset", "data.csv")
         batch_def = asset.add_batch_definition("my_batch_definition")
-        suite = ExpectationSuite(name="my_suite")
+        suite = context.suites.add(ExpectationSuite(name="my_suite"))
 
         validation_definition = ValidationDefinition(
             name="validation_def", data=batch_def, suite=suite
@@ -495,7 +499,7 @@ class TestValidationDefinitionFactoryAnalytics:
         ds = context.data_sources.add_pandas("my_datasource")
         asset = ds.add_csv_asset("my_asset", "data.csv")
         batch_def = asset.add_batch_definition("my_batch_definition")
-        suite = ExpectationSuite(name="my_suite")
+        suite = context.suites.add(ExpectationSuite(name="my_suite"))
 
         name = "validation_def"
         validation_definition = context.validation_definitions.add(

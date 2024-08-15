@@ -166,13 +166,15 @@ def _test_checkpoint_factory_add_success(context):
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_def = asset.add_batch_definition("my_batch_definition")
-    suite = ExpectationSuite(name="my_suite")
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+    )
 
     checkpoint = Checkpoint(
         name=name,
-        validation_definitions=[
-            ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
-        ],
+        validation_definitions=[validation_definition],
     )
     with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
         context.checkpoints.get(name)
@@ -200,14 +202,16 @@ def _test_checkpoint_factory_delete_success(context):
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_def = asset.add_batch_definition("my_batch_definition")
-    suite = ExpectationSuite(name="my_suite")
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+    )
 
     context.checkpoints.add(
         checkpoint=Checkpoint(
             name=name,
-            validation_definitions=[
-                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition],
         )
     )
 
@@ -237,22 +241,26 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
     batch_def = asset.add_batch_definition("my_batch_definition")
-    suite = ExpectationSuite(name="my_suite")
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition_a = context.validation_definitions.add(
+        ValidationDefinition(name="val def a", data=batch_def, suite=suite)
+    )
 
     checkpoint_a = context.checkpoints.add(
         Checkpoint(
             name="a",
-            validation_definitions=[
-                ValidationDefinition(name="val def a", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition_a],
         )
+    )
+
+    validation_definition_b = context.validation_definitions.add(
+        ValidationDefinition(name="val def b", data=batch_def, suite=suite)
     )
     checkpoint_b = context.checkpoints.add(
         Checkpoint(
             name="b",
-            validation_definitions=[
-                ValidationDefinition(name="val def b", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition_b],
         )
     )
 
@@ -318,13 +326,15 @@ class TestCheckpointFactoryAnalytics:
         ds = context.data_sources.add_pandas("my_datasource")
         asset = ds.add_csv_asset("my_asset", "data.csv")
         batch_def = asset.add_batch_definition("my_batch_definition")
-        suite = ExpectationSuite(name="my_suite")
+
+        suite = context.suites.add(ExpectationSuite(name="my_suite"))
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+        )
 
         checkpoint = Checkpoint(
             name=name,
-            validation_definitions=[
-                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition],
         )
 
         # Act
@@ -350,13 +360,15 @@ class TestCheckpointFactoryAnalytics:
         ds = context.data_sources.add_pandas("my_datasource")
         asset = ds.add_csv_asset("my_asset", "data.csv")
         batch_def = asset.add_batch_definition("my_batch_definition")
-        suite = ExpectationSuite(name="my_suite")
+
+        suite = context.suites.add(ExpectationSuite(name="my_suite"))
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+        )
 
         checkpoint = Checkpoint(
             name=name,
-            validation_definitions=[
-                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition],
         )
         checkpoint = context.checkpoints.add(checkpoint=checkpoint)
 
