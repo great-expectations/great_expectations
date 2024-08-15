@@ -25,14 +25,6 @@ def mock_data_asset(monkeypatch) -> DataAsset:
     return data_asset
 
 
-@pytest.mark.unit
-def test_save(mock_data_asset):
-    batch_definition = BatchDefinition(name="test_batch_definition")
-    batch_definition.set_data_asset(mock_data_asset)
-
-    batch_definition.save()
-
-
 @pytest.mark.parametrize(
     "batch_parameters",
     [

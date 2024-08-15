@@ -75,15 +75,28 @@ class ExpectationSuiteError(DataContextError):
     pass
 
 
-class ExpectationSuiteSaveError(ExpectationSuiteError):
+class ExpectationSuiteSaveError(DataContextError):
     pass
 
 
-class ExpectationSuiteNotAddedToStoreError(DataContextError):
-    def __init__(self) -> None:
+class ExpectationSuiteNotAddedError(ExpectationSuiteError):
+    def __init__(self, name: str) -> None:
         super().__init__(
-            "ExpectationSuite must be added to the DataContext store before it can be saved. "
-            "Please call my_data_context.suites.add(my_expectation_suite), "
+            f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
+            "Please call context.suites.add(<SUITE_OBJECT>), "
+            "then try your action again."
+        )
+
+
+class ValidationDefinitionError(DataContextError):
+    pass
+
+
+class ValidationDefinitionNotAddedError(ValidationDefinitionError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
+            "Please call context.validation_definitions.add(<VALIDATION_DEFINITION_OBJECT>), "
             "then try your action again."
         )
 

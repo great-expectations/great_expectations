@@ -32,7 +32,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
     ExpectationSuiteError,
-    ExpectationSuiteNotAddedToStoreError,
+    ExpectationSuiteNotAddedError,
     ExpectationSuiteSaveError,
     ResourceNotSavedError,
     StoreBackendError,
@@ -245,7 +245,7 @@ class ExpectationSuite(SerializableDictDot):
             else:
                 self._store.add(key=key, value=self)
         except (
-            ExpectationSuiteNotAddedToStoreError,  # Raised by failure in ExpectationsStore._update
+            ExpectationSuiteNotAddedError,  # Raised by failure in ExpectationsStore._update
             ExpectationSuiteError,  # Raised by failure in ExpectationsStore._add
             StoreBackendError,  # Generic error raised by store backends (namely GXCloudStoreBackend) # noqa: E501
         ) as e:
@@ -255,9 +255,7 @@ class ExpectationSuite(SerializableDictDot):
         if self.id:
             return True, []
         return False, [
-            ResourceNotSavedError(
-                resource_type=self.__class__.__name__, resource_identifier=self.name
-            )
+            ResourceNotSavedError(resource_type=self.__class__.__name__, resource_name=self.name)
         ]
 
     def _has_been_saved(self) -> bool:
@@ -617,12 +615,8 @@ class ExpectationSuite(SerializableDictDot):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         if not self.id:
-            expectation_store = project_manager.get_expectations_store()
-            key = expectation_store.get_key(name=self.name, id=None)
-            expectation_store.add(key=key, value=self)
+            raise ExpectationSuiteNotAddedError(name=self.name)
 
         return _IdentifierBundle(name=self.name, id=self.id)
 

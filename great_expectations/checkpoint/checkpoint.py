@@ -271,7 +271,7 @@ class Checkpoint(BaseModel):
         if not self_saved:
             errs.append(
                 ResourceNotSavedError(
-                    resource_type=self.__class__.__name__, resource_identifier=self.name
+                    resource_type=self.__class__.__name__, resource_name=self.name
                 )
             )
 
