@@ -4,7 +4,7 @@
  * We apply that class to generated API docs during the build process.
  */
 
-.sphinx-api-doc {
+section.sphinx-api-doc {
 
     @import "pygments.scss";
     @import "basic-modified.scss";
