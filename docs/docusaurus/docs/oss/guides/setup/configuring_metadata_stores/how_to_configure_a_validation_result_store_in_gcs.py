@@ -38,12 +38,14 @@ checkpoint = context.checkpoints.add(
     Checkpoint(
         name=checkpoint_name,
         validation_definitions=[
-            ValidationDefinition(
-                name="my_validation_definition",
-                expectation_suite=suite,
-                data=asset.add_batch_definition_path(
-                    name="2019-01", path="yellow_tripdata_sample_2019-01.csv"
-                ),
+            context.validation_definitions.add(
+                ValidationDefinition(
+                    name="my_validation_definition",
+                    expectation_suite=suite,
+                    data=asset.add_batch_definition_path(
+                        name="2019-01", path="yellow_tripdata_sample_2019-01.csv"
+                    ),
+                )
             )
         ],
     )
