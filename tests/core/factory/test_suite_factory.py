@@ -3,6 +3,7 @@ from unittest import mock
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
+from typing_extensions import override
 
 from great_expectations.alias_types import JSONValues
 from great_expectations.analytics.events import (
@@ -234,8 +235,10 @@ def test_suite_factory_all_with_bad_config(in_memory_runtime_context: AbstractDa
     class BadExpectation(SerializableDictDot):
         def __init__(self, id: int):
             self.id = id
-            self.configuration = {}
+            # This type intentionally mismatches. We want a bad config.
+            self.configuration: dict = {}
 
+        @override
         def to_json_dict(self) -> Dict[str, JSONValues]:
             return {"id": self.id}
 
@@ -247,8 +250,9 @@ def test_suite_factory_all_with_bad_config(in_memory_runtime_context: AbstractDa
     # Assert both suites are added
     assert sorted(context.suites.all(), key=lambda x: x.name) == [suite_1, suite_2]
 
-    # Put suite_2 into an invalid state
-    suite_2.expectations = [BadExpectation(id=1), BadExpectation(id=2)]
+    # Put suite_2 into an invalid state, These BadExpectations are real Expectations since
+    # we want them to not deserialize correctly.
+    suite_2.expectations = [BadExpectation(id=1), BadExpectation(id=2)]  # type: ignore[list-item]
     suite_2.save()
 
     # Act
