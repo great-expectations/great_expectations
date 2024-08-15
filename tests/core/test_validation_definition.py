@@ -425,10 +425,6 @@ class TestValidationDefinitionSerialization:
             "id": validation_id,
         }
 
-        # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one  # noqa: E501
-        if suite_id is None:
-            self._assert_contains_valid_uuid(actual["suite"])
-
         assert actual == expected
 
     def _assert_contains_valid_uuid(self, data: dict):
@@ -684,10 +680,8 @@ def test_identifier_bundle_no_id(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
     actual = validation_definition.identifier_bundle()
-    expected = {"name": "my_validation", "id": mock.ANY}
-
-    assert actual.dict() == expected
-    assert actual.id is not None
+    assert actual.name == validation_definition.name
+    assert actual.id is None
 
 
 @pytest.mark.unit

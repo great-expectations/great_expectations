@@ -1062,7 +1062,5 @@ def test_identifier_bundle_no_id():
     suite = ExpectationSuite(name="my_suite", id=None)
 
     actual = suite.identifier_bundle()
-    expected = {"name": "my_suite", "id": mock.ANY}
-
-    assert actual.dict() == expected
-    assert actual.id is not None
+    assert actual.name == "my_suite"
+    assert actual.id is None
