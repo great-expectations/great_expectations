@@ -516,19 +516,20 @@ class MigrationError(GreatExpectationsError):
 
 
 class ResourceNotSavedError(DataContextError):
-    pass
+    def __init__(self, resource_type: str, resource_name: str) -> None:
+        super().__init__(
+            f"Please save {resource_type} '{resource_name}' before continuing (use `save()`)."
+        )
 
 
-class RelatedResourcesNotSavedError(Exception):
+class RelatedResourcesNotSavedError(ValueError):
     def __init__(self, errors: list[ResourceNotSavedError]) -> None:
         self._errors = errors
+        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
 
+    @property
     def errors(self) -> list[ResourceNotSavedError]:
         return self._errors
-
-    @override
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self._errors})"
 
 
 class CheckpointRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):

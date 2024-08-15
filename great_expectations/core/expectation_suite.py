@@ -239,7 +239,9 @@ class ExpectationSuite(SerializableDictDot):
         if self.id:
             return True, []
         return False, [
-            ResourceNotSavedError(f"Please save ExpectationSuite '{self.name}' before continuing.")
+            ResourceNotSavedError(
+                resource_type=self.__class__.__name__, resource_identifier=self.name
+            )
         ]
 
     def _has_been_saved(self) -> bool:

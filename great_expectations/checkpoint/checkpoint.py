@@ -270,7 +270,9 @@ class Checkpoint(BaseModel):
         self_saved = self.id is not None
         if not self_saved:
             errs.append(
-                ResourceNotSavedError(f"Please save Checkpoint '{self.name}' before continuing.")
+                ResourceNotSavedError(
+                    resource_type=self.__class__.__name__, resource_identifier=self.name
+                )
             )
 
         return (all_validations_saved and self_saved, errs)

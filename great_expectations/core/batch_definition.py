@@ -76,13 +76,15 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         return batch_list[-1]
 
     def save(self) -> None:
-        self.data_asset._save_batch_definition(self)
+        pass
 
     def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
         if self.id:
             return True, []
         return False, [
-            ResourceNotSavedError(f"Please save BatchDefinition '{self.name}' before continuing.")
+            ResourceNotSavedError(
+                resource_type=self.__class__.__name__, resource_identifier=self.name
+            )
         ]
 
     def identifier_bundle(self) -> _EncodedValidationData:

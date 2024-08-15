@@ -130,7 +130,7 @@ class ValidationDefinition(BaseModel):
         if not self_saved:
             errors.append(
                 ResourceNotSavedError(
-                    f"Please save ValidationDefinition '{self.name}' before continuing."
+                    resource_type=self.__class__.__name__, resource_identifier=self.name
                 )
             )
 
