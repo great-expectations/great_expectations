@@ -75,6 +75,11 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     def save(self) -> None:
         self.data_asset._save_batch_definition(self)
 
+    def is_saved(self) -> tuple[bool, list[str]]:
+        if self.id:
+            return True, []
+        return False, [f"Please save BatchDefinition '{self.name}' before continuing."]
+
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
         asset = self.data_asset

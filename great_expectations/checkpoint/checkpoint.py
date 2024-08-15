@@ -153,8 +153,9 @@ class Checkpoint(BaseModel):
         if not self.validation_definitions:
             raise CheckpointRunWithoutValidationDefinitionError()
 
-        if not self.id:
-            self._add_to_store()
+        saved, errs = self.is_saved()
+        if not saved:
+            raise ValueError(errs)
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -251,6 +252,22 @@ class Checkpoint(BaseModel):
                 secondary_actions.append(action)
 
         return priority_actions + secondary_actions
+
+    @property
+    def is_saved(self) -> tuple[bool, list[str]]:
+        errs: list[str] = []
+
+        all_validations_saved = True
+        for validation_definition in self.validation_definitions:
+            validation_saved, validation_errs = validation_definition.is_saved()
+            errs.extend(validation_errs)
+            all_validations_saved = validation_saved and all_validations_saved
+
+        self_saved = self.id is not None
+        if not self_saved:
+            errs.append(f"Please save Checkpoint '{self.name}' before continuing.")
+
+        return (all_validations_saved and self_saved, errs)
 
     @public_api
     def save(self) -> None:

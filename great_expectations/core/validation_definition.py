@@ -113,6 +113,21 @@ class ValidationDefinition(BaseModel):
     def data_source(self) -> Datasource:
         return self.asset.datasource
 
+    def is_saved(self) -> tuple[bool, list[str]]:
+        errs: list[str] = []
+
+        data_saved, data_errs = self.data.is_saved()
+        errs.extend(data_errs)
+
+        suite_saved, suite_errs = self.suite.is_saved()
+        errs.extend(suite_errs)
+
+        self_saved = self.id is not None
+        if not self_saved:
+            errs.append(f"Please save ValidationDefinition '{self.name}' before continuing.")
+
+        return (data_saved and suite_saved and self_saved, errs)
+
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
         # Input will be a dict of identifiers if being deserialized or a suite object if being constructed by a user.  # noqa: E501
@@ -200,8 +215,9 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
-        if not self.id:
-            self._add_to_store()
+        saved, errs = self.is_saved()
+        if not saved:
+            raise ValueError(errs)
 
         validator = Validator(
             batch_definition=self.batch_definition,

@@ -234,6 +234,11 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
+    def is_saved(self) -> tuple[bool, list[str]]:
+        if self.id:
+            return True, []
+        return False, [f"Please save ExpectationSuite '{self.name}' before continuing."]
+
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""
         # todo: this should only check local keys instead of potentially querying the remote backend
