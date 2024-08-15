@@ -161,9 +161,9 @@ def test_validation_definition_run(
     """Ensure ValidationDefinition::run works"""
 
     batch_definition = request.getfixturevalue(batch_definition_fixture_name)
-    suite = ExpectationSuite("my_suite", expectations=[expectation])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=batch_definition, suite=suite
+    suite = context.suites.add(ExpectationSuite("my_suite", expectations=[expectation]))
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="whatever", data=batch_definition, suite=suite)
     )
     result = validation_definition.run(batch_parameters=batch_parameters)
 
