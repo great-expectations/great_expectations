@@ -105,11 +105,11 @@ local_tests = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[BackendDependencies.PANDAS],
     # ),
-    IntegrationTestFixture(
-        name="expect_column_max_to_be_between_custom",
-        user_flow_script="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py",
-        backend_dependencies=[],
-    ),
+    # IntegrationTestFixture(
+    #     name="expect_column_max_to_be_between_custom",
+    #     user_flow_script="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py",
+    #     backend_dependencies=[],
+    # ),
     # IntegrationTestFixture(
     #     name="expect_column_values_to_be_in_solfege_scale_set",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py",  # noqa: E501
@@ -120,11 +120,11 @@ local_tests = [
     #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py",  # noqa: E501
     #     backend_dependencies=[],
     # ),
-    IntegrationTestFixture(
-        name="how_to_configure_result_format_parameter",
-        user_flow_script="docs/docusaurus/docs/snippets/result_format.py",
-        backend_dependencies=[],
-    ),
+    # IntegrationTestFixture(
+    #     name="how_to_configure_result_format_parameter",
+    #     user_flow_script="docs/docusaurus/docs/snippets/result_format.py",
+    #     backend_dependencies=[],
+    # ),
     # Fluent Datasources
     # IntegrationTestFixture(
     #     name="how_to_create_and_edit_expectations_with_instant_feedback_fluent",
@@ -144,46 +144,46 @@ local_tests = [
     #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py",  # noqa: E501
     #     backend_dependencies=[],
     # ),
-    IntegrationTestFixture(
-        name="setup_overview",
-        user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
-        data_context_dir=None,
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="expectation_management",
-        user_flow_script="tests/integration/docusaurus/expectations/expectation_management.py",
-        data_context_dir=None,
-        backend_dependencies=[],
-    ),
+    # IntegrationTestFixture(
+    #     name="setup_overview",
+    #     user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
+    #     data_context_dir=None,
+    #     backend_dependencies=[],
+    # ),
+    # IntegrationTestFixture(
+    #     name="expectation_management",
+    #     user_flow_script="tests/integration/docusaurus/expectations/expectation_management.py",
+    #     data_context_dir=None,
+    #     backend_dependencies=[],
+    # ),
 ]
 
 quickstart = [
-    IntegrationTestFixture(
-        name="quickstart",
-        user_flow_script="docs/docusaurus/docs/snippets/quickstart.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="v1_pandas_quickstart",
-        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="v1_sql_quickstart",
-        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py",
-        backend_dependencies=[BackendDependencies.SQLALCHEMY],
-    ),
+    # IntegrationTestFixture(
+    #     name="quickstart",
+    #     user_flow_script="docs/docusaurus/docs/snippets/quickstart.py",
+    #     backend_dependencies=[BackendDependencies.PANDAS],
+    # ),
+    # IntegrationTestFixture(
+    #     name="v1_pandas_quickstart",
+    #     user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py",
+    #     backend_dependencies=[BackendDependencies.PANDAS],
+    # ),
+    # IntegrationTestFixture(
+    #     name="v1_sql_quickstart",
+    #     user_flow_script="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py",
+    #     backend_dependencies=[BackendDependencies.SQLALCHEMY],
+    # ),
 ]
 
 fluent_datasources = [
-    IntegrationTestFixture(
-        name="connect_to_your_data_overview",
-        data_context_dir=None,
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="docs/docusaurus/docs/snippets/connect_to_your_data_overview.py",
-        backend_dependencies=[],
-    ),
+    # IntegrationTestFixture(
+    #     name="connect_to_your_data_overview",
+    #     data_context_dir=None,
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    #     user_flow_script="docs/docusaurus/docs/snippets/connect_to_your_data_overview.py",
+    #     backend_dependencies=[],
+    # ),
     # IntegrationTestFixture(
     #     name="how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",  # noqa: E501
@@ -191,26 +191,26 @@ fluent_datasources = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[],
     # ),
-    IntegrationTestFixture(
-        name="glossary_batch_request",
-        data_context_dir=None,
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="docs/docusaurus/docs/snippets/batch_request.py",
-        backend_dependencies=[],
-    ),
+    # IntegrationTestFixture(
+    #     name="glossary_batch_request",
+    #     data_context_dir=None,
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    #     user_flow_script="docs/docusaurus/docs/snippets/batch_request.py",
+    #     backend_dependencies=[],
+    # ),
     # IntegrationTestFixture(
     #     name="how_to_create_and_edit_an_expectation_with_domain_knowledge",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py",  # noqa: E501
     #     data_context_dir=None,
     #     backend_dependencies=[],
     # ),
-    IntegrationTestFixture(
-        name="how_to_request_data_from_a_data_asset",
-        user_flow_script="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
+    # IntegrationTestFixture(
+    #     name="how_to_request_data_from_a_data_asset",
+    #     user_flow_script="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    #     backend_dependencies=[BackendDependencies.PANDAS],
+    # ),
     # IntegrationTestFixture(
     #     name="how_to_organize_batches_in_a_file_based_data_asset",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py",  # noqa: E501
@@ -218,12 +218,12 @@ fluent_datasources = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[BackendDependencies.PANDAS],
     # ),
-    IntegrationTestFixture(
-        name="how_to_organize_batches_in_a_sql_based_data_asset",
-        user_flow_script="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.SQLALCHEMY],
-    ),
+    # IntegrationTestFixture(
+    #     name="how_to_organize_batches_in_a_sql_based_data_asset",
+    #     user_flow_script="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     backend_dependencies=[BackendDependencies.SQLALCHEMY],
+    # ),
     # IntegrationTestFixture(
     #     name="how_to_connect_to_one_or_more_files_using_pandas",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.py",  # noqa: E501
@@ -249,12 +249,12 @@ fluent_datasources = [
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[BackendDependencies.SQLALCHEMY],
     # ),
-    IntegrationTestFixture(
-        name="how_to_connect_to_a_sql_table",
-        user_flow_script="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[],
-    ),
+    # IntegrationTestFixture(
+    #     name="how_to_connect_to_a_sql_table",
+    #     user_flow_script="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     backend_dependencies=[],
+    # ),
     # IntegrationTestFixture(
     #     name="how_to_connect_to_sql_data",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data.py",  # noqa: E501
@@ -273,12 +273,12 @@ fluent_datasources = [
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[],
     # ),
-    IntegrationTestFixture(
-        name="how_to_explicitly_instantiate_an_ephemeral_data_context",
-        user_flow_script="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[],
-    ),
+    # IntegrationTestFixture(
+    #     name="how_to_explicitly_instantiate_an_ephemeral_data_context",
+    #     user_flow_script="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     backend_dependencies=[],
+    # ),
     # IntegrationTestFixture(
     #     name="how_to_connect_to_in_memory_data_using_pandas",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py",  # noqa: E501

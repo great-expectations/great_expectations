@@ -270,6 +270,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         except (ModuleNotFoundError, ValueError, KeyError):
             spark_session = pyspark.SparkSession.builder.getOrCreate()
 
+        breakpoint()
         return SparkDFExecutionEngine._get_session_with_spark_config(
             spark_config=spark_config,
             spark_session=spark_session,
@@ -502,6 +503,7 @@ illegal.  Please check your config."""  # noqa: E501
                 if schema:
                     reader = self.spark.read.schema(schema).options(**reader_options)
                 else:
+                    breakpoint()
                     reader = self.spark.read.options(**reader_options)
 
                 reader_fn = self._get_reader_fn(
@@ -509,6 +511,7 @@ illegal.  Please check your config."""  # noqa: E501
                     reader_method=reader_method,
                     path=path,
                 )
+                breakpoint()
                 batch_data = reader_fn(path)
             except AttributeError:
                 raise ExecutionEngineError(  # noqa: TRY003

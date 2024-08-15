@@ -2,9 +2,20 @@
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_whole_directory.py - retrieve Data Asset">
 from pathlib import Path
 
+from great_expectations.data_context.data_context.context_factory import set_context
 import great_expectations as gx
+from great_expectations.compatibility import pyspark
 
+spark_session = pyspark.SparkSession.getActiveSession()
+spark_connect_session = pyspark.SparkConnectSession.getActiveSession()
+x = 3
+if spark_session:
+    spark_session.stop()
+if spark_connect_session:
+    spark_connect_session.stop()
 context = gx.get_context()
+print(id(context))
+
 
 data_source_name = "my_filesystem_data_source"
 data_asset_name = "my_directory_data_asset"
