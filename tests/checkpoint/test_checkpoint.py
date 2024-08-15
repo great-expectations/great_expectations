@@ -239,12 +239,16 @@ class TestCheckpointSerialization:
         asset = ds.add_csv_asset(asset_name, "my_file.csv")  # type: ignore[arg-type]
 
         bc1 = asset.add_batch_definition(batch_definition_name_1)
-        suite1 = ExpectationSuite(suite_name_1)
-        vc1 = ValidationDefinition(name=validation_definition_name_1, data=bc1, suite=suite1)
+        suite1 = context.suites.add(ExpectationSuite(suite_name_1))
+        vc1 = context.validation_definitions.add(
+            ValidationDefinition(name=validation_definition_name_1, data=bc1, suite=suite1)
+        )
 
         bc2 = asset.add_batch_definition(batch_definition_name_2)
-        suite2 = ExpectationSuite(suite_name_2)
-        vc2 = ValidationDefinition(name=validation_definition_name_2, data=bc2, suite=suite2)
+        suite2 = context.suites.add(ExpectationSuite(suite_name_2))
+        vc2 = context.validation_definitions.add(
+            ValidationDefinition(name=validation_definition_name_2, data=bc2, suite=suite2)
+        )
 
         validation_definitions = [vc1, vc2]
         cp = Checkpoint(
@@ -659,22 +663,26 @@ class TestCheckpointResult:
         asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
 
         batch_definition = asset.add_batch_definition(self.batch_definition_name)
-        suite = ExpectationSuite(
-            name=self.suite_name,
-            expectations=[
-                gxe.ExpectColumnValuesToBeBetween(
-                    column=self.column_name, min_value=0, max_value=10
-                ),
-                gxe.ExpectColumnMeanToBeBetween(
-                    column=self.column_name,
-                    min_value=0,
-                    max_value=1,
-                ),
-            ],
+        suite = context.suites.add(
+            ExpectationSuite(
+                name=self.suite_name,
+                expectations=[
+                    gxe.ExpectColumnValuesToBeBetween(
+                        column=self.column_name, min_value=0, max_value=10
+                    ),
+                    gxe.ExpectColumnMeanToBeBetween(
+                        column=self.column_name,
+                        min_value=0,
+                        max_value=1,
+                    ),
+                ],
+            )
         )
 
-        validation_definition = ValidationDefinition(
-            name=self.validation_definition_name, data=batch_definition, suite=suite
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(
+                name=self.validation_definition_name, data=batch_definition, suite=suite
+            )
         )
 
         return Checkpoint(name=self.checkpoint_name, validation_definitions=[validation_definition])
@@ -751,12 +759,10 @@ class TestCheckpointResult:
         # should be saved during the run
         # This is also true for its nested validation definitions
         assert checkpoint.id is None
-        assert checkpoint.validation_definitions[0].id is None
 
         result = checkpoint.run()
 
         assert checkpoint.id is not None
-        assert checkpoint.validation_definitions[0].id is not None
 
         # The meta attribute of each run result should contain the requisite IDs
         run_results = tuple(result.run_results.values())

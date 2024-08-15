@@ -22,7 +22,7 @@ from .exceptions import (
     ExecutionEngineError,
     ExpectationNotFoundError,
     ExpectationSuiteError,
-    ExpectationSuiteNotAddedToStoreError,
+    ExpectationSuiteNotAddedError,
     ExpectationSuiteNotFoundError,
     GitIgnoreScaffoldingError,
     GreatExpectationsError,

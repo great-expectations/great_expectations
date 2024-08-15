@@ -27,6 +27,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import ValidationDefinitionNotAddedError
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
@@ -272,14 +273,7 @@ class ValidationDefinition(BaseModel):
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         if not self.id:
-            validation_definition_store = project_manager.get_validation_definition_store()
-            key = validation_definition_store.get_key(name=self.name, id=None)
-            validation_definition_store.add(key=key, value=self)
-
-        # Nested batch definition and suite should be persisted with their respective stores
-        self.data.identifier_bundle()
-        self.suite.identifier_bundle()
-
+            raise ValidationDefinitionNotAddedError(name=self.name)
         return _IdentifierBundle(name=self.name, id=self.id)
 
     @public_api

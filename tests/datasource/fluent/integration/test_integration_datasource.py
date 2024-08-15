@@ -631,10 +631,12 @@ def _validate_whole_dataframe_batch_definition(
     suite.add_expectation(
         gxe.ExpectColumnMeanToBeBetween(column="column_name", min_value=2.5, max_value=3.5)
     )
-    validation_def = gx.ValidationDefinition(
-        name="vd",
-        data=bd,
-        suite=suite,
+    validation_def = context_source_frame.context.validation_definitions.add(
+        gx.ValidationDefinition(
+            name="vd",
+            data=bd,
+            suite=suite,
+        )
     )
     result = validation_def.run(batch_parameters={"dataframe": context_source_frame.dataframe})
     assert result.success
