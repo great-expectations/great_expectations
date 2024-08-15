@@ -21,19 +21,8 @@ if TYPE_CHECKING:
 def mock_data_asset(monkeypatch) -> DataAsset:
     monkeypatch.setattr(DataAsset, "build_batch_request", Mock())
     data_asset: DataAsset = DataAsset(name="my_data_asset", type="table")
-    data_asset._save_batch_definition = Mock()
 
     return data_asset
-
-
-@pytest.mark.unit
-def test_save(mock_data_asset):
-    batch_definition = BatchDefinition(name="test_batch_definition")
-    batch_definition.set_data_asset(mock_data_asset)
-
-    batch_definition.save()
-
-    mock_data_asset._save_batch_definition.assert_called_once_with(batch_definition)
 
 
 @pytest.mark.parametrize(
