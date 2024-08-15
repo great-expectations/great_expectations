@@ -313,7 +313,15 @@ class ValidationDefinition(BaseModel):
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
 
-        store.update(key=key, value=self)
+        saved, errors = self.is_saved()
+        if saved:
+            store.update(key=key, value=self)
+
+        # If not saved, one of three possibilities:
+        # - Child components not saved
+        # - Self (validation definition) not saved
+        # - Both
+        print(errors)
 
     def _add_to_store(self) -> None:
         """This is used to persist a validation_definition before we run it.

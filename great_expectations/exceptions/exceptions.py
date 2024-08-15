@@ -46,9 +46,19 @@ class DataContextError(GreatExpectationsError):
 
 class ResourceNotSavedError(DataContextError):
     def __init__(self, resource_type: str, resource_name: str) -> None:
+        self._resource_type = resource_type
+        self._resource_name = resource_name
         super().__init__(
             f"Please save {resource_type} '{resource_name}' before continuing (use `save()`)."
         )
+
+    @property
+    def resource_type(self) -> str:
+        return self._resource_type
+
+    @property
+    def resource_name(self) -> str:
+        return self._resource_name
 
 
 class RelatedResourcesNotSavedError(ValueError):
