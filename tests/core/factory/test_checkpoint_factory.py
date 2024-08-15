@@ -265,6 +265,44 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
     assert result == [checkpoint_a, checkpoint_b]
 
 
+@pytest.mark.unit
+def test_checkpoint_factory_all_with_bad_config(
+    in_memory_runtime_context: AbstractDataContext,
+):
+    # Arrange
+    context: AbstractDataContext = in_memory_runtime_context
+    ds = context.data_sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
+    batch_def = asset.add_batch_definition("my_batch_definition")
+    suite = ExpectationSuite(name="my_suite")
+
+    checkpoint_1 = context.checkpoints.add(
+        Checkpoint(
+            name="1",
+            validation_definitions=[ValidationDefinition(name="vd1", data=batch_def, suite=suite)],
+        )
+    )
+    checkpoint_2 = context.checkpoints.add(
+        Checkpoint(
+            name="2",
+            validation_definitions=[ValidationDefinition(name="vd2", data=batch_def, suite=suite)],
+        )
+    )
+    # Verify our checkpoints are added
+    assert sorted(context.checkpoints.all(), key=lambda cp: cp.name) == [checkpoint_1, checkpoint_2]
+
+    # Make checkpoint_2 invalid. Pydantic will validate the object at creation time
+    # but we can invalidate via assignment.
+    checkpoint_2.validation_definitions = None
+    checkpoint_2.save()
+
+    # Act
+    result = context.checkpoints.all()
+
+    # Assert
+    assert result == [checkpoint_1]
+
+
 class TestCheckpointFactoryAnalytics:
     @pytest.mark.filesystem
     def test_checkpoint_factory_add_emits_event_filesystem(self, empty_data_context):
