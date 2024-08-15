@@ -156,6 +156,7 @@ def test_validation_definition_run(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
     batch_parameters: Optional[Dict],
+    context: AbstractDataContext,
     request: pytest.FixtureRequest,
 ) -> None:
     """Ensure ValidationDefinition::run works"""
