@@ -367,7 +367,7 @@ def test_validation_definition_factory_all_with_bad_config(
     # Arrange
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
-    suite = ExpectationSuite(name="my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
 
     validation_definition_1 = ValidationDefinition(
         name="validation1",
@@ -381,7 +381,6 @@ def test_validation_definition_factory_all_with_bad_config(
         data=asset.add_batch_definition("2"),
         suite=suite,
     )
-
     context.validation_definitions.add(validation=validation_definition_2)
 
     # Verify our validation definitions are added

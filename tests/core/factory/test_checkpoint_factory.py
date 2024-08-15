@@ -282,18 +282,26 @@ def test_checkpoint_factory_all_with_bad_config(
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
     batch_def = asset.add_batch_definition("my_batch_definition")
-    suite = ExpectationSuite(name="my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
 
     checkpoint_1 = context.checkpoints.add(
         Checkpoint(
             name="1",
-            validation_definitions=[ValidationDefinition(name="vd1", data=batch_def, suite=suite)],
+            validation_definitions=[
+                context.validation_definitions.add(
+                    ValidationDefinition(name="vd1", data=batch_def, suite=suite)
+                )
+            ],
         )
     )
     checkpoint_2 = context.checkpoints.add(
         Checkpoint(
             name="2",
-            validation_definitions=[ValidationDefinition(name="vd2", data=batch_def, suite=suite)],
+            validation_definitions=[
+                context.validation_definitions.add(
+                    ValidationDefinition(name="vd2", data=batch_def, suite=suite)
+                )
+            ],
         )
     )
     # Verify our checkpoints are added
