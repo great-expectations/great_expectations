@@ -247,7 +247,6 @@ class ExpectationSuite(SerializableDictDot):
             ExpectationSuiteNotAddedToStoreError,  # Raised by failure in ExpectationsStore._update
             ExpectationSuiteError,  # Raised by failure in ExpectationsStore._add
             StoreBackendError,  # Generic error raised by store backends (namely GXCloudStoreBackend) # noqa: E501
-            ValueError,  # Generic error by certain stores/store backends
         ) as e:
             raise ExpectationSuiteSaveError(name=self.name) from e
 

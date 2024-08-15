@@ -160,8 +160,7 @@ class Checkpoint(BaseModel):
         if not self.validation_definitions:
             raise CheckpointRunWithoutValidationDefinitionError()
 
-        if not self.id:
-            self.save()
+        self.save()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -284,10 +283,7 @@ class Checkpoint(BaseModel):
                 store.update(key=key, value=self)
             else:
                 store.add(key=key, value=self)
-        except (
-            StoreBackendError,  # Generic error raised by store backends (namely GXCloudStoreBackend) # noqa: E501
-            ValueError,  # Generic error by certain stores/store backends
-        ) as e:
+        except StoreBackendError as e:
             raise CheckpointSaveError(name=self.name) from e
 
 

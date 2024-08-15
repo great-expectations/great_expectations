@@ -207,8 +207,7 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
-        if not self.id:
-            self.save()
+        self.save()
 
         validator = Validator(
             batch_definition=self.batch_definition,
@@ -318,8 +317,5 @@ class ValidationDefinition(BaseModel):
                 store.update(key=key, value=self)
             else:
                 store.add(key=key, value=self)
-        except (
-            StoreBackendError,  # Generic error raised by store backends (namely GXCloudStoreBackend) # noqa: E501
-            ValueError,  # Generic error by certain stores/store backends
-        ) as e:
+        except StoreBackendError as e:
             raise ValidationDefinitionSaveError(name=self.name) from e
