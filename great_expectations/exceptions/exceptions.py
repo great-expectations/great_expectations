@@ -4,7 +4,7 @@ import importlib
 import itertools
 import json
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Self, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -520,7 +520,7 @@ class ResourceNotSavedError(DataContextError):
 
 
 class RelatedResourcesNotSavedError(Exception):
-    def __init__(self: Self, errors: list[ResourceNotSavedError]):
+    def __init__(self, errors: list[ResourceNotSavedError]) -> None:
         self._errors = errors
 
     def errors(self) -> list[ResourceNotSavedError]:

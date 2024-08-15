@@ -157,9 +157,9 @@ class Checkpoint(BaseModel):
         if not self.validation_definitions:
             raise CheckpointRunWithoutValidationDefinitionError()
 
-        saved, errs = self.is_saved()
+        saved, errors = self.is_saved()
         if not saved:
-            raise CheckpointRelatedResourcesNotSavedError(errors=errs)
+            raise CheckpointRelatedResourcesNotSavedError(errors=errors)
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
