@@ -4,7 +4,7 @@ import importlib
 import itertools
 import json
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Self, Union
 
 from marshmallow import ValidationError
 
@@ -513,3 +513,27 @@ class DatabaseConnectionError(GreatExpectationsError):
 
 class MigrationError(GreatExpectationsError):
     """Error when using the migration tool."""
+
+
+class ResourceNotSavedError(DataContextError):
+    pass
+
+
+class RelatedResourcesNotSavedError(Exception):
+    def __init__(self: Self, errors: list[ResourceNotSavedError]):
+        self._errors = errors
+
+    def errors(self) -> list[ResourceNotSavedError]:
+        return self._errors
+
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self._errors})"
+
+
+class CheckpointRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):
+    pass
+
+
+class ValidationDefinitionRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):
+    pass

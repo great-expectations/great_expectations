@@ -30,6 +30,7 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
+from great_expectations.exceptions.exceptions import ResourceNotSavedError
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
@@ -234,10 +235,12 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
-    def is_saved(self) -> tuple[bool, list[str]]:
+    def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
         if self.id:
             return True, []
-        return False, [f"Please save ExpectationSuite '{self.name}' before continuing."]
+        return False, [
+            ResourceNotSavedError(f"Please save ExpectationSuite '{self.name}' before continuing.")
+        ]
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""

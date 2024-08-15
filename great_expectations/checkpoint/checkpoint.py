@@ -29,7 +29,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import CheckpointRunWithoutValidationDefinitionError
+from great_expectations.exceptions.exceptions import (
+    CheckpointRelatedResourcesNotSavedError,
+    CheckpointRunWithoutValidationDefinitionError,
+    ResourceNotSavedError,
+)
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -155,7 +159,7 @@ class Checkpoint(BaseModel):
 
         saved, errs = self.is_saved()
         if not saved:
-            raise ValueError(errs)
+            raise CheckpointRelatedResourcesNotSavedError(errors=errs)
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -254,8 +258,8 @@ class Checkpoint(BaseModel):
         return priority_actions + secondary_actions
 
     @property
-    def is_saved(self) -> tuple[bool, list[str]]:
-        errs: list[str] = []
+    def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
+        errs: list[ResourceNotSavedError] = []
 
         all_validations_saved = True
         for validation_definition in self.validation_definitions:
@@ -265,7 +269,9 @@ class Checkpoint(BaseModel):
 
         self_saved = self.id is not None
         if not self_saved:
-            errs.append(f"Please save Checkpoint '{self.name}' before continuing.")
+            errs.append(
+                ResourceNotSavedError(f"Please save Checkpoint '{self.name}' before continuing.")
+            )
 
         return (all_validations_saved and self_saved, errs)
 

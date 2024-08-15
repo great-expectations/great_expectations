@@ -27,6 +27,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import (
+    ResourceNotSavedError,
+    ValidationDefinitionRelatedResourcesNotSavedError,
+)
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
@@ -113,20 +117,24 @@ class ValidationDefinition(BaseModel):
     def data_source(self) -> Datasource:
         return self.asset.datasource
 
-    def is_saved(self) -> tuple[bool, list[str]]:
-        errs: list[str] = []
+    def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
+        errors: list[ResourceNotSavedError] = []
 
-        data_saved, data_errs = self.data.is_saved()
-        errs.extend(data_errs)
+        data_saved, data_errors = self.data.is_saved()
+        errors.extend(data_errors)
 
-        suite_saved, suite_errs = self.suite.is_saved()
-        errs.extend(suite_errs)
+        suite_saved, suite_errors = self.suite.is_saved()
+        errors.extend(suite_errors)
 
         self_saved = self.id is not None
         if not self_saved:
-            errs.append(f"Please save ValidationDefinition '{self.name}' before continuing.")
+            errors.append(
+                ResourceNotSavedError(
+                    f"Please save ValidationDefinition '{self.name}' before continuing."
+                )
+            )
 
-        return (data_saved and suite_saved and self_saved, errs)
+        return (data_saved and suite_saved and self_saved, errors)
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -215,9 +223,9 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
-        saved, errs = self.is_saved()
+        saved, errors = self.is_saved()
         if not saved:
-            raise ValueError(errs)
+            raise ValidationDefinitionRelatedResourcesNotSavedError(errors=errors)
 
         validator = Validator(
             batch_definition=self.batch_definition,
