@@ -1061,6 +1061,5 @@ def test_identifier_bundle_no_id():
     _ = gx.get_context(mode="ephemeral")
     suite = ExpectationSuite(name="my_suite", id=None)
 
-    actual = suite.identifier_bundle()
-    assert actual.name == "my_suite"
-    assert actual.id is None
+    with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedToStoreError):
+        suite.identifier_bundle()

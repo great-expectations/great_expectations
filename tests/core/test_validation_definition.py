@@ -40,6 +40,7 @@ from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDataAsset,
 )
+from great_expectations.exceptions.exceptions import ValidationDefinitionNotAddedToStoreError
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -679,9 +680,8 @@ def test_identifier_bundle_with_existing_id(validation_definition: ValidationDef
 def test_identifier_bundle_no_id(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
-    actual = validation_definition.identifier_bundle()
-    assert actual.name == validation_definition.name
-    assert actual.id is None
+    with pytest.raises(ValidationDefinitionNotAddedToStoreError):
+        validation_definition.identifier_bundle()
 
 
 @pytest.mark.unit
