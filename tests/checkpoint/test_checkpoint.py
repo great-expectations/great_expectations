@@ -761,6 +761,15 @@ class TestCheckpointResult:
         # The meta attribute of each run result should contain the requisite IDs
         run_results = tuple(result.run_results.values())
         meta = run_results[0].meta
-        assert sorted(meta.keys()) == ["checkpoint_id", "run_id", "validation_id"]
+        assert sorted(meta.keys()) == [
+            "active_batch_definition",
+            "batch_markers",
+            "batch_spec",
+            "checkpoint_id",
+            "great_expectations_version",
+            "run_id",
+            "validation_id",
+            "validation_time",
+        ]
         assert meta["checkpoint_id"] == checkpoint.id
         assert meta["validation_id"] == checkpoint.validation_definitions[0].id
