@@ -34,40 +34,21 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
         return self.message
 
 
-class SuiteEditNotebookCustomTemplateModuleNotFoundError(ModuleNotFoundError):
-    def __init__(self, custom_module) -> None:
-        message = f"The custom module '{custom_module}' could not be found"
-        super().__init__(message)
-
-
 class DataContextError(GreatExpectationsError):
     pass
 
 
-class ResourceNotSavedError(DataContextError):
-    def __init__(self, resource_type: str, resource_name: str) -> None:
-        self._resource_type = resource_type
-        self._resource_name = resource_name
-        super().__init__(
-            f"Please save {resource_type} '{resource_name}' before continuing (use `save()`)."
-        )
-
-    @property
-    def resource_type(self) -> str:
-        return self._resource_type
-
-    @property
-    def resource_name(self) -> str:
-        return self._resource_name
+class ResourceNotAddedError(DataContextError):
+    pass
 
 
-class RelatedResourcesNotSavedError(ValueError):
-    def __init__(self, errors: list[ResourceNotSavedError]) -> None:
+class ResourcesNotAddedError(ValueError):
+    def __init__(self, errors: list[ResourceNotAddedError]) -> None:
         self._errors = errors
         super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
 
     @property
-    def errors(self) -> list[ResourceNotSavedError]:
+    def errors(self) -> list[ResourceNotAddedError]:
         return self._errors
 
 
@@ -79,7 +60,7 @@ class ExpectationSuiteSaveError(DataContextError):
     pass
 
 
-class ExpectationSuiteNotAddedError(ExpectationSuiteError):
+class ExpectationSuiteNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
@@ -92,7 +73,7 @@ class ValidationDefinitionError(DataContextError):
     pass
 
 
-class ValidationDefinitionNotAddedError(ValidationDefinitionError):
+class ValidationDefinitionNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
@@ -109,6 +90,15 @@ class CheckpointNotFoundError(CheckpointError):
     pass
 
 
+class CheckpointNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"Checkpoint '{name}' must be added to the DataContext before it can be updated. "
+            "Please call context.checkpoints.add(<CHECKPOINT_OBJECT>), "
+            "then try your action again."
+        )
+
+
 class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
     def __init__(self) -> None:
         super().__init__(
@@ -117,11 +107,11 @@ class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
         )
 
 
-class CheckpointRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):
+class CheckpointRelatedResourcesNotAddedError(ResourcesNotAddedError):
     pass
 
 
-class ValidationDefinitionRelatedResourcesNotSavedError(RelatedResourcesNotSavedError):
+class ValidationDefinitionRelatedResourcesNotAddedError(ResourcesNotAddedError):
     pass
 
 
@@ -453,6 +443,14 @@ class BatchDefinitionError(DataContextError):
 
 class BatchDefinitionSaveError(BatchDefinitionError):
     pass
+
+
+class BatchDefinitionNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"BatchDefinition '{name}' must be added to the DataContext before it can be updated. "
+            "Please update using the parent asset or data source, then try your action again."
+        )
 
 
 class BatchSpecError(DataContextError):

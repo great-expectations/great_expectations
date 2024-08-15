@@ -28,9 +28,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.exceptions.exceptions import (
-    ResourceNotSavedError,
+    ResourceNotAddedError,
     ValidationDefinitionNotAddedError,
-    ValidationDefinitionRelatedResourcesNotSavedError,
+    ValidationDefinitionRelatedResourcesNotAddedError,
 )
 from great_expectations.validator.v1_validator import Validator
 
@@ -118,24 +118,20 @@ class ValidationDefinition(BaseModel):
     def data_source(self) -> Datasource:
         return self.asset.datasource
 
-    def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
-        errors: list[ResourceNotSavedError] = []
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+        errors: list[ResourceNotAddedError] = []
 
-        data_saved, data_errors = self.data.is_saved()
+        data_added, data_errors = self.data.is_added()
         errors.extend(data_errors)
 
-        suite_saved, suite_errors = self.suite.is_saved()
+        suite_added, suite_errors = self.suite.is_added()
         errors.extend(suite_errors)
 
-        self_saved = self.id is not None
-        if not self_saved:
-            errors.append(
-                ResourceNotSavedError(
-                    resource_type=self.__class__.__name__, resource_name=self.name
-                )
-            )
+        self_added = self.id is not None
+        if not self_added:
+            errors.append(ValidationDefinitionNotAddedError(name=self.name))
 
-        return (data_saved and suite_saved and self_saved, errors)
+        return (data_added and suite_added and self_added, errors)
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -224,9 +220,9 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
-        saved, errors = self.is_saved()
-        if not saved:
-            raise ValidationDefinitionRelatedResourcesNotSavedError(errors=errors)
+        added, errors = self.is_added()
+        if not added:
+            raise ValidationDefinitionRelatedResourcesNotAddedError(errors=errors)
 
         validator = Validator(
             batch_definition=self.batch_definition,
@@ -317,7 +313,7 @@ class ValidationDefinition(BaseModel):
         ):
             store.add(key=key, value=self)
         else:
-            raise ValidationDefinitionRelatedResourcesNotSavedError(errors=errors)
+            raise ValidationDefinitionRelatedResourcesNotAddedError(errors=errors)
 
     def _add_to_store(self) -> None:
         """This is used to persist a validation_definition before we run it.

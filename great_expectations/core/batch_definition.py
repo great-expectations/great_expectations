@@ -9,7 +9,8 @@ from great_expectations.compatibility import pydantic
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
-    ResourceNotSavedError,
+    BatchDefinitionNotAddedError,
+    ResourceNotAddedError,
 )
 
 if TYPE_CHECKING:
@@ -75,12 +76,10 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         return batch_list[-1]
 
-    def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
         if self.id:
             return True, []
-        return False, [
-            ResourceNotSavedError(resource_type=self.__class__.__name__, resource_name=self.name)
-        ]
+        return False, [BatchDefinitionNotAddedError(name=self.name)]
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder

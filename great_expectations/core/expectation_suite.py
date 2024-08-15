@@ -31,11 +31,8 @@ from great_expectations.analytics.events import (
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
-    ExpectationSuiteError,
     ExpectationSuiteNotAddedError,
-    ExpectationSuiteSaveError,
-    ResourceNotSavedError,
-    StoreBackendError,
+    ResourceNotAddedError,
 )
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
@@ -239,24 +236,12 @@ class ExpectationSuite(SerializableDictDot):
         """Save this ExpectationSuite."""
         # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now  # noqa: E501
         key = self._store.get_key(name=self.name, id=self.id)
-        try:
-            if self._store.has_key(key):
-                self._store.update(key=key, value=self)
-            else:
-                self._store.add(key=key, value=self)
-        except (
-            ExpectationSuiteNotAddedError,  # Raised by failure in ExpectationsStore._update
-            ExpectationSuiteError,  # Raised by failure in ExpectationsStore._add
-            StoreBackendError,  # Generic error raised by store backends (namely GXCloudStoreBackend) # noqa: E501
-        ) as e:
-            raise ExpectationSuiteSaveError(name=self.name) from e
+        self._store.update(key=key, value=self)
 
-    def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
         if self.id:
             return True, []
-        return False, [
-            ResourceNotSavedError(resource_type=self.__class__.__name__, resource_name=self.name)
-        ]
+        return False, [ExpectationSuiteNotAddedError(name=self.name)]
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""

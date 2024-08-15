@@ -30,9 +30,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.exceptions.exceptions import (
-    CheckpointRelatedResourcesNotSavedError,
+    CheckpointNotAddedError,
+    CheckpointRelatedResourcesNotAddedError,
     CheckpointRunWithoutValidationDefinitionError,
-    ResourceNotSavedError,
+    ResourceNotAddedError,
 )
 from great_expectations.render.renderer.renderer import Renderer
 
@@ -159,7 +160,7 @@ class Checkpoint(BaseModel):
 
         saved, errors = self.is_saved()
         if not saved:
-            raise CheckpointRelatedResourcesNotSavedError(errors=errors)
+            raise CheckpointRelatedResourcesNotAddedError(errors=errors)
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -258,8 +259,8 @@ class Checkpoint(BaseModel):
         return priority_actions + secondary_actions
 
     @property
-    def is_saved(self) -> tuple[bool, list[ResourceNotSavedError]]:
-        errs: list[ResourceNotSavedError] = []
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+        errs: list[ResourceNotAddedError] = []
 
         all_validations_saved = True
         for validation_definition in self.validation_definitions:
@@ -269,11 +270,7 @@ class Checkpoint(BaseModel):
 
         self_saved = self.id is not None
         if not self_saved:
-            errs.append(
-                ResourceNotSavedError(
-                    resource_type=self.__class__.__name__, resource_name=self.name
-                )
-            )
+            errs.append(CheckpointNotAddedError(name=self.name))
 
         return (all_validations_saved and self_saved, errs)
 
