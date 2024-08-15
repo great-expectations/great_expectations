@@ -13,9 +13,11 @@ from typing import (
     Type,
 )
 
+from marshmallow import ValidationError as MarshmallowValidationError
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pydantic import ValidationError as PydanticValidationError
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
@@ -238,7 +240,7 @@ class Store:
         for obj in objs:
             try:
                 deserializable_objs.append(self.deserialize(obj))
-            except Exception:  # We want to filter out all undeserializable configs
+            except (MarshmallowValidationError, PydanticValidationError):
                 bad_objs.append(obj)
         if bad_objs:
             prefix = "\n    SKIPPED: "
