@@ -47,11 +47,13 @@ exports.handler = async (req, context) => {
 
         const result = await response.json()
 
-        await httpPostRequest(`${JIRA_ISSUE_ENDPOINT_URL}/${result.id}/transitions`, {
-            "transition": {
-                "id": TO_DO_STATE_ID
-            }
-        })
+        if (result.id) {
+            await httpPostRequest(`${JIRA_ISSUE_ENDPOINT_URL}/${result.id}/transitions`, {
+                "transition": {
+                    "id": TO_DO_STATE_ID
+                }
+            })
+        }
 
         return {
             statusCode: response.status,
