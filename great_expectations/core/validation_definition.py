@@ -316,9 +316,11 @@ class ValidationDefinition(BaseModel):
         saved, errors = self.is_saved()
         if saved:
             store.update(key=key, value=self)
-        elif (
-            len(errors) == 1 and not self.id
-        ):  # All child components are saved but self is not saved
+        elif (  # All child components are saved but self is not saved
+            len(errors) == 1
+            and errors[0].resource_type == self.__class__.__name__
+            and self.id is None
+        ):
             store.add(key=key, value=self)
         else:
             raise ValidationDefinitionRelatedResourcesNotSavedError(errors=errors)
