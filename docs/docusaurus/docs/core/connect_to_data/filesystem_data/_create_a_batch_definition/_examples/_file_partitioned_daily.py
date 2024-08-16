@@ -9,8 +9,12 @@ context = gx.get_context(mode="ephemeral")
 data_source_name = "my_filesystem_data_source"
 data_asset_name = "my_file_data_asset"
 # file_data_asset = context.data_sources.get(data_source_name).get_asset(data_asset_name)
-data_source = context.data_sources.add_spark_filesystem(data_source_name, base_directory=Path("data"))
-file_data_asset = data_source.add_directory_csv_asset(data_asset_name, data_directory=Path("folder_with_data"))
+data_source = context.data_sources.add_spark_filesystem(
+    data_source_name, base_directory=Path("data")
+)
+file_data_asset = data_source.add_directory_csv_asset(
+    data_asset_name, data_directory=Path("folder_with_data")
+)
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_daily.py - add Batch Definition">
