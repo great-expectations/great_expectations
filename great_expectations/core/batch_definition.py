@@ -72,9 +72,6 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         return batch_list[-1]
 
-    def save(self) -> None:
-        self.data_asset._save_batch_definition(self)
-
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
         asset = self.data_asset
@@ -90,7 +87,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         )
         batch_definition_bundle = _IdentifierBundle(
             name=self.name,
-            id=self.id,
+            id=str(self.id) if self.id else None,
         )
 
         return _EncodedValidationData(

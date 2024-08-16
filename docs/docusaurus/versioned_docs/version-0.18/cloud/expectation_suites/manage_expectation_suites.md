@@ -46,13 +46,11 @@ If you have specific business requirements, or you want to examine specific data
 
 ## Delete an Expectation Suite
 
-1. In GX Cloud, delete all Checkpoints associated with the Expectation Suite. See [Delete a Checkpoint](/cloud/checkpoints/manage_checkpoints.md#delete-a-checkpoint). 
+1. Click **Expectation Suites**.
 
-2. Click **Expectation Suites**.
+2. Click **Delete** for the Expectation Suite you want to delete.
 
-3. Click **Delete** for the Expectation Suite you want to delete.
-
-4. Click **Delete**.
+3. Click **Delete**.
 
 ## Related documentation
 

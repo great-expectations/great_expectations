@@ -53,7 +53,7 @@ batch_definition = (
 
 # <snippet name="docs/docusaurus/docs/snippets/unexpected_row_expectation.py define_expectation_suite">
 expectation = UnexpectedTripDistance()
-suite = ExpectationSuite("my_suite", expectations=[expectation])
+suite = context.suites.add(ExpectationSuite("my_suite", expectations=[expectation]))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/unexpected_row_expectation.py validate_suite">

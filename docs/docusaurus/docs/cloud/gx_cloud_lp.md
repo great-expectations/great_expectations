@@ -1,11 +1,11 @@
 ---
-title: 'GX Cloud'
+title: "GX Cloud"
 hide_title: true
 description: Get started with GX Cloud and learn more about GX Cloud features and functionality.
 hide_table_of_contents: true
 pagination_next: null
 pagination_prev: null
-slug: '/cloud/'
+slug: "/cloud/"
 displayed_sidebar: gx_cloud
 hide_feedback_survey: true
 ---
@@ -32,7 +32,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
   <LinkCard topIcon label="Manage Expectations" description="Create, edit, or delete an Expectation." to="/cloud/expectations/manage_expectations" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Expectation Suites" description="Create or delete Expectation Suites." to="/cloud/expectation_suites/manage_expectation_suites" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Validations" description="Run a Validation, or view the Validation run history." to="/cloud/validations/manage_validations" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Manage Checkpoints" description="Add, run, edit, or delete a Checkpoint." to="/cloud/checkpoints/manage_checkpoints" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage alerts" description="Add, edit, or delete alerts." to="/cloud/alerts/manage_alerts" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage users and access tokens" description="Manage GX Cloud users and access tokens." to="/cloud/users/manage_users" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
