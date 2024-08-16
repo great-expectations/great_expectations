@@ -29,7 +29,6 @@ YAML = YAMLHandler()
 logger = logging.getLogger(__file__)
 
 
-@pytest.mark.xfail(reason="YAML file shares state with other tests")
 @pytest.mark.filesystem
 def test_load_an_existing_config(
     cloud_storage_get_client_doubles,
