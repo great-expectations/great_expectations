@@ -404,6 +404,7 @@ def assert_fluent_datasource_content(
     config = yaml.load(config_file_path.read_text())
     assert _FLUENT_DATASOURCES_KEY in config
     config_from_gx_yaml = config[_FLUENT_DATASOURCES_KEY]
+    assert isinstance(config_from_gx_yaml, dict)
     config_from_gx_yaml_without_ids = _remove_ids(config_from_gx_yaml)
     assert config_from_gx_yaml_without_ids == fluent_datasource_config
 
