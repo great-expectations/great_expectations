@@ -268,11 +268,11 @@ class Checkpoint(BaseModel):
             errs.extend(validation_errs)
             validations_added = validation_added and validations_added
 
-        self_saved = self.id is not None
-        if not self_saved:
+        self_added = self.id is not None
+        if not self_added:
             errs.append(CheckpointNotAddedError(name=self.name))
 
-        return (validations_added and self_saved, errs)
+        return (validations_added and self_added, errs)
 
     @public_api
     def save(self) -> None:
