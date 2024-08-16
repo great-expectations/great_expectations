@@ -384,7 +384,7 @@ class TestCRUDMethods:
             name=self.expectation_suite_name,
         )
 
-        with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedToStoreError):
+        with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedError):
             suite.save()
 
     @pytest.mark.filesystem
@@ -1061,8 +1061,5 @@ def test_identifier_bundle_no_id():
     _ = gx.get_context(mode="ephemeral")
     suite = ExpectationSuite(name="my_suite", id=None)
 
-    actual = suite.identifier_bundle()
-    expected = {"name": "my_suite", "id": mock.ANY}
-
-    assert actual.dict() == expected
-    assert actual.id is not None
+    with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedError):
+        suite.identifier_bundle()

@@ -298,7 +298,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     batch_definitions: List[BatchDefinition] = Field(default_factory=list)
 
     # non-field private attributes
-    _save_batch_definition: Callable[[BatchDefinition], None] = pydantic.PrivateAttr()
     _datasource: DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)

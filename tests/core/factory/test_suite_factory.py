@@ -1,8 +1,11 @@
+from typing import Dict
 from unittest import mock
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
+from typing_extensions import override
 
+from great_expectations.alias_types import JSONValues
 from great_expectations.analytics.events import (
     ExpectationSuiteCreatedEvent,
     ExpectationSuiteDeletedEvent,
@@ -13,6 +16,7 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.exceptions import DataContextError
+from great_expectations.types import SerializableDictDot
 
 
 @pytest.mark.unit
@@ -222,6 +226,40 @@ def test_suite_factory_all(context_fixture_name: str, request: pytest.FixtureReq
     # Assert
     assert [r.name for r in result] == [suite_a.name, suite_b.name]
     assert result == [suite_a, suite_b]
+
+
+@pytest.mark.unit
+def test_suite_factory_all_with_bad_config(in_memory_runtime_context: AbstractDataContext):
+    # The difficult part of writing this test was making an expectation I could save
+    # in a bad state. To do that I've created this FakeExpectation.
+    class BadExpectation(SerializableDictDot):
+        def __init__(self, id: int):
+            self.id = id
+            # This type intentionally mismatches. We want a bad config.
+            self.configuration: dict = {}
+
+        @override
+        def to_json_dict(self) -> Dict[str, JSONValues]:
+            return {"id": self.id}
+
+    # Arrange
+    context: AbstractDataContext = in_memory_runtime_context
+    suite_1 = context.suites.add(suite=ExpectationSuite(name="suite1"))
+    suite_2 = context.suites.add(suite=ExpectationSuite(name="suite2"))
+
+    # Assert both suites are added
+    assert sorted(context.suites.all(), key=lambda x: x.name) == [suite_1, suite_2]
+
+    # Put suite_2 into an invalid state, These BadExpectations are real Expectations since
+    # we want them to not deserialize correctly.
+    suite_2.expectations = [BadExpectation(id=1), BadExpectation(id=2)]  # type: ignore[list-item]
+    suite_2.save()
+
+    # Act
+    result = context.suites.all()
+
+    # Assert
+    assert result == [suite_1]
 
 
 class TestSuiteFactoryAnalytics:
