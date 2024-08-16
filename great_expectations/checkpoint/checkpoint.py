@@ -158,8 +158,8 @@ class Checkpoint(BaseModel):
         if not self.validation_definitions:
             raise CheckpointRunWithoutValidationDefinitionError()
 
-        saved, errors = self.is_saved()
-        if not saved:
+        added, errors = self.is_added()
+        if not added:
             raise CheckpointRelatedResourcesNotAddedError(errors=errors)
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
@@ -262,17 +262,17 @@ class Checkpoint(BaseModel):
     def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
         errs: list[ResourceNotAddedError] = []
 
-        all_validations_saved = True
+        validations_added: bool = True
         for validation_definition in self.validation_definitions:
-            validation_saved, validation_errs = validation_definition.is_saved()
+            validation_added, validation_errs = validation_definition.is_added()
             errs.extend(validation_errs)
-            all_validations_saved = validation_saved and all_validations_saved
+            validations_added = validation_added and validations_added
 
         self_saved = self.id is not None
         if not self_saved:
             errs.append(CheckpointNotAddedError(name=self.name))
 
-        return (all_validations_saved and self_saved, errs)
+        return (validations_added and self_saved, errs)
 
     @public_api
     def save(self) -> None:
