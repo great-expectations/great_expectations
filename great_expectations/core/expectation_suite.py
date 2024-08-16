@@ -34,10 +34,6 @@ from great_expectations.exceptions.exceptions import (
     ExpectationSuiteNotAddedError,
     ResourceNotAddedError,
 )
-from great_expectations.render import (
-    AtomicPrescriptiveRendererType,
-    RenderedAtomicContent,
-)
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     convert_to_json_serializable,  # noqa: TID251
@@ -586,17 +582,9 @@ class ExpectationSuite(SerializableDictDot):
         from great_expectations.render.renderer.inline_renderer import InlineRenderer
 
         for expectation in self.expectations:
-            inline_renderer = InlineRenderer(render_object=expectation.configuration)
-
-            rendered_content: List[RenderedAtomicContent] = inline_renderer.get_rendered_content()
-
-            expectation.rendered_content = (
-                inline_renderer.replace_or_keep_existing_rendered_content(
-                    existing_rendered_content=expectation.rendered_content,
-                    new_rendered_content=rendered_content,
-                    failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
-                )
-            )
+            if not expectation.rendered_content:
+                inline_renderer = InlineRenderer(render_object=expectation.configuration)
+                expectation.rendered_content = inline_renderer.get_rendered_content()
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
