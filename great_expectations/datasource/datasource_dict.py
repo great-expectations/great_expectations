@@ -171,6 +171,8 @@ class CacheableDatasourceDict(DatasourceDict):
         return ds
 
     def _add_ids(self, ds: FluentDatasource) -> FluentDatasource:
+        # File and ephemeral contexts do not use the store, so we need to add IDs here.
+        # Note that this is used for both `add` and `update` operations.
         if ds.id is None:
             ds.id = uuid.uuid4()
         for asset in ds.assets:
