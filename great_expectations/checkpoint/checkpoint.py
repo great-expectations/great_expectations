@@ -262,7 +262,6 @@ class Checkpoint(BaseModel):
 
         return priority_actions + secondary_actions
 
-    @property
     def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
         errs: list[ResourceNotAddedError] = []
 
