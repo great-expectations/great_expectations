@@ -192,7 +192,7 @@ connect_to_filesystem_data_create_a_batch_definition = [
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_path.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
         data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_file_asset/gx",
-        backend_dependencies=[],
+        backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
         # To test, run:
@@ -201,7 +201,7 @@ connect_to_filesystem_data_create_a_batch_definition = [
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_daily.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/daily_file_sample_data/",
         data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_file_asset/gx",
-        backend_dependencies=[],
+        backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
         # To test, run:
@@ -210,7 +210,7 @@ connect_to_filesystem_data_create_a_batch_definition = [
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_monthly.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/monthly_file_sample_data/",
         data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_file_asset/gx",
-        backend_dependencies=[],
+        backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
         # To test, run:
@@ -219,7 +219,7 @@ connect_to_filesystem_data_create_a_batch_definition = [
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_yearly.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/partitioned_file_sample_data/yearly_file_sample_data/",
         data_context_dir="docs/docusaurus/docs/components/_testing/test_data_contexts/filesystem_datasource_local_pandas_file_asset/gx",
-        backend_dependencies=[],
+        backend_dependencies=[BackendDependencies.SPARK],
     ),
 ]
 
