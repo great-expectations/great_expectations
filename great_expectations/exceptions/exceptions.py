@@ -60,7 +60,7 @@ class ExpectationSuiteNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
-            "Please call context.suites.add(<SUITE_OBJECT>), "
+            "Please call `context.suites.add(<SUITE_OBJECT>)`, "
             "then try your action again."
         )
 
@@ -73,7 +73,7 @@ class ValidationDefinitionNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
-            "Please call context.validation_definitions.add(<VALIDATION_DEFINITION_OBJECT>), "
+            "Please call `context.validation_definitions.add(<VALIDATION_DEFINITION_OBJECT>)`, "
             "then try your action again."
         )
 
@@ -90,7 +90,7 @@ class CheckpointNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"Checkpoint '{name}' must be added to the DataContext before it can be updated. "
-            "Please call context.checkpoints.add(<CHECKPOINT_OBJECT>), "
+            "Please call `context.checkpoints.add(<CHECKPOINT_OBJECT>)`, "
             "then try your action again."
         )
 
