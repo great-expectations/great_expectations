@@ -28,7 +28,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.exceptions import (
+    ClassInstantiationError,
+    DataContextError,
+    StoreBackendError,
+)
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `NotRequired`, so it can't be imported at runtime
@@ -240,7 +244,11 @@ class Store:
         for obj in objs:
             try:
                 deserializable_objs.append(self.deserialize(obj))
-            except (MarshmallowValidationError, PydanticValidationError):
+            except (
+                MarshmallowValidationError,
+                PydanticValidationError,
+                StoreBackendError,
+            ):
                 bad_objs.append(obj)
         if bad_objs:
             prefix = "\n    SKIPPED: "
