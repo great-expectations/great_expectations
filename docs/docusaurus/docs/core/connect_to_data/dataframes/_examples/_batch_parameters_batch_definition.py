@@ -2,7 +2,7 @@
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_batch_definition.py - spark dataframe">
 from pyspark.sql import SparkSession
 
-csv = "./data/folder_with_data/sampled_yellow_tripdata_2019-01.csv"
+csv = "./data/folder_with_data/yellow_tripdata_sample_2019-01.csv"
 spark = SparkSession.builder.appName("Read CSV").getOrCreate()
 dataframe = spark.read.csv(csv, header=True, inferSchema=True)
 

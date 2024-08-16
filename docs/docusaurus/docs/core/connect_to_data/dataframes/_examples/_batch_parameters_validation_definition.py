@@ -40,6 +40,6 @@ validation_definition_name = "my_validation_definition"
 validation_definition = context.validation_definitions.get(validation_definition_name)
 
 # Validate the dataframe by passing it to the Validation Definition as Batch Parameters.
-validation_results = validation_definition.validate(batch_parameters=batch_parameters)
+validation_results = validation_definition.run(batch_parameters=batch_parameters)
 print(validation_results)
 # </snippet>
