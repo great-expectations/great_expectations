@@ -103,6 +103,8 @@ class SuiteFactory(Factory[ExpectationSuite]):
     def all(self) -> Iterable[ExpectationSuite]:
         """Get all ExpectationSuites."""
         dicts = self._store.get_all()
+        # Even though we deserialize here, all the validation has already
+        # been done via marshmallow in the get_all() call
         return [self._deserialize(suite_dict) for suite_dict in dicts]
 
     def _deserialize(self, suite_dict: dict) -> ExpectationSuite:

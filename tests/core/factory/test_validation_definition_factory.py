@@ -356,6 +356,51 @@ def test_validation_definition_factory_all(
     assert result == [validation_definition_a, validation_definition_b]
 
 
+@pytest.mark.unit
+def test_validation_definition_factory_all_with_bad_config(
+    in_memory_runtime_context: AbstractDataContext,
+    monkeypatch,  # I'm leaving this untyped because it's an internal _pytest type.
+):
+    monkeypatch.setattr(ValidationDefinition.Config, "validate_assignment", False)
+    context: AbstractDataContext = in_memory_runtime_context
+
+    # Arrange
+    ds = context.data_sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    validation_definition_1 = ValidationDefinition(
+        name="validation1",
+        data=asset.add_batch_definition("1"),
+        suite=suite,
+    )
+    context.validation_definitions.add(validation=validation_definition_1)
+
+    validation_definition_2 = ValidationDefinition(
+        name="validation2",
+        data=asset.add_batch_definition("2"),
+        suite=suite,
+    )
+    context.validation_definitions.add(validation=validation_definition_2)
+
+    # Verify our validation definitions are added
+    assert sorted(context.validation_definitions.all(), key=lambda cp: cp.name) == [
+        validation_definition_1,
+        validation_definition_2,
+    ]
+
+    # Make validation_definition_2 invalid. Pydantic will validate the object at creation time
+    # but we can invalidate via assignment because of the monkeypatch at the top of this test.
+    validation_definition_2.suite = None  # type: ignore[assignment] # done intentionally for test
+    validation_definition_2.save()
+
+    # Act
+    result = context.validation_definitions.all()
+
+    # Assert
+    assert result == [validation_definition_1]
+
+
 @pytest.mark.filesystem
 def test_validation_definition_factory_round_trip(
     empty_data_context: FileDataContext,
