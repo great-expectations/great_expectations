@@ -160,7 +160,11 @@ class Checkpoint(BaseModel):
 
         added, errors = self.is_added()
         if not added:
-            raise CheckpointRelatedResourcesNotAddedError(errors=errors)
+            # The checkpoint itself is not added but all children are - we can add it for the user
+            if len(errors) == 1 and isinstance(errors[0], CheckpointNotAddedError):
+                self._add_to_store()
+            else:
+                raise CheckpointRelatedResourcesNotAddedError(errors=errors)
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(

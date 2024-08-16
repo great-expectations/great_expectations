@@ -222,7 +222,11 @@ class ValidationDefinition(BaseModel):
     ) -> ExpectationSuiteValidationResult:
         added, errors = self.is_added()
         if not added:
-            raise ValidationDefinitionRelatedResourcesNotAddedError(errors=errors)
+            # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
+            if len(errors) == 1 and isinstance(errors[0], ValidationDefinitionNotAddedError):
+                self._add_to_store()
+            else:
+                raise ValidationDefinitionRelatedResourcesNotAddedError(errors=errors)
 
         validator = Validator(
             batch_definition=self.batch_definition,
