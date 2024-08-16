@@ -3,7 +3,7 @@ from pathlib import Path
 
 import great_expectations as gx
 
-context = gx.get_context()
+context = gx.get_context(mode="ephemeral")
 
 data_source_name = "my_filesystem_data_source"
 data_asset_name = "my_directory_data_asset"

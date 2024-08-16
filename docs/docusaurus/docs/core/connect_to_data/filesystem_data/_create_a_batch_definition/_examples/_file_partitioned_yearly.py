@@ -1,7 +1,7 @@
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_yearly.py - full_example">
 import great_expectations as gx
 
-context = gx.get_context()
+context = gx.get_context(mode="ephemeral")
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_file_partitioned_yearly.py - retrieve Data Asset">
 data_source_name = "my_filesystem_data_source"
