@@ -16,16 +16,6 @@ import PrereqDataContext from '../../_core_components/prerequisites/_preconfigur
 
 A dataframe is a set of data that resides in-memory and is represented in your code by a variable to which it is assigned.  To connect to this in-memory data you will define a Data Source based on the type of dataframe you are connecting to, a Data Asset that connects to the dataframe in question, and a Batch Definition that will return all of the records in the dataframe as a single Batch of data.
 
-```python
-
-# This is a test
-
-A test1
-# Hide this
-A test2
-
-```
-
 ## Create a Data Source
 
 Because the dataframes reside in memory you do not need to specify the location of the data when you create your Data Source.  Instead, the type of Data Source you create depends on the type of dataframe containing your data. Great Expectations has methods for connecting to both pandas and Spark dataframes.  
@@ -49,7 +39,7 @@ Because the dataframes reside in memory you do not need to specify the location 
 
    Update `data_source_name` in the following code with a descriptive name for your Data Source:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_source.py - define Data Source parameters"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_source.py - define Data Source name"
    ```
 
 2. Create the Data Source.
@@ -62,7 +52,7 @@ Because the dataframes reside in memory you do not need to specify the location 
 
       Execute the following code to create a pandas Data Source:
 
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_source.py - create Data Source"
+      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_source.py Add Data Source"
       ```
 
       </TabItem>
@@ -71,7 +61,7 @@ Because the dataframes reside in memory you do not need to specify the location 
 
       Execute the following code to create a Spark Data Source:
 
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_source.py - create Data Source"
+      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_source.py Add Data Source"
       ```
 
       </TabItem>
@@ -84,19 +74,19 @@ Because the dataframes reside in memory you do not need to specify the location 
 
    <Tabs queryString="execution_engine" groupId="execution_engine" defaultValue='pandas'>
 
-      <TabItem value="pandas" label="pandas">
+   <TabItem value="pandas" label="pandas">
 
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_source.py - full example"
-      ```
+   ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_source.py - full example
+   ```
 
-      </TabItem>
+   </TabItem>
 
-      <TabItem value="spark" label="Spark">
+   <TabItem value="spark" label="Spark">
 
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_source.py - full example"
-      ```
+   ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_source.py - full example"
+   ```
 
-      </TabItem>
+   </TabItem>
 
    </Tabs>
 
@@ -124,7 +114,7 @@ A dataframe Data Asset is used to group your Validation Results.  For instance, 
 
    If you do not already have a variable referencing your pandas or Spark Data Source, you can retrieve a previously created one with:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - retrieve Data Source"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - retrieve Data Source"
    ```
 
 2. Define the Data Asset's parameters.
@@ -132,70 +122,25 @@ A dataframe Data Asset is used to group your Validation Results.  For instance, 
    A dataframe Data Asset requires the following information:
 
    - `name`: A name by which the Data Asset can be referenced.  This should be unique among Data Assets on the Data Source.
-   - `dataframe`: The pandas or Spark dataframe that the Data Asset should retrieve data from.
 
-   The following examples create a dataframe by reading a `.csv` file and defines a name for the Data Asset:
+   Update the `data_asset_name` parameter in the following code with a descriptive name for your Data Asset:
 
-   <Tabs queryString="execution_engine" groupId="execution_engine" defaultValue='pandas'>
-
-      <TabItem value="pandas" label="pandas">
-
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - define Data Asset parameters"
-      ```
-
-      </TabItem>
-
-      <TabItem value="spark" label="Spark">
-
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - define Data Asset parameters"
-      ```
-
-      </TabItem>
-
-   </Tabs>
-
-3. Add the Data Asset to the Data Source.
-
-   Execute the following code to create a dataframe Data Asset and add it to your Data Source:
-
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - create Data Asset"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - define Data Asset name"
    ```
 
-4. Add a Batch Definition to the Data Asset.
+3. Add a Data Asset to the Data Source.
 
-   Dataframe Data Assets do not support further partitioning into Batches.  A Batch Definition for a dataframe Data Asset will always have a single Batch available which contains all of the records in the Data Asset.  Because of this you only need to provide a name when defining a dataframe Batch Definition:
+   Execute the following code to add a Data Asset to your Data Source:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - add Batch Definition"
-   ```
-
-5. Optional. Verify the Batch Definition.
-
-   You can verify that your Batch Definition can retrieve data from your dataframe by requesting the available Batch and printing the first few records:
-
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - verify Batch Definition"
+   ```title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - add Data Asset"
    ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-   <Tabs queryString="execution_engine" groupId="execution_engine" defaultValue='pandas'>
-
-      <TabItem value="pandas" label="pandas">
-
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - full example"
-      ```
-
-      </TabItem>
-
-      <TabItem value="spark" label="Spark">
-
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - full example"
-      ```
-
-      </TabItem>
-
-   </Tabs>
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - full code example"
+   ```
 
 </TabItem>
 
@@ -224,7 +169,7 @@ This means that Batch Definitions for dataframe Data Assets don't work to subdiv
 
    If you do not already have a variable referencing your pandas or Spark Data Asset, you can retrieve a previously created Data Asset with:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - retrieve Data Source"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_batch_definition.py - retrieve Data Asset"
    ```
 
 2. Define the Batch Definition's parameters.
@@ -235,54 +180,24 @@ This means that Batch Definitions for dataframe Data Assets don't work to subdiv
 
    Because dataframes are always provided in their entirety, dataframe Batch Definitions always use the `add_batch_definition_whole_dataframe()` method.
 
-   The following example creates a Batch Definition named `my_batch_definition`:
+   Update the value of `batch_definition_name` in the following code with something that describes your dataframe:
 
-   <Tabs queryString="execution_engine" groupId="execution_engine" defaultValue='pandas'>
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_batch_definition.py - define Batch Definition name"
+   ```
 
-      <TabItem value="pandas" label="pandas">
+3. Add the Batch Definition to the Data Asset.
 
-      ```Python title="Python" 
-      ```
+   Execute the following code to add a Batch Definition to your Data Asset:
 
-      </TabItem>
-
-      <TabItem value="spark" label="Spark">
-
-      ```Python title="Python" 
-      ```
-
-      </TabItem>
-
-   </Tabs>
-
-3. Optional. Verify the Batch Definition.
-
-   You can verify that your Batch Definition can retrieve data from your dataframe by requesting the available Batch and printing the first few records:
-
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - verify Batch Definition"
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_batch_definition.py - add Batch Definition"
    ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-   <Tabs queryString="execution_engine" groupId="execution_engine" defaultValue='pandas'>
-
-      <TabItem value="pandas" label="pandas">
-
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - full example"
-      ```
-
-      </TabItem>
-
-      <TabItem value="spark" label="Spark">
-
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - full example"
-      ```
-
-      </TabItem>
-
-   </Tabs>
+   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_batch_definition.py - full code example"
+   ```
 
 </TabItem>
 
@@ -379,14 +294,14 @@ Because dataframes exist in memory and cease to exist when a Python session ends
 
       <TabItem value="pandas" label="pandas">
 
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py - full example"
+      ```Python title="Python" 
       ```
 
       </TabItem>
 
       <TabItem value="spark" label="Spark">
 
-      ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - full example"
+      ```Python title="Python" 
       ```
 
       </TabItem>
