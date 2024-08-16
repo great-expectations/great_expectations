@@ -882,7 +882,6 @@ def test_config_substitution_retains_original_value_on_save(
         _FLUENT_DATASOURCES_KEY
     ]["my_sqlite_ds_w_subs"]
 
-    round_tripped.pop("id")  # id is generated through _save_project_config()
     assert round_tripped == original
 
 
