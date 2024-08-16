@@ -19,11 +19,11 @@
 }
 
 :root[data-theme='dark'] {
-  --ifm-color-info-contrast-background: #3C3C3C;
-  --ifm-color-success-contrast-background: #3C3C3C;
-  --ifm-color-warning-contrast-background: #3C3C3C;
-  --ifm-color-danger-contrast-background: #3C3C3C;
-  --ifm-color-cta-contrast-background: #3C3C3C;
+  --ifm-color-info-contrast-background: var(--card-background-dark-theme);
+  --ifm-color-success-contrast-background: var(--card-background-dark-theme);
+  --ifm-color-warning-contrast-background: var(--card-background-dark-theme);
+  --ifm-color-danger-contrast-background: var(--card-background-dark-theme);
+  --ifm-color-cta-contrast-background: var(--card-background-dark-theme);
 }
 
 .alert {

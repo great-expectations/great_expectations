@@ -52,7 +52,7 @@
   }
 
   html[data-theme="dark"] .gxCard {
-    background-color: #66371D;
+    background-color: var(--dark-orange-dark-theme);
   }
   
   html[data-theme="dark"] .button__outline {

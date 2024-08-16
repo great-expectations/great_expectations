@@ -4,7 +4,7 @@
  * We apply that class to generated API docs during the build process.
  */
 
-section.sphinx-api-doc {
+.sphinx-api-doc {
 
     @import "pygments.scss";
     @import "basic-modified.scss";
@@ -95,7 +95,7 @@ section.sphinx-api-doc {
         }
 
         .deprecated, .versionadded {
-          background-color: #3C3C3C;
+          background-color: var(--card-background-dark-theme);
           box-shadow: none;
 
           .deprecated:before {
