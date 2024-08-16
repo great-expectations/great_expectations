@@ -214,6 +214,7 @@ def test_validate_expectation_suite_suite_parameters(
     assert result.success == expected
 
 
+@pytest.mark.unit
 def test_non_cloud_validate_does_not_render_results(
     validator: Validator,
     empty_data_context: AbstractDataContext,
@@ -238,6 +239,7 @@ def test_non_cloud_validate_does_not_render_results(
 @mock.patch(
     "great_expectations.data_context.data_context.context_factory.project_manager.is_using_cloud",
 )
+@pytest.mark.unit
 def test_cloud_validate_renders_results_when_appropriate(
     mock_is_using_cloud,
     validator: Validator,
