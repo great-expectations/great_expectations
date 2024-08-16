@@ -87,7 +87,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         )
         batch_definition_bundle = _IdentifierBundle(
             name=self.name,
-            id=self.id,
+            id=str(self.id) if self.id else None,
         )
 
         return _EncodedValidationData(
