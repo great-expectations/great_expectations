@@ -413,7 +413,6 @@ def _remove_ids(config: dict) -> dict:
     for data_source in config.values():
         data_source.pop("id")
         for asset in data_source.get("assets", {}).values():
-            print(asset)
             asset.pop("id")
             for batch_definition in asset.get("batch_definitions", []):
                 batch_definition.pop("id")
