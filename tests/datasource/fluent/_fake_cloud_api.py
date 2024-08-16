@@ -384,7 +384,7 @@ def post_datasources_cb(
         )
 
 
-def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
+def put_datasource_cb(request: PreparedRequest) -> CallbackResult:  # noqa: C901
     LOGGER.debug(f"{request.method} {request.url}")
     if not request.url:
         raise NotImplementedError("request.url should not be empty")
@@ -400,6 +400,15 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
 
     parsed_url = urllib.parse.urlparse(request.url)
     datasource_id = parsed_url.path.split("/")[-1]
+
+    # Ensure that assets and batch definitions get IDs
+    # Note that this logic should also happen in POST but is not implemented for our fake
+    for asset in payload.data.assets:
+        if not asset.get("id"):
+            asset["id"] = str(uuid.uuid4())
+        for batch_definition in asset.get("batch_definitions", []):
+            if not batch_definition.get("id"):
+                batch_definition["id"] = str(uuid.uuid4())
 
     old_datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if old_datasource:
