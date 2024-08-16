@@ -7,7 +7,7 @@ context = gx.get_context(mode="file")
 
 # Retrieve the Data Source
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_asset.py - retrieve Data Source">
-data_source_name = "my_data_source"
+data_source_name = "my_dataframe_data_source"
 data_source = context.data_sources.get(name=data_source_name)
 # </snippet>
 

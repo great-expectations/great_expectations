@@ -5,7 +5,7 @@ context = gx.get_context(mode="file")
 
 # Define the Data Source parameters
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_source.py - define Data Source parameters">
-data_source_name = "my_data_source"
+data_source_name = "my_dataframe_data_source"
 # </snippet>
 
 # Create the Data Source
