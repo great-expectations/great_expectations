@@ -403,7 +403,21 @@ def assert_fluent_datasource_content(
 ):
     config = yaml.load(config_file_path.read_text())
     assert _FLUENT_DATASOURCES_KEY in config
-    assert config[_FLUENT_DATASOURCES_KEY] == fluent_datasource_config
+    config_from_gx_yaml = config[_FLUENT_DATASOURCES_KEY]
+    config_from_gx_yaml_without_ids = _remove_ids(config_from_gx_yaml)
+    assert config_from_gx_yaml_without_ids == fluent_datasource_config
+
+
+def _remove_ids(config: dict) -> dict:
+    for data_source in config.values():
+        data_source.pop("id")
+        for asset in data_source.get("assets", {}).values():
+            print(asset)
+            asset.pop("id")
+            for batch_definition in asset.get("batch_definitions", []):
+                batch_definition.pop("id")
+
+    return config
 
 
 @pytest.fixture
