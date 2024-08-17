@@ -64,7 +64,7 @@ def validation_definition(
     return ValidationDefinition(
         name="my_validation",
         data=batch_definition,
-        suite=ExpectationSuite(name="my_suite"),
+        suite=context.suites.add(ExpectationSuite(name="my_suite")),
     )
 
 

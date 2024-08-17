@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import weakref
 from abc import ABCMeta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -161,6 +162,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             _ = self.store_backend_id
 
         self._session = create_session(access_token=self._ge_cloud_credentials["access_token"])
+        # Finalizer to close the session when the object is garbage collected.
+        # https://docs.python.org/3.11/library/weakref.html#weakref.finalize
+        self._finalizer = weakref.finalize(self, close_session, self._session)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
@@ -334,7 +338,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return True
         if not (kwarg_names <= self.allowed_set_kwargs):
             extra_kwargs = kwarg_names - self.allowed_set_kwargs
-            raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')  # noqa: TRY003
+            raise ValueError(  # noqa: TRY003
+                f'Invalid kwargs: {(", ").join(extra_kwargs)}'
+            )
         return None
 
     @override
@@ -407,7 +413,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ) from timeout_exc
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(f"Unable to set object in GX Cloud Store Backend: {e}") from e  # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to set object in GX Cloud Store Backend: {e}"
+            ) from e
 
     @property
     def ge_cloud_base_url(self) -> str:
@@ -454,7 +462,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return keys
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(f"Unable to list keys in GX Cloud Store Backend: {e}") from e  # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to list keys in GX Cloud Store Backend: {e}"
+            ) from e
 
     @override
     def get_url_for_key(  # type: ignore[override]
@@ -727,3 +737,17 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @property
     def _is_v1_resource(self) -> bool:
         return self._ENDPOINT_VERSION_LOOKUP.get(self.ge_cloud_resource_type) == EndpointVersion.V1
+
+
+def close_session(session: requests.Session):
+    """Close the session.
+    Used by a finalizer to close the session when the GXCloudStoreBackend is garbage collected.
+
+    This is not a bound method on the GXCloudStoreBackend class because of this note
+    in the Python docs (https://docs.python.org/3.11/library/weakref.html#weakref.finalize):
+    Note It is important to ensure that func, args and kwargs do not own any references to obj,
+    either directly or indirectly, since otherwise obj will never be garbage collected.
+    In particular, func should not be a bound method of obj.
+
+    """
+    session.close()

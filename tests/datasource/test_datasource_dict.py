@@ -281,3 +281,18 @@ def test_cacheable_datasource_dict___getitem___with_fds(
     retrieved_fds = datasource_dict[pandas_fds.name]
     assert store.get_count == 1
     assert retrieved_fds.dict() == pandas_fds.dict()
+
+
+@pytest.mark.unit
+def test_cacheable_datasource_dict_set_datasource_adds_ids(
+    build_cacheable_datasource_dict_with_store_spy: Callable,
+    pandas_fds: PandasDatasource,
+):
+    datasource_dict = build_cacheable_datasource_dict_with_store_spy(
+        datasource_configs=[pandas_fds],
+        populate_cache=False,
+    )
+
+    assert pandas_fds.id is None
+    updated_fds = datasource_dict.set_datasource(pandas_fds.name, pandas_fds)
+    assert updated_fds.id is not None

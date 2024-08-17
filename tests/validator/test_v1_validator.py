@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pprint import pformat as pf
+from unittest import mock
 
 import pytest
 
@@ -211,3 +212,52 @@ def test_validate_expectation_suite_suite_parameters(
     result = validator.validate_expectation_suite(suite, {"my_parameter": parameter})
 
     assert result.success == expected
+
+
+@pytest.mark.unit
+def test_non_cloud_validate_does_not_render_results(
+    validator: Validator,
+    empty_data_context: AbstractDataContext,
+):
+    suite = empty_data_context.suites.add(
+        ExpectationSuite(
+            name="test_suite",
+            expectations=[
+                gxe.ExpectColumnValuesToBeInSet(
+                    column="event_type",
+                    value_set=["start"],
+                )
+            ],
+        )
+    )
+    result = validator.validate_expectation_suite(suite)
+
+    assert len(result.results) == 1
+    assert not result.results[0].rendered_content
+
+
+@mock.patch(
+    "great_expectations.data_context.data_context.context_factory.project_manager.is_using_cloud",
+)
+@pytest.mark.unit
+def test_cloud_validate_renders_results_when_appropriate(
+    mock_is_using_cloud,
+    validator: Validator,
+    empty_data_context: AbstractDataContext,
+):
+    mock_is_using_cloud.return_value = True
+    suite = empty_data_context.suites.add(
+        ExpectationSuite(
+            name="test_suite",
+            expectations=[
+                gxe.ExpectColumnValuesToBeInSet(
+                    column="event_type",
+                    value_set=["start"],
+                )
+            ],
+        )
+    )
+    result = validator.validate_expectation_suite(suite)
+
+    assert len(result.results) == 1
+    assert result.results[0].rendered_content
