@@ -45,6 +45,7 @@ from great_expectations.exceptions.exceptions import (
     ExpectationSuiteNotAddedError,
     ResourceNotAddedError,
     ValidationDefinitionNotAddedError,
+    ValidationDefinitionRelatedResourcesNotAddedError,
 )
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
@@ -325,6 +326,19 @@ class TestValidationRun:
         assert result.results[0].expectation_config is not None
         assert result.results[0].expectation_config.rendered_content is not None
         assert result.results[0].rendered_content is not None
+
+    @pytest.mark.unit
+    def test_dependencies_not_added_raises_error(self, validation_definition: ValidationDefinition):
+        validation_definition.suite.id = None
+        validation_definition.data.id = None
+
+        with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError) as e:
+            validation_definition.run()
+
+        assert [type(err) for err in e.value.errors] == [
+            BatchDefinitionNotAddedError,
+            ExpectationSuiteNotAddedError,
+        ]
 
 
 class TestValidationDefinitionSerialization:

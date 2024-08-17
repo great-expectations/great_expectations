@@ -44,6 +44,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
     CheckpointNotAddedError,
+    CheckpointRelatedResourcesNotAddedError,
     CheckpointRunWithoutValidationDefinitionError,
     ExpectationSuiteNotAddedError,
     ResourceNotAddedError,
@@ -493,6 +494,23 @@ class TestCheckpointResult:
 
         with pytest.raises(CheckpointRunWithoutValidationDefinitionError):
             checkpoint.run()
+
+    @pytest.mark.unit
+    def test_checkpoint_run_dependencies_not_added_raises_error(
+        self, validation_definition: ValidationDefinition
+    ):
+        validation_definition.id = None
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name, validation_definitions=[validation_definition]
+        )
+
+        with pytest.raises(CheckpointRelatedResourcesNotAddedError) as e:
+            checkpoint.run()
+
+        assert [type(err) for err in e.value.errors] == [
+            ValidationDefinitionNotAddedError,
+            CheckpointNotAddedError,
+        ]
 
     @pytest.mark.unit
     def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
