@@ -419,16 +419,21 @@ class TestCheckpointResult:
     def mock_suite(self, mocker: MockerFixture):
         suite = mocker.Mock(spec=ExpectationSuite)
         suite.name = self.suite_name
+        suite.id = str(uuid.uuid4())
         return suite
 
     @pytest.fixture
     def mock_batch_def(self, mocker: MockerFixture):
-        return mocker.Mock(spec=BatchDefinition)
+        # NOTE: This does not seem to mock properly (some copy and set values) but suite is fine
+        batch_definition = mocker.Mock(spec=BatchDefinition)
+        batch_definition.id = str(uuid.uuid4())
+        return batch_definition
 
     @pytest.fixture
     def validation_definition(self, mock_suite: MockerFixture, mock_batch_def: MockerFixture):
         validation_definition = ValidationDefinition(
             name=self.validation_definition_name,
+            id=str(uuid.uuid4()),
             data=mock_batch_def,
             suite=mock_suite,
         )
