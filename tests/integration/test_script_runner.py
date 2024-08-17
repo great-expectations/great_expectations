@@ -10,7 +10,6 @@ import logging
 import os
 import pathlib
 import shutil
-from tempfile import TemporaryDirectory
 from typing import List
 
 import pkg_resources
@@ -357,37 +356,9 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
-@pytest.fixture
-def spark_tmp_dir():
-    """A Spark session relies on the directory in which it was started. That's a problem
-    for these tests, which create a bunch of random temporary directories, copy data,
-    copy a GX context, and try to run the docs script using the context & data.
-    It should be possible to stop the spark context, but for whatever reason that doesn't fix the
-    problem.
-
-    The solution here is to pass Spark tests a temporary directory with a stable name.
-    Unfortunately, tempfile doesn't give us an API to do that, so we create a normal temp dir,
-    change its name to a stable path, yield for the test, and then rename the dir back to its
-    original name so tempfile can handle cleaning up.
-
-    It's possible that Spark does something magical in the directory it's called in, so if
-    Spark tests start failing because things aren't being found, look here first.
-    """
-    current_dir = pathlib.Path(__file__).parent.absolute()
-    tmp_dir_path = current_dir / "spark_tmp_test_dir"
-    with TemporaryDirectory() as temp_dir:
-        pathlib.Path.rename(pathlib.Path(temp_dir), tmp_dir_path)
-        yield tmp_dir_path
-
-        pathlib.Path.rename(tmp_dir_path, temp_dir)
-
-
 @flaky(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
-def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments, spark_tmp_dir):
-    if BackendDependencies.SPARK in integration_test_fixture.backend_dependencies:
-        tmp_path = spark_tmp_dir  # see fixture docstring
-
+def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, integration_test_fixture)
     _execute_integration_test(integration_test_fixture, tmp_path)
 
