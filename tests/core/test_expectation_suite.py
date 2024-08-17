@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from copy import copy, deepcopy
 from typing import Dict, Union
 from unittest import mock
@@ -1063,3 +1064,20 @@ def test_identifier_bundle_no_id():
 
     with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedError):
         suite.identifier_bundle()
+
+
+@pytest.mark.parametrize(
+    "id,is_added,num_errors",
+    [
+        pytest.param(str(uuid.uuid4()), True, 0, id="added"),
+        pytest.param(None, False, 1, id="not_added"),
+    ],
+)
+@pytest.mark.unit
+def test_is_added(id: str | None, is_added: bool, num_errors: int):
+    suite = ExpectationSuite(name="my_batch_def", id=id)
+    suite_added, errors = suite.is_added()
+
+    assert suite_added == is_added
+    assert len(errors) == num_errors
+    assert all(isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in errors)
