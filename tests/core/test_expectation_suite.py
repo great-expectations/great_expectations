@@ -1075,7 +1075,7 @@ def test_identifier_bundle_no_id():
 )
 @pytest.mark.unit
 def test_is_added(id: str | None, is_added: bool, num_errors: int):
-    suite = ExpectationSuite(name="my_batch_def", id=id)
+    suite = ExpectationSuite(name="my_suite", id=id)
     suite_added, errors = suite.is_added()
 
     assert suite_added == is_added
