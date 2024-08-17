@@ -20,3 +20,5 @@ context = gx.get_context(mode="file")
 print(context)
 # </snippet>
 # </snippet>
+
+assert type(context).__name__ == "FileDataContext"
