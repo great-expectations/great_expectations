@@ -12,6 +12,7 @@ from typing import (
     Dict,
     Final,
     Generator,
+    List,
     NamedTuple,
     Optional,
     Sequence,
@@ -64,6 +65,7 @@ class _DatasourceSchema(pydantic.BaseModel, extra="allow"):
     id: Optional[str] = None
     type: str
     name: str
+    assets: List[dict] = pydantic.Field(default_factory=list)
 
 
 class CloudResponseSchema(pydantic.BaseModel):
