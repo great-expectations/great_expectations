@@ -7,11 +7,6 @@ module.exports = {
       items: [
         {
           type: 'doc',
-          id: 'core/introduction/about_gx',
-          label: 'About GX'
-        },
-        {
-          type: 'doc',
           id: 'core/introduction/gx_overview',
           label: 'GX overview'
         },

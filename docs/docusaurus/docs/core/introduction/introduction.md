@@ -18,14 +18,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
 
   <LinkCard 
     topIcon 
-    label="About GX"
-    description="Learn about the key features of GX."
-    to="/core/introduction/about_gx" 
-    icon="/img/expectation_icon.svg" 
-  />
-
-  <LinkCard 
-    topIcon 
     label="GX overview"
     description="Learn about the major components of GX and how they interact."
     to="/core/introduction/gx_overview" 

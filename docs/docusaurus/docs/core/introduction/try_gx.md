@@ -19,7 +19,7 @@ Start here to learn how to connect to sample data, build an Expectation, validat
 
 {GxData.product_name} is a Python library you can install with the Python `pip` tool.
 
-For more comprehensive guidance on setting up a Python environment, installing {GxData.product_name}, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/installation_and_setup/install_gx.md).
+For more comprehensive guidance on setting up a Python environment, installing {GxData.product_name}, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/set_up_a_gx_environment/install_gx.md).
 
 1. Run the following terminal command to install the {GxData.product_name} library:
 
@@ -122,5 +122,5 @@ For more comprehensive guidance on setting up a Python environment, installing {
 
 - To learn more about {GxData.product_name}, see [Community resources](/core/introduction/community_resources.md).
 
-- If you're ready to start using {GxData.product_name} with your own data, the [Set up a GX environment](/core/installation_and_setup/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
+- If you're ready to start using {GxData.product_name} with your own data, the [Set up a GX environment](/core/set_up_a_gx_environment/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
 

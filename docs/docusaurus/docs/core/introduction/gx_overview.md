@@ -29,7 +29,7 @@ Data Assets are collections of records within a Data Source, like tables in a da
 
 Data Assets should be defined in a way that makes sense for your data and your use case. For instance, you could define a Data Asset based on a SQL view that joins multiple tables or selects a subset of a table, such as all of the records with a given status in a specific field. 
 
-## Batches
+### Batches
 
 All validation in GX is performed on Batches of data. You can validate the entire data asset as a single batch, or you can partition the data asset into multiple batches and validate each one separately. 
 
