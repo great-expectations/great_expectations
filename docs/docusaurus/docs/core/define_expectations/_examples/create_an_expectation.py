@@ -1,8 +1,8 @@
 """
-This is an example script for $Purpose$.
+This is an example script for creating an expectation with preset or runtime parameters.
 
 To test, run:
-
+pytest --docs-tests -k "doc_example_create_an_expectation" tests/integration/test_script_runner.py
 """
 
 
