@@ -9,11 +9,22 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 docs_tests = []
 
 docs_example_scripts_run_validations = [
+    # Create a Validation Definition
     IntegrationTestFixture(
         # To test, run:
         # pytest --docs-tests -k "docs_example_create_a_validation_definition" tests/integration/test_script_runner.py
         name="docs_example_create_a_validation_definition",
         user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Run a Validation Definition
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_run_a_validation_definition" tests/integration/test_script_runner.py
+        name="docs_example_run_a_validation_definition",
+        user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
         # data_context_dir="",
         backend_dependencies=[],
