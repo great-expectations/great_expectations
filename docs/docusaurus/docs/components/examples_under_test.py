@@ -22,9 +22,19 @@ example_scripts_for_define_expectations = [
     # Retrieve a Batch of test data (using pandas_default)
     IntegrationTestFixture(
         # To test, run:
-        # pytest --docs-tests -k "doc_example_retrieve_a_batch_of_test_data" tests/integration/test_script_runner.py
-        name="doc_example_retrieve_a_batch_of_test_data_pandas_default",
+        # pytest --docs-tests -k "doc_example_retrieve_a_batch_of_test_data_with_pandas_default" tests/integration/test_script_runner.py
+        name="doc_example_retrieve_a_batch_of_test_data_with_pandas_default",
         user_flow_script="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_pandas_default.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Retrieve a Batch of test data (from a Batch Definition)
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "doc_example_retrieve_a_batch_of_test_data_from_batch_definition" tests/integration/test_script_runner.py
+        name="doc_example_retrieve_a_batch_of_test_data_from_batch_definition",
+        user_flow_script="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_from_a_batch_definition.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
         # data_context_dir="",
         backend_dependencies=[],

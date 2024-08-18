@@ -2,7 +2,7 @@
 This is an example script for how to retrieve a Batch of data for testing individual Expectations or engaging in data exploration.
 
 To test, run:
-pytest --docs-tests -k "doc_example_retrieve_a_batch_of_test_data" tests/integration/test_script_runner.py
+pytest --docs-tests -k "doc_example_retrieve_a_batch_of_test_data_with_pandas_default" tests/integration/test_script_runner.py
 """
 
 
