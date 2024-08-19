@@ -9,6 +9,7 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 docs_tests = []
 
 docs_examples_trigger_actions_based_on_validation_results = [
+    # Create a Checkpoint
     IntegrationTestFixture(
         # To test, run:
         # pytest --docs-tests -k "docs_example_create_a_checkpoint" tests/integration/test_script_runner.py
@@ -18,11 +19,22 @@ docs_examples_trigger_actions_based_on_validation_results = [
         # data_context_dir="",
         backend_dependencies=[],
     ),
+    # Run a Checkpoint
     IntegrationTestFixture(
         # To test, run:
         # pytest --docs-tests -k "docs_example_run_a_checkpoint" tests/integration/test_script_runner.py
         name="docs_example_run_a_checkpoint",
         user_flow_script="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Choose a Result Format
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_choose_result_format" tests/integration/test_script_runner.py
+        name="docs_example_choose_result_format",
+        user_flow_script="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/choose_result_format.py",
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
         # data_context_dir="",
         backend_dependencies=[],
