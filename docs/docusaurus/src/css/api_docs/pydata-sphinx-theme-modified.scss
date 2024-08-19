@@ -10288,27 +10288,45 @@ nav.page-toc ul > li {
 }
 
 div.deprecated, div.versionadded, div.versionchanged {
-  background-color: var(--pst-color-on-background);
-  border-left: .2rem solid;
-  border-color: var(--pst-color-info);
+  border: 1px solid;
   border-radius: .25rem;
-  box-shadow: 0 .2rem .5rem var(--pst-color-shadow), 0 0 .0625rem var(--pst-color-shadow) !important;
+  box-shadow: none !important;
   margin: 1.5625em auto;
   overflow: hidden;
   padding: 0 .6rem;
   page-break-inside: avoid;
   position: relative;
   transition: color .25s, background-color .25s, border-color .25s;
-  vertical-align: middle
+  vertical-align: middle;
+
+  p {
+    margin: 0.5rem 0
+  }
+
+  p:before {
+    background-color: transparent;
+  }
+
+  cite {
+    [data-theme='dark'] & {
+      color: var(--ifm-font-color-base);
+    }
+  }
+
+  .deprecated:before,
+  .added:before,
+  .versionchanged:before{
+    background-color: var(--ifm-font-color-base);
+    content: '';
+    display: inline-block;
+    mask-size: cover;
+    height: 1em;
+    width: 1em;
+  }
 }
 
-div.deprecated > p, div.versionadded > p, div.versionchanged > p {
-  margin-bottom: .6rem;
-  margin-top: .6rem
-}
 
 div.deprecated > p:before, div.versionadded > p:before, div.versionchanged > p:before {
-  background-color: var(--pst-color-info);
   content: "";
   height: 100%;
   left: 0;
@@ -10320,11 +10338,18 @@ div.deprecated > p:before, div.versionadded > p:before, div.versionchanged > p:b
 }
 
 div.versionadded {
-  border-color: var(--pst-color-success)
-}
+  background-color: #F8F9EC;
+  border: 1px solid #B6C647;
+  border-left-width: 6px;
 
-div.versionadded p:before {
-  background-color: var(--pst-color-success)
+  cite {
+    background-color: #b6c64733;
+    border-color: #b6c647;
+  }
+
+  .added:before {
+    mask: url("/static/img/admonition-info-icon.svg");
+  }
 }
 
 div.versionchanged {
@@ -10336,11 +10361,18 @@ div.versionchanged p:before {
 }
 
 div.deprecated {
-  border-color: var(--pst-color-danger)
-}
+  background-color: #FEF6F9;
+  border: 1px solid #E54F54;
+  border-left-width: 6px;
 
-div.deprecated p:before {
-  background-color: var(--pst-color-danger)
+  .deprecated:before {
+    mask: url("/static/img/admonition-info-icon.svg");
+  }
+
+  cite {
+    background-color: #FEF6F9;
+    border-color: #E54F54;
+  }
 }
 
 span.versionmodified {

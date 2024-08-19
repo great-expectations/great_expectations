@@ -121,6 +121,10 @@ h3 {
     color: #404041;
 }
 
+[data-theme='dark'] .markdown img{
+  background-color: var(--white);
+}
+
 .docusaurus-highlight-code-line {
     background-color: rgb(72, 77, 91);
     display: block;
