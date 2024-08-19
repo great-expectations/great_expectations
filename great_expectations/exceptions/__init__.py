@@ -71,7 +71,6 @@ from .exceptions import (
     StoreBackendUnsupportedResourceTypeError,
     StoreConfigurationError,
     StoreError,
-    SuiteEditNotebookCustomTemplateModuleNotFoundError,
     SuiteParameterError,
     UnavailableMetricError,
     UnsupportedConfigVersionError,

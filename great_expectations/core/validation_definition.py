@@ -27,7 +27,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import ValidationDefinitionNotAddedError
+from great_expectations.exceptions.exceptions import (
+    ResourceNotAddedError,
+    ValidationDefinitionNotAddedError,
+    ValidationDefinitionRelatedResourcesNotAddedError,
+)
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
@@ -113,6 +117,21 @@ class ValidationDefinition(BaseModel):
     @property
     def data_source(self) -> Datasource:
         return self.asset.datasource
+
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+        errors: list[ResourceNotAddedError] = []
+
+        data_added, data_errors = self.data.is_added()
+        errors.extend(data_errors)
+
+        suite_added, suite_errors = self.suite.is_added()
+        errors.extend(suite_errors)
+
+        self_added = self.id is not None
+        if not self_added:
+            errors.append(ValidationDefinitionNotAddedError(name=self.name))
+
+        return (data_added and suite_added and self_added, errors)
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -201,8 +220,13 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
-        if not self.id:
-            self._add_to_store()
+        added, errors = self.is_added()
+        if not added:
+            # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
+            if len(errors) == 1 and isinstance(errors[0], ValidationDefinitionNotAddedError):
+                self._add_to_store()
+            else:
+                raise ValidationDefinitionRelatedResourcesNotAddedError(errors=errors)
 
         validator = Validator(
             batch_definition=self.batch_definition,
