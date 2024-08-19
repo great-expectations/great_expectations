@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from copy import copy, deepcopy
 from typing import Dict, Union
 from unittest import mock
@@ -384,7 +385,7 @@ class TestCRUDMethods:
             name=self.expectation_suite_name,
         )
 
-        with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedToStoreError):
+        with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedError):
             suite.save()
 
     @pytest.mark.filesystem
@@ -1061,8 +1062,22 @@ def test_identifier_bundle_no_id():
     _ = gx.get_context(mode="ephemeral")
     suite = ExpectationSuite(name="my_suite", id=None)
 
-    actual = suite.identifier_bundle()
-    expected = {"name": "my_suite", "id": mock.ANY}
+    with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedError):
+        suite.identifier_bundle()
 
-    assert actual.dict() == expected
-    assert actual.id is not None
+
+@pytest.mark.parametrize(
+    "id,is_added,num_errors",
+    [
+        pytest.param(str(uuid.uuid4()), True, 0, id="added"),
+        pytest.param(None, False, 1, id="not_added"),
+    ],
+)
+@pytest.mark.unit
+def test_is_added(id: str | None, is_added: bool, num_errors: int):
+    suite = ExpectationSuite(name="my_suite", id=id)
+    suite_added, errors = suite.is_added()
+
+    assert suite_added == is_added
+    assert len(errors) == num_errors
+    assert all(isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in errors)

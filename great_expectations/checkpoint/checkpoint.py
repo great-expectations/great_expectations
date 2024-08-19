@@ -29,7 +29,12 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import CheckpointRunWithoutValidationDefinitionError
+from great_expectations.exceptions.exceptions import (
+    CheckpointNotAddedError,
+    CheckpointRelatedResourcesNotAddedError,
+    CheckpointRunWithoutValidationDefinitionError,
+    ResourceNotAddedError,
+)
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -153,8 +158,13 @@ class Checkpoint(BaseModel):
         if not self.validation_definitions:
             raise CheckpointRunWithoutValidationDefinitionError()
 
-        if not self.id:
-            self._add_to_store()
+        added, errors = self.is_added()
+        if not added:
+            # The checkpoint itself is not added but all children are - we can add it for the user
+            if len(errors) == 1 and isinstance(errors[0], CheckpointNotAddedError):
+                self._add_to_store()
+            else:
+                raise CheckpointRelatedResourcesNotAddedError(errors=errors)
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -251,6 +261,21 @@ class Checkpoint(BaseModel):
                 secondary_actions.append(action)
 
         return priority_actions + secondary_actions
+
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+        errs: list[ResourceNotAddedError] = []
+
+        validations_added: bool = True
+        for validation_definition in self.validation_definitions:
+            validation_added, validation_errs = validation_definition.is_added()
+            errs.extend(validation_errs)
+            validations_added = validation_added and validations_added
+
+        self_added = self.id is not None
+        if not self_added:
+            errs.append(CheckpointNotAddedError(name=self.name))
+
+        return (validations_added and self_added, errs)
 
     @public_api
     def save(self) -> None:

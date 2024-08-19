@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Type
 from unittest import mock
 
 import pytest
@@ -39,6 +39,13 @@ from great_expectations.datasource.fluent.pandas_datasource import (
     CSVAsset,
     PandasDatasource,
     _PandasDataAsset,
+)
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotAddedError,
+    ExpectationSuiteNotAddedError,
+    ResourceNotAddedError,
+    ValidationDefinitionNotAddedError,
+    ValidationDefinitionRelatedResourcesNotAddedError,
 )
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
@@ -88,10 +95,12 @@ def validation_definition(ephemeral_context: EphemeralDataContext) -> Validation
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_definition(BATCH_DEFINITION_NAME)
     )
-    return ValidationDefinition(
-        name="my_validation",
-        data=batch_definition,
-        suite=ExpectationSuite(name="my_suite"),
+    return context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation",
+            data=batch_definition,
+            suite=context.suites.add(ExpectationSuite(name="my_suite")),
+        )
     )
 
 
@@ -99,15 +108,18 @@ def validation_definition(ephemeral_context: EphemeralDataContext) -> Validation
 def cloud_validation_definition(
     empty_cloud_data_context: CloudDataContext,
 ) -> ValidationDefinition:
+    context = empty_cloud_data_context
     batch_definition = (
         empty_cloud_data_context.data_sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_definition(BATCH_DEFINITION_NAME)
     )
-    return ValidationDefinition(
-        name="my_validation",
-        data=batch_definition,
-        suite=ExpectationSuite(name="my_suite"),
+    return context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation",
+            data=batch_definition,
+            suite=context.suites.add(ExpectationSuite(name="my_suite")),
+        )
     )
 
 
@@ -228,11 +240,7 @@ class TestValidationRun:
     ):
         mock_validator.graph_validate.return_value = []
 
-        assert validation_definition.id is None
-
         output = validation_definition.run(checkpoint_id=checkpoint_id)
-
-        assert validation_definition.id is not None
         assert output.meta == {
             "validation_id": validation_definition.id,
             "checkpoint_id": checkpoint_id,
@@ -319,6 +327,19 @@ class TestValidationRun:
         assert result.results[0].expectation_config.rendered_content is not None
         assert result.results[0].rendered_content is not None
 
+    @pytest.mark.unit
+    def test_dependencies_not_added_raises_error(self, validation_definition: ValidationDefinition):
+        validation_definition.suite.id = None
+        validation_definition.data.id = None
+
+        with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError) as e:
+            validation_definition.run()
+
+        assert [type(err) for err in e.value.errors] == [
+            BatchDefinitionNotAddedError,
+            ExpectationSuiteNotAddedError,
+        ]
+
 
 class TestValidationDefinitionSerialization:
     ds_name = "my_ds"
@@ -328,12 +349,14 @@ class TestValidationDefinitionSerialization:
     validation_definition_name = "my_validation"
 
     @pytest.fixture
+    def context(self, in_memory_runtime_context: EphemeralDataContext) -> EphemeralDataContext:
+        return in_memory_runtime_context
+
+    @pytest.fixture
     def validation_definition_data(
         self,
-        in_memory_runtime_context: EphemeralDataContext,
+        context: EphemeralDataContext,
     ) -> tuple[PandasDatasource, CSVAsset, BatchDefinition]:
-        context = in_memory_runtime_context
-
         ds = context.data_sources.add_pandas(self.ds_name)
         asset = ds.add_csv_asset(self.asset_name, "data.csv")
         batch_definition = asset.add_batch_definition(self.batch_definition_name)
@@ -341,64 +364,37 @@ class TestValidationDefinitionSerialization:
         return ds, asset, batch_definition
 
     @pytest.fixture
-    def validation_definition_suite(self) -> ExpectationSuite:
-        return ExpectationSuite(self.suite_name)
+    def validation_definition_suite(self, context: EphemeralDataContext) -> ExpectationSuite:
+        return context.suites.add(ExpectationSuite(self.suite_name))
 
     @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "ds_id, asset_id, batch_definition_id",
-        [
-            (
-                "9a88975e-6426-481e-8248-7ce90fad51c4",
-                "9b35aa4d-7f01-420d-9d45-b45658e60afd",
-                "782c4aaf-8d56-4d8f-9982-49821f4c86c2",
-            ),
-            (
-                None,
-                None,
-                "782c4aaf-8d56-4d8f-9982-49821f4c86c2",
-            ),
-            (
-                "9a88975e-6426-481e-8248-7ce90fad51c4",
-                "9b35aa4d-7f01-420d-9d45-b45658e60afd",
-                None,
-            ),
-            (None, None, None),
-        ],
-        ids=["with_data_ids", "no_parent_ids", "no_child_id", "without_data_ids"],
-    )
-    @pytest.mark.parametrize(
-        "suite_id",
-        ["9b35aa4d-7f01-420d-9d45-b45658e60afd", None],
-        ids=["with_suite_id", "without_suite_id"],
-    )
-    @pytest.mark.parametrize(
-        "validation_id",
-        ["708bd8b9-1ae4-43e6-8dfc-42ec320aa3db", None],
-        ids=["with_validation_id", "without_validation_id"],
-    )
     def test_validation_definition_serialization(
         self,
-        ds_id: str | None,
-        asset_id: str | None,
-        batch_definition_id: str | None,
-        suite_id: str | None,
-        validation_id: str | None,
+        in_memory_runtime_context: EphemeralDataContext,
         validation_definition_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_definition_suite: ExpectationSuite,
     ):
+        context = in_memory_runtime_context
         pandas_ds, csv_asset, batch_definition = validation_definition_data
 
+        ds_id = str(uuid.uuid4())
         pandas_ds.id = ds_id
+
+        asset_id = str(uuid.uuid4())
         csv_asset.id = asset_id
+
+        batch_definition_id = str(uuid.uuid4())
         batch_definition.id = batch_definition_id
+
+        suite_id = str(uuid.uuid4())
         validation_definition_suite.id = suite_id
 
-        validation_definition = ValidationDefinition(
-            name=self.validation_definition_name,
-            data=batch_definition,
-            suite=validation_definition_suite,
-            id=validation_id,
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(
+                name=self.validation_definition_name,
+                data=batch_definition,
+                suite=validation_definition_suite,
+            )
         )
 
         actual = json.loads(validation_definition.json(models_as_dict=False))
@@ -422,14 +418,11 @@ class TestValidationDefinitionSerialization:
                 "name": validation_definition_suite.name,
                 "id": suite_id,
             },
-            "id": validation_id,
+            "id": mock.ANY,
         }
 
-        # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one  # noqa: E501
-        if suite_id is None:
-            self._assert_contains_valid_uuid(actual["suite"])
-
         assert actual == expected
+        assert actual["id"] is not None
 
     def _assert_contains_valid_uuid(self, data: dict):
         id = data.pop("id")
@@ -442,14 +435,11 @@ class TestValidationDefinitionSerialization:
     @pytest.mark.unit
     def test_validation_definition_deserialization_success(
         self,
-        in_memory_runtime_context: EphemeralDataContext,
+        context: EphemeralDataContext,
         validation_definition_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_definition_suite: ExpectationSuite,
     ):
-        context = in_memory_runtime_context
         _, _, batch_definition = validation_definition_data
-
-        validation_definition_suite = context.suites.add(validation_definition_suite)
 
         serialized_config = {
             "name": self.validation_definition_name,
@@ -683,11 +673,8 @@ def test_identifier_bundle_with_existing_id(validation_definition: ValidationDef
 def test_identifier_bundle_no_id(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
-    actual = validation_definition.identifier_bundle()
-    expected = {"name": "my_validation", "id": mock.ANY}
-
-    assert actual.dict() == expected
-    assert actual.id is not None
+    with pytest.raises(ValidationDefinitionNotAddedError):
+        validation_definition.identifier_bundle()
 
 
 @pytest.mark.unit
@@ -701,3 +688,96 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
     context.validation_definition_store.update.assert_called_once_with(
         key=store_key, value=validation_definition
     )
+
+
+@pytest.mark.parametrize(
+    "id,suite_id,batch_def_id,is_added,error_list",
+    [
+        pytest.param(
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            True,
+            [],
+            id="validation_id|suite_id|batch_def_id",
+        ),
+        pytest.param(
+            str(uuid.uuid4()),
+            None,
+            str(uuid.uuid4()),
+            False,
+            [ExpectationSuiteNotAddedError],
+            id="validation_id|no_suite_id|batch_def_id",
+        ),
+        pytest.param(
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            None,
+            False,
+            [BatchDefinitionNotAddedError],
+            id="validation_id|suite_id|no_batch_def_id",
+        ),
+        pytest.param(
+            str(uuid.uuid4()),
+            None,
+            None,
+            False,
+            [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
+            id="validation_id|no_suite_id|no_batch_def_id",
+        ),
+        pytest.param(
+            None,
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            False,
+            [ValidationDefinitionNotAddedError],
+            id="no_validation_id|suite_id|batch_def_id",
+        ),
+        pytest.param(
+            None,
+            None,
+            str(uuid.uuid4()),
+            False,
+            [ExpectationSuiteNotAddedError, ValidationDefinitionNotAddedError],
+            id="no_validation_id|no_suite_id|batch_def_id",
+        ),
+        pytest.param(
+            None,
+            str(uuid.uuid4()),
+            None,
+            False,
+            [BatchDefinitionNotAddedError, ValidationDefinitionNotAddedError],
+            id="no_validation_id|suite_id|no_batch_def_id",
+        ),
+        pytest.param(
+            None,
+            None,
+            None,
+            False,
+            [
+                BatchDefinitionNotAddedError,
+                ExpectationSuiteNotAddedError,
+                ValidationDefinitionNotAddedError,
+            ],
+            id="no_validation_id|no_suite_id|no_batch_def_id",
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_is_added(
+    id: str | None,
+    suite_id: str | None,
+    batch_def_id: str | None,
+    is_added: bool,
+    error_list: list[Type[ResourceNotAddedError]],
+):
+    validation_definition = ValidationDefinition(
+        name="my_validation_definition",
+        id=id,
+        suite=ExpectationSuite(name="my_suite", id=suite_id),
+        data=BatchDefinition(name="my_batch_def", id=batch_def_id),
+    )
+    validation_definition_added, errors = validation_definition.is_added()
+
+    assert validation_definition_added == is_added
+    assert [type(err) for err in errors] == error_list

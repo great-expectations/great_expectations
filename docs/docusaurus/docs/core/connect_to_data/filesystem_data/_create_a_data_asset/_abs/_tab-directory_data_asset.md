@@ -28,7 +28,8 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
 
    - `name`: A name by which you can reference the Data Asset in the future.
    - `abs_container`: The name of your Azure Blob Storage container.
-   - `abs_name_starts_with`: The path to the data files for the Data Asset, relative to the root of the `abs_container`.
+   - `abs_name_starts_with`: The path to the data files for the Data Asset in the Azure Blob Storage container.  This should be relative to the root of the `abs_container`.
+   - `data_directory`: The path of the folder containing data files for the Data asset, relative to the root of the `abs_container`.
    - `abs_recursive_file_discovery`: (Optional) A boolean (True/False) indicating if files should be searched recursively from subfolders.  The default is False.
 
    This example uses taxi trip data stored in `.csv` files in the `data/taxi_yellow_tripdata_samples/` folder within the Azure Blob Storage container:
