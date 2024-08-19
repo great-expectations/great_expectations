@@ -242,6 +242,7 @@ class ValidationDefinition(BaseModel):
         if run_id:
             results.meta["run_id"] = run_id
             results.meta["validation_time"] = run_id.run_time
+            results.meta["batch_parameters"] = batch_parameters
 
         (
             expectation_suite_identifier,
