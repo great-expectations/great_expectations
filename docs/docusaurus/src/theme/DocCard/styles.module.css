@@ -39,6 +39,6 @@ a.cardContainer {
     font-size: 0.8rem;
   }
 
-[data-theme='dark'] .cardTitle img {
-    background-color: transparent !important;
+[data-theme='dark'] :global(.markdown) .cardTitle img {
+    background-color: transparent;
 }
