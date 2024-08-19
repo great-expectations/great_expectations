@@ -422,11 +422,11 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
 def _add_ids_to_data_source_and_nested_objects(payload: CloudResponseSchema) -> CloudResponseSchema:
     data_source = payload.data
     for asset in data_source.assets:
-        if not asset.get("id"):
-            asset["id"] = str(uuid.uuid4())
+        if not asset.id:
+            asset.id = str(uuid.uuid4())
         for batch_definition in asset.batch_definitions:
-            if not batch_definition.get("id"):
-                batch_definition["id"] = str(uuid.uuid4())
+            if not batch_definition.id:
+                batch_definition.id = str(uuid.uuid4())
 
     return payload
 
