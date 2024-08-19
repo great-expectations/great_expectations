@@ -103,5 +103,5 @@ li.menu__list-item {
 
 [data-theme='dark'] nav.menu {
   background-color: var(--ifm-background-color);
-  border-right: 1px solid #6E6E6E;
+  border-right: 1px solid var(--light-gray-dark-theme);
 }
