@@ -8,6 +8,10 @@ from great_expectations.compatibility import pydantic
 # Partitioner class when we update forward refs, so we just import here.
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotAddedError,
+    ResourceNotAddedError,
+)
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
@@ -71,6 +75,11 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
             raise ValueError("No batch found")  # noqa: TRY003
 
         return batch_list[-1]
+
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+        if self.id:
+            return True, []
+        return False, [BatchDefinitionNotAddedError(name=self.name)]
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
