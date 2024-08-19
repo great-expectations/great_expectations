@@ -44,6 +44,10 @@ connect_to_dataframe_data = [
         # pytest --docs-tests -k "create_a_df_batch_definition_pandas" tests/integration/test_script_runner.py
         name="create_a_df_batch_definition_pandas",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_batch_definition.py",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
 
 docs_example_scripts_run_validations = [
     # Create a Validation Definition
@@ -71,13 +75,16 @@ docs_example_scripts_run_validations = [
         # pytest --docs-tests -k "df_batch_parameters_for_validation_definition" tests/integration/test_script_runner.py
         name="df_batch_parameters_for_validation_definition",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_validation_definition.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
     # Run a Validation Definition
     IntegrationTestFixture(
         # To test, run:
         # pytest --docs-tests -k "docs_example_run_a_validation_definition" tests/integration/test_script_runner.py
         name="docs_example_run_a_validation_definition",
         user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py",
-
         data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
         # data_context_dir="",
         backend_dependencies=[],
@@ -329,10 +336,10 @@ learn_data_quality_use_cases = [
 
 docs_tests.extend(connect_to_dataframe_data)
 
-docs_tests.extend(docs_example_scripts_run_validations)
-
 docs_tests.extend(connect_to_filesystem_data_create_a_data_source)
 docs_tests.extend(connect_to_filesystem_data_create_a_data_asset)
 docs_tests.extend(connect_to_filesystem_data_create_a_batch_definition)
+
+docs_tests.extend(docs_example_scripts_run_validations)
 
 docs_tests.extend(learn_data_quality_use_cases)
