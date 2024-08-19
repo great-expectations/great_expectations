@@ -61,11 +61,20 @@ DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
 # ##########################
 
 
+class _BatchDefinitionSchema(pydantic.BaseModel, extra="allow"):
+    id: Optional[str] = None
+
+
+class _AssetSchema(pydantic.BaseModel, extra="allow"):
+    id: Optional[str] = None
+    batch_definitions: List[_BatchDefinitionSchema] = pydantic.Field(default_factory=list)
+
+
 class _DatasourceSchema(pydantic.BaseModel, extra="allow"):
     id: Optional[str] = None
     type: str
     name: str
-    assets: List[dict] = pydantic.Field(default_factory=list)
+    assets: List[_AssetSchema] = pydantic.Field(default_factory=list)
 
 
 class CloudResponseSchema(pydantic.BaseModel):
@@ -334,16 +343,10 @@ def post_datasources_cb(
         LOGGER.debug(f"POST request body -->\n{pf(json.loads(request.body), depth=4)}")
         payload = CloudResponseSchema.from_datasource_json(request.body)
 
-        datasource_name: str = payload.data.name
+        payload_with_ids = _add_ids_to_data_source_and_nested_objects(payload=payload)
+        datasource_name = payload_with_ids.data.name
+        datasource_id = payload_with_ids.data.id
         if datasource_name not in ds_names:
-            datasource_id = payload.data.id
-            if not datasource_id:
-                datasource_id = str(uuid.uuid4())
-                payload.data.id = datasource_id
-            assert (
-                datasource_id not in _CLOUD_API_FAKE_DB["datasources"]
-            ), f"ID collision for '{datasource_name}'"
-
             _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
             _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].add(payload.data.name)
 
@@ -386,7 +389,7 @@ def post_datasources_cb(
         )
 
 
-def put_datasource_cb(request: PreparedRequest) -> CallbackResult:  # noqa: C901
+def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
     LOGGER.debug(f"{request.method} {request.url}")
     if not request.url:
         raise NotImplementedError("request.url should not be empty")
@@ -403,24 +406,29 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:  # noqa: C901
     parsed_url = urllib.parse.urlparse(request.url)
     datasource_id = parsed_url.path.split("/")[-1]
 
-    # Ensure that assets and batch definitions get IDs
-    # Note that this logic should also happen in POST but is not implemented for our fake
-    for asset in payload.data.assets:
-        if not asset.get("id"):
-            asset["id"] = str(uuid.uuid4())
-        for batch_definition in asset.get("batch_definitions", []):
-            if not batch_definition.get("id"):
-                batch_definition["id"] = str(uuid.uuid4())
+    payload_with_ids = _add_ids_to_data_source_and_nested_objects(payload=payload)
 
     old_datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if old_datasource:
-        if payload.data.name != old_datasource["data"]["name"]:
+        if payload_with_ids.data.name != old_datasource["data"]["name"]:
             raise NotImplementedError("Unsure how to handle name change")
-        _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
-        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload.json())
+        _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload_with_ids.dict()
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload_with_ids.json())
     else:
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body="")
     return result
+
+
+def _add_ids_to_data_source_and_nested_objects(payload: CloudResponseSchema) -> CloudResponseSchema:
+    data_source = payload.data
+    for asset in data_source.assets:
+        if not asset.get("id"):
+            asset["id"] = str(uuid.uuid4())
+        for batch_definition in asset.batch_definitions:
+            if not batch_definition.get("id"):
+                batch_definition["id"] = str(uuid.uuid4())
+
+    return payload
 
 
 def get_datasources_cb(
