@@ -31,7 +31,7 @@ import PandasDefault from './_pandas_default.md'
    
    If you are using a File Data Context, you can provide a path that is relative to the Data Context's `base_directory`.  Otherwise, you should provide the absolute path to the folder that contains your data.
 
-   In this example, a relative folder path is defined for a folder that happens to contain taxi trip data for New York City:
+   In this example, a relative path is defined for a folder that contains taxi trip data for New York City in `.csv` format:
 
    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_local_or_networked/_spark.py - define Data Source parameters"
    ```

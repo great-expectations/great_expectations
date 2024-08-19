@@ -319,6 +319,7 @@ failed_rows_tests = [
 
 
 # populate docs_test_matrix with sub-lists
+docs_test_matrix += docs_tests  # this has to go first. TODO: Fix in V1-481
 docs_test_matrix += local_tests
 docs_test_matrix += quickstart
 docs_test_matrix += fluent_datasources
@@ -338,7 +339,6 @@ docs_test_matrix += athena_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 docs_test_matrix += failed_rows_tests
-docs_test_matrix += docs_tests
 
 pandas_integration_tests: List[IntegrationTestFixture] = []
 
