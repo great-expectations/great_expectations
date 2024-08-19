@@ -18,6 +18,15 @@ docs_examples_customize_expectations = [
         # data_context_dir="",
         backend_dependencies=[],
     ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "doc_example_expectation_row_conditions" tests/integration/test_script_runner.py
+        name="doc_example_expectation_row_conditions",
+        user_flow_script="docs/docusaurus/docs/core/customize_expectations/_examples/expectation_row_conditions.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/titantic_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
 ]
 
 learn_data_quality_use_cases = [

@@ -75,16 +75,14 @@ The data used in the examples for this procedure is passenger data for the Titan
    
    <TabItem value="pandas" label="pandas">
 
-      ```python title="Python"
-      row_condition = "PClass=='1st'"
+      ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/expectation_row_conditions.py - pandas example row_condition"
       ```
 
    </TabItem>
 
    <TabItem value="spark_sql" label="Spark/SQL">
 
-      ```python title="Python"
-      row_condition = "PClass=='1st'"
+      ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/expectation_row_conditions.py - spark example row_condition"
       ```
 
    </TabItem>
@@ -150,24 +148,14 @@ The data used in the examples for this procedure is passenger data for the Titan
 
    Expectations with different conditions are treated as unique even if they are of the same type and apply to the same column within an Expectation Suite.  This allows you to create one unconditional Expectation and an arbitrary number of Conditional Expectations (each with a different condition).  
 
-   For example, the following code creates a unconditional Expectation that the value of the `"Suvived"` column is either 0 or 1, and a Conditional Expectation that the value of the `"Survived"` column is `1` if the individual was a first class passenger:
+   For example, the following code creates a unconditional Expectation that the value of the `"Suvived"` column is either 0 or 1:
 
-   ```python title="Python"
-   expectation = suite.add_expectation(
-      gxe.ExpectColumnValuesToBeInSet(
-         column="Survived",
-         value_set=[0, 1]
-      )
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/expectation_row_conditions.py - example unconditional Expectation"
+   ```
 
-   conditional_expectation = suite.add_expectation(
-      gxe.ExpectColumnValuesToBeInSet(
-         column='Survived',
-         value_set=[1],
-         condition_parser='pandas',
-         row_condition='PClass=="1st"'
-      )
-   )
+   And this code creates a Conditional version of the same Expectation that specifies the value of the `"Survived"` column is `1` if the individual was a first class passenger:
+
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/expectation_row_conditions.py - example conditional Expectation"
    ```
 
 
