@@ -1613,7 +1613,7 @@ representation."""  # noqa: E501
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
-class UnexpectedRowsExpectation(BatchExpectation, ABC):
+class UnexpectedRowsExpectation(BatchExpectation):
     """
     UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
 

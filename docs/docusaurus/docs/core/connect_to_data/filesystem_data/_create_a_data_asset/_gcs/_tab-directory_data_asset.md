@@ -28,6 +28,7 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
    To define a Directory Data Asset for Google Cloud Storage you provide the following elements:
 
    - `name`: A name by which you can reference the Data Asset in the future.  This should be unique among Data Assets on the same Data Source.
+   - `data_directory`: The full path from your bucket root for the folder containing the data files.
    - `gcs_prefix`: The beginning of the object key name.
    - `gcs_delimiter`: Optional. A character used to define the hierarchical structure of object keys within a bucket (default is "/").
    - `gcs_recursive_file_discovery`: Optional. A boolean indicating if files should be searched recursively from subfolders (default is False).
