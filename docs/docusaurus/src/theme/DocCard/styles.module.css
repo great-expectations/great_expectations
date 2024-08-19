@@ -40,5 +40,5 @@ a.cardContainer {
   }
 
 [data-theme='dark'] .markdown .cardTitle img {
-    background-color: transparent;
+    background-color: transparent !important;
 }
