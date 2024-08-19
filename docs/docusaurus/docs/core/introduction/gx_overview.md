@@ -4,7 +4,7 @@ title: Great Expectations overview
 
 This overview is for new users of the Great Expectations (GX) and those looking for an improved understanding of GX components and primary workflows. It is an ideal place to start before exploring more advanced GX topics found in the GX documentation.
 
-## What is GX Core
+## GX Core components and workflows
 
 GX is a framework for describing data using expressive tests and then validating that the data meets test criteria. GX Core is a Python library that provides a programmatic interface to building and running data validation workflows using GX.
 
