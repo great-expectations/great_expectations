@@ -33,12 +33,12 @@ a.cardContainer {
     /* vertical-align: middle; */
     max-height: 30px;
     width: auto;
-
-    [data-theme='dark'] & {
-        background-color: transparent;
-    }
   }
 
   .cardDescription {
     font-size: 0.8rem;
   }
+
+[data-theme='dark'] .markdown .cardTitle img {
+    background-color: transparent;
+}
