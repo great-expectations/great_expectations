@@ -16,13 +16,13 @@ try_gx = [
         user_flow_script="docs/docusaurus/docs/core/introduction/try_gx_exploratory.py",
         backend_dependencies=[],
     ),
-        # To test, run:
-        # pytest --docs-tests --postgresql -k "try_gx_end_to_end" tests/integration/test_script_runner.py
+    # To test, run:
+    # pytest --docs-tests --postgresql -k "try_gx_end_to_end" tests/integration/test_script_runner.py
     IntegrationTestFixture(
         name="try_gx_end_to_end",
         user_flow_script="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
-    )
+    ),
 ]
 
 docs_example_scripts_run_validations = [

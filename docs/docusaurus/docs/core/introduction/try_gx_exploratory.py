@@ -94,5 +94,8 @@ exploratory_output = """
 
 # Test workflow output with passing Expectation.
 assert validation_result["success"] is True
-assert validation_result["expectation_config"]["type"] == "expect_column_values_to_be_between"
+assert (
+    validation_result["expectation_config"]["type"]
+    == "expect_column_values_to_be_between"
+)
 assert validation_result["result"]["element_count"] == 10_000

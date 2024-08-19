@@ -26,17 +26,11 @@ context = gx.get_context()
 connection_string = "postgresql+psycopg2://example_user:workshop_example_password@workshops-gx-cloud.cvqgq2g6er9a.us-east-1.rds.amazonaws.com/gx_example_db"
 
 data_source = context.data_sources.add_postgres(
-    "postgres db",
-    connection_string=connection_string
+    "postgres db", connection_string=connection_string
 )
-data_asset = data_source.add_table_asset(
-    name="taxi data",
-    table_name="nyc_taxi_data"
-)
+data_asset = data_source.add_table_asset(name="taxi data", table_name="nyc_taxi_data")
 
-batch_definition = data_asset.add_batch_definition_whole_table(
-    "batch definition"
-)
+batch_definition = data_asset.add_batch_definition_whole_table("batch definition")
 batch = batch_definition.get_batch()
 # </snippet>
 
@@ -45,10 +39,14 @@ batch = batch_definition.get_batch()
 suite = context.suites.add(
     gx.core.expectation_suite.ExpectationSuite(name="expectations")
 )
-suite.add_expectation(gxe.ExpectColumnValuesToBeBetween(
-    column="passenger_count", min_value=1, max_value=6
-))
-suite.add_expectation(gxe.ExpectColumnValuesToBeBetween(column="fare_amount", min_value=0))
+suite.add_expectation(
+    gxe.ExpectColumnValuesToBeBetween(
+        column="passenger_count", min_value=1, max_value=6
+    )
+)
+suite.add_expectation(
+    gxe.ExpectColumnValuesToBeBetween(column="fare_amount", min_value=0)
+)
 # </snippet>
 
 # Create Validation Definition.
