@@ -30,9 +30,9 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.render import (
-    AtomicPrescriptiveRendererType,
-    RenderedAtomicContent,
+from great_expectations.exceptions.exceptions import (
+    ExpectationSuiteNotAddedError,
+    ResourceNotAddedError,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
@@ -233,6 +233,11 @@ class ExpectationSuite(SerializableDictDot):
         # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now  # noqa: E501
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
+
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+        if self.id:
+            return True, []
+        return False, [ExpectationSuiteNotAddedError(name=self.name)]
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""
@@ -577,26 +582,14 @@ class ExpectationSuite(SerializableDictDot):
         from great_expectations.render.renderer.inline_renderer import InlineRenderer
 
         for expectation in self.expectations:
-            inline_renderer = InlineRenderer(render_object=expectation.configuration)
-
-            rendered_content: List[RenderedAtomicContent] = inline_renderer.get_rendered_content()
-
-            expectation.rendered_content = (
-                inline_renderer.replace_or_keep_existing_rendered_content(
-                    existing_rendered_content=expectation.rendered_content,
-                    new_rendered_content=rendered_content,
-                    failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
-                )
-            )
+            if not expectation.rendered_content:
+                inline_renderer = InlineRenderer(render_object=expectation.configuration)
+                expectation.rendered_content = inline_renderer.get_rendered_content()
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         if not self.id:
-            expectation_store = project_manager.get_expectations_store()
-            key = expectation_store.get_key(name=self.name, id=None)
-            expectation_store.add(key=key, value=self)
+            raise ExpectationSuiteNotAddedError(name=self.name)
 
         return _IdentifierBundle(name=self.name, id=self.id)
 

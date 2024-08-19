@@ -49,6 +49,11 @@ class ValidationDefinitionStore(Store):
         return validation_data
 
     @override
+    @staticmethod
+    def _convert_raw_json_to_object_dict(data: dict) -> dict:
+        return data
+
+    @override
     def serialize(self, value):
         # In order to enable the custom json_encoders in ValidationDefinition, we need to set `models_as_dict` off  # noqa: E501
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
