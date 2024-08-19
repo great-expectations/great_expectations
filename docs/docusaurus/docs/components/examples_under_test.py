@@ -304,12 +304,12 @@ learn_data_quality_use_cases = [
 
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
 # into `test_script_runner.py` and actually used in CI checks).
-docs_tests.extend(docs_examples_customize_expectations)
-
-docs_tests.extend(docs_example_scripts_run_validations)
-
 docs_tests.extend(connect_to_filesystem_data_create_a_data_source)
 docs_tests.extend(connect_to_filesystem_data_create_a_data_asset)
 docs_tests.extend(connect_to_filesystem_data_create_a_batch_definition)
+
+docs_tests.extend(docs_examples_customize_expectations)
+
+docs_tests.extend(docs_example_scripts_run_validations)
 
 docs_tests.extend(learn_data_quality_use_cases)
