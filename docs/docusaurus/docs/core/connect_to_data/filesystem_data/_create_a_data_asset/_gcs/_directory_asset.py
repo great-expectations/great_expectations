@@ -13,12 +13,13 @@ data_source = context.get_datasource(data_source_name)
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_gcs/_directory_asset.py - define Data Asset parameters">
 asset_name = "gcs_taxi_csv_directory_asset"
 gcs_prefix = "data/taxi_yellow_tripdata_samples/"
+data_directory = "data/taxi_yellow_tripdata_samples/"
 # </snippet>
 
 # Add the Data Asset to the Data Source:
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_gcs/_directory_asset.py - add Data Asset">
 directory_csv_asset = data_source.add_directory_csv_asset(
-    name=asset_name, gcs_prefix=gcs_prefix
+    name=asset_name, gcs_prefix=gcs_prefix, data_directory=data_directory
 )
 # </snippet>
 # </snippet>
@@ -26,4 +27,4 @@ directory_csv_asset = data_source.add_directory_csv_asset(
 # Use the Data Context to retrieve the Data Asset when needed:
 data_source_name = "my_filesystem_data_source"
 asset_name = "gcs_taxi_csv_directory_asset"
-directory_csv_asset = context.get_data_source(data_source_name).get_asset(asset_name)
+directory_csv_asset = context.data_sources.get(data_source_name).get_asset(asset_name)
