@@ -28,7 +28,7 @@ def set_up_context_for_example(context):
     )
 
 
-# <snippet name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_validation_definition.py - validation_definition.validate() example">
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_validation_definition.py - validation_definition.run() example">
 import great_expectations as gx
 
 context = gx.get_context()

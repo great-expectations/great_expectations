@@ -273,9 +273,9 @@ Because dataframes exist in memory and cease to exist when a Python session ends
 
    <TabItem value="validate" label="Validation Definition">
 
-   A Validation Definition's `validate()` method runs an Expectation Suite against a Batch returned by a Batch Definition.  Runtime Batch Parameters can be provided to a Validation Definition's `validate()` method to specify the data returned in the Batch.  This allows you to validate your dataframe by executing the Expectation Suite included in the Validation Definition.
+   A Validation Definition's `run()` method validates an Expectation Suite against a Batch returned by a Batch Definition.  Runtime Batch Parameters can be provided to a Validation Definition's `run()` method to specify the data returned in the Batch.  This allows you to validate your dataframe by executing the Expectation Suite included in the Validation Definition.
 
-   ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_validation_definition.py - validation_definition.validate() example"
+   ```Python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_validation_definition.py - validation_definition.run() example"
    ```
 
    For more information on Validation Definitions see [Run Validations](/core/run_validations/run_validations.md).
