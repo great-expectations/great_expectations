@@ -9,11 +9,11 @@ import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.expectations import UnexpectedRowsExpectation
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ColumnPairMapExpectation,
     MulticolumnMapExpectation,
-    UnexpectedRowsExpectation,
     _validate_dependencies_against_available_metrics,
 )
 from great_expectations.expectations.expectation_configuration import (
