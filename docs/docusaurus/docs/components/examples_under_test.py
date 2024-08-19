@@ -16,6 +16,7 @@ create_a_data_context = [
         user_flow_script="docs/docusaurus/docs/core/set_up_a_gx_environment/_create_a_data_context/ephemeral_data_context.py",
         # data_dir="",
         # data_context_dir="",
+        backend_dependencies=[],
     ),
     IntegrationTestFixture(
         # To test, run:
@@ -44,6 +45,7 @@ create_a_data_context = [
         # data_context_dir="",
         backend_dependencies=[],
     ),
+]
 
 connect_to_filesystem_data_create_a_data_source = [
     # Local, pandas/spark
