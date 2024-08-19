@@ -32,6 +32,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
     ExpectationSuiteNotAddedError,
+    ResourceNotAddedError,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
@@ -232,6 +233,11 @@ class ExpectationSuite(SerializableDictDot):
         # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now  # noqa: E501
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
+
+    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+        if self.id:
+            return True, []
+        return False, [ExpectationSuiteNotAddedError(name=self.name)]
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""

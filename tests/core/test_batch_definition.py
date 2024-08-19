@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import re
+import uuid
 from typing import TYPE_CHECKING, Optional
-from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
@@ -12,14 +12,17 @@ from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBu
 from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotAddedError,
+)
 
 if TYPE_CHECKING:
     import pytest_mock
 
 
 @pytest.fixture
-def mock_data_asset(monkeypatch) -> DataAsset:
-    monkeypatch.setattr(DataAsset, "build_batch_request", Mock())
+def mock_data_asset(monkeypatch, mocker: pytest_mock.MockerFixture) -> DataAsset:
+    monkeypatch.setattr(DataAsset, "build_batch_request", mocker.Mock())
     data_asset: DataAsset = DataAsset(name="my_data_asset", type="table")
 
     return data_asset
@@ -36,6 +39,7 @@ def mock_data_asset(monkeypatch) -> DataAsset:
 def test_build_batch_request(
     batch_parameters: Optional[BatchParameters],
     mock_data_asset: DataAsset,
+    mocker: pytest_mock.MockerFixture,
 ):
     batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     partitioner = FileNamePartitionerYearly(regex=batching_regex)
@@ -48,7 +52,7 @@ def test_build_batch_request(
     batch_definition.build_batch_request(batch_parameters=batch_parameters)
 
     mock_build_batch_request = batch_definition.data_asset.build_batch_request
-    assert isinstance(mock_build_batch_request, Mock)
+    assert isinstance(mock_build_batch_request, mocker.Mock)
     mock_build_batch_request.assert_called_once_with(
         options=batch_parameters,
         partitioner=partitioner,
@@ -135,3 +139,20 @@ def test_identifier_bundle():
         asset=_IdentifierBundle(name="my_asset", id=None),
         batch_definition=_IdentifierBundle(name="my_batch_definition", id=None),
     )
+
+
+@pytest.mark.parametrize(
+    "id,is_added,num_errors",
+    [
+        pytest.param(str(uuid.uuid4()), True, 0, id="added"),
+        pytest.param(None, False, 1, id="not_added"),
+    ],
+)
+@pytest.mark.unit
+def test_is_added(id: str | None, is_added: bool, num_errors: int):
+    batch_definition = BatchDefinition(name="my_batch_def", id=id)
+    batch_def_added, errors = batch_definition.is_added()
+
+    assert batch_def_added == is_added
+    assert len(errors) == num_errors
+    assert all(isinstance(err, BatchDefinitionNotAddedError) for err in errors)
