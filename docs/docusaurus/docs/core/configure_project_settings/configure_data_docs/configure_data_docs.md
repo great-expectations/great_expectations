@@ -51,14 +51,7 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 
    All Data Docs sites have a unique name within a Data Context.  Start building a Data Docs configuration dictionary by updating the value of `site_name` in the following to something more descriptive and then execute the code:
 
-   ```python title="Python"
-   site_name="my_data_docs_site"
-
-   site_config={
-       site_name=site_name,
-       "class_name": "SiteBuilder",
-       "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-   }
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - start a data docs config dictionary"
    ```
 
 2. Add a `store_backend` to your Data Docs configuration.
@@ -107,62 +100,77 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 
    Once your Data Docs site configuration has been defined, add it to the Data Context by executing the following code:
 
-   ```python title="Python"
-   context.add_data_docs_site(site_config)
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - add data docs config to Data Context"
    ```
 
 4. Optional. Build your Data Docs sites manually.
 
    You can manually build a Data Docs site by executing the following code:
 
-   ```python title="Python"
-   context.build_data_docs(site_names=site_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - manually build Data Docs"
    ```
 
 5. Optional. Automate Data Docs site updates with Checkpoint Actions.
 
    You can automate the creation and update of Data Docs sites by including the `UpdateDataDocsAction` in your Checkpoints.  This Action will automatically trigger a Data Docs site build whenever the Checkpoint it is included in completes its `run()` method.
 
-   ```python title="Python"
-   checkpoint = gx.Checkpoint(
-        name=checkpoint_name,
-        validation_definitions=[validation_definition],
-        actions=[gx.checkpoint.actions.UpdateDataDocsAction(name="foo", site_names=[site_name])],
-    )
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - automate data docs with a Checkpoint Action"
+   ```
 
-   result = checkpoint.run(batch_parameters={"year": 2024})
+6. Optional. View your Data Docs.
+
+   Once your Data Docs have been created, you can view them with:
+
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - view data docs"
    ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python"
-site_name = "site_name"
-context.add_data_docs_site(
-site_config={
-    "class_name": "SiteBuilder",
-    "store_backend": {
-        "class_name": "TupleAzureBlobStoreBackend",
-        "container": "another",
-        "connection_string": connection_string,
-    },
-    "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-},
-site_name=site_name,
-)
-...
-checkpoint = gx.Checkpoint(
-        name=checkpoint_name,
-        validation_definitions=[validation_definition],
-        actions=[gx.checkpoint.actions.UpdateDataDocsAction(name="foo", site_names=[site_name])],
-    )
-...
+   GX 1.0 supports the Data Docs configurations for the following environments:
 
-result = checkpoint.run(batch_parameters={"year": 2024})
+   <Tabs 
+      queryString="environment"
+      groupId="environment"
+      defaultValue='filesystem'
+      values={[
+         {label: 'Filesystem', value:'filesystem'},
+         {label: 'Amazon S3', value:'s3'},
+         {label: 'Azure Blob Storage', value:'abs'},
+         {label: 'Google Cloud Service', value:'gcs'},
+      ]}
+   >
+   
+   <TabItem value="filesystem">
+   
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - full code example"
+   ```
+   
+   </TabItem>
 
-context.build_data_docs(site_names=site_name)
-```
+   <TabItem value="s3">
+   
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_s3.py - full code example"
+   ```
+   
+   </TabItem>
+
+   <TabItem value="abs">
+   
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_abs.py - full code example"
+   ```
+   
+   </TabItem>
+
+   <TabItem value="gcs">
+   
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_gcs.py - full code example"
+   ```
+   
+   </TabItem>
+
+   </Tabs>
 
 </TabItem>
 

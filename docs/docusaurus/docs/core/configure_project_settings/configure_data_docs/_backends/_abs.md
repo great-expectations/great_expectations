@@ -7,15 +7,5 @@ An Azure Blob Storage Data Doc site requires the following `store_backend` infor
 
 To add a local or networked filesystem backend for your Data Docs configuration, update the values of `container`, `prefix`, and `connection_string` in the following code and execute it:
 
-```python title="Python"
-container = "my_abs_container"
-prefix = "data_docs/"
-connection_string = "${AZURE_STORAGE_CONNECTION_STRING}"  # This uses string substitution to get the actual connection string from an environment variable or config file.
-
-site_config["store_backend"] = {
-  "class_name": "TupleAzureBlobStoreBackend",
-  "container": container,
-  "prefix": prefix,
-  "connection_string": connection_string
-}
+```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_abs.py - add store backend"
 ```

@@ -6,11 +6,5 @@ A local or networked filesystem Data Doc site requires the following `store_back
 
 To add a local or networked filesystem backend for your Data Docs configuration, update the value of `base_directory` in the following code and execute it:
 
-```python title="Python"
-base_directory = "uncommitted/data_docs/local_site/" # this is the default path (relative to the root folder of the Data Context) but can be changed as required
-
-site_config["store_backend"] = {
-  "class_name": "TupleFilesystemStoreBackend"
-  "base_directory": base_directory
-}
+```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - add store backend"
 ```
