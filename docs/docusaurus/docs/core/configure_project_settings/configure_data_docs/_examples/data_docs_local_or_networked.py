@@ -2,7 +2,7 @@
 This is an example script for how to configure Data Docs in a local or networked filesystem environment.
 
 To test, run:
-
+pytest --docs-tests -k "docs_example_configure_data_docs_filesystem" tests/integration/test_script_runner.py
 """
 
 
@@ -69,7 +69,7 @@ site_config["store_backend"] = {
 
 # Add the Data Docs configuration to the Data Context
 # <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - add data docs config to Data Context">
-context.add_data_docs_site(site_config)
+context.add_data_docs_site(site_name=site_name, site_config=site_config)
 # </snippet>
 
 # Manually build the Data Docs
@@ -80,7 +80,7 @@ context.build_data_docs(site_names=site_name)
 # Automate Data Docs updates with a Checkpoint Action
 # <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - automate data docs with a Checkpoint Action">
 checkpoint_name = "my_checkpoint"
-validation_definition_name = "my_validaton_definition"
+validation_definition_name = "my_validation_definition"
 validation_definition = context.validation_definitions.get(validation_definition_name)
 actions = [
     gx.checkpoint.actions.UpdateDataDocsAction(
