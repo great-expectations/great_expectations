@@ -106,6 +106,47 @@ def validation_definition(ephemeral_context: EphemeralDataContext) -> Validation
 
 
 @pytest.fixture
+def dataframe_validation_definition(
+    ephemeral_context: EphemeralDataContext,
+) -> ValidationDefinition:
+    context = ephemeral_context
+    batch_definition = (
+        context.data_sources.add_pandas(DATA_SOURCE_NAME)
+        .add_dataframe_asset("dataframe_asset")
+        .add_batch_definition_whole_dataframe("dataframe_batch_def")
+    )
+    return context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_dataframe_validation",
+            data=batch_definition,
+            suite=context.suites.add(ExpectationSuite(name="my_suite")),
+        )
+    )
+
+
+@pytest.fixture
+def postgres_validation_definition(
+    ephemeral_context: EphemeralDataContext,
+) -> ValidationDefinition:
+    context = ephemeral_context
+    batch_definition = (
+        ephemeral_context.data_sources.add_postgres(
+            name="postgres_datasource",
+            connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
+        )
+        .add_table_asset(name="my_asset", table_name="postgres_taxi_data")
+        .add_batch_definition_monthly(name="my_batch_definition", column="pickup_datetime")
+    )
+    return context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_postgres_validation",
+            data=batch_definition,
+            suite=context.suites.add(ExpectationSuite(name="my_suite")),
+        )
+    )
+
+
+@pytest.fixture
 def cloud_validation_definition(
     empty_cloud_data_context: CloudDataContext,
 ) -> ValidationDefinition:
@@ -232,37 +273,76 @@ class TestValidationRun:
         )
 
     @pytest.mark.parametrize("checkpoint_id", [None, "my_checkpoint_id"])
-    @pytest.mark.parametrize(
-        ("batch_parameters", "expected_batch_parameters"),
-        [
-            (None, None),
-            ({"year": 2024}, {"year": 2024}),
-            (
-                {"dataframe": pd.DataFrame({"a": ["1", "2", "3", "4", "5"]})},
-                {"dataframe": "<DATAFRAME>"},
-            ),
-        ],
-    )
     @pytest.mark.unit
     def test_adds_requisite_fields(
         self,
         mock_validator: MagicMock,
         validation_definition: ValidationDefinition,
         checkpoint_id: str | None,
-        batch_parameters: dict | None,
-        expected_batch_parameters: dict | None,
     ):
         mock_validator.graph_validate.return_value = []
 
-        output = validation_definition.run(
-            checkpoint_id=checkpoint_id,
-            batch_parameters=batch_parameters,
-        )
+        output = validation_definition.run(checkpoint_id=checkpoint_id)
 
         assert output.meta == {
             "validation_id": validation_definition.id,
             "checkpoint_id": checkpoint_id,
-            "batch_parameters": expected_batch_parameters,
+            "batch_parameters": None,
+            "batch_spec": ACTIVE_BATCH_SPEC,
+            "batch_markers": BATCH_MARKERS,
+            "active_batch_definition": ACTIVE_BATCH_DEFINITION,
+            "great_expectations_version": GX_VERSION,
+        }
+
+    @pytest.mark.unit
+    def test_adds_correct_batch_parameter_field_for_dataframes(
+        self,
+        mock_validator: MagicMock,
+        dataframe_validation_definition: ValidationDefinition,
+    ) -> None:
+        mock_validator.graph_validate.return_value = []
+
+        output = dataframe_validation_definition.run(
+            checkpoint_id=None,
+            batch_parameters={"dataframe": pd.DataFrame({"a": ["1", "2", "3", "4", "5"]})},
+        )
+
+        assert output.meta == {
+            "validation_id": dataframe_validation_definition.id,
+            "checkpoint_id": None,
+            "batch_parameters": {"dataframe": "<DATAFRAME>"},
+            "batch_spec": ACTIVE_BATCH_SPEC,
+            "batch_markers": BATCH_MARKERS,
+            "active_batch_definition": ACTIVE_BATCH_DEFINITION,
+            "great_expectations_version": GX_VERSION,
+        }
+
+    @pytest.mark.parametrize(
+        "batch_parameters",
+        [
+            pytest.param(None),
+            pytest.param({"year": 2024}),
+            pytest.param({"year": 2024, "month": 10}),
+        ],
+    )
+    @pytest.mark.postgresql
+    def test_adds_correct_batch_parameter_fields_for_postgres(
+        self,
+        mock_validator: MagicMock,
+        postgres_validation_definition: ValidationDefinition,
+        batch_parameters: dict | None,
+    ) -> None:
+        mock_validator.graph_validate.return_value = []
+
+        output = postgres_validation_definition.run(
+            checkpoint_id=None,
+            batch_parameters=batch_parameters,
+        )
+
+        assert output.meta == {
+            "validation_id": postgres_validation_definition.id,
+            "checkpoint_id": None,
+            "batch_parameters": batch_parameters,
             "batch_spec": ACTIVE_BATCH_SPEC,
             "batch_markers": BATCH_MARKERS,
             "active_batch_definition": ACTIVE_BATCH_DEFINITION,
