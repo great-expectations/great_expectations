@@ -233,7 +233,7 @@ def test_suite_factory_all(context_fixture_name: str, request: pytest.FixtureReq
 
 
 @pytest.mark.unit
-def test_suite_factory_all_with_bad_config(
+def test_suite_factory_all_with_bad_marshmallow_config(
     in_memory_runtime_context: AbstractDataContext, mocker: MockerFixture
 ):
     # The difficult part of writing this test was making an expectation I could save
@@ -278,6 +278,53 @@ def test_suite_factory_all_with_bad_config(
     )
     analytics_submit_args = analytics_submit_mock.call_args[0][0]
     assert re.match("marshmallow.*ValidationError", analytics_submit_args.error_type)
+
+
+@pytest.mark.unit
+def test_suite_factory_all_with_bad_pydantic_config(
+    in_memory_runtime_context: AbstractDataContext, mocker: MockerFixture
+):
+    # Arrange
+    analytics_submit_mock = mocker.patch(
+        "great_expectations.data_context.store.store.submit_analytics_event"
+    )
+
+    context: AbstractDataContext = in_memory_runtime_context
+    mocker.patch.object(
+        context.suites._store,
+        "get_all",
+        lambda: [
+            {
+                "name": "my_suite",
+                "expectations": [
+                    {
+                        "type": "expect_column_max_to_be_between",
+                        "kwargs": {
+                            "column": "my_col",
+                            # mostly makes this expectation invalid
+                            "mostly": None,
+                            "max_value": 265,
+                            "min_value": 265,
+                        },
+                    }
+                ],
+            }
+        ],
+    )
+
+    # Act
+    result = context.suites.all()
+
+    # Assert
+    assert result == []
+    analytics_submit_mock.assert_called_once_with(
+        DomainObjectAllDeserializationEvent(
+            error_type=ANY_TEST_ARG,
+            store_name="ExpectationsStore",
+        )
+    )
+    analytics_submit_args = analytics_submit_mock.call_args[0][0]
+    assert re.match("pydantic.*ValidationError", analytics_submit_args.error_type)
 
 
 class TestSuiteFactoryAnalytics:

@@ -252,11 +252,11 @@ class Store:
                 StoreBackendError,
             ) as e:
                 bad_objs.append(obj)
-                self._submit_all_deserialization_event(e)
+                self.submit_all_deserialization_event(e)
             except Exception as e:
                 # For a general error we want to log so we can understand if there
                 # is user pain here and then we reraise.
-                self._submit_all_deserialization_event(e)
+                self.submit_all_deserialization_event(e)
                 raise
 
         if bad_objs:
@@ -265,7 +265,7 @@ class Store:
             logger.warning(f"Skipping Bad Configs:{skipped}")
         return deserializable_objs
 
-    def _submit_all_deserialization_event(self, e: Exception):
+    def submit_all_deserialization_event(self, e: Exception):
         error_type = type(e)
         submit_analytics_event(
             DomainObjectAllDeserializationEvent(
