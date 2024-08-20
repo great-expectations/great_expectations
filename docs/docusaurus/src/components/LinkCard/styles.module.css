@@ -64,4 +64,5 @@
 
 [data-theme='dark'] :global(.markdown) .linkCard img {
     background-color: transparent;
+    margin: 0;
 }

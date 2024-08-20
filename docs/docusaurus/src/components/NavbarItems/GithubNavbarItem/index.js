@@ -10,7 +10,23 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const [forksCount, setForksCount] = useState('0');
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
 
+    const [colorCode, setColorCode] = useState('');
+    const [githubMarkImg, setGithubMarkImg] = useState(useBaseUrl(`img/github-mark.svg`));
+    const [githubLogoImg, setGithubLogoImg] = useState(useBaseUrl(`img/github.svg`));
+    const [starIcon, setStarIcon] = useState(useBaseUrl(`img/star.svg`));
+    const [forkIcon, setForkIcon] = useState(useBaseUrl(`img/code-branch.svg`));
+
     useEffect(() => {
+        setColorCode(colorMode === 'dark' ? '-dark' : '');
+        setGithubMarkImg(useBaseUrl(`img/github-mark${colorCode}.svg`));
+        setGithubLogoImg(useBaseUrl(`img/github${colorCode}.svg`));
+        setStarIcon(useBaseUrl(`img/star${colorCode}.svg`));
+        setForkIcon(useBaseUrl(`img/code-branch${colorCode}.svg`));
+    }, [colorMode]);
+
+
+    useEffect(() => {
+
         fetch(`https://api.github.com/repos/${owner}/${repository}`)
             .then(response => response.json())
             .then(data => {
@@ -27,11 +43,7 @@ export default function GithubNavbarItem({ owner, repository, className }) {
         return formatter.format(number).toLowerCase();
     }
 
-    const colorCode = colorMode === 'dark' ? '-dark' : '';
-    const githubMarkImg = useBaseUrl(`img/github-mark${colorCode}.svg`);
-    const githubLogoImg = useBaseUrl(`img/github${colorCode}.svg`);
-    const starIcon = useBaseUrl(`img/star${colorCode}.svg`);
-    const forkIcon = useBaseUrl(`img/code-branch${colorCode}.svg`);
+
 
     return repository && (
         <a href={`https://github.com/${owner}/${repository}`} target="_blank"

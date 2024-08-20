@@ -113,7 +113,7 @@
 .modalHeaderCloseButton {
     align-self: flex-end;
     cursor: pointer;
-    height: 8px;
+    height: 12px;
     margin: auto;
 }
 
@@ -250,5 +250,6 @@
 
     .modal .modalHeader img {
         background-color: transparent;
+        margin: auto;
     }
 }

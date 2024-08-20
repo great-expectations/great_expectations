@@ -41,4 +41,5 @@ a.cardContainer {
 
 [data-theme='dark'] :global(.markdown) .cardTitle img {
     background-color: transparent;
+    margin: 0;
 }
