@@ -399,6 +399,40 @@ example_scripts_for_define_expectations = [
     ),
 ]
 
+docs_examples_trigger_actions_based_on_validation_results = [
+    # Create a Checkpoint
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_create_a_checkpoint" tests/integration/test_script_runner.py
+        name="docs_example_create_a_checkpoint",
+        user_flow_script="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/create_a_checkpoint_with_actions.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Run a Checkpoint
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_run_a_checkpoint" tests/integration/test_script_runner.py
+        name="docs_example_run_a_checkpoint",
+        user_flow_script="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Choose a Result Format
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_choose_result_format" tests/integration/test_script_runner.py
+        name="docs_example_choose_result_format",
+        user_flow_script="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/choose_result_format.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
+
 learn_data_quality_use_cases = [
     # Schema.
     IntegrationTestFixture(
@@ -421,6 +455,59 @@ learn_data_quality_use_cases = [
         data_dir="tests/test_sets/learn_data_quality_use_cases/",
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+]
+
+docs_examples_customize_expectations = [
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_define_a_custom_expectation_class" tests/integration/test_script_runner.py
+        name="docs_example_define_a_custom_expectation_class",
+        user_flow_script="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_expectation_row_conditions" tests/integration/test_script_runner.py
+        name="docs_example_expectation_row_conditions",
+        user_flow_script="docs/docusaurus/docs/core/customize_expectations/_examples/expectation_row_conditions.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/titantic_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_use_sql_to_define_a_custom_expectation" tests/integration/test_script_runner.py
+        name="docs_example_use_sql_to_define_a_custom_expectation",
+        user_flow_script="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
+docs_example_configure_project_settings = [
+    # Toggle analytics events
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_toggle_analytics_events" tests/integration/test_script_runner.py
+        name="docs_example_toggle_analytics_events",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py",
+        # data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Configure Metadata Stores
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_configure_metadata_stores" tests/integration/test_script_runner.py
+        name="docs_example_configure_metadata_stores",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py",
+        # data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
     ),
 ]
 
@@ -455,6 +542,12 @@ docs_tests.extend(connect_to_dataframe_data)
 docs_tests.extend(docs_example_scripts_run_validations)
 
 docs_tests.extend(example_scripts_for_define_expectations)
+
+docs_tests.extend(docs_examples_customize_expectations)
+
+docs_tests.extend(docs_examples_trigger_actions_based_on_validation_results)
+
+docs_tests.extend(docs_example_configure_project_settings)
 
 docs_tests.extend(learn_data_quality_use_cases)
 docs_tests.extend(try_gx)

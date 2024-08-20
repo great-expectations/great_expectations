@@ -22,34 +22,30 @@ The Data Context variable `analytics_enabled` can be used to toggle the collecti
 
 1. Set the Data Context variable `analytics_enabled`.
 
-   You can set environment variables through terminal commands or by adding the equivalent commands to your `~/.bashrc` file.  If you set the environment variable directly from the terminal, the environment variable will not persist beyond the current session.  If you add them to the `~/.bashrc` file, the variable will be exported each time you log in.
+   With a File Data Context you can set the `analytics_enabled` Data Context variable and your setting will persist between sessions.
 
    To set the `analytics_enabled` Data Context variable, use the command:
 
-   ```python title="Python"
-   context.variables.analytics_enabled = False
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py - disable Analytics Events"
    ```
 
    or:
 
-   ```python title="Python"
-   context.variables.analytics_enabled = True
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py - enable Analytics Events"
    ```
 
 2. Save changes to `analytics_enabled`.
 
    Changes to your File Data Context's variables reside in memory and will not persist between sessions unless they are explicitly pushed to the Data Context's configuration file. To push your changes to the Data Context's configuration file execute the following code:
 
-   ```python title="Python"
-   context.variables.save_config()
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py - save changes to the Data Context"
    ```
 
 4. Re-initialize the Data Context.
 
    Analytics settings are checked when a Data Context is initialized.  Therefore, for a change to `analytics_enabled` to take effect, the File Data Context must be re-initialized after the change has been saved to the Data Context's configuration file.
 
-   ```python title="Python"
-   context = gx.get_context(mode="file")
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py - re-initialize the Data Context"
    ```
 
    For more information on initializing a Data Context, see [Create a Data Context](/core/set_up_a_gx_environment/create_a_data_context.md).
@@ -58,23 +54,7 @@ The Data Context variable `analytics_enabled` can be used to toggle the collecti
 
 <TabItem value="sample_code" label="Sample code">
 
-   ```python title="Python"
-   import great_expectations as gx
-   
-   # Get a File Data Context:
-   context = gx.get_context(mode="file")
-   
-   # Set the `analytics_enabled` Data Context variable:
-   context.variables.analytics_enabled = True
-   # or:
-   context.variables.analytics_enabled = False
-   
-   # Save the change to the Data Context's config file:
-   context.variables.save_config()
-   
-   # Re-initialize the Data Context using the updated
-   # `analytics_enabled` configuration:
-   context = gx.get_context(mode="file")
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py - full code example"
    ```
 
 </TabItem>
