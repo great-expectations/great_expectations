@@ -75,7 +75,7 @@ GX recommends deploying GX OSS within a virtual environment. For more informatio
 
 ## Get support from GX and the community
 
-They are listed in the order in which GX is prioritizing the support issues: 
+They are listed in the order in which GX is prioritizing the support issues:
 
 1. Issues and PRs in the [GX GitHub repository](https://github.com/great-expectations)
 2. Questions posted to the [GX Core Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11)
