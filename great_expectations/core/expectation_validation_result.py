@@ -422,6 +422,7 @@ class ExpectationValidationResultSchema(Schema):
 class ExpectationSuiteValidationResultMeta(TypedDict):
     active_batch_definition: LegacyBatchDefinition
     batch_markers: BatchMarkers
+    batch_parameters: dict | None
     batch_spec: BatchSpec
     checkpoint_id: Optional[str]
     checkpoint_name: str
