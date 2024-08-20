@@ -799,6 +799,7 @@ class TestCheckpointResult:
         assert sorted(meta.keys()) == [
             "active_batch_definition",
             "batch_markers",
+            "batch_parameters",
             "batch_spec",
             "checkpoint_id",
             "great_expectations_version",

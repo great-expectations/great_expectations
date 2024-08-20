@@ -8,84 +8,41 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 docs_tests = []
 
-connect_to_dataframe_data = [
-    # Create a Data Source, pandas/spark
+create_a_data_context = [
     IntegrationTestFixture(
         # To test, run:
-        # pytest --docs-tests --spark -k "create_a_df_data_source_spark" tests/integration/test_script_runner.py
-        name="create_a_df_data_source_spark",
-        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_source.py",
-        # data_dir="",
-        # data_context_dir="",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        # To test, run:
-        # pytest --docs-tests -k "create_a_df_data_source_pandas" tests/integration/test_script_runner.py
-        name="create_a_df_data_source_pandas",
-        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_source.py",
+        # pytest --docs-tests -k "create_an_ephemeral_data_context" tests/integration/test_script_runner.py
+        name="create_an_ephemeral_data_context",
+        user_flow_script="docs/docusaurus/docs/core/set_up_a_gx_environment/_create_a_data_context/ephemeral_data_context.py",
         # data_dir="",
         # data_context_dir="",
         backend_dependencies=[],
     ),
-    # Create a Data Asset, pandas
+    # TODO: Re-enable this once a --docs-tests-cloud environment is available.
+    # IntegrationTestFixture(
+    #     # To test, run:
+    #     # pytest --docs-tests --cloud -k "create_a_cloud_data_context" tests/integration/test_script_runner.py
+    #     name="create_a_cloud_data_context",
+    #     user_flow_script="docs/docusaurus/docs/core/set_up_a_gx_environment/_create_a_data_context/cloud_data_context.py",
+    #     # data_dir="",
+    #     # data_context_dir="",
+    #     backend_dependencies=[],
+    # ),
     IntegrationTestFixture(
         # To test, run:
-        # pytest --docs-tests -k "create_a_df_data_asset_pandas" tests/integration/test_script_runner.py
-        name="create_a_df_data_asset_pandas",
-        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # pytest --docs-tests -k "create_a_file_data_context" tests/integration/test_script_runner.py
+        name="create_a_file_data_context",
+        user_flow_script="docs/docusaurus/docs/core/set_up_a_gx_environment/_create_a_data_context/file_data_context.py",
+        # data_dir="",
         # data_context_dir="",
         backend_dependencies=[],
     ),
-    # Create a Batch Definition, pandas
     IntegrationTestFixture(
         # To test, run:
-        # pytest --docs-tests -k "create_a_df_batch_definition_pandas" tests/integration/test_script_runner.py
-        name="create_a_df_batch_definition_pandas",
-        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_batch_definition.py",
-        # data_context_dir="",
-        backend_dependencies=[],
-    ),
-]
-
-docs_example_scripts_run_validations = [
-    # Create a Validation Definition
-    IntegrationTestFixture(
-        # To test, run:
-        # pytest --docs-tests -k "docs_example_create_a_validation_definition" tests/integration/test_script_runner.py
-        name="docs_example_create_a_validation_definition",
-        user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
-        # data_context_dir="",
-        backend_dependencies=[],
-    ),
-    # Batch Parameters, for a Batch Definition/for a Validation Definition
-    IntegrationTestFixture(
-        # To test, run:
-        # pytest --docs-tests --spark -k "df_batch_parameters_for_batch_definition" tests/integration/test_script_runner.py
-        name="df_batch_parameters_for_batch_definition",
-        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_batch_definition.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
-        # data_context_dir="",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        # To test, run:
-        # pytest --docs-tests -k "df_batch_parameters_for_validation_definition" tests/integration/test_script_runner.py
-        name="df_batch_parameters_for_validation_definition",
-        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_validation_definition.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
-        # data_context_dir="",
-        backend_dependencies=[],
-    ),
-    # Run a Validation Definition
-    IntegrationTestFixture(
-        # To test, run:
-        # pytest --docs-tests -k "docs_example_run_a_validation_definition" tests/integration/test_script_runner.py
-        name="docs_example_run_a_validation_definition",
-        user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py",
-        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # pytest --docs-tests -k "create_a_quick_data_context" tests/integration/test_script_runner.py
+        name="create_a_quick_data_context",
+        user_flow_script="docs/docusaurus/docs/core/set_up_a_gx_environment/_create_a_data_context/quick_start.py",
+        # data_dir="",
         # data_context_dir="",
         backend_dependencies=[],
     ),
@@ -306,6 +263,89 @@ connect_to_filesystem_data_create_a_batch_definition = [
     ),
 ]
 
+connect_to_dataframe_data = [
+    # Create a Data Source, pandas/spark
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --spark -k "create_a_df_data_source_spark" tests/integration/test_script_runner.py
+        name="create_a_df_data_source_spark",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_spark_df_data_source.py",
+        # data_dir="",
+        # data_context_dir="",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "create_a_df_data_source_pandas" tests/integration/test_script_runner.py
+        name="create_a_df_data_source_pandas",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_source.py",
+        # data_dir="",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Create a Data Asset, pandas
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "create_a_df_data_asset_pandas" tests/integration/test_script_runner.py
+        name="create_a_df_data_asset_pandas",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_data_asset.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Create a Batch Definition, pandas
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "create_a_df_batch_definition_pandas" tests/integration/test_script_runner.py
+        name="create_a_df_batch_definition_pandas",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_pandas_df_batch_definition.py",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
+docs_example_scripts_run_validations = [
+    # Create a Validation Definition
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_create_a_validation_definition" tests/integration/test_script_runner.py
+        name="docs_example_create_a_validation_definition",
+        user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Batch Parameters, for a Batch Definition/for a Validation Definition
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --spark -k "df_batch_parameters_for_batch_definition" tests/integration/test_script_runner.py
+        name="df_batch_parameters_for_batch_definition",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_batch_definition.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "df_batch_parameters_for_validation_definition" tests/integration/test_script_runner.py
+        name="df_batch_parameters_for_validation_definition",
+        user_flow_script="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_validation_definition.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Run a Validation Definition
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_run_a_validation_definition" tests/integration/test_script_runner.py
+        name="docs_example_run_a_validation_definition",
+        user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
 example_scripts_for_define_expectations = [
     # Create an Expectation
     IntegrationTestFixture(
@@ -359,6 +399,40 @@ example_scripts_for_define_expectations = [
     ),
 ]
 
+docs_examples_trigger_actions_based_on_validation_results = [
+    # Create a Checkpoint
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_create_a_checkpoint" tests/integration/test_script_runner.py
+        name="docs_example_create_a_checkpoint",
+        user_flow_script="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/create_a_checkpoint_with_actions.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Run a Checkpoint
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_run_a_checkpoint" tests/integration/test_script_runner.py
+        name="docs_example_run_a_checkpoint",
+        user_flow_script="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Choose a Result Format
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_choose_result_format" tests/integration/test_script_runner.py
+        name="docs_example_choose_result_format",
+        user_flow_script="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/choose_result_format.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
+
 learn_data_quality_use_cases = [
     # Schema.
     IntegrationTestFixture(
@@ -384,17 +458,78 @@ learn_data_quality_use_cases = [
     ),
 ]
 
+docs_examples_customize_expectations = [
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_define_a_custom_expectation_class" tests/integration/test_script_runner.py
+        name="docs_example_define_a_custom_expectation_class",
+        user_flow_script="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_expectation_row_conditions" tests/integration/test_script_runner.py
+        name="docs_example_expectation_row_conditions",
+        user_flow_script="docs/docusaurus/docs/core/customize_expectations/_examples/expectation_row_conditions.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/titantic_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_use_sql_to_define_a_custom_expectation" tests/integration/test_script_runner.py
+        name="docs_example_use_sql_to_define_a_custom_expectation",
+        user_flow_script="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
+docs_example_configure_project_settings = [
+    # Toggle analytics events
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_toggle_analytics_events" tests/integration/test_script_runner.py
+        name="docs_example_toggle_analytics_events",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py",
+        # data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Configure Metadata Stores
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_configure_metadata_stores" tests/integration/test_script_runner.py
+        name="docs_example_configure_metadata_stores",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py",
+        # data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
 # into `test_script_runner.py` and actually used in CI checks).
 
+docs_tests.extend(create_a_data_context)
 
 docs_tests.extend(connect_to_filesystem_data_create_a_data_source)
 docs_tests.extend(connect_to_filesystem_data_create_a_data_asset)
 docs_tests.extend(connect_to_filesystem_data_create_a_batch_definition)
+
 docs_tests.extend(connect_to_dataframe_data)
 
 docs_tests.extend(docs_example_scripts_run_validations)
 
 docs_tests.extend(example_scripts_for_define_expectations)
+
+docs_tests.extend(docs_examples_customize_expectations)
+
+docs_tests.extend(docs_examples_trigger_actions_based_on_validation_results)
+
+docs_tests.extend(docs_example_configure_project_settings)
 
 docs_tests.extend(learn_data_quality_use_cases)
