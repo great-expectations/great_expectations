@@ -17,6 +17,8 @@ from marshmallow import ValidationError as MarshmallowValidationError
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.analytics import submit as submit_analytics_event
+from great_expectations.analytics.events import DomainObjectAllDeserializationEvent
 from great_expectations.compatibility.pydantic import ValidationError as PydanticValidationError
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
@@ -248,13 +250,29 @@ class Store:
                 MarshmallowValidationError,
                 PydanticValidationError,
                 StoreBackendError,
-            ):
+            ) as e:
                 bad_objs.append(obj)
+                self.submit_all_deserialization_event(e)
+            except Exception as e:
+                # For a general error we want to log so we can understand if there
+                # is user pain here and then we reraise.
+                self.submit_all_deserialization_event(e)
+                raise
+
         if bad_objs:
             prefix = "\n    SKIPPED: "
             skipped = prefix + prefix.join([str(bad) for bad in bad_objs])
             logger.warning(f"Skipping Bad Configs:{skipped}")
         return deserializable_objs
+
+    def submit_all_deserialization_event(self, e: Exception):
+        error_type = type(e)
+        submit_analytics_event(
+            DomainObjectAllDeserializationEvent(
+                error_type=f"{error_type.__module__}.{error_type.__qualname__}",
+                store_name=type(self).__name__,
+            )
+        )
 
     def set(self, key: DataContextKey, value: Any, **kwargs) -> Any:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
