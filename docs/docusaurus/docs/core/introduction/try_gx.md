@@ -4,12 +4,11 @@ title: Try GX Core
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-import GxData from '../_core_components/_data.jsx';
 import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
 import ReleaseVersionBox from '../../components/versions/_gx_version_code_box.mdx'
 import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
-Start here to learn how to connect to data, create Expectations, validate data, and review Validation Results. This is an ideal place to start if you're new to {GxData.product_name} and want to experiment with features and see what it offers.
+Start here to learn how to connect to data, create Expectations, validate data, and review Validation Results. This is an ideal place to start if you're new to GX Core and want to experiment with features and see what it offers.
 
 To complement your code exploration, check out the [GX Core overview](/core/introduction/gx_overview.md) for a primer on the GX components and workflow pattern used in the examples.
 
@@ -19,23 +18,23 @@ To complement your code exploration, check out the [GX Core overview](/core/intr
 
 ## Setup
 
-{GxData.product_name} is a Python library you can install with the Python `pip` tool.
+GX Core is a Python library you can install with the Python `pip` tool.
 
-For more comprehensive guidance on setting up a Python environment, installing {GxData.product_name}, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/installation_and_setup/install_gx.md).
+For more comprehensive guidance on setting up a Python environment, installing GX Core, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/installation_and_setup/install_gx.md).
 
-1. Run the following terminal command to install the {GxData.product_name} library:
+1. Run the following terminal command to install the GX Core library:
 
    ```bash title="Terminal input"
    pip install great_expectations
    ```
 
-2. Verify {GxData.product_name} installed successfully:
+2. Verify GX Core installed successfully:
 
    ```bash title="Terminal input"
    great_expectations --version
    ```
 
-   The following output appears when {GxData.product_name} is successfully installed:
+   The following output appears when GX Core is successfully installed:
 
    <ReleaseVersionBox/>
 
@@ -49,7 +48,7 @@ The examples provided on this page use a sample of [NYC taxi trip record data](h
 This example workflow walks you through connecting to data in a Pandas DataFrame and validating the data using a single Expectation.
 
 :::tip Pandas install
-This example requires that [Pandas](https://pandas.pydata.org/) is installed in the same Python environment where you are running {GxData.product_name}.
+This example requires that [Pandas](https://pandas.pydata.org/) is installed in the same Python environment where you are running GX Core.
 :::
 
 <Tabs>
@@ -192,6 +191,6 @@ To reduce the size of the results and make it easier to review, only a portion o
 
 - Go to the [Expectations Gallery](https://greatexpectations.io/expectations) and experiment with other Expectations.
 
-- If you're ready to start using {GxData.product_name} with your own data, the [Set up a GX environment](/core/installation_and_setup/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
+- If you're ready to start using GX Core with your own data, the [Set up a GX environment](/core/installation_and_setup/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
 
 - <GxCloudAdvert/>
