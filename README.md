@@ -14,9 +14,9 @@
 
 <img align="right" src="./docs/docusaurus/static/img/gx-mark-160.png">
 
-## About GX OSS
+## About GX Core
 
-GX OSS is a data quality platform designed by and for data engineers. It helps you surface issues quickly and clearly while also making it easier to collaborate with nontechnical stakeholders.
+GX Core is a data quality platform designed by and for data engineers. It helps you surface issues quickly and clearly while also making it easier to collaborate with nontechnical stakeholders.
 
 Its powerful technical tools start with Expectations: expressive and extensible unit tests for your data. As you create and run tests, your test definitions and results are automatically rendered in human-readable plain-language Data Docs.
 
@@ -49,20 +49,22 @@ Learn more about our plans for 1.0 and how we’ll be making this transition in 
 --------------------------------------------------
 -->
 
-## Python version support
+## Integration support policy
 
 GX OSS supports Python `3.8` through `3.11`.
 Experimental support for Python `3.12` and later can be enabled by setting a `GX_PYTHON_EXPERIMENTAL` environment variable when installing `great_expectations`.
 
+For data sources and other integrations that GX supports, see [GX integration support policy](https://docs.greatexpectations.io/docs/application_integration_support) for additional information.
+
 ## Get started
 
-GX recommends deploying GX OSS within a virtual environment. For more information about getting started with GX OSS, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/guides/setup/get_started_lp).
+GX recommends deploying GX OSS within a virtual environment. For more information about getting started with GX OSS, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/tutorials/quickstart).
 
 1. Run the following command in an empty base directory inside a Python virtual environment to install GX OSS:
 
-    ```bash title="Terminal input"
-    pip install great_expectations
-    ```
+	```bash title="Terminal input"
+	pip install great_expectations
+	```
 2. Run the following command to import the `great_expectations module` and create a Data Context:
 
 	```python
@@ -71,18 +73,36 @@ GX recommends deploying GX OSS within a virtual environment. For more informatio
 	context = gx.get_context()
 	```
 
-## Get support
+## Get support from GX and the community
 
-- Chat with community members about general issues and seek solutions on the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82).
+They are listed in the order in which GX is prioritizing the support issues: 
 
-- If you've found a bug, open an issue in one of the [GX GitHub repositories](https://github.com/great-expectations).
+1. Issues and PRs in the [GX GitHub repository](https://github.com/great-expectations)
+2. Questions posted to the [GX Core Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11)
+3. Questions posted to the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82)
 
 ## Contribute
+We deeply value the contributions and engagement of our community. We're now accepting PRs for bug fixes. To ensure quality, we're not yet ready to accept feature contributions in parts of code base where there is not clear API for extensions.  However, we're actively working to increase that surface area. Thank you for your patience and being a crucial part of our data quality journey!
 
-We deeply value the contributions and engagement of our community. We’re temporarily pausing the acceptance of new pull requests (PRs). We’re going to be updating the API and codebase frequently and significantly over the next few months—we don’t want contributors to spend time and effort only to find that we’ve just implemented a breaking change for their work.
+### Levels of contribution readiness
+🟢 Ready. Have a clear and public API for extensions.
+🟡 Partially ready. Case-by-case.
+🔴 Not ready. Will accept contributions that fix existing bugs or workflows.
 
-Hold onto your fantastic ideas and PRs until after the 1.0 release, when we will be excited to resume accepting them. We appreciate your understanding and support as we make this final push toward this exciting milestone. Watch for updates in our [Slack](https://greatexpectations.io/slack) community, and thank you for being a crucial part of our journey!
+| GX Component         | Readiness          | Notes |
+| -------------------- | ------------------ | ----- |
+| Action               | 🟢 Ready           |       |
+| CredentialStore      | 🟢 Ready           |       |
+| BatchDefinition      | 🟡 Partially ready | Formerly known as splitters |
+| DataSource           | 🔴 Not ready       | Includes MetricProvider and ExecutionEngine |
+| DataContext          | 🔴 Not ready       | Also known as Configuration Stores |
+| DataAsset            | 🔴 Not ready       |       |
+| Expectation          | 🔴 Not ready       |       |
+| ValidationDefinition | 🔴 Not ready       |       |
+| Checkpoint           | 🔴 Not ready       |       |
+| CustomExpectations   | 🔴 Not ready       |       |
+| Data Docs            | 🔴 Not ready       | Also known as Renderers |
+
 
 ## Code of conduct
-
 Everyone interacting in GX OSS project codebases, Discourse forums, Slack channels, and email communications is expected to adhere to the [GX Community Code of Conduct](https://discourse.greatexpectations.io/t/gx-community-code-of-conduct/1199).
