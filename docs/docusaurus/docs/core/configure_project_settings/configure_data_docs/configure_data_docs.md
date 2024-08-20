@@ -16,6 +16,11 @@ import PrereqAbsInstalled from '../../_core_components/prerequisites/_gx_install
 import PrereqS3Installed from '../../_core_components/prerequisites/_gx_installation_with_s3_dependencies.md'
 import PrereqGcsInstalled from '../../_core_components/prerequisites/_gx_installation_with_gcs_dependencies.md'
 
+import EnvironmentAbs from './_backends/_abs.md'
+import EnvironmentGcs from './_backends/_gcs.md'
+import EnvironmentS3 from './_backends/_s3.md'
+import EnvironmentFilesystem from './_backends/_local_or_networked.md'
+
 Data Docs translate Expectations, Validation Results, and other metadata into human-readable documentation that is saved as static web pages. Automatically compiling your data documentation from your data tests in the form of Data Docs keeps your documentation current.  This guide covers how to configure additional locations where Data Docs should be created.
 
 ### Prerequisites:
@@ -26,9 +31,9 @@ Data Docs translate Expectations, Validation Results, and other metadata into hu
 
 To host Data Docs in an environment other than a local or networked filesystem, you will also need to install the appropriate dependencies and configure access credentials accordingly:
 
-- Optional. <PrereqS3Installed> and [credentials configured](core/configure_project_settings/configure_credentials.configure_credentials.md).
-- Optional. <PrereqGcsInstalled/> and [credentials configured](core/configure_project_settings/configure_credentials.configure_credentials.md).
-- Optional. <PrereqAbsInstalled/> and [credentials configured](core/configure_project_settings/configure_credentials.configure_credentials.md).
+- Optional. <PrereqS3Installed/> and [credentials configured](/core/configure_project_settings/configure_credentials/configure_credentials.md).
+- Optional. <PrereqGcsInstalled/> and [credentials configured](/core/configure_project_settings/configure_credentials/configure_credentials.md).
+- Optional. <PrereqAbsInstalled/> and [credentials configured](/core/configure_project_settings/configure_credentials/configure_credentials.md).
 
 ### Procedure
 <Tabs 
@@ -60,7 +65,43 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 
    The `store_backend` tells GX 1.0 where to generate Data Docs pages and how to connect to that location.  The specifics of the `store_backend` will depend on the environment in which the Data Docs will be created.  GX 1.0 supports generation of Data Docs in local or networked filesystems, Amazon S3, Google Cloud Service, and Azure Blob Storage.
 
+   <Tabs 
+      queryString="environment"
+      groupId="environment"
+      defaultValue='filesystem'
+      values={[
+         {label: 'Filesystem', value:'filesystem'},
+         {label: 'Amazon S3', value:'s3'},
+         {label: 'Azure Blob Storage', value:'abs'},
+         {label: 'Google Cloud Service', value:'gcs'},
+      ]}
+   >
+   
+   <TabItem value="filesystem">
+   
+   <EnvironmentFilesystem/>
+   
+   </TabItem>
 
+   <TabItem value="s3">
+   
+   <EnvironmentS3/>
+   
+   </TabItem>
+
+   <TabItem value="abs">
+   
+   <EnvironmentAbs/>
+   
+   </TabItem>
+
+   <TabItem value="gcs">
+   
+   <EnvironmentGcs/>
+   
+   </TabItem>
+
+   </Tabs>
 
 3. Add your configuration to your Data Context.
 
@@ -96,12 +137,6 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 
 <TabItem value="sample_code" label="Sample code">
 
-
-
-</TabItem>
-
-</Tabs>
-
 ```python title="Python"
 site_name = "site_name"
 context.add_data_docs_site(
@@ -123,8 +158,13 @@ checkpoint = gx.Checkpoint(
         actions=[gx.checkpoint.actions.UpdateDataDocsAction(name="foo", site_names=[site_name])],
     )
 ...
-# we blow up here!
+
 result = checkpoint.run(batch_parameters={"year": 2024})
 
 context.build_data_docs(site_names=site_name)
 ```
+
+</TabItem>
+
+</Tabs>
+
