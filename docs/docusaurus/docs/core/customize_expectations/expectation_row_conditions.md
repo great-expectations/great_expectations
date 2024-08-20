@@ -148,7 +148,7 @@ The data used in the examples for this procedure is passenger data for the Titan
 
    Expectations with different conditions are treated as unique even if they are of the same type and apply to the same column within an Expectation Suite.  This allows you to create one unconditional Expectation and an arbitrary number of Conditional Expectations (each with a different condition).  
 
-   For example, the following code creates a unconditional Expectation that the value of the `"Suvived"` column is either 0 or 1:
+   For example, the following code creates a unconditional Expectation that the value of the `"Survived"` column is either 0 or 1:
 
    ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/expectation_row_conditions.py - example unconditional Expectation"
    ```
