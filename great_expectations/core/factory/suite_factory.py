@@ -104,11 +104,12 @@ class SuiteFactory(Factory[ExpectationSuite]):
     def all(self) -> Iterable[ExpectationSuite]:
         """Get all ExpectationSuites."""
         dicts = self._store.get_all()
-        # Marshmallow validation was done in the previous get_all() call but
-        # we can still die during pydantic validation when instantiating the
-        # ExpectationSuite object.
-        # TODO: Move marshmallow validation for Suites to pydantic like we do
-        # TODO: for other domain objects so we can remove this logic.
+        # Marshmallow validation was done in the previous get_all() call for
+        # suites but we can still die here because pydantic validation happens
+        # on the expectations inside the suites here.
+        # TODO: deserialization should not live in the factory and should
+        # TODO: live in the store like in other domain objects. That will
+        # TODO: allow us delete this error handling here.
         deserializable_suites: list[ExpectationSuite] = []
         bad_dicts: list[Any] = []
         for suite_dict in dicts:
