@@ -2,6 +2,8 @@
 title: GX Core overview
 ---
 
+GX Core is the open source Python library that supports the Great Expectations (GX) framework for data validation.
+
 This overview is for new users of the Great Expectations (GX) Core and those looking for an improved understanding of GX components and primary workflows. It is an ideal place to start before exploring more advanced GX topics found in the GX documentation.
 
 ## GX Core components and workflows

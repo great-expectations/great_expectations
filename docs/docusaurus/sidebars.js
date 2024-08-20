@@ -7,11 +7,6 @@ module.exports = {
       items: [
         {
           type: 'doc',
-          id: 'core/introduction/about_gx',
-          label: 'About GX Core'
-        },
-        {
-          type: 'doc',
           id: 'core/introduction/gx_overview',
           label: 'GX Core overview'
         },
@@ -19,12 +14,7 @@ module.exports = {
           type: 'doc',
           id: 'core/introduction/try_gx',
           label: 'Try GX Core'
-        },
-        {
-          type: 'doc',
-          id: 'core/introduction/community_resources',
-          label: 'Community resources'
-        },
+        }
       ],
     },
     {
@@ -149,6 +139,11 @@ module.exports = {
       id: 'oss/changelog',
       label: 'Changelog'
     },
+    {
+      type: 'doc',
+      id: 'core/introduction/community_resources',
+      label: 'Community resources'
+    }
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
