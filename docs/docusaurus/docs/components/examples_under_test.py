@@ -257,6 +257,16 @@ docs_example_configure_project_settings = [
         # data_context_dir="",
         backend_dependencies=[],
     ),
+    # Configure Metadata Stores
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_configure_metadata_stores" tests/integration/test_script_runner.py
+        name="docs_example_configure_metadata_stores",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py",
+        # data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
 ]
 
 learn_data_quality_use_cases = [
