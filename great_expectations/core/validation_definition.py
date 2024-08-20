@@ -44,6 +44,8 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
+DATAFRAME_INDICATOR = "<DATAFRAME>"
+
 
 class ValidationDefinition(BaseModel):
     """
@@ -242,6 +244,13 @@ class ValidationDefinition(BaseModel):
         if run_id:
             results.meta["run_id"] = run_id
             results.meta["validation_time"] = run_id.run_time
+        if batch_parameters:
+            batch_parameters_copy = {k: v for k, v in batch_parameters.items()}
+            if "dataframe" in batch_parameters_copy:
+                batch_parameters_copy["dataframe"] = DATAFRAME_INDICATOR
+            results.meta["batch_parameters"] = batch_parameters_copy
+        else:
+            results.meta["batch_parameters"] = None
 
         (
             expectation_suite_identifier,

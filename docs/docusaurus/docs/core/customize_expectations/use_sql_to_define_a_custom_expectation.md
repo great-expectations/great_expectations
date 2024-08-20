@@ -28,79 +28,43 @@ You customize an `UnexpectedRowsExpectation` in essentially the same manner as y
 
 <TabItem value="procedure" label="Procedure">
 
-1. Import the `UnexpectedRowsExpectation` class:
- 
-   ```python title="Python"
-   from great_expectations.expectations import UnexpectedRowsExpectation
-   ```
-
-2. Create a new Expectation class that inherits the `UnexpectedRowsExpectation` class.
+1. Create a new Expectation class that inherits the `UnexpectedRowsExpectation` class.
   
    The class name `UnexpectedRowsExpectation` describes the functionality of the Expectation: it finds rows with unexpected values.  When you create a customized Expectation class you can provide a class name that is more indicative of your specific use case.  In this example, the customized subclass of `UnexpectedRowsExpectation` will be used to find invalid passenger counts in taxi trip data:
 
-   ```python title="Python"
-   class ExpectPassengerCountToBeLegal(UnexpectedRowsExpectation):
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - define a more descriptive name for an UnexpectedRowsExpectation"
    ```
 
-3. Override the Expectation's `unexpected_rows_query` attribute.
+2. Override the Expectation's `unexpected_rows_query` attribute.
 
    The `unexpected_rows_query` attribute is a SQL or Spark-SQL query that returns a selection of rows from the Batch of data being validated.  By default, rows that are returned have failed the validation check.
 
    Although the `unexpected_rows_query` should be written in standard SQL or Spark-SQL syntax, it must also contain the special `{batch}` placeholder.  When the Expectation is evaluated, the `{batch}` placeholder will be replaced with the Batch of data that is validated.
 
-   In this example, `unexpected_rows_query` will select any rows where the passenger count is greater than `6`.  These rows will fail validation for this Expectation:
+   In this example, `unexpected_rows_query` will select any rows where the passenger count is greater than `6` or less than `0`.  These rows will fail validation for this Expectation:
 
-   ```python title="Python"
-   class ExpectPassengerCountToBeLegal(UnexpectedRowsExpectation):
-       # highlight-start
-       unexpected_rows_query: str = "SELECT * FROM {batch} WHERE passenger_count > 6"
-       # highlight-end
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - define the query for an UnexpectedRowsExpectation"
    ```
 
-5. Customize the rendering of the new Expectation when displayed in Data Docs.
+3. Customize the rendering of the new Expectation when displayed in Data Docs.
 
    As with other Expectations, the `description` attribute contains the text describing the customized Expectation when your results are rendered into Data Docs.  It can be set when an Expectation class is defined or edited as an attribute of an Expectation instance.  You can format the `description` string with Markdown syntax:
 
-   ```python title="Python"
-   class ExpectPassengerCountToBeLegal(UnexpectedRowsExpectation):
-       column: str = "passenger_count"
-       unexpected_rows_query: str = "SELECT * FROM {batch} WHERE passenger_count > 6"
-       # highlight-start
-       description: str = "There should be no more than **6** passengers."
-       # highlight-end
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - define a custom UnexpectedRowsExpectation"
    ```
 
-6. Use the customized subclass as an Expectation.
+4. Use the customized subclass as an Expectation.
 
    Once the customized Expectation subclass has been defined, instances of it can be created, added to Expectation Suites, and validated just like any other Expectation class:
 
-   ```python title="Python"
-   expectation = ExpectPassengerCountToBeLegal()
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - instantiate the custom SQL Expectation"
    ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python"
-import great_expectations as gx
-from great_expectations.expectations import UnexpectedRowsExpectation
-
-class ExpectPassengerCountToBeLegal(UnexpectedRowsExpectation):
-   unexpected_rows_query: str = "SELECT * FROM {batch} WHERE passenger_count > 6"
-   description: str = "There should be no more than **6** passengers."
-
-context = gx.get_context()
-
-expectation = ExpectPassengerCountToBeLegal()  # Uses the predefined default values
-
-data_source_name = "my_taxi_data"
-asset_name = "2018_taxi_data"
-batch_definition_name = "all_records_in_asset"
-batch = context.get_datasource(datasource_name).get_asset(asset_name).get_batch_definition(batch_definition_name=batch_definition_name).get_batch()
-
-batch.validate(expectation)
-
+```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - full code example"
 ```
 
 </TabItem>
