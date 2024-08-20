@@ -30,7 +30,7 @@ context.variables.analytics_enabled = False
 
 # Save the change to the Data Context's config file:
 # <snippet name="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py - save changes to the Data Context">
-context.variables.save_config()
+context.variables.save()
 # </snippet>
 
 # Re-initialize the Data Context using the updated
