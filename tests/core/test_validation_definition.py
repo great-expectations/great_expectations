@@ -134,8 +134,8 @@ def postgres_validation_definition(
             name="postgres_datasource",
             connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
         )
-        .add_table_asset(name="my_asset", table_name="postgres_taxi_data")
-        .add_batch_definition_monthly(name="my_batch_definition", column="pickup_datetime")
+        .add_query_asset(name="my_asset", query="SELECT * FROM fake_table")
+        .add_batch_definition_monthly(name="my_batch_definition", column="not_very_real")
     )
     return context.validation_definitions.add(
         ValidationDefinition(
