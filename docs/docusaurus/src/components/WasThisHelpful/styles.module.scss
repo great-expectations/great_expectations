@@ -247,4 +247,8 @@
     .modalTextLabel {
         color: var(--ifm-font-color-base);
     }
+
+    .modal .modalHeader img {
+        background-color: transparent;
+    }
 }
