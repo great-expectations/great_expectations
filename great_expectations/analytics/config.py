@@ -15,7 +15,7 @@ class _EnvConfig(BaseSettings):
 
     gx_posthog_debug: bool = False
     gx_posthog_host: HttpUrl = "https://posthog.greatexpectations.io"  # type: ignore[assignment] # default will be coerced
-    gx_posthog_project_api_key: str = ""
+    gx_posthog_project_api_key: str = "phc_ph6ugZ1zq94dli0r1xgFg19fk2bb1EdDoLn9NZnCvRs"
 
     _gx_cloud_dev_posthog_project_api_key: str = "phc_dq7deLClUIj5Sm9M40eAMthzkNtBOhF22ZDqPVxU14e"
 
@@ -45,6 +45,7 @@ class Config(GenericModel):
     data_context_id: Optional[UUID] = None
     oss_id: Optional[UUID] = None
     cloud_mode: bool = False
+    service: str = "gx-core"
 
 
 ENV_CONFIG = _EnvConfig()
