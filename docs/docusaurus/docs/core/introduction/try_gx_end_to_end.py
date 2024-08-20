@@ -23,7 +23,7 @@ context = gx.get_context()
 # Connect to data.
 # Create Data Source, Data Asset, Batch Definition, and Batch.
 # <snippet name="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py connect to data and get batch">
-connection_string = "postgresql+psycopg2://example_user:workshop_example_password@workshops-gx-cloud.cvqgq2g6er9a.us-east-1.rds.amazonaws.com/gx_example_db"
+connection_string = "postgresql+psycopg2://try_gx:try_gx@workshops-gx-cloud.cvqgq2g6er9a.us-east-1.rds.amazonaws.com/gx_example_db"
 
 data_source = context.data_sources.add_postgres(
     "postgres db", connection_string=connection_string
