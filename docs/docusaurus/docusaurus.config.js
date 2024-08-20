@@ -76,6 +76,18 @@ module.exports = {
     prism: {
       additionalLanguages: ['bash'],
       theme: require('./src/theme/CodeBlock/theme'),
+      magicComments: [
+        // Remember to extend the default highlight class name as well!
+        {
+          className: 'theme-code-block-highlighted-line',
+          line: 'highlight-next-line',
+          block: {start: 'highlight-start', end: 'highlight-end'},
+        },
+        {
+          className: 'code-block-hide-line',
+          line: 'Hide this',
+        },
+      ]
     },
     colorMode: {
       disableSwitch: true,

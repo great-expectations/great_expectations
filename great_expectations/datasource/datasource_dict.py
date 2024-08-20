@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import uuid
 from collections import UserDict
 from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
@@ -8,7 +9,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
-from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -70,10 +70,7 @@ class DatasourceDict(UserDict):
 
         configs = self._datasource_store.get_all()
         for config in configs:
-            if isinstance(config, FluentDatasource):
-                name = config.name
-            else:
-                raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
+            name = config.name
             try:
                 datasources[name] = self._init_fluent_datasource(name=name, ds=config)
             except gx_exceptions.DatasourceInitializationError as e:
@@ -170,20 +167,26 @@ class CacheableDatasourceDict(DatasourceDict):
 
     @override
     def set_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource | None:
-        self.data[name] = ds
+        self.data[name] = self._add_ids(ds)
+        return ds
 
-        # FDS do not use stores
-        if not isinstance(ds, FluentDatasource):
-            return super().set_datasource(name=name, ds=ds)
+    def _add_ids(self, ds: FluentDatasource) -> FluentDatasource:
+        # File and ephemeral contexts do not use the store, so we need to add IDs here.
+        # Note that this is used for both `add` and `update` operations.
+        if ds.id is None:
+            ds.id = uuid.uuid4()
+        for asset in ds.assets:
+            if asset.id is None:
+                asset.id = uuid.uuid4()
+            for batch_definition in asset.batch_definitions:
+                if batch_definition.id is None:
+                    batch_definition.id = uuid.uuid4()
+
         return ds
 
     @override
     def __delitem__(self, name: str) -> None:
-        ds = self.data.pop(name, None)
-
-        # FDS do not use stores
-        if not isinstance(ds, FluentDatasource):
-            super().__delitem__(name)
+        self.data.pop(name, None)
 
     @override
     def __getitem__(self, name: str) -> FluentDatasource:
