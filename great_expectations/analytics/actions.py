@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from great_expectations.analytics.base_event import Action
 
+DOMAIN_OBJECT_ALL_DESERIALIZE_ERROR: Action = Action("domain_object.all_deserialize_error")
 DATA_CONTEXT_INITIALIZED: Action = Action("data_context.initialized")
 CHECKPOINT_CREATED: Action = Action("checkpoint.created")
 CHECKPOINT_DELETED: Action = Action("checkpoint.deleted")

@@ -3,6 +3,5 @@ When the `result_format` key is set to `"SUMMARY"` the Validation Results of eac
 You can check the [Validation Results reference tables](#validation-results-reference-tables) to see what information is provided in the `result` dictionary.
 To create a `"SUMMARY"` result format configuration use the following code:
 
-```python title="Python"
-summary_rf_dict = {"result_format": "SUMMARY"}
+```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/choose_result_format.py - summary Result Format"
 ```

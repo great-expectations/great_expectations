@@ -1,12 +1,15 @@
 import json
 import pathlib
+import re
 from unittest import mock
+from unittest.mock import ANY as ANY_TEST_ARG
 
 import pytest
 from pytest_mock import MockerFixture
 
 import great_expectations.expectations as gxe
 from great_expectations.analytics.events import (
+    DomainObjectAllDeserializationEvent,
     ValidationDefinitionCreatedEvent,
     ValidationDefinitionDeletedEvent,
 )
@@ -359,9 +362,15 @@ def test_validation_definition_factory_all(
 @pytest.mark.unit
 def test_validation_definition_factory_all_with_bad_config(
     in_memory_runtime_context: AbstractDataContext,
-    monkeypatch,  # I'm leaving this untyped because it's an internal _pytest type.
+    mocker: MockerFixture,
 ):
-    monkeypatch.setattr(ValidationDefinition.Config, "validate_assignment", False)
+    mocker.patch(
+        "great_expectations.core.validation_definition.ValidationDefinition.Config.validate_assignment",
+        False,
+    )
+    analytics_submit_mock = mocker.patch(
+        "great_expectations.data_context.store.store.submit_analytics_event"
+    )
     context: AbstractDataContext = in_memory_runtime_context
 
     # Arrange
@@ -399,6 +408,14 @@ def test_validation_definition_factory_all_with_bad_config(
 
     # Assert
     assert result == [validation_definition_1]
+    analytics_submit_mock.assert_called_once_with(
+        DomainObjectAllDeserializationEvent(
+            error_type=ANY_TEST_ARG,
+            store_name="ValidationDefinitionStore",
+        )
+    )
+    analytics_submit_args = analytics_submit_mock.call_args[0][0]
+    assert re.match("pydantic.*ValidationError", analytics_submit_args.error_type)
 
 
 @pytest.mark.filesystem

@@ -1,9 +1,15 @@
+import re
 from unittest import mock
+from unittest.mock import ANY as ANY_TEST_ARG
 
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations.analytics.events import CheckpointCreatedEvent, CheckpointDeletedEvent
+from great_expectations.analytics.events import (
+    CheckpointCreatedEvent,
+    CheckpointDeletedEvent,
+    DomainObjectAllDeserializationEvent,
+)
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
@@ -275,8 +281,12 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
 
 @pytest.mark.unit
 def test_checkpoint_factory_all_with_bad_config(
-    in_memory_runtime_context: AbstractDataContext,
+    in_memory_runtime_context: AbstractDataContext, mocker: MockerFixture
 ):
+    analytics_submit_mock = mocker.patch(
+        "great_expectations.data_context.store.store.submit_analytics_event"
+    )
+
     # Arrange
     context: AbstractDataContext = in_memory_runtime_context
     ds = context.data_sources.add_pandas("my_datasource")
@@ -317,6 +327,14 @@ def test_checkpoint_factory_all_with_bad_config(
 
     # Assert
     assert result == [checkpoint_1]
+    analytics_submit_mock.assert_called_once_with(
+        DomainObjectAllDeserializationEvent(
+            error_type=ANY_TEST_ARG,
+            store_name="CheckpointStore",
+        )
+    )
+    analytics_submit_args = analytics_submit_mock.call_args[0][0]
+    assert re.match("pydantic.*ValidationError", analytics_submit_args.error_type)
 
 
 class TestCheckpointFactoryAnalytics:
