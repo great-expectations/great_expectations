@@ -1,8 +1,8 @@
 ---
-title: Great Expectations overview
+title: GX Core overview
 ---
 
-This overview is for new users of the Great Expectations (GX) and those looking for an improved understanding of GX components and primary workflows. It is an ideal place to start before exploring more advanced GX topics found in the GX documentation.
+This overview is for new users of the Great Expectations (GX) Core and those looking for an improved understanding of GX components and primary workflows. It is an ideal place to start before exploring more advanced GX topics found in the GX documentation.
 
 ## GX Core components and workflows
 
@@ -102,4 +102,4 @@ When using GX in an production capacity, typically you will:
 
 ## Next steps
 
-Visit [Try GX](/core/introduction/try_gx.md) to see example workflows implemented using GX Core.
+Visit [Try GX Core](/core/introduction/try_gx.md) to see example workflows implemented using GX Core.

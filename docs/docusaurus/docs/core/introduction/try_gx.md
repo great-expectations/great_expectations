@@ -1,5 +1,5 @@
 ---
-title: Try Great Expectations
+title: Try GX Core
 ---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -11,7 +11,7 @@ import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
 Start here to learn how to connect to data, create Expectations, validate data, and review Validation Results. This is an ideal place to start if you're new to {GxData.product_name} and want to experiment with features and see what it offers.
 
-To complement your code exploration, check out the [GX Overview](/core/introduction/gx_overview.md) for a primer on the GX components and workflow pattern used in the examples.
+To complement your code exploration, check out the [GX Core overview](/core/introduction/gx_overview.md) for a primer on the GX components and workflow pattern used in the examples.
 
 ## Prerequisites
 

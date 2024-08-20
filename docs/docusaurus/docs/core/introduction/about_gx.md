@@ -1,5 +1,5 @@
 ---
-title: About Great Expectations
+title: About GX Core
 ---
 import GxData from '../_core_components/_data.jsx'
 import PythonVersion from '../_core_components/_python_version.md'

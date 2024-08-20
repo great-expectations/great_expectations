@@ -1,6 +1,6 @@
 ---
-title: Introduction to Great Expectations
-description: Learn about the key features of GX, how to connect with the GX community, and try GX in Python.
+title: Introduction to GX Core
+description: Learn about the key features of GX Core, how to connect with the GX community, and try GX Core in Python.
 hide_feedback_survey: true
 hide_title: true
 ---
@@ -11,7 +11,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Learn about the key features of Great Expectations (GX).  Connect with the GX community, and try GX in Python using provided sample data.
+  Learn about the key features of Great Expectations (GX) Core.  Connect with the GX community, and try GX Core in Python using provided sample data.
 </OverviewCard>
 
 <LinkCardGrid>
@@ -19,7 +19,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
   <LinkCard 
     topIcon 
     label="About GX"
-    description="Learn about the key features of GX."
+    description="Learn about the key features of GX Core."
     to="/core/introduction/about_gx" 
     icon="/img/expectation_icon.svg" 
   />
@@ -27,7 +27,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
   <LinkCard 
     topIcon 
     label="GX overview"
-    description="Learn about the major components of GX and how they interact."
+    description="Learn about GX Core components and workflows."
     to="/core/introduction/gx_overview" 
     icon="/img/expectation_icon.svg" 
   />
@@ -35,7 +35,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
   <LinkCard 
     topIcon 
     label="Try GX"
-    description="Set up a local GX deployment and give it a test run using sample data."
+    description="Walk through example GX Core workflows using sample data."
     to="/core/introduction/try_gx" 
     icon="/img/expectation_icon.svg" 
   />
@@ -43,7 +43,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
   <LinkCard 
       topIcon 
       label="Community resources"
-      description="Learn how to connect with the GX community, where to ask questions about GX, and how to contribute to the GX open source code and documentation."
+      description="Learn how to connect with the GX community, where to ask questions about GX Core, and how to contribute to the GX open source code and documentation."
       to="/core/introduction/community_resources" 
       icon="/img/expectation_icon.svg"
   />

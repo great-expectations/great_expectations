@@ -2,23 +2,23 @@ module.exports = {
   gx_core: [
     {
       type: 'category',
-      label: 'Introduction to Great Expectations',
+      label: 'Introduction to GX Core',
       link: {type: 'doc', id: 'core/introduction/introduction'},
       items: [
         {
           type: 'doc',
           id: 'core/introduction/about_gx',
-          label: 'About GX'
+          label: 'About GX Core'
         },
         {
           type: 'doc',
           id: 'core/introduction/gx_overview',
-          label: 'GX overview'
+          label: 'GX Core overview'
         },
         {
           type: 'doc',
           id: 'core/introduction/try_gx',
-          label: 'Try GX'
+          label: 'Try GX Core'
         },
         {
           type: 'doc',
