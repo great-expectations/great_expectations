@@ -41,7 +41,7 @@ You customize an `UnexpectedRowsExpectation` in essentially the same manner as y
 
    Although the `unexpected_rows_query` should be written in standard SQL or Spark-SQL syntax, it must also contain the special `{batch}` placeholder.  When the Expectation is evaluated, the `{batch}` placeholder will be replaced with the Batch of data that is validated.
 
-   In this example, `unexpected_rows_query` will select any rows where the passenger count is greater than `6`.  These rows will fail validation for this Expectation:
+   In this example, `unexpected_rows_query` will select any rows where the passenger count is greater than `6` or less than `0`.  These rows will fail validation for this Expectation:
 
    ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - define the query for an UnexpectedRowsExpectation"
    ```

@@ -44,7 +44,9 @@ class ExpectPassengerCountToBeLegal(
     gx.expectations.expectation.UnexpectedRowsExpectation
 ):
     # </snippet>
-    unexpected_rows_query: str = "SELECT * FROM {batch} WHERE passenger_count > 6"
+    unexpected_rows_query: str = (
+        "SELECT * FROM {batch} WHERE passenger_count > 6 or passenger_count < 0"
+    )
     # </snippet>
     description: str = "There should be no more than **6** passengers."
 
