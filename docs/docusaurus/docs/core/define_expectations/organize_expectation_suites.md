@@ -30,32 +30,23 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 2. Create an Expectation Suite.
 
-   To create a new Expectation Suite you first need to import the `ExpectationSuite` class:
+   To create a new Expectation Suite you will instantiate the `ExpectationSuite` class, which is available from the `great_expectations` module.
 
-   ```python title="Python input"
-   from great_expectations.core.expectation_suite import ExpectationSuite
-   ```
-   
-   Next, you will provide a descriptive name and instantiate the `ExpectationSuite` class.  In the following code update the variable `suite_name` with a a name relevant to your data.  Then execute the code:
+   Each Expectation Suite will require a unique name.  In the following code update the variable `suite_name` with a a name relevant to your data.  Then execute the code to create your Expectation Suite:
 
-   ```python title="Python input"
-   suite_name = "my_expectation_suite"
-   suite = ExpectationSuite(name=suite_name)
+   ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/organize_expectations_into_suites.py - create an Expectation Suite"
    ```
 
 3. Add the Expectation Suite to your Data Context
 
    Once you have finalized the contents of your Expectation Suite you should save it to your Data Context:  
 
-   ```python title="Python input"
-   suite = context.suites.add(suite)
+   ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/organize_expectations_into_suites.py - add Expectation Suite to the Data Context"
    ```
 
    With a File or GX Cloud Data Context your saved Expectation Suite will be available between Python sessions.  You can retrieve your Expectation Suite from your Data Context with the following code:
 
-   ```python title="Python input"
-   existing_suite_name = "my_expectation_suite"  # replace this with the name of your Expectation Suite
-   suite = context.suites.get(name=existing_suite_name)
+   ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/organize_expectations_into_suites.py - retrieve an Expectation Suite"
    ```
 
 4. Create an Expectation.
@@ -66,17 +57,14 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
    An Expectation Suite's `add_expectation(...)` method takes in an instance of an Expectation and adds it to the Expectation Suite's configuraton: 
 
-   ```python title="Python input"
-   suite.add_expectation(expectation)
+   ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/organize_expectations_into_suites.py - add an Expectation in a variable to an Expectation Suite"
    ```
 
    If you have a configured Data Source, Data Asset, and Batch Definition you can test your Expectation before adding it to your Expectation Suite.  To do this see [Test an Expectation](./test_an_expectation.md).
 
    However, if you test and modify an Expectation _after_ you have added it to your Expectation Suite you must explicitly save those modifications before they will be pushed to the Expectation Suite's configuration:
 
-   ```python title="Python input"
-   expectation.column = "pickup_location_id"
-   expectation.save()
+   ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/organize_expectations_into_suites.py - update an Expectation and push changes to the Suite config"
    ```
    
    Because the `save()` method of a modified Expectation updates its Expectation Suite's configuration, the `save()` method will only function if the Expectation Suite has been added to your Data Context.
@@ -89,34 +77,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python input"
-import great_expectations as gx
-from great_expectations.core.expectation_suite import ExpectationSuite
-import great_expectations.expectations as gxe
-
-context = gx.get_context()
-expectation = gxe.ExpectColumnValuesToNotBeNull(column="passenger_count")
-
-# Create an Expectation Suite
-suite_name = "my_expectation_suite"
-suite = ExpectationSuite(name=suite_name)
-
-# Add the Expectation Suite to the Data Context
-suite = context.suites.add(suite)
-
-# Add a previously created Expectation to the Expectation Suite
-suite.add_expectation(expectation)
-
-# Add an Expectation to the Expectation Suite when it is created
-suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
-
-# Update the configuration of an Expectation, then push the changes to the Expectation Suite
-expectation.column = "pickup_location_id"
-expectation.save()
-
-# Retrieve an Expectation Suite from the Data Context
-existing_suite_name = "my_expectation_suite"  # replace this with the name of your Expectation Suite
-suite = context.suites.get(name=existing_suite_name)
+```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/organize_expectations_into_suites.py - full code example"
 ```
 
 
