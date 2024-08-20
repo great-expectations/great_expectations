@@ -488,6 +488,29 @@ docs_examples_customize_expectations = [
     ),
 ]
 
+docs_example_configure_project_settings = [
+    # Toggle analytics events
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_toggle_analytics_events" tests/integration/test_script_runner.py
+        name="docs_example_toggle_analytics_events",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/_examples/toggle_analytics_events.py",
+        # data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Configure Metadata Stores
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_configure_metadata_stores" tests/integration/test_script_runner.py
+        name="docs_example_configure_metadata_stores",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py",
+        # data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
 # into `test_script_runner.py` and actually used in CI checks).
 
@@ -506,5 +529,7 @@ docs_tests.extend(example_scripts_for_define_expectations)
 docs_tests.extend(docs_examples_customize_expectations)
 
 docs_tests.extend(docs_examples_trigger_actions_based_on_validation_results)
+
+docs_tests.extend(docs_example_configure_project_settings)
 
 docs_tests.extend(learn_data_quality_use_cases)
