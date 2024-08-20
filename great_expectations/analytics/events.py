@@ -221,6 +221,7 @@ class DomainObjectAllDeserializationEvent(Event):
         self.error_type = error_type
         self.store_name = store_name
 
+    @override
     def _properties(self) -> dict:
         return {
             "error_type": self.error_type,
