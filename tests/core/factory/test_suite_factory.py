@@ -1,12 +1,16 @@
+import re
 from typing import Dict
 from unittest import mock
+from unittest.mock import ANY as ANY_TEST_ARG
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
+from pytest_mock import MockerFixture
 from typing_extensions import override
 
 from great_expectations.alias_types import JSONValues
 from great_expectations.analytics.events import (
+    DomainObjectAllDeserializationEvent,
     ExpectationSuiteCreatedEvent,
     ExpectationSuiteDeletedEvent,
 )
@@ -229,9 +233,15 @@ def test_suite_factory_all(context_fixture_name: str, request: pytest.FixtureReq
 
 
 @pytest.mark.unit
-def test_suite_factory_all_with_bad_config(in_memory_runtime_context: AbstractDataContext):
+def test_suite_factory_all_with_bad_config(
+    in_memory_runtime_context: AbstractDataContext, mocker: MockerFixture
+):
     # The difficult part of writing this test was making an expectation I could save
     # in a bad state. To do that I've created this FakeExpectation.
+    analytics_submit_mock = mocker.patch(
+        "great_expectations.data_context.store.store.submit_analytics_event"
+    )
+
     class BadExpectation(SerializableDictDot):
         def __init__(self, id: int):
             self.id = id
@@ -260,6 +270,14 @@ def test_suite_factory_all_with_bad_config(in_memory_runtime_context: AbstractDa
 
     # Assert
     assert result == [suite_1]
+    analytics_submit_mock.assert_called_once_with(
+        DomainObjectAllDeserializationEvent(
+            error_type=ANY_TEST_ARG,
+            store_name="ExpectationsStore",
+        )
+    )
+    analytics_submit_args = analytics_submit_mock.call_args[0][0]
+    assert re.match("marshmallow.*ValidationError", analytics_submit_args.error_type)
 
 
 class TestSuiteFactoryAnalytics:
