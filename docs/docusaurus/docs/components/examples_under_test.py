@@ -8,6 +8,29 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 docs_tests = []
 
+docs_example_scripts_run_validations = [
+    # Create a Validation Definition
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_create_a_validation_definition" tests/integration/test_script_runner.py
+        name="docs_example_create_a_validation_definition",
+        user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+    # Run a Validation Definition
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "docs_example_run_a_validation_definition" tests/integration/test_script_runner.py
+        name="docs_example_run_a_validation_definition",
+        user_flow_script="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
 connect_to_filesystem_data_create_a_data_source = [
     # Local, pandas/spark
     IntegrationTestFixture(
@@ -250,6 +273,9 @@ learn_data_quality_use_cases = [
 
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
 # into `test_script_runner.py` and actually used in CI checks).
+
+docs_tests.extend(docs_example_scripts_run_validations)
+
 docs_tests.extend(connect_to_filesystem_data_create_a_data_source)
 docs_tests.extend(connect_to_filesystem_data_create_a_data_asset)
 docs_tests.extend(connect_to_filesystem_data_create_a_batch_definition)
