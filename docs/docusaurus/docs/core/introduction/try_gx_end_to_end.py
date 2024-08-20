@@ -187,4 +187,4 @@ end_to_end_output = """
 checkpoint_summary = checkpoint_result.describe_dict()
 
 assert checkpoint_summary["success"] is False
-assert checkpoint_summary["expectations"] == 2
+assert len(checkpoint_summary["validation_results"][0]["expectations"]) == 2
