@@ -18,7 +18,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
 
   <LinkCard 
     topIcon 
-    label="About GX"
+    label="About GX Core"
     description="Learn about the key features of GX Core."
     to="/core/introduction/about_gx" 
     icon="/img/expectation_icon.svg" 
@@ -26,7 +26,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
 
   <LinkCard 
     topIcon 
-    label="GX overview"
+    label="GX Core overview"
     description="Learn about GX Core components and workflows."
     to="/core/introduction/gx_overview" 
     icon="/img/expectation_icon.svg" 
@@ -34,7 +34,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
 
   <LinkCard 
     topIcon 
-    label="Try GX"
+    label="Try GX Core"
     description="Walk through example GX Core workflows using sample data."
     to="/core/introduction/try_gx" 
     icon="/img/expectation_icon.svg" 
