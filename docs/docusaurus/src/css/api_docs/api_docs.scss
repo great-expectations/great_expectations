@@ -39,19 +39,6 @@
           color: var(--ifm-font-color-base);
         }
 
-        .deprecated, .versionadded {
-          background-color: var(--card-background-dark-theme);
-          box-shadow: none;
-
-          .deprecated:before {
-            fill: #FEF6F9;
-          }
-
-          .added:before {
-            fill: #F8F9EC;
-          }
-        }
-
         cite {
           background-color: var(--gray-800);
           border: none;
