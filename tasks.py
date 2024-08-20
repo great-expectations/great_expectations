@@ -1082,7 +1082,7 @@ def docs_snippet_tests(
 @invoke.task(
     help={
         "pty": _PTY_HELP_DESC,
-        "reports": "Generate coverage reports to be uploaded to codecov",
+        "reports": "Generate coverage & result reports to be uploaded to codecov",
         "W": "Warnings control",
     },
     iterable=["service_names", "up_services", "verbose"],
@@ -1123,7 +1123,9 @@ def ci_tests(  # noqa: C901 - too complex (9)
         pytest_options.append(f"--timeout={timeout}")
 
     if reports:
-        pytest_options.extend(["--cov=great_expectations", "--cov-report=xml"])
+        pytest_options.extend(
+            ["--cov=great_expectations", "--cov-report=xml", "--junitxml=junit.xml"]
+        )
 
     if verbose:
         pytest_options.append("-vv")

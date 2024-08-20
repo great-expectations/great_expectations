@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.analytics.client import submit as submit_event
@@ -8,6 +8,7 @@ from great_expectations.analytics.events import (
     ExpectationSuiteCreatedEvent,
     ExpectationSuiteDeletedEvent,
 )
+from great_expectations.compatibility.pydantic import ValidationError as PydanticValidationError
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.factory.factory import Factory
@@ -103,9 +104,24 @@ class SuiteFactory(Factory[ExpectationSuite]):
     def all(self) -> Iterable[ExpectationSuite]:
         """Get all ExpectationSuites."""
         dicts = self._store.get_all()
-        # Even though we deserialize here, all the validation has already
-        # been done via marshmallow in the get_all() call
-        return [self._deserialize(suite_dict) for suite_dict in dicts]
+        # Marshmallow validation was done in the previous get_all() call for
+        # suites but we can still die here because pydantic validation happens
+        # on the expectations inside the suites here.
+        # TODO: deserialization should not live in the factory and should
+        # TODO: live in the store like in other domain objects. That will
+        # TODO: allow us delete this error handling here.
+        deserializable_suites: list[ExpectationSuite] = []
+        bad_dicts: list[Any] = []
+        for suite_dict in dicts:
+            try:
+                deserializable_suites.append(self._deserialize(suite_dict))
+            except PydanticValidationError as e:
+                bad_dicts.append(suite_dict)
+                self._store.submit_all_deserialization_event(e)
+            except Exception as e:
+                self._store.submit_all_deserialization_event(e)
+                raise
+        return deserializable_suites
 
     def _deserialize(self, suite_dict: dict) -> ExpectationSuite:
         # TODO: Move this logic to the store
