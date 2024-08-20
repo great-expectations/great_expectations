@@ -23,7 +23,7 @@ Batch Definitions both organize a Data Asset's records into Batches and provide 
 
    Update the values of `data_source_name`, `data_asset_name`, and `batch_definition_name` in the following code and execute it to retrieve your Batch Definition from the Data Context:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve Batch Definition"
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_from_a_batch_definition.py - retrieve Batch Definition"
    ```
 
 2. Optional. Specify the Batch to retrieve.
@@ -52,7 +52,7 @@ Batch Definitions both organize a Data Asset's records into Batches and provide 
 
    The following are some sample Batch Parameter dictionaries for progressively more specific dates:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - example Batch Parameters"
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_from_a_batch_definition.py - sample Batch Parameter dictionaries"
    ```
 
 3. Retrieve a Batch of data.
@@ -65,7 +65,7 @@ Batch Definitions both organize a Data Asset's records into Batches and provide 
 
    Execute the following code to retrieve the first available Batch from the Batch Definition:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve most recent Batch"
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_from_a_batch_definition.py - retrieve most recent Batch"
    ```
 
    </TabItem>
@@ -74,7 +74,7 @@ Batch Definitions both organize a Data Asset's records into Batches and provide 
 
    Update the Batch Parameters in the following code and execute it to retrieve a specific Batch from the Batch Definition:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - retrieve specific Batch"
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_from_a_batch_definition.py - retrieve specific Batch"
    ```
 
    </TabItem>
@@ -85,14 +85,14 @@ Batch Definitions both organize a Data Asset's records into Batches and provide 
 
    You can verify that your Batch Definition was able to read in data and return a populated Batch by printing the header and first few records of the returned Batch:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - verify populated Batch"
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_from_a_batch_definition.py - verify populated Batch"
    ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - full example"
+```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_from_a_batch_definition.py - full code example"
 ```
 
 </TabItem>
