@@ -28,10 +28,12 @@ For more comprehensive guidance on setting up a Python environment, installing G
    pip install great_expectations
    ```
 
-2. Verify GX Core installed successfully:
+2. Verify GX Core installed successfully by running the command below in your Python interpreter, IDE, notebook, or script:
 
-   ```bash title="Terminal input"
-   great_expectations --version
+   ```python title="Python input"
+   import great_expectations as gx
+
+   print(gx.__version__)
    ```
 
    The following output appears when GX Core is successfully installed:
@@ -40,11 +42,13 @@ For more comprehensive guidance on setting up a Python environment, installing G
 
 
 ## Sample data
-The examples provided on this page use a sample of [NYC taxi trip record data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). Using this data, you can make certain assumptions. For example:
+The examples provided on this page use a sample of [NYC taxi trip record data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The sample data is provided using multiple mediums (CSV file, Postgres table) to support each workflow.
+
+When using the taxi data, you can make certain assumptions. For example:
 * The passenger count should be greater than zero because at least one passenger needs to be present for a ride. And, taxis can accommodate a maximum of six passengers.
 * Trip fares should be greater than zero.
 
-## Try an exploratory workflow to validate data in a DataFrame
+## Validate data in a DataFrame
 This example workflow walks you through connecting to data in a Pandas DataFrame and validating the data using a single Expectation.
 
 :::tip Pandas install
@@ -57,11 +61,9 @@ This example requires that [Pandas](https://pandas.pydata.org/) is installed in 
 
 Run the following steps in a Python interpreter, IDE, notebook, or script.
 
-1. Import the `great_expectations` library and `expectations` module.
+1. Import the `great_expectations` library.
 
-   The `great_expectations` module is the root of the GX library and contains shortcuts and convenience methods for starting a GX project in a Python session.
-
-   The `expectations` module contains all the Expectation classes that are provided by the GX library.
+   The `great_expectations` module is the root of the GX Core library and contains shortcuts and convenience methods for starting a GX project in a Python session.
 
    The `pandas` library is used to ingest sample data for this example.
 
@@ -116,8 +118,8 @@ Run the following steps in a Python interpreter, IDE, notebook, or script.
 
 </Tabs>
 
-## Try an end-to-end workflow to validate data in a SQL table
-This example end-to-end workflow walks you through connecting to data in a Postgres table, creating an Expectation Suite, and setting up a Checkpoint to validate the data.
+## Validate data in a SQL table
+This example workflow walks you through connecting to data in a Postgres table, creating an Expectation Suite, and setting up a Checkpoint to validate the data.
 
 <Tabs>
 
@@ -125,11 +127,9 @@ This example end-to-end workflow walks you through connecting to data in a Postg
 
 Run the following steps in a Python interpreter, IDE, notebook, or script.
 
-1. Import the `great_expectations` library and `expectations` module.
+1. Import the `great_expectations` library.
 
-   The `great_expectations` module is the root of the GX library and contains shortcuts and convenience methods for starting a GX project in a Python session.
-
-   The `expectations` module contains all the Expectation classes that are provided by the GX library.
+   The `great_expectations` module is the root of the GX Core library and contains shortcuts and convenience methods for starting a GX project in a Python session.
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py import gx library"
    ```

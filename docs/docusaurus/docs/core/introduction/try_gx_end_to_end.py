@@ -12,7 +12,6 @@ The snippet tags are used to insert the corresponding code into the
 # Import required modules from GX library.
 # <snippet name="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py import gx library">
 import great_expectations as gx
-import great_expectations.expectations as gxe
 
 # </snippet>
 # Create Data Context.
@@ -40,12 +39,12 @@ suite = context.suites.add(
     gx.core.expectation_suite.ExpectationSuite(name="expectations")
 )
 suite.add_expectation(
-    gxe.ExpectColumnValuesToBeBetween(
+    gx.expectations.ExpectColumnValuesToBeBetween(
         column="passenger_count", min_value=1, max_value=6
     )
 )
 suite.add_expectation(
-    gxe.ExpectColumnValuesToBeBetween(column="fare_amount", min_value=0)
+    gx.expectations.ExpectColumnValuesToBeBetween(column="fare_amount", min_value=0)
 )
 # </snippet>
 

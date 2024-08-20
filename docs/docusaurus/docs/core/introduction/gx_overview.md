@@ -2,13 +2,11 @@
 title: GX Core overview
 ---
 
-GX Core is the open source Python library that supports the Great Expectations (GX) framework for data validation.
-
-This overview is for new users of the Great Expectations (GX) Core and those looking for an improved understanding of GX components and primary workflows. It is an ideal place to start before exploring more advanced GX topics found in the GX documentation.
+This overview is for new users of GX Core and those looking for an improved understanding of GX Core components and primary workflows. It is an ideal place to start before exploring more advanced topics found in the GX Core documentation.
 
 ## GX Core components and workflows
 
-GX is a framework for describing data using expressive tests and then validating that the data meets test criteria. GX Core is a Python library that provides a programmatic interface to building and running data validation workflows using GX.
+**Great Expectations (GX)** is a framework for describing data using expressive tests and then validating that the data meets test criteria. **GX Core** is a Python library that provides a programmatic interface to building and running data validation workflows using GX.
 
 GX Core is versatile and supports a variety of workflows. It can be used for interactive, exploratory data validation as well as data validation within production deployments.
 
@@ -71,36 +69,19 @@ A **Checkpoint** is the primary means for validating data in a production deploy
 
 For more information on defining and running Validations, see [Run Validations](/core/run_validations/run_validations.md).
 
+## Customize GX Core workflows
 
-## Guidance for exploratory and production workflows
+While all GX Core workflows follow a shared pattern, the outcome and operation of a workflow can be customized based on how you create Batches, define Expectations, and run Validations. GX components are building blocks that can be applied in a variety of ways to satisfy your data validation use case.
 
-GX workflows can be built to satisfy a variety of use cases. The two most common types are:
-* Exploratory workflows
-* Production workflows
+For instance, a GX Core workflow might:
 
-This section provides high-level guidance on the differences between exploratory and production GX workflows.
+* Create a Batch using data from a Spark DataFrame, allow you to interactively validate the Batch with Expectations, and immediately review the Validation Results. This workflow could serve to inform your exploration of which Expectations you want to use in a production deployment of GX.
 
-### Interactive and exploratory workflows
+* Connect to data in a SQL table, define multiple Expectation Suites that each test for a desired data quality characteristic, and use a Checkpoint to run all Expectation Suites. This workflow, when integrated with and triggered by an orchestrator, could enable automated, scheduled data quality testing on an essential data table.
 
-GX is a popular choice for validating Pandas and Spark DataFrames. You may employ GX during the exploratory data analysis phase to gain more insight into your data. GX enables you to interactively run Expectations against your in-memory data and immediately view the results.
+* Connect to a group of SQL tables and define a collection of Data Assets, each batched on a temporal column, and validate the data within each Data Asset using the same Expectation Suite. This workflow could provide a way to implement consistent data quality testing across a sharded data infrastructure.
 
-When using GX in an interactive and exploratory capacity, typically you will:
-* [Connect to data in DataFrames](/core/connect_to_data/dataframes/dataframes.md).
-* Run your GX workflow code in a notebook or REPL.
-* Use an [Ephemeral Data Context](/core/set_up_a_gx_environment/create_a_data_context.md?context_type=ephemeral), which stores GX environment settings, configuration, and metadata in memory and does not persist outside of the active Python or kernel session.
-* Validate Batches directly with Expectations and Expectations Suites.
-
-### Production deployment workflows
-
-GX is a flexible and powerful framework to introduce data validation into a production data pipeline deployment. You may employ GX to implement robust data quality testing and monitoring across your organization's data stores.
-
-When using GX in an production capacity, typically you will:
-* [Connect to SQL data](/core/connect_to_data/sql_data/sql_data.md).
-* Define your GX workflow as versioned, source-controlled Python code.
-* Trigger and run your GX workflow using Python within a pipeline orchestrator (for example, Airflow or Dagster).
-* Use a [File Data Context](/core/set_up_a_gx_environment/create_a_data_context.md?context_type=file), so that GX environment settings, configuration, and metadata can be persisted between validation runs.
-* Use Checkpoints, Validation Definitions, and Actions to define how data should be validated as well as how the results should be processed.
-* Store your Validation Result history in Data Docs (or [a GX Cloud organization](/cloud/gx_cloud_lp.md)) so that other team members can access the results.
+Equipped with an understanding of the GX Core components, you can design data validation workflows that logically and effectively validate your data across a variety of data store types, environments, and business use cases.
 
 ## Next steps
 

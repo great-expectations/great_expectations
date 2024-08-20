@@ -14,7 +14,6 @@ The snippet tags are used to insert the corresponding code into the
 # Import required modules from GX library.
 # <snippet name="docs/docusaurus/docs/core/introduction/try_gx_exploratory.py import gx library">
 import great_expectations as gx
-import great_expectations.expectations as gxe
 
 import pandas as pd
 # </snippet>
@@ -43,7 +42,7 @@ batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
 # Create Expectation.
 # <snippet name="docs/docusaurus/docs/core/introduction/try_gx_exploratory.py create expectation">
-expectation = gxe.ExpectColumnValuesToBeBetween(
+expectation = gx.expectations.ExpectColumnValuesToBeBetween(
     column="passenger_count", min_value=1, max_value=6
 )
 # </snippet>
