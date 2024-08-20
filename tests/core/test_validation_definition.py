@@ -5,6 +5,7 @@ import uuid
 from typing import TYPE_CHECKING, Type
 from unittest import mock
 
+import pandas as pd
 import pytest
 
 import great_expectations as gx
@@ -137,7 +138,7 @@ class TestValidationRun:
         """Set up our ProjectManager to return a mock Validator"""
         with mock.patch.object(ProjectManager, "get_validator") as mock_get_validator:
             with mock.patch.object(OldValidator, "graph_validate"):
-                gx.get_context()
+                gx.get_context(mode="ephemeral")
                 mock_execution_engine = mocker.MagicMock(
                     spec=ExecutionEngine,
                     batch_manager=mocker.MagicMock(
@@ -231,19 +232,37 @@ class TestValidationRun:
         )
 
     @pytest.mark.parametrize("checkpoint_id", [None, "my_checkpoint_id"])
+    @pytest.mark.parametrize(
+        ("batch_parameters", "expected_batch_parameters"),
+        [
+            (None, None),
+            ({"year": 2024}, {"year": 2024}),
+            (
+                {"dataframe": pd.DataFrame({"a": ["1", "2", "3", "4", "5"]})},
+                {"dataframe": "<DATAFRAME>"},
+            ),
+        ],
+    )
     @pytest.mark.unit
-    def test_adds_requisite_ids(
+    def test_adds_requisite_fields(
         self,
         mock_validator: MagicMock,
         validation_definition: ValidationDefinition,
         checkpoint_id: str | None,
+        batch_parameters: dict | None,
+        expected_batch_parameters: dict | None,
     ):
         mock_validator.graph_validate.return_value = []
 
-        output = validation_definition.run(checkpoint_id=checkpoint_id)
+        output = validation_definition.run(
+            checkpoint_id=checkpoint_id,
+            batch_parameters=batch_parameters,
+        )
+
         assert output.meta == {
             "validation_id": validation_definition.id,
             "checkpoint_id": checkpoint_id,
+            "batch_parameters": expected_batch_parameters,
             "batch_spec": ACTIVE_BATCH_SPEC,
             "batch_markers": BATCH_MARKERS,
             "active_batch_definition": ACTIVE_BATCH_DEFINITION,

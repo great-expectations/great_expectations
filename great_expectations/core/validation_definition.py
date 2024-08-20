@@ -242,7 +242,13 @@ class ValidationDefinition(BaseModel):
         if run_id:
             results.meta["run_id"] = run_id
             results.meta["validation_time"] = run_id.run_time
-            results.meta["batch_parameters"] = batch_parameters
+            if batch_parameters:
+                batch_parameters_copy = {k: v for k, v in batch_parameters.items()}
+                if "dataframe" in batch_parameters_copy:
+                    batch_parameters_copy["dataframe"] = "<DATAFRAME>"
+                results.meta["batch_parameters"] = batch_parameters_copy
+            else:
+                results.meta["batch_parameters"] = None
 
         (
             expectation_suite_identifier,
