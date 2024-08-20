@@ -1,4 +1,4 @@
-from great_expectations.expectations.expectation import Expectation
+from great_expectations.expectations.expectation import Expectation, UnexpectedRowsExpectation
 
 from .core import (
     ExpectColumnDistinctValuesToBeInSet,

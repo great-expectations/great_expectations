@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Type
 from unittest import mock
 
 import pytest
@@ -40,7 +40,13 @@ from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDataAsset,
 )
-from great_expectations.exceptions.exceptions import ValidationDefinitionNotAddedError
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotAddedError,
+    ExpectationSuiteNotAddedError,
+    ResourceNotAddedError,
+    ValidationDefinitionNotAddedError,
+    ValidationDefinitionRelatedResourcesNotAddedError,
+)
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -320,6 +326,19 @@ class TestValidationRun:
         assert result.results[0].expectation_config is not None
         assert result.results[0].expectation_config.rendered_content is not None
         assert result.results[0].rendered_content is not None
+
+    @pytest.mark.unit
+    def test_dependencies_not_added_raises_error(self, validation_definition: ValidationDefinition):
+        validation_definition.suite.id = None
+        validation_definition.data.id = None
+
+        with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError) as e:
+            validation_definition.run()
+
+        assert [type(err) for err in e.value.errors] == [
+            BatchDefinitionNotAddedError,
+            ExpectationSuiteNotAddedError,
+        ]
 
 
 class TestValidationDefinitionSerialization:
@@ -669,3 +688,96 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
     context.validation_definition_store.update.assert_called_once_with(
         key=store_key, value=validation_definition
     )
+
+
+@pytest.mark.parametrize(
+    "id,suite_id,batch_def_id,is_added,error_list",
+    [
+        pytest.param(
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            True,
+            [],
+            id="validation_id|suite_id|batch_def_id",
+        ),
+        pytest.param(
+            str(uuid.uuid4()),
+            None,
+            str(uuid.uuid4()),
+            False,
+            [ExpectationSuiteNotAddedError],
+            id="validation_id|no_suite_id|batch_def_id",
+        ),
+        pytest.param(
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            None,
+            False,
+            [BatchDefinitionNotAddedError],
+            id="validation_id|suite_id|no_batch_def_id",
+        ),
+        pytest.param(
+            str(uuid.uuid4()),
+            None,
+            None,
+            False,
+            [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
+            id="validation_id|no_suite_id|no_batch_def_id",
+        ),
+        pytest.param(
+            None,
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            False,
+            [ValidationDefinitionNotAddedError],
+            id="no_validation_id|suite_id|batch_def_id",
+        ),
+        pytest.param(
+            None,
+            None,
+            str(uuid.uuid4()),
+            False,
+            [ExpectationSuiteNotAddedError, ValidationDefinitionNotAddedError],
+            id="no_validation_id|no_suite_id|batch_def_id",
+        ),
+        pytest.param(
+            None,
+            str(uuid.uuid4()),
+            None,
+            False,
+            [BatchDefinitionNotAddedError, ValidationDefinitionNotAddedError],
+            id="no_validation_id|suite_id|no_batch_def_id",
+        ),
+        pytest.param(
+            None,
+            None,
+            None,
+            False,
+            [
+                BatchDefinitionNotAddedError,
+                ExpectationSuiteNotAddedError,
+                ValidationDefinitionNotAddedError,
+            ],
+            id="no_validation_id|no_suite_id|no_batch_def_id",
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_is_added(
+    id: str | None,
+    suite_id: str | None,
+    batch_def_id: str | None,
+    is_added: bool,
+    error_list: list[Type[ResourceNotAddedError]],
+):
+    validation_definition = ValidationDefinition(
+        name="my_validation_definition",
+        id=id,
+        suite=ExpectationSuite(name="my_suite", id=suite_id),
+        data=BatchDefinition(name="my_batch_def", id=batch_def_id),
+    )
+    validation_definition_added, errors = validation_definition.is_added()
+
+    assert validation_definition_added == is_added
+    assert [type(err) for err in errors] == error_list
