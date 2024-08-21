@@ -55,6 +55,7 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
 
     def update_with_children(self, *children_diagnostics: AddedDiagnostics) -> None:
         for diagnostics in children_diagnostics:
+            # Child errors should be prepended to parent errors so diagnostics are in order
             self.errors = diagnostics.errors + self.errors
 
     @property
