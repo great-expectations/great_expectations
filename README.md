@@ -20,7 +20,7 @@ GX Core is the engine of the GX platform. It combines the collective wisdom of t
 
 Its powerful technical tools start with Expectations: expressive and extensible unit tests for your data. Expectations foster collaboration by giving teams a common language to express data quality tests in an intuitive way. You can automatically generate documentation for each set of validation results, making it easy for everyone to stay on the same page. This not only simplifies your data quality processes, but helps preserve your organization’s institutional knowledge about its data.
 
-Learn more about how data teams are using GX Core in our featured [case studies](https://greatexpectations.io/case-studies/). 
+Learn more about how data teams are using GX Core in our featured [case studies](https://greatexpectations.io/case-studies/).
 
 ## Integration support policy
 
