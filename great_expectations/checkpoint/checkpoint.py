@@ -27,7 +27,6 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
-from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.added_diagnostics import CheckpointAddedDiagnostics
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
@@ -118,16 +117,6 @@ class Checkpoint(BaseModel):
             Renderer: lambda r: r.serialize(),
         }
 
-    @override
-    def json(self, **kwargs: Any) -> str:
-        # Necessary override to check that all children validation definitions are added.
-        # Without this, JSON encoder will raise an error on the first non-added child.
-        diagnostics = self.is_added()
-        if not diagnostics.dependencies_added_except_parent:
-            diagnostics.raise_for_error()
-
-        return super().json(**kwargs)
-
     @validator("validation_definitions", pre=True)
     def _validate_validation_definitions(
         cls, validation_definitions: list[ValidationDefinition] | list[dict]
@@ -178,9 +167,11 @@ class Checkpoint(BaseModel):
             raise CheckpointRunWithoutValidationDefinitionError()
 
         diagnostics = self.is_added()
-        if not diagnostics.is_added and diagnostics.dependencies_added_except_parent:
-            self._add_to_store()
-        diagnostics.raise_for_error()
+        if not diagnostics.is_added:
+            if diagnostics.dependencies_added_except_parent:
+                self._add_to_store()
+            else:
+                diagnostics.raise_for_error()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
