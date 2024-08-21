@@ -11,6 +11,7 @@ from great_expectations.exceptions.exceptions import (
     CheckpointRelatedResourcesNotAddedError,
     ExpectationSuiteNotAddedError,
     ResourceNotAddedError,
+    ResourcesNotAddedError,
     ValidationDefinitionNotAddedError,
     ValidationDefinitionRelatedResourcesNotAddedError,
 )
@@ -51,7 +52,7 @@ class ExpectationSuiteAddedDiagnostics(_ChildAddedDiagnostics):
 class _ParentAddedDiagnostics(AddedDiagnostics):
     parent_error_class: ClassVar[Type[ResourceNotAddedError]]
     children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]]
-    raise_for_error_class: ClassVar[Type[ResourceNotAddedError]]
+    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]]
 
     def update_with_children(self, *children_diagnostics: AddedDiagnostics) -> None:
         for diagnostics in children_diagnostics:
