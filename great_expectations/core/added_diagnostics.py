@@ -96,7 +96,7 @@ class ValidationDefinitionAddedDiagnostics(_ParentAddedDiagnostics):
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourceNotAddedError]] = (
+    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
         ValidationDefinitionRelatedResourcesNotAddedError
     )
 
@@ -107,6 +107,6 @@ class CheckpointAddedDiagnostics(_ParentAddedDiagnostics):
     children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourceNotAddedError]] = (
+    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
         CheckpointRelatedResourcesNotAddedError
     )

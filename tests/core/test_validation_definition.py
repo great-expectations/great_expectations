@@ -435,8 +435,8 @@ class TestValidationRun:
             validation_definition.run()
 
         assert [type(err) for err in e.value.errors] == [
-            ExpectationSuiteNotAddedError,
             BatchDefinitionNotAddedError,
+            ExpectationSuiteNotAddedError,
         ]
 
 
