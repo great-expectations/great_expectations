@@ -8826,6 +8826,7 @@ a.text-dark:focus, a.text-dark:hover {
 }
 
 @media print {
+ [data-theme="light"] {
   *, :after, :before {
     box-shadow: none !important;
     text-shadow: none !important
@@ -8883,6 +8884,7 @@ a.text-dark:focus, a.text-dark:hover {
     border-color: #dee2e6;
     color: inherit
   }
+ }
 }
 
 // Changed to * to apply to all elements since this file is imported under a selector
