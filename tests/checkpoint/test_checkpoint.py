@@ -198,6 +198,7 @@ class TestCheckpointSerialization:
             name="my_checkpoint",
             validation_definitions=validation_definitions,
             actions=actions,
+            id=str(uuid.uuid4()),
         )
 
         actual = json.loads(cp.json(models_as_dict=False))
