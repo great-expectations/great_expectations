@@ -29,10 +29,13 @@ from great_expectations.analytics.events import (
     ExpectationSuiteExpectationUpdatedEvent,
 )
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.added_diagnostics import (
+    AddedDiagnostics,
+    ExpectationSuiteAddedDiagnostics,
+)
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
@@ -234,10 +237,12 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
-    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+    def is_added(self) -> AddedDiagnostics:
         if self.id:
-            return True, []
-        return False, [ExpectationSuiteNotAddedError(name=self.name)]
+            return ExpectationSuiteAddedDiagnostics(added=True, errors=[])
+        return ExpectationSuiteAddedDiagnostics(
+            added=False, errors=[ExpectationSuiteNotAddedError(name=self.name)]
+        )
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""
@@ -588,9 +593,8 @@ class ExpectationSuite(SerializableDictDot):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        added, errors = self.is_added()
-        if not added:
-            raise errors[0]  # Should only be one as this is a leaf node
+        diagnostics = self.is_added()
+        diagnostics.raise_for_error()
 
         return _IdentifierBundle(name=self.name, id=self.id)
 

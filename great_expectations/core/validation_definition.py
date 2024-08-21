@@ -12,6 +12,10 @@ from great_expectations.compatibility.pydantic import (
     ValidationError,
     validator,
 )
+from great_expectations.core.added_diagnostics import (
+    AddedDiagnostics,
+    ValidationDefinitionAddedDiagnostics,
+)
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -28,7 +32,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.exceptions.exceptions import (
-    ResourceNotAddedError,
     ValidationDefinitionNotAddedError,
     ValidationDefinitionRelatedResourcesNotAddedError,
 )
@@ -120,20 +123,22 @@ class ValidationDefinition(BaseModel):
     def data_source(self) -> Datasource:
         return self.asset.datasource
 
-    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
-        errors: list[ResourceNotAddedError] = []
+    def is_added(self) -> AddedDiagnostics:
+        validation_definition_added = self.id is not None
+        validation_definition_errors = (
+            []
+            if validation_definition_added
+            else [ValidationDefinitionNotAddedError(name=self.name)]
+        )
+        validation_definition_diagnostics = ValidationDefinitionAddedDiagnostics(
+            added=validation_definition_added, errors=validation_definition_errors
+        )
 
-        data_added, data_errors = self.data.is_added()
-        errors.extend(data_errors)
+        data_diagnostics = self.data.is_added()
+        suite_diagnostics = self.suite.is_added()
+        validation_definition_diagnostics.update(data_diagnostics, suite_diagnostics)
 
-        suite_added, suite_errors = self.suite.is_added()
-        errors.extend(suite_errors)
-
-        self_added = self.id is not None
-        if not self_added:
-            errors.append(ValidationDefinitionNotAddedError(name=self.name))
-
-        return (data_added and suite_added and self_added, errors)
+        return validation_definition_diagnostics
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -222,13 +227,12 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
-        added, errors = self.is_added()
-        if not added:
+        diagnostics = self.is_added()
+        if not diagnostics.added:
             # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
-            if len(errors) == 1 and isinstance(errors[0], ValidationDefinitionNotAddedError):
+            if not diagnostics.parent_added() and diagnostics.children_added():
                 self._add_to_store()
-            else:
-                raise ValidationDefinitionRelatedResourcesNotAddedError(errors=errors)
+            diagnostics.raise_for_error()
 
         validator = Validator(
             batch_definition=self.batch_definition,
