@@ -211,6 +211,7 @@ class TestCheckpointSerialization:
             name="my_checkpoint",
             validation_definitions=validation_definitions,
             actions=actions,
+            id=str(uuid.uuid4()),
         )
 
         actual = json.loads(cp.json(models_as_dict=False))
@@ -236,111 +237,6 @@ class TestCheckpointSerialization:
         # Validation definitions should be persisted and obtain IDs before serialization
         self._assert_valid_uuid(actual["validation_definitions"][0]["id"])
         self._assert_valid_uuid(actual["validation_definitions"][1]["id"])
-
-    @pytest.mark.filesystem
-    def test_checkpoint_filesystem_round_trip_adds_ids(
-        self,
-        tmp_path: pathlib.Path,
-        actions: list[CheckpointAction],
-    ):
-        with working_directory(tmp_path):
-            context = gx.get_context(mode="file")
-
-        ds_name = "my_datasource"
-        asset_name = "my_asset"
-        batch_definition_name_1 = "my_batch1"
-        suite_name_1 = "my_suite1"
-        validation_definition_name_1 = "my_validation1"
-        batch_definition_name_2 = "my_batch2"
-        suite_name_2 = "my_suite2"
-        validation_definition_name_2 = "my_validation2"
-        cp_name = "my_checkpoint"
-
-        ds = context.data_sources.add_pandas(ds_name)
-        asset = ds.add_csv_asset(asset_name, "my_file.csv")  # type: ignore[arg-type]
-
-        bc1 = asset.add_batch_definition(batch_definition_name_1)
-        suite1 = context.suites.add(ExpectationSuite(suite_name_1))
-        vc1 = context.validation_definitions.add(
-            ValidationDefinition(name=validation_definition_name_1, data=bc1, suite=suite1)
-        )
-
-        bc2 = asset.add_batch_definition(batch_definition_name_2)
-        suite2 = context.suites.add(ExpectationSuite(suite_name_2))
-        vc2 = context.validation_definitions.add(
-            ValidationDefinition(name=validation_definition_name_2, data=bc2, suite=suite2)
-        )
-
-        validation_definitions = [vc1, vc2]
-        cp = Checkpoint(
-            name=cp_name, validation_definitions=validation_definitions, actions=actions
-        )
-
-        serialized_checkpoint = cp.json(models_as_dict=False)
-        serialized_checkpoint_dict = json.loads(serialized_checkpoint)
-
-        assert serialized_checkpoint_dict == {
-            "name": cp_name,
-            "validation_definitions": [
-                {
-                    "id": mock.ANY,
-                    "name": validation_definition_name_1,
-                },
-                {
-                    "id": mock.ANY,
-                    "name": validation_definition_name_2,
-                },
-            ],
-            "actions": [
-                {
-                    "name": "my_slack_action",
-                    "notify_on": "all",
-                    "notify_with": None,
-                    "renderer": {
-                        "class_name": "SlackRenderer",
-                        "module_name": "great_expectations.render.renderer.slack_renderer",
-                    },
-                    "show_failed_expectations": False,
-                    "slack_channel": None,
-                    "slack_token": None,
-                    "slack_webhook": "slack_webhook",
-                    "type": "slack",
-                },
-                {
-                    "name": "my_teams_action",
-                    "notify_on": "all",
-                    "renderer": {
-                        "class_name": "MicrosoftTeamsRenderer",
-                        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",  # noqa: E501
-                    },
-                    "teams_webhook": "teams_webhook",
-                    "type": "microsoft",
-                },
-            ],
-            "result_format": ResultFormat.SUMMARY,
-            "id": None,
-        }
-
-        cp = Checkpoint.parse_raw(serialized_checkpoint)
-
-        # Check that all nested objects have been built properly with their appropriate names
-        assert cp.name == cp_name
-        assert cp.validation_definitions[0].data_source.name == ds_name
-        assert cp.validation_definitions[0].asset.name == asset_name
-
-        assert cp.validation_definitions[0].name == validation_definition_name_1
-        assert cp.validation_definitions[0].batch_definition.name == batch_definition_name_1
-        assert cp.validation_definitions[0].suite.name == suite_name_1
-
-        assert cp.validation_definitions[1].name == validation_definition_name_2
-        assert cp.validation_definitions[1].batch_definition.name == batch_definition_name_2
-        assert cp.validation_definitions[1].suite.name == suite_name_2
-
-        # Check that all validation_definitions and nested suites have been assigned IDs during serialization  # noqa: E501
-        self._assert_valid_uuid(id=cp.validation_definitions[0].id)
-        self._assert_valid_uuid(id=cp.validation_definitions[1].id)
-        self._assert_valid_uuid(id=cp.validation_definitions[0].suite.id)
-        self._assert_valid_uuid(id=cp.validation_definitions[1].suite.id)
 
     def _assert_valid_uuid(self, id: str | None) -> None:
         if not id:
@@ -1015,3 +911,50 @@ def test_is_added(
 
     assert diagnostics.is_added is is_added
     assert [type(err) for err in diagnostics.errors] == error_list
+
+
+@pytest.mark.unit
+def test_adding_with_multiple_child_validation_definitions_raises_error():
+    context = gx.get_context(mode="ephemeral")
+
+    suite_name = "my_suite"
+    validation_definition_name_1 = "my_first_validation"
+    validation_definition_name_2 = "my_second_validation"
+
+    datasource = context.data_sources.add_pandas(name="my_pandas_datasource")
+    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
+    batch_definition = asset.add_batch_definition_whole_dataframe(name="my_batch_definition")
+
+    suite = gx.ExpectationSuite(name=suite_name)
+    expectation = gx.expectations.ExpectColumnValuesToBeBetween(
+        column="passenger_count", min_value=1, max_value=6
+    )
+    suite.add_expectation(expectation)
+
+    validation_definition_1 = gx.ValidationDefinition(
+        name=validation_definition_name_1, data=batch_definition, suite=suite
+    )
+    validation_definition_2 = gx.ValidationDefinition(
+        name=validation_definition_name_2, data=batch_definition, suite=suite
+    )
+
+    with pytest.raises(CheckpointRelatedResourcesNotAddedError) as e:
+        context.checkpoints.add(
+            gx.Checkpoint(
+                name="my_checkpoint",
+                validation_definitions=[validation_definition_1, validation_definition_2],
+            )
+        )
+
+    errors = e.value.errors
+    assert len(errors) == 4
+    assert isinstance(errors[0], ExpectationSuiteNotAddedError) and suite_name in errors[0].message
+    assert (
+        isinstance(errors[1], ValidationDefinitionNotAddedError)
+        and validation_definition_name_2 in errors[1].message
+    )
+    assert isinstance(errors[2], ExpectationSuiteNotAddedError) and suite_name in errors[2].message
+    assert (
+        isinstance(errors[3], ValidationDefinitionNotAddedError)
+        and validation_definition_name_1 in errors[3].message
+    )

@@ -319,7 +319,7 @@ def test_checkpoint_factory_all_with_bad_config(
 
     # Make checkpoint_2 invalid. Pydantic will validate the object at creation time
     # but we can invalidate via assignment.
-    checkpoint_2.validation_definitions = None  # type: ignore[assignment] # done intentionally for test
+    checkpoint_2.result_format = "not_valid"  # type: ignore[assignment] # done intentionally for test
     checkpoint_2.save()
 
     # Act

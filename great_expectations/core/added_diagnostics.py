@@ -38,7 +38,7 @@ class AddedDiagnostics:
         return len(self.errors) == 0
 
     @abstractmethod
-    def raise_for_error(self) -> None:
+    def raise_for_errors(self) -> None:
         """
         Conditionally raises an error if the resource has not been added successfully;
         should prescribe the correct action(s) to take.
@@ -49,7 +49,7 @@ class AddedDiagnostics:
 @dataclass
 class _ChildAddedDiagnostics(AddedDiagnostics):
     @override
-    def raise_for_error(self) -> None:
+    def raise_for_errors(self) -> None:
         if not self.is_added:
             raise self.errors[0]  # Child node so only one error
 
@@ -68,25 +68,32 @@ class ExpectationSuiteAddedDiagnostics(_ChildAddedDiagnostics):
 class _ParentAddedDiagnostics(AddedDiagnostics):
     parent_error_class: ClassVar[Type[ResourceNotAddedError]]
     children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]]
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]]
+    exception_class: ClassVar[Type[ResourcesNotAddedError]]
 
     def update_with_children(self, *children_diagnostics: AddedDiagnostics) -> None:
         for diagnostics in children_diagnostics:
             # Child errors should be prepended to parent errors so diagnostics are in order
             self.errors = diagnostics.errors + self.errors
 
-    @property
-    def parent_added(self) -> bool:
-        return all(not isinstance(err, self.parent_error_class) for err in self.errors)
-
-    @property
-    def children_added(self) -> bool:
-        return all(not isinstance(err, self.children_error_classes) for err in self.errors)
-
     @override
-    def raise_for_error(self) -> None:
+    def raise_for_errors(self) -> None:
         if not self.is_added:
-            raise self.raise_for_error_class(errors=self.errors)
+            raise self.exception_class(errors=self.errors)
+
+    @property
+    def _dependencies_added_except_parent(self) -> bool:
+        return len(self.errors) == 1 and isinstance(self.errors[0], self.parent_error_class)
+
+    def raise_for_errors_except_parent_not_added_error(self) -> None:
+        """
+        Conditionally raises an error if the resource has not been added successfully;
+        if the only error is the parent resource not being added, the error is not raised.
+
+        This is useful when downstream callers add the parent resource on behalf of the user.
+        (e.g., Checkpoint.run())
+        """
+        if not self.is_added and not self._dependencies_added_except_parent:
+            raise self.exception_class(errors=self.errors)
 
 
 @dataclass
@@ -96,7 +103,7 @@ class ValidationDefinitionAddedDiagnostics(_ParentAddedDiagnostics):
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
+    exception_class: ClassVar[Type[ResourcesNotAddedError]] = (
         ValidationDefinitionRelatedResourcesNotAddedError
     )
 
@@ -107,6 +114,6 @@ class CheckpointAddedDiagnostics(_ParentAddedDiagnostics):
     children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
+    exception_class: ClassVar[Type[ResourcesNotAddedError]] = (
         CheckpointRelatedResourcesNotAddedError
     )

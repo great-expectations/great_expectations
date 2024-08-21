@@ -219,12 +219,9 @@ class ValidationDefinition(BaseModel):
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         diagnostics = self.is_added()
-        if not diagnostics.is_added:
-            # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
-            if not diagnostics.parent_added and diagnostics.children_added:
-                self._add_to_store()
-            else:
-                diagnostics.raise_for_error()
+        diagnostics.raise_for_errors_except_parent_not_added_error()
+        if not self.id:
+            self._add_to_store()
 
         validator = Validator(
             batch_definition=self.batch_definition,
@@ -302,7 +299,7 @@ class ValidationDefinition(BaseModel):
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         diagnostics = self.is_added()
-        diagnostics.raise_for_error()
+        diagnostics.raise_for_errors()
 
         return _IdentifierBundle(name=self.name, id=self.id)
 

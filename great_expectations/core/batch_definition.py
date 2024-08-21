@@ -86,7 +86,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
         diagnostics = self.is_added()
-        diagnostics.raise_for_error()
+        diagnostics.raise_for_errors()
 
         asset = self.data_asset
         data_source = asset.datasource
