@@ -121,7 +121,7 @@ class Checkpoint(BaseModel):
     @override
     def json(self, **kwargs: Any) -> str:
         # Necessary override to check that all children validation definitions are added.
-        # JSON encoder will raise an error on the first non-added child.
+        # Without this, JSON encoder will raise an error on the first non-added child.
         diagnostics = self.is_added()
         diagnostics.raise_for_error()
 
