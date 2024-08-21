@@ -65,8 +65,10 @@ class CheckpointStore(Store):
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
         diagnostics = value.is_added()
         if self.cloud_mode:
+            # Cloud provides the parent ID
             diagnostics.raise_for_errors_except_parent()
         else:
+            # File/ephemeral will add the ID prior to this step
             diagnostics.raise_for_errors()
 
         data = value.json(models_as_dict=False, indent=2, sort_keys=True, exclude_none=True)
