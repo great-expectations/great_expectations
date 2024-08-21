@@ -76,6 +76,12 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
             self.errors = diagnostics.errors + self.errors
 
     @property
+    def dependencies_added_except_parent(self) -> bool:
+        if self.is_added:
+            return False
+        return not self.parent_added and self.children_added
+
+    @property
     def parent_added(self) -> bool:
         return all(not isinstance(err, self.parent_error_class) for err in self.errors)
 

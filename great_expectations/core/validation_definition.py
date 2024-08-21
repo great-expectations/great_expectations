@@ -221,7 +221,7 @@ class ValidationDefinition(BaseModel):
         diagnostics = self.is_added()
         if not diagnostics.is_added:
             # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
-            if not diagnostics.parent_added and diagnostics.children_added:
+            if diagnostics.dependencies_added_except_parent:
                 self._add_to_store()
             else:
                 diagnostics.raise_for_error()
