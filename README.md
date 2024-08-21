@@ -11,6 +11,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v1.json)](https://github.com/charliermarsh/ruff)
 
 Will CI fail?
+Or will it succeed TWICE?
 
 <!-- <<<Super-quickstart links go here>>> -->
 
