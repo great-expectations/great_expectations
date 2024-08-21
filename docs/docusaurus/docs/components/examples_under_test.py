@@ -8,6 +8,23 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 docs_tests = []
 
+try_gx = [
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "try_gx_exploratory" tests/integration/test_script_runner.py
+        name="try_gx_exploratory",
+        user_flow_script="docs/docusaurus/docs/core/introduction/try_gx_exploratory.py",
+        backend_dependencies=[],
+    ),
+    # To test, run:
+    # pytest --docs-tests --postgresql -k "try_gx_end_to_end" tests/integration/test_script_runner.py
+    IntegrationTestFixture(
+        name="try_gx_end_to_end",
+        user_flow_script="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+]
+
 create_a_data_context = [
     IntegrationTestFixture(
         # To test, run:
@@ -524,6 +541,7 @@ learn_data_quality_use_cases = [
 
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
 # into `test_script_runner.py` and actually used in CI checks).
+docs_tests.extend(try_gx)
 
 docs_tests.extend(create_a_data_context)
 

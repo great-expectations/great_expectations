@@ -32,7 +32,7 @@ Search the docs you're using currently for an answer to your issue or question.
 
 If you're new to GX Cloud, review [About GX Cloud](/cloud/about_gx.md).
 
-If you're new to GX OSS, see [About Great Expectations](/core/introduction/about_gx.md).
+If you're new to GX Core, see the [Introduction to GX Core](/core/introduction/introduction.md).
 
 ### Include all the relevant information
 
