@@ -10,6 +10,9 @@ from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import FileNamePartitionerYearly
 from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotAddedError,
+)
 
 if TYPE_CHECKING:
     import pytest_mock
@@ -122,20 +125,32 @@ def test_get_batch_raises_error_with_empty_batch_list(mocker: pytest_mock.MockFi
 
 
 @pytest.mark.unit
-def test_identifier_bundle(in_memory_runtime_context):
+def test_identifier_bundle_success(in_memory_runtime_context):
     context = in_memory_runtime_context
     ds = context.data_sources.add_pandas("pandas_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_definition = asset.add_batch_definition("my_batch_definition")
 
     result = batch_definition.identifier_bundle()
-
     assert result.datasource.name == "pandas_datasource" and result.datasource.id is not None
     assert result.asset.name == "my_asset" and result.asset.id is not None
     assert (
         result.batch_definition.name == "my_batch_definition"
         and result.batch_definition.id is not None
     )
+
+
+@pytest.mark.unit
+def test_identifier_bundle_no_id_raises_error(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    ds = context.data_sources.add_pandas("pandas_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")
+    batch_definition = asset.add_batch_definition("my_batch_definition")
+
+    batch_definition.id = None
+
+    with pytest.raises(BatchDefinitionNotAddedError):
+        batch_definition.identifier_bundle()
 
 
 @pytest.mark.parametrize(

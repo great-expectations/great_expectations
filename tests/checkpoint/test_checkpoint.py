@@ -121,7 +121,7 @@ class TestCheckpointSerialization:
             ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ):
+        ), mock.patch.object(ValidationDefinition, "is_added", return_value=(True, [])):
             yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
@@ -138,7 +138,7 @@ class TestCheckpointSerialization:
             ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ):
+        ), mock.patch.object(ValidationDefinition, "is_added", return_value=(True, [])):
             yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture

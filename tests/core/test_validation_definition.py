@@ -670,7 +670,7 @@ def test_identifier_bundle_with_existing_id(validation_definition: ValidationDef
 
 
 @pytest.mark.unit
-def test_identifier_bundle_no_id(validation_definition: ValidationDefinition):
+def test_identifier_bundle_no_id_raises_error(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
     with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError):

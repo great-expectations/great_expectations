@@ -1058,7 +1058,7 @@ def test_identifier_bundle_with_existing_id():
 
 
 @pytest.mark.unit
-def test_identifier_bundle_no_id():
+def test_identifier_bundle_no_id_raises_error():
     _ = gx.get_context(mode="ephemeral")
     suite = ExpectationSuite(name="my_suite", id=None)
 
