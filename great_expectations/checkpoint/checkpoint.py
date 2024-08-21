@@ -2,7 +2,16 @@ from __future__ import annotations
 
 import datetime as dt
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    TypedDict,
+    Union,
+    cast,
+)
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
@@ -18,6 +27,7 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
+from great_expectations.core.added_diagnostics import CheckpointAddedDiagnostics
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -31,9 +41,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions.exceptions import (
     CheckpointNotAddedError,
-    CheckpointRelatedResourcesNotAddedError,
     CheckpointRunWithoutValidationDefinitionError,
-    ResourceNotAddedError,
 )
 from great_expectations.render.renderer.renderer import Renderer
 
@@ -158,13 +166,13 @@ class Checkpoint(BaseModel):
         if not self.validation_definitions:
             raise CheckpointRunWithoutValidationDefinitionError()
 
-        added, errors = self.is_added()
-        if not added:
+        diagnostics = self.is_added()
+        if not diagnostics.is_added:
             # The checkpoint itself is not added but all children are - we can add it for the user
-            if len(errors) == 1 and isinstance(errors[0], CheckpointNotAddedError):
+            if not diagnostics.parent_added and diagnostics.children_added:
                 self._add_to_store()
             else:
-                raise CheckpointRelatedResourcesNotAddedError(errors=errors)
+                diagnostics.raise_for_error()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -262,20 +270,14 @@ class Checkpoint(BaseModel):
 
         return priority_actions + secondary_actions
 
-    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
-        errs: list[ResourceNotAddedError] = []
+    def is_added(self) -> CheckpointAddedDiagnostics:
+        checkpoint_diagnostics = CheckpointAddedDiagnostics(
+            errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
+        )
+        validation_definition_diagnostics = [vd.is_added() for vd in self.validation_definitions]
+        checkpoint_diagnostics.update_with_children(*validation_definition_diagnostics)
 
-        validations_added: bool = True
-        for validation_definition in self.validation_definitions:
-            validation_added, validation_errs = validation_definition.is_added()
-            errs.extend(validation_errs)
-            validations_added = validation_added and validations_added
-
-        self_added = self.id is not None
-        if not self_added:
-            errs.append(CheckpointNotAddedError(name=self.name))
-
-        return (validations_added and self_added, errs)
+        return checkpoint_diagnostics
 
     @public_api
     def save(self) -> None:
