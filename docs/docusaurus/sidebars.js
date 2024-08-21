@@ -2,29 +2,19 @@ module.exports = {
   gx_core: [
     {
       type: 'category',
-      label: 'Introduction to Great Expectations',
+      label: 'Introduction to GX Core',
       link: {type: 'doc', id: 'core/introduction/introduction'},
       items: [
         {
           type: 'doc',
-          id: 'core/introduction/about_gx',
-          label: 'About GX'
-        },
-        {
-          type: 'doc',
           id: 'core/introduction/gx_overview',
-          label: 'GX overview'
+          label: 'GX Core overview'
         },
         {
           type: 'doc',
           id: 'core/introduction/try_gx',
-          label: 'Try GX'
-        },
-        {
-          type: 'doc',
-          id: 'core/introduction/community_resources',
-          label: 'Community resources'
-        },
+          label: 'Try GX Core'
+        }
       ],
     },
     {
@@ -149,6 +139,11 @@ module.exports = {
       id: 'oss/changelog',
       label: 'Changelog'
     },
+    {
+      type: 'doc',
+      id: 'core/introduction/community_resources',
+      label: 'Community resources'
+    }
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
