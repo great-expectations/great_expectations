@@ -219,7 +219,7 @@ class ValidationDefinition(BaseModel):
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         diagnostics = self.is_added()
-        diagnostics.raise_for_dependencies_added_except_parent()
+        diagnostics.raise_for_parent_not_added()
         if not self.id:
             self._add_to_store()
 
@@ -299,7 +299,7 @@ class ValidationDefinition(BaseModel):
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         diagnostics = self.is_added()
-        diagnostics.raise_for_any_errors()
+        diagnostics.raise_for_errors()
 
         return _IdentifierBundle(name=self.name, id=self.id)
 
