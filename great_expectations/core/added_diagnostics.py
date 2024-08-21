@@ -93,6 +93,10 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
             raise self.exception_class(errors=self.errors)
 
     def raise_for_errors_except_parent(self) -> None:
+        """
+        Conditionally raises an error if the resource has not been added successfully;
+        purposely omits raising an error if the parent resource has not been added successfully.
+        """
         if not self.is_added and not self._dependencies_added_except_parent:
             raise self.exception_class(errors=self.errors)
 
