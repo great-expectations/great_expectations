@@ -40,4 +40,6 @@ If you're interested in helping out, review the [GitHub issues list](https://git
 
 ## Connect with our community
 
-Check out the [GX community](https://greatexpectations.io/community) and connect with other GX users and see how they're using GX in the GX [public Slack channel](https://greatexpectations.io/slack). Before you post for the first time, review the [Slack Guidelines](https://discourse.greatexpectations.io/t/slack-guidelines/1195).
+Check out the [GX community](https://greatexpectations.io/community) for the latest news on GX development, events and workshops, job opprotunities, and ways to contribute or collaborate with the GX team and fellow community members.  
+
+Connect with other GX users and see how they're using GX in the GX [public Slack channel](https://greatexpectations.io/slack). Before you post for the first time, review the [Slack Guidelines](https://discourse.greatexpectations.io/t/slack-guidelines/1195).
