@@ -75,22 +75,14 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
             # Child errors should be prepended to parent errors so diagnostics are in order
             self.errors = diagnostics.errors + self.errors
 
-    @property
-    def _dependencies_added_except_parent(self) -> bool:
-        return not self._parent_added and self._children_added
-
-    @property
-    def _parent_added(self) -> bool:
-        return all(not isinstance(err, self.parent_error_class) for err in self.errors)
-
-    @property
-    def _children_added(self) -> bool:
-        return all(not isinstance(err, self.children_error_classes) for err in self.errors)
-
     @override
     def raise_for_errors(self) -> None:
         if not self.is_added:
             raise self.exception_class(errors=self.errors)
+
+    @property
+    def _dependencies_added_except_parent(self) -> bool:
+        return len(self.errors) == 1 and isinstance(self.errors[0], self.parent_error_class)
 
     def raise_for_errors_except_parent_not_added_error(self) -> None:
         """
