@@ -66,7 +66,7 @@ class CheckpointStore(Store):
         diagnostics = value.is_added()
         if self.cloud_mode:
             # Cloud provides the parent ID
-            diagnostics.raise_for_errors_except_parent()
+            diagnostics.raise_for_errors_except_parent_not_added_error()
         else:
             # File/ephemeral will add the ID prior to this step
             diagnostics.raise_for_errors()

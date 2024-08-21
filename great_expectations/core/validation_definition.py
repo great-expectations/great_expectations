@@ -219,7 +219,7 @@ class ValidationDefinition(BaseModel):
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         diagnostics = self.is_added()
-        diagnostics.raise_for_errors_except_parent()
+        diagnostics.raise_for_errors_except_parent_not_added_error()
         if not self.id:
             self._add_to_store()
 

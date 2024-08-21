@@ -92,7 +92,7 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
         if not self.is_added:
             raise self.exception_class(errors=self.errors)
 
-    def raise_for_errors_except_parent(self) -> None:
+    def raise_for_errors_except_parent_not_added_error(self) -> None:
         """
         Conditionally raises an error if the resource has not been added successfully;
         purposely omits raising an error if the parent resource has not been added successfully.
