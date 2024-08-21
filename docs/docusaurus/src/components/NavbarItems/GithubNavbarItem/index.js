@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import styles from './styles.module.scss';
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import {useColorMode} from '@docusaurus/theme-common';
 import ThemedImage from '@theme/ThemedImage';
 
 export default function GithubNavbarItem({ owner, repository, className }) {
