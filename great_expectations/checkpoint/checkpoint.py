@@ -18,6 +18,7 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -108,6 +109,15 @@ class Checkpoint(BaseModel):
             ValidationDefinition: lambda v: v.identifier_bundle(),
             Renderer: lambda r: r.serialize(),
         }
+
+    @override
+    def json(self, **kwargs: Any) -> str:
+        # Necessary override to check that all children validation definitions are added.
+        # JSON encoder will raise an error on the first non-added child.
+        added, errors = self.is_added()
+        if not added:
+            raise CheckpointRelatedResourcesNotAddedError(errors=errors)
+        return super().json(**kwargs)
 
     @validator("validation_definitions", pre=True)
     def _validate_validation_definitions(

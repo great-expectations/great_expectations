@@ -1002,3 +1002,50 @@ def test_is_added(
 
     assert checkpoint_added is is_added
     assert [type(err) for err in errors] == error_list
+
+
+@pytest.mark.unit
+def test_adding_with_multiple_child_validation_definitions_raises_error():
+    context = gx.get_context(mode="ephemeral")
+
+    suite_name = "my_suite"
+    validation_definition_name_1 = "my_first_validation"
+    validation_definition_name_2 = "my_second_validation"
+
+    datasource = context.data_sources.add_pandas(name="my_pandas_datasource")
+    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
+    batch_definition = asset.add_batch_definition_whole_dataframe(name="my_batch_definition")
+
+    suite = gx.ExpectationSuite(name=suite_name)
+    expectation = gx.expectations.ExpectColumnValuesToBeBetween(
+        column="passenger_count", min_value=1, max_value=6
+    )
+    suite.add_expectation(expectation)
+
+    validation_definition_1 = gx.ValidationDefinition(
+        name=validation_definition_name_1, data=batch_definition, suite=suite
+    )
+    validation_definition_2 = gx.ValidationDefinition(
+        name=validation_definition_name_2, data=batch_definition, suite=suite
+    )
+
+    with pytest.raises(CheckpointRelatedResourcesNotAddedError) as e:
+        context.checkpoints.add(
+            gx.Checkpoint(
+                name="my_checkpoint",
+                validation_definitions=[validation_definition_1, validation_definition_2],
+            )
+        )
+
+    errors = e.value.errors
+    assert len(errors) == 4
+    assert isinstance(errors[0], ExpectationSuiteNotAddedError) and suite_name in errors[0].message
+    assert (
+        isinstance(errors[1], ValidationDefinitionNotAddedError)
+        and validation_definition_name_1 in errors[1].message
+    )
+    assert isinstance(errors[2], ExpectationSuiteNotAddedError) and suite_name in errors[2].message
+    assert (
+        isinstance(errors[3], ValidationDefinitionNotAddedError)
+        and validation_definition_name_2 in errors[3].message
+    )
