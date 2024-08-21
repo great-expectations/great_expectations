@@ -67,7 +67,7 @@ class CheckpointStore(Store):
         if self.cloud_mode:
             diagnostics.raise_for_dependencies_added_except_parent()
         else:
-            diagnostics.raise_for_error()
+            diagnostics.raise_for_any_errors()
 
         data = value.json(models_as_dict=False, indent=2, sort_keys=True, exclude_none=True)
 

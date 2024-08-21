@@ -38,7 +38,7 @@ class AddedDiagnostics:
         return len(self.errors) == 0
 
     @abstractmethod
-    def raise_for_error(self) -> None:
+    def raise_for_any_errors(self) -> None:
         """
         Conditionally raises an error if the resource has not been added successfully;
         should prescribe the correct action(s) to take.
@@ -49,7 +49,7 @@ class AddedDiagnostics:
 @dataclass
 class _ChildAddedDiagnostics(AddedDiagnostics):
     @override
-    def raise_for_error(self) -> None:
+    def raise_for_any_errors(self) -> None:
         if not self.is_added:
             raise self.errors[0]  # Child node so only one error
 
@@ -88,7 +88,7 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
         return all(not isinstance(err, self.children_error_classes) for err in self.errors)
 
     @override
-    def raise_for_error(self) -> None:
+    def raise_for_any_errors(self) -> None:
         if not self.is_added:
             raise self.exception_class(errors=self.errors)
 

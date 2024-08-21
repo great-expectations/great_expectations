@@ -299,7 +299,7 @@ class ValidationDefinition(BaseModel):
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         diagnostics = self.is_added()
-        diagnostics.raise_for_error()
+        diagnostics.raise_for_any_errors()
 
         return _IdentifierBundle(name=self.name, id=self.id)
 
