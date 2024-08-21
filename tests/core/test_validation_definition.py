@@ -435,8 +435,8 @@ class TestValidationRun:
             validation_definition.run()
 
         assert [type(err) for err in e.value.errors] == [
-            BatchDefinitionNotAddedError,
             ExpectationSuiteNotAddedError,
+            BatchDefinitionNotAddedError,
         ]
 
 
@@ -821,7 +821,7 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
             None,
             None,
             False,
-            [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
+            [ExpectationSuiteNotAddedError, BatchDefinitionNotAddedError],
             id="validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
@@ -854,8 +854,8 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
             None,
             False,
             [
-                BatchDefinitionNotAddedError,
                 ExpectationSuiteNotAddedError,
+                BatchDefinitionNotAddedError,
                 ValidationDefinitionNotAddedError,
             ],
             id="no_validation_id|no_suite_id|no_batch_def_id",
@@ -876,7 +876,7 @@ def test_is_added(
         suite=ExpectationSuite(name="my_suite", id=suite_id),
         data=BatchDefinition(name="my_batch_def", id=batch_def_id),
     )
-    validation_definition_added, errors = validation_definition.is_added()
+    diagnostics = validation_definition.is_added()
 
-    assert validation_definition_added is is_added
-    assert [type(err) for err in errors] == error_list
+    assert diagnostics.added is is_added
+    assert [type(err) for err in diagnostics.errors] == error_list

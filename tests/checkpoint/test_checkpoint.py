@@ -24,6 +24,11 @@ from great_expectations.checkpoint.checkpoint import (
     CheckpointResult,
 )
 from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.core.added_diagnostics import (
+    BatchDefinitionAddedDiagnostics,
+    ExpectationSuiteAddedDiagnostics,
+    ValidationDefinitionAddedDiagnostics,
+)
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -121,7 +126,11 @@ class TestCheckpointSerialization:
             ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(ValidationDefinition, "is_added", return_value=(True, [])):
+        ), mock.patch.object(
+            ValidationDefinition,
+            "is_added",
+            return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
+        ):
             yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
@@ -138,7 +147,11 @@ class TestCheckpointSerialization:
             ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(ValidationDefinition, "is_added", return_value=(True, [])):
+        ), mock.patch.object(
+            ValidationDefinition,
+            "is_added",
+            return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
+        ):
             yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
@@ -427,13 +440,13 @@ class TestCheckpointResult:
     def mock_suite(self, mocker: MockerFixture):
         suite = mocker.Mock(spec=ExpectationSuite)
         suite.name = self.suite_name
-        suite.is_added.return_value = (True, [])
+        suite.is_added.return_value = ExpectationSuiteAddedDiagnostics(errors=[])
         return suite
 
     @pytest.fixture
     def mock_batch_def(self, mocker: MockerFixture):
         bd = mocker.Mock(spec=BatchDefinition)
-        bd._copy_and_set_values().is_added.return_value = (True, [])
+        bd._copy_and_set_values().is_added.return_value = BatchDefinitionAddedDiagnostics(errors=[])
         return bd
 
     @pytest.fixture
@@ -847,7 +860,7 @@ class TestCheckpointResult:
             None,
             None,
             False,
-            [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
+            [ExpectationSuiteNotAddedError, BatchDefinitionNotAddedError],
             id="checkpoint_id|validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
@@ -884,8 +897,8 @@ class TestCheckpointResult:
             None,
             False,
             [
-                BatchDefinitionNotAddedError,
                 ExpectationSuiteNotAddedError,
+                BatchDefinitionNotAddedError,
                 ValidationDefinitionNotAddedError,
             ],
             id="checkpoint_id|no_validation_id|no_suite_id|no_batch_def_id",
@@ -923,7 +936,7 @@ class TestCheckpointResult:
             None,
             None,
             False,
-            [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError, CheckpointNotAddedError],
+            [ExpectationSuiteNotAddedError, BatchDefinitionNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
@@ -968,8 +981,8 @@ class TestCheckpointResult:
             None,
             False,
             [
-                BatchDefinitionNotAddedError,
                 ExpectationSuiteNotAddedError,
+                BatchDefinitionNotAddedError,
                 ValidationDefinitionNotAddedError,
                 CheckpointNotAddedError,
             ],
@@ -998,7 +1011,7 @@ def test_is_added(
             )
         ],
     )
-    checkpoint_added, errors = checkpoint.is_added()
+    diagnostics = checkpoint.is_added()
 
-    assert checkpoint_added is is_added
-    assert [type(err) for err in errors] == error_list
+    assert diagnostics.added is is_added
+    assert [type(err) for err in diagnostics.errors] == error_list

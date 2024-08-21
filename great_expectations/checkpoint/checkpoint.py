@@ -169,9 +169,10 @@ class Checkpoint(BaseModel):
         diagostics = self.is_added()
         if not diagostics.added:
             # The checkpoint itself is not added but all children are - we can add it for the user
-            if not diagostics.parent_added() and diagostics.children_added():
+            if not diagostics.parent_added and diagostics.children_added:
                 self._add_to_store()
-            diagostics.raise_for_error()
+            else:
+                diagostics.raise_for_error()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -270,12 +271,9 @@ class Checkpoint(BaseModel):
         return priority_actions + secondary_actions
 
     def is_added(self) -> AddedDiagnostics:
-        checkpoint_added = self.id is not None
-        checkpoint_errors = [] if checkpoint_added else [CheckpointNotAddedError(name=self.name)]
         checkpoint_diagnostics = CheckpointAddedDiagnostics(
-            added=checkpoint_added, errors=checkpoint_errors
+            errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
         )
-
         validation_definition_diagnostics = [vd.is_added() for vd in self.validation_definitions]
         checkpoint_diagnostics.update(*validation_definition_diagnostics)
 
