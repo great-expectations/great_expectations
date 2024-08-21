@@ -78,7 +78,7 @@ class ExpectationSuite(SerializableDictDot):
         self.name = name
         self.id = id
 
-        self.expectations: list[Union[Expectation, ExpectationConfiguration, dict]] = []
+        self.expectations = []
         for exp in expectations or []:
             try:
                 self.expectations.append(self._process_expectation(exp))
