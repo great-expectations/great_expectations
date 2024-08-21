@@ -122,16 +122,9 @@ class ValidationDefinition(BaseModel):
         return self.asset.datasource
 
     def is_added(self) -> ValidationDefinitionAddedDiagnostics:
-        validation_definition_added = self.id is not None
-        validation_definition_errors = (
-            []
-            if validation_definition_added
-            else [ValidationDefinitionNotAddedError(name=self.name)]
-        )
         validation_definition_diagnostics = ValidationDefinitionAddedDiagnostics(
-            errors=validation_definition_errors
+            errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
         )
-
         suite_diagnostics = self.suite.is_added()
         data_diagnostics = self.data.is_added()
         validation_definition_diagnostics.update_with_children(suite_diagnostics, data_diagnostics)
