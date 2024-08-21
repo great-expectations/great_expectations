@@ -219,10 +219,9 @@ class ValidationDefinition(BaseModel):
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         diagnostics = self.is_added()
-        if diagnostics.dependencies_added_except_parent:
+        if not diagnostics.is_added and diagnostics.dependencies_added_except_parent:
             self._add_to_store()
-        else:
-            diagnostics.raise_for_error()
+        diagnostics.raise_for_error()
 
         validator = Validator(
             batch_definition=self.batch_definition,

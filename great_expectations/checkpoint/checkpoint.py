@@ -178,10 +178,9 @@ class Checkpoint(BaseModel):
             raise CheckpointRunWithoutValidationDefinitionError()
 
         diagnostics = self.is_added()
-        if diagnostics.dependencies_added_except_parent:
+        if not diagnostics.is_added and diagnostics.dependencies_added_except_parent:
             self._add_to_store()
-        else:
-            diagnostics.raise_for_error()
+        diagnostics.raise_for_error()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(

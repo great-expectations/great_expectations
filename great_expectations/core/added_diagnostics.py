@@ -79,14 +79,14 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
     def dependencies_added_except_parent(self) -> bool:
         if self.is_added:
             return False
-        return not self.parent_added and self.children_added
+        return not self._parent_added and self._children_added
 
     @property
-    def parent_added(self) -> bool:
+    def _parent_added(self) -> bool:
         return all(not isinstance(err, self.parent_error_class) for err in self.errors)
 
     @property
-    def children_added(self) -> bool:
+    def _children_added(self) -> bool:
         return all(not isinstance(err, self.children_error_classes) for err in self.errors)
 
     @override
