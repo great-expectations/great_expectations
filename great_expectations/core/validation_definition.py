@@ -296,8 +296,9 @@ class ValidationDefinition(BaseModel):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        if not self.id:
-            raise ValidationDefinitionNotAddedError(name=self.name)
+        added, errors = self.is_added()
+        if not added:
+            raise ValidationDefinitionRelatedResourcesNotAddedError(errors=errors)
         return _IdentifierBundle(name=self.name, id=self.id)
 
     @public_api

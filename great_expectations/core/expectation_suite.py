@@ -588,8 +588,9 @@ class ExpectationSuite(SerializableDictDot):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        if not self.id:
-            raise ExpectationSuiteNotAddedError(name=self.name)
+        added, errors = self.is_added()
+        if not added:
+            raise errors[0]
 
         return _IdentifierBundle(name=self.name, id=self.id)
 
