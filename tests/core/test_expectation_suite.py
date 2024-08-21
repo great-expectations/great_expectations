@@ -1078,7 +1078,7 @@ def test_is_added(id: str | None, is_added: bool, num_errors: int):
     suite = ExpectationSuite(name="my_suite", id=id)
     diagnostics = suite.is_added()
 
-    assert diagnostics.dependencies_added is is_added
+    assert diagnostics.is_added is is_added
     assert len(diagnostics.errors) == num_errors
     assert all(
         isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in diagnostics.errors
