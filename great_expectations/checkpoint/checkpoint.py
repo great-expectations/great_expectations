@@ -166,13 +166,13 @@ class Checkpoint(BaseModel):
         if not self.validation_definitions:
             raise CheckpointRunWithoutValidationDefinitionError()
 
-        diagostics = self.is_added()
-        if not diagostics.is_added:
+        diagnostics = self.is_added()
+        if not diagnostics.is_added:
             # The checkpoint itself is not added but all children are - we can add it for the user
-            if not diagostics.parent_added and diagostics.children_added:
+            if not diagnostics.parent_added and diagnostics.children_added:
                 self._add_to_store()
             else:
-                diagostics.raise_for_error()
+                diagnostics.raise_for_error()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
