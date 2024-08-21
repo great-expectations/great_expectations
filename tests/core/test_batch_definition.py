@@ -167,4 +167,4 @@ def test_is_added(id: str | None, is_added: bool, num_errors: int):
 
     assert batch_def_added is is_added
     assert len(errors) == num_errors
-    assert all(isinstance(error, BatchDefinitionNotAddedError) for error in errors)
+    assert all(isinstance(err, BatchDefinitionNotAddedError) for err in errors)
