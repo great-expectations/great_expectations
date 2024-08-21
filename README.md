@@ -48,7 +48,7 @@ GX recommends deploying GX Core within a virtual environment. For more informati
 
 ## Get support from GX and the community
 
-You can get help from GX and the community in a few ways. GX prioritizes addressing issues in Github and Discourse. 
+You can get help from GX and the community in a few ways. GX prioritizes addressing issues in Github and Discourse.
 
 1. Issues and PRs in the [GX GitHub repository](https://github.com/great-expectations)
 2. Questions posted to the [GX Core Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11)
