@@ -123,7 +123,11 @@ class Checkpoint(BaseModel):
         # Necessary override to check that all children validation definitions are added.
         # Without this, JSON encoder will raise an error on the first non-added child.
         diagnostics = self.is_added()
-        diagnostics.raise_for_error()
+        if not diagnostics.is_added:
+            if not diagnostics.parent_added and diagnostics.children_added:
+                pass  # Checkpoint is not added but all children are - valid serialization state
+            else:
+                diagnostics.raise_for_error()
 
         return super().json(**kwargs)
 
