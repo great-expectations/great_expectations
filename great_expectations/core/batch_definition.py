@@ -76,16 +76,16 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         return batch_list[-1]
 
-    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+    def is_added(self) -> tuple[bool, ResourceNotAddedError | None]:
         if self.id:
             return True, []
-        return False, [BatchDefinitionNotAddedError(name=self.name)]
+        return False, BatchDefinitionNotAddedError(name=self.name)
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
-        added, errors = self.is_added()
+        added, error = self.is_added()
         if not added:
-            raise errors[0]
+            raise error
 
         asset = self.data_asset
         data_source = asset.datasource

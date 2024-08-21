@@ -673,7 +673,7 @@ def test_identifier_bundle_with_existing_id(validation_definition: ValidationDef
 def test_identifier_bundle_no_id(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
-    with pytest.raises(ValidationDefinitionNotAddedError):
+    with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError):
         validation_definition.identifier_bundle()
 
 

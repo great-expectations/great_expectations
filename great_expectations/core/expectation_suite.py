@@ -234,10 +234,10 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
-    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
+    def is_added(self) -> tuple[bool, ResourceNotAddedError | None]:
         if self.id:
-            return True, []
-        return False, [ExpectationSuiteNotAddedError(name=self.name)]
+            return True, None
+        return False, ExpectationSuiteNotAddedError(name=self.name)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""
@@ -588,9 +588,9 @@ class ExpectationSuite(SerializableDictDot):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        added, errors = self.is_added()
+        added, error = self.is_added()
         if not added:
-            raise errors[0]
+            raise error
 
         return _IdentifierBundle(name=self.name, id=self.id)
 

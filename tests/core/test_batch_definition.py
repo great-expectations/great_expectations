@@ -8,13 +8,8 @@ import pytest
 
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import FileNamePartitionerYearly
-from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
-from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
-from great_expectations.exceptions.exceptions import (
-    BatchDefinitionNotAddedError,
-)
 
 if TYPE_CHECKING:
     import pytest_mock
@@ -127,32 +122,33 @@ def test_get_batch_raises_error_with_empty_batch_list(mocker: pytest_mock.MockFi
 
 
 @pytest.mark.unit
-def test_identifier_bundle():
-    ds = PandasDatasource(
-        name="pandas_datasource",
-    )
+def test_identifier_bundle(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    ds = context.data_sources.add_pandas("pandas_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_definition = asset.add_batch_definition("my_batch_definition")
 
-    assert batch_definition.identifier_bundle() == _EncodedValidationData(
-        datasource=_IdentifierBundle(name="pandas_datasource", id=None),
-        asset=_IdentifierBundle(name="my_asset", id=None),
-        batch_definition=_IdentifierBundle(name="my_batch_definition", id=None),
+    result = batch_definition.identifier_bundle()
+
+    assert result.datasource.name == "pandas_datasource" and result.datasource.id is not None
+    assert result.asset.name == "my_asset" and result.asset.id is not None
+    assert (
+        result.batch_definition.name == "my_batch_definition"
+        and result.batch_definition.id is not None
     )
 
 
 @pytest.mark.parametrize(
-    "id,is_added,num_errors",
+    "id,is_added,has_error",
     [
-        pytest.param(str(uuid.uuid4()), True, 0, id="added"),
-        pytest.param(None, False, 1, id="not_added"),
+        pytest.param(str(uuid.uuid4()), True, False, id="added"),
+        pytest.param(None, False, True, id="not_added"),
     ],
 )
 @pytest.mark.unit
-def test_is_added(id: str | None, is_added: bool, num_errors: int):
+def test_is_added(id: str | None, is_added: bool, has_error: bool):
     batch_definition = BatchDefinition(name="my_batch_def", id=id)
-    batch_def_added, errors = batch_definition.is_added()
+    batch_def_added, error = batch_definition.is_added()
 
     assert batch_def_added == is_added
-    assert len(errors) == num_errors
-    assert all(isinstance(err, BatchDefinitionNotAddedError) for err in errors)
+    assert bool(error) == has_error

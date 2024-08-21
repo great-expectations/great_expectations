@@ -121,11 +121,13 @@ class ValidationDefinition(BaseModel):
     def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
         errors: list[ResourceNotAddedError] = []
 
-        data_added, data_errors = self.data.is_added()
-        errors.extend(data_errors)
+        data_added, data_error = self.data.is_added()
+        if data_error:
+            errors.append(data_error)
 
-        suite_added, suite_errors = self.suite.is_added()
-        errors.extend(suite_errors)
+        suite_added, suite_error = self.suite.is_added()
+        if suite_error:
+            errors.append(suite_error)
 
         self_added = self.id is not None
         if not self_added:

@@ -1067,17 +1067,16 @@ def test_identifier_bundle_no_id():
 
 
 @pytest.mark.parametrize(
-    "id,is_added,num_errors",
+    "id,is_added,has_error",
     [
-        pytest.param(str(uuid.uuid4()), True, 0, id="added"),
-        pytest.param(None, False, 1, id="not_added"),
+        pytest.param(str(uuid.uuid4()), True, False, id="added"),
+        pytest.param(None, False, True, id="not_added"),
     ],
 )
 @pytest.mark.unit
-def test_is_added(id: str | None, is_added: bool, num_errors: int):
+def test_is_added(id: str | None, is_added: bool, has_error: bool):
     suite = ExpectationSuite(name="my_suite", id=id)
-    suite_added, errors = suite.is_added()
+    suite_added, error = suite.is_added()
 
     assert suite_added == is_added
-    assert len(errors) == num_errors
-    assert all(isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in errors)
+    assert bool(error) == has_error
