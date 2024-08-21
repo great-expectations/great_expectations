@@ -878,5 +878,5 @@ def test_is_added(
     )
     validation_definition_added, errors = validation_definition.is_added()
 
-    assert validation_definition_added == is_added
+    assert validation_definition_added is is_added
     assert [type(err) for err in errors] == error_list

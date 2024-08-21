@@ -165,5 +165,5 @@ def test_is_added(id: str | None, is_added: bool, has_error: bool):
     batch_definition = BatchDefinition(name="my_batch_def", id=id)
     batch_def_added, error = batch_definition.is_added()
 
-    assert batch_def_added == is_added
-    assert bool(error) == has_error
+    assert batch_def_added is is_added
+    assert bool(error) is has_error

@@ -1000,5 +1000,5 @@ def test_is_added(
     )
     checkpoint_added, errors = checkpoint.is_added()
 
-    assert checkpoint_added == is_added
+    assert checkpoint_added is is_added
     assert [type(err) for err in errors] == error_list

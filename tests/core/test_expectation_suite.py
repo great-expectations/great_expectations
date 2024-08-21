@@ -1078,5 +1078,5 @@ def test_is_added(id: str | None, is_added: bool, has_error: bool):
     suite = ExpectationSuite(name="my_suite", id=id)
     suite_added, error = suite.is_added()
 
-    assert suite_added == is_added
-    assert bool(error) == has_error
+    assert suite_added is is_added
+    assert bool(error) is has_error
