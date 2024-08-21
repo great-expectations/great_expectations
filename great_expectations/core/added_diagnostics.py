@@ -68,7 +68,7 @@ class ExpectationSuiteAddedDiagnostics(_ChildAddedDiagnostics):
 class _ParentAddedDiagnostics(AddedDiagnostics):
     parent_error_class: ClassVar[Type[ResourceNotAddedError]]
     children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]]
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]]
+    exception_class: ClassVar[Type[ResourcesNotAddedError]]
 
     def update_with_children(self, *children_diagnostics: AddedDiagnostics) -> None:
         for diagnostics in children_diagnostics:
@@ -76,9 +76,7 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
             self.errors = diagnostics.errors + self.errors
 
     @property
-    def dependencies_added_except_parent(self) -> bool:
-        if self.is_added:
-            return False
+    def _dependencies_added_except_parent(self) -> bool:
         return not self._parent_added and self._children_added
 
     @property
@@ -92,7 +90,11 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
     @override
     def raise_for_error(self) -> None:
         if not self.is_added:
-            raise self.raise_for_error_class(errors=self.errors)
+            raise self.exception_class(errors=self.errors)
+
+    def raise_for_dependencies_added_except_parent(self) -> None:
+        if not self.is_added and not self._dependencies_added_except_parent:
+            raise self.exception_class(errors=self.errors)
 
 
 @dataclass
@@ -102,7 +104,7 @@ class ValidationDefinitionAddedDiagnostics(_ParentAddedDiagnostics):
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
+    exception_class: ClassVar[Type[ResourcesNotAddedError]] = (
         ValidationDefinitionRelatedResourcesNotAddedError
     )
 
@@ -113,6 +115,6 @@ class CheckpointAddedDiagnostics(_ParentAddedDiagnostics):
     children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
+    exception_class: ClassVar[Type[ResourcesNotAddedError]] = (
         CheckpointRelatedResourcesNotAddedError
     )
