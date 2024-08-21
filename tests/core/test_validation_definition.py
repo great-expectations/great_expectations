@@ -821,7 +821,7 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
             None,
             None,
             False,
-            [ExpectationSuiteNotAddedError, BatchDefinitionNotAddedError],
+            [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
             id="validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
@@ -854,8 +854,8 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
             None,
             False,
             [
-                ExpectationSuiteNotAddedError,
                 BatchDefinitionNotAddedError,
+                ExpectationSuiteNotAddedError,
                 ValidationDefinitionNotAddedError,
             ],
             id="no_validation_id|no_suite_id|no_batch_def_id",

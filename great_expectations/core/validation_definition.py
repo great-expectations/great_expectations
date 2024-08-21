@@ -132,9 +132,9 @@ class ValidationDefinition(BaseModel):
             errors=validation_definition_errors
         )
 
-        data_diagnostics = self.data.is_added()
         suite_diagnostics = self.suite.is_added()
-        validation_definition_diagnostics.update(data_diagnostics, suite_diagnostics)
+        data_diagnostics = self.data.is_added()
+        validation_definition_diagnostics.update_with_children(suite_diagnostics, data_diagnostics)
 
         return validation_definition_diagnostics
 

@@ -860,7 +860,7 @@ class TestCheckpointResult:
             None,
             None,
             False,
-            [ExpectationSuiteNotAddedError, BatchDefinitionNotAddedError],
+            [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
             id="checkpoint_id|validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
@@ -897,8 +897,8 @@ class TestCheckpointResult:
             None,
             False,
             [
-                ExpectationSuiteNotAddedError,
                 BatchDefinitionNotAddedError,
+                ExpectationSuiteNotAddedError,
                 ValidationDefinitionNotAddedError,
             ],
             id="checkpoint_id|no_validation_id|no_suite_id|no_batch_def_id",
@@ -936,7 +936,7 @@ class TestCheckpointResult:
             None,
             None,
             False,
-            [ExpectationSuiteNotAddedError, BatchDefinitionNotAddedError, CheckpointNotAddedError],
+            [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
@@ -981,8 +981,8 @@ class TestCheckpointResult:
             None,
             False,
             [
-                ExpectationSuiteNotAddedError,
                 BatchDefinitionNotAddedError,
+                ExpectationSuiteNotAddedError,
                 ValidationDefinitionNotAddedError,
                 CheckpointNotAddedError,
             ],

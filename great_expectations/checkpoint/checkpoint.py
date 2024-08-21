@@ -275,7 +275,7 @@ class Checkpoint(BaseModel):
             errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
         )
         validation_definition_diagnostics = [vd.is_added() for vd in self.validation_definitions]
-        checkpoint_diagnostics.update(*validation_definition_diagnostics)
+        checkpoint_diagnostics.update_with_children(*validation_definition_diagnostics)
 
         return checkpoint_diagnostics
 
