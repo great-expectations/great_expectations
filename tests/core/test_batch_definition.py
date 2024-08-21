@@ -154,16 +154,17 @@ def test_identifier_bundle_no_id_raises_error(in_memory_runtime_context):
 
 
 @pytest.mark.parametrize(
-    "id,is_added,has_error",
+    "id,is_added,num_errors",
     [
-        pytest.param(str(uuid.uuid4()), True, False, id="added"),
-        pytest.param(None, False, True, id="not_added"),
+        pytest.param(str(uuid.uuid4()), True, 0, id="added"),
+        pytest.param(None, False, 1, id="not_added"),
     ],
 )
 @pytest.mark.unit
-def test_is_added(id: str | None, is_added: bool, has_error: bool):
+def test_is_added(id: str | None, is_added: bool, num_errors: int):
     batch_definition = BatchDefinition(name="my_batch_def", id=id)
-    batch_def_added, error = batch_definition.is_added()
+    batch_def_added, errors = batch_definition.is_added()
 
     assert batch_def_added is is_added
-    assert bool(error) is has_error
+    assert len(errors) == num_errors
+    assert all(isinstance(error, BatchDefinitionNotAddedError) for error in errors)
