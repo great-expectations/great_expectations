@@ -1058,7 +1058,7 @@ def test_identifier_bundle_with_existing_id():
 
 
 @pytest.mark.unit
-def test_identifier_bundle_no_id():
+def test_identifier_bundle_no_id_raises_error():
     _ = gx.get_context(mode="ephemeral")
     suite = ExpectationSuite(name="my_suite", id=None)
 
@@ -1078,6 +1078,6 @@ def test_is_added(id: str | None, is_added: bool, num_errors: int):
     suite = ExpectationSuite(name="my_suite", id=id)
     suite_added, errors = suite.is_added()
 
-    assert suite_added == is_added
+    assert suite_added is is_added
     assert len(errors) == num_errors
     assert all(isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in errors)
