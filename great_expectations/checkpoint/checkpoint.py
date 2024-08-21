@@ -167,7 +167,7 @@ class Checkpoint(BaseModel):
             raise CheckpointRunWithoutValidationDefinitionError()
 
         diagostics = self.is_added()
-        if not diagostics.added:
+        if not diagostics.dependencies_added:
             # The checkpoint itself is not added but all children are - we can add it for the user
             if not diagostics.parent_added and diagostics.children_added:
                 self._add_to_store()

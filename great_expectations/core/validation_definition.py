@@ -227,7 +227,7 @@ class ValidationDefinition(BaseModel):
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         diagnostics = self.is_added()
-        if not diagnostics.added:
+        if not diagnostics.dependencies_added:
             # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
             if not diagnostics.parent_added and diagnostics.children_added:
                 self._add_to_store()

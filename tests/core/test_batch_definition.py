@@ -165,6 +165,6 @@ def test_is_added(id: str | None, is_added: bool, num_errors: int):
     batch_definition = BatchDefinition(name="my_batch_def", id=id)
     diagnostics = batch_definition.is_added()
 
-    assert diagnostics.added is is_added
+    assert diagnostics.dependencies_added is is_added
     assert len(diagnostics.errors) == num_errors
     assert all(isinstance(err, BatchDefinitionNotAddedError) for err in diagnostics.errors)

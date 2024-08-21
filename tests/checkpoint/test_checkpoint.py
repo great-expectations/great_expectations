@@ -1013,5 +1013,5 @@ def test_is_added(
     )
     diagnostics = checkpoint.is_added()
 
-    assert diagnostics.added is is_added
+    assert diagnostics.dependencies_added is is_added
     assert [type(err) for err in diagnostics.errors] == error_list
