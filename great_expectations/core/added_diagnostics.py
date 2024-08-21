@@ -22,8 +22,7 @@ class AddedDiagnostics:
 
     def update(self, *diagnostics: AddedDiagnostics) -> None:
         for diagnostic in diagnostics:
-            self.added = self.added and diagnostic.added
-            self.errors.extend(diagnostic.errors)
+            self.errors = diagnostic.errors + self.errors
 
     @abstractmethod
     def raise_for_error(self) -> None:

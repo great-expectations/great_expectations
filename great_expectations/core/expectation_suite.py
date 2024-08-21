@@ -238,10 +238,8 @@ class ExpectationSuite(SerializableDictDot):
         self._store.update(key=key, value=self)
 
     def is_added(self) -> AddedDiagnostics:
-        if self.id:
-            return ExpectationSuiteAddedDiagnostics(added=True, errors=[])
         return ExpectationSuiteAddedDiagnostics(
-            added=False, errors=[ExpectationSuiteNotAddedError(name=self.name)]
+            errors=[] if self.id else [ExpectationSuiteNotAddedError(name=self.name)]
         )
 
     def _has_been_saved(self) -> bool:

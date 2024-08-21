@@ -80,10 +80,8 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         return batch_list[-1]
 
     def is_added(self) -> AddedDiagnostics:
-        if self.id:
-            return BatchDefinitionAddedDiagnostics(added=True, errors=[])
         return BatchDefinitionAddedDiagnostics(
-            added=False, errors=[BatchDefinitionNotAddedError(name=self.name)]
+            errors=[] if self.id else [BatchDefinitionNotAddedError(name=self.name)]
         )
 
     def identifier_bundle(self) -> _EncodedValidationData:

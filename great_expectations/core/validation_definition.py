@@ -33,7 +33,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions.exceptions import (
     ValidationDefinitionNotAddedError,
-    ValidationDefinitionRelatedResourcesNotAddedError,
 )
 from great_expectations.validator.v1_validator import Validator
 
@@ -131,7 +130,7 @@ class ValidationDefinition(BaseModel):
             else [ValidationDefinitionNotAddedError(name=self.name)]
         )
         validation_definition_diagnostics = ValidationDefinitionAddedDiagnostics(
-            added=validation_definition_added, errors=validation_definition_errors
+            errors=validation_definition_errors
         )
 
         data_diagnostics = self.data.is_added()
@@ -309,9 +308,9 @@ class ValidationDefinition(BaseModel):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        added, errors = self.is_added()
-        if not added:
-            raise ValidationDefinitionRelatedResourcesNotAddedError(errors=errors)
+        diagnostics = self.is_added()
+        diagnostics.raise_for_error()
+
         return _IdentifierBundle(name=self.name, id=self.id)
 
     @public_api
