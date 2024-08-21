@@ -19,6 +19,18 @@ from great_expectations.exceptions.exceptions import (
 
 @dataclass
 class AddedDiagnostics:
+    """
+    Wrapper around a list of errors; used to determine if a resource has been added successfully.
+
+    Note that some resources may have dependencies on other resources - in order to be considered
+    "added", the root resource and all of its dependencies must be added successfully.
+    For example, a Checkpoint may have dependencies on ValidationDefinitions, which may have
+    dependencies on ExpectationSuites and BatchDefinitions.
+
+    GX requires that all resources are added successfully before they can be used to prevent
+    unexpected behavior.
+    """
+
     errors: list[ResourceNotAddedError]
 
     @property
@@ -27,6 +39,10 @@ class AddedDiagnostics:
 
     @abstractmethod
     def raise_for_error(self) -> None:
+        """
+        Conditionally raises an error if the resource has not been added successfully;
+        should prescribe the correct action(s) to take.
+        """
         raise NotImplementedError
 
 
