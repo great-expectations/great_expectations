@@ -27,7 +27,7 @@ Learn more about how data teams are using GX Core in our featured [case studies]
 GX Core supports Python `3.8` through `3.11`.
 Experimental support for Python `3.12` and later can be enabled by setting a `GX_PYTHON_EXPERIMENTAL` environment variable when installing `great_expectations`.
 
-For data sources and other integrations that GX supports, see [GX integration support policy](https://docs.greatexpectations.io/docs/application_integration_support) for additional information.
+For data sources and other integrations that GX Core supports, see [GX integration support policy](https://docs.greatexpectations.io/docs/application_integration_support) for additional information.
 
 ## Get started
 
@@ -48,7 +48,7 @@ GX recommends deploying GX Core within a virtual environment. For more informati
 
 ## Get support from GX and the community
 
-They are listed in the order in which GX is prioritizing the support issues:
+You can get help from GX and the community in a few ways. GX prioritizes addressing issues in Github and Discourse. 
 
 1. Issues and PRs in the [GX GitHub repository](https://github.com/great-expectations)
 2. Questions posted to the [GX Core Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11)
@@ -59,7 +59,9 @@ We deeply value the contributions of our community. We're now accepting PRs for 
 
 ### Levels of contribution readiness
 🟢 Ready. Have a clear and public API for extensions.
+
 🟡 Partially ready. Case-by-case.
+
 🔴 Not ready. Will accept contributions that fix existing bugs or workflows.
 
 | GX Component         | Readiness          | Notes |
