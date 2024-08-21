@@ -1,7 +1,6 @@
 ---
 title: 'Community resources'
 ---
-import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
 Great Expectations (GX) is committed to building a great application and a great community.
 
@@ -41,8 +40,4 @@ If you're interested in helping out, review the [GitHub issues list](https://git
 
 ## Connect with our community
 
-Join the GX [public Slack channel](https://greatexpectations.io/slack) to connect with other GX users and see how they're using GX. Before you post for the first time, review the [Slack Guidelines](https://discourse.greatexpectations.io/t/slack-guidelines/1195).
-
-## GX Cloud
-
-<GxCloudAdvert/>
+Check out the [GX community](https://greatexpectations.io/community) and connect with other GX users and see how they're using GX in the GX [public Slack channel](https://greatexpectations.io/slack). Before you post for the first time, review the [Slack Guidelines](https://discourse.greatexpectations.io/t/slack-guidelines/1195).

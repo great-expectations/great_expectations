@@ -20,11 +20,6 @@ module.exports = {
           id: 'core/introduction/try_gx',
           label: 'Try GX'
         },
-        {
-          type: 'doc',
-          id: 'core/introduction/community_resources',
-          label: 'Community resources'
-        },
       ],
     },
     {
@@ -148,6 +143,11 @@ module.exports = {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
+    },
+    {
+      type: 'doc',
+      id: 'core/introduction/community_resources',
+      label: 'Community resources'
     },
   ],
   gx_cloud: [
