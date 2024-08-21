@@ -1,0 +1,22 @@
+"","Name","PClass","Age","Sex","Survived","SexCode"
+"1","Allen, Miss Elisabeth Walton","1st",29,"female",1,1
+"2","Allison, Miss Helen Loraine","1st",2,"female",0,1
+"3","Allison, Mr Hudson Joshua Creighton","1st",30,"male",0,0
+"4","Allison, Mrs Hudson JC (Bessie Waldo Daniels)","1st",25,"female",0,1
+"5","Allison, Master Hudson Trevor","1st",0.92,"male",1,0
+"6","Anderson, Mr Harry","1st",47,"male",1,0
+"7","Andrews, Miss Kornelia Theodosia","1st",63,"female",1,1
+"8","Andrews, Mr Thomas, jr","1st",39,"male",0,0
+"358","Caldwell, Mrs Albert Francis (Sylvia Mae Harbaugh)","2nd",26,"female",1,1
+"359","Caldwell, Master Alden Gates","2nd",0.83,"male",1,0
+"360","Cameron, Miss Clear","2nd",31,"female",1,1
+"361","Campbell, Mr William","2nd",NA,"male",0,0
+"362","Carbines, Mr William","2nd",19,"male",0,0
+"363","Carter, Rev Ernest Courtenay","2nd",54,"male",0,0
+"364","Carter, Mrs Ernest Courtenay (Lillian Hughes)","2nd",44,"female",0,1
+"365","Chapman, Mr Charles Henry","2nd",52,"male",0,0
+"366","Chapman, Mr John Henry","2nd",30,"male",0,0
+"367","Chapman, Mrs John Henry (Elizabeth Lawry)","2nd",30,"female",0,1
+"368","Christy, Mrs Alice Frances","2nd",NA,"female",1,1
+"369","Christy, Miss Julie","2nd",NA,"female",1,1
+
