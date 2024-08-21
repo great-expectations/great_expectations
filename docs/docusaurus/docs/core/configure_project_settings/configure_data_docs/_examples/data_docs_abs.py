@@ -48,30 +48,27 @@ context = gx.get_context(mode="file")
 # Hide this
 set_up_context_for_example(context)
 
-# Start a Data Docs configuration dictionary
-site_name = "my_data_docs_site"
-site_config = {
-    "site_name": site_name,
-    "class_name": "SiteBuilder",
-    "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-}
-
-# Add a Store backend configuration to the Data Docs configuration
-# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_abs.py - add store backend">
+# Define a Data Docs configuration dictionary
+# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_abs.py - define a Data Docs configuratin dictionary">
 container = "my_abs_container"
 prefix = "data_docs/"
 connection_string = "${AZURE_STORAGE_CONNECTION_STRING}"  # This uses string substitution to get the actual connection string from an environment variable or config file.
 
-site_config["store_backend"] = {
-    "class_name": "TupleAzureBlobStoreBackend",
-    "container": container,
-    "prefix": prefix,
-    "connection_string": connection_string,
+site_config = {
+    "class_name": "SiteBuilder",
+    "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+    "store_backend": {
+        "class_name": "TupleAzureBlobStoreBackend",
+        "container": container,
+        "prefix": prefix,
+        "connection_string": connection_string,
+    },
 }
 # </snippet>
 
 # Add the Data Docs configuration to the Data Context
-context.add_data_docs_site(site_config)
+site_name = "my_data_docs_site"
+context.add_data_docs_site(site_name=site_name, site_config=site_config)
 
 # Manually build the Data Docs
 context.build_data_docs(site_names=site_name)

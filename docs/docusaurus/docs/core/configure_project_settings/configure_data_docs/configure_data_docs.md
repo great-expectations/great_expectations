@@ -49,14 +49,11 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 
 1. Define a configuration dictionary for your new Data Docs site.
 
-   All Data Docs sites have a unique name within a Data Context.  Start building a Data Docs configuration dictionary by updating the value of `site_name` in the following to something more descriptive and then execute the code:
+   The main component that requires customization in a Data Docs site configuration is its `store_backend`.  The `store_backend` is a dictionary that tells GX where the Data Docs site will be hosted and how to access that location when the site is updated.
 
-   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - start a data docs config dictionary"
-   ```
+   The specifics of the `store_backend` will depend on the environment in which the Data Docs will be created.  GX 1.0 supports generation of Data Docs in local or networked filesystems, Amazon S3, Google Cloud Service, and Azure Blob Storage.
 
-2. Add a `store_backend` to your Data Docs configuration.
-
-   The `store_backend` tells GX 1.0 where to generate Data Docs pages and how to connect to that location.  The specifics of the `store_backend` will depend on the environment in which the Data Docs will be created.  GX 1.0 supports generation of Data Docs in local or networked filesystems, Amazon S3, Google Cloud Service, and Azure Blob Storage.
+   To create a Data Docs site configuration, select one of the following environments and follow the corresponding instructions.
 
    <Tabs 
       queryString="environment"
@@ -96,28 +93,28 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 
    </Tabs>
 
-3. Add your configuration to your Data Context.
+4. Add your configuration to your Data Context.
 
-   Once your Data Docs site configuration has been defined, add it to the Data Context by executing the following code:
+   All Data Docs sites have a unique name within a Data Context. Once your Data Docs site configuration has been defined, add it to the Data Context by updating the value of `site_name` in the following to something more descriptive and then execute the code::
 
    ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - add data docs config to Data Context"
    ```
 
-4. Optional. Build your Data Docs sites manually.
+5. Optional. Build your Data Docs sites manually.
 
    You can manually build a Data Docs site by executing the following code:
 
    ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - manually build Data Docs"
    ```
 
-5. Optional. Automate Data Docs site updates with Checkpoint Actions.
+6. Optional. Automate Data Docs site updates with Checkpoint Actions.
 
    You can automate the creation and update of Data Docs sites by including the `UpdateDataDocsAction` in your Checkpoints.  This Action will automatically trigger a Data Docs site build whenever the Checkpoint it is included in completes its `run()` method.
 
    ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - automate data docs with a Checkpoint Action"
    ```
 
-6. Optional. View your Data Docs.
+7. Optional. View your Data Docs.
 
    Once your Data Docs have been created, you can view them with:
 

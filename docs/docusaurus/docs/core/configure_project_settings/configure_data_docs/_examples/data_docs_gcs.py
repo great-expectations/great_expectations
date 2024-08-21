@@ -48,30 +48,26 @@ context = gx.get_context(mode="file")
 # Hide this
 set_up_context_for_example(context)
 
-# Start a Data Docs configuration dictionary
-site_name = "my_data_docs_site"
-site_config = {
-    "site_name": site_name,
-    "class_name": "SiteBuilder",
-    "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-}
-
-# Add a Store backend configuration to the Data Docs configuration
-# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_gcs.py - add store backend">
+# Define a Data Docs configuration dictionary
+# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_gcs.py - define a Data Docs site configuration">
 project = "my_project"
 bucket = "my_gcs_bucket"
 prefix = "data_docs_site/"
-
-site_config["store_backend"] = {
-    "class_name": "TupleGCSStoreBackend",
-    "project": project,
-    "bucket": bucket,
-    "prefix": prefix,
+site_config = {
+    "class_name": "SiteBuilder",
+    "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+    "store_backend": {
+        "class_name": "TupleGCSStoreBackend",
+        "project": project,
+        "bucket": bucket,
+        "prefix": prefix,
+    },
 }
 # </snippet>
 
 # Add the Data Docs configuration to the Data Context
-context.add_data_docs_site(site_config)
+site_name = "my_data_docs_site"
+context.add_data_docs_site(site_name=site_name, site_config=site_config)
 
 # Manually build the Data Docs
 context.build_data_docs(site_names=site_name)

@@ -48,27 +48,22 @@ context = gx.get_context(mode="file")
 # Hide this
 set_up_context_for_example(context)
 
-# Start a Data Docs configuration dictionary
-# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - start a data docs config dictionary">
-site_name = "my_data_docs_site"
+# Define a Data Docs site configuration dictionary
+# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - define a data docs config dictionary">
+base_directory = "uncommitted/data_docs/local_site/"  # this is the default path (relative to the root folder of the Data Context) but can be changed as required
 site_config = {
-    "site_name": site_name,
     "class_name": "SiteBuilder",
     "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-}
-# </snippet>
-
-# Add a Store backend configuration to the Data Docs configuration
-# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - add store backend">
-base_directory = "uncommitted/data_docs/local_site/"  # this is the default path (relative to the root folder of the Data Context) but can be changed as required
-site_config["store_backend"] = {
-    "class_name": "TupleFilesystemStoreBackend",
-    "base_directory": base_directory,
+    "store_backend": {
+        "class_name": "TupleFilesystemStoreBackend",
+        "base_directory": base_directory,
+    },
 }
 # </snippet>
 
 # Add the Data Docs configuration to the Data Context
 # <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py - add data docs config to Data Context">
+site_name = "my_data_docs_site"
 context.add_data_docs_site(site_name=site_name, site_config=site_config)
 # </snippet>
 

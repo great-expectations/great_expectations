@@ -6,9 +6,9 @@ A Google Cloud Service Data Doc site requires the following `store_backend` info
 - `bucket`: The name of the bucket that will contain the Data Docs pages.
 - `prefix`: The path of the folder that will contain the Data Docs pages relative to the root of the GCS bucket.  The combination of `bucket` and `prefix` must be unique accross all Stores used by a Data Context.
 
-To add a local or networked filesystem backend for your Data Docs configuration, update the values of `project`, `bucket`, and `prefix` in the following code and execute it:
+To define a Data Docs site configuration for Google Cloud Storage, update the values of `project`, `bucket`, and `prefix` in the following code and execute it:
 
-```python name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_gcs.py - add store backend"
+```python name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_gcs.py - define a Data Docs site configuration"
 ```
 
 For GX to access your Google Cloud Services environment, you will also need to configure the appropriate credentials.  By default, GCS credentials are handled through the gcloud command line tool and the `GOOGLE_APPLICATION_CREDENTIALS` environment variable. The gcloud command line tool is used to set up authentication credentials, and the `GOOGLE_APPLICATION_CREDENTIALS` environment variable provides the path to the json file with those credentials.

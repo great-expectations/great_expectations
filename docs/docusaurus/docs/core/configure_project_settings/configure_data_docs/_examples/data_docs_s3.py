@@ -48,33 +48,29 @@ context = gx.get_context(mode="file")
 # Hide this
 set_up_context_for_example(context)
 
-# Start a Data Docs configuration dictionary
-site_name = "my_data_docs_site"
-site_config = {
-    "site_name": site_name,
-    "class_name": "SiteBuilder",
-    "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-}
-
-# Add a Store backend configuration to the Data Docs configuration
-# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_s3.py - add store backend">
+# Build Data Docs configuration dictionary
+# <snippet name="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_s3.py - define a Data Docs site configuration">
 bucket = "my_s3_bucket"
 prefix = "data_docs/"
 boto3_options = {
     "endpoint_url": "${S3_ENDPOINT}",  # Uses string substitution to get the endpoint url form the S3_ENDPOINT environment variable.
     "region_name": "<your AWS region name>",  # Use the name of your AWS region.
 }
-
-site_config["store_backend"] = {
-    "class_name": "TupleS3StoreBackend",
-    "bucket": bucket,
-    "prefix": prefix,
-    "boto3_options": boto3_options,
+site_config = {
+    "class_name": "SiteBuilder",
+    "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+    "store_backend": {
+        "class_name": "TupleS3StoreBackend",
+        "bucket": bucket,
+        "prefix": prefix,
+        "boto3_options": boto3_options,
+    },
 }
 # </snippet>
 
 # Add the Data Docs configuration to the Data Context
-context.add_data_docs_site(site_config)
+site_name = "my_data_docs_site"
+context.add_data_docs_site(site_name=site_name, site_config=site_config)
 
 # Manually build the Data Docs
 context.build_data_docs(site_names=site_name)
