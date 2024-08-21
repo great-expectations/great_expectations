@@ -24,6 +24,11 @@ from great_expectations.checkpoint.checkpoint import (
     CheckpointResult,
 )
 from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.core.added_diagnostics import (
+    BatchDefinitionAddedDiagnostics,
+    ExpectationSuiteAddedDiagnostics,
+    ValidationDefinitionAddedDiagnostics,
+)
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -121,7 +126,11 @@ class TestCheckpointSerialization:
             ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(ValidationDefinition, "is_added", return_value=(True, [])):
+        ), mock.patch.object(
+            ValidationDefinition,
+            "is_added",
+            return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
+        ):
             yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
@@ -138,7 +147,11 @@ class TestCheckpointSerialization:
             ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(ValidationDefinition, "is_added", return_value=(True, [])):
+        ), mock.patch.object(
+            ValidationDefinition,
+            "is_added",
+            return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
+        ):
             yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
@@ -323,13 +336,13 @@ class TestCheckpointResult:
     def mock_suite(self, mocker: MockerFixture):
         suite = mocker.Mock(spec=ExpectationSuite)
         suite.name = self.suite_name
-        suite.is_added.return_value = (True, [])
+        suite.is_added.return_value = ExpectationSuiteAddedDiagnostics(errors=[])
         return suite
 
     @pytest.fixture
     def mock_batch_def(self, mocker: MockerFixture):
         bd = mocker.Mock(spec=BatchDefinition)
-        bd._copy_and_set_values().is_added.return_value = (True, [])
+        bd._copy_and_set_values().is_added.return_value = BatchDefinitionAddedDiagnostics(errors=[])
         return bd
 
     @pytest.fixture
@@ -894,10 +907,10 @@ def test_is_added(
             )
         ],
     )
-    checkpoint_added, errors = checkpoint.is_added()
+    diagnostics = checkpoint.is_added()
 
-    assert checkpoint_added is is_added
-    assert [type(err) for err in errors] == error_list
+    assert diagnostics.is_added is is_added
+    assert [type(err) for err in diagnostics.errors] == error_list
 
 
 @pytest.mark.unit
@@ -938,10 +951,10 @@ def test_adding_with_multiple_child_validation_definitions_raises_error():
     assert isinstance(errors[0], ExpectationSuiteNotAddedError) and suite_name in errors[0].message
     assert (
         isinstance(errors[1], ValidationDefinitionNotAddedError)
-        and validation_definition_name_1 in errors[1].message
+        and validation_definition_name_2 in errors[1].message
     )
     assert isinstance(errors[2], ExpectationSuiteNotAddedError) and suite_name in errors[2].message
     assert (
         isinstance(errors[3], ValidationDefinitionNotAddedError)
-        and validation_definition_name_2 in errors[3].message
+        and validation_definition_name_1 in errors[3].message
     )

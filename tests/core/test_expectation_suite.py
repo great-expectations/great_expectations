@@ -1104,8 +1104,10 @@ def test_identifier_bundle_no_id_raises_error():
 @pytest.mark.unit
 def test_is_added(id: str | None, is_added: bool, num_errors: int):
     suite = ExpectationSuite(name="my_suite", id=id)
-    suite_added, errors = suite.is_added()
+    diagnostics = suite.is_added()
 
-    assert suite_added is is_added
-    assert len(errors) == num_errors
-    assert all(isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in errors)
+    assert diagnostics.is_added is is_added
+    assert len(diagnostics.errors) == num_errors
+    assert all(
+        isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in diagnostics.errors
+    )

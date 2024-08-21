@@ -6,11 +6,13 @@ from great_expectations.compatibility import pydantic
 
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
+from great_expectations.core.added_diagnostics import (
+    BatchDefinitionAddedDiagnostics,
+)
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
-    ResourceNotAddedError,
 )
 
 if TYPE_CHECKING:
@@ -76,16 +78,15 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         return batch_list[-1]
 
-    def is_added(self) -> tuple[bool, list[ResourceNotAddedError]]:
-        if self.id:
-            return True, []
-        return False, [BatchDefinitionNotAddedError(name=self.name)]
+    def is_added(self) -> BatchDefinitionAddedDiagnostics:
+        return BatchDefinitionAddedDiagnostics(
+            errors=[] if self.id else [BatchDefinitionNotAddedError(name=self.name)]
+        )
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
-        added, errors = self.is_added()
-        if not added:
-            raise errors[0]  # Should only be one as this is a leaf node
+        diagnostics = self.is_added()
+        diagnostics.raise_for_error()
 
         asset = self.data_asset
         data_source = asset.datasource
