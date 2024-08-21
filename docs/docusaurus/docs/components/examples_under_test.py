@@ -8,6 +8,23 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 docs_tests = []
 
+try_gx = [
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "try_gx_exploratory" tests/integration/test_script_runner.py
+        name="try_gx_exploratory",
+        user_flow_script="docs/docusaurus/docs/core/introduction/try_gx_exploratory.py",
+        backend_dependencies=[],
+    ),
+    # To test, run:
+    # pytest --docs-tests --postgresql -k "try_gx_end_to_end" tests/integration/test_script_runner.py
+    IntegrationTestFixture(
+        name="try_gx_end_to_end",
+        user_flow_script="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+]
+
 create_a_data_context = [
     IntegrationTestFixture(
         # To test, run:
@@ -432,32 +449,6 @@ docs_examples_trigger_actions_based_on_validation_results = [
     ),
 ]
 
-
-learn_data_quality_use_cases = [
-    # Schema.
-    IntegrationTestFixture(
-        name="data_quality_use_case_schema_expectations",
-        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py",
-        data_dir="tests/test_sets/learn_data_quality_use_cases/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
-    IntegrationTestFixture(
-        name="data_quality_use_case_schema_validation_over_time",
-        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py",
-        data_dir="tests/test_sets/learn_data_quality_use_cases/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
-    IntegrationTestFixture(
-        name="data_quality_use_case_schema_strict_and_relaxed_validation",
-        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_strict_and_relaxed.py",
-        data_dir="tests/test_sets/learn_data_quality_use_cases/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
-]
-
 docs_examples_customize_expectations = [
     IntegrationTestFixture(
         # To test, run:
@@ -511,25 +502,46 @@ docs_example_configure_project_settings = [
     ),
 ]
 
-try_gx = [
+docs_examples_configure_data_docs = [
     IntegrationTestFixture(
         # To test, run:
-        # pytest --docs-tests -k "try_gx_exploratory" tests/integration/test_script_runner.py
-        name="try_gx_exploratory",
-        user_flow_script="docs/docusaurus/docs/core/introduction/try_gx_exploratory.py",
+        # pytest --docs-tests -k "docs_example_configure_data_docs_filesystem" tests/integration/test_script_runner.py
+        name="docs_example_configure_data_docs_filesystem",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/configure_data_docs/_examples/data_docs_local_or_networked.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        # data_context_dir="",
         backend_dependencies=[],
     ),
-    # To test, run:
-    # pytest --docs-tests --postgresql -k "try_gx_end_to_end" tests/integration/test_script_runner.py
+]
+
+learn_data_quality_use_cases = [
+    # Schema.
     IntegrationTestFixture(
-        name="try_gx_end_to_end",
-        user_flow_script="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py",
+        name="data_quality_use_case_schema_expectations",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py",
+        data_dir="tests/test_sets/learn_data_quality_use_cases/",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+    IntegrationTestFixture(
+        name="data_quality_use_case_schema_validation_over_time",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py",
+        data_dir="tests/test_sets/learn_data_quality_use_cases/",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+    IntegrationTestFixture(
+        name="data_quality_use_case_schema_strict_and_relaxed_validation",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_strict_and_relaxed.py",
+        data_dir="tests/test_sets/learn_data_quality_use_cases/",
+        util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
 ]
 
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
 # into `test_script_runner.py` and actually used in CI checks).
+docs_tests.extend(try_gx)
 
 docs_tests.extend(create_a_data_context)
 
@@ -549,5 +561,6 @@ docs_tests.extend(docs_examples_trigger_actions_based_on_validation_results)
 
 docs_tests.extend(docs_example_configure_project_settings)
 
+docs_tests.extend(docs_examples_configure_data_docs)
+
 docs_tests.extend(learn_data_quality_use_cases)
-docs_tests.extend(try_gx)
