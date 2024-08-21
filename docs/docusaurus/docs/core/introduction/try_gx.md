@@ -10,7 +10,7 @@ import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
 Start here to learn how to connect to data, create Expectations, validate data, and review Validation Results. This is an ideal place to start if you're new to GX Core and want to experiment with features and see what it offers.
 
-To complement your code exploration, check out the [GX Core overview](/core/introduction/gx_overview.md) for a primer on the GX components and workflow pattern used in the examples.
+To complement your code exploration, check out the [GX Core overview](/core/introduction/gx_overview.md) for a primer on the GX Core components and workflow pattern used in the examples.
 
 ## Prerequisites
 
@@ -152,7 +152,7 @@ Run the following steps in a Python interpreter, IDE, notebook, or script.
 
    Expectations are a fundamental component of GX.  They allow you to explicitly define the state to which your data should conform. Expectation Suites are collections of Expectations.
 
-   Run the following code to define an Expectation containing two Expectations. The first Expectation expects that the column `passenger_count` consists of values ranging from `1` to `6`, and the second expects that the column `fare_amount` contains non-negative values.
+   Run the following code to define an Expectation Suite containing two Expectations. The first Expectation expects that the column `passenger_count` consists of values ranging from `1` to `6`, and the second expects that the column `fare_amount` contains non-negative values.
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py create expectation suite"
    ```

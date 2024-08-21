@@ -23,7 +23,7 @@ All GX workflows share a common pattern:
 3. Define Expectations
 4. Run Validations
 
-At each workflow step, different GX components are defined and used. This section introduces the key GX components required to create a data validation workflow.
+At each workflow step, different GX components are defined and used. This section introduces the key GX Core components required to create a data validation workflow.
 
 ![GX workflow pattern with related GX components](./overview_images/gx_workflow_steps_and_components.png)
 
@@ -47,7 +47,7 @@ For more information on connecting to data, see [Connect to data](/core/connect_
 
 ### Define Expectations
 
-An **Expectation** is a verifiable assertion about data. Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behaviors. An Expectation can be used to validate a Batch of data.
+An **Expectation** is a verifiable assertion about data. Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected data qualities. An Expectation can be used to validate a Batch of data.
 
 For a full list of available Expectations, see [the Expectation Gallery](https://greatexpectations.io/expectations/).
 
@@ -71,15 +71,15 @@ For more information on defining and running Validations, see [Run Validations](
 
 ## Customize GX Core workflows
 
-While all GX Core workflows follow a shared pattern, the outcome and operation of a workflow can be customized based on how you create Batches, define Expectations, and run Validations. GX components are building blocks that can be applied in a variety of ways to satisfy your data validation use case.
+While all GX Core workflows follow a shared pattern, the outcome and operation of a workflow can be customized based on how you create Batches, define Expectations, and run Validations. GX Core components are building blocks that can be applied in a variety of ways to satisfy your data validation use case.
 
 For instance, a GX Core workflow might:
 
-* Create a Batch using data from a Spark DataFrame, allow you to interactively validate the Batch with Expectations, and immediately review the Validation Results. This workflow could serve to inform your exploration of which Expectations you want to use in a production deployment of GX.
+* Create a Batch using data from a Spark DataFrame and allow you to interactively validate the Batch with Expectations and immediately review the Validation Results. This workflow could serve to inform your exploration of which Expectations you want to use in a production deployment of GX.
 
 * Connect to data in a SQL table, define multiple Expectation Suites that each test for a desired data quality characteristic, and use a Checkpoint to run all Expectation Suites. This workflow, when integrated with and triggered by an orchestrator, could enable automated, scheduled data quality testing on an essential data table.
 
-* Connect to a group of SQL tables and define a collection of Data Assets, each batched on a temporal column, and validate the data within each Data Asset using the same Expectation Suite. This workflow could provide a way to implement consistent data quality testing across a sharded data infrastructure.
+* Connect to a group of SQL tables and define a collection of Data Assets, each batched on a time-based column, and validate the data within each Data Asset using the same Expectation Suite. This workflow could provide a way to implement consistent data quality testing across a sharded data infrastructure.
 
 Equipped with an understanding of the GX Core components, you can design data validation workflows that logically and effectively validate your data across a variety of data store types, environments, and business use cases.
 
