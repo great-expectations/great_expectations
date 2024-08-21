@@ -769,10 +769,10 @@ def test_identifier_bundle_with_existing_id(validation_definition: ValidationDef
 
 
 @pytest.mark.unit
-def test_identifier_bundle_no_id(validation_definition: ValidationDefinition):
+def test_identifier_bundle_no_id_raises_error(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
-    with pytest.raises(ValidationDefinitionNotAddedError):
+    with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError):
         validation_definition.identifier_bundle()
 
 
@@ -878,5 +878,5 @@ def test_is_added(
     )
     validation_definition_added, errors = validation_definition.is_added()
 
-    assert validation_definition_added == is_added
+    assert validation_definition_added is is_added
     assert [type(err) for err in errors] == error_list
