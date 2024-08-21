@@ -97,8 +97,8 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
         Conditionally raises an error if the resource has not been added successfully;
         if the only error is the parent resource not being added, the error is not raised.
 
-        This is useful when downstream callers add the parent resource on behalf of the user
-        after this check.
+        This is useful when downstream callers add the parent resource on behalf of the user.
+        (e.g., Checkpoint.run())
         """
         if not self.is_added and not self._dependencies_added_except_parent:
             raise self.exception_class(errors=self.errors)
