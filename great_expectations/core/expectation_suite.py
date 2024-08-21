@@ -78,7 +78,14 @@ class ExpectationSuite(SerializableDictDot):
         self.name = name
         self.id = id
 
-        self.expectations = [self._process_expectation(exp) for exp in expectations or []]
+        self.expectations: list[Union[Expectation, ExpectationConfiguration, dict]] = []
+        for exp in expectations or []:
+            try:
+                self.expectations.append(self._process_expectation(exp))
+            except gx_exceptions.InvalidExpectationConfigurationError as e:
+                logger.exception(
+                    f"Could not add expectation; provided configuration is not valid: {e.message}"
+                )
 
         if suite_parameters is None:
             suite_parameters = {}

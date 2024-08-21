@@ -63,6 +63,15 @@ def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
 
 
 @pytest.fixture
+def bad_expectation_dict() -> dict:
+    return {
+        "type": "expect_stuff_not_to_go_well",
+        "kwargs": {},
+        "meta": {"notes": "this_should_explode"},
+    }
+
+
+@pytest.fixture
 def empty_suite_with_meta(fake_expectation_suite_name: str) -> ExpectationSuite:
     return ExpectationSuite(
         name=fake_expectation_suite_name,
@@ -169,6 +178,25 @@ class TestInit:
         ]
         assert len(suite.expectations) == 2
         assert suite.expectation_configurations == test_expected_expectations
+
+    @pytest.mark.unit
+    def test_bad_expectation_configs_are_skipped(
+        self,
+        bad_expectation_dict: dict,
+        expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
+    ):
+        suite = ExpectationSuite(
+            name="test_suite",
+            expectations=[
+                bad_expectation_dict,
+                expect_column_values_to_be_in_set_col_a_with_meta_dict,
+            ],
+        )
+        assert len(suite.expectations) == 1
+        assert (
+            suite.expectations[0].expectation_type
+            == expect_column_values_to_be_in_set_col_a_with_meta_dict["type"]
+        )
 
     @pytest.mark.unit
     def test_expectation_suite_init_overrides_non_json_serializable_meta(
