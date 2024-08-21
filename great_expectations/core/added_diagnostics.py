@@ -43,18 +43,12 @@ class _ChildAddedDiagnostics(AddedDiagnostics):
 
 @dataclass
 class BatchDefinitionAddedDiagnostics(_ChildAddedDiagnostics):
-    @override
-    def raise_for_error(self) -> None:
-        if not self.dependencies_added:
-            raise self.errors[0]  # Child node so only one error
+    pass
 
 
 @dataclass
 class ExpectationSuiteAddedDiagnostics(_ChildAddedDiagnostics):
-    @override
-    def raise_for_error(self) -> None:
-        if not self.dependencies_added:
-            raise self.errors[0]  # Leaf node so only one error
+    pass
 
 
 @dataclass

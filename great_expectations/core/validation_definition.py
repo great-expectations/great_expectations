@@ -13,7 +13,6 @@ from great_expectations.compatibility.pydantic import (
     validator,
 )
 from great_expectations.core.added_diagnostics import (
-    AddedDiagnostics,
     ValidationDefinitionAddedDiagnostics,
 )
 from great_expectations.core.batch_definition import BatchDefinition
@@ -122,7 +121,7 @@ class ValidationDefinition(BaseModel):
     def data_source(self) -> Datasource:
         return self.asset.datasource
 
-    def is_added(self) -> AddedDiagnostics:
+    def is_added(self) -> ValidationDefinitionAddedDiagnostics:
         validation_definition_added = self.id is not None
         validation_definition_errors = (
             []

@@ -30,7 +30,6 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.added_diagnostics import (
-    AddedDiagnostics,
     ExpectationSuiteAddedDiagnostics,
 )
 from great_expectations.core.serdes import _IdentifierBundle
@@ -237,7 +236,7 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
-    def is_added(self) -> AddedDiagnostics:
+    def is_added(self) -> ExpectationSuiteAddedDiagnostics:
         return ExpectationSuiteAddedDiagnostics(
             errors=[] if self.id else [ExpectationSuiteNotAddedError(name=self.name)]
         )

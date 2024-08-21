@@ -7,7 +7,6 @@ from great_expectations.compatibility import pydantic
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
 from great_expectations.core.added_diagnostics import (
-    AddedDiagnostics,
     BatchDefinitionAddedDiagnostics,
 )
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
@@ -79,7 +78,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         return batch_list[-1]
 
-    def is_added(self) -> AddedDiagnostics:
+    def is_added(self) -> BatchDefinitionAddedDiagnostics:
         return BatchDefinitionAddedDiagnostics(
             errors=[] if self.id else [BatchDefinitionNotAddedError(name=self.name)]
         )

@@ -27,7 +27,7 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
-from great_expectations.core.added_diagnostics import AddedDiagnostics, CheckpointAddedDiagnostics
+from great_expectations.core.added_diagnostics import CheckpointAddedDiagnostics
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -270,7 +270,7 @@ class Checkpoint(BaseModel):
 
         return priority_actions + secondary_actions
 
-    def is_added(self) -> AddedDiagnostics:
+    def is_added(self) -> CheckpointAddedDiagnostics:
         checkpoint_diagnostics = CheckpointAddedDiagnostics(
             errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
         )
