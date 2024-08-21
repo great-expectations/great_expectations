@@ -167,7 +167,7 @@ class Checkpoint(BaseModel):
             raise CheckpointRunWithoutValidationDefinitionError()
 
         diagnostics = self.is_added()
-        diagnostics.raise_for_parent_not_added()
+        diagnostics.raise_for_errors_except_parent()
         if not self.id:
             self._add_to_store()
 

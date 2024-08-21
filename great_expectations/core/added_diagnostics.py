@@ -92,7 +92,7 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
         if not self.is_added:
             raise self.exception_class(errors=self.errors)
 
-    def raise_for_parent_not_added(self) -> None:
+    def raise_for_errors_except_parent(self) -> None:
         if not self.is_added and not self._dependencies_added_except_parent:
             raise self.exception_class(errors=self.errors)
 

@@ -65,7 +65,7 @@ class CheckpointStore(Store):
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
         diagnostics = value.is_added()
         if self.cloud_mode:
-            diagnostics.raise_for_parent_not_added()
+            diagnostics.raise_for_errors_except_parent()
         else:
             diagnostics.raise_for_errors()
 
