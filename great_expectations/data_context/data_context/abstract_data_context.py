@@ -234,7 +234,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._init_datasources()
 
         # Init data_context_id (ahhhhhhh pls don't show up in posthog thanks)
-        self._data_context_id = "ffffffff-ffff-ffff-ffff-ffffffffffff"
+        self._data_context_id = "gggggggg-gggg-gggg-gggg-gggggggggggg"
 
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.data_context_id = self._data_context_id
