@@ -602,7 +602,7 @@ class ExpectationSuite(SerializableDictDot):
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         diagnostics = self.is_added()
-        diagnostics.raise_for_errors()
+        diagnostics.raise_for_error()
 
         return _IdentifierBundle(name=self.name, id=self.id)
 
