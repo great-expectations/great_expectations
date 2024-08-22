@@ -1167,8 +1167,17 @@ def test_save_on_individual_expectation_updates_rendered_content(
         )
     )
 
-    assert suite.expectations[0].rendered_content == []
+    old_expectation_rendered_content = suite.expectations[0].rendered_content
+    suite.expectations[0].value_set = [1, 2, 3, 4, 5]
 
     suite.expectations[0].save()
+    new_expectation_rendered_content = suite.expectations[0].rendered_content
 
-    assert suite.expectations[0].rendered_content != []
+    assert new_expectation_rendered_content != old_expectation_rendered_content
+    assert new_expectation_rendered_content[0].value["params"]["value_set"]["value"] == [
+        1,
+        2,
+        3,
+        4,
+        5,
+    ]
