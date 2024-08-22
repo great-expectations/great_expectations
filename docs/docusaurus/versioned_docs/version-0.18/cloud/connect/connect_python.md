@@ -11,13 +11,6 @@ import DataContextInitializeInstantiateSave from '../../components/setup/link_li
 
 Learn how to use GX Cloud from a Python script or interpreter, such as a Jupyter Notebook. You'll install Great Expectations, configure your GX Cloud environment variables, connect to sample data, build your first Expectation, validate data, and review the validation results through Python code.
 
-:::tip Get the most out of GX Cloud
-
-To get the most out of GX Cloud, GX recommends deploying the GX Agent. If you do not deploy the GX Agent, some features and functionality might be unavailable. To deploy the GX Agent, see [Deploy the GX Agent](../deploy_gx_agent.md).
-
-If you don't want to deploy the GX Agent, use the GX API to create a Data Source for your GX Cloud organization. See [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md).
-
-:::
 
 ## Prerequisites
 

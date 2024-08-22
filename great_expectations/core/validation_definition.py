@@ -8,10 +8,12 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Extra,
-    Field,
     PrivateAttr,
     ValidationError,
     validator,
+)
+from great_expectations.core.added_diagnostics import (
+    ValidationDefinitionAddedDiagnostics,
 )
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
@@ -28,6 +30,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import (
+    ValidationDefinitionNotAddedError,
+)
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
@@ -39,6 +44,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+
+DATAFRAME_INDICATOR = "<DATAFRAME>"
 
 
 class ValidationDefinition(BaseModel):
@@ -90,9 +97,9 @@ class ValidationDefinition(BaseModel):
             BatchDefinition: lambda b: b.identifier_bundle(),
         }
 
-    name: str = Field(..., allow_mutation=False)
-    data: BatchDefinition = Field(..., allow_mutation=False)
-    suite: ExpectationSuite = Field(..., allow_mutation=False)
+    name: str
+    data: BatchDefinition
+    suite: ExpectationSuite
     id: Union[str, None] = None
     _validation_results_store: ValidationResultsStore = PrivateAttr()
 
@@ -113,6 +120,16 @@ class ValidationDefinition(BaseModel):
     @property
     def data_source(self) -> Datasource:
         return self.asset.datasource
+
+    def is_added(self) -> ValidationDefinitionAddedDiagnostics:
+        validation_definition_diagnostics = ValidationDefinitionAddedDiagnostics(
+            errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
+        )
+        suite_diagnostics = self.suite.is_added()
+        data_diagnostics = self.data.is_added()
+        validation_definition_diagnostics.update_with_children(suite_diagnostics, data_diagnostics)
+
+        return validation_definition_diagnostics
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -195,26 +212,41 @@ class ValidationDefinition(BaseModel):
     def run(
         self,
         *,
+        checkpoint_id: Optional[str] = None,
         batch_parameters: Optional[BatchParameters] = None,
-        suite_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
-        if not self.id:
-            self._add_to_store()
+        diagnostics = self.is_added()
+        if not diagnostics.is_added:
+            # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
+            if not diagnostics.parent_added and diagnostics.children_added:
+                self._add_to_store()
+            else:
+                diagnostics.raise_for_error()
 
         validator = Validator(
             batch_definition=self.batch_definition,
             batch_parameters=batch_parameters,
             result_format=result_format,
         )
-        results = validator.validate_expectation_suite(self.suite, suite_parameters)
+        results = validator.validate_expectation_suite(self.suite, expectation_parameters)
         results.meta["validation_id"] = self.id
+        results.meta["checkpoint_id"] = checkpoint_id
 
         # NOTE: We should promote this to a top-level field of the result.
         #       Meta should be reserved for user-defined information.
         if run_id:
             results.meta["run_id"] = run_id
+            results.meta["validation_time"] = run_id.run_time
+        if batch_parameters:
+            batch_parameters_copy = {k: v for k, v in batch_parameters.items()}
+            if "dataframe" in batch_parameters_copy:
+                batch_parameters_copy["dataframe"] = DATAFRAME_INDICATOR
+            results.meta["batch_parameters"] = batch_parameters_copy
+        else:
+            results.meta["batch_parameters"] = None
 
         (
             expectation_suite_identifier,
@@ -269,20 +301,14 @@ class ValidationDefinition(BaseModel):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        if not self.id:
-            validation_definition_store = project_manager.get_validation_definition_store()
-            key = validation_definition_store.get_key(name=self.name, id=None)
-            validation_definition_store.add(key=key, value=self)
-
-        # Nested batch definition and suite should be persisted with their respective stores
-        self.data.identifier_bundle()
-        self.suite.identifier_bundle()
+        diagnostics = self.is_added()
+        diagnostics.raise_for_error()
 
         return _IdentifierBundle(name=self.name, id=self.id)
 
     @public_api
     def save(self) -> None:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
@@ -295,7 +321,7 @@ class ValidationDefinition(BaseModel):
         We need to persist a validation_definition before it can be run. If user calls runs but
         hasn't persisted it we add it for them."""
 
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)

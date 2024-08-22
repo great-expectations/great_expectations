@@ -16,6 +16,7 @@ from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import CloudDataContext
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -51,13 +52,13 @@ def datasource_name(
     # if the test was skipped, we may not have a datasource to clean up
     # in that case, we create one simply to test get and delete
     try:
-        _ = context.get_datasource(datasource_name=datasource_name)
+        _ = context.get_datasource(name=datasource_name)
     except ValueError:
         _ = context.data_sources.add_pandas(name=datasource_name)
-        context.get_datasource(datasource_name=datasource_name)
-    context.delete_datasource(datasource_name=datasource_name)
+        context.get_datasource(name=datasource_name)
+    context.delete_datasource(name=datasource_name)
     with pytest.raises(ValueError):
-        _ = context.get_datasource(datasource_name=datasource_name)
+        _ = context.get_datasource(name=datasource_name)
 
 
 @pytest.fixture(scope="module")
@@ -124,7 +125,7 @@ def get_missing_data_asset_error_type() -> type[Exception]:
 
 @pytest.fixture(scope="package")
 def in_memory_batch_request_missing_dataframe_error_type() -> type[Exception]:
-    return ValueError
+    return BuildBatchRequestError
 
 
 class TableFactory(Protocol):

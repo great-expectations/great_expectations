@@ -39,7 +39,6 @@ if TYPE_CHECKING:
         BatchMetadata,
         BatchParameters,
         DataAsset,
-        SortersDefinition,
     )
 
 # This module serves as an example of how to extend _SQLAssets for specific backends. The steps are:
@@ -154,7 +153,6 @@ class SqliteDatasource(SQLDatasource):
         name: str,
         table_name: str = "",
         schema_name: Optional[str] = None,
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> SqliteTableAsset:
         return cast(
@@ -163,7 +161,6 @@ class SqliteDatasource(SQLDatasource):
                 name=name,
                 table_name=table_name,
                 schema_name=schema_name,
-                order_by=order_by,
                 batch_metadata=batch_metadata,
             ),
         )
@@ -176,14 +173,11 @@ class SqliteDatasource(SQLDatasource):
         self,
         name: str,
         query: str,
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> SqliteQueryAsset:
         return cast(
             SqliteQueryAsset,
-            super().add_query_asset(
-                name=name, query=query, order_by=order_by, batch_metadata=batch_metadata
-            ),
+            super().add_query_asset(name=name, query=query, batch_metadata=batch_metadata),
         )
 
     add_query_asset.__doc__ = SQLDatasource.add_query_asset.__doc__

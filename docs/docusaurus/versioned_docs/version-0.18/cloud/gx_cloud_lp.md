@@ -22,7 +22,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
 
 <LinkCardGrid>
   <LinkCard topIcon label="About GX Cloud deployment patterns and architecture" description="Learn more about GX Cloud features and functionality and why it's the best choice for data validation." to="/cloud/about_gx" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Deploy the GX Agent" description="Deploy the GX Agent to use GX Cloud features and functionality." to="/cloud/deploy_gx_agent" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Connect GX Cloud" description="Ready to integrate GX Cloud with your production enviornment? Connect GX Cloud to popular data platforms and orchestration tools." to="/cloud/connect/connect_lp" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
@@ -33,7 +32,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
   <LinkCard topIcon label="Manage Expectations" description="Create, edit, or delete an Expectation." to="/cloud/expectations/manage_expectations" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Expectation Suites" description="Create or delete Expectation Suites." to="/cloud/expectation_suites/manage_expectation_suites" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Validations" description="Run a Validation, or view the Validation run history." to="/cloud/validations/manage_validations" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Manage Checkpoints" description="Add, run, edit, or delete a Checkpoint." to="/cloud/checkpoints/manage_checkpoints" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage alerts" description="Add, edit, or delete alerts." to="/cloud/alerts/manage_alerts" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage users and access tokens" description="Manage GX Cloud users and access tokens." to="/cloud/users/manage_users" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>

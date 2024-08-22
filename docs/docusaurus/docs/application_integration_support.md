@@ -24,7 +24,7 @@ The following table defines the GX Cloud, GX Core, and Community Supported integ
 | --------------------- | -------------------------- | ----------------------------------------------------------------------------- | --------------------------------- |
 | Data Sources¹         | Snowflake<br/> PostgreSQL² | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>Spark<br/>Pandas | Redshift<br/>MSSQL<br/>MySQL<br/> |
 | Configuration Stores³ | In-app                     | File system                                                                   | None                              |
-| Actions               | Slack                      | Slack ⁴<br/>Email                                                             | None                              |
+| Actions               | Slack                      | Slack <br/>Email                                                              | None                              |
 | Credential Store      | Environment variables      | Environment variables <br/> YAML⁴                                             | None                              |
 | Orchestrator          | Airflow ⁵                  | Airflow ⁵                                                                     | None                              |
 
@@ -42,7 +42,6 @@ The following table defines the GX components supported by GX Cloud and GX Core.
 | ------------ | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | Expectations | See [Available Expectations](/cloud/expectations/manage_expectations.md#available-expectations) | See [Expectations Gallery](https://greatexpectations.io/expectations) | See [Legacy Gallery](https://greatexpectations.io/legacy/v1/expectations/) |
 | GX Agent     | All versions                                                                                    | N/A                                                                   | N/A                                                                        |
-
 
 ### Operating systems
 
@@ -66,6 +65,6 @@ The following table defines the Python versions supported by GX Cloud and GX Cor
 
 The following table defines the GX versions supported by GX Cloud and GX Core.
 
-| GX Cloud | GX Core | Community     |
-| -------- | ------- | ------------- |
-| >1.0     | >1.0    | 0.17<br/>0.18 |
+| GX Cloud | GX Core | Community |
+| -------- | ------- | --------- |
+| ≥1.0     | ≥1.0    | ≥1.0      |

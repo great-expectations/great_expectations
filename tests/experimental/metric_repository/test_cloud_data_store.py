@@ -1,4 +1,5 @@
 import uuid
+from unittest import mock
 from unittest.mock import Mock  # noqa: TID251
 from uuid import UUID
 
@@ -233,3 +234,17 @@ class TestCloudDataStoreMetricRun:
             data=expected_data,
         )
         assert uuid_from_add == response_metric_run_id
+
+
+@pytest.mark.cloud
+def test_closes_session(
+    empty_cloud_context_fluent: CloudDataContext,  # used as a fixture
+):
+    """Make sure that when the CloudDataStore object is garbage collected,
+    the session is closed."""
+    cloud_data_store = CloudDataStore(context=empty_cloud_context_fluent)
+    with mock.patch("requests.Session.close", autospec=True) as mock_close:
+        # Use the finalizer to remove the object from memory.
+        # Using del or __del__ directly does not work in the test environment.
+        cloud_data_store._finalizer()
+        mock_close.assert_called_once()

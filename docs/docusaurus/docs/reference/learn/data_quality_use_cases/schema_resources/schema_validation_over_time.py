@@ -81,10 +81,12 @@ batch_definition = data_asset.add_batch_definition_whole_table("batch definition
 batch = batch_definition.get_batch()
 
 # Validate Batch.
-validation_definition = gx.core.validation_definition.ValidationDefinition(
-    name="validation definition",
-    data=batch_definition,
-    suite=suite,
+validation_definition = context.validation_definitions.add(
+    gx.core.validation_definition.ValidationDefinition(
+        name="validation definition",
+        data=batch_definition,
+        suite=suite,
+    )
 )
 
 # Define Checkpoint, run it, and capture result.

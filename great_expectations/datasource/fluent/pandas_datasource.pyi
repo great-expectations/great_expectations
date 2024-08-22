@@ -27,7 +27,6 @@ from typing_extensions import TypeAlias
 
 from great_expectations._docs_decorators import (
     deprecated_argument,
-    new_argument,
 )
 from great_expectations._docs_decorators import (
     public_api as public_api,
@@ -60,7 +59,6 @@ _EXCLUDE_TYPES_FROM_JSON: list[Type]
 MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
 AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 logger: Logger
-_PandasDataFrameT = TypeVar("_PandasDataFrameT")
 
 class PandasDatasourceError(Exception): ...
 
@@ -122,16 +120,13 @@ class XMLAsset(_PandasDataAsset): ...
 
 class DataFrameAsset(_PandasDataAsset):
     type: Literal["dataframe"]
-    dataframe: _PandasDataFrameT  # type: ignore[valid-type]
 
-    @new_argument(
-        argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
-        version="0.16.15",
-    )
     @override
-    def build_batch_request(  # type: ignore[override]
-        self, dataframe: Optional[pd.DataFrame] = None
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters] = ...,
+        batch_slice: Optional[BatchSlice] = ...,
+        partitioner: Optional[ColumnPartitioner] = ...,
     ) -> BatchRequest: ...
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...

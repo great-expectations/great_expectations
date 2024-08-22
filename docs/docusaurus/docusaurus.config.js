@@ -74,7 +74,20 @@ module.exports = {
       contextualSearch: true,
     },
     prism: {
+      additionalLanguages: ['bash'],
       theme: require('./src/theme/CodeBlock/theme'),
+      magicComments: [
+        // Remember to extend the default highlight class name as well!
+        {
+          className: 'theme-code-block-highlighted-line',
+          line: 'highlight-next-line',
+          block: {start: 'highlight-start', end: 'highlight-end'},
+        },
+        {
+          className: 'code-block-hide-line',
+          line: 'Hide this',
+        },
+      ]
     },
     colorMode: {
       disableSwitch: true,
@@ -136,7 +149,7 @@ module.exports = {
         {
           type: 'doc',
           label: 'GX OSS',
-          docId: 'oss/oss',
+          docId: 'core/introduction/introduction',
           position: 'right',
         },
         {
@@ -268,14 +281,13 @@ module.exports = {
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
           // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
+          lastVersion: 'current',
           versions: {
             current: {
-              label: '1.0 prerelease',
-              path: '1.0-prerelease',
+              label: '1.0.0',
             },
             ['0.18']: {
               label: '0.18.17',
-              path: '',
             },
           },
           admonitions: {

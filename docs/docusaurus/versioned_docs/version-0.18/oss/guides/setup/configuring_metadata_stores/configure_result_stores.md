@@ -3,8 +3,7 @@ sidebar_label: "Configure Validation Result Stores"
 title: "Configure Validation Result Stores"
 id: configure_result_stores
 description: Configure storage locations for Validation Results.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 ---
 
 import Preface from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_preface.mdx'
