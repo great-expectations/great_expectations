@@ -62,7 +62,7 @@ The following are the available Data Context types:
 
 <TabItem value="file" label="Local (File)">
 
-A Data Context is required in almost all Python scripts using GX 1.0. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
+A Data Context is required in almost all Python scripts using GX Core. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
 ### Import GX
 

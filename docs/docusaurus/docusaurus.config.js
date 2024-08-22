@@ -148,7 +148,7 @@ module.exports = {
         },
         {
           type: 'doc',
-          label: 'GX OSS',
+          label: 'GX Core',
           docId: 'oss/oss',
           position: 'right',
         },
@@ -215,7 +215,7 @@ module.exports = {
               to: 'https://greatexpectations.io/gx-cloud',
             },
             {
-              label: 'GX OSS',
+              label: 'GX Core',
               to: 'https://greatexpectations.io/gx-oss',
             },
             {

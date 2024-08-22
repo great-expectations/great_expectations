@@ -11,7 +11,7 @@ For guidance on creating new Data Sources, see [Connect to data](/core/manage_an
 ## Prerequisites
 
 - Installed Python
-- Installed the GX 1.0 library
+- Installed the GX Core library
 
 
 ## List available Data Sources

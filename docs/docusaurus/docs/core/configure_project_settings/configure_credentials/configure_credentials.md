@@ -15,13 +15,13 @@ import AccessCredentials from './_access_credentials.md'
 
 
 
-Credentials, whether they are tokens for accessing third party apps such as Slack or connection strings for accessing your data, should be stored securely outside of version control.  {GxData.product_name} allows you to securely store credentials of all types as environment variables on a local system, or as entries in an uncommitted config file.  These credentials are then referenced by variable name in your version controlled code, and implemented by GX through string substitution.
+Credentials, whether they are tokens for accessing third party apps such as Slack or connection strings for accessing your data, should be stored securely outside of version control.  GX Core allows you to securely store credentials of all types as environment variables on a local system, or as entries in an uncommitted config file.  These credentials are then referenced by variable name in your version controlled code, and implemented by GX through string substitution.
 
 ### Prerequisites
 
 - The ability to set environment variables or a File Data Context.
 
-{GxData.product_name} also supports referencing credentials that have been stored in the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers.  To set up {GxData.product_name} to access one of these secrets managers you will additionally require:
+GX Core also supports referencing credentials that have been stored in the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers.  To set up GX Core to access one of these secrets managers you will additionally require:
 
 - The ability to install Python modules with `pip`.
 

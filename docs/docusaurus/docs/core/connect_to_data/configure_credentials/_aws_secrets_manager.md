@@ -11,7 +11,7 @@ import PreReqFileDataContext from '../../_core_components/prerequisites/_file_da
 
 1. Set up AWS Secrets Manager support.
    
-   To use the AWS Secrets Manager with {GxData.product_name} you will first need to install the `great_expectations` Python package with the `aws_secrets` requirement.  To do this, run the following command:
+   To use the AWS Secrets Manager with GX Core you will first need to install the `great_expectations` Python package with the `aws_secrets` requirement.  To do this, run the following command:
 
    ```bash title="Terminal"
    pip install 'great_expectations[aws_secrets]'
