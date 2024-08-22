@@ -42,7 +42,7 @@ def submit(event: Event) -> None:
 
 
 def _in_gx_ci() -> bool:
-    return os.env("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
+    return os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
 
 
 def init(  # noqa: PLR0913
