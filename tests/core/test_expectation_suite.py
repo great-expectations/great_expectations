@@ -1114,7 +1114,7 @@ def test_is_added(id: str | None, is_added: bool, num_errors: int):
 
 
 @pytest.mark.cloud
-def test_save_updates_rendered_content(
+def test_save_on_suite_updates_rendered_content(
     empty_cloud_context_fluent,
 ):
     context = empty_cloud_context_fluent
@@ -1152,3 +1152,23 @@ def test_save_updates_rendered_content(
     ]
     assert new_expectation_2_rendered_content != old_expectation_2_rendered_content
     assert new_expectation_2_rendered_content[0].value["params"]["min_value"]["value"] == 2
+
+
+@pytest.mark.cloud
+def test_save_on_individual_expectation_updates_rendered_content(
+    empty_cloud_context_fluent,
+):
+    context = empty_cloud_context_fluent
+
+    suite = context.suites.add(
+        suite=ExpectationSuite(
+            name="my_suite",
+            expectations=[gxe.ExpectColumnDistinctValuesToBeInSet(column="a", value_set=[1, 2, 3])],
+        )
+    )
+
+    assert suite.expectations[0].rendered_content == []
+
+    suite.expectations[0].save()
+
+    assert suite.expectations[0].rendered_content != []
