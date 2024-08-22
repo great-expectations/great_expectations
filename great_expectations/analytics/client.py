@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
@@ -25,7 +26,8 @@ def submit(event: Event) -> None:
         if event.organization_id:
             groups.update({"organization": event.organization_id})
 
-        return
+        if "great_expectations" in os.getenv("GITHUB_REPOSITORY"):
+            return
 
         posthog.capture(
             str(event.distinct_id),
