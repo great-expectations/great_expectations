@@ -149,7 +149,7 @@ module.exports = {
         {
           type: 'doc',
           label: 'GX OSS',
-          docId: 'oss/oss',
+          docId: 'core/introduction/introduction',
           position: 'right',
         },
         {
@@ -284,12 +284,10 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '1.0',
-              path: '1.0',
+              label: '1.0.0',
             },
             ['0.18']: {
               label: '0.18.17',
-              path: '',
             },
           },
           admonitions: {
