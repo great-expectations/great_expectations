@@ -17,9 +17,18 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Choose an Expectation to create.
 

@@ -15,9 +15,18 @@ Batch Definitions both organize a Data Asset's records into Batches and provide 
 - <PrereqDataContext/>.  These examples assume the variable `context` contains your Data Context.
 - <PrereqDataSourceAndAssetConnectedToData/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Batch Definition.
 
