@@ -17,6 +17,7 @@ from unittest import mock
 import numpy as np
 import packaging
 import pandas as pd
+import posthog
 import pytest
 
 import great_expectations as gx
@@ -433,6 +434,7 @@ def pytest_collection_modifyitems(config, items):
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
     monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", False)
+    monkeypatch.setattr(posthog, "capture", lambda *args, **kwargs: None)
 
 
 @pytest.fixture(scope="session", autouse=True)
