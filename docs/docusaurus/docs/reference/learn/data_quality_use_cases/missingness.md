@@ -11,7 +11,7 @@ In this guide, you will learn how to leverage GX to effectively handle missing d
 
 ## Prerequisite knowledge
 
-Before diving into this guide, ensure you have a basic understanding of GX components and workflows. If you're new to GX, start with the [GX Overview](https://docs.greatexpectations.io/docs/guides/overview) to familiarize yourself with key concepts and setup procedures.
+This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Overview](https://docs.greatexpectations.io/docs/guides/overview) to familiarize yourself with key concepts and setup procedures.
 
 ## Data preview
 
@@ -26,12 +26,9 @@ In this dataset, you'll notice missing data in the `type` and `transfer_date` co
 
 ## Key missingness Expectations
 
-GX provides a suite of missingness-focused Expectations to manage missing data in your datasets. These Expectations can be added to an Expectation Suite via the GX Cloud UI or using the GX Core Python library.
+GX provides a suite of missingness-focused Expectations to manage missing data in your datasets. These Expectations can be created using the GX Cloud UI or the GX Core Python library.
 
-
-:::[TODO]
-> Add animated GIF demonstrating how to create Expectations using the GX Cloud UI.
-:::
+![Add a missingness Expectation in GX Cloud](./missingness_resources/gx_cloud_missingness_expectations_add.gif)
 
 ### Expect Column Values To Be Null
 
@@ -65,13 +62,9 @@ Ensures that values within a specific column are not `NULL`.
 
 ## Examples and scenarios
 
-**GX Cloud** provides a visual interface to create and run workflows for managing missing data. The GX Cloud workflow to handle data missingness is intuitive and straightforward: create a Data Asset, define Expectations for missing values, run a Checkpoint, and review Validation Results.
+GX Cloud provides a visual interface to create and run workflows for managing missing data. The GX Cloud workflow to handle data missingness is intuitive and straightforward: create a Data Asset, define Expectations for missing values, run a Validation, and review Validation Results.
 
-:::note
-> TODO add animated gif
-:::
-
-![Validate missingness Expectations in GX Cloud](#)
+![Validate missingness Expectations in GX Cloud](./missingness_resources/gx_cloud_missingness_expectations_validate.gif)
 
 **GX Core** can be used to complement and extend the capabilities of GX Cloud to programmatically implement custom workflows for handling missing data. The examples provided in this section feature use cases that leverage GX Core to achieve effective management of missing values.
 
@@ -119,13 +112,13 @@ This Expectation serves as an early warning system for potential issues in your 
 
 ## Avoid common missingness pitfalls
 
-- **Overlooking Edge Cases**: Rare scenarios of missing data can go unnoticed, leading to incomplete data quality checks. Regularly broaden your [ExpectColumnValuesToNotBeNull](#expect-column-values-to-not-be-null) coverage to cover such cases.
+- **Overlooking Edge Cases**: Rare scenarios of missing data can go unnoticed, leading to incomplete data quality checks. Regularly broaden your [`ExpectColumnValuesToNotBeNull`](#expect-column-values-to-not-be-null) coverage to cover such cases.
 - **Inconsistent Definitions**: Differing definitions of 'missing' data across teams can lead to inconsistent handling. Standardize definitions and document them clearly across teams.
-- **False Positives/Negatives**: Rigid thresholds can cause false positives or negatives. Use historical data for setting thresholds and consider the `mostly` attribute available for both [ExpectColumnValuesToNotBeNull](#expect-column-values-to-not-be-null) and [ExpectColumnValuesToBeNull](#expect-column-values-to-be-null).
+- **False Positives/Negatives**: Rigid thresholds can cause false positives or negatives. Use historical data for setting thresholds and consider the `mostly` attribute available for both [`ExpectColumnValuesToNotBeNull`](#expect-column-values-to-not-be-null) and [`ExpectColumnValuesToBeNull`](#expect-column-values-to-be-null).
 - **Manual Handling**: Manually addressing missing data can introduce errors and is unsustainable for large datasets. Automate data quality checks and remediation.
 - **Ignoring Root Causes**: Addressing symptoms without understanding the root causes can lead to recurring problems. Conduct root cause analyses and implement relevant Expectations early in your data stream.
 
-## Next Steps: Implementing Missingness Strategies
+## Next steps: Implementing missingness strategies
 
 Managing missing data is a critical component of ensuring data quality and reliability. By implementing the strategies explored in this guide, you can significantly enhance your data's integrity and trustworthiness. Here's how you can build upon these practices:
 
