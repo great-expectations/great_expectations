@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
@@ -25,6 +26,9 @@ def submit(event: Event) -> None:
         if event.organization_id:
             groups.update({"organization": event.organization_id})
 
+        if _in_gx_ci():
+            posthog.disabled = True
+
         posthog.capture(
             str(event.distinct_id),
             str(event.action),
@@ -35,6 +39,10 @@ def submit(event: Event) -> None:
         # failure to send an analytics event should not be propagated to user
         # TODO: figure out what to do about undeliverable events
         pass
+
+
+def _in_gx_ci() -> bool:
+    return os.env("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
 
 
 def init(  # noqa: PLR0913
