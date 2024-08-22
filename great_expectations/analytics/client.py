@@ -26,7 +26,7 @@ def submit(event: Event) -> None:
         if event.organization_id:
             groups.update({"organization": event.organization_id})
 
-        if os.getenv("CI"):
+        if os.getenv("GITHUB_ACTIONS"):
             return
 
         posthog.capture(
