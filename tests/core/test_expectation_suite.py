@@ -1111,3 +1111,44 @@ def test_is_added(id: str | None, is_added: bool, num_errors: int):
     assert all(
         isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in diagnostics.errors
     )
+
+
+@pytest.mark.cloud
+def test_save_updates_rendered_content(
+    empty_cloud_context_fluent,
+):
+    context = empty_cloud_context_fluent
+
+    expectation_1 = gxe.ExpectColumnDistinctValuesToBeInSet(column="a", value_set=[1, 2, 3])
+    expectation_2 = gxe.ExpectColumnValuesToBeBetween(column="a", min_value=1, max_value=5)
+    suite = context.suites.add(
+        suite=ExpectationSuite(
+            name="my_suite",
+            expectations=[
+                expectation_1,
+                expectation_2,
+            ],
+        )
+    )
+
+    old_expectation_1_rendered_content = suite.expectations[0].rendered_content
+    old_expectation_2_rendered_content = suite.expectations[1].rendered_content
+
+    suite.expectations[0].value_set = [1, 2, 3, 4, 5]
+    suite.expectations[1].min_value = 2
+
+    suite.save()
+
+    new_expectation_1_rendered_content = suite.expectations[0].rendered_content
+    new_expectation_2_rendered_content = suite.expectations[1].rendered_content
+
+    assert new_expectation_1_rendered_content != old_expectation_1_rendered_content
+    assert new_expectation_1_rendered_content[0].value["params"]["value_set"]["value"] == [
+        1,
+        2,
+        3,
+        4,
+        5,
+    ]
+    assert new_expectation_2_rendered_content != old_expectation_2_rendered_content
+    assert new_expectation_2_rendered_content[0].value["params"]["min_value"]["value"] == 2
