@@ -38,33 +38,3 @@ Some environments and Data Sources require additional Python libraries or third 
   </TabItem>
 
 </Tabs>
-
-## Next steps
-
-<Tabs className="hidden" queryString="dependencies" groupId="additional-dependencies" defaultValue='amazon' values={[{value: 'amazon', label: 'Amazon S3'}, {label: 'Microsoft Azure Blob Storage', value:'azure'}, {label: 'Google Cloud Storage', value:'gcs'}, {label: 'SQL databases', value:'sql'}]}>
-
-<TabItem value="amazon" label="Amazon S3">
-
-- [Manage Data Contexts](/core/installation_and_setup/manage_data_contexts.md)
-
-</TabItem>
-
-<TabItem value="azure">
-
-- [Manage Data Contexts](/core/installation_and_setup/manage_data_contexts.md)
-
-</TabItem>
-
-<TabItem value="gcs">
-
-- [Manage Data Contexts](/core/installation_and_setup/manage_data_contexts.md)
-
-</TabItem>
-
-<TabItem value="sql">
-
-- [Manage Data Contexts](/core/installation_and_setup/manage_data_contexts.md)
-
-</TabItem>
-
-</Tabs>
