@@ -596,11 +596,8 @@ class ExpectationSuite(SerializableDictDot):
         Renders content using the atomic prescriptive renderer for each expectation configuration associated with
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """  # noqa: E501
-        from great_expectations.render.renderer.inline_renderer import InlineRenderer
-
         for expectation in self.expectations:
-            inline_renderer = InlineRenderer(render_object=expectation.configuration)
-            expectation.rendered_content = inline_renderer.get_rendered_content()
+            expectation.render()
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
