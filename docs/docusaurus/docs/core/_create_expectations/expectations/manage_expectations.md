@@ -24,7 +24,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Import the `expectations` module from the GX Core library:
 
@@ -57,7 +57,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. [Retrieve a Batch of data](/core/manage_and_access_data/request_data.md) to test the Expectation against.  
 
@@ -111,7 +111,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/_create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.  
 
@@ -156,7 +156,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Choose and import a base Expectation class:
 

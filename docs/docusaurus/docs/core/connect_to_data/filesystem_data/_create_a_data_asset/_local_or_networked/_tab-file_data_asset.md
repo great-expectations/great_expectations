@@ -13,9 +13,18 @@ import PrereqSparkFilesystemDataSource from '../../../../_core_components/prereq
 - Access to data files (such as `.csv` or `.parquet` files) in a local or networked folder hierarchy.
 - [A pandas](/core/connect_to_data/filesystem_data/filesystem_data.md?data_source_type=pandas&environment=filesystem#create-a-data-source) or [Spark Filesystem Data Source configured for local or networked data files](/core/connect_to_data/filesystem_data/filesystem_data.md?data_source_type=spark&environment=filesystem#create-a-data-source).
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Data Source.
 

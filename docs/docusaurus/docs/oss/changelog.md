@@ -14,6 +14,11 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.0.0
+* [BUGFIX] Always rerender content (#10257)
+* [BUGFIX] Ensure that all diagnostics for a Checkpoint's children validation definitions appear in error messages (#10250)
+* [MAINTENANCE] Revert "[BUGFIX] Ensure that all diagnostics for a Checkpoint's children validation definitions appear in error messages" (#10256)
+
 ### 1.0.0a6
 * [FEATURE] Add the public api to context.data_source and context.data_source.get ([#10180](https://github.com/great-expectations/great_expectations/pull/10180))
 * [FEATURE] Remove order_by from Asset API ([#10187](https://github.com/great-expectations/great_expectations/pull/10187))

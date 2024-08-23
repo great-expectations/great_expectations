@@ -9,7 +9,7 @@ import Tabs from '@theme/Tabs';
 
 import InProgress from '../_core_components/_in_progress.md'
 
-To access a deployment environment or a data storage system you must provide your access credentials. These access credentials must be stored securely outside of version control. With GX 1.0 you can store you access credentials as environment variables, in a YAML file that exists outside of version control, or in a third-party secrets manager. GX 1.0 supports the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers. 
+To access a deployment environment or a data storage system you must provide your access credentials. These access credentials must be stored securely outside of version control. With GX Core you can store you access credentials as environment variables, in a YAML file that exists outside of version control, or in a third-party secrets manager. GX Core supports the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers. 
 
 ## Environment variables
 
@@ -43,7 +43,7 @@ The default ``config_variables.yml`` file located at ``great_expectations/uncomm
 
 ## Secrets manager
 
-GX 1.0 supports the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers.
+GX Core supports the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers.
 
 <Tabs
   queryString="secrets_manager"

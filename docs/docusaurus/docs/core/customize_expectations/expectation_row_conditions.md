@@ -30,9 +30,18 @@ Great Expectations lets you express Conditional Expectations with a `row_conditi
 - <PrereqPreconfiguredDataContext/>.
 - Recommended. <PrereqPreconfiguredDataSourceAndAsset/> for [testing your customized Expectation](/core/define_expectations/test_an_expectation.md).
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 In this procedure, your Data Context is assumed to be stored in the variable `context` and your Expectation Suite is assumed to be stored in the variable `suite`.  `suite` can be a newly created and empty Expectation Suite, or an existing Expectation Suite retrieved from the Data Context.
 

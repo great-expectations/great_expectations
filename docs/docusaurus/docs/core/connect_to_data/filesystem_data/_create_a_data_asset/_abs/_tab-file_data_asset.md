@@ -12,9 +12,18 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 - Access to data files in Azure Blob Storage.
 - A pandas or Spark [Filesystem Data Source configured for Azure Blob Storage data files](/core/connect_to_data/filesystem_data/filesystem_data.md?data_source_type=spark&environment=abs#create-a-data-source).
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Data Source.
 
