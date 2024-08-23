@@ -18,9 +18,18 @@ import PandasDefault from './_pandas_default.md'
 <PandasDefault/>
 :::
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Define the Data Source's parameters.
 

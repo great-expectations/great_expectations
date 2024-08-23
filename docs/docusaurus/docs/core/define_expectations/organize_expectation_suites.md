@@ -19,10 +19,18 @@ An Expectation Suite contains a group of Expectations that describe the same set
 - Recommended. <PrereqPreconfiguredDataContext/>.
 - Recommended. <PrereqPreconfiguredDataSourceAndAsset/>.
 
+### Procedure
 
-<Tabs>
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve or create a Data Context.
 

@@ -79,7 +79,7 @@ The following table lists the available GX Cloud Expectations.
 
 4. Click **New Expectation**.
 
-5. Select an Expectation type. See [Available Expectation types](#available-expectation-types).
+5. Select an Expectation type. See [Available Expectations](#available-expectations).
 
 6. If you are adding your first expectation on this data asset, you may be able to select a time-based Batch interval for that asset.
 

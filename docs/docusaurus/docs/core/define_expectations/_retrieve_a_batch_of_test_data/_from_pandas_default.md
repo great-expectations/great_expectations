@@ -18,9 +18,18 @@ Because the `pandas_default` Data Source's `.read_*(...)` methods only return a 
 - <PrereqDataContext/>.  These examples assume the variable `context` contains your Data Context.
 - Data in a file format supported by pandas, such as `.csv` or `.parquet`.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Define the path to the datafile.
 

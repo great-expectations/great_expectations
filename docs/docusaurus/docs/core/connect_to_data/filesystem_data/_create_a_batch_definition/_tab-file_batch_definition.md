@@ -11,7 +11,7 @@ Batch Definitions for File Data Assets can be configured to return the content o
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Data Asset.
 
@@ -42,7 +42,7 @@ Batch Definitions for File Data Assets can be configured to return the content o
 
    <TabItem value="partitioned" label="Partitioned">
    
-   {GxData.product_name} currently supports partitioning File Data Assets based on dates.  The files can be returned by year, month, or day.
+   GX Core currently supports partitioning File Data Assets based on dates.  The files can be returned by year, month, or day.
 
    <Tabs queryString="partition_type" groupId="partition_type" defaultValue='yearly'>
    

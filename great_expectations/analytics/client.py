@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
@@ -57,8 +58,13 @@ def init(  # noqa: PLR0913
         conf["oss_id"] = oss_id
     update_config(config=Config(cloud_mode=cloud_mode, **conf))
 
+    enable = enable and not _in_gx_ci()
     posthog.disabled = not enable
     if enable:
         posthog.debug = ENV_CONFIG.posthog_debug
         posthog.project_api_key = ENV_CONFIG.posthog_project_api_key
         posthog.host = ENV_CONFIG.posthog_host
+
+
+def _in_gx_ci() -> bool:
+    return os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
