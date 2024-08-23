@@ -109,6 +109,12 @@ class ExpectationSuite(SerializableDictDot):
         self._store = project_manager.get_expectations_store()
 
     @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        return project_manager.is_using_cloud()
+
+    @property
     def suite_parameter_options(self) -> tuple[str, ...]:
         """SuiteParameter options for this ExpectationSuite.
 
@@ -240,6 +246,8 @@ class ExpectationSuite(SerializableDictDot):
     def save(self) -> None:
         """Save this ExpectationSuite."""
         # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now  # noqa: E501
+        if self._include_rendered_content:
+            self.render()
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
@@ -588,17 +596,13 @@ class ExpectationSuite(SerializableDictDot):
         Renders content using the atomic prescriptive renderer for each expectation configuration associated with
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """  # noqa: E501
-        from great_expectations.render.renderer.inline_renderer import InlineRenderer
-
         for expectation in self.expectations:
-            if not expectation.rendered_content:
-                inline_renderer = InlineRenderer(render_object=expectation.configuration)
-                expectation.rendered_content = inline_renderer.get_rendered_content()
+            expectation.render()
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         diagnostics = self.is_added()
-        diagnostics.raise_for_errors()
+        diagnostics.raise_for_error()
 
         return _IdentifierBundle(name=self.name, id=self.id)
 

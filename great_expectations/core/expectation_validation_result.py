@@ -248,20 +248,18 @@ class ExpectationValidationResult(SerializableDictDot):
 
         rendered_content: List[RenderedAtomicContent] = inline_renderer.get_rendered_content()
 
-        if not self.rendered_content:
-            self.rendered_content = [
-                content_block
-                for content_block in rendered_content
-                if content_block.name.startswith(AtomicRendererType.DIAGNOSTIC)
-            ]
+        self.rendered_content = [
+            content_block
+            for content_block in rendered_content
+            if content_block.name.startswith(AtomicRendererType.DIAGNOSTIC)
+        ]
 
         if self.expectation_config:
-            if not self.expectation_config.rendered_content:
-                self.expectation_config.rendered_content = [
-                    content_block
-                    for content_block in rendered_content
-                    if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)
-                ]
+            self.expectation_config.rendered_content = [
+                content_block
+                for content_block in rendered_content
+                if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)
+            ]
 
     @staticmethod
     def validate_result_dict(result):
