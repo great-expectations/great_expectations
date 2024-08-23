@@ -1,5 +1,7 @@
 ---
 title: Try GX Core
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
