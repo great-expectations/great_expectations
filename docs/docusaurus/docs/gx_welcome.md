@@ -14,7 +14,7 @@ import GXCard from '@site/src/components/GXCard';
 
 # Great Expectations documentation
 
-<p className="DocItem__header-description">Learn everything you need to know about GX Cloud and GX Open Source Software (OSS)</p>
+<p className="DocItem__header-description">Learn everything you need to know about GX Cloud and GX Core</p>
 
 ---
 

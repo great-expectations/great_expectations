@@ -32,7 +32,7 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 - **GX Cloud web UI** - A web interface that allows you to manage and validate your organization's data quality without running Python code and enables shared visibility into your organization's Validation Results and Checkpoint run history. It's browser- and platform-independent.
 
-- **GX Cloud API** - Provides a REST API to programmatically access and manage GX Cloud data and configurations. Both the GX open source software (OSS) client and the GX Agent use the GX Cloud API to query data from and send data to GX Cloud.
+- **GX Cloud API** - Provides a REST API to programmatically access and manage GX Cloud data and configurations. Both the GX Core Python library and the GX Agent use the GX Cloud API to query data from and send data to GX Cloud.
 
 
 ## GX Cloud deployment options
