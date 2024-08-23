@@ -26,9 +26,6 @@ def submit(event: Event) -> None:
         if event.organization_id:
             groups.update({"organization": event.organization_id})
 
-        if os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations":
-            posthog.disabled = True  # Don't emit in CI
-
         posthog.capture(
             str(event.distinct_id),
             str(event.action),
