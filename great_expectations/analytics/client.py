@@ -26,9 +26,6 @@ def submit(event: Event) -> None:
         if event.organization_id:
             groups.update({"organization": event.organization_id})
 
-        if _in_gx_ci():
-            posthog.disabled = True
-
         posthog.capture(
             str(event.distinct_id),
             str(event.action),
@@ -39,10 +36,6 @@ def submit(event: Event) -> None:
         # failure to send an analytics event should not be propagated to user
         # TODO: figure out what to do about undeliverable events
         pass
-
-
-def _in_gx_ci() -> bool:
-    return os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
 
 
 def init(  # noqa: PLR0913
@@ -65,8 +58,13 @@ def init(  # noqa: PLR0913
         conf["oss_id"] = oss_id
     update_config(config=Config(cloud_mode=cloud_mode, **conf))
 
+    enable = enable and not _in_gx_ci()
     posthog.disabled = not enable
     if enable:
         posthog.debug = ENV_CONFIG.posthog_debug
         posthog.project_api_key = ENV_CONFIG.posthog_project_api_key
         posthog.host = ENV_CONFIG.posthog_host
+
+
+def _in_gx_ci() -> bool:
+    return os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
