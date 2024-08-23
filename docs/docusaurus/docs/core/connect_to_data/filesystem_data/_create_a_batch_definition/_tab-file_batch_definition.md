@@ -11,7 +11,7 @@ Batch Definitions for File Data Assets can be configured to return the content o
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Data Asset.
 

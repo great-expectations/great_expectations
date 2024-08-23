@@ -21,9 +21,18 @@ Data can be validated against individual Expectations.  This workflow is general
 - [A Batch of sample data](/core/define_expectations/retrieve_a_batch_of_test_data.md).  This guide assumes the variable `batch` contains your sample data.
 - <PrereqExpectation/>.  This guide assumes the variable `expectation` contains the Expectation to be tested.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Run the Expectation on the Batch of data.
 

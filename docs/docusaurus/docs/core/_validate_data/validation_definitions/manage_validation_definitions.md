@@ -27,7 +27,7 @@ A Validation Definition is a fixed reference that links a Batch of data to an Ex
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Import the `ValidationDefinition` class from the GX library.
 
@@ -112,7 +112,7 @@ validation_definition = context.validation_definitions.add(ValidationDefinition(
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -149,7 +149,7 @@ for definition in context.validation_definitions:
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -185,7 +185,7 @@ validation_definition = context.validation_definitions.get(name=definition_name)
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -255,7 +255,7 @@ validation_definitions_for_asset = [
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -299,7 +299,7 @@ context.validation_definitions.delete(validation_definition.name)
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 Validation definitions are intended to be fixed references that link a set of data to an Expectation Suite.  As such, they do not include an update method.  However, multiple Validation Definitions with the same Batch Definition and Expectation Suite can exist as long as each has a unique name.
 
@@ -381,7 +381,7 @@ context.validation_definitions.delete(original_validation_definition)
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Create a new or retrieve an existing Validation Definition.
 

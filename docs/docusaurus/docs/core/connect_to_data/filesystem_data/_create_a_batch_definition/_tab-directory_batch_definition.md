@@ -9,9 +9,18 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 - <PreReqDataContext/>.  The variable `context` is used for your Data Context in the following example code.
 - [A File Data Asset on a Filesystem Data Source](#create-a-data-asset).
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Data Asset.
 

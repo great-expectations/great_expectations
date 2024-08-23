@@ -15,9 +15,18 @@ import DatasourceMethodReferenceTable from './_datasource_method_reference_table
 - <PreReqDataContext/>.
 - <PreReqCredentials/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Import GX and instantiate a Data Context:
 

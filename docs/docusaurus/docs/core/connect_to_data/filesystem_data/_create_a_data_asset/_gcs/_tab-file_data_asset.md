@@ -12,9 +12,18 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 - Access to data files in Google Cloud Storage.
 - [A pandas](/core/connect_to_data/filesystem_data/filesystem_data.md?data_source_type=pandas&environment=gcs#create-a-data-source) or [Spark Filesystem Data Source configured for Google Cloud Storage data files](/core/connect_to_data/filesystem_data/filesystem_data.md?data_source_type=spark&environment=gcs#create-a-data-source).
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Data Source.
 

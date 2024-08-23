@@ -36,13 +36,14 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 - Optional. <PrereqAbsInstalled/> and [credentials configured](/core/configure_project_settings/configure_credentials/configure_credentials.md).
 
 ### Procedure
+
 <Tabs 
-  queryString="procedure"
-  defaultValue="instructions" 
-  values={[
-    {value: 'instructions', label:'Instructions'},
-    {value:'sample_code', label:'Sample code'}
-  ]}
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
 >
 
 <TabItem value="instructions" label="Instructions">
