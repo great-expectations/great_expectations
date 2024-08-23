@@ -2,7 +2,7 @@
 sidebar_label: 'Data quality use cases'
 title: 'Data quality use cases'
 hide_title: true
-description: Example data quality use cases and implementations with GX Cloud and GX OSS.
+description: Example data quality use cases and implementations with GX Cloud and GX Core.
 hide_feedback_survey: true
 pagination_next: null
 pagination_prev: null

@@ -1,5 +1,5 @@
 ---
-title: Install GX 1.0
+title: Install GX Core
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
@@ -13,7 +13,7 @@ import InstallGxCloud from './_install_gx/_gx_cloud_installation.md';
 import GxData from '../../components/_data.jsx';
 import PythonVersion from '../_core_components/_python_version.md';
 
-To use GX 1.0, you need to install Python and the GX 1.0 Python library. GX also recommends you set up a virtual environment for your GX Python projects.
+To use GX Core, you need to install Python and the GX Core Python library. GX also recommends you set up a virtual environment for your GX Python projects.
 
 ## Prerequisites
 
@@ -73,7 +73,7 @@ To use GX 1.0, you need to install Python and the GX 1.0 Python library. GX also
   source my_venv/bin/activate
   ```
 
-## Install the GX 1.0 Python library
+## Install the GX Core Python library
 
 <Tabs queryString="install-location" groupId="install-location" defaultValue='local' values={[{label: 'Local', value:'local'}, {label: 'Hosted environment', value:'hosted'}, {label: 'GX Cloud', value:'gx-cloud'}]}>
 

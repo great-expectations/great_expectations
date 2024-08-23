@@ -14,7 +14,7 @@ import CloudDataContext from './_create_a_data_context/_cloud_data_context.md'
 
 A Data Context defines the storage location for metadata, such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs. It also contains your Validation Results and the metrics associated with them, and it provides access to those objects in Python, along with other helper functions for the GX Python API. 
 
-All scripts that utilize {GxData.product_name} should start with the creation of a Data Context.
+All scripts that utilize GX Core should start with the creation of a Data Context.
 
 The following are the available Data Context types:
 

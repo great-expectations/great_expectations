@@ -11,7 +11,7 @@ import PreReqFileDataContext from '../../_core_components/prerequisites/_file_da
 
 1. Set up Azure Key Vault support.
    
-   To use Azure Key Vault with {GxData.product_name} you will first need to install the `great_expectations` Python package with the `gcp` requirement.  To do this, run the following command:
+   To use Azure Key Vault with GX Core you will first need to install the `great_expectations` Python package with the `gcp` requirement.  To do this, run the following command:
 
    ```bash title="Terminal"
    pip install 'great_expectations[gcp]'

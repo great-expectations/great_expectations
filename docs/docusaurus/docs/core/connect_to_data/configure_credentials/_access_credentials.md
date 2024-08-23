@@ -12,4 +12,4 @@ Or you could reference a configured variable that contains the full connection s
 connection_string="${POSTGRES_CONNECTION_STRING}"
 ```
 
-When you pass a string that references your stored credentials to a {GxData.product_name} method that requires a connection string as a parameter the referenced variable will be substituted for the corresponding stored value.
+When you pass a string that references your stored credentials to a GX Core method that requires a connection string as a parameter the referenced variable will be substituted for the corresponding stored value.

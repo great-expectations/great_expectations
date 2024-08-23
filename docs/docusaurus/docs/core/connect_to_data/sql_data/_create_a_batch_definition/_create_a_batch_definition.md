@@ -43,7 +43,7 @@ import PreReqDataContext from '../../../_core_components/prerequisites/_preconfi
 
    <TabItem value="partitioned" label="Partitioned">
    
-   A partitioned Batch Definition subdivides the records in a Data Asset based on the values in a specified field.  {GxData.product_name} currently supports partitioning Data Assets based on date fields.  The records can be grouped by year, month, or day.
+   A partitioned Batch Definition subdivides the records in a Data Asset based on the values in a specified field.  GX Core currently supports partitioning Data Assets based on date fields.  The records can be grouped by year, month, or day.
 
    Update the `date_column` variable and `name` parameters in the following snippet, then execute it to create partitioned Batch Definitions:
 

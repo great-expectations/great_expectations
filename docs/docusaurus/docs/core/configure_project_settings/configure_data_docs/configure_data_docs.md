@@ -52,7 +52,7 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 
    The main component that requires customization in a Data Docs site configuration is its `store_backend`.  The `store_backend` is a dictionary that tells GX where the Data Docs site will be hosted and how to access that location when the site is updated.
 
-   The specifics of the `store_backend` will depend on the environment in which the Data Docs will be created.  GX 1.0 supports generation of Data Docs in local or networked filesystems, Amazon S3, Google Cloud Service, and Azure Blob Storage.
+   The specifics of the `store_backend` will depend on the environment in which the Data Docs will be created.  GX Core supports generation of Data Docs in local or networked filesystems, Amazon S3, Google Cloud Service, and Azure Blob Storage.
 
    To create a Data Docs site configuration, select one of the following environments and follow the corresponding instructions.
 
@@ -126,7 +126,7 @@ To host Data Docs in an environment other than a local or networked filesystem, 
 
 <TabItem value="sample_code" label="Sample code">
 
-   GX 1.0 supports the Data Docs configurations for the following environments:
+   GX Core supports the Data Docs configurations for the following environments:
 
    <Tabs 
       queryString="environment"

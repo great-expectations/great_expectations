@@ -50,7 +50,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
    <TabItem value="partitioned" label="Partitioned">
    
-   {GxData.product_name} currently supports partitioning Directory Data Assets based on a datetime field.  Therefore, to define a partitioned Directory Batch Definition you need to provide two pieces of information:
+   GX Core currently supports partitioning Directory Data Assets based on a datetime field.  Therefore, to define a partitioned Directory Batch Definition you need to provide two pieces of information:
 
    - `name`:A name by which you can reference the Batch Definition in the future.  This should be unique within the Data Asset.
    - `column`: The datetime column that records should be subdivided on.
