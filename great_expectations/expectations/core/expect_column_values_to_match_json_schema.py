@@ -37,7 +37,7 @@ except ImportError:
 class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     """Expect the column entries to be JSON objects matching a given JSON schema.
 
-    expect_column_values_to_match_json_schema is a \
+    ExpectColumnValuesToMatchJsonSchema is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
@@ -68,7 +68,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_values_to_be_json_parseable](https://greatexpectations.io/expectations/expect_column_values_to_be_json_parseable)
+        [ExpectColumnValuesToBeJsonParseable](https://greatexpectations.io/expectations/expect_column_values_to_be_json_parseable)
         [The JSON-schema docs](https://json-schema.org)
     """  # noqa: E501
 
