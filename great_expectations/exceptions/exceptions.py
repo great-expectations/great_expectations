@@ -445,6 +445,14 @@ class BatchDefinitionNotAddedError(ResourceNotAddedError):
         )
 
 
+class BatchDefinitionChangesNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"BatchDefinition '{name}' has local changes that have not yet been saved. "
+            "Please update using the parent asset or data source, then try your action again."
+        )
+
+
 class BatchSpecError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message

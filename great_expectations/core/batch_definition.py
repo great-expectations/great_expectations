@@ -12,6 +12,7 @@ from great_expectations.core.added_diagnostics import (
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
+    BatchDefinitionChangesNotAddedError,
     BatchDefinitionNotAddedError,
 )
 
@@ -79,8 +80,25 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         return batch_list[-1]
 
     def is_added(self) -> BatchDefinitionAddedDiagnostics:
-        return BatchDefinitionAddedDiagnostics(
+        diagnostics = BatchDefinitionAddedDiagnostics(
             errors=[] if self.id else [BatchDefinitionNotAddedError(name=self.name)]
+        )
+        if not diagnostics.is_added:
+            return diagnostics
+        return self._is_fresh()
+
+    def _is_fresh(self) -> bool:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        datasources = project_manager.get_datasources()
+        datasource = datasources.get(self.data_asset.datasource.name)
+        asset = datasource.get_asset(self.data_asset.name)
+        batch_def = asset.get_batch_definition(self.name)
+
+        return BatchDefinitionAddedDiagnostics(
+            errors=[]
+            if self == batch_def
+            else [BatchDefinitionChangesNotAddedError(name=self.name)]
         )
 
     def identifier_bundle(self) -> _EncodedValidationData:
