@@ -8,7 +8,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Extra,
-    PrivateAttr,
     ValidationError,
     validator,
 )
@@ -23,7 +22,6 @@ from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -104,13 +102,6 @@ class ValidationDefinition(BaseModel):
     data: BatchDefinition
     suite: ExpectationSuite
     id: Union[str, None] = None
-    _validation_results_store: ValidationResultsStore = PrivateAttr()
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-
-        # TODO: Migrate this to model_post_init when we get to pydantic 2
-        self._validation_results_store = project_manager.get_validation_results_store()
 
     @property
     def batch_definition(self) -> BatchDefinition:
@@ -123,6 +114,12 @@ class ValidationDefinition(BaseModel):
     @property
     def data_source(self) -> Datasource:
         return self.asset.datasource
+
+    @property
+    def _validation_results_store(self) -> ValidationResultsStore:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        return project_manager.get_validation_results_store()
 
     def is_added(self) -> ValidationDefinitionAddedDiagnostics:
         validation_definition_diagnostics = ValidationDefinitionAddedDiagnostics(
@@ -158,6 +155,8 @@ class ValidationDefinition(BaseModel):
 
     @classmethod
     def _decode_suite(cls, suite_dict: dict) -> ExpectationSuite:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.  # noqa: E501
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
@@ -179,6 +178,8 @@ class ValidationDefinition(BaseModel):
 
     @classmethod
     def _decode_data(cls, data_dict: dict) -> BatchDefinition:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.  # noqa: E501
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
