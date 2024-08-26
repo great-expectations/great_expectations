@@ -22,15 +22,16 @@ from great_expectations.exceptions import DataContextError
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_uses_store_get(mocker: MockerFixture):
+def test_checkpoint_factory_get_uses_store_get(
+    mocker: MockerFixture,
+    arbitrary_validation_definition: ValidationDefinition,
+):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    )
+    checkpoint = Checkpoint(name=name, validation_definitions=[arbitrary_validation_definition])
     store.get.return_value = checkpoint
     factory = CheckpointFactory(store=store)
 
@@ -44,14 +45,15 @@ def test_checkpoint_factory_get_uses_store_get(mocker: MockerFixture):
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_raises_error_on_missing_key(mocker: MockerFixture):
+def test_checkpoint_factory_get_raises_error_on_missing_key(
+    mocker: MockerFixture,
+    arbitrary_validation_definition: ValidationDefinition,
+):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
-    checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    )
+    checkpoint = Checkpoint(name=name, validation_definitions=[arbitrary_validation_definition])
     store.get.return_value = checkpoint
     factory = CheckpointFactory(store=store)
 
