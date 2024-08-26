@@ -1,6 +1,7 @@
 import json
 import pathlib
 import re
+import uuid
 from unittest import mock
 from unittest.mock import ANY as ANY_TEST_ARG
 
@@ -37,7 +38,9 @@ from great_expectations.exceptions import DataContextError
 @pytest.fixture
 def validation_definition(mocker: MockerFixture) -> ValidationDefinition:
     batch_definition = mocker.Mock(spec=BatchDefinition)
+    batch_definition.id = str(uuid.uuid4())
     suite = mocker.Mock(spec=ExpectationSuite)
+    suite.id = str(uuid.uuid4())
     return ValidationDefinition(
         name="test-validation",
         data=batch_definition,
@@ -496,7 +499,9 @@ class TestValidationDefinitionFactoryAnalytics:
         # Assert
         mock_submit.assert_called_once_with(
             event=ValidationDefinitionCreatedEvent(
-                validation_definition_id=validation_definition.id
+                validation_definition_id=validation_definition.id,
+                batch_definition_id=batch_def.id,
+                expectation_suite_id=suite.id,
             )
         )
 
@@ -532,6 +537,8 @@ class TestValidationDefinitionFactoryAnalytics:
         # Assert
         mock_submit.assert_called_once_with(
             event=ValidationDefinitionDeletedEvent(
-                validation_definition_id=validation_definition.id
+                validation_definition_id=validation_definition.id,
+                batch_definition_id=batch_def.id,
+                expectation_suite_id=suite.id,
             )
         )

@@ -44,6 +44,8 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
         submit_event(
             event=ValidationDefinitionCreatedEvent(
                 validation_definition_id=validation.id,
+                batch_definition_id=validation.data.id,
+                expectation_suite_id=validation.suite.id,
             )
         )
 
@@ -73,6 +75,8 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
         submit_event(
             event=ValidationDefinitionDeletedEvent(
                 validation_definition_id=validation_definition.id,
+                batch_definition_id=validation_definition.data.id,
+                expectation_suite_id=validation_definition.suite.id,
             )
         )
 

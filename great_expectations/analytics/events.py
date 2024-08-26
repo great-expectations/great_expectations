@@ -179,11 +179,15 @@ class CheckpointDeletedEvent(_CheckpointEvent):
 @dataclass
 class _ValidationDefinitionEvent(Event):
     validation_definition_id: str | None = None
+    batch_definition_id: str | None = None
+    expectation_suite_id: str | None = None
 
     @override
     def _properties(self) -> dict:
         return {
             "validation_definition_id": self.validation_definition_id,
+            "batch_definition_id": self.batch_definition_id,
+            "expectation_suite_id": self.expectation_suite_id,
         }
 
 
@@ -191,10 +195,17 @@ class _ValidationDefinitionEvent(Event):
 class ValidationDefinitionCreatedEvent(_ValidationDefinitionEvent):
     _allowed_actions: ClassVar[List[Action]] = [VALIDATION_DEFINITION_CREATED]
 
-    def __init__(self, validation_definition_id: str | None = None):
+    def __init__(
+        self,
+        validation_definition_id: str | None = None,
+        batch_definition_id: str | None = None,
+        expectation_suite_id: str | None = None,
+    ):
         super().__init__(
             action=VALIDATION_DEFINITION_CREATED,
             validation_definition_id=validation_definition_id,
+            batch_definition_id=batch_definition_id,
+            expectation_suite_id=expectation_suite_id,
         )
 
 
@@ -202,10 +213,17 @@ class ValidationDefinitionCreatedEvent(_ValidationDefinitionEvent):
 class ValidationDefinitionDeletedEvent(_ValidationDefinitionEvent):
     _allowed_actions: ClassVar[List[Action]] = [VALIDATION_DEFINITION_DELETED]
 
-    def __init__(self, validation_definition_id: str | None = None):
+    def __init__(
+        self,
+        validation_definition_id: str | None = None,
+        batch_definition_id: str | None = None,
+        expectation_suite_id: str | None = None,
+    ):
         super().__init__(
             action=VALIDATION_DEFINITION_DELETED,
             validation_definition_id=validation_definition_id,
+            batch_definition_id=batch_definition_id,
+            expectation_suite_id=expectation_suite_id,
         )
 
 
