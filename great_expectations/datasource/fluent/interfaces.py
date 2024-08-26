@@ -67,6 +67,8 @@ if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
 
+    from great_expectations.checkpoint.checkpoint import ResultFormatUnion
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     from great_expectations.core import (
@@ -1076,7 +1078,7 @@ class Batch:
         self,
         expect: Expectation,
         *,
-        result_format: Union[ResultFormat, dict] = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
     ) -> ExpectationValidationResult: ...
 
     @overload
@@ -1084,7 +1086,7 @@ class Batch:
         self,
         expect: ExpectationSuite,
         *,
-        result_format: Union[ResultFormat, dict] = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
@@ -1092,7 +1094,7 @@ class Batch:
         self,
         expect: Expectation | ExpectationSuite,
         *,
-        result_format: Union[ResultFormat, dict] = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
         from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
@@ -1111,7 +1113,7 @@ class Batch:
     def _validate_expectation(
         self,
         expect: Expectation,
-        result_format: Union[ResultFormat, dict],
+        result_format: ResultFormatUnion,
     ) -> ExpectationValidationResult:
         return self._create_validator(
             result_format=result_format,
@@ -1120,13 +1122,13 @@ class Batch:
     def _validate_expectation_suite(
         self,
         expect: ExpectationSuite,
-        result_format: Union[ResultFormat, dict],
+        result_format: ResultFormatUnion,
     ) -> ExpectationSuiteValidationResult:
         return self._create_validator(
             result_format=result_format,
         ).validate_expectation_suite(expect)
 
-    def _create_validator(self, *, result_format: Union[ResultFormat, dict]) -> V1Validator:
+    def _create_validator(self, *, result_format: ResultFormatUnion) -> V1Validator:
         from great_expectations.validator.v1_validator import Validator as V1Validator
 
         context = self.datasource.data_context

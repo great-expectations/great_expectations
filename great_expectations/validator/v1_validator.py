@@ -14,6 +14,7 @@ from great_expectations.validator.validator import Validator as OldValidator
 from great_expectations.validator.validator import calc_validation_statistics
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import ResultFormatUnion
     from great_expectations.core import ExpectationSuite
     from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent.batch_request import BatchParameters
@@ -32,7 +33,7 @@ class Validator:
     def __init__(
         self,
         batch_definition: BatchDefinition,
-        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
         batch_parameters: Optional[BatchParameters] = None,
     ) -> None:
         self._batch_definition = batch_definition

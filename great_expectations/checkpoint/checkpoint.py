@@ -7,6 +7,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Literal,
     Optional,
     TypedDict,
     Union,
@@ -50,6 +51,10 @@ if TYPE_CHECKING:
         ValidationDefinitionStore,
     )
 
+ResultFormatUnion = Union[
+    ResultFormat, dict, Literal["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"]
+]
+
 
 @public_api
 class Checkpoint(BaseModel):
@@ -71,7 +76,7 @@ class Checkpoint(BaseModel):
     name: str
     validation_definitions: List[ValidationDefinition]
     actions: List[CheckpointAction] = Field(default_factory=list)
-    result_format: Union[ResultFormat, dict] = ResultFormat.SUMMARY
+    result_format: ResultFormatUnion = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
     class Config:

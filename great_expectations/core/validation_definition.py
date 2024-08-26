@@ -36,6 +36,7 @@ from great_expectations.exceptions.exceptions import (
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import ResultFormatUnion
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -218,7 +219,7 @@ class ValidationDefinition(BaseModel):
         checkpoint_id: Optional[str] = None,
         batch_parameters: Optional[BatchParameters] = None,
         expectation_parameters: Optional[dict[str, Any]] = None,
-        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         diagnostics = self.is_added()
