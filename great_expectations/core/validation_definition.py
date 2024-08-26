@@ -63,6 +63,9 @@ class ValidationDefinition(BaseModel):
     class Config:
         extra = Extra.forbid
         arbitrary_types_allowed = True  # Necessary for compatibility with suite's Marshmallow dep
+        copy_on_model_validation = (
+            "none"  # Necessary to prevent cloning when passing to a checkpoint
+        )
         validate_assignment = True
         """
         When serialized, the suite and data fields should be encoded as a set of identifiers.
