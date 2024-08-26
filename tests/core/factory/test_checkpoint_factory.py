@@ -66,7 +66,9 @@ def test_checkpoint_factory_get_raises_error_on_missing_key(
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
+def test_checkpoint_factory_add_uses_store_add(
+    mocker: MockerFixture, arbitrary_validation_definition: ValidationDefinition
+):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
@@ -74,9 +76,7 @@ def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
     key = store.get_key.return_value
     store.get.return_value = None
     factory = CheckpointFactory(store=store)
-    checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    )
+    checkpoint = Checkpoint(name=name, validation_definitions=[arbitrary_validation_definition])
     store.get.return_value = checkpoint
 
     # Act
