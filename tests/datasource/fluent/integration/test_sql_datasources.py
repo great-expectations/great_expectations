@@ -318,7 +318,7 @@ def databricks_sql_ds(
         "databricks_sql",
         connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
-        "/" + RAND_SCHEMA + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema=" + RAND_SCHEMA,
+        "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema=" + RAND_SCHEMA,
     )
     return ds
 
