@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -57,7 +57,7 @@ DATA_QUALITY_ISSUES = ["Sets"]
 class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_distinct_values_to_contain_set is a \
+    ExpectColumnDistinctValuesToContainSet is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -87,8 +87,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_distinct_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_be_in_set)
-        [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
+        [ExpectColumnDistinctValuesToBeInSet](https://greatexpectations.io/expectations/expect_column_distinct_values_to_be_in_set)
+        [ExpectColumnDistinctValuesToEqualSet](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -189,7 +189,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -210,6 +210,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column distinct values to contain set"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnDistinctValuesToContainSet]

@@ -6,16 +6,17 @@ import responses
 
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 
-CLOUD_BASE_URL = "https://greatexpectations.io/fake-url"
+CLOUD_BASE_URL = "https://api.greatexpectations.io/fake"
 ACCESS_TOKEN = "my-secret-access-token"
 ORG_ID = str(uuid.uuid4())
-CONTEXT_CONFIGURATION_URL = f"{CLOUD_BASE_URL}/organizations/{ORG_ID}/data-context-configuration"
+CONTEXT_CONFIGURATION_URL = (
+    f"{CLOUD_BASE_URL}/api/v1/organizations/{ORG_ID}/data-context-configuration"
+)
 
 
 def _create_cloud_config_response(
     expectation_suite_store_name_key: str,
     validation_results_store_name_key: str,
-    suite_parameter_store_class_name: str,
     validation_results_store_class_name: str,
 ) -> Dict[str, Any]:
     return {
@@ -49,7 +50,6 @@ def _create_cloud_config_response(
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_suite_parameter_store": {"class_name": suite_parameter_store_class_name},
             "default_expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
@@ -76,10 +76,6 @@ def _create_cloud_config_response(
                     "suppress_store_backend_id": True,
                 },
             },
-            "suite_parameter_store": {
-                "class_name": suite_parameter_store_class_name,
-                "module_name": "great_expectations.data_context.store",
-            },
             "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
@@ -95,14 +91,12 @@ def _create_cloud_config_response(
 V0_CONFIG = _create_cloud_config_response(
     expectation_suite_store_name_key="evaluation_parameter_store_name",
     validation_results_store_name_key="validations_store_name",
-    suite_parameter_store_class_name="EvaluationParameterStore",
     validation_results_store_class_name="ValidationsStore",
 )
 
 V1_CONFIG = _create_cloud_config_response(
     expectation_suite_store_name_key="suite_parameter_store_name",
     validation_results_store_name_key="validation_results_store_name",
-    suite_parameter_store_class_name="SuiteParameterStore",
     validation_results_store_class_name="ValidationResultsStore",
 )
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -46,7 +47,7 @@ DATA_QUALITY_ISSUES = ["Schema"]
 class ExpectTableColumnCountToEqual(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_table_column_count_to_equal is a \
+    ExpectTableColumnCountToEqual is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     BatchExpectations are one of the most common types of Expectation.
@@ -72,7 +73,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_table_column_count_to_be_between](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
+        [ExpectTableColumnCountToBeBetween](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -136,7 +137,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    value: Union[int, SuiteParameterDict]
+    value: Union[int, SuiteParameterDict] = pydantic.Field(description=VALUE_DESCRIPTION)
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -155,6 +156,8 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     args_keys = ("value",)
 
     class Config:
+        title = "Expect table column count to equal"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

@@ -39,7 +39,7 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column entries to be strings that match a given regular expression."
 )
 REGEX_DESCRIPTION = "The regular expression the column entries should match."
-DATA_QUALITY_ISSUES = ["Pattern Matching"]
+DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
 
 
@@ -50,7 +50,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
     anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
     "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
 
-    expect_column_values_to_match_regex is a \
+    ExpectColumnValuesToMatchRegex is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -83,13 +83,13 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_values_to_match_regex_list](https://greatexpectations.io/expectations/expect_column_values_to_match_regex_list)
-        [expect_column_values_to_not_match_regex](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex)
-        [expect_column_values_to_not_match_regex_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex_list)
-        [expect_column_values_to_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern)
-        [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
-        [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
-        [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
+        [ExpectColumnValuesToMatchRegexList](https://greatexpectations.io/expectations/expect_column_values_to_match_regex_list)
+        [ExpectColumnValuesToNotMatchRegex](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex)
+        [ExpectColumnValuesToNotMatchRegexList](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex_list)
+        [ExpectColumnValuesToMatchLikePattern](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern)
+        [ExpectColumnValuesToMatchLikePatternList](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
+        [ExpectColumnValuesToNotMatchLikePattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
+        [ExpectColumnValuesToNotMatchLikePatternList](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -195,6 +195,8 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to match regex"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToMatchRegex]
@@ -349,39 +351,3 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                 }
             )
         ]
-
-    # examples = [
-    #     {
-    #         "data": {
-    #             "a": ["aaa", "abb", "acc", "add", "bee"],
-    #             "b": ["aaa", "abb", "acc", "bdd", None],
-    #             "column_name with space": ["aaa", "abb", "acc", "add", "bee"],
-    #         },
-    #         "tests": [
-    #             {
-    #                 "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
-    #                 "exact_match_out": False,
-    #                 "in": {"column": "a", "regex": "^a", "mostly": 0.9},
-    #                 "out": {
-    #                     "success": False,
-    #                     "unexpected_index_list": [4],
-    #                     "unexpected_list": ["bee"],
-    #                 },
-    #                 "include_in_gallery": True,
-    #                 "suppress_test_for": ["sqlite", "mssql"],
-    #             },
-    #             {
-    #                 "title": "positive_test_exact_mostly_w_one_non_matching_value",
-    #                 "exact_match_out": False,
-    #                 "in": {"column": "a", "regex": "^a", "mostly": 0.8},
-    #                 "out": {
-    #                     "success": True,
-    #                     "unexpected_index_list": [4],
-    #                     "unexpected_list": ["bee"],
-    #                 },
-    #                 "include_in_gallery": True,
-    #                 "suppress_test_for": ["sqlite", "mssql"],
-    #             },
-    #         ],
-    #     }
-    # ]

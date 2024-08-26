@@ -1,6 +1,6 @@
 import GxData from '../../_core_components/_data.jsx';
 
-The following table lists the installation commands used to install {GxData.product_name} dependencies for specific SQL dialects.
+The following table lists the installation commands used to install GX Core dependencies for specific SQL dialects.
 
 | SQL Dialect | Command |
 | :-- | :-- | 

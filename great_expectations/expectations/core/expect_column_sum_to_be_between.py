@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = (
-    "Expect the column to sum to be between a minimum value and a maximum value."
+    "Expect the column sum to be between a minimum value and a maximum value."
 )
 MIN_VALUE_DESCRIPTION = "The minimal sum allowed."
 MAX_VALUE_DESCRIPTION = "The maximal sum allowed."
@@ -58,7 +58,7 @@ DATA_QUALITY_ISSUES = ["Distribution"]
 class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_sum_to_be_between is a \
+    ExpectColumnSumToBeBetween is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -176,7 +176,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     strict_max: bool = pydantic.Field(False, description=STRICT_MAX_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -205,6 +205,8 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column sum to be between"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnSumToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)
@@ -324,6 +326,8 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
                 template_str = f"sum must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"sum must be {at_least_str} $min_value."
+            else:
+                raise ValueError("unresolvable template_str")  # noqa: TRY003
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -336,16 +340,11 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
+        styling = runtime_configuration.get("styling") if runtime_configuration else None
         return [
             RenderedStringTemplateContent(
-                **{  # type: ignore[arg-type]
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": runtime_configuration.get("styling"),
-                    },
-                }
+                content_block_type="string_template",
+                string_template={"template": template_str, "params": params, "styling": styling},
             )
         ]
 

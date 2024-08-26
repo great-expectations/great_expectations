@@ -47,7 +47,7 @@ DATA_QUALITY_ISSUES = ["Volume"]
 class ExpectTableRowCountToEqual(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_table_row_count_to_equal is a \
+    ExpectTableRowCountToEqual is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     BatchExpectations are one of the most common types of Expectation.
@@ -74,7 +74,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
+        [ExpectTableRowCountToBeBetween](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -155,6 +155,8 @@ class ExpectTableRowCountToEqual(BatchExpectation):
     args_keys = ("value",)
 
     class Config:
+        title = "Expect table row count to equal"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableRowCountToEqual]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

@@ -10,9 +10,6 @@ from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import
 from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition,
-)
 
 logger: Logger
 
@@ -39,5 +36,4 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         gcs_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
-        order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...

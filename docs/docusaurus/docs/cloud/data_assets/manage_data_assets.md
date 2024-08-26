@@ -16,7 +16,7 @@ A Data Asset is a collection of records that you create when you connect to your
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to data](/core/manage_and_access_data/connect_to_data/connect_to_data.md) in the GX 1.0 documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to data](/core/manage_and_access_data/connect_to_data/connect_to_data.md) in the GX Core documentation. 
 
 <Tabs
   groupId="manage-data-assets"
@@ -32,8 +32,6 @@ Define the data you want GX Cloud to access within Snowflake.
 ### Prerequisites
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud).
-
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
 
 - You have a Snowflake database, schema, and table.
 
@@ -97,8 +95,6 @@ Define the data you want GX Cloud to access within PostgreSQL.
 ### Prerequisites
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud).
-
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
 
 - You have a PostgreSQL database, schema, and table.
 

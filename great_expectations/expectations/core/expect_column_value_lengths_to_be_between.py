@@ -60,7 +60,7 @@ MIN_VALUE_DESCRIPTION = "The minimum value for a column entry length."
 MAX_VALUE_DESCRIPTION = "The maximum value for a column entry length."
 STRICT_MIN_DESCRIPTION = "If True, values must be strictly larger than min_value."
 STRICT_MAX_DESCRIPTION = "If True, values must be strictly smaller than max_value."
-DATA_QUALITY_ISSUES = ["Numerical Data"]
+DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
@@ -79,7 +79,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-    expect_column_value_lengths_to_be_between is a \
+    ExpectColumnValueLengthsToBeBetween is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -125,7 +125,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
           no maximum.
 
     See Also:
-        [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
+        [ExpectColumnValueLengthsToEqual](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -249,6 +249,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column value lengths to be between"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValueLengthsToBeBetween]

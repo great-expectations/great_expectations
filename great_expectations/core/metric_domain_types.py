@@ -3,12 +3,9 @@ from __future__ import annotations
 import enum
 import logging
 
-from great_expectations._docs_decorators import public_api
-
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class MetricDomainTypes(enum.Enum):
     """Enum type, whose members signify the data "Domain", on which a metric can be computed.
 

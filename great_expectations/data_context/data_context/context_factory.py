@@ -35,7 +35,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store import (
         ExpectationsStore,
-        SuiteParameterStore,
         ValidationResultsStore,
     )
     from great_expectations.data_context.store.checkpoint_store import CheckpointStore
@@ -104,11 +103,8 @@ class ProjectManager:
     def get_validation_definition_store(self) -> ValidationDefinitionStore:
         return self._project.validation_definition_store
 
-    def get_suite_parameters_store(self) -> SuiteParameterStore:
-        return self._project.suite_parameter_store
-
     def get_datasources(self) -> DatasourceDict:
-        return self._project.datasources
+        return self._project.data_sources.all()
 
     def get_validator(self, batch_request: BatchRequest) -> Validator:
         return self._project.get_validator(batch_request=batch_request)

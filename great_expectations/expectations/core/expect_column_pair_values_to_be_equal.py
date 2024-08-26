@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     render_suite_parameter_string,
@@ -9,6 +10,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.model_field_descriptions import (
     COLUMN_A_DESCRIPTION,
     COLUMN_B_DESCRIPTION,
+    IGNORE_ROW_IF_DESCRIPTION,
     MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -44,13 +46,13 @@ SUPPORTED_DATA_SOURCES = [
     "BigQuery",
     "Snowflake",
 ]
-DATA_QUALITY_ISSUES = ["Data Integrity"]
+DATA_QUALITY_ISSUES = ["Data integrity"]
 
 
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_pair_values_to_be_equal is a \
+    ExpectColumnPairValuesToBeEqual is a \
     [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
 
     Column Pair Map Expectations are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns.
@@ -64,7 +66,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
-            If specified, sets the condition on which a given row is to be ignored. Default "neither".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "neither".
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
@@ -174,7 +176,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     """  # noqa: E501
 
     ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
-        "both_values_are_missing"
+        pydantic.Field(default="both_values_are_missing", description=IGNORE_ROW_IF_DESCRIPTION)
     )
 
     # This dictionary contains metadata for display in the public gallery
@@ -203,6 +205,8 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     )
 
     class Config:
+        title = "Expect column pair values to be equal"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnPairValuesToBeEqual]
@@ -252,7 +256,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
 
         if not params.column_A or not params.column_B:
             template_str += (
-                "Unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column. "
+                "Unrecognized kwargs for ExpectColumnPairValuesToBeEqual: missing column. "
             )
 
         if not params.mostly or params.mostly.value == 1.0:
@@ -296,7 +300,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
 
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = (
-                " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+                " unrecognized kwargs for ExpectColumnPairValuesToBeEqual: missing column."
             )
             params["row_condition"] = None
 

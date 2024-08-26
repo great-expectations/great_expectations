@@ -3,8 +3,7 @@ sidebar_label: "Connect to filesystem Data Assets"
 title: "Connect to filesystem Data Assets"
 id: connect_filesystem_source_data
 description: Connect to filesystem Data Assets.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 ---
 
 import TechnicalTag from '../../../../../reference/learn/term_tags/_tag.mdx';

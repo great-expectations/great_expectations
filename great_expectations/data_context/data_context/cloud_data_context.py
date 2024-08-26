@@ -45,8 +45,9 @@ from great_expectations.data_context.store.datasource_store import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.store.metric_store import SuiteParameterStore
-from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
+from great_expectations.data_context.store.validation_results_store import (
+    ValidationResultsStore,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
@@ -79,20 +80,6 @@ class OrganizationIdNotSpecifiedError(Exception):
             "A request to GX Cloud is being attempted without an organization id configured. "
             "Maybe you need to set the environment variable GX_CLOUD_ORGANIZATION_ID?"
         )
-
-
-def _extract_fluent_datasources(config_dict: dict) -> dict:
-    """
-    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
-    We need to extract the fluent datasources otherwise the data context will attempt eager config
-    substitutions and other inappropriate operations.
-    """
-    datasources = config_dict.get("datasources", {})
-    fds_names: list[str] = []
-    for ds_name, ds in datasources.items():
-        if "type" in ds:
-            fds_names.append(ds_name)
-    return {name: datasources.pop(name) for name in fds_names}
 
 
 @public_api
@@ -269,7 +256,8 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         # This should be done before datasources are popped from the config below until
         # fluent_datasourcse are renamed datasourcess ()
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
+        v1_data_sources = config.pop("data_sources", [])
+        config["fluent_datasources"] = {ds["name"]: ds for ds in v1_data_sources}
 
         # Various context variables are no longer top-level keys in V1
         for var in (
@@ -279,20 +267,19 @@ class CloudDataContext(SerializableDataContext):
             "include_rendered_content",
             "profiler_store_name",
             "anonymous_usage_statistics",
+            "evaluation_parameter_store_name",
+            "suite_parameter_store_name",
         ):
             val = config.pop(var, None)
             if val:
                 logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
 
-        # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
+        # V1 renamed Validations to ValidationResults
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
         cls._change_key_from_v0_to_v1(
             config,
-            "evaluation_parameter_store_name",
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-        )
-        cls._change_key_from_v0_to_v1(
-            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
+            "validations_store_name",
+            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
         )
 
         config = cls._prepare_stores_config(config=config)
@@ -309,17 +296,15 @@ class CloudDataContext(SerializableDataContext):
         for name, store in stores.items():
             # Certain stores have been renamed in V1
             cls._change_value_from_v0_to_v1(
-                store,
-                "class_name",
-                "EvaluationParameterStore",
-                SuiteParameterStore.__name__,
-            )
-            cls._change_value_from_v0_to_v1(
                 store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
             )
 
             # Profiler stores are no longer supported in V1
-            if store.get("class_name") == "ProfilerStore":
+            if store.get("class_name") in [
+                "ProfilerStore",
+                "EvaluationParameterStore",
+                "SuiteParameterStore",
+            ]:
                 to_delete.append(name)
 
         for name in to_delete:
@@ -352,9 +337,9 @@ class CloudDataContext(SerializableDataContext):
         if not organization_id:
             raise OrganizationIdNotSpecifiedError()
 
-        session = create_session(access_token=access_token)
-        url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
-        response = session.get(url)
+        with create_session(access_token=access_token) as session:
+            url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
+            response = session.get(url)
 
         try:
             response.raise_for_status()

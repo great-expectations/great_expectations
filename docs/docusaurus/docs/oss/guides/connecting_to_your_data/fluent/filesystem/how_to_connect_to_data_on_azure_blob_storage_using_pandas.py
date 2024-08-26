@@ -31,7 +31,7 @@ datasource = context.data_sources.add_pandas_abs(
 )
 # </snippet>
 
-assert datasource_name in context.datasources
+assert datasource_name in context.data_sources.all()
 
 asset_name = "my_taxi_data_asset"
 abs_container = "superconductive-public"

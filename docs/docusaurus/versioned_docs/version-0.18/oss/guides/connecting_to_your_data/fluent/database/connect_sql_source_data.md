@@ -3,8 +3,7 @@ sidebar_label: "Connect to SQL database Data Assets"
 title: "Connect to SQL database Data Assets"
 id: connect_sql_source_data
 description: Connect to Data Assets stored on SQL databases.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 ---
 
 import Prerequisites from '../../../../../components/_prerequisites.jsx'

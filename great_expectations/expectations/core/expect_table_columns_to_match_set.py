@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to match an unordered set."
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns in a table to match an unordered set."
 COLUMN_SET_DESCRIPTION = "The column names, in any order."
 EXACT_MATCH_DESCRIPTION = (
     "If True, the list of columns must exactly match the observed columns. "
@@ -51,7 +52,7 @@ DATA_QUALITY_ISSUES = ["Schema"]
 class ExpectTableColumnsToMatchSet(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_table_columns_to_match_set is a \
+    ExpectTableColumnsToMatchSet is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     BatchExpectations are one of the most common types of Expectation.
@@ -165,8 +166,10 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    column_set: Union[list, set, SuiteParameterDict, None]
-    exact_match: Union[bool, None]
+    column_set: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
+        description=COLUMN_SET_DESCRIPTION
+    )
+    exact_match: Union[bool, None] = pydantic.Field(description=EXACT_MATCH_DESCRIPTION)
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -191,6 +194,8 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     )
 
     class Config:
+        title = "Expect table columns to match set"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchSet]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)

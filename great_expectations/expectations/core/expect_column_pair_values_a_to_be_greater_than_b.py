@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     render_suite_parameter_string,
@@ -9,6 +10,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.model_field_descriptions import (
     COLUMN_A_DESCRIPTION,
     COLUMN_B_DESCRIPTION,
+    IGNORE_ROW_IF_DESCRIPTION,
     MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -50,7 +52,7 @@ DATA_QUALITY_ISSUES = ["Distribution"]
 class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_pair_values_a_to_be_greater_than_b is a \
+    ExpectColumnPairValuesAToBeGreaterThanB is a \
     [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
 
     Column Pair Map Expectations are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns.
@@ -65,7 +67,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
-            If specified, sets the condition on which a given row is to be ignored. Default "neither".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "neither".
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
@@ -176,9 +178,12 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 }}
     """  # noqa: E501
 
-    or_equal: Union[bool, None] = None
+    or_equal: Union[bool, None] = pydantic.Field(default=None, description=OR_EQUAL_DESCRIPTION)
     ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
-        "both_values_are_missing"
+        pydantic.Field(
+            default="both_values_are_missing",
+            description=IGNORE_ROW_IF_DESCRIPTION,
+        )
     )
 
     # This dictionary contains metadata for display in the public gallery
@@ -210,6 +215,8 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     )
 
     class Config:
+        title = "Expect column pair values A to be greater than B"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnPairValuesAToBeGreaterThanB]

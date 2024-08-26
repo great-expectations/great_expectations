@@ -919,9 +919,7 @@ def test_adding_partitioner_persists_results(
     empty_data_context.data_sources.add_postgres(
         name="my_datasource",
         connection_string="postgresql://postgres:@localhost/not_a_real_db",
-    ).add_query_asset(
-        name="my_asset", query="select * from table", order_by=["year"]
-    ).add_batch_definition(
+    ).add_query_asset(name="my_asset", query="select * from table").add_batch_definition(
         name="my_batch_definition", partitioner=ColumnPartitionerYearly(column_name="my_col")
     )
 
@@ -953,9 +951,7 @@ def test_partitioner_year(
     ) as source:
         # We use a query asset because then we don't have to mock out db connection tests
         # in this unit test.
-        asset = source.add_query_asset(
-            name="my_asset", query="select * from table", order_by=["year"]
-        )
+        asset = source.add_query_asset(name="my_asset", query="select * from table")
         partitioner = ColumnPartitionerYearly(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
@@ -993,9 +989,7 @@ def test_partitioner_year_and_month(
     ) as source:
         # We use a query asset because then we don't have to mock out db connection tests
         # in this unit test.
-        asset = source.add_query_asset(
-            name="my_asset", query="select * from table", order_by=["year", "month"]
-        )
+        asset = source.add_query_asset(name="my_asset", query="select * from table")
         partitioner = ColumnPartitionerMonthly(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
@@ -1044,7 +1038,6 @@ def test_partitioner_year_and_month_and_day(
         asset = source.add_query_asset(
             name="my_asset",
             query="select * from table",
-            order_by=["year", "month", "day"],
         )
         partitioner = ColumnPartitionerDaily(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
@@ -1268,7 +1261,6 @@ def test_add_postgres_query_asset_with_batch_metadata(
             name="query_asset",
             query="SELECT * FROM my_table",
             batch_metadata=asset_specified_metadata,
-            order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
         partitioner = ColumnPartitionerYearly(column_name="col")
@@ -1313,7 +1305,6 @@ def test_add_postgres_table_asset_with_batch_metadata(
             name="query_asset",
             table_name="my_table",
             batch_metadata=asset_specified_metadata,
-            order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
         partitioner = ColumnPartitionerYearly(column_name="my_col")

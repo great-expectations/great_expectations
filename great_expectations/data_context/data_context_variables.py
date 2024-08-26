@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -41,7 +42,6 @@ class DataContextVariableSchema(str, enum.Enum):
     FLUENT_DATASOURCES = "fluent_datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
     VALIDATIONS_STORE_NAME = "validation_results_store_name"
-    SUITE_PARAMETER_STORE_NAME = "suite_parameter_store_name"
     CHECKPOINT_STORE_NAME = "checkpoint_store_name"
     PLUGINS_DIRECTORY = "plugins_directory"
     STORES = "stores"
@@ -59,6 +59,7 @@ class DataContextVariableSchema(str, enum.Enum):
         return value in cls._value2member_map_
 
 
+@public_api
 @dataclass
 class DataContextVariables(ABC):
     """
@@ -114,7 +115,8 @@ class DataContextVariables(ABC):
         substituted_val: Any = self.config_provider.substitute_config(val)
         return substituted_val
 
-    def save_config(self) -> Any:
+    @public_api
+    def save(self) -> Any:
         """
         Persist any changes made to variables utilizing the configured Store.
         """
@@ -163,17 +165,6 @@ class DataContextVariables(ABC):
     @validation_results_store_name.setter
     def validation_results_store_name(self, validation_results_store_name: str) -> None:
         self._set(DataContextVariableSchema.VALIDATIONS_STORE_NAME, validation_results_store_name)
-
-    @property
-    def suite_parameter_store_name(self) -> Optional[str]:
-        return self._get(DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME)
-
-    @suite_parameter_store_name.setter
-    def suite_parameter_store_name(self, suite_parameter_store_name: str) -> None:
-        self._set(
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-            suite_parameter_store_name,
-        )
 
     @property
     def checkpoint_store_name(self) -> Optional[str]:
@@ -298,14 +289,14 @@ class FileDataContextVariables(DataContextVariables):
         return store
 
     @override
-    def save_config(self) -> Any:
+    def save(self) -> Any:
         """
         Persist any changes made to variables utilizing the configured Store.
         """
         # overridden in order to prevent calling `instantiate_class_from_config` on fluent objects
         # parent class does not have access to the `data_context`
         with self._fluent_objects_stash():
-            save_result = super().save_config()
+            save_result = super().save()
         return save_result
 
     @contextlib.contextmanager
@@ -325,10 +316,10 @@ class FileDataContextVariables(DataContextVariables):
         try:
             if config_fluent_datasources_stash:
                 logger.info(
-                    f"Stashing `FluentDatasource` during {type(self).__name__}.save_config() - {len(config_fluent_datasources_stash)} stashed"  # noqa: E501
+                    f"Stashing `FluentDatasource` during {type(self).__name__}.save() - {len(config_fluent_datasources_stash)} stashed"  # noqa: E501
                 )
                 for fluent_datasource_name in config_fluent_datasources_stash:
-                    self.data_context.datasources.pop(fluent_datasource_name)
+                    self.data_context.data_sources.all().pop(fluent_datasource_name)
                 # this would be `deep_copy'ed in `instantiate_class_from_config` too
                 self.data_context.fluent_config.fluent_datasources = []
             yield
@@ -339,7 +330,7 @@ class FileDataContextVariables(DataContextVariables):
                 logger.info(
                     f"Replacing {len(config_fluent_datasources_stash)} stashed `FluentDatasource`s"
                 )
-                self.data_context.datasources.update(config_fluent_datasources_stash)
+                self.data_context.data_sources.all().update(config_fluent_datasources_stash)
                 self.data_context.fluent_config.fluent_datasources = list(
                     config_fluent_datasources_stash.values()
                 )

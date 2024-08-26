@@ -61,13 +61,13 @@ SUPPORTED_DATA_SOURCES = [
     "BigQuery",
     "Snowflake",
 ]
-DATA_QUALITY_ISSUES = ["Numerical Data"]
+DATA_QUALITY_ISSUES = ["Numerical data"]
 
 
 class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_mean_to_be_between is a \
+    ExpectColumnMeanToBeBetween is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -110,8 +110,8 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
             representing the true mean for the column
 
     See Also:
-        [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
-        [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
+        [ExpectColumnMedianToBeBetween](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
+        [ExpectColumnStdevToBeBetween](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -217,6 +217,8 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column mean to be between"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMeanToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)

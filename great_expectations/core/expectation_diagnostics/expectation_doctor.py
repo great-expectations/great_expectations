@@ -291,7 +291,7 @@ class ExpectationDoctor:
         augmented_library_metadata["problems"] = problems
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
 
-    def _get_maturity_checklist(  # noqa: PLR0913
+    def _get_maturity_checklist(
         self,
         library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics],
         description: ExpectationDescriptionDiagnostics,

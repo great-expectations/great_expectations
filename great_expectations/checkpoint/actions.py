@@ -31,6 +31,7 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    Extra,
     Field,
     root_validator,
     validator,
@@ -108,17 +109,17 @@ class ValidationAction(BaseModel):
     """  # noqa: E501
 
     class Config:
+        extra = Extra.forbid
         arbitrary_types_allowed = True
         # Due to legacy pattern of instantiate_class_from_config, we need a custom serializer
         json_encoders = {Renderer: lambda r: r.serialize()}
 
     type: str
     name: str
-    notify_on: Literal["all", "failure", "success"] = "all"
 
     @property
     def _using_cloud_context(self) -> bool:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         return project_manager.is_using_cloud()
 
@@ -126,15 +127,6 @@ class ValidationAction(BaseModel):
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         raise NotImplementedError
-
-    def _is_enabled(self, success: bool) -> bool:
-        return (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and success
-            or self.notify_on == "failure"
-            and not success
-        )
 
     def _get_data_docs_pages_from_prior_action(
         self, action_context: ActionContext | None
@@ -145,13 +137,23 @@ class ValidationAction(BaseModel):
         return None
 
 
+def _should_notify(success: bool, notify_on: Literal["all", "failure", "success"]) -> bool:
+    return (
+        notify_on == "all"
+        or notify_on == "success"
+        and success
+        or notify_on == "failure"
+        and not success
+    )
+
+
 class DataDocsAction(ValidationAction):
     def _build_data_docs(
         self,
         site_names: list[str] | None = None,
         resource_identifiers: list | None = None,
     ) -> dict:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         return project_manager.build_data_docs(
             site_names=site_names, resource_identifiers=resource_identifiers
@@ -162,7 +164,7 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifier: Any | None = None,
     ):
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         return project_manager.get_docs_sites_urls(
             site_names=site_names, resource_identifier=resource_identifier
@@ -255,7 +257,7 @@ class SlackNotificationAction(DataDocsAction):
         checkpoint_name = checkpoint_result.checkpoint_config.name
         result = {"slack_notification_result": "none required"}
 
-        if not self._is_enabled(success=success):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return result
 
         checkpoint_text_blocks: list[dict] = []
@@ -365,7 +367,7 @@ class PagerdutyAlertAction(ValidationAction):
         return self._run_pypd_alert(dedup_key=checkpoint_name, message=summary, success=success)
 
     def _run_pypd_alert(self, dedup_key: str, message: str, success: bool):
-        if self._is_enabled(success=success):
+        if _should_notify(success=success, notify_on=self.notify_on):
             pypd.api_key = self.api_key
             pypd.EventV2.create(
                 data={
@@ -437,7 +439,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     @override
     def run(self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None):
         success = checkpoint_result.success or False
-        if not self._is_enabled(success=success):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return {"microsoft_teams_notification_result": None}
 
         data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
@@ -504,7 +506,7 @@ class OpsgenieAlertAction(ValidationAction):
         validation_success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
 
-        if self._is_enabled(success=validation_success):
+        if _should_notify(success=validation_success, notify_on=self.notify_on):
             settings = {
                 "api_key": self.api_key,
                 "region": self.region,
@@ -627,7 +629,7 @@ class EmailAction(ValidationAction):
         action_context: ActionContext | None = None,
     ) -> dict:
         success = checkpoint_result.success or False
-        if not self._is_enabled(success=success):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return {"email_result": ""}
 
         title, html = self.renderer.render(checkpoint_result=checkpoint_result)
@@ -707,7 +709,7 @@ class UpdateDataDocsAction(DataDocsAction):
 
         return action_results
 
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],

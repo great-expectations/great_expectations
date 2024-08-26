@@ -228,7 +228,8 @@ def test_construct_json_payload_raises_error_with_V1_resource_and_wrong_attribut
     organization_id = "de5b9ca6-caf7-43c8-a820-5540ec6df9b2"
     attributes_value_of_legacy_type = "a string"
     with pytest.raises(
-        TypeError, match="Parameter attributes_value of type <class 'str'> is unsupported in GX V1."
+        TypeError,
+        match="Parameter attributes_value of type <class 'str'> is unsupported in GX V1.",
     ):
         GXCloudStoreBackend.construct_versioned_payload(
             resource_type=v1_resource,
@@ -247,7 +248,7 @@ def test_list_keys(
         store_backend.list_keys()
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
-            url=f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            url=f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             params=None,
         )
 
@@ -260,7 +261,7 @@ def test_list_keys_with_empty_payload_from_backend(
 
     responses.add(
         responses.GET,
-        f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
+        f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
         json={"data": []},
         status=200,
     )
@@ -318,7 +319,7 @@ def test_get_all(
         store_backend.get_all()
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
-            url=f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
+            url=f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
             params=None,
         )
 
@@ -340,7 +341,7 @@ def test_remove_key_with_only_id(
         )
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
+            f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
         )
@@ -360,7 +361,7 @@ def test_remove_key_with_id_and_name(
         )
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
+            f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
         )
@@ -378,7 +379,7 @@ def test_remove_key_with_only_name(
         store_backend.remove_key(("checkpoint", "", "checkpoint_name"))
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             params={"name": "checkpoint_name"},
         )
 
@@ -497,3 +498,17 @@ def test_ge_cloud_store_backend_invalid_key_raises_error(
 
     with pytest.raises(TypeError):
         backend.get(key)
+
+
+def test_closes_session(
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
+) -> None:
+    """Make sure that when the GXCloudStoreBackend object is garbage collected,
+    the session is closed."""
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
+
+    with mock.patch("requests.Session.close", autospec=True) as mock_close:
+        # Use the finalizer to remove the object from memory.
+        # Using del or __del__ directly does not work in the test environment.
+        store_backend._finalizer()
+        mock_close.assert_called_once()

@@ -2,11 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_LIST_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -29,7 +33,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the compound columns to be unique."
-COLUMN_LIST_DESCRIPTION = "Set of columns to be checked."
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
     "Spark",
@@ -47,7 +50,7 @@ DATA_QUALITY_ISSUES = ["Cardinality"]
 class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_compound_columns_to_be_unique is a \
+    ExpectCompoundColumnsToBeUnique is a \
     [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
 
     Multicolumn Map Expectations are evaluated for a set of columns and ask a yes/no question about the row-wise relationship between those columns.
@@ -168,7 +171,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    column_list: Sequence[str]
+    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
@@ -190,6 +193,8 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     args_keys = ("column_list",)
 
     class Config:
+        title = "Expect compound columns to be unique"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectCompoundColumnsToBeUnique]

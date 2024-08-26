@@ -12,7 +12,6 @@ import pytest
 import requests
 from requests import Session
 
-from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     APINotificationAction,
     EmailAction,
@@ -35,6 +34,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -194,13 +194,11 @@ class TestActionSerialization:
         },
         UpdateDataDocsAction: {
             "name": "my_data_docs_action",
-            "notify_on": "all",
             "site_names": EXAMPLE_SITE_NAMES,
             "type": "update_data_docs",
         },
         SNSNotificationAction: {
             "name": "my_sns_action",
-            "notify_on": "all",
             "sns_message_subject": None,
             "sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN,
             "type": "sns",
@@ -208,7 +206,6 @@ class TestActionSerialization:
         APINotificationAction: {
             "name": "my_api_action",
             "type": "api",
-            "notify_on": "all",
             "url": EXAMPLE_URL,
         },
     }
@@ -530,9 +527,7 @@ class TestV1ActionRun:
     def test_OpsgenieAlertAction_run(
         self, checkpoint_result: CheckpointResult, success: bool, message: str
     ):
-        action = OpsgenieAlertAction(
-            name="my_action", api_key="test", routing_key="test", notify_on="all"
-        )
+        action = OpsgenieAlertAction(name="my_action", api_key="test", notify_on="all")
         checkpoint_result.success = success
 
         with mock.patch.object(Session, "post") as mock_post:

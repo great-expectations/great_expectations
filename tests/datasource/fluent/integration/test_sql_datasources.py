@@ -270,6 +270,7 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
         engine = engines[dialect]
         with engine.connect() as conn:
             transaction = conn.begin()
+            schema: str | None = None
             for table in tables:
                 name = table["table_name"]
                 schema = table["schema"]
@@ -536,14 +537,13 @@ class TestTableIdentifiers:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))
 
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="validation_definition", suite=suite, data=batch_definition)
+        )
         checkpoint = context.checkpoints.add(
             Checkpoint(
                 name=f"{datasource.name}-{asset.name}",
-                validation_definitions=[
-                    ValidationDefinition(
-                        name="validation_definition", suite=suite, data=batch_definition
-                    )
-                ],
+                validation_definitions=[validation_definition],
             )
         )
         result = checkpoint.run()
@@ -829,8 +829,8 @@ class TestColumnIdentifiers:
         suite.save()
 
         batch_definition = asset.add_batch_definition_whole_table("my_batch_def")
-        validation_definition = ValidationDefinition(
-            name="my_validation_def", suite=suite, data=batch_definition
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="my_validation_def", suite=suite, data=batch_definition)
         )
 
         checkpoint = context.checkpoints.add(

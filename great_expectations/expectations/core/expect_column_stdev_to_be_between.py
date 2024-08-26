@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
@@ -65,7 +65,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
 
     Uses sample standard deviation (normalized by N-1).
 
-    expect_column_stdev_to_be_between is a \
+    ExpectColumnStdevToBeBetween is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -108,8 +108,8 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
           representing the true standard deviation for the column
 
     See Also:
-        [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
-        [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
+        [ExpectColumnMeanToBeBetween](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
+        [ExpectColumnMedianToBeBetween](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -188,7 +188,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
     strict_max: bool = pydantic.Field(False, description=STRICT_MAX_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -216,6 +216,8 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column standard deviation to be between"
+
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnStdevToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)

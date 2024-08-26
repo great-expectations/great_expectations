@@ -16,9 +16,9 @@ repos:
       - id: no-commit-to-branch
         args: [--branch, develop, --branch, main]
       - id: detect-private-key
-        exclude: tests/test_fixtures/database_key_test*
+        exclude: tests/test_fixtures/database_key_test*|tests/datasource/fluent/test_snowflake_datasource\.py
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.4.8"
+    rev: "v0.5.3"
     hooks:
       - id: ruff
         args: ["--fix"]

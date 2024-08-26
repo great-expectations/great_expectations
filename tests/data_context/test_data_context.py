@@ -662,7 +662,7 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     config_var_value: str = "my_patched_value"
 
     context.variables.config.plugins_directory = f"${config_var_name}"
-    context.save_config_variable(config_variable_name=config_var_name, value=config_var_value)
+    context.save_config_variable(name=config_var_name, value=config_var_value)
 
     assert context.plugins_directory and context.plugins_directory.endswith(config_var_value)
 
@@ -671,6 +671,8 @@ class ExpectSkyToBeColor(BatchExpectation):
     metric_dependencies = ("table.color",)
     success_keys = ("color",)
     args_keys = ("color",)
+
+    color: str
 
     @classmethod
     @renderer(renderer_type=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]))
@@ -691,156 +693,107 @@ class ExpectSkyToBeColor(BatchExpectation):
         }
 
 
-@pytest.mark.xfail(
-    reason="Uses unsupported expectation but tests required behavior - fix this test as part of V1-117"  # noqa: E501
-)
-@pytest.mark.filesystem
-def test_unrendered_and_failed_prescriptive_renderer_behavior(
-    empty_data_context,
-):
-    context = empty_data_context
+class TestRenderedContent:
+    @pytest.mark.filesystem
+    def test_no_rendered_content_for_file_data_context(self, empty_data_context: FileDataContext):
+        suite_name = "test_suite"
+        empty_data_context.suites.add(
+            ExpectationSuite(
+                name=suite_name,
+                expectations=[gx.expectations.ExpectTableRowCountToEqual(value=0)],
+            )
+        )
+        expectation_suite = empty_data_context.suites.get(name=suite_name)
 
-    expectation_suite_name: str = "test_suite"
-
-    expectation_suite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name,
-        data_context=context,
-        expectations=[
-            ExpectationConfiguration(type="expect_table_row_count_to_equal", kwargs={"value": 0}),
-        ],
-    )
-    context.suites.add(expectation_suite)
-
-    # Without include_rendered_content set, all legacy rendered_content was None.
-    expectation_suite = context.suites.get(name=expectation_suite_name)
-    assert not any(
-        expectation_configuration.rendered_content
-        for expectation_configuration in expectation_suite.expectation_configurations
-    )
-
-    # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.  # noqa: E501
-    expectation_suite = context.suites.get(name=expectation_suite_name)
-    for expectation_configuration in expectation_suite.expectation_configurations:
         assert all(
-            isinstance(rendered_content_block, RenderedAtomicContent)
-            for rendered_content_block in expectation_configuration.rendered_content
+            expectation.rendered_content is None for expectation in expectation_suite.expectations
         )
 
-    # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is  # noqa: E501
-    # broken, we should get the failure message for one of the content blocks.
-    expectation_suite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name,
-        data_context=context,
-        expectations=[
-            ExpectationConfiguration(type="expect_sky_to_be_color", kwargs={"color": "blue"}),
-        ],
-    )
-    context.suites.add(expectation_suite)
-    expectation_suite = context.suites.get(name=expectation_suite_name)
+    @pytest.mark.cloud
+    def test_rendered_content_for_cloud(self, empty_cloud_data_context: CloudDataContext) -> None:
+        suite_name = "test_suite"
+        empty_cloud_data_context.suites.add(
+            ExpectationSuite(
+                name=suite_name,
+                expectations=[gx.expectations.ExpectTableRowCountToEqual(value=0)],
+            )
+        )
+        expectation_suite = empty_cloud_data_context.suites.get(name=suite_name)
 
-    expected_rendered_content: List[RenderedAtomicContent] = [
-        RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererType.FAILED,
-            value=renderedAtomicValueSchema.load(
-                {
-                    "template": "Rendering failed for Expectation: $expectation_type(**$kwargs).",
-                    "params": {
-                        "expectation_type": {
-                            "schema": {"type": "string"},
-                            "value": "expect_sky_to_be_color",
+        rendered_content_blocks: list = []
+        for expectation in expectation_suite.expectations:
+            assert expectation.rendered_content is not None
+            rendered_content_blocks.extend(expectation.rendered_content)
+        assert rendered_content_blocks
+
+    @pytest.mark.cloud
+    def test_multiple_rendered_content_blocks_one_is_busted(
+        self, empty_cloud_data_context: CloudDataContext
+    ) -> None:
+        suite_name = "test_suite"
+        empty_cloud_data_context.suites.add(
+            ExpectationSuite(
+                name=suite_name,
+                expectations=[
+                    ExpectSkyToBeColor(color="blue"),
+                ],
+            )
+        )
+        expectation_suite = empty_cloud_data_context.suites.get(name=suite_name)
+
+        expected_rendered_content: List[RenderedAtomicContent] = [
+            RenderedAtomicContent(
+                name=AtomicPrescriptiveRendererType.FAILED,
+                value=renderedAtomicValueSchema.load(
+                    {
+                        "template": (
+                            "Rendering failed for Expectation: $expectation_type(**$kwargs)."
+                        ),
+                        "params": {
+                            "expectation_type": {
+                                "schema": {"type": "string"},
+                                "value": "expect_sky_to_be_color",
+                            },
+                            "kwargs": {
+                                "schema": {"type": "string"},
+                                "value": {"color": "blue"},
+                            },
                         },
-                        "kwargs": {
-                            "schema": {"type": "string"},
-                            "value": {"color": "blue"},
-                        },
-                    },
-                    "schema": {"type": "com.superconductive.rendered.string"},
-                }
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                    }
+                ),
+                value_type="StringValueType",
+                exception='Renderer "atomic.prescriptive.custom_renderer_type" failed to render Expectation '  # noqa: E501
+                '"expect_sky_to_be_color with exception message: This renderer is broken!".',
             ),
-            value_type="StringValueType",
-            exception='Renderer "atomic.prescriptive.custom_renderer_type" failed to render Expectation '  # noqa: E501
-            '"expect_sky_to_be_color with exception message: This renderer is broken!".',
-        ),
-        RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererType.SUMMARY,
-            value=renderedAtomicValueSchema.load(
-                {
-                    "schema": {"type": "com.superconductive.rendered.string"},
-                    "template": "$expectation_type(**$kwargs)",
-                    "params": {
-                        "expectation_type": {
-                            "schema": {"type": "string"},
-                            "value": "expect_sky_to_be_color",
+            RenderedAtomicContent(
+                name=AtomicPrescriptiveRendererType.SUMMARY,
+                value=renderedAtomicValueSchema.load(
+                    {
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "template": "$expectation_type(**$kwargs)",
+                        "params": {
+                            "expectation_type": {
+                                "schema": {"type": "string"},
+                                "value": "expect_sky_to_be_color",
+                            },
+                            "kwargs": {
+                                "schema": {"type": "string"},
+                                "value": {"color": "blue"},
+                            },
                         },
-                        "kwargs": {
-                            "schema": {"type": "string"},
-                            "value": {"color": "blue"},
-                        },
-                    },
-                }
+                    }
+                ),
+                value_type="StringValueType",
             ),
-            value_type="StringValueType",
-        ),
-    ]
+        ]
 
-    actual_rendered_content: List[RenderedAtomicContent] = []
-    for expectation_configuration in expectation_suite.expectation_configurations:
-        actual_rendered_content.extend(expectation_configuration.rendered_content)
+        actual_rendered_content: List[RenderedAtomicContent] = []
+        for expectation in expectation_suite.expectations:
+            assert expectation.rendered_content is not None
+            actual_rendered_content.extend(expectation.rendered_content)
 
-    assert actual_rendered_content == expected_rendered_content
-
-    # If we have a legacy ExpectationSuite with successful rendered_content blocks, but the new renderer is broken,  # noqa: E501
-    # we should not update the existing rendered_content.
-    legacy_rendered_content = [
-        RenderedAtomicContent(
-            name=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]),
-            value=renderedAtomicValueSchema.load(
-                {
-                    "schema": {"type": "com.superconductive.rendered.string"},
-                    "template": "This is a working renderer for $expectation_type(**$kwargs).",
-                    "params": {
-                        "expectation_type": {
-                            "schema": {"type": "string"},
-                            "value": "expect_sky_to_be_color",
-                        },
-                        "kwargs": {
-                            "schema": {"type": "string"},
-                            "value": {"color": "blue"},
-                        },
-                    },
-                }
-            ),
-            value_type="StringValueType",
-        ),
-        RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererType.SUMMARY,
-            value=renderedAtomicValueSchema.load(
-                {
-                    "schema": {"type": "com.superconductive.rendered.string"},
-                    "template": "$expectation_type(**$kwargs)",
-                    "params": {
-                        "expectation_type": {
-                            "schema": {"type": "string"},
-                            "value": "expect_sky_to_be_color",
-                        },
-                        "kwargs": {
-                            "schema": {"type": "string"},
-                            "value": {"color": "blue"},
-                        },
-                    },
-                }
-            ),
-            value_type="StringValueType",
-        ),
-    ]
-
-    expectation_suite.expectation_configurations[0].rendered_content = legacy_rendered_content
-
-    actual_rendered_content: List[RenderedAtomicContent] = []
-    for expectation_configuration in expectation_suite.expectation_configurations:
-        actual_rendered_content.extend(expectation_configuration.rendered_content)
-
-    assert actual_rendered_content == legacy_rendered_content
+        assert actual_rendered_content == expected_rendered_content
 
 
 @pytest.mark.filesystem

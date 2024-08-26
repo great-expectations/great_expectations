@@ -114,6 +114,8 @@ jobs:
       # azure
       AZURE_ACCESS_KEY: ${{secrets.AZURE_ACCESS_KEY}}
       AZURE_CREDENTIAL: ${{secrets.AZURE_CREDENTIAL}}
+      AZURE_CONTAINER: ${{secrets.AZURE_CONTAINER}}
+      AZURE_STORAGE_ACCOUNT_URL: ${{secrets.AZURE_STORAGE_ACCOUNT_URL}}
       # snowflake
       SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
       SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
@@ -185,6 +187,14 @@ jobs:
           slug: great-expectations/great_expectations
           flags: ${{ matrix.doc-step }}
 
+      # upload test results to codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.doc-step }}
+
   unit-tests:
     env:
       GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
@@ -222,13 +232,21 @@ jobs:
           slug: great-expectations/great_expectations
           flags: ${{ matrix.python-version }}
 
+      # upload test results to codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.python-version }}
+
   doc-checks:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
     permissions:
       id-token: write
       contents: read
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -284,6 +302,17 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=4096
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
         run: cd docs/docusaurus && yarn install && bash ../build_docs
+
+  docs-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run tests
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+        run: cd docs/docusaurus && yarn install && yarn test
 
   cloud-tests:
     needs: [unit-tests, static-analysis, ci-is-on-main-repo]
@@ -357,6 +386,14 @@ jobs:
           slug: great-expectations/great_expectations
           flags: cloud
 
+      # upload test results to codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: cloud
+
   marker-tests:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
@@ -381,7 +418,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -452,6 +489,14 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: great-expectations/great_expectations
+          flags: "${{ matrix.python-version }} ${{ matrix.markers }}"
+
+      # upload test results to codecov
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           flags: "${{ matrix.python-version }} ${{ matrix.markers }}"
 
   py38-min-versions:
@@ -561,26 +606,6 @@ jobs:
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/pydantic-v1-install.txt -r reqs/requirements-dev-test.txt
-      - name: Run the tests
-        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
-
-  numpy-2:
-    needs: [unit-tests, static-analysis]
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.9"
-          cache: "pip"
-          cache-dependency-path: reqs/requirements-dev-test.txt
-      - name: Install dependencies
-        run: pip install . -r reqs/requirements-dev-test.txt
-      - name: Install numpy 2
-        run: pip install --pre "numpy>1.9999999999999"
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 

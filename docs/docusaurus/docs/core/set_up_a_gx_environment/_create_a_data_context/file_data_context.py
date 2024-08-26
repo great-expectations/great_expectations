@@ -15,8 +15,15 @@ import great_expectations as gx
 context = gx.get_context(mode="file")
 # </snippet>
 
+# Optional. Request a File Data Context from a specific folder.
+# <snippet name="docs/docusaurus/docs/core/set_up_a_gx_environment/_create_a_data_context/file_data_context.py - specific file data context">
+context = gx.get_context(mode="file", project_root_dir="./new_context_folder")
+# </snippet>
+
 # Optional. Review the configuration of the returned File Data Context.
 # <snippet name="core/set_up_a_gx_environment/_create_a_data_context/file_data_context.py review returned Data Context">
 print(context)
 # </snippet>
 # </snippet>
+
+assert type(context).__name__ == "FileDataContext"

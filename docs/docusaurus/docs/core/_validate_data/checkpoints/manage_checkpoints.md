@@ -20,7 +20,7 @@ If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. 
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Import the GX library and the `Checkpoint` class:
 
@@ -74,7 +74,7 @@ If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. 
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -100,7 +100,7 @@ If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. 
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -126,7 +126,7 @@ If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. 
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -158,7 +158,7 @@ If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. 
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -195,7 +195,7 @@ If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. 
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 

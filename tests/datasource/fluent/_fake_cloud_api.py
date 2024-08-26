@@ -12,7 +12,7 @@ from typing import (
     Dict,
     Final,
     Generator,
-    Literal,
+    List,
     NamedTuple,
     Optional,
     Sequence,
@@ -61,14 +61,11 @@ DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
 # ##########################
 
 
-class _DatasourceSchema(pydantic.BaseModel):
+class _DatasourceSchema(pydantic.BaseModel, extra="allow"):
     id: Optional[str] = None
-    type: Literal["datasource"]
-    attributes: Dict[str, Union[Dict, str]]
-
-    @property
-    def name(self) -> str:
-        return self.attributes["datasource_config"]["name"]  # type: ignore[index]
+    type: str
+    name: str
+    assets: List[dict] = pydantic.Field(default_factory=list)
 
 
 class CloudResponseSchema(pydantic.BaseModel):
@@ -76,14 +73,8 @@ class CloudResponseSchema(pydantic.BaseModel):
 
     @classmethod
     def from_datasource_json(cls, ds_payload: str | bytes) -> CloudResponseSchema:
-        payload_dict = json.loads(ds_payload)
-        data = {
-            "id": payload_dict["data"].get("id"),
-            "type": "datasource",
-            "attributes": payload_dict["data"]["attributes"],
-        }
-
-        return cls(data=data)  # type: ignore[arg-type] # pydantic type coercion
+        data = json.loads(ds_payload)
+        return cls(**data)
 
 
 class CallbackResult(NamedTuple):
@@ -139,13 +130,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
         id: str = str(uuid.uuid4())
         ds["id"] = id
 
-        ds_response_json = {
-            "data": {
-                "attributes": {"datasource_config": ds},
-                "id": id,
-                "type": "datasource",
-            }
-        }
+        ds_response_json = {"data": ds}
 
         datasource_config[name] = name
         datasources_by_id[id] = ds_response_json
@@ -166,10 +151,8 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
             "datasources": datasource_config,
             "checkpoint_store_name": "default_checkpoint_store",
             "expectations_store_name": "default_expectations_store",
-            "suite_parameter_store_name": "default_suite_parameter_store",
             "validation_results_store_name": "default_validation_results_store",
             "stores": {
-                "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
@@ -286,9 +269,8 @@ def delete_datasources_cb(
 
     datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["datasources"]
     deleted_ds = datasources.pop(datasource_id, None)
-    print(pf(deleted_ds, depth=5))
     if deleted_ds:
-        ds_name = deleted_ds["data"]["attributes"]["datasource_config"]["name"]
+        ds_name = deleted_ds["data"]["name"]
         _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].remove(ds_name)
         LOGGER.debug(f"Deleted datasource '{ds_name}'")
         result = CallbackResult(204, headers={}, body="")
@@ -313,16 +295,12 @@ def delete_data_assets_cb(
 
     # find and remove asset from datasource config
     for datasource in datasources.values():
-        for idx, asset in enumerate(
-            datasource["data"]["attributes"]["datasource_config"].get("assets", {})
-        ):
+        for idx, asset in enumerate(datasource["data"].get("assets", {})):
             if asset.get("id") == data_asset_id:
                 deleted_asset_idx = idx
                 break
         if deleted_asset_idx is not None:
-            deleted_asset = datasource["data"]["attributes"]["datasource_config"]["assets"].pop(
-                deleted_asset_idx
-            )
+            deleted_asset = datasource["data"]["assets"].pop(deleted_asset_idx)
             break
 
     if deleted_asset:
@@ -408,7 +386,7 @@ def post_datasources_cb(
         )
 
 
-def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
+def put_datasource_cb(request: PreparedRequest) -> CallbackResult:  # noqa: C901
     LOGGER.debug(f"{request.method} {request.url}")
     if not request.url:
         raise NotImplementedError("request.url should not be empty")
@@ -425,9 +403,18 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(request.url)
     datasource_id = parsed_url.path.split("/")[-1]
 
+    # Ensure that assets and batch definitions get IDs
+    # Note that this logic should also happen in POST but is not implemented for our fake
+    for asset in payload.data.assets:
+        if not asset.get("id"):
+            asset["id"] = str(uuid.uuid4())
+        for batch_definition in asset.get("batch_definitions", []):
+            if not batch_definition.get("id"):
+                batch_definition["id"] = str(uuid.uuid4())
+
     old_datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if old_datasource:
-        if payload.data.name != old_datasource["data"]["attributes"]["datasource_config"]["name"]:
+        if payload.data.name != old_datasource["data"]["name"]:
             raise NotImplementedError("Unsure how to handle name change")
         _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
         result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload.json())
@@ -450,9 +437,7 @@ def get_datasources_cb(
     datasources_list: list[dict] = list(all_datasources.values())
     if queried_names:
         datasources_list = [
-            d["data"]
-            for d in datasources_list
-            if d["data"]["attributes"]["datasource_config"]["name"] in queried_names
+            d["data"] for d in datasources_list if d["data"]["name"] in queried_names
         ]
     else:
         datasources_list = [d["data"] for d in datasources_list]
@@ -626,11 +611,7 @@ def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
     checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
     checkpoint_list: list[dict] = list(checkpoints.values())
     if queried_names:
-        checkpoint_list = [
-            d
-            for d in checkpoint_list
-            if d["attributes"]["checkpoint_config"]["name"] in queried_names
-        ]
+        checkpoint_list = [d for d in checkpoint_list if d["name"] in queried_names]
 
     resp_body = {"data": checkpoint_list}
 
@@ -673,7 +654,7 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["checkpoint_config"]["name"]
+    name = payload["data"]["name"]
 
     checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
     checkpoint_names: set[str] = _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"]
@@ -720,7 +701,7 @@ def delete_checkpoint_by_id_cb(
         return CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
 
     print(pf(deleted_cp, depth=5))
-    cp_name = deleted_cp["attributes"]["checkpoint_config"]["name"]
+    cp_name = deleted_cp["name"]
     _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"].remove(cp_name)
     LOGGER.debug(f"Deleted checkpoint '{cp_name}'")
     return CallbackResult(204, headers={}, body="")
@@ -743,7 +724,7 @@ def delete_checkpoint_by_name_cb(
 
     checkpoint_id: str | None = None
     for checkpoint in checkpoints.values():
-        if checkpoint["attributes"]["checkpoint_config"]["name"] == cp_name:
+        if checkpoint["name"] == cp_name:
             checkpoint_id = checkpoint["id"]
             break
 
@@ -797,7 +778,7 @@ def post_validation_definitions_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["validation_definition"]["name"]
+    name = payload["data"]["name"]
 
     validation_definitions: dict[str, dict] = _CLOUD_API_FAKE_DB["validation_definitions"]
     validation_definition_names: set[str] = _CLOUD_API_FAKE_DB["VALIDATION_DEFINITION_NAMES"]
@@ -845,7 +826,7 @@ def gx_cloud_api_fake_ctx(
     org_url_base_V1 = urllib.parse.urljoin(
         cloud_details.base_url, f"api/v1/organizations/{cloud_details.org_id}/"
     )
-    dc_config_url = urllib.parse.urljoin(org_url_base_V0, "data-context-configuration")
+    dc_config_url = urllib.parse.urljoin(org_url_base_V1, "data-context-configuration")
     me_url = urllib.parse.urljoin(org_url_base_V0, "accounts/me")
 
     assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
@@ -860,32 +841,32 @@ def gx_cloud_api_fake_ctx(
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
-            urllib.parse.urljoin(org_url_base_V0, "datasources"),
+            urllib.parse.urljoin(org_url_base_V1, "datasources"),
             get_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "datasources"),
+            urllib.parse.urljoin(org_url_base_V1, "datasources"),
             post_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"datasources/{UUID_REGEX}")),
             get_datasource_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"datasources/{UUID_REGEX}")),
             delete_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.PUT,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"datasources/{UUID_REGEX}")),
             put_datasource_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"data-assets/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"data-assets/{UUID_REGEX}")),
             delete_data_assets_cb,
         )
         resp_mocker.add_callback(
@@ -915,37 +896,37 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.GET,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             get_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             post_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"checkpoints/{UUID_REGEX}")),
             delete_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
+            urllib.parse.urljoin(org_url_base_V1, "checkpoints"),
             delete_checkpoint_by_name_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"checkpoints/{UUID_REGEX}")),
             get_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "validation-results"),
+            urllib.parse.urljoin(org_url_base_V1, "validation-results"),
             post_validation_results_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V0, "validation-definitions"),
+            urllib.parse.urljoin(org_url_base_V1, "validation-definitions"),
             post_validation_definitions_cb,
         )
 

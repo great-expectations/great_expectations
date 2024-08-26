@@ -1,6 +1,7 @@
 fluent_datasources:
   my_pg_ds:
     type: postgres
+    id: dae0accb-fec0-410b-9baa-dd704729de0e
     connection_string: "postgresql://userName:@hostname/dbName"
     kwargs:
       echo: True
@@ -16,26 +17,13 @@ fluent_datasources:
         batch_definitions:
           with_partitioner:
             name: with_partitioner
+            id: fe4c0a40-f0d8-482c-8dd5-0572b5176ea5
             partitioner:
               method_name: partition_on_year_and_month
               column_name: my_column
-      with_sorters:
-        id: ddd94d36-1443-4298-b0bf-d2d7918c8f66
-        type: table
-        table_name: another_table
-        order_by:
-          - key: year
-          - key: month
-            reverse: true
-      with_dsl_ish_sorters:
-        id: 523d8416-3e91-41ea-af2f-3dbee2c44392
-        type: table
-        table_name: another_table
-        order_by:
-          - year
-          - -month
   sql_taxi:
     type: sql
+    id: f4ae9455-8dab-4cac-99ce-cd8557c4f4be
     connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
     assets:
       my_asset:
@@ -45,29 +33,26 @@ fluent_datasources:
         batch_definitions:
           my_batch_definition:
             name: with_partitioner
+            id: 39af08fd-61a6-43e4-85c2-eef5c5e8fbab
             partitioner:
               column_name: pickup_datetime
               method_name: partition_on_year_and_month
-        order_by:
-          - key: year
-          - key: month
-
   sqlite_taxi:
     type: sqlite
+    id: 2cd7dd94-edb1-4159-87b8-6a195a184749
     connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
     assets:
       my_asset:
         id: fa713f58-9825-4b30-816b-eeda511c4b08
         type: table
         table_name: yellow_tripdata_sample_2019_01
-        order_by:
-          - key: year
-          - key: month
   my_sqlite_ds_w_subs:
     type: sqlite
+    id: 8a8b3391-5989-446b-b95a-cd2c0ea2a867
     connection_string: "${MY_CONN_STR}"
   my_pandas_fs_ds:
     type: pandas_filesystem
+    id: 2225806a-fea7-4fe5-ac88-ca4b7d951cee
     base_directory: "."
     assets:
       my_csv_asset_w_custom_connect_options:
@@ -82,6 +67,7 @@ fluent_datasources:
         sep: ","
   my_pandas_s3_ds:
     type: pandas_s3
+    id: 2720b4ef-1ecf-4df0-bd70-915ce264df6a
     bucket: "test_bucket"
     boto3_options:
       endpoint_url: "${MY_URL}"
@@ -100,6 +86,7 @@ fluent_datasources:
         delimiter: ","
   my_pandas_gcs_ds:
     type: pandas_gcs
+    id: cbbbba81-5950-4634-a5bb-9e04e2683ea1
     bucket_or_name: "test_bucket"
     gcs_options:
       filename: "${MY_FILE}"
@@ -118,6 +105,7 @@ fluent_datasources:
         delimiter: ","
   my_pandas_abs_ds:
     type: pandas_abs
+    id: 6bf97ca4-ca7d-4067-bcb1-e2581d0746fc
     azure_options:
       account_url: "${MY_URL}"
     assets:
@@ -131,11 +119,13 @@ fluent_datasources:
           abs_delimiter: "/"
       my_csv_asset_with_default_connect_options:
         type: csv
+        id: 2d6ffed1-6233-40a8-8ab5-244766f809a4
         delimiter: ","
         connect_options:
           abs_container: "this_is_always_required"
   my_spark_fs_ds:
     type: spark_filesystem
+    id: 64118877-f1a3-4452-9f0c-0f92ec6cd583
     base_directory: "."
     assets:
       my_csv_asset_w_custom_connect_options:
@@ -150,6 +140,7 @@ fluent_datasources:
         infer_schema: False
   my_spark_s3_ds:
     type: spark_s3
+    id: 9ac7a0ff-cf3b-4d8c-8917-19d073503175
     bucket: "test_bucket"
     boto3_options:
       endpoint_url: "${MY_URL}"
@@ -166,6 +157,7 @@ fluent_datasources:
         type: csv
   my_spark_gcs_ds:
     type: spark_gcs
+    id: 3b85df79-2d9a-4553-a5d2-3f017f16385a
     bucket_or_name: "test_bucket"
     gcs_options:
       filename: "${MY_FILE}"
@@ -179,8 +171,10 @@ fluent_datasources:
           gcs_max_results: 99
       my_csv_asset_with_default_connect_options:
         type: csv
+        id: a3d004ea-8a08-419e-8d31-62e6fa17f25a
   my_spark_abs_ds:
     type: spark_abs
+    id: 7ea70495-baf1-4dc9-96d0-c859b4dbf5b5
     azure_options:
       account_url: "${MY_URL}"
     assets:
@@ -198,7 +192,8 @@ fluent_datasources:
           abs_container: "this_is_always_required"
   my_snowflake_ds:
     type: snowflake
-    connection_string: "snowflake://user_login_name:password@account_identifier/database/public?warehouse=wh&role=role"
+    id: c0973631-4cca-4c87-b8ce-a7662c7a0bdf
+    connection_string: "snowflake://user_login_name:password@account.us-east-2.aws/database/public?warehouse=wh&role=role"
     assets:
       my_table_asset_wo_partitioners:
         id: d8b22f50-d3f9-4d04-9b4c-cfed86b157ff
@@ -206,7 +201,8 @@ fluent_datasources:
         table_name: my_table
   my_snowflake_ds_with_connect_args:
     type: snowflake
-    account: "myorganization"
+    id: f24e74bc-f565-4e54-918f-6fa5bd67bf44
+    account: "myorganization-myaccount"
     user: "testuser1"
     password: "foobarbaz"
     database: "testdb"
@@ -219,8 +215,16 @@ fluent_datasources:
         id: e9ac5d80-679b-49d2-8c60-3bbf6530dbb4
         type: table
         table_name: my_table
+  my_snow_flake_w_private_key:
+    type: snowflake
+    id: 49846470-db19-4457-ba7d-32d52ecfeae3
+    connection_string: "snowflake://user_login_name:dummy_value@account.us-east-2.aws/db/schema?role=role&warehouse=wh"
+    kwargs:
+      connect_args:
+        private_key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWEFJQkFBS0JnSHBGZENkS09HTGFpTUg5dDF0aDFsS3FKVmNEd2ZubFAybHBuZUFOYmJzZ0hiNi80VTJVCnVhMDg1emxOWWhaNXhKc25TZHFJQWZyYWd6dVZZTmsyT0Nwb04xUWtxNG9XYWQwYTRjRUIyUUJ0UDlqczBkVlcKeFFPYkpNOHQxWkxIQjNMdzFOQ3FCNk9lZmtQN1hsRTB3NmFYUlo1SVd3dlZDODZjQlhWQm1CWHpBZ01CQUFFQwpnWUFCUjZUVm5ITkdwWjcwMk9FSWRkZTJlYzEyUWJYUUZkUTZHRDdzejNjc2xFTjdjYXE4RXloMlpjTE4yTCtFCkdMWTBJWThtV0hJYzNCaXZrUHE0aTFhL0p5UlV6RVRvSnZqVmQ4SjFzbHJ6ejhyeU1PQWlQYnh0MzNJcGdHTDMKLzhLZ09MWXhqZGc1YnBuNnNDWmxPWHk3V1lqbDFIOFRCdzhDelpGNDFIYTI0UUpCQU03VSs4bTBoeWtuYm5CRApnS1hHYjBlSElCeDB6bFBhTkp3REhVY0pYdWp4YlZmd1ZqS1dMeTA3Sm9YUmlBZ1B1VnN6SU1odTByK1hhODdMClcyV0xkVHNDUVFDWFZtMEhlN1NheXRucmxBRmNrNS9MNEVqdFdhQVFHZm1WNGVhd0kySGVtV01qajB0dWtkRnQKd0FXSER1S1lNYitiZzIxT1UyWFF4b2xsWVlKZmsvYXBBa0JhU2UxMFd1Tloyc1hDS2lXQnVJTWhaV0ptS2JOYwpOWGdiMXR3MEEybzBKQmhJZURrWXNpajhCTU5IVFhXbGx6K2lDVXE1VkcrWmhYOWhjYkovUElhN0FrRUFqZmdkCnYrOWt0ZkdtRFVHREpYMjNZbUs5Qnl3VTVBWDZCWWt1Qi82cFNWRkxsNGhOa3lSbit6VXYra3NVZHdIMFpjY2QKTzJVeEZuR3BZdG5lbkJzS1FRSkJBTVgydGdGY2cvL3QxTGk0K2R4bFR2WlovY2xaQ0xwV1hwNEhRZ0J3enhNTgp3cERvRjQwT3pOWXJyS0lib1U0QkpGT01PQldBUzRERkRZR2RmTFZTOTlnPQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==
   my_databricks_sql_ds:
     type: databricks_sql
+    id: 542eec80-9b48-4174-b93f-29fb46d87bb9
     connection_string: "databricks://token:dapi123@abc-123.cloud.databricks.com:123/default_db?http_path=/sql/1.0/warehouses/abc123&catalog=default&schema=dev"
     assets:
       my_table_asset_wo_partitioners:
@@ -229,14 +233,17 @@ fluent_datasources:
         table_name: my_table
   my_fabric_ds:
     type: fabric_powerbi
+    id: e13dfa78-1669-4ae3-84f1-d09945769175
     # dummy dataset
     dataset: 0993ddd1-f01d-4c8f-a64e-9c4e5b8905e8
     assets:
       my_dax_asset:
         type: powerbi_dax
+        id: 7a22271c-1940-4dae-bd70-529b5582e09f
         dax_string: "foo bar"
       my_measure_asset:
         type: powerbi_measure
+        id: 6197519a-55e8-4a11-aaa4-f83932cbe4c4
         measure:
           - foo
           - bar
@@ -245,5 +252,6 @@ fluent_datasources:
           - "fizz with space[Buzz]"
       my_pwr_bi_table_asset:
         type: powerbi_table
+        id: 681a90c3-2bdc-42a2-a8eb-2d4cf477a807
         table: my_table
         num_rows: 100

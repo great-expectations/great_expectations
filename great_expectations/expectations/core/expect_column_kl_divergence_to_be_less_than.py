@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 import altair as alt
 import numpy as np
@@ -121,7 +121,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     This expectation works on both categorical and continuous partitions. See notes below for details.
 
-    expect_column_kl_divergence_to_be_less_than is a \
+    ExpectColumnKlDivergenceToBeLessThan is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -339,7 +339,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": [
             "core expectation",
@@ -368,6 +368,8 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column KL divergence to be less than"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnKLDivergenceToBeLessThan]

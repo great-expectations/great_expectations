@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
@@ -62,7 +62,7 @@ DATA_QUALITY_ISSUES = ["Sets"]
 class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_most_common_value_to_be_in_set is a \
+    ExpectColumnMostCommonValueToBeInSet is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -179,7 +179,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -202,6 +202,8 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column most common value to be in set"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnMostCommonValueToBeInSet]

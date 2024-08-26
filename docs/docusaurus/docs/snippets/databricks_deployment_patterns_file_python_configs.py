@@ -37,7 +37,7 @@ dbfs_datasource = context.data_sources.add_or_update_spark_dbfs(
 # </snippet>
 
 # unable to successfully mock dbfs, so using filesystem for tests
-context.delete_datasource(datasource_name="my_spark_dbfs_datasource")
+context.delete_datasource(name="my_spark_dbfs_datasource")
 dbfs_datasource = context.data_sources.add_or_update_spark_filesystem(
     name="my_spark_dbfs_datasource",
     base_directory=data_directory,

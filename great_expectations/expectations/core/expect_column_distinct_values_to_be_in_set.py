@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
 import altair as alt
 import pandas as pd
@@ -66,7 +66,7 @@ DATA_QUALITY_ISSUES = ["Sets"]
 class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_distinct_values_to_be_in_set is a \
+    ExpectColumnDistinctValuesToBeInSet is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -97,11 +97,11 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
     Notes:
         The success value for this expectation will match that of \
-    [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set).
+    [ExpectColumnValuesToBeInSet](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set).
 
     See Also:
-        [expect_column_distinct_values_to_contain_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
-        [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
+        [ExpectColumnDistinctValuesToContainSet](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
+        [ExpectColumnDistinctValuesToEqualSet](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -201,7 +201,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         description=VALUE_SET_DESCRIPTION,
     )
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -221,27 +221,37 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     )
 
     class Config:
+        title = "Expect column distinct values to be in set"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnDistinctValuesToBeInSet]
         ) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["data_quality_issues"] = {
-                "type": "array",
-                "const": DATA_QUALITY_ISSUES,
-            }
-            schema["properties"]["library_metadata"] = {
-                "type": "object",
-                "const": model._library_metadata,
-            }
-            schema["properties"]["short_description"] = {
-                "type": "string",
-                "const": EXPECTATION_SHORT_DESCRIPTION,
-            }
-            schema["properties"]["supported_data_sources"] = {
-                "type": "array",
-                "const": SUPPORTED_DATA_SOURCES,
-            }
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

@@ -16,6 +16,10 @@ from great_expectations.expectations.model_field_descriptions import (
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 if TYPE_CHECKING:
@@ -25,19 +29,20 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationValidationResult,
     )
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column entries to be strings that do NOT match a given like pattern expression."
 )
 LIKE_PATTERN_DESCRIPTION = "The SQL like pattern expression the column entries should NOT match."
-DATA_QUALITY_ISSUES = ["Pattern Matching"]
+DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = ["SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
 
 
 class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_values_to_not_match_like_pattern is a \
+    ExpectColumnValuesToNotMatchLikePattern is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -70,13 +75,13 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_values_to_match_regex](https://greatexpectations.io/expectations/expect_column_values_to_match_regex)
-        [expect_column_values_to_match_regex_list](https://greatexpectations.io/expectations/expect_column_values_to_match_regex_list)
-        [expect_column_values_to_not_match_regex](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex)
-        [expect_column_values_to_not_match_regex_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex_list)
-        [expect_column_values_to_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern)
-        [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
-        [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
+        [ExpectColumnValuesToMatchRegex](https://greatexpectations.io/expectations/expect_column_values_to_match_regex)
+        [ExpectColumnValuesToMatchRegexList](https://greatexpectations.io/expectations/expect_column_values_to_match_regex_list)
+        [ExpectColumnValuesToNotMatchRegex](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex)
+        [ExpectColumnValuesToNotMatchRegexList](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex_list)
+        [ExpectColumnValuesToMatchLikePattern](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern)
+        [ExpectColumnValuesToMatchLikePatternList](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
+        [ExpectColumnValuesToNotMatchLikePatternList](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -186,6 +191,8 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to not match like pattern"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotMatchLikePattern]
@@ -215,6 +222,40 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
                     },
                 }
             )
+
+    @classmethod
+    def _prescriptive_template(
+        cls,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("like_pattern", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
+        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        params = renderer_configuration.params
+
+        if renderer_configuration.include_column_name:
+            template_str = "$column values "
+        else:
+            template_str = "Values "
+
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
+            )
+            template_str += (
+                "must not match like pattern $like_pattern, at least $mostly_pct % of the time."
+            )
+        else:
+            template_str += "must not match like pattern $like_pattern."
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

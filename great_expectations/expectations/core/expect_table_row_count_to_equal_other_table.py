@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -46,7 +47,7 @@ DATA_QUALITY_ISSUES = ["Volume"]
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_table_row_count_to_equal_other_table is a \
+    ExpectTableRowCountToEqualOtherTable is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     BatchExpectations are one of the most common types of Expectation.
@@ -72,8 +73,8 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
-        [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
+        [ExpectTableRowCountToBeBetween](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
+        [ExpectTableRowCountToEqual](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -145,7 +146,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    other_table_name: str
+    other_table_name: str = pydantic.Field(description=OTHER_TABLE_NAME_DESCRIPTION)
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -164,6 +165,8 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     args_keys = ("other_table_name",)
 
     class Config:
+        title = "Expect table row count to equal other table"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectTableRowCountToEqualOtherTable]

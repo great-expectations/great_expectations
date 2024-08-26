@@ -11,12 +11,13 @@ from unittest.mock import patch as mock_patch
 
 import pytest
 
-from great_expectations import get_context, project_manager
+from great_expectations import get_context
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -49,7 +50,6 @@ def data_context_config_dict() -> dict:
     config: dict = {
         "config_version": 3.0,
         "plugins_directory": "plugins/",
-        "suite_parameter_store_name": "suite_parameter_store",
         "validation_results_store_name": "validation_results_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
@@ -61,10 +61,6 @@ def data_context_config_dict() -> dict:
                     "class_name": "TupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
                 },
-            },
-            "suite_parameter_store": {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "SuiteParameterStore",
             },
         },
         "data_docs_sites": {},
@@ -217,10 +213,6 @@ def progress_bars() -> ProgressBarsConfig:
             id="validation_results_store getter",
         ),
         pytest.param(
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-            id="suite_parameter_store getter",
-        ),
-        pytest.param(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store getter",
         ),
@@ -308,11 +300,6 @@ def test_data_context_variables_get_with_substitutions(
             id="validation_results_store setter",
         ),
         pytest.param(
-            "my_suite_parameter_store",
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-            id="suite_parameter_store setter",
-        ),
-        pytest.param(
             "my_checkpoint_store",
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store setter",
@@ -355,19 +342,19 @@ def test_data_context_variables_set(
 
 
 @pytest.mark.unit
-def test_data_context_variables_save_config(
+def test_data_context_variables_save(
     mocker: MockerFixture,
     data_context_config_dict: dict,
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
     # The below GX Cloud variables were used to instantiate the above CloudDataContextVariables
-    ge_cloud_base_url: str,
+    v1_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
 ) -> None:
     # EphemeralDataContextVariables
-    ephemeral_data_context_variables.save_config()
+    ephemeral_data_context_variables.save()
     key: ConfigurationIdentifier = ephemeral_data_context_variables.get_key()
     persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(key=key)
     assert persisted_value.to_json_dict() == ephemeral_data_context_variables.config.to_json_dict()
@@ -377,7 +364,7 @@ def test_data_context_variables_save_config(
         "great_expectations.data_context.store.InlineStoreBackend._save_changes",
         autospec=True,
     )
-    file_data_context_variables.save_config()
+    file_data_context_variables.save()
 
     assert mock_save.call_count == 1
 
@@ -385,7 +372,7 @@ def test_data_context_variables_save_config(
     mock_put = mocker.patch("requests.Session.put", autospec=True)
     type(mock_put.return_value).status_code = mocker.PropertyMock(return_value=200)
 
-    cloud_data_context_variables.save_config()
+    cloud_data_context_variables.save()
 
     expected_config_dict = {
         "analytics_enabled": True,
@@ -402,10 +389,6 @@ def test_data_context_variables_save_config(
                     "base_directory": "expectations/",
                 },
             },
-            "suite_parameter_store": {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "SuiteParameterStore",
-            },
             "checkpoint_store": {"class_name": "CheckpointStore"},
             "validation_results_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
@@ -414,19 +397,13 @@ def test_data_context_variables_save_config(
 
     assert mock_put.call_count == 1
     url = urllib.parse.urljoin(
-        ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/data-context-variables"
+        v1_cloud_base_url, f"organizations/{ge_cloud_organization_id}/data-context-variables"
     )
     mock_put.assert_called_with(
         MOCK_ANY,  # requests.Session object
         url,
         json={
-            "data": {
-                "type": "data_context_variables",
-                "attributes": {
-                    "organization_id": ge_cloud_organization_id,
-                    "data_context_variables": expected_config_dict,
-                },
-            }
+            "data": expected_config_dict,
         },
     )
 
@@ -460,7 +437,7 @@ def test_file_data_context_variables_e2e(
 
     Tests the E2E workflow with a FileDataContextVariables instance.
       1. User updates certain values and sets them as attributes.
-      2. User persists changes utilizing the save_config call defined by the Variables API.
+      2. User persists changes utilizing the save call defined by the Variables API.
       3. Upon reading the result config from disk, we can confirm that changes were appropriately persisted.
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
@@ -478,7 +455,7 @@ def test_file_data_context_variables_e2e(
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
     file_data_context.variables.plugins_directory = f"${env_var_name}"
-    file_data_context.variables.save_config()
+    file_data_context.variables.save()
 
     # Review great_expectations.yml where values were written and confirm changes
     config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(
@@ -511,7 +488,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     through the Variables API.
     """
     cloud_data_context.variables.config = data_context_config
-    success = cloud_data_context.variables.save_config()
+    success = cloud_data_context.variables.save()
 
     assert success is True
 
@@ -537,7 +514,7 @@ def test_cloud_enabled_data_context_variables_e2e(
     feature parity with the DataContext (as v0.15.15), this is the primary mechanism by which Great
     Expectations Cloud interacts with variables.
       1. User updates certain values and sets them as attributes.
-      2. User persists changes utilizing the save_config call defined by the Variables API.
+      2. User persists changes utilizing the save call defined by the Variables API.
       3. Upon reading the result config from a GET request, we can confirm that changes were appropriately persisted.
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
@@ -562,7 +539,7 @@ def test_cloud_enabled_data_context_variables_e2e(
     assert context.variables.plugins_directory == updated_plugins_dir
     assert context.variables.data_docs_sites == updated_data_docs_sites
 
-    context.variables.save_config()
+    context.variables.save()
 
     context = get_context(cloud_mode=True)
 

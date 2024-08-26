@@ -15,9 +15,18 @@ import DatasourceMethodReferenceTable from './_datasource_method_reference_table
 - <PreReqDataContext/>.
 - <PreReqCredentials/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Import GX and instantiate a Data Context:
 
@@ -37,7 +46,7 @@ import DatasourceMethodReferenceTable from './_datasource_method_reference_table
 
 3. Create a Data Source.
    
-   {GxData.product_name} provides specific methods for creating Data Sources that correspond to supported SQL dialects.  All of these methods are accessible from the `data_sources` attribute of your Data Context.  Reference the following table to determine the method used for your data's SQL dialect:
+   GX Core provides specific methods for creating Data Sources that correspond to supported SQL dialects.  All of these methods are accessible from the `data_sources` attribute of your Data Context.  Reference the following table to determine the method used for your data's SQL dialect:
 
    <DatasourceMethodReferenceTable/>
 

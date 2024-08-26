@@ -6,12 +6,12 @@ To avoid configuring external resources, you'll use the [Databricks File System 
 
 DBFS is a distributed file system mounted in a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It also persists in object storage, so you won’t lose data after terminating a cluster. See the Databricks documentation for best practices, including mounting object stores.
 
-## Additional prerequisites
+### Additional prerequisites
 
 - A complete Databricks setup, including a running Databricks cluster with an attached notebook
 - Access to [DBFS](https://docs.databricks.com/dbfs/index.html)
 
-## Installation and setup
+### Installation and setup
 
 1. Run the following command in your notebook to install GX as a notebook-scoped library:
 

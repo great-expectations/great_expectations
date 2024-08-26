@@ -46,7 +46,7 @@ MATCH_ON_DESCRIPTION = (
     "Use 'any' if the value should match at least one regular expression in the list. "
     "Use 'all' if it should match each regular expression in the list."
 )
-DATA_QUALITY_ISSUES = ["Pattern Matching"]
+DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
 
 
@@ -55,7 +55,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
 
     Matches can be anywhere in the string.
 
-    expect_column_values_to_match_regex_list is a \
+    ExpectColumnValuesToMatchRegexList is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -91,13 +91,13 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
 
 
     See Also:
-        [expect_column_values_to_match_regex](https://greatexpectations.io/expectations/expect_column_values_to_match_regex)
-        [expect_column_values_to_not_match_regex](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex)
-        [expect_column_values_to_not_match_regex_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex_list)
-        [expect_column_values_to_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern)
-        [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
-        [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
-        [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
+        [ExpectColumnValuesToMatchRegex](https://greatexpectations.io/expectations/expect_column_values_to_match_regex)
+        [ExpectColumnValuesToNotMatchRegex](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex)
+        [ExpectColumnValuesToNotMatchRegexList](https://greatexpectations.io/expectations/expect_column_values_to_not_match_regex_list)
+        [ExpectColumnValuesToMatchLikePattern](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern)
+        [ExpectColumnValuesToMatchLikePatternList](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
+        [ExpectColumnValuesToNotMatchLikePattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
+        [ExpectColumnValuesToNotMatchLikePatternList](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -209,6 +209,8 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     )
 
     class Config:
+        title = "Expect column values to match regex list"
+
         @staticmethod
         def schema_extra(
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToMatchRegexList]

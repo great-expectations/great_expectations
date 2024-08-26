@@ -29,6 +29,7 @@ from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBu
 
 if TYPE_CHECKING:
     from invoke.context import Context
+    from typing_extensions import Literal
 
 
 LOGGER = logging.getLogger(__name__)
@@ -138,6 +139,7 @@ def lint(
     fmt_: bool = True,
     fix: bool = False,
     unsafe_fixes: bool = False,
+    output_format: Literal["full", "concise", "github"] | None = None,
     watch: bool = False,
     pty: bool = True,
 ):
@@ -153,6 +155,10 @@ def lint(
         cmds.append("--unsafe-fixes")
     if watch:
         cmds.append("--watch")
+    if output_format:
+        cmds.append(f"--output-format={output_format}")
+    elif os.getenv("GITHUB_ACTIONS"):
+        cmds.append("--output-format=github")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
@@ -1076,7 +1082,7 @@ def docs_snippet_tests(
 @invoke.task(
     help={
         "pty": _PTY_HELP_DESC,
-        "reports": "Generate coverage reports to be uploaded to codecov",
+        "reports": "Generate coverage & result reports to be uploaded to codecov",
         "W": "Warnings control",
     },
     iterable=["service_names", "up_services", "verbose"],
@@ -1117,7 +1123,9 @@ def ci_tests(  # noqa: C901 - too complex (9)
         pytest_options.append(f"--timeout={timeout}")
 
     if reports:
-        pytest_options.extend(["--cov=great_expectations", "--cov-report=xml"])
+        pytest_options.extend(
+            ["--cov=great_expectations", "--cov-report=xml", "--junitxml=junit.xml"]
+        )
 
     if verbose:
         pytest_options.append("-vv")
