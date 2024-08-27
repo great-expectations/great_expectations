@@ -22,7 +22,7 @@ The following are the available Data Context types:
 
 - **Ephemeral Data Context:** A temporary Data Context that stores metadata and configuration information in memory. This Data Context will not persist beyond the current Python session. This means Ephemeral Data Contexts are useful when you don’t have write permissions to a file system or if you are going to engage in data exploration without needing to save your results.
 
-- **GX Cloud Data Context:** A Data Context that connects to a GX Cloud Account to retrieve and store GX Cloud metadata and configuration information. The GX Cloud Data Context lets you leverage GX Cloud to share your Data Assets, Expectations, and Validations with your organization.
+- **GX Cloud Data Context:** A Data Context that connects to a GX Cloud Account to retrieve and store GX Cloud metadata and configuration information. The GX Cloud Data Context lets you leverage GX Cloud to share your Expectation Suites, Data Sources, and Checkpoints with your organization.
 
 <Tabs queryString="context_type" groupId="context_type" defaultValue='quick' values={[{label: 'Quick Start', value:'quick'}, {label: 'File', value:'file'}, {label: 'Ephemeral', value:'ephemeral'}, {label: 'GX Cloud', value:'gx_cloud'}]}>
 
