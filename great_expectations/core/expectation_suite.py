@@ -34,6 +34,7 @@ from great_expectations.core.added_diagnostics import (
 )
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.exceptions.exceptions import (
+    ExpectationSuiteChangesNotAddedError,
     ExpectationSuiteNotAddedError,
 )
 from great_expectations.types import SerializableDictDot
@@ -252,8 +253,19 @@ class ExpectationSuite(SerializableDictDot):
         self._store.update(key=key, value=self)
 
     def is_added(self) -> ExpectationSuiteAddedDiagnostics:
-        return ExpectationSuiteAddedDiagnostics(
+        diagnostics = ExpectationSuiteAddedDiagnostics(
             errors=[] if self.id else [ExpectationSuiteNotAddedError(name=self.name)]
+        )
+        if not diagnostics.is_added:
+            return diagnostics
+        return self._is_fresh()
+
+    def _is_fresh(self) -> ExpectationSuiteAddedDiagnostics:
+        key = self._store.get_key(name=self.name, id=self.id)
+        suite = self._store.get(key)
+
+        return ExpectationSuiteAddedDiagnostics(
+            errors=[] if self == suite else [ExpectationSuiteChangesNotAddedError(name=self.name)]
         )
 
     def _has_been_saved(self) -> bool:

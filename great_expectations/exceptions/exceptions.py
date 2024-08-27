@@ -65,6 +65,15 @@ class ExpectationSuiteNotAddedError(ResourceNotAddedError):
         )
 
 
+class ExpectationSuiteChangesNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ExpectationSuite '{name}' has been updated since it was last saved. "
+            "Please call `context.suites.add(<SUITE_OBJECT>)`, "
+            "then try your action again."
+        )
+
+
 class ValidationDefinitionError(DataContextError):
     pass
 
@@ -441,6 +450,14 @@ class BatchDefinitionNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"BatchDefinition '{name}' must be added to the DataContext before it can be updated. "
+            "Please update using the parent asset or data source, then try your action again."
+        )
+
+
+class BatchDefinitionChangesNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"BatchDefinition '{name}' has been updated since it was last saved. "
             "Please update using the parent asset or data source, then try your action again."
         )
 
