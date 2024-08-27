@@ -86,7 +86,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         column (str): \
             {COLUMN_DESCRIPTION}
         min_value (comparable type or None): \
-            {MAX_VALUE_DESCRIPTION}
+            {MIN_VALUE_DESCRIPTION}
         max_value (comparable type or None): \
             {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
