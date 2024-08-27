@@ -8,15 +8,18 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.result_format import (
+    DEFAULT_RESULT_FORMAT,
+    ResultFormat,
+)
 from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 from great_expectations.validator.validator import Validator as OldValidator
 from great_expectations.validator.validator import calc_validation_statistics
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.checkpoint import ResultFormatUnion
     from great_expectations.core import ExpectationSuite
     from great_expectations.core.batch_definition import BatchDefinition
+    from great_expectations.core.result_format import ResultFormatUnion
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.expectations.expectation import (
         Expectation,
@@ -33,7 +36,7 @@ class Validator:
     def __init__(
         self,
         batch_definition: BatchDefinition,
-        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
         batch_parameters: Optional[BatchParameters] = None,
     ) -> None:
         self._batch_definition = batch_definition

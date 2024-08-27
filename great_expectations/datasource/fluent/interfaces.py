@@ -42,7 +42,7 @@ from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_definition import BatchDefinition, PartitionerT
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
 )
@@ -67,7 +67,7 @@ if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
 
-    from great_expectations.checkpoint.checkpoint import ResultFormatUnion
+    from great_expectations.core.result_format import ResultFormatUnion
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -1078,7 +1078,7 @@ class Batch:
         self,
         expect: Expectation,
         *,
-        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
     ) -> ExpectationValidationResult: ...
 
     @overload
@@ -1086,7 +1086,7 @@ class Batch:
         self,
         expect: ExpectationSuite,
         *,
-        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
     ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
@@ -1094,7 +1094,7 @@ class Batch:
         self,
         expect: Expectation | ExpectationSuite,
         *,
-        result_format: ResultFormatUnion = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
         from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
