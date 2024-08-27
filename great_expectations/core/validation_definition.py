@@ -22,6 +22,7 @@ from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -117,8 +118,6 @@ class ValidationDefinition(BaseModel):
 
     @property
     def _validation_results_store(self) -> ValidationResultsStore:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.get_validation_results_store()
 
     def is_added(self) -> ValidationDefinitionAddedDiagnostics:
@@ -155,8 +154,6 @@ class ValidationDefinition(BaseModel):
 
     @classmethod
     def _decode_suite(cls, suite_dict: dict) -> ExpectationSuite:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.  # noqa: E501
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
@@ -178,8 +175,6 @@ class ValidationDefinition(BaseModel):
 
     @classmethod
     def _decode_data(cls, data_dict: dict) -> BatchDefinition:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.  # noqa: E501
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
@@ -312,8 +307,6 @@ class ValidationDefinition(BaseModel):
 
     @public_api
     def save(self) -> None:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
 
@@ -324,9 +317,6 @@ class ValidationDefinition(BaseModel):
 
         We need to persist a validation_definition before it can be run. If user calls runs but
         hasn't persisted it we add it for them."""
-
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
 

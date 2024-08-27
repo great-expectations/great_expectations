@@ -12,6 +12,7 @@ from great_expectations.compatibility.pydantic import ValidationError as Pydanti
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.factory.factory import Factory
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
@@ -24,8 +25,6 @@ class SuiteFactory(Factory[ExpectationSuite]):
 
     @property
     def _include_rendered_content(self) -> bool:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.is_using_cloud()
 
     @public_api
