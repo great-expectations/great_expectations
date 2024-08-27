@@ -31,7 +31,7 @@ from great_expectations.core.added_diagnostics import CheckpointAddedDiagnostics
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
-from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT
+from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT, ResultFormatUnion
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_definition import ValidationDefinition
@@ -46,7 +46,6 @@ from great_expectations.exceptions.exceptions import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.core.result_format import ResultFormatUnion
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
