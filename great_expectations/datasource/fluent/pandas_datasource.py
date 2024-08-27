@@ -120,7 +120,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
-        batch_list: List[Batch] = []
 
         batch_spec = PandasBatchSpec(
             reader_method=self._get_reader_method(),
@@ -153,7 +152,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_request=batch_request, ignore_options=("dataframe",)
         )
 
-        batch_list.append(
+        return [
             Batch(
                 datasource=self.datasource,
                 data_asset=self,
@@ -164,8 +163,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 batch_spec=batch_spec,
                 batch_definition=batch_definition,
             )
-        )
-        return batch_list
+        ]
 
     @override
     def build_batch_request(

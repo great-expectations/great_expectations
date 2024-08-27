@@ -77,7 +77,6 @@ class _PowerBIAsset(DataAsset):
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
-        batch_list: List[Batch] = []
 
         reader_options = {
             "workspace": self._datasource.workspace,
@@ -117,7 +116,7 @@ class _PowerBIAsset(DataAsset):
             batch_request=batch_request
         )
 
-        batch_list.append(
+        return [
             Batch(
                 datasource=self.datasource,
                 data_asset=self,
@@ -128,8 +127,7 @@ class _PowerBIAsset(DataAsset):
                 batch_spec=batch_spec.to_json_dict(),  # type: ignore[arg-type] # will be coerced to BatchSpec
                 batch_definition=batch_definition,
             )
-        )
-        return batch_list
+        ]
 
     @override
     def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
