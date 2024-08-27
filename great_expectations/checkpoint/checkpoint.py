@@ -196,7 +196,7 @@ class Checkpoint(BaseModel):
         self,
         batch_parameters: Dict[str, Any] | None,
         expectation_parameters: Dict[str, Any] | None,
-        result_format: ResultFormat | dict,
+        result_format: ResultFormatUnion,
         run_id: RunIdentifier,
     ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:
         run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
