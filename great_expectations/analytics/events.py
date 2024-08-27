@@ -159,7 +159,9 @@ class CheckpointCreatedEvent(_CheckpointEvent):
     _allowed_actions: ClassVar[List[Action]] = [CHECKPOINT_CREATED]
 
     def __init__(
-        self, checkpoint_id: str | None = None, validation_definition_ids: list[str] | None = None
+        self,
+        checkpoint_id: str | None = None,
+        validation_definition_ids: list[str | None] | None = None,
     ):
         self.validation_definition_ids = validation_definition_ids
         super().__init__(
