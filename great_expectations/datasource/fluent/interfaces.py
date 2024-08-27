@@ -6,6 +6,7 @@ import functools
 import logging
 import uuid
 import warnings
+from abc import ABC, abstractmethod
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -96,6 +97,8 @@ if TYPE_CHECKING:
     from great_expectations.validator.v1_validator import (
         Validator as V1Validator,
     )
+
+_T = TypeVar("_T")
 
 
 class PartitionerSortingProtocol(Protocol):
@@ -281,7 +284,7 @@ _ExecutionEngineT = TypeVar("_ExecutionEngineT")
 DatasourceT = TypeVar("DatasourceT", bound="Datasource")
 
 
-class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
+class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -349,6 +352,14 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
 
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         raise NotImplementedError
+
+    @abstractmethod
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        ...
+
+    @abstractmethod
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        ...
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
@@ -517,9 +528,15 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         """
         reverse = not partitioner.sort_ascending
         for key in reversed(partitioner.param_names):
+
+            def get_value(batch: Batch) -> Any:
+                return batch.metadata[key]
+
             try:
                 batch_list.sort(
-                    key=functools.cmp_to_key(_sort_batches_with_none_metadata_values(key)),
+                    key=functools.cmp_to_key(
+                        _sort_batch_identifiers_with_none_metadata_values(get_value)
+                    ),
                     reverse=reverse,
                 )
             except KeyError as e:
@@ -528,33 +545,106 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
                     "which isn't available on all batches."
                 ) from e
 
+    def sort_legacy_batch_definitions(
+        self,
+        batch_definition_list: List[LegacyBatchDefinition],
+        partitioner: PartitionerSortingProtocol,
+    ) -> List[LegacyBatchDefinition]:
+        """Sorts batch_definition_list in the order configured by the partitioner."""
+        reverse = not partitioner.sort_ascending
+        for key in reversed(partitioner.param_names):
 
-def _sort_batches_with_none_metadata_values(
-    key: str,
-) -> Callable[[Batch, Batch], int]:
-    def _compare_function(a: Batch, b: Batch) -> int:
-        if a.metadata[key] is not None and b.metadata[key] is not None:
-            if a.metadata[key] < b.metadata[key]:
+            def get_value(batch_definition: LegacyBatchDefinition) -> Any:
+                return batch_definition.batch_identifiers[key]
+
+            try:
+                batch_definition_list = sorted(
+                    batch_definition_list,
+                    key=functools.cmp_to_key(
+                        _sort_batch_identifiers_with_none_metadata_values(get_value)
+                    ),
+                    reverse=reverse,
+                )
+            except KeyError as e:
+                raise KeyError(  # noqa: TRY003
+                    f"Trying to sort {self.name} asset batches on key {key} "
+                    "which isn't available on all batches."
+                ) from e
+        return batch_definition_list
+
+    def sort_batch_identifiers_list(
+        self, batch_identfiers_list: List[dict], partitioner: PartitionerSortingProtocol
+    ) -> List[dict]:
+        """Sorts batch_identfiers_list in the order configured by the partitioner."""
+        reverse = not partitioner.sort_ascending
+        for key in reversed(partitioner.param_names):
+
+            def get_value(batch: dict) -> Any:
+                return batch[key]
+
+            try:
+                batch_identfiers_list = sorted(
+                    batch_identfiers_list,
+                    key=functools.cmp_to_key(
+                        _sort_batch_identifiers_with_none_metadata_values(get_value)
+                    ),
+                    reverse=reverse,
+                )
+            except KeyError as e:
+                raise KeyError(  # noqa: TRY003
+                    f"Trying to sort {self.name} asset batches on key {key} "
+                    "which isn't available on all batches."
+                ) from e
+        return batch_identfiers_list
+
+    # def _sort_batch_objects_list(
+    #     self,
+    #     batch_identfiers_list: List[_T],
+    #     partitioner: PartitionerSortingProtocol,
+    #     get_value: Callable[[str], Any],
+    # ) -> List[dict]:
+    #     """Sorts batch_identfiers_list in the order configured by the partitioner."""
+    #     reverse = not partitioner.sort_ascending
+    #     for key in reversed(partitioner.param_names):
+    #         # def get_value(batch: dict) -> Any:
+    #         #     return batch[key]
+
+    #         try:
+    #             batch_identfiers_list = sorted(
+    #                 batch_identfiers_list,
+    #                 key=functools.cmp_to_key(
+    #                     _sort_batch_identifiers_with_none_metadata_values(get_value)
+    #                 ),
+    #                 reverse=reverse,
+    #             )
+    #         except KeyError as e:
+    #             raise KeyError(
+    #                 f"Trying to sort {self.name} asset batches on key {key} "
+    #                 "which isn't available on all batches."
+    #             ) from e
+    #     return batch_identfiers_list
+
+
+def _sort_batch_identifiers_with_none_metadata_values(
+    get_val: Callable[[_T], Any],
+) -> Callable[[_T, _T], int]:
+    def _compare_function(a: _T, b: _T) -> int:
+        a_val = get_val(a)
+        b_val = get_val(b)
+
+        if a_val is not None and b_val is not None:
+            if a_val < b_val:
                 return -1
-
-            if a.metadata[key] > b.metadata[key]:
+            elif a_val > b_val:
                 return 1
-
+            else:
+                return 0
+        elif a_val is None and b_val is None:
             return 0
-
-        if a.metadata[key] is None and b.metadata[key] is None:
-            return 0
-
-        if a.metadata[key] is None:  # b.metadata[key] is not None
+        elif a_val is None:  # b.metadata_val is not None
             return -1
-
-        if a.metadata[key] is not None:  # b.metadata[key] is None
+        else:  # b[key] is None
             return 1
-
-        # This line should never be reached; hence, "ValueError" with corresponding error message is raised.  # noqa: E501
-        raise ValueError(  # noqa: TRY003
-            f'Unexpected Batch metadata key combination, "{a.metadata[key]}" and "{b.metadata[key]}", was encountered.'  # noqa: E501
-        )
 
     return _compare_function
 

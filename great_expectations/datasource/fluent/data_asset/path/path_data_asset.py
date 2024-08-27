@@ -116,6 +116,22 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
             )
 
     @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        batch_definition_list: List[LegacyBatchDefinition] = self._get_batch_definition_list(
+            batch_request
+        )
+        batch_identifiers_list: List[dict] = [
+            batch_definition_list.batch_identifiers
+            for batch_definition_list in batch_definition_list
+        ]
+        if sortable_partitioner := self._get_sortable_partitioner(batch_request.partitioner):
+            batch_identifiers_list = self.sort_batch_identifiers_list(
+                batch_identifiers_list, sortable_partitioner
+            )
+
+        return batch_identifiers_list
+
+    @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         """A list of batches that match the BatchRequest.
 
@@ -165,6 +181,50 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
             self.sort_batches(batch_list, sortable_partitioner)
 
         return batch_list
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        """Get a batch from the data asset using a batch request."""
+        self._validate_batch_request(batch_request)
+
+        execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
+            self.datasource.get_execution_engine()
+        )
+
+        batch_definitions = self._get_batch_definition_list(batch_request)
+        if len(batch_definitions) == 0:
+            raise ValueError("No batch found")  # noqa: TRY003
+
+        # Pick the last, which most likely corresponds to the most recent, batch in the list
+        if sortable_partitioner := self._get_sortable_partitioner(batch_request.partitioner):
+            batch_definitions = self.sort_legacy_batch_definitions(
+                batch_definitions,
+                sortable_partitioner,
+            )
+        batch_definition = batch_definitions[-1]
+
+        batch_spec = self._data_connector.build_batch_spec(batch_definition=batch_definition)
+        batch_spec_options = self._batch_spec_options_from_batch_request(batch_request)
+        batch_spec.update(batch_spec_options)
+
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
+
+        fully_specified_batch_request = copy.deepcopy(batch_request)
+        fully_specified_batch_request.options.update(batch_definition.batch_identifiers)
+        batch_metadata = self._get_batch_metadata_from_batch_request(
+            batch_request=fully_specified_batch_request
+        )
+
+        return Batch(
+            datasource=self.datasource,
+            data_asset=self,
+            batch_request=fully_specified_batch_request,
+            data=data,
+            metadata=batch_metadata,
+            batch_markers=markers,
+            batch_spec=batch_spec,
+            batch_definition=batch_definition,
+        )
 
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
