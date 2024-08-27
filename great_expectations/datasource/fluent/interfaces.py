@@ -350,9 +350,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
-        raise NotImplementedError
-
     @abstractmethod
     def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]: ...
 

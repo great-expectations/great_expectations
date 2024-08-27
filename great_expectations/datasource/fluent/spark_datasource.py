@@ -267,46 +267,6 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             )
 
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
-        self._validate_batch_request(batch_request)
-
-        batch_spec = RuntimeDataBatchSpec(batch_data=batch_request.options["dataframe"])
-        execution_engine: SparkDFExecutionEngine = self.datasource.get_execution_engine()
-        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
-
-        # batch_definition (along with batch_spec and markers) is only here to satisfy a
-        # legacy constraint when computing usage statistics in a validator. We hope to remove
-        # it in the future.
-        # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core import IDDict
-        from great_expectations.core.batch import LegacyBatchDefinition
-
-        batch_definition = LegacyBatchDefinition(
-            datasource_name=self.datasource.name,
-            data_connector_name=_DATA_CONNECTOR_NAME,
-            data_asset_name=self.name,
-            batch_identifiers=IDDict(batch_request.options),
-            batch_spec_passthrough=None,
-        )
-
-        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request, ignore_options=("dataframe",)
-        )
-
-        return [
-            Batch(
-                datasource=self.datasource,
-                data_asset=self,
-                batch_request=batch_request,
-                data=data,
-                metadata=batch_metadata,
-                batch_markers=markers,
-                batch_spec=batch_spec,
-                batch_definition=batch_definition,
-            )
-        ]
-
-    @override
     def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
         from great_expectations.core import IDDict
 

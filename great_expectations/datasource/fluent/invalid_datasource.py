@@ -92,10 +92,6 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> NoReturn:
-        self._raise_type_error()
-
-    @override
     def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
         self._raise_type_error()
 
