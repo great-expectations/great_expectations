@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 
 # if we move this import into the TYPE_CHECKING block, we need to provide the
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
 PartitionerT = TypeVar("PartitionerT", ColumnPartitioner, FileNamePartitioner, None)
 
 
+@public_api
 class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     """Configuration for a batch of data.
 
@@ -42,6 +44,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     _data_asset: Any = pydantic.PrivateAttr()
 
     @property
+    @public_api
     def data_asset(self) -> DataAsset[Any, PartitionerT]:
         return self._data_asset
 
@@ -58,6 +61,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
             partitioner=self.partitioner,
         )
 
+    @public_api
     def get_batch(self, batch_parameters: Optional[BatchParameters] = None) -> Batch:
         """
         Retrieves a batch from the underlying asset. Defaults to the last batch
