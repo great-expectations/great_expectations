@@ -24,27 +24,30 @@ Advantages of subclassing an Expectation and providing customized attributes rat
 - <PrereqPreconfiguredDataContext/>.
 - Recommended. <PrereqPreconfiguredDataSourceAndAsset/> for [testing your customized Expectation](/core/define_expectations/test_an_expectation.md).
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
-1. Choose and import a base Expectation class.
+<TabItem value="instructions" label="Instructions">
+
+1. Choose a base Expectation class.
 
    You can customize any of the core Expectation classes in GX. You can view the available Expectations and their functionality in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-   In this example, `ExpectColumnValueToBeBetween` will be customized:
- 
-   ```python title="Python"
-   from great_expectations.expectations import ExpectColumnValueToBeBetween
-   ```
-
+   In this example, `ExpectColumnValuesToBeBetween` will be customized.
 
 2. Create a new Expectation class that inherits the base Expectation class.
   
    The core Expectations in GX have names describing their functionality.  When you create a customized Expectation class you can provide a class name that is more indicative of your specific use case:
 
-   ```python title="Python"
-   class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define a custom Expectation subclass"
    ```
 
 3. Override the Expectation's attributes with new default values.
@@ -53,67 +56,30 @@ Advantages of subclassing an Expectation and providing customized attributes rat
 
    In this example, the default column for `ExpectValidPassengerCount` is set to `passenger_count` and the default value range for the column is defined as between `1` and `6`:
 
-   ```python title="Python"
-   class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
-       # highlight-start
-       column: str = "passenger_count"
-       min_value: int = 1
-       max_value: int = 6
-       # highlight-end
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define default attributes for a custom Expectation class"
    ```
 
-5. Customize the rendering of the new Expectation when displayed in Data Docs.
+4. Customize the rendering of the new Expectation when displayed in Data Docs.
 
-   The `description` attribute contains the text describing the customized Expectation when your results are rendered into Data Docs.  It can be set when an Expectation class is defined or edited as an attribute of an Expectation instance.  You can format the `description` string with Markdown syntax:
+   The `description` attribute of a customized Expectation class contains the text describing the customized Expectation when its results are rendered into Data Docs.  You can format the `description` string with Markdown syntax:
 
-   ```python title="Python"
-   class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
-       column: str = "passenger_count"
-       min_value: int = 1
-       max_value: int = 6
-       # highlight-start
-       description: str = "There should be between **1** and **6** passengers."
-       # highlight-end
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define description attribute for a cusom Expectation"
    ```
 
-6. Use the customized subclass as an Expectation.
+5. Use the customized subclass as an Expectation.
 
-   Once a customized Expectation subclass has been defined, instances of it can be created, added to Expectation Suites, and validated just like any other Expectation class:
+   It is best not to overwrite the predefined default values by passing in parameters when a customized Expectation is created.  This ensures that the `description` remains accurate to the values that the customized Expectation uses.  It also allows you to update all instances of the customized Expectation by editing the default values in the customized Expectation's class definition rather than having to update each instance individually in their Expectation Suites:
 
-   ```python title="Python"
-   expectation1 = ExpectValidPassengerCount()  # Uses the predefined default values
-   expectation2 = ExpectValidPassengerCount(column="occupied_seats")  # Uses a different column than the default, but keeps the default min_value, max_value, and description.
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - instantiate a Custom Expectation"
    ```
-   
-   It is best to use the predefined default values when a customized Expectation is created.  This ensures that the `description` remains accurate to the values that the Expectation uses.  It also allows you to update all instances of the customized Expectation by editing the default values in the customized Expectation's class definition rather than having to update each instance individually in their Expectation Suites.
+
+   A customized Expectation instance can be added to Expectation Suites and validated just like any other Expectation.
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python"
-import great_expectations as gx
-from great_expectations.expectations import ExpectColumnValueToBeBetween
-
-class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
-  column: str = "passenger_count"
-  min_value: int = 1
-  max_value: int = 6
-  description: str = "There should be between **1** and **6** passengers."
-
-context = gx.get_context()
-
-expectation1 = ExpectValidPassengerCount()  # Uses the predefined default values
-expectation2 = ExpectValidPassengerCount(column="occupied_seats")  # Uses a different column than the default, but keeps the default min_value, max_value, and description.
-
-data_source_name = "my_taxi_data"
-asset_name = "2018_taxi_data"
-batch_definition_name = "all_records_in_asset"
-batch = context.get_datasource(datasource_name).get_asset(asset_name).get_batch_definition(batch_definition_name=batch_definition_name).get_batch()
-
-batch.validate(expectation1)
-batch.validate(expectation2)
-
+```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - full code example"
 ```
 
 </TabItem>

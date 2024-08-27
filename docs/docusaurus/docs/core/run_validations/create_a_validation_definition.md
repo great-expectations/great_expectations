@@ -20,106 +20,54 @@ A Validation Definition is a fixed reference that links a Batch of data to an Ex
 
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.
-- <PrereqPreconfiguredDataContext/>.
+- <PrereqPreconfiguredDataContext/>. In this guide the variable `context` is assumed to contain your Data Context.
 - <PrereqPreconfiguredDataSourceAndAsset/>.
 - <PrereqPreconfiguredExpectationSuiteAndExpectations/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
-1. Import the `ValidationDefinition` class from the {GxData.product_name} library:
+<TabItem value="instructions" label="Instructions">
 
-   ```python title="Python"
-   from great_expectations.core import ValidationDefinition
-   ```
-
-2. Request a Data Context:
-
-   ```python title="Python"
-   import great_expectations as gx
-   
-   context = gx.get_context()
-   ```
-
-3. Retrieve an Expectation Suite with Expectations.
+1. Retrieve an Expectation Suite with Expectations.
 
    Update the value of `suite_name` in the following code with the name of your Expectation Suite.  Then execute the code to retrieve that Expectation Suite:
 
-   ```python title="Python"
-   suite_name = "<NAME OF AN EXISTING EXPECTATION SUITE>"
-   suite = context.get_expectation_suite(suite_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py - retrieve an Expectation Suite"
    ```
 
-4. Retrieve the Batch Definition that describes the data to associate with the Expectation Suite.
+2. Retrieve the Batch Definition that describes the data to associate with the Expectation Suite.
 
    Update the values of `data_source_name`, `data_asset_name`, and `batch_definition_name` in the following code with the names of your previously defined Data Source, one of its Data Assets, and a Batch Definition for that Data Asset.  Then execute the code to retrieve the Batch Definition:
 
-   ```python title="Python"
-   data_source_name = "my_datasource"
-   data_asset_name = "my_data_asset"
-   batch_definition_name = "my_batch_definition"
-
-   batch_definition = context.get_datasource(data_source_name).get(data_asset_name).get(batch_definition_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py - retrieve a Batch Definition"
    ```
 
-5. Create a `ValidationDefinition` instance using the Batch Definition, Expectation Suite, and a unique name.
+3. Create a `ValidationDefinition` instance using the Batch Definition, Expectation Suite, and a unique name.
 
    Update the value of `definition_name` with a descriptive name that indicates the purpose of the Validation Definition.  Then execute the code to create your Validation Definition:
 
-   ```python title="Python"
-   definition_name = "My Validation Definition"
-   validation_definition = ValidationDefinition(data=batch_definition, suite=suite, name=definition_name)
+   ```python title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py - create a Validation Definition"
    ```
 
-6. Optional. Save the Validation Definition to your Data Context.
+4. Optional. Save the Validation Definition to your Data Context.
 
-   ```python title="Python"
-   validation_definition = context.validation_definitions.add(validation_definition)
+   ```python title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py - save the Validation Definition to the Data Context"
    ```
-
-   :::tip
-
-   You can add a Validation Definition to your Data Context at the same time as you create it with the following code:
-
-   ```python title="Python"
-   definition_name = "My second Validation Definition"
-   validation_definition = context.validation_definitions.add(ValidationDefinition(data=batch_definition, suite=suite, name=definition_name)) 
-   ```
-
-   :::
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python"
-from great_expectations.core import ValidationDefinition
-import great_expectations as gx
-
-context = gx.get_context()
-
-suite_name = "my_expectation_suite"
-suite = context.suites.get(name=suite_name)
-
-data_source_name = "my_datasource"
-data_asset_name = "my_data_asset"
-batch_definition_name = "my_batch_definition"
-batch_definition = context.get_datasource(data_source_name).get(data_asset_name).get(batch_definition_name)
-
-# highlight-start
-definition_name = "My Validation Definition"
-validation_definition = ValidationDefinition(data=batch_definition, suite=suite, name=definition_name)
-# highlight-end
-
-# highlight-start
-validation_definition = context.validation_definitions.add(validation_definition)
-# highlight-end
-
-# highlight-start
-new_definition_name = "My second Validation Definition"
-validation_definition = context.validation_definitions.add(ValidationDefinition(data=batch_definition, suite=suite, name=new_definition_name)) 
-# highlight-end
+```python showLineNumbers title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py - full code example"
 ```
 
 </TabItem>

@@ -201,8 +201,8 @@ export default function WasThisHelpful(){
             </dialog>
         </>}
 
-        { feedbackSent &&
-            <div class="alert alert--secondary" role="alert">
+        { feedbackSent && !isOpen &&
+            <div className="alert alert--secondary" role="alert">
                 Thank you for helping us improve our documentation!
             </div> }
     </>

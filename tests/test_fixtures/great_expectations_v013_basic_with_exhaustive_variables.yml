@@ -6,7 +6,6 @@ config_version: 3
 config_variables_file_path: uncommitted/config_variables.yml
 
 plugins_directory: ${l}
-suite_parameter_store_name: ${m}
 expectations_store_name: ${n}
 validation_results_store_name: ${o}
 checkpoint_store_name: ${cps}
@@ -27,10 +26,6 @@ stores:
     store_backend:
       class_name: ${v}
       base_directory: ${w}
-
-  suite_parameter_store:
-    module_name: ${x}
-    class_name: ${y}
 
   validation_results_store:
     class_name: ${z}

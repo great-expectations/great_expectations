@@ -116,7 +116,6 @@ class ValidationAction(BaseModel):
 
     type: str
     name: str
-    notify_on: Literal["all", "failure", "success"] = "all"
 
     @property
     def _using_cloud_context(self) -> bool:
@@ -129,15 +128,6 @@ class ValidationAction(BaseModel):
     ) -> dict:
         raise NotImplementedError
 
-    def _is_enabled(self, success: bool) -> bool:
-        return (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and success
-            or self.notify_on == "failure"
-            and not success
-        )
-
     def _get_data_docs_pages_from_prior_action(
         self, action_context: ActionContext | None
     ) -> list[dict] | None:
@@ -145,6 +135,16 @@ class ValidationAction(BaseModel):
             return action_context.filter_results(class_=UpdateDataDocsAction)
 
         return None
+
+
+def _should_notify(success: bool, notify_on: Literal["all", "failure", "success"]) -> bool:
+    return (
+        notify_on == "all"
+        or notify_on == "success"
+        and success
+        or notify_on == "failure"
+        and not success
+    )
 
 
 class DataDocsAction(ValidationAction):
@@ -257,7 +257,7 @@ class SlackNotificationAction(DataDocsAction):
         checkpoint_name = checkpoint_result.checkpoint_config.name
         result = {"slack_notification_result": "none required"}
 
-        if not self._is_enabled(success=success):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return result
 
         checkpoint_text_blocks: list[dict] = []
@@ -367,7 +367,7 @@ class PagerdutyAlertAction(ValidationAction):
         return self._run_pypd_alert(dedup_key=checkpoint_name, message=summary, success=success)
 
     def _run_pypd_alert(self, dedup_key: str, message: str, success: bool):
-        if self._is_enabled(success=success):
+        if _should_notify(success=success, notify_on=self.notify_on):
             pypd.api_key = self.api_key
             pypd.EventV2.create(
                 data={
@@ -439,7 +439,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     @override
     def run(self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None):
         success = checkpoint_result.success or False
-        if not self._is_enabled(success=success):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return {"microsoft_teams_notification_result": None}
 
         data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
@@ -506,7 +506,7 @@ class OpsgenieAlertAction(ValidationAction):
         validation_success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
 
-        if self._is_enabled(success=validation_success):
+        if _should_notify(success=validation_success, notify_on=self.notify_on):
             settings = {
                 "api_key": self.api_key,
                 "region": self.region,
@@ -629,7 +629,7 @@ class EmailAction(ValidationAction):
         action_context: ActionContext | None = None,
     ) -> dict:
         success = checkpoint_result.success or False
-        if not self._is_enabled(success=success):
+        if not _should_notify(success=success, notify_on=self.notify_on):
             return {"email_result": ""}
 
         title, html = self.renderer.render(checkpoint_result=checkpoint_result)

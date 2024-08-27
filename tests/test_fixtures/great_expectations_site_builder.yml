@@ -4,7 +4,6 @@ config_version: 4
 plugins_directory: plugins/
 
 expectations_store_name: expectations_store
-suite_parameter_store_name: suite_parameter_store
 validation_results_store_name: validation_results_store
 
 stores:
@@ -24,9 +23,6 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: fixtures/validations
-
-  suite_parameter_store:
-    class_name: SuiteParameterStore
 
 data_docs_sites:
   local_site: # site name

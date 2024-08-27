@@ -18,9 +18,18 @@ Because the `pandas_default` Data Source's `.read_*(...)` methods only return a 
 - <PrereqDataContext/>.  These examples assume the variable `context` contains your Data Context.
 - Data in a file format supported by pandas, such as `.csv` or `.parquet`.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Define the path to the datafile.
 
@@ -28,8 +37,7 @@ Because the `pandas_default` Data Source's `.read_*(...)` methods only return a 
 
    The following example specifies a `.csv` datafile using a relative path:
 
-   ```python title="Python"
-   file_path = "./data/nyc_trip_data_sample_2018.csv"
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_pandas_default.py - provide the path to a data file"
    ```
 
 2. Use the appropriate `.read_*(...)` method of the `pandas_default` Data Source to retrieve a Batch of data.
@@ -40,8 +48,7 @@ Because the `pandas_default` Data Source's `.read_*(...)` methods only return a 
 
    The following example reads a `.csv` file into a Batch of data:
 
-   ```python title="Python"
-   sample_batch = context.data_sources.pandas_default.read_csv(file_path)
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_pandas_default.py - read data into Batch with pandas_default Data Source"
    ```
 
    GX supports all of the pandas `.read_*(...)` methods.  For more information on which Pandas `read_*` methods are available, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html) for the version of Pandas that you have installed.
@@ -50,8 +57,7 @@ Because the `pandas_default` Data Source's `.read_*(...)` methods only return a 
 
    You can verify that your Batch Definition was able to read in data and return a populated Batch by printing the header and first few records of the returned Batch:
 
-   ```python title="Python"
-   sample_batch.head()
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_pandas_default.py - verify data was read into a Batch"
    ```
 
 
@@ -59,16 +65,7 @@ Because the `pandas_default` Data Source's `.read_*(...)` methods only return a 
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python"
-import great_expectations as gx
-
-context = gx.get_context()
-
-file_path = "./data/nyc_trip_data_sample_2018.csv"
-
-sample_batch = context.data_sources.pandas_default.read_csv(file_path)
-
-sample_batch.head()
+```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_pandas_default.py - full code example"
 ```
 
 </TabItem>

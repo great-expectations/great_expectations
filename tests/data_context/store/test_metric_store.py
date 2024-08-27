@@ -104,13 +104,3 @@ def test_metric_store_deserialize() -> None:
 
     value = '{"value": {"foo": "bar"}}'
     assert store.deserialize(value=value) == {"foo": "bar"}
-
-
-@pytest.mark.unit
-def test_suite_parameter_store_get_bind_params() -> None:
-    pass
-
-
-@pytest.mark.unit
-def test_suite_parameter_store_config_property_and_defaults() -> None:
-    pass

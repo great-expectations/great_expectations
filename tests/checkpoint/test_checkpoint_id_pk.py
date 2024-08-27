@@ -116,8 +116,8 @@ def _build_checkpoint_and_run(
     asset = ds.get_asset(asset_name)
     batch_definition = asset.add_batch_definition(name="my_batch_def")
 
-    validation_definition = ValidationDefinition(
-        name="my_validation_def", suite=suite, data=batch_definition
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="my_validation_def", suite=suite, data=batch_definition)
     )
 
     checkpoint = Checkpoint(

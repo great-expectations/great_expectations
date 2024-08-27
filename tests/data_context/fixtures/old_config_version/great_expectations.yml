@@ -3,7 +3,6 @@ config_version: 0
 config_variables_file_path: uncommitted/config_variables.yml
 
 plugins_directory: plugins/
-suite_parameter_store_name: suite_parameter_store
 expectations_store_name: expectations_store
 validation_results_store_name: "foo"
 
@@ -15,6 +14,3 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
-  suite_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: SuiteParameterStore

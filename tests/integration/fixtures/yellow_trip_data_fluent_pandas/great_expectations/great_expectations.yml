@@ -12,8 +12,6 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-  suite_parameter_store:
-    class_name: SuiteParameterStore
   checkpoint_store:
     class_name: CheckpointStore
     store_backend:
@@ -22,7 +20,6 @@ stores:
       base_directory: checkpoints/
 expectations_store_name: expectations_store
 validation_results_store_name: validation_results_store
-suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 data_docs_sites:
   local_site:
@@ -47,11 +44,6 @@ fluent_datasources:
     assets:
       yellow_tripdata:
         type: csv
-        order_by:
-          - key: year
-            reverse: true
-          - key: month
-            reverse: false
         batching_regex: yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv
     base_directory: data
   taxi_frame_source:

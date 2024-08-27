@@ -29,7 +29,7 @@ with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
 
 stores = great_expectations_yaml["stores"]
-pop_stores = ["checkpoint_store", "suite_parameter_store", "validation_results_store"]
+pop_stores = ["checkpoint_store", "validation_results_store"]
 for store in pop_stores:
     stores.pop(store)
 

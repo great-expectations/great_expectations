@@ -13,7 +13,7 @@ from typing import (
 
 from great_expectations._docs_decorators import public_api as public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasource
+from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset,
     ExcelAsset,
@@ -61,7 +61,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
@@ -119,7 +118,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         sheet_name: typing.Union[str, int, None] = 0,
         header: Union[int, Sequence[int], None] = 0,
@@ -150,7 +148,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         columns: Union[Sequence[Hashable], None] = ...,
         use_threads: bool = ...,
@@ -161,7 +158,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         connect_options: typing.Mapping = ...,
         colspecs: Union[Sequence[Tuple[int, int]], str, None] = ...,
@@ -175,7 +171,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         key: typing.Any = ...,
         mode: str = "r",
@@ -193,7 +188,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         match: Union[str, typing.Pattern] = ".+",
         flavor: typing.Union[str, None] = ...,
@@ -215,7 +209,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         orient: typing.Union[str, None] = ...,
         dtype: typing.Union[dict, None] = ...,
@@ -233,12 +226,11 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
     ) -> JSONAsset: ...
-    def add_orc_asset(  # noqa: PLR0913
+    def add_orc_asset(
         self,
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
@@ -248,7 +240,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         engine: str = "auto",
         columns: typing.Union[typing.List[str], None] = ...,
@@ -256,12 +247,11 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> ParquetAsset: ...
-    def add_pickle_asset(  # noqa: PLR0913
+    def add_pickle_asset(
         self,
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
@@ -271,7 +261,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         format: typing.Union[str, None] = ...,
         index: Union[Hashable, None] = ...,
@@ -280,12 +269,11 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
     ) -> SASAsset: ...
-    def add_spss_asset(  # noqa: PLR0913
+    def add_spss_asset(
         self,
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
@@ -295,7 +283,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         convert_dates: bool = ...,
         convert_categoricals: bool = ...,
@@ -314,7 +301,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         name: str,
         *,
         glob_directive: str = ...,
-        order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         xpath: str = "./*",
         namespaces: typing.Union[typing.Dict[str, str], None] = ...,

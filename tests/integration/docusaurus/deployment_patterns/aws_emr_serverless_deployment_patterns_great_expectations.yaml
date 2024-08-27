@@ -18,9 +18,6 @@ stores:
       bucket: "bucket_name"
       prefix: "great_expectations/uncommitted/validations/"
 
-  suite_parameter_store:
-    class_name: SuiteParameterStore
-
   checkpoint_S3_store:
     class_name: CheckpointStore
     store_backend:
@@ -30,7 +27,6 @@ stores:
 
 expectations_store_name: expectations_S3_store
 validation_results_store_name: validation_results_S3_store
-suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_S3_store
 
 data_docs_sites:

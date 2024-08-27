@@ -79,7 +79,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-    expect_column_value_lengths_to_be_between is a \
+    ExpectColumnValueLengthsToBeBetween is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -125,7 +125,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
           no maximum.
 
     See Also:
-        [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
+        [ExpectColumnValueLengthsToEqual](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

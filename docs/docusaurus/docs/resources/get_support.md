@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Get support'
 title: 'Get support'
-description: Learn what resources are available to help you resolve issues with GX Cloud and GX OSS.
+description: Learn what resources are available to help you resolve issues with GX Cloud and GX Core.
 ---
 
 Knowing how and where to request GX support can improve response times.
@@ -14,7 +14,7 @@ Use one of the following methods to request support:
 - Create a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17).
 - Post a message in the [GX Cloud Slack community channel](https://greatexpectationstalk.slack.com/archives/C051D941XAL).
 
-## GX OSS support
+## GX Core support
 
 Use one of the following methods to request support:
 
@@ -32,7 +32,7 @@ Search the docs you're using currently for an answer to your issue or question.
 
 If you're new to GX Cloud, review [About GX Cloud](/cloud/about_gx.md).
 
-If you're new to GX OSS, see [About Great Expectations](/core/introduction/about_gx.md).
+If you're new to GX Core, see the [Introduction to GX Core](/core/introduction/introduction.md).
 
 ### Include all the relevant information
 
@@ -42,6 +42,6 @@ Clearly explain the issue you're experiencing, or the problem you're trying to s
 
 - The relevant code you're trying to run.
 
-- The version of GX OSS you're using.
+- The version of GX Core you're using.
 
 - A detailed explanation of what you're trying to resolve including what attempts you've made on your own to date.

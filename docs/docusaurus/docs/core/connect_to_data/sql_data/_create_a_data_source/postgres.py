@@ -20,7 +20,9 @@ context = gx.get_context()
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py name and connection string">
 datasource_name = "my_new_datasource"
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py - example postgresql connection string using string substitution">
 my_connection_string = "${POSTGRESQL_CONNECTION_STRING}"
+# </snippet>
 # </snippet>
 
 # highlight-start

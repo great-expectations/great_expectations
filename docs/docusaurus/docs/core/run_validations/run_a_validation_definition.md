@@ -15,29 +15,32 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.
-- <PrereqPreconfiguredDataContext/>.
+- <PrereqPreconfiguredDataContext/>. In this guide the variable `context` is assumed to contain your Data Context.
 - <PrereqValidationDefinition/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Validation Definition.
 
    If you have created a new Validation Definition you can use the object returned by your Data Context's `.validation_definitions.add(...)` method.  Alternatively, you can retrieve a previously configured Validation Definition by updating the variable `validation_definition_name` in the following code and executing it:
 
-   ```python title="Python
-   import great_expectations as gx
-   context = gx.get_context()
-   
-   validation_definition_name = "my_validation_definition"
-   validation_definition = context.validation_definitions.get(validation_definition_name)
+   ```python title="Python name="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py - retrieve a Validation Definition"
    ```
 
 2. Execute the Validation Definition's `run()` method:
 
-   ```python title="Python"
-   validation_result = validation_definition.run()
+   ```python title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py - run a Validation Definition"
    ```
 
    Validation Results are automatically saved in your Data Context when a Validation Definition's `run()` method is called.  For convenience, the `run()` method also returns the Validation Results as an object you can review.
@@ -50,8 +53,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 
 3. Review the Validation Results:
  
-   ```python title="Python"
-   print(validation_result)
+   ```python title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py - review Validation Results"
    ```
    
    When you print the returned Validation Result object you will recieve a yaml representation of the results.  By default this will include a `"results"` list that includes each Expectation in your Validation Definition's Expectation Suite, whether the Expectation was successfully met or failed to pass, and some sumarized information explaining the why the Expectation succeeded or failed.
@@ -61,7 +63,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
    GX Cloud users can view the Validation Results in the GX Cloud UI by following the url provided with:
 
    ```python title="Python"
-   print(validation_result.result_url)
+   print(validation_results.results_url)
    ```
 
    :::
@@ -70,22 +72,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python"
-import great_expectations as gx
-
-context = gx.get_context()
-
-validation_definition_name = "my_validation_definition"
-validation_definition = context.validation_definitions.get(validation_definition_name)
-
-# highlight-next-line
-validation_result = validation_definition.run()
-
-# highlight-next-line
-print(validation_result)
-
-# highlight-next-line
-print(validation_result.results_url)
+```python showLineNumbers title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py - full code example"
 ```
 
 </TabItem>

@@ -21,7 +21,7 @@ from great_expectations.datasource.fluent import (
     GxInvalidDatasourceWarning,
     InvalidDatasource,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -114,7 +114,7 @@ class DatasourceStore(Store):
             if not type_:
                 raise ValueError("Datasource type is missing")  # noqa: TRY003
             try:
-                datasource_model = _SourceFactories.type_lookup[type_]
+                datasource_model = DataSourceManager.type_lookup[type_]
                 return datasource_model(**value)
             except (PydanticValidationError, LookupError) as config_error:
                 warnings.warn(
@@ -150,29 +150,29 @@ class DatasourceStore(Store):
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:  # type: ignore[override]
         return data  # type: ignore[return-value]
 
-    def retrieve_by_name(self, datasource_name: str) -> FluentDatasource:
+    def retrieve_by_name(self, name: str) -> FluentDatasource:
         """Retrieves a Datasource persisted in the store by it's given name.
 
         Args:
-            datasource_name: The name of the Datasource to retrieve.
+            name: The name of the Datasource to retrieve.
 
         Returns:
             The Datasource persisted in the store that is associated with the given
-            input datasource_name.
+            input name.
 
         Raises:
             ValueError if a Datasource is not found.
         """
         datasource_key: Union[DataContextVariableKey, GXCloudIdentifier] = (
-            self.store_backend.build_key(name=datasource_name)
+            self.store_backend.build_key(name=name)
         )
         if not self.has_key(datasource_key):
             raise ValueError(  # noqa: TRY003
-                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."  # noqa: E501
+                f"Unable to load datasource `{name}` -- no configuration found or invalid configuration."  # noqa: E501
             )
 
         datasource_config: FluentDatasource = copy.deepcopy(self.get(datasource_key))  # type: ignore[arg-type]
-        datasource_config.name = datasource_name
+        datasource_config.name = name
         return datasource_config
 
     def delete(self, datasource_config: FluentDatasource) -> None:
@@ -241,8 +241,8 @@ class DatasourceStore(Store):
 
         return return_value
 
-    def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
+    def _determine_datasource_key(self, name: str) -> DataContextVariableKey:
         datasource_key = DataContextVariableKey(
-            resource_name=datasource_name,
+            resource_name=name,
         )
         return datasource_key
