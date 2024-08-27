@@ -224,6 +224,30 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
+        """
+        Runs a validation using the configured data and suite.
+
+        Args:
+            batch_parameters: The dictionary of parameters necessary for selecting the
+              correct batch to run the validation on. The keys are strings that are determined
+              by the BatchDefinition used to instantiate this ValidationDefinition. For example:
+
+              - whole table -> None
+              - yearly -> year
+              - monthly -> year, month
+              - daily -> year, month, day
+
+            expectation_parameters: A dictionary of parameters values for any expectations using
+              parameterized values (the $PARAMETER syntax). The keys are the parameter names
+              and the values are the values to be used for this validation run.
+            result_format: A parameter controlling how much diagnostic information the result
+              contains.
+            checkpoint_id: You likely want to leave this as None. This is inserted into
+              the result and is used to tie multiple validation definition runs together
+              if they were all run from 1 checkpoint.
+            run_id: You likely want to leave this as None, in which case one will be generated
+              for you.
+        """
         diagnostics = self.is_added()
         if not diagnostics.is_added:
             # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
@@ -314,6 +338,7 @@ class ValidationDefinition(BaseModel):
 
     @public_api
     def save(self) -> None:
+        """Persists the ValidationDefinition."""
         from great_expectations.data_context.data_context.context_factory import project_manager
 
         store = project_manager.get_validation_definition_store()
