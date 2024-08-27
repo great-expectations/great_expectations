@@ -354,12 +354,10 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
-        ...
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]: ...
 
     @abstractmethod
-    def get_batch(self, batch_request: BatchRequest) -> Batch:
-        ...
+    def get_batch(self, batch_request: BatchRequest) -> Batch: ...
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
