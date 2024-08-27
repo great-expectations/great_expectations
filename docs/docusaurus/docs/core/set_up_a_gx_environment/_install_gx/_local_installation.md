@@ -25,12 +25,11 @@ GX Core is a Python library and as such can be used with a local Python installa
    pip install great_expectations
    ```
 
-4. Verify that GX installed successfully with the terminal command:
+4. Verify that GX installed successfully.
 
-   ```bash title="Terminal input"
-   great_expectations --version
+   In Python, run the following code:
+
+   ```python title="Python" name="docs/docusaurus/docs/core/set_up_a_gx_environment/_install_gx/_local_installation_verification.py - full code example"
    ```
-
-   If GX was successfully installed, the following output appears:
-
-   <ReleaseVersionBox/>
+   
+   If GX was installed correctly, the version number of the installed GX library will be printed.
