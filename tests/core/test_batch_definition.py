@@ -11,6 +11,7 @@ from great_expectations.core.partitioners import FileNamePartitionerYearly
 from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 from great_expectations.exceptions.exceptions import (
+    BatchDefinitionChangesNotAddedError,
     BatchDefinitionNotAddedError,
 )
 
@@ -174,3 +175,24 @@ def test_is_added(in_memory_runtime_context, id: str | None, is_added: bool, num
     assert diagnostics.is_added is is_added
     assert len(diagnostics.errors) == num_errors
     assert all(isinstance(err, BatchDefinitionNotAddedError) for err in diagnostics.errors)
+
+
+@pytest.mark.cloud
+def test_is_added_freshness(empty_cloud_context_fluent):
+    # Ephemeral/file use a cacheable datasource dict so freshness
+    # with batch definitions is a Cloud-only concern
+    context = empty_cloud_context_fluent
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+
+    batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    partitioner = FileNamePartitionerYearly(regex=batching_regex)
+    batch_definition.partitioner = partitioner
+
+    diagnostics = batch_definition.is_added()
+    assert diagnostics.is_added is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], BatchDefinitionChangesNotAddedError)

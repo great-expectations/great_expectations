@@ -1062,7 +1062,7 @@ def test_is_added(
         .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
         .add_batch_definition(name="my_batch_def")
     )
-    batch_definition.id = batch_def_id
+    batch_definition.id = batch_def_id  # Fluent API will add an ID but manually overriding for test
 
     checkpoint = Checkpoint(
         name="my_checkpoint",
