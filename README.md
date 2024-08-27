@@ -55,7 +55,7 @@ They are listed in the order in which GX is prioritizing the support issues:
 3. Questions posted to the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82)
 
 ## Contribute
-We deeply value the contributions of our community. We're now accepting PRs for bug fixes. 
+We deeply value the contributions of our community. We're now accepting PRs for bug fixes.
 
 To ensure the long-term quality of the GX Core codebase, we're not yet ready to accept feature contributions to the parts of the codebase that don't have clear APIs for extensions. We're actively working to increase the surface area for contributions. Thank you being a crucial part of GX's data quality platform!
 
