@@ -161,14 +161,8 @@ def test_identifier_bundle_no_id_raises_error(in_memory_runtime_context):
     ],
 )
 @pytest.mark.unit
-def test_is_added(in_memory_runtime_context, id: str | None, is_added: bool, num_errors: int):
-    context = in_memory_runtime_context
-    batch_definition = (
-        context.data_sources.add_pandas(name="pandas_datasource")
-        .add_csv_asset(name="my_asset", filepath_or_buffer="data.csv")
-        .add_batch_definition(name="my_batch_def")
-    )
-    batch_definition.id = id  # Manual override
+def test_is_added(id: str | None, is_added: bool, num_errors: int):
+    batch_definition = BatchDefinition(name="my_batch_def", id=id)
     diagnostics = batch_definition.is_added()
 
     assert diagnostics.is_added is is_added
