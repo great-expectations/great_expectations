@@ -1048,6 +1048,7 @@ class TestCheckpointResult:
 )
 @pytest.mark.unit
 def test_is_added(
+    in_memory_runtime_context,
     id: str | None,
     validation_def_id: str | None,
     suite_id: str | None,
@@ -1055,6 +1056,14 @@ def test_is_added(
     is_added: bool,
     error_list: list[Type[ResourceNotAddedError]],
 ):
+    context = in_memory_runtime_context
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+    batch_definition.id = batch_def_id
+
     checkpoint = Checkpoint(
         name="my_checkpoint",
         id=id,
@@ -1063,7 +1072,7 @@ def test_is_added(
                 name="my_validation_definition",
                 id=validation_def_id,
                 suite=ExpectationSuite(name="my_suite", id=suite_id),
-                data=BatchDefinition(name="my_batch_def", id=batch_def_id),
+                data=batch_definition,
             )
         ],
     )

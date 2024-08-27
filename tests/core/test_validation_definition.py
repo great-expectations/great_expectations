@@ -864,17 +864,27 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
 )
 @pytest.mark.unit
 def test_is_added(
+    in_memory_runtime_context,
     id: str | None,
     suite_id: str | None,
     batch_def_id: str | None,
     is_added: bool,
     error_list: list[Type[ResourceNotAddedError]],
 ):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+    batch_definition.id = batch_def_id
+
     validation_definition = ValidationDefinition(
         name="my_validation_definition",
         id=id,
         suite=ExpectationSuite(name="my_suite", id=suite_id),
-        data=BatchDefinition(name="my_batch_def", id=batch_def_id),
+        data=batch_definition,
     )
     diagnostics = validation_definition.is_added()
 
