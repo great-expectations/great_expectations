@@ -4,7 +4,6 @@ https://learn.microsoft.com/en-us/python/api/semantic-link-sempy/sempy.fabric?vi
 
 from __future__ import annotations
 
-from abc import abstractmethod
 import logging
 import os
 import uuid

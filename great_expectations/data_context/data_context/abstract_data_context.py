@@ -18,7 +18,6 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -80,7 +79,8 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.datasource.datasource_dict import CacheableDatasourceDict
 from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch, Datasource
+from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
+from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.interfaces import (
     Datasource as FluentDatasource,
 )
