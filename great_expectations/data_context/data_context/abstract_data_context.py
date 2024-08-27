@@ -18,6 +18,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -80,7 +81,6 @@ from great_expectations.data_context.util import (
 from great_expectations.datasource.datasource_dict import CacheableDatasourceDict
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
-from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.interfaces import (
     Datasource as FluentDatasource,
 )
@@ -1181,7 +1181,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_request_list = [batch_request]  # type: ignore[list-item]
         for batch_req in batch_request_list:
             computed_batch_list.append(
-                self.get_batch(
+                self.get_batch_list(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
                     data_asset_name=data_asset_name,
@@ -1265,7 +1265,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite | None,
-        batch: FluentBatch,
+        batch_list: Sequence[Union[Batch, FluentBatch]],
         **kwargs: Optional[dict],
     ) -> Validator:
         """
@@ -1278,10 +1278,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
 
         """
+        if len(batch_list) == 0:
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
+                """Validator could not be created because BatchRequest returned an empty batch_list.
+                Please check your parameters and try again."""
+            )
 
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one  # noqa: E501
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.  # noqa: E501
         execution_engine: ExecutionEngine
+        batch = batch_list[-1]
+        assert isinstance(batch, FluentBatch)
         execution_engine = batch.data.execution_engine
 
         validator = Validator(
@@ -1289,12 +1296,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,
-            batches=[batch],
+            batches=batch_list,
         )
 
         return validator
 
-    def get_batch(  # noqa: PLR0913
+    def get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1367,7 +1374,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`)
 
         """  # noqa: E501
-        return self._get_batch(
+        return self._get_batch_list(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -1391,7 +1398,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _get_batch(  # noqa: PLR0913
+    def _get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1440,7 +1447,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         datasource_name = result.datasource_name
 
-        datasource: Optional[Datasource] = self.data_sources.all().get(datasource_name)
+        datasource = self.data_sources.all().get(datasource_name)
         if not datasource:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
