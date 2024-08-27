@@ -2,6 +2,5 @@ When the `result_format` is `"BOOLEAN_ONLY"` Validation Results do not include a
 
 To create a `"BOOLEAN_ONLY"` result format configuration use the following code:
 
-```python title="Python"
-boolean_only_rf_dict = {"result_format": "BOOLEAN_ONLY"}
+```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/choose_result_format.py - boolean_only Result Format"
 ```

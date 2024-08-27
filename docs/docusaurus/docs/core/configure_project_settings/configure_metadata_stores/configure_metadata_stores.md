@@ -25,9 +25,18 @@ By default, Store files are created in folders within the `base_folder` of the F
 - <PrereqGxInstalled/>.
 - <PrereqFileDataContext/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Load a File Data Context.
 
@@ -37,10 +46,7 @@ By default, Store files are created in folders within the `base_folder` of the F
 
    Therefore, only File Data Contexts can have customized Store configurations.  This procedure assumes you have a File Data Context loaded as the variable `context`:
 
-   ```python title="Python"
-   import great_expectations as gx
-   
-   context = gx.get_context(mode="file")
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - retrieve a File Data Context"
    ```
 
 2. Determine the Store to update.
@@ -51,12 +57,7 @@ By default, Store files are created in folders within the `base_folder` of the F
 
    The following code shows how to print the configuration for each of these stores:
 
-   ```python title="Python"
-   print(context.variables.config.stores['expectations_store'])
-   print(context.variables.config.stores['validation_definition_store'])
-   print(context.variables.config.stores['checkpoint_store'])
-   print(context.variables.config.stores['suite_parameter_store'])
-   print(context.variables.config.stores['validation_results_store'])
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - access Metadata Store configurations"
    ```
    
    When updating a Store configuration you will use the same key to access it from your Data Context's `variables.config.stores` attribute as was used to print it in the above example.
@@ -65,9 +66,7 @@ By default, Store files are created in folders within the `base_folder` of the F
 
    Each Store has a `store_backend` configuration that determines how and where the Store accesses and saves information.  To change the location of a Store, you will update the `store_backend` configuration's `base_directory` value.  For instance, to change the location of an Expectation Store, you would update the `expectation_store_directory` variable in the following code and execute it:
 
-   ```pyhton title="Python"
-   expectation_store_directory = "my_expectations_store/"
-   context.variables.config.stores['expectations_store']['store_backend']['base_directory'] = expectation_store_directory
+   ```pyhton title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - example update Expectations Store base directory"
    ```
 
    The path provided for the `base_directory` should be either be an absolute path, or a path relative to the File Data Context's `project_root_dir`.
@@ -76,44 +75,21 @@ By default, Store files are created in folders within the `base_folder` of the F
 
    Once a Data Context's `variables` have been updated, the changes need to be saved to the Data Context's configuration file so that they will persist when the Data Context is loaded in the future.  This is done with:
 
-   ```python title="Python"
-   context.variables.save()
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - save changes to the Data Context"
    ```
 
 5. Re-initialize the File Data Context.
 
    Because Store configurations are loaded when the Data Context is initialized, you will need to re-initialize your Data Context before your changes will take effect.  This is done by loading the Data Context again, exactly as when it was loaded the first time:
 
-   ```python title="Python"
-   context = gx.get_context(mode="file")
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - re-initialize the Data Context"
    ```
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-```python
-import great_expectations as gx
-
-# Load a File Data Context
-context = gx.get_context(mode="file")
-
-# Access the Stores through the Data Context's `variables` attribute:
-print(context.variables.config.stores['expectations_store'])
-print(context.variables.config.stores['validation_definition_store'])
-print(context.variables.config.stores['checkpoint_store'])
-print(context.variables.config.stores['suite_parameter_store'])
-print(context.variables.config.stores['validation_results_store'])
-
-# Update the path of the Data Context's Expectations Store:
-expectation_store_directory = "my_expectations_store/"
-context.variables.config.stores['expectations_store']['store_backend']['base_directory'] = expectation_store_directory
-
-# Save changes to the Data Context's configuration:
-context.variables.save()
-
-# Re-initialize the Data Context:
-context = gx.get_context(mode="file")
+```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - full code example"
 ```
 
 </TabItem>

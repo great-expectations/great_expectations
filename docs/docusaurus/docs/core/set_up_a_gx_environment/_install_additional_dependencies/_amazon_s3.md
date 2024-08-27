@@ -3,7 +3,7 @@ import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_
 import RecommendedVirtualEnvironment from '../../_core_components/prerequisites/_recommended_virtual_environment.md';
 import InfoUsingAVirtualEnvironment from '../../_core_components/admonitions/_if_you_are_using_a_virtual_environment.md';
 
-{GxData.product_name} uses the Python library `boto3` to access objects stored in Amazon S3 buckets, but you must configure your Amazon S3 account and credentials through AWS and the AWS command line interface (CLI).
+GX Core uses the Python library `boto3` to access objects stored in Amazon S3 buckets, but you must configure your Amazon S3 account and credentials through AWS and the AWS command line interface (CLI).
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ import InfoUsingAVirtualEnvironment from '../../_core_components/admonitions/_if
 
 ## Installation
 
-Python interacts with AWS through the `boto3` library. {GxData.product_name} uses the library in the background when working with AWS. Although you won't use `boto3` directly, must install it in your Python environment.
+Python interacts with AWS through the `boto3` library. GX Core uses the library in the background when working with AWS. Although you won't use `boto3` directly, must install it in your Python environment.
 
 To set up `boto3` with AWS, and use `boto3` within Python, see the [Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html).
 
@@ -54,7 +54,7 @@ To set up `boto3` with AWS, and use `boto3` within Python, see the [Boto3 docume
   
 4. Install the Python dependencies for AWS S3 support.
 
-   Run the following terminal command to install the optional dependencies required by {GxData.product_name} to work with AWS S3:
+   Run the following terminal command to install the optional dependencies required by GX Core to work with AWS S3:
 
    :::info
    <InfoUsingAVirtualEnvironment/>
@@ -64,4 +64,4 @@ To set up `boto3` with AWS, and use `boto3` within Python, see the [Boto3 docume
    python -m pip install 'great_expectations[s3]'
    ```
 
-   {GxData.product_name} and the requirements for the `boto3` Python library are installed.
+   GX Core and the requirements for the `boto3` Python library are installed.

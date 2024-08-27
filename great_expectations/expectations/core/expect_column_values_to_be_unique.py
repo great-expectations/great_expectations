@@ -56,7 +56,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     For example, [1, 2, 3, 3, 3] will return [3, 3, 3] in result.exceptions_list, with \
     unexpected_percent = 60.0.
 
-    expect_column_values_to_be_unique is a \
+    ExpectColumnValuesToBeUnique is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations)
 
     Column Map Expectations are one of the most common types of Expectation.

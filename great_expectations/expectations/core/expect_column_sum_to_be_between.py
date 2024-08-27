@@ -58,7 +58,7 @@ DATA_QUALITY_ISSUES = ["Distribution"]
 class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_sum_to_be_between is a \
+    ExpectColumnSumToBeBetween is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.

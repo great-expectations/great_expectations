@@ -1,5 +1,5 @@
 # <snippet name="docs/docusaurus/docs/core/define_expectations/_retrieve_a_batch_of_test_data/_from_a_batch_definition.py - full example">
-from great_expectations import gx
+import great_expectations as gx
 
 context = gx.get_context()
 
@@ -9,7 +9,7 @@ data_source_name = "my_filesystem_data_source"
 data_asset_name = "my_file_data_asset"
 batch_definition_name = "yellow_tripdata_sample_daily"
 batch_definition = (
-    context.get_data_source(data_source_name)
+    context.data_sources.get(data_source_name)
     .get_asset(data_asset_name)
     .get_batch_definition(batch_definition_name)
 )

@@ -34,25 +34,46 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
         return self.message
 
 
-class SuiteEditNotebookCustomTemplateModuleNotFoundError(ModuleNotFoundError):
-    def __init__(self, custom_module) -> None:
-        message = f"The custom module '{custom_module}' could not be found"
-        super().__init__(message)
-
-
 class DataContextError(GreatExpectationsError):
     pass
+
+
+class ResourceNotAddedError(DataContextError):
+    pass
+
+
+class ResourcesNotAddedError(ValueError):
+    def __init__(self, errors: list[ResourceNotAddedError]) -> None:
+        self._errors = errors
+        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
+
+    @property
+    def errors(self) -> list[ResourceNotAddedError]:
+        return self._errors
 
 
 class ExpectationSuiteError(DataContextError):
     pass
 
 
-class ExpectationSuiteNotAddedToStoreError(DataContextError):
-    def __init__(self) -> None:
+class ExpectationSuiteNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
         super().__init__(
-            "ExpectationSuite must be added to the DataContext store before it can be saved. "
-            "Please call my_data_context.suites.add(my_expectation_suite), "
+            f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
+            "Please call `context.suites.add(<SUITE_OBJECT>)`, "
+            "then try your action again."
+        )
+
+
+class ValidationDefinitionError(DataContextError):
+    pass
+
+
+class ValidationDefinitionNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
+            "Please call `context.validation_definitions.add(<VALIDATION_DEFINITION_OBJECT>)`, "
             "then try your action again."
         )
 
@@ -62,6 +83,31 @@ class CheckpointError(DataContextError):
 
 
 class CheckpointNotFoundError(CheckpointError):
+    pass
+
+
+class CheckpointNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"Checkpoint '{name}' must be added to the DataContext before it can be updated. "
+            "Please call `context.checkpoints.add(<CHECKPOINT_OBJECT>)`, "
+            "then try your action again."
+        )
+
+
+class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
+    def __init__(self) -> None:
+        super().__init__(
+            "Checkpoint.run() requires at least one validation definition. "
+            "Please add one and try your action again."
+        )
+
+
+class CheckpointRelatedResourcesNotAddedError(ResourcesNotAddedError):
+    pass
+
+
+class ValidationDefinitionRelatedResourcesNotAddedError(ResourcesNotAddedError):
     pass
 
 
@@ -313,7 +359,6 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleFilesystemStoreBackend": "TupleFilesystemStoreBackend",
             "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
-            "InMemorySuiteParameterStore": "SuiteParameterStore",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
             "ExtractAndStoreSuiteParamsAction": "StoreSuiteParametersAction",
             "StoreAction": "StoreValidationResultAction",
@@ -392,6 +437,14 @@ class BatchDefinitionError(DataContextError):
         super().__init__(self.message)
 
 
+class BatchDefinitionNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"BatchDefinition '{name}' must be added to the DataContext before it can be updated. "
+            "Please update using the parent asset or data source, then try your action again."
+        )
+
+
 class BatchSpecError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message
@@ -414,6 +467,12 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 class DatasourceNotFoundError(DataContextError):
     pass
+
+
+class DataAssetInitializationError(GreatExpectationsError):
+    def __init__(self, message: str) -> None:
+        self.message = f"Cannot initialize data asset: {message}"
+        super().__init__(self.message)
 
 
 class InvalidConfigValueTypeError(DataContextError):

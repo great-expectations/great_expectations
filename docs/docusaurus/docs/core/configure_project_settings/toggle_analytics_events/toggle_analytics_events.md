@@ -12,7 +12,7 @@ import Tabs from '@theme/Tabs';
 import TabEnvironmentVaribale from './_tab_environment_variable.md';
 import TabContextVariable from './_tab_context_variable.md';
 
-In order to determine if analytics should be enabled, GX 1.0 checks two sources:
+In order to determine if analytics should be enabled, GX Core checks two sources:
 
 - The environment variable `GX_ANALYTICS_ENABLED`
 - The Data Context variable `analytics_enabled`

@@ -9,9 +9,6 @@ from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import
 from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition,
-)
 
 logger: Logger
 
@@ -36,5 +33,4 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         s3_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
-        order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...

@@ -1,7 +1,7 @@
 import GxData from '../../_core_components/_data.jsx'
 
 GX Cloud provides a web interface for using GX to validate your data without creating and running complex Python code. However,
-{GxData.product_name} can connect to a GX Cloud account if you want to customize or automate your workflows through Python scripts.
+GX Core can connect to a GX Cloud account if you want to customize or automate your workflows through Python scripts.
 
 ### Installation and setup
 

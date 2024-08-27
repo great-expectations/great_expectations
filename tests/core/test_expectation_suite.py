@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from copy import copy, deepcopy
 from typing import Dict, Union
 from unittest import mock
@@ -58,6 +59,15 @@ def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
             "value_set": [1, 2, 3, 4, 5],
         },
         "meta": {"notes": "This is an expectation."},
+    }
+
+
+@pytest.fixture
+def bad_expectation_dict() -> dict:
+    return {
+        "type": "expect_stuff_not_to_go_well",
+        "kwargs": {},
+        "meta": {"notes": "this_should_explode"},
     }
 
 
@@ -168,6 +178,25 @@ class TestInit:
         ]
         assert len(suite.expectations) == 2
         assert suite.expectation_configurations == test_expected_expectations
+
+    @pytest.mark.unit
+    def test_bad_expectation_configs_are_skipped(
+        self,
+        bad_expectation_dict: dict,
+        expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
+    ):
+        suite = ExpectationSuite(
+            name="test_suite",
+            expectations=[
+                bad_expectation_dict,
+                expect_column_values_to_be_in_set_col_a_with_meta_dict,
+            ],
+        )
+        assert len(suite.expectations) == 1
+        assert (
+            suite.expectations[0].expectation_type
+            == expect_column_values_to_be_in_set_col_a_with_meta_dict["type"]
+        )
 
     @pytest.mark.unit
     def test_expectation_suite_init_overrides_non_json_serializable_meta(
@@ -384,7 +413,7 @@ class TestCRUDMethods:
             name=self.expectation_suite_name,
         )
 
-        with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedToStoreError):
+        with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedError):
             suite.save()
 
     @pytest.mark.filesystem
@@ -1057,12 +1086,98 @@ def test_identifier_bundle_with_existing_id():
 
 
 @pytest.mark.unit
-def test_identifier_bundle_no_id():
+def test_identifier_bundle_no_id_raises_error():
     _ = gx.get_context(mode="ephemeral")
     suite = ExpectationSuite(name="my_suite", id=None)
 
-    actual = suite.identifier_bundle()
-    expected = {"name": "my_suite", "id": mock.ANY}
+    with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedError):
+        suite.identifier_bundle()
 
-    assert actual.dict() == expected
-    assert actual.id is not None
+
+@pytest.mark.parametrize(
+    "id,is_added,num_errors",
+    [
+        pytest.param(str(uuid.uuid4()), True, 0, id="added"),
+        pytest.param(None, False, 1, id="not_added"),
+    ],
+)
+@pytest.mark.unit
+def test_is_added(id: str | None, is_added: bool, num_errors: int):
+    suite = ExpectationSuite(name="my_suite", id=id)
+    diagnostics = suite.is_added()
+
+    assert diagnostics.is_added is is_added
+    assert len(diagnostics.errors) == num_errors
+    assert all(
+        isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in diagnostics.errors
+    )
+
+
+@pytest.mark.cloud
+def test_save_on_suite_updates_rendered_content(
+    empty_cloud_context_fluent,
+):
+    context = empty_cloud_context_fluent
+
+    expectation_1 = gxe.ExpectColumnDistinctValuesToBeInSet(column="a", value_set=[1, 2, 3])
+    expectation_2 = gxe.ExpectColumnValuesToBeBetween(column="a", min_value=1, max_value=5)
+    suite = context.suites.add(
+        suite=ExpectationSuite(
+            name="my_suite",
+            expectations=[
+                expectation_1,
+                expectation_2,
+            ],
+        )
+    )
+
+    old_expectation_1_rendered_content = suite.expectations[0].rendered_content
+    old_expectation_2_rendered_content = suite.expectations[1].rendered_content
+
+    suite.expectations[0].value_set = [1, 2, 3, 4, 5]
+    suite.expectations[1].min_value = 2
+
+    suite.save()
+
+    new_expectation_1_rendered_content = suite.expectations[0].rendered_content
+    new_expectation_2_rendered_content = suite.expectations[1].rendered_content
+
+    assert new_expectation_1_rendered_content != old_expectation_1_rendered_content
+    assert new_expectation_1_rendered_content[0].value["params"]["value_set"]["value"] == [
+        1,
+        2,
+        3,
+        4,
+        5,
+    ]
+    assert new_expectation_2_rendered_content != old_expectation_2_rendered_content
+    assert new_expectation_2_rendered_content[0].value["params"]["min_value"]["value"] == 2
+
+
+@pytest.mark.cloud
+def test_save_on_individual_expectation_updates_rendered_content(
+    empty_cloud_context_fluent,
+):
+    context = empty_cloud_context_fluent
+
+    suite = context.suites.add(
+        suite=ExpectationSuite(
+            name="my_suite",
+            expectations=[gxe.ExpectColumnDistinctValuesToBeInSet(column="a", value_set=[1, 2, 3])],
+        )
+    )
+
+    old_expectation_rendered_content = suite.expectations[0].rendered_content
+    suite.expectations[0].value_set = [1, 2, 3, 4, 5]
+
+    suite.expectations[0].save()
+    new_expectation_rendered_content = suite.expectations[0].rendered_content
+
+    assert new_expectation_rendered_content != old_expectation_rendered_content
+    assert new_expectation_rendered_content[0].value["params"]["value_set"]["value"] == [
+        1,
+        2,
+        3,
+        4,
+        5,
+    ]
