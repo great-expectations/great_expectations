@@ -48,6 +48,7 @@ if TYPE_CHECKING:
 DATAFRAME_INDICATOR = "<DATAFRAME>"
 
 
+@public_api
 class ValidationDefinition(BaseModel):
     """
     Responsible for running a suite against data and returning a validation result.
@@ -113,10 +114,12 @@ class ValidationDefinition(BaseModel):
         self._validation_results_store = project_manager.get_validation_results_store()
 
     @property
+    @public_api
     def batch_definition(self) -> BatchDefinition:
         return self.data
 
     @property
+    @public_api
     def asset(self) -> DataAsset:
         return self.data.data_asset
 
