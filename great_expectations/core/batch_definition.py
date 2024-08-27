@@ -2,15 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
+# if we move this import into the TYPE_CHECKING block, we need to provide the
+# Partitioner class when we update forward refs, so we just import here.
 from great_expectations.compatibility import pydantic
 from great_expectations.core.added_diagnostics import (
     BatchDefinitionAddedDiagnostics,
 )
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
-
-# if we move this import into the TYPE_CHECKING block, we need to provide the
-# Partitioner class when we update forward refs, so we just import here.
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionChangesNotAddedError,
