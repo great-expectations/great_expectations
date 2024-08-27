@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
+from great_expectations.compatibility import pydantic
+
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
-from great_expectations.compatibility import pydantic
 from great_expectations.core.added_diagnostics import (
     BatchDefinitionAddedDiagnostics,
 )
