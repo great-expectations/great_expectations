@@ -158,11 +158,21 @@ class _CheckpointEvent(Event):
 class CheckpointCreatedEvent(_CheckpointEvent):
     _allowed_actions: ClassVar[List[Action]] = [CHECKPOINT_CREATED]
 
-    def __init__(self, checkpoint_id: str | None = None):
+    def __init__(
+        self, checkpoint_id: str | None = None, validation_definition_ids: list[str] | None = None
+    ):
+        self.validation_definition_ids = validation_definition_ids
         super().__init__(
             action=CHECKPOINT_CREATED,
             checkpoint_id=checkpoint_id,
         )
+
+    @override
+    def _properties(self) -> dict:
+        return {
+            "validation_definition_ids": self.validation_definition_ids,
+            **super()._properties(),
+        }
 
 
 @dataclass
