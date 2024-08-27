@@ -518,30 +518,17 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
 
     def sort_batches(
         self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
-    ) -> None:
+    ) -> List[Batch]:
         """Sorts batch_list in place in the order configured in this DataAsset.
         Args:
             batch_list: The list of batches to sort in place.
             partitioner: Configuration used to determine sort.
         """
-        reverse = not partitioner.sort_ascending
-        for key in reversed(partitioner.param_names):
 
-            def get_value(batch: Batch) -> Any:
-                return batch.metadata[key]
+        def get_value(key: str) -> Callable[[Batch], Any]:
+            return lambda bd: bd.metadata[key]
 
-            try:
-                batch_list.sort(
-                    key=functools.cmp_to_key(
-                        _sort_batch_identifiers_with_none_metadata_values(get_value)
-                    ),
-                    reverse=reverse,
-                )
-            except KeyError as e:
-                raise KeyError(  # noqa: TRY003
-                    f"Trying to sort {self.name} table asset batches on key {key} "
-                    "which isn't available on all batches."
-                ) from e
+        return self._sort_batch_data_list(batch_list, partitioner, get_value)
 
     def sort_legacy_batch_definitions(
         self,
@@ -549,78 +536,45 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
         partitioner: PartitionerSortingProtocol,
     ) -> List[LegacyBatchDefinition]:
         """Sorts batch_definition_list in the order configured by the partitioner."""
-        reverse = not partitioner.sort_ascending
-        for key in reversed(partitioner.param_names):
 
-            def get_value(batch_definition: LegacyBatchDefinition) -> Any:
-                return batch_definition.batch_identifiers[key]
+        def get_value(key: str) -> Callable[[LegacyBatchDefinition], Any]:
+            return lambda bd: bd.batch_identifiers[key]
 
-            try:
-                batch_definition_list = sorted(
-                    batch_definition_list,
-                    key=functools.cmp_to_key(
-                        _sort_batch_identifiers_with_none_metadata_values(get_value)
-                    ),
-                    reverse=reverse,
-                )
-            except KeyError as e:
-                raise KeyError(  # noqa: TRY003
-                    f"Trying to sort {self.name} asset batches on key {key} "
-                    "which isn't available on all batches."
-                ) from e
-        return batch_definition_list
+        return self._sort_batch_data_list(batch_definition_list, partitioner, get_value)
 
     def sort_batch_identifiers_list(
         self, batch_identfiers_list: List[dict], partitioner: PartitionerSortingProtocol
     ) -> List[dict]:
         """Sorts batch_identfiers_list in the order configured by the partitioner."""
+
+        def get_value(key: str) -> Callable[[dict], Any]:
+            return lambda d: d[key]
+
+        return self._sort_batch_data_list(batch_identfiers_list, partitioner, get_value)
+
+    def _sort_batch_data_list(
+        self,
+        batch_data_list: List[_T],
+        partitioner: PartitionerSortingProtocol,
+        get_value: Callable[[str], Any],
+    ) -> List[_T]:
+        """Sorts batch_data_list in the order configured by the partitioner."""
         reverse = not partitioner.sort_ascending
         for key in reversed(partitioner.param_names):
-
-            def get_value(batch: dict) -> Any:
-                return batch[key]
-
             try:
-                batch_identfiers_list = sorted(
-                    batch_identfiers_list,
+                batch_data_list = sorted(
+                    batch_data_list,
                     key=functools.cmp_to_key(
-                        _sort_batch_identifiers_with_none_metadata_values(get_value)
+                        _sort_batch_identifiers_with_none_metadata_values(get_value(key))
                     ),
                     reverse=reverse,
                 )
             except KeyError as e:
                 raise KeyError(  # noqa: TRY003
-                    f"Trying to sort {self.name} asset batches on key {key} "
+                    f"Trying to sort {self.name}'s batches on key {key}, "
                     "which isn't available on all batches."
                 ) from e
-        return batch_identfiers_list
-
-    # def _sort_batch_objects_list(
-    #     self,
-    #     batch_identfiers_list: List[_T],
-    #     partitioner: PartitionerSortingProtocol,
-    #     get_value: Callable[[str], Any],
-    # ) -> List[dict]:
-    #     """Sorts batch_identfiers_list in the order configured by the partitioner."""
-    #     reverse = not partitioner.sort_ascending
-    #     for key in reversed(partitioner.param_names):
-    #         # def get_value(batch: dict) -> Any:
-    #         #     return batch[key]
-
-    #         try:
-    #             batch_identfiers_list = sorted(
-    #                 batch_identfiers_list,
-    #                 key=functools.cmp_to_key(
-    #                     _sort_batch_identifiers_with_none_metadata_values(get_value)
-    #                 ),
-    #                 reverse=reverse,
-    #             )
-    #         except KeyError as e:
-    #             raise KeyError(
-    #                 f"Trying to sort {self.name} asset batches on key {key} "
-    #                 "which isn't available on all batches."
-    #             ) from e
-    #     return batch_identfiers_list
+        return batch_data_list
 
 
 def _sort_batch_identifiers_with_none_metadata_values(
