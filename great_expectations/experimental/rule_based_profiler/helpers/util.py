@@ -173,7 +173,7 @@ def get_batch_ids(  # noqa: PLR0913
             parameters=parameters,
         )
 
-        batch_list = data_context.get_batch_list(batch_request=batch_request)
+        batch_list = data_context.get_batch(batch_request=batch_request)
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
 
@@ -208,18 +208,18 @@ def build_batch_request(
         return None
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
-    effective_batch_request: Optional[Union[BatchRequestBase, dict]] = (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=batch_request,
-            expected_return_type=(BatchRequestBase, dict),
-            variables=variables,
-            parameters=parameters,
-        )
+    effective_batch_request: Optional[
+        Union[BatchRequestBase, dict]
+    ] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=batch_request,
+        expected_return_type=(BatchRequestBase, dict),
+        variables=variables,
+        parameters=parameters,
     )
-    materialized_batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = (
-        materialize_batch_request(batch_request=effective_batch_request)
-    )
+    materialized_batch_request: Optional[
+        Union[BatchRequest, RuntimeBatchRequest]
+    ] = materialize_batch_request(batch_request=effective_batch_request)
 
     return materialized_batch_request
 
@@ -471,14 +471,14 @@ def build_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables_as_dict: Optional[Union[ParameterNode, Dict[str, Any]]] = (
-        get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=VARIABLES_PREFIX,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
-        )
+    variables_as_dict: Optional[
+        Union[ParameterNode, Dict[str, Any]]
+    ] = get_parameter_value_and_validate_return_type(
+        domain=None,
+        parameter_reference=VARIABLES_PREFIX,
+        expected_return_type=None,
+        variables=variables,
+        parameters=None,
     )
     if isinstance(variables_as_dict, ParameterNode):
         return variables_as_dict.to_dict()

@@ -652,6 +652,104 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
         return batch_list[batch_request.batch_slice]
 
     @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        from great_expectations.core import IDDict
+
+        self._validate_batch_request(batch_request)
+
+        output: List[dict] = []
+        if batch_request.partitioner:
+            sql_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
+        else:
+            sql_partitioner = None
+        batch_spec_kwargs: dict[str, str | dict | None]
+        for request in self._fully_specified_batch_requests(batch_request):
+            batch_spec_kwargs = self._create_batch_spec_kwargs()
+            if sql_partitioner:
+                batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
+                batch_spec_kwargs[
+                    "partitioner_kwargs"
+                ] = sql_partitioner.partitioner_method_kwargs()
+                # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
+                # it is hardcoded to a dict above, so we cast it here.
+                cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
+                    sql_partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
+                        request.options
+                    )
+                )
+            # Creating the batch_spec is our hook into the execution engine.
+            batch_spec = self._create_batch_spec(batch_spec_kwargs)
+
+            output.append(IDDict(batch_spec["batch_identifiers"]))
+        return output
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        """Batch that matches the BatchRequest.
+
+        Args:
+            batch_request: A batch request for this asset. Usually obtained by calling
+                build_batch_request on the asset.
+
+        Returns:
+            A list Batch that matches the options specified in the batch request.
+        """
+        from great_expectations.core import IDDict
+        from great_expectations.core.batch import LegacyBatchDefinition
+
+        self._validate_batch_request(batch_request)
+
+        if batch_request.partitioner:
+            sql_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
+        else:
+            sql_partitioner = None
+
+        batch_spec_kwargs: dict[str, str | dict | None]
+        requests = self._fully_specified_batch_requests(batch_request)
+        metadata_dicts = [self._get_batch_metadata_from_batch_request(r) for r in requests]
+        if sql_partitioner:
+            sorted_metadata_dicts = self.sort_batch_identifiers_list(
+                metadata_dicts, sql_partitioner
+            )
+        else:
+            sorted_metadata_dicts = metadata_dicts
+        batch_metadata = sorted_metadata_dicts[-1]
+        request_index = sorted_metadata_dicts.index(batch_metadata)
+        request = requests[request_index]
+        batch_spec_kwargs = self._create_batch_spec_kwargs()
+        if sql_partitioner:
+            batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
+            batch_spec_kwargs["partitioner_kwargs"] = sql_partitioner.partitioner_method_kwargs()
+            # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
+            # it is hardcoded to a dict above, so we cast it here.
+            cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
+                sql_partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(request.options)
+            )
+        # Creating the batch_spec is our hook into the execution engine.
+        batch_spec = self._create_batch_spec(batch_spec_kwargs)
+        execution_engine: SqlAlchemyExecutionEngine = self.datasource.get_execution_engine()
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
+
+        batch_definition = LegacyBatchDefinition(
+            datasource_name=self.datasource.name,
+            data_connector_name=_DATA_CONNECTOR_NAME,
+            data_asset_name=self.name,
+            batch_identifiers=IDDict(batch_spec["batch_identifiers"]),
+            batch_spec_passthrough=None,
+        )
+
+        return Batch(
+            datasource=self.datasource,
+            data_asset=self,
+            batch_request=request,
+            data=data,
+            metadata=batch_metadata,
+            batch_markers=markers,
+            batch_spec=batch_spec,
+            batch_definition=batch_definition,
+        )
+
+    @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,

@@ -96,6 +96,14 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        self._raise_type_error()
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        self._raise_type_error()
+
+    @override
     def sort_batches(
         self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
     ) -> None:

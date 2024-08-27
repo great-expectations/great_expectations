@@ -116,22 +116,6 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
             )
 
     @override
-    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
-        batch_definition_list: List[LegacyBatchDefinition] = self._get_batch_definition_list(
-            batch_request
-        )
-        batch_identifiers_list: List[dict] = [
-            batch_definition_list.batch_identifiers
-            for batch_definition_list in batch_definition_list
-        ]
-        if sortable_partitioner := self._get_sortable_partitioner(batch_request.partitioner):
-            batch_identifiers_list = self.sort_batch_identifiers_list(
-                batch_identifiers_list, sortable_partitioner
-            )
-
-        return batch_identifiers_list
-
-    @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         """A list of batches that match the BatchRequest.
 
@@ -181,6 +165,20 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
             self.sort_batches(batch_list, sortable_partitioner)
 
         return batch_list
+
+    @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        batch_definition_list = self._get_batch_definition_list(batch_request)
+        batch_identifiers_list: List[dict] = [
+            batch_definition_list.batch_identifiers
+            for batch_definition_list in batch_definition_list
+        ]
+        if sortable_partitioner := self._get_sortable_partitioner(batch_request.partitioner):
+            batch_identifiers_list = self.sort_batch_identifiers_list(
+                batch_identifiers_list, sortable_partitioner
+            )
+
+        return batch_identifiers_list
 
     @override
     def get_batch(self, batch_request: BatchRequest) -> Batch:

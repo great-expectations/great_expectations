@@ -798,18 +798,18 @@ class Datasource(
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
         return self._execution_engine
 
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
-        """A list of batches that correspond to the BatchRequest.
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        """A Batch that corresponds to the BatchRequest.
 
         Args:
             batch_request: A batch request for this asset. Usually obtained by calling
                 build_batch_request on the asset.
 
         Returns:
-            A list of batches that match the options specified in the batch request.
+            A Batch that matches the options specified in the batch request.
         """
         data_asset = self.get_asset(batch_request.data_asset_name)
-        return data_asset.get_batch_list_from_batch_request(batch_request)
+        return data_asset.get_batch(batch_request)
 
     def get_assets_as_dict(self) -> MutableMapping[str, _DataAssetT]:
         """Returns available DataAsset objects as dictionary, with corresponding name as key.

@@ -4,6 +4,7 @@ https://learn.microsoft.com/en-us/python/api/semantic-link-sempy/sempy.fabric?vi
 
 from __future__ import annotations
 
+from abc import abstractmethod
 import logging
 import os
 import uuid
@@ -128,6 +129,65 @@ class _PowerBIAsset(DataAsset):
                 batch_definition=batch_definition,
             )
         ]
+
+    @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        from great_expectations.core import IDDict
+
+        return [IDDict(batch_request.options)]
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        self._validate_batch_request(batch_request)
+
+        reader_options = {
+            "workspace": self._datasource.workspace,
+            "dataset": self._datasource.dataset,
+            **self.dict(
+                exclude=self._EXCLUDE_FROM_READER_OPTIONS,
+                exclude_none=True,
+                exclude_unset=True,
+                by_alias=True,
+                config_provider=self._datasource._config_provider,
+            ),
+        }
+
+        batch_spec = FabricBatchSpec(
+            reader_method=self._reader_method, reader_options=reader_options
+        )
+        # TODO: update get_batch_data_and_markers types
+        execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
+
+        # batch_definition (along with batch_spec and markers) is only here to satisfy a
+        # legacy constraint when computing usage statistics in a validator. We hope to remove
+        # it in the future.
+        # imports are done inline to prevent a circular dependency with core/batch.py
+        from great_expectations.core import IDDict
+        from great_expectations.core.batch import LegacyBatchDefinition
+
+        batch_definition = LegacyBatchDefinition(
+            datasource_name=self.datasource.name,
+            data_connector_name=_DATA_CONNECTOR_NAME,
+            data_asset_name=self.name,
+            batch_identifiers=IDDict(batch_request.options),
+            batch_spec_passthrough=None,
+        )
+
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+            batch_request=batch_request
+        )
+
+        return Batch(
+            datasource=self.datasource,
+            data_asset=self,
+            batch_request=batch_request,
+            data=data,
+            metadata=batch_metadata,
+            batch_markers=markers,
+            batch_spec=batch_spec.to_json_dict(),  # type: ignore[arg-type] # will be coerced to BatchSpec
+            batch_definition=batch_definition,
+        )
 
     @override
     def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
