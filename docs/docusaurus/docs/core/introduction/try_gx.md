@@ -7,7 +7,6 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
-import ReleaseVersionBox from '../../components/versions/_gx_version_code_box.mdx'
 import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
 Start here to learn how to connect to data, create Expectations, validate data, and review Validation Results. This is an ideal place to start if you're new to GX Core and want to experiment with features and see what it offers.
@@ -38,9 +37,7 @@ For more comprehensive guidance on setting up a Python environment, installing G
    print(gx.__version__)
    ```
 
-   The following output appears when GX Core is successfully installed:
-
-   <ReleaseVersionBox/>
+   If GX was installed correctly, the version number of the installed GX library will be printed.
 
 
 ## Sample data
