@@ -29,7 +29,14 @@ Because the dataframes reside in memory you do not need to specify the location 
 
 ### Procedure
 
-<Tabs>
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
 <TabItem value="instructions" label="Instructions">
 
@@ -110,7 +117,14 @@ A dataframe Data Asset is used to group your Validation Results.  For instance, 
 
 ### Procedure
 
-<Tabs>
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
 <TabItem value="instructions" label="Instructions">
 
@@ -167,7 +181,14 @@ This means that Batch Definitions for dataframe Data Assets don't work to subdiv
 
 ### Procedure
 
-<Tabs>
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
 <TabItem value="instructions" label="Instructions">
 

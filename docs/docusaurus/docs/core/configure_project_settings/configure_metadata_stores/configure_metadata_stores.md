@@ -25,9 +25,18 @@ By default, Store files are created in folders within the `base_folder` of the F
 - <PrereqGxInstalled/>.
 - <PrereqFileDataContext/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Load a File Data Context.
 

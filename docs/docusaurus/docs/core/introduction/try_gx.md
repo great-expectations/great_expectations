@@ -1,5 +1,7 @@
 ---
 title: Try GX Core
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -55,9 +57,18 @@ This example workflow walks you through connecting to data in a Pandas DataFrame
 This example requires that [Pandas](https://pandas.pydata.org/) is installed in the same Python environment where you are running GX Core.
 :::
 
-<Tabs>
+### Procedure
 
-<TabItem value="exploratory_walkthrough" label="Walkthrough">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 Run the following steps in a Python interpreter, IDE, notebook, or script.
 
@@ -110,7 +121,8 @@ Run the following steps in a Python interpreter, IDE, notebook, or script.
 
 </TabItem>
 
-<TabItem value="exploratory_full_example" label="Full example code">
+<TabItem value="sample_code" label="Sample code">
+
 ```python title="Full example code" name="docs/docusaurus/docs/core/introduction/try_gx_exploratory.py full exploratory script"
 ```
 
@@ -121,9 +133,18 @@ Run the following steps in a Python interpreter, IDE, notebook, or script.
 ## Validate data in a SQL table
 This example workflow walks you through connecting to data in a Postgres table, creating an Expectation Suite, and setting up a Checkpoint to validate the data.
 
-<Tabs>
+### Procedure
 
-<TabItem value="end2end_walkthrough" label="Walkthrough">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 Run the following steps in a Python interpreter, IDE, notebook, or script.
 
@@ -169,20 +190,22 @@ Run the following steps in a Python interpreter, IDE, notebook, or script.
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py create and run checkpoint"
    ```
 
-The returned results reflect the passing of one Expectation and the failure of one Expectation.
+   The returned results reflect the passing of one Expectation and the failure of one Expectation.
 
-When an Expectation fails, the Validation Results of the failed Expectation include metrics to help you assess the severity of the issue:
+   When an Expectation fails, the Validation Results of the failed Expectation include metrics to help you assess the severity of the issue:
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py checkpoint result"
    ```
 
-To reduce the size of the results and make it easier to review, only a portion of the failed values and record indexes are included in the Checkpoint results. The failed counts and percentages correspond to the failed records in the validated data.
+   To reduce the size of the results and make it easier to review, only a portion of the failed values and record indexes are included in the Checkpoint results. The failed counts and percentages correspond to the failed records in the validated data.
 
 </TabItem>
 
-<TabItem value="end2end_full_example" label="Full example code">
+<TabItem value="sample_code" label="Sample code">
+
 ```python title="Full example code" name="docs/docusaurus/docs/core/introduction/try_gx_end_to_end.py full end2end script"
 ```
+
 </TabItem>
 </Tabs>
 

@@ -18,9 +18,18 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 - <PrereqPreconfiguredDataContext/>. In this guide the variable `context` is assumed to contain your Data Context.
 - <PrereqValidationDefinition/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve your Validation Definition.
 

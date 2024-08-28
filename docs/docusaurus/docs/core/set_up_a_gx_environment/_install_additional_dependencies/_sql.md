@@ -4,7 +4,7 @@ import RecommendedVirtualEnvironment from '../../_core_components/prerequisites/
 import InfoUsingAVirtualEnvironment from '../../_core_components/admonitions/_if_you_are_using_a_virtual_environment.md';
 import SqlDialectInstallationCommands from './_sql_dialect_installation_commands.md';
 
-To validate data stored on SQL databases with {GxData.product_name}, you create your GX Python environment, install {GxData.product_name} locally, and then configure the necessary dependencies.
+To validate data stored on SQL databases with GX Core, you create your GX Python environment, install GX Core locally, and then configure the necessary dependencies.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ To validate data stored on SQL databases with {GxData.product_name}, you create 
 
    You can manage your credentials for all environments and Data Sources by storing them as environment variables.  To do this, enter `export ENV_VARIABLE_NAME=env_var_value` in the terminal or add the equivalent command to your `~/.bashrc` file.
 
-   You can reference environment variables in {GxData.product_name} by including them in strings using the format `${ENV_VARIABLE_NAME}`.  For instance, to insert the password stored as `MY_DB_PASSWORD` into a PostgreSql connection string you would provide the string:
+   You can reference environment variables in GX Core by including them in strings using the format `${ENV_VARIABLE_NAME}`.  For instance, to insert the password stored as `MY_DB_PASSWORD` into a PostgreSql connection string you would provide the string:
 
    ```python title="Example PostgreSql Connection String"
    "postgresql+psycopg2://<username>:${MY_DB_PW}@<host>:<port>/<database>"

@@ -19,9 +19,18 @@ At runtime, a Checkpoint can take in a `batch_parameters` dictionary that select
 - <PrereqPreconfiguredDataContext/>.
 - <PrereqCheckpoint/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 In this procedure your Data Context is assumed to be stored in the variable `context` and your Checkpoint is assumed to be stored in the variable `checkpoint`.
 

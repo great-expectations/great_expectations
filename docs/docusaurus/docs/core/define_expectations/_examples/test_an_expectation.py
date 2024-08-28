@@ -34,7 +34,9 @@ validation_results = batch.validate(expectation)
 # </snippet>
 
 # Evaluate the Validation Results:
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - evaluate Validation Results">
 print(validation_results)
+# </snippet>
 
 # If needed, adjust the Expectation's preset parameters and test again:
 # <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - modify preset expectation parameters">
@@ -71,9 +73,9 @@ print(new_validation_results)
 # # </snippet>
 #
 # # Evaluate the Validation Results:
-# # <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - evaluate Validation Results">
+#
 # print(validation_results)
-# # </snippet>
+#
 #
 # # If needed, update the Expectation Parameter dictionary and test again:
 # # <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - modify and retest Expectation Parameters dictionary">

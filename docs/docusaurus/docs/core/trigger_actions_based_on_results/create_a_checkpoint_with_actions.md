@@ -18,9 +18,18 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
 - <PrereqPreconfiguredDataContext/>. In this guide the variable `context` is assumed to contain your Data Context.
 - <PrereqValidationDefinition/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Retrieve the Validation Definitions the Checkpoint will run.
 

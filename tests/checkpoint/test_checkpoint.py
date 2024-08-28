@@ -83,6 +83,62 @@ def test_checkpoint_save_success(mocker: MockerFixture):
     context.checkpoint_store.update.assert_called_once_with(key=store_key, value=checkpoint)
 
 
+class TestValidationDefinitionInteraction:
+    """
+    These tests are specifically to verify the following workflow:
+    * Users instantiates (but doesn't save) a ValidationDefinition
+    * User instantiates (but doesn't save) a Checkpoint with the ValidationDefinition
+    * User saves the ValidationDefinition
+    * User saves the Checkpoint
+
+    See https://greatexpectations.atlassian.net/browse/V1-496.
+    """
+
+    @pytest.mark.unit
+    def test_checkpoint_does_not_clone_validation_definition(self):
+        context = gx.get_context(mode="ephemeral")
+
+        batch_definition = (
+            context.data_sources.add_pandas("my_datasource")
+            .add_dataframe_asset("my_asset")
+            .add_batch_definition_whole_dataframe("my_batch_definition")
+        )
+        suite = context.suites.add(ExpectationSuite(name="my_suite"))
+        validation_definition = ValidationDefinition(
+            name="my_validation_definition", suite=suite, data=batch_definition
+        )
+
+        checkpoint = Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+
+        assert checkpoint.validation_definitions[0] is validation_definition
+
+    @pytest.mark.filesystem
+    def test_save_order_does_not_matter(self, tmp_path: pathlib.Path):
+        with working_directory(tmp_path):
+            context = gx.get_context(mode="file")
+
+            batch_definition = (
+                context.data_sources.add_pandas("my_datasource")
+                .add_dataframe_asset("my_asset")
+                .add_batch_definition_whole_dataframe("my_batch_definition")
+            )
+            suite = context.suites.add(ExpectationSuite(name="my_suite"))
+            validation_definition = ValidationDefinition(
+                name="my_validation_definition", suite=suite, data=batch_definition
+            )
+
+            checkpoint = Checkpoint(
+                name="my_checkpoint",
+                validation_definitions=[validation_definition],
+            )
+
+            context.validation_definitions.add(validation_definition)
+            context.checkpoints.add(checkpoint)
+
+
 @pytest.fixture
 def slack_action():
     return SlackNotificationAction(

@@ -14,7 +14,7 @@ import InstallGxCloud from './_install_gx/_gx_cloud_installation.md';
 
 import PythonVersion from '../_core_components/_python_version.md';
 
-{GxData.product_name} is a Python library.  Follow the instructions in this guide to install GX in your local Python environment, or as a notebook-scoped library in hosted environments such as Databricks or EMR Spark clusters.
+GX Core is a Python library.  Follow the instructions in this guide to install GX in your local Python environment, or as a notebook-scoped library in hosted environments such as Databricks or EMR Spark clusters.
 
 ## Prerequisites
 

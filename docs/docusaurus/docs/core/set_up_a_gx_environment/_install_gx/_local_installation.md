@@ -1,7 +1,7 @@
 import ReleaseVersionBox from '../../../components/versions/_gx_version_code_box.mdx'
 import GxData from '../../_core_components/_data.jsx'
 
-{GxData.product_name} is a Python library and as such can be used with a local Python installation to access the functionality of GX through Python scripts.
+GX Core is a Python library and as such can be used with a local Python installation to access the functionality of GX through Python scripts.
 
 ### Installation and setup
 
@@ -19,7 +19,7 @@ import GxData from '../../_core_components/_data.jsx'
    python -m ensurepip --upgrade
    ```
 
-3. Install the {GxData.product_name} library:
+3. Install the GX Core library:
 
    ```bash title="Terminal input"
    pip install great_expectations

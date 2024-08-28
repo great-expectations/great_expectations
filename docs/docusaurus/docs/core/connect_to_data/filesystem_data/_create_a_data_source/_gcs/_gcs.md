@@ -12,9 +12,18 @@ import PrereqDataContext from '../../../../_core_components/prerequisites/_preco
 - <PrereqDataContext/>
 - Access to data files in Google Cloud Storage.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Set up the Data Source's credentials.
 
