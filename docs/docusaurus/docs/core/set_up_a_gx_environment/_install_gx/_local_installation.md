@@ -1,4 +1,4 @@
-import ReleaseVersionBox from '../../../components/versions/_gx_version_code_box.mdx'
+
 import GxData from '../../_core_components/_data.jsx'
 
 GX Core is a Python library and as such can be used with a local Python installation to access the functionality of GX through Python scripts.

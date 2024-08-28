@@ -1,4 +1,3 @@
-import ReleaseVersionBox from '../../../components/versions/_gx_version_code_box.mdx'
 
 GX Core is a Python library and as such can be used with a local Python installation to access the functionality of GX through Python scripts.
 
@@ -24,12 +23,9 @@ GX Core is a Python library and as such can be used with a local Python installa
   pip install great_expectations
   ```
 
-4. Verify that GX installed successfully with the CLI command:
+4. Verify that GX installed successfully with following code:
 
-  ```bash title="Terminal input"
-  great_expectations --version
-  ```
-
-  The output you receive if GX was successfully installed will be:
-
-  <ReleaseVersionBox/>
+   ```python title="Python" name="docs/docusaurus/docs/core/set_up_a_gx_environment/_install_gx/_local_installation_verification.py - full code example"
+   ```
+   
+   If GX was installed correctly, the version number of the installed GX library will be printed.
