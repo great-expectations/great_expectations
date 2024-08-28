@@ -22,7 +22,7 @@ The following table defines the GX Cloud, GX Core, and Community Supported integ
 
 | Integration Type      | GX Cloud                   | GX Core                                                                       | Community                         |
 | --------------------- | -------------------------- | ----------------------------------------------------------------------------- | --------------------------------- |
-| Data Sources¹         | Snowflake<br/> PostgreSQL² | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>Spark<br/>Pandas | Redshift<br/>MSSQL<br/>MySQL<br/> |
+| Data Sources¹         | Snowflake<br/> PostgreSQL² | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>Spark<br/>Pandas | MSSQL<br/>MySQL<br/> |
 | Configuration Stores³ | In-app                     | File system                                                                   | None                              |
 | Actions               | Slack                      | Slack <br/>Email                                                              | None                              |
 | Credential Store      | Environment variables      | Environment variables <br/> YAML⁴                                             | None                              |
