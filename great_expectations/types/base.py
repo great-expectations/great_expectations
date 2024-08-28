@@ -30,7 +30,7 @@ class DotDict(dict):
     __setattr__: Callable[[Self, _KT, _VT], None] = dict.__setitem__
     __delattr__: Callable[[Self, _KT], None] = dict.__delitem__
 
-    def __dir__(self):
+    def __dir__(self):  # type: ignore[explicit-override] # FIXME
         return self.keys()
 
     # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
