@@ -297,7 +297,7 @@ class FluentBaseModel(pydantic.BaseModel):
             include_exclude_dict = {}
         return include_exclude_dict
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return self.yaml()
 
 

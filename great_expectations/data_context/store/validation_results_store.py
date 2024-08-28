@@ -157,14 +157,14 @@ class ValidationResultsStore(Store):
 
         return suite_validation_result_dict
 
-    def serialize(self, value):
+    def serialize(self, value):  # type: ignore[explicit-override]
         if self.cloud_mode:
             return value.to_json_dict()
         return self._expectationSuiteValidationResultSchema.dumps(
             value.to_json_dict(), indent=2, sort_keys=True
         )
 
-    def deserialize(self, value):
+    def deserialize(self, value):  # type: ignore[explicit-override]
         if isinstance(value, dict):
             return self._expectationSuiteValidationResultSchema.load(value)
         else:

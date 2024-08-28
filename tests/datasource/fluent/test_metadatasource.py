@@ -157,7 +157,7 @@ def empty_sources(context_sources_cleanup) -> Generator[DataSourceManager, None,
 
 
 class DummyExecutionEngine(ExecutionEngine):
-    def get_batch_data_and_markers(self, batch_spec):
+    def get_batch_data_and_markers(self, batch_spec):  # type: ignore[explicit-override]
         raise NotImplementedError
 
 
@@ -344,7 +344,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     class RedAsset(DataAsset):
         type = "red"
 
-        def test_connection(self): ...
+        def test_connection(self): ...  # type: ignore[explicit-override]
 
     class BlueAsset(DataAsset):
         type = "blue"
@@ -361,7 +361,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         def execution_engine_type(self) -> Type[ExecutionEngine]:
             return DummyExecutionEngine
 
-        def test_connection(self): ...
+        def test_connection(self): ...  # type: ignore[explicit-override]
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)  # type: ignore[call-arg] # ?

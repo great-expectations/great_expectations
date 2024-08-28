@@ -87,14 +87,14 @@ class ConfigurationStore(Store):
 
         self._overwrite_existing = overwrite_existing
 
-    def serialize(self, value):
+    def serialize(self, value):  # type: ignore[explicit-override]
         if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
         return value.to_yaml_str()
 
-    def deserialize(self, value):
+    def deserialize(self, value):  # type: ignore[explicit-override]
         config = value
         if isinstance(value, str):
             config: CommentedMap = yaml.load(value)

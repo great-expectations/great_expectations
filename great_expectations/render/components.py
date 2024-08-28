@@ -42,7 +42,7 @@ class AtomicPrescriptiveRendererType(str, Enum):
     FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
     SUMMARY = ".".join([AtomicRendererType.PRESCRIPTIVE, "summary"])
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return self.value
 
 
@@ -52,7 +52,7 @@ class AtomicDiagnosticRendererType(str, Enum):
     FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
     OBSERVED_VALUE = ".".join([AtomicRendererType.DIAGNOSTIC, "observed_value"])
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return self.value
 
 
@@ -132,7 +132,7 @@ class RenderedContent:
         """
         return {}
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override]
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
@@ -497,13 +497,13 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         d["string_template"] = self.string_template
         return d
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         string = pTemplate(self.string_template["template"]).safe_substitute(
             self.string_template["params"]
         )
         return string
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override]
         return str(self) == str(other)
 
 

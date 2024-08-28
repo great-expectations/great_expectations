@@ -335,7 +335,7 @@ class CaseInsensitiveString(str):
         else:
             return False
 
-    def __hash__(self):
+    def __hash__(self):  # type: ignore[explicit-override]
         return hash(self._lower)
 
     @override

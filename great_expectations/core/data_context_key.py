@@ -28,13 +28,13 @@ class DataContextKey(metaclass=ABCMeta):
     def from_fixed_length_tuple(cls, tuple_) -> DataContextKey:
         raise NotImplementedError
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override]
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         return self.to_tuple() == other.to_tuple()
 
-    def __ne__(self, other):
+    def __ne__(self, other):  # type: ignore[explicit-override]
         return not self == other
 
     def __lt__(self, other):
@@ -57,10 +57,10 @@ class DataContextKey(metaclass=ABCMeta):
             return NotImplemented
         return self.to_tuple() >= other.to_tuple()
 
-    def __hash__(self):
+    def __hash__(self):  # type: ignore[explicit-override]
         return hash(self.to_tuple())
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override]
         return f"{self.__class__.__name__}::{'/'.join(self.to_tuple())}"
 
 
@@ -70,10 +70,10 @@ class StringKey(DataContextKey):
     def __init__(self, key) -> None:
         self._key = key
 
-    def to_tuple(self):
+    def to_tuple(self):  # type: ignore[explicit-override]
         return (self._key,)
 
-    def to_fixed_length_tuple(self):
+    def to_fixed_length_tuple(self):  # type: ignore[explicit-override]
         return self.to_tuple()
 
     @classmethod

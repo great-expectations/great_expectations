@@ -801,7 +801,7 @@ illegal.  Please check your config."""  # noqa: E501
             partitioned_domain_kwargs.accessor,
         )
 
-    def add_column_row_condition(
+    def add_column_row_condition(  # type: ignore[explicit-override]
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
         # We explicitly handle filter_nan & filter_null for spark using a spark-native condition

@@ -93,10 +93,10 @@ class SqlAlchemyQueryStore(Store):
             return StringKey(key)
         return key
 
-    def get(self, key):
+    def get(self, key):  # type: ignore[explicit-override]
         return super().get(self._convert_key(key))
 
-    def set(self, key, value):
+    def set(self, key, value):  # type: ignore[explicit-override]
         return super().set(self._convert_key(key), value)
 
     def get_query_result(self, key, query_parameters=None):

@@ -339,7 +339,7 @@ class TestMarkerCoverage:
     name: str
     markers: set[str]
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return f"{self.path}, {self.name}, {self.markers}"
 
 

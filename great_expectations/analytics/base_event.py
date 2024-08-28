@@ -18,7 +18,7 @@ class Action:
 
     name: str
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override]
         return self.name
 
 

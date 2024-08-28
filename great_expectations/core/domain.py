@@ -128,13 +128,13 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
             rule_name=rule_name,
         )
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return self.__repr__()
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override]
         return (other is not None) and (
             (hasattr(other, "to_json_dict") and self.to_json_dict() == other.to_json_dict())
             or (
@@ -147,7 +147,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
             or (self.__str__() == str(other))
         )
 
-    def __ne__(self, other):
+    def __ne__(self, other):  # type: ignore[explicit-override]
         return not self.__eq__(other=other)
 
     @override

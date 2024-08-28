@@ -228,7 +228,7 @@ class DatabaseStoreBackend(StoreBackend):
             create_engine_kwargs,
         )
 
-    def _get(self, key):
+    def _get(self, key):  # type: ignore[explicit-override]
         sel = (
             sa.select(sa.column("value"))
             .select_from(self._table)
@@ -285,7 +285,7 @@ class DatabaseStoreBackend(StoreBackend):
     def _move(self) -> None:  # type: ignore[override]
         raise NotImplementedError
 
-    def get_url_for_key(self, key):
+    def get_url_for_key(self, key):  # type: ignore[explicit-override]
         url = self._convert_engine_and_key_to_url(key)
         return url
 
@@ -303,7 +303,7 @@ class DatabaseStoreBackend(StoreBackend):
         db_name = full_url.split("/")[-1]
         return f"{engine_name}://{db_name}/{key[0]!s}"
 
-    def _has_key(self, key):
+    def _has_key(self, key):  # type: ignore[explicit-override]
         sel = (
             sa.select(sa.func.count(sa.column("value")))
             .select_from(self._table)
@@ -323,7 +323,7 @@ class DatabaseStoreBackend(StoreBackend):
             logger.debug(f"Error checking for value: {e!s}")
             return False
 
-    def list_keys(self, prefix=()):
+    def list_keys(self, prefix=()):  # type: ignore[explicit-override]
         columns = [sa.column(col) for col in self.key_columns]
         sel = (
             sa.select(*columns)
@@ -342,7 +342,7 @@ class DatabaseStoreBackend(StoreBackend):
             row_list: list[sqlalchemy.Row] = connection.execute(sel).fetchall()
         return [tuple(row) for row in row_list]
 
-    def remove_key(self, key):
+    def remove_key(self, key):  # type: ignore[explicit-override]
         delete_statement = self._table.delete().where(
             sa.and_(
                 *(

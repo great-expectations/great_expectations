@@ -230,13 +230,13 @@ class LegacyBatchDefinition(SerializableDictDot):
     def batching_regex(self) -> re.Pattern | None:
         return self._batching_regex
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override]
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         return self.id == other.id
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
     @override
@@ -406,7 +406,7 @@ class BatchRequestBase(SerializableDictDot):
 
         return result
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override]
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
@@ -877,7 +877,7 @@ class Batch(SerializableDictDot):
 
         return IDDict({}).to_id()
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
     def head(self, n_rows: int = 5, fetch_all: bool = False) -> pd.DataFrame:

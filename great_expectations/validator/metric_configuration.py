@@ -50,10 +50,10 @@ class MetricConfiguration:
 
         self._metric_dependencies: IDDict = IDDict({})
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return self.__repr__()
 
     @property

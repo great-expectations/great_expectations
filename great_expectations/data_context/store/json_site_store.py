@@ -59,10 +59,10 @@ class JsonSiteStore(Store):
 
         return json_site_dict
 
-    def serialize(self, value):
+    def serialize(self, value):  # type: ignore[explicit-override]
         return value.to_json_dict()
 
-    def deserialize(self, value):
+    def deserialize(self, value):  # type: ignore[explicit-override]
         return RenderedDocumentContent(**loads(value))
 
     @property

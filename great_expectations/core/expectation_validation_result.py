@@ -116,7 +116,7 @@ class ExpectationValidationResult(SerializableDictDot):
         }
         self.rendered_content = rendered_content
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override]
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
         # NOTE: JPC - 20200213 - need to spend some time thinking about whether we want to
         # consistently allow dict as a comparison alternative in situations like these...
@@ -159,7 +159,7 @@ class ExpectationValidationResult(SerializableDictDot):
             # if invalid comparisons are attempted, the objects are not equal.
             return False
 
-    def __ne__(self, other):
+    def __ne__(self, other):  # type: ignore[explicit-override]
         # Negated implementation of '__eq__'. TODO the method should be deleted when it will coincide with __eq__.  # noqa: E501
         # return not self == other
         if not isinstance(other, self.__class__):
@@ -522,7 +522,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             return self.meta["active_batch_definition"].data_asset_name
         return None
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override]
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
@@ -537,10 +537,10 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
