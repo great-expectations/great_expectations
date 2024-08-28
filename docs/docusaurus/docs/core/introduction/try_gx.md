@@ -21,7 +21,7 @@ To complement your code exploration, check out the [GX Core overview](/core/intr
 
 GX Core is a Python library you can install with the Python `pip` tool.
 
-For more comprehensive guidance on setting up a Python environment, installing GX Core, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/installation_and_setup/install_gx.md).
+For more comprehensive guidance on setting up a Python environment, installing GX Core, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/set_up_a_gx_environment/set_up_a_gx_environment.md).
 
 1. Run the following terminal command to install the GX Core library:
 
@@ -211,6 +211,6 @@ Run the following steps in a Python interpreter, IDE, notebook, or script.
 
 - Go to the [Expectations Gallery](https://greatexpectations.io/expectations) and experiment with other Expectations.
 
-- If you're ready to start using GX Core with your own data, the [Set up a GX environment](/core/installation_and_setup/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
+- If you're ready to start using GX Core with your own data, the [Set up a GX environment](/core/set_up_a_gx_environment/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
 
 - <GxCloudAdvert/>
