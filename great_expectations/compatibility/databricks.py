@@ -5,6 +5,6 @@ DATABRICKS_CONNECT_NOT_IMPORTED = NotImported(
 )
 
 try:
-    from databricks import connect  # type: ignore[import-not-found]  # type: ignore[import-untyped]
+    from databricks import connect  # type: ignore[import-not-found,import-untyped]
 except ImportError:
     connect = DATABRICKS_CONNECT_NOT_IMPORTED
