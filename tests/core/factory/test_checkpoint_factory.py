@@ -372,7 +372,12 @@ class TestCheckpointFactoryAnalytics:
             _ = context.checkpoints.add(checkpoint=checkpoint)
 
         # Assert
-        mock_submit.assert_called_once_with(event=CheckpointCreatedEvent(checkpoint_id=mock.ANY))
+        mock_submit.assert_called_once_with(
+            event=CheckpointCreatedEvent(
+                checkpoint_id=mock.ANY,
+                validation_definition_ids=[mock.ANY for _ in checkpoint.validation_definitions],
+            )
+        )
 
     @pytest.mark.filesystem
     def test_checkpoint_factory_delete_emits_event_filesystem(self, empty_data_context):
