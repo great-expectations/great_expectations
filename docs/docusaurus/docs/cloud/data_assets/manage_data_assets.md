@@ -16,7 +16,7 @@ A Data Asset is a collection of records that you create when you connect to your
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to data](/core/manage_and_access_data/connect_to_data/connect_to_data.md) in the GX 1.0 documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to data](/core/manage_and_access_data/connect_to_data/connect_to_data.md) in the GX Core documentation. 
 
 <Tabs
   groupId="manage-data-assets"
@@ -75,17 +75,21 @@ Define the data you want GX Cloud to access within Snowflake.
 
 7. Click **Connect**.
 
-8. Complete the following fields:
+8. Select tables to import as Data Assets:
 
-    - **Table name**: Enter the name of the Data Source table you're connecting to.
+    - Check the box next to a table name to add that table as an asset.
     
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
+    - At least one table must be added.
 
-9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 8.
+    - To search for a specific table type the table's name in the **Search** box above the list of tables.
+            
+    - To add all of the available tables check the box for **All Tables**.
 
-10. Click **Finish**.
 
-11. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+
+9. Click **Add Asset**.
+
+10. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -120,16 +124,20 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 6. Click **Connect**.
 
-7. Complete the following fields:
+7. Select tables to import as Data Assets:
 
-    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    - Check the box next to a table name to add that table as an asset.
 
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique across all Data Sources in GX Cloud.
+    - At least one table must be added.
 
-8. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 7.
-9. Click **Finish**.
+    - To search for a specific table type the table's name in the **Search** box above the list of tables.
 
-10. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+    - To add all of the available tables check the box for **All Tables**.
+
+
+8. Click **Add Asset**.
+
+9. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 </Tabs>
@@ -207,15 +215,18 @@ Additional Data Assets can only be added to Data Sources created in GX Cloud.
 
 3. Click **Add Data Asset**.
 
-4. Complete the following fields:
+4. Select tables to import as Data Assets:
 
-    - **Table name**: Enter the name of the Data Source table you're connecting to.
+    - Check the box next to a table name to add that table as an asset.
 
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
+    - At least one table must be added.
 
-5. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 4.
+    - To search for a specific table type the table's name in the **Search** box above the list of tables.
 
-6. Click **Finish**.
+    - To add all of the available tables check the box for **All Tables**.
+
+
+5. Click **Add Asset**.
 
 
 ## Edit Data Source settings

@@ -25,7 +25,7 @@ import AdditionalSettingsSummary from './_additional_settings/_SUMMARY.md';
 import AdditionalSettingsComplete from './_additional_settings/_COMPLETE.md';
 
 
-When you validate data with {GxData.product_name} you can set the level of detail returned in your Validation Results by specifying a value for the optional `result_format` parameter.  These settings will be applied to the results returned by each validated Expectation.
+When you validate data with GX Core you can set the level of detail returned in your Validation Results by specifying a value for the optional `result_format` parameter.  These settings will be applied to the results returned by each validated Expectation.
 
 Typical use cases customizing Result Format settings include summarizing values that cause Expectations to fail durring data exploration, retrieving failed rows to facilitate cleaning data, or excluding excess Validation Result data in published Data Docs.
 

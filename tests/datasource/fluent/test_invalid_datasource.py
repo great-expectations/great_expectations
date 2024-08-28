@@ -16,7 +16,7 @@ from great_expectations.datasource.fluent import (
     InvalidDatasource,
     TestConnectionError,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 
 pytestmark = pytest.mark.unit
 
@@ -31,7 +31,6 @@ _EXCLUDE_METHODS: Final[set[str]] = {
     "get_batch_definition",  # DataAsset
     "get_execution_engine",
     "json",
-    "parse_order_by_sorters",
     "update_batch_definition_field_set",  # DataAsset
     "yaml",
 }
@@ -101,7 +100,7 @@ class InvalidDSFactory(Protocol):
 def invalid_datasource_factory() -> InvalidDSFactory:
     def _invalid_ds_fct(config: dict) -> InvalidDatasource:
         try:
-            ds_type: type[Datasource] = _SourceFactories.type_lookup[config["type"]]
+            ds_type: type[Datasource] = DataSourceManager.type_lookup[config["type"]]
             ds_type(**config)
         except (pydantic.ValidationError, LookupError) as config_error:
             return InvalidDatasource(**config, config_error=config_error)
@@ -270,7 +269,7 @@ class TestInvalidDatasource:
 def rand_invalid_datasource_with_assets(
     invalid_datasource_factory: InvalidDSFactory,
 ) -> InvalidDatasource:
-    random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
+    random_ds_type = random.choice([t for t in DataSourceManager.type_lookup.type_names()])
     invalid_ds = invalid_datasource_factory(
         {
             "name": "my invalid ds",
@@ -291,7 +290,7 @@ class TestInvalidDataAsset:
     def test_connection_raises_informative_error(
         self, invalid_datasource_factory: InvalidDSFactory
     ):
-        random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
+        random_ds_type = random.choice([t for t in DataSourceManager.type_lookup.type_names()])
         print(f"{random_ds_type=}")
         invalid_datasource: InvalidDatasource = invalid_datasource_factory(
             {

@@ -38,12 +38,14 @@ checkpoint = context.checkpoints.add(
     Checkpoint(
         name=checkpoint_name,
         validation_definitions=[
-            ValidationDefinition(
-                name="my_validation_definition",
-                expectation_suite=suite,
-                data=asset.add_batch_definition_path(
-                    name="2019-01", path="yellow_tripdata_sample_2019-01.csv"
-                ),
+            context.validation_definitions.add(
+                ValidationDefinition(
+                    name="my_validation_definition",
+                    expectation_suite=suite,
+                    data=asset.add_batch_definition_path(
+                        name="2019-01", path="yellow_tripdata_sample_2019-01.csv"
+                    ),
+                )
             )
         ],
     )
@@ -61,7 +63,7 @@ with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
 
 stores = great_expectations_yaml["stores"]
-pop_stores = ["checkpoint_store", "suite_parameter_store", "expectations_store"]
+pop_stores = ["checkpoint_store", "expectations_store"]
 for store in pop_stores:
     stores.pop(store)
 

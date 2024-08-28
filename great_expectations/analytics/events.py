@@ -7,6 +7,7 @@ from great_expectations.analytics.actions import (
     CHECKPOINT_CREATED,
     CHECKPOINT_DELETED,
     DATA_CONTEXT_INITIALIZED,
+    DOMAIN_OBJECT_ALL_DESERIALIZE_ERROR,
     EXPECTATION_SUITE_CREATED,
     EXPECTATION_SUITE_DELETED,
     EXPECTATION_SUITE_EXPECTATION_CREATED,
@@ -157,11 +158,23 @@ class _CheckpointEvent(Event):
 class CheckpointCreatedEvent(_CheckpointEvent):
     _allowed_actions: ClassVar[List[Action]] = [CHECKPOINT_CREATED]
 
-    def __init__(self, checkpoint_id: str | None = None):
+    def __init__(
+        self,
+        checkpoint_id: str | None = None,
+        validation_definition_ids: list[str | None] | None = None,
+    ):
+        self.validation_definition_ids = validation_definition_ids
         super().__init__(
             action=CHECKPOINT_CREATED,
             checkpoint_id=checkpoint_id,
         )
+
+    @override
+    def _properties(self) -> dict:
+        return {
+            "validation_definition_ids": self.validation_definition_ids,
+            **super()._properties(),
+        }
 
 
 @dataclass
@@ -206,3 +219,23 @@ class ValidationDefinitionDeletedEvent(_ValidationDefinitionEvent):
             action=VALIDATION_DEFINITION_DELETED,
             validation_definition_id=validation_definition_id,
         )
+
+
+@dataclass
+class DomainObjectAllDeserializationEvent(Event):
+    _allowed_actions: ClassVar[List[Action]] = [DOMAIN_OBJECT_ALL_DESERIALIZE_ERROR]
+
+    store_name: str
+    error_type: str
+
+    def __init__(self, store_name: str, error_type: str):
+        super().__init__(action=DOMAIN_OBJECT_ALL_DESERIALIZE_ERROR)
+        self.error_type = error_type
+        self.store_name = store_name
+
+    @override
+    def _properties(self) -> dict:
+        return {
+            "error_type": self.error_type,
+            "store_name": self.store_name,
+        }

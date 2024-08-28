@@ -204,4 +204,4 @@ class ValidationResultsStore(Store):
 
     @staticmethod
     def parse_result_url_from_gx_cloud_ref(ref: GXCloudResourceRef) -> str | None:
-        return ref.response["data"]["attributes"]["validation_result"]["display_url"]
+        return ref.response["data"]["result_url"]

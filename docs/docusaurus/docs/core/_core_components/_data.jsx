@@ -1,3 +1,3 @@
 export default {
-  product_name: 'GX 1.0'
+  product_name: 'GX Core'
 }

@@ -62,7 +62,7 @@ The following are the available Data Context types:
 
 <TabItem value="file" label="Local (File)">
 
-A Data Context is required in almost all Python scripts using GX 1.0. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
+A Data Context is required in almost all Python scripts using GX Core. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
 ### Import GX
 
@@ -288,7 +288,7 @@ Environment variables securely store your GX Cloud access credentials.
     export GX_CLOUD_ORGANIZATION_ID=<organization_id>
     ```
 
-    After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [GX OSS guides](/core/introduction/about_gx.md).
+    After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [Introduction to GX Core](/core/introduction/introduction.md).
 
 2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 

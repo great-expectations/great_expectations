@@ -76,7 +76,7 @@ def test_event_properties(event, expected_properties):
     actual_properties = event.properties()
 
     # Assert that base properties are present
-    for base_property in ("data_context_id", "oss_id", "service"):
+    for base_property in ("data_context_id", "oss_id", "service", "gx_version"):
         assert base_property in actual_properties
         actual_properties.pop(base_property)
 

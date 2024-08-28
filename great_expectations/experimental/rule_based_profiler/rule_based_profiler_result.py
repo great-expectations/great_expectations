@@ -109,12 +109,12 @@ class RuleBasedProfilerResult(SerializableDictDot):
         """
         return self.to_dict()
 
-    def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
+    def get_expectation_suite(self, name: str) -> ExpectationSuite:
         """
         Retrieve the `ExpectationSuite` generated during the `RuleBasedProfiler` run.
 
         Args:
-            expectation_suite_name: The name of the desired `ExpectationSuite`.
+            name: The name of the desired `ExpectationSuite`.
 
         Returns:
             `ExpectationSuite`
@@ -122,7 +122,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,
             expectation_suite=None,
-            expectation_suite_name=expectation_suite_name,
+            expectation_suite_name=name,
             component_name=self.__class__.__name__,
             persist=False,
         )

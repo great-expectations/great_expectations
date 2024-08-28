@@ -1,5 +1,6 @@
 import os
 import pathlib
+from unittest import mock
 
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -78,14 +79,15 @@ assert context.list_datasources() == [
     {
         "type": "postgres",
         "name": "my_postgres_db",
+        "id": mock.ANY,
         "assets": [
             {
                 "name": "postgres_taxi_data",
                 "type": "table",
-                "order_by": [],
                 "batch_metadata": {},
                 "table_name": "postgres_taxi_data",
                 "schema_name": None,
+                "id": mock.ANY,
             }
         ],
         "connection_string": ConfigStr("${POSTGRES_CONNECTION_STRING}"),
@@ -106,14 +108,15 @@ assert context.list_datasources() == [
     {
         "type": "postgres",
         "name": "my_postgres_db",
+        "id": mock.ANY,
         "assets": [
             {
                 "name": "postgres_taxi_data",
                 "type": "table",
-                "order_by": [],
                 "batch_metadata": {},
                 "table_name": "postgres_taxi_data",
                 "schema_name": None,
+                "id": mock.ANY,
             }
         ],
         "connection_string": ConfigStr("${my_postgres_db_yaml_creds}"),
