@@ -63,7 +63,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
    GX Cloud users can view the Validation Results in the GX Cloud UI by following the url provided with:
 
    ```python title="Python"
-   print(validation_results.results_url)
+   print(validation_results.result_url)
    ```
 
    :::
