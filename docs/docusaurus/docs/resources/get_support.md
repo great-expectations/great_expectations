@@ -16,11 +16,15 @@ Use one of the following methods to request support:
 
 ## GX Core support
 
-Use one of the following methods to request support:
+The order in which we are prioritizing support issues are as follows: 
 
-- Create a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11).
-- Post a message in the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82).
-- Open an issue in the [GX GitHub repository](https://github.com/great-expectations/great_expectations) when you encounter a bug.
+- Issues and PRs in the [GX GitHub repository](https://github.com/great-expectations/great_expectations)
+- Questions posted to the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11)
+- Questions posted to the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82)
+
+**Your support question will be answered more quickly if you post in Discourse than if you post in Slack.** The reason: Discourse allows for better organization and searchability of support topics.
+
+For specific details on what is GX-supported (in either GX Core or GX Cloud), community-supported or not supported, you can reference our [integration and support policy](https://docs.greatexpectations.io/docs/application_integration_support/). For areas not covered by GX support, we encourage community-driven assistance. 
 
 ## How to effectively get support
 

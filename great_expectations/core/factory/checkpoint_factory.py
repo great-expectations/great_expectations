@@ -50,6 +50,9 @@ class CheckpointFactory(Factory[Checkpoint]):
         submit_event(
             event=CheckpointCreatedEvent(
                 checkpoint_id=persisted_checkpoint.id,
+                validation_definition_ids=[
+                    vd.id for vd in persisted_checkpoint.validation_definitions
+                ],
             )
         )
 

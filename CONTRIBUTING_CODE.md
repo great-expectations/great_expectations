@@ -500,25 +500,30 @@ Test the performance of code changes to determine they perform as expected. BigQ
 
     - [HACKATHON] for submissions to an active Great Expectations Hackathon.
 
-    In the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place. For example: Closes #123”, linking to a relevant discuss or slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
+4. In the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place. For example: Closes #123”, linking to a relevant [Discourse](https://discourse.greatexpectations.io/) or Slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
 
-4. If this is your first Great Expectations contribution, you'll be prompted to complete the Contributor License Agreement (CLA). Complete the CLA and add `@cla-bot check` as a comment to the pull request (PR) to indicate that you’ve completed it.
+5. If this is your first Great Expectations contribution, you'll be prompted to complete the Contributor License Agreement (CLA). Complete the CLA and add `@cla-bot check` as a comment to the pull request (PR) to indicate that you’ve completed it.
 
-5. Wait for the Continuous Integration (CI) checks to complete and then correct any syntax or formatting issues.
+6. Wait for the Continuous Integration (CI) checks to complete and then correct any syntax or formatting issues.
 
-    A Great Expectations team member reviews, approves, and merges your PR. Depending on your GitHub notification settings, you'll be notified when there are comments or when your changes are successfully merged.
+7. A Great Expectations team member reviews, approves, and merges your PR. Depending on your GitHub notification settings, you'll be notified when there are comments or when your changes are successfully merged.
 
-## Issue tags
+## Issue labels
 
-Great Expectations uses a `stalebot` to automatically tag issues without activity as `stale`, and closes them when a response is not received within a week. To prevent `stalebot` from closing an issue, you can add the `stalebot-exempt` tag.
+Great Expectations uses a `stalebot` to automatically tag issues without activity as `stale`, and closes them when a response is not received within a week. To prevent `stalebot` from closing an issue, you can add the `stalebot-exempt` label.
 
-Additionally, Great Expectations adds the following tags to indicate issue status:
+Additionally, Great Expectations adds the following labels to indicate issue status:
 
-- The`help wanted` tag identifies useful issues that require help from community contributors to accelerate development.
+- `help wanted`: identifies useful issues that require help from community contributors to accelerate development
 
-- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion.
+- `enhacement` and `expectation-request`: identify new Great Expectations features that require additional investigation and discussion
 
-- The `good first issue` tag identifies issues that provide an introduction to the Great Expectations contribution process.
+- `good first issue`: identifies issues that provide an introduction to the Great Expectations contribution process
+
+We also have labels to indicate the level of support you can expect for each issue. They are as follows:
+- `gx-supported`: related to a part of the code-base that is tested and actively maintained with new GX Core or GX Cloud releases
+- `community-supported`:  related to a part of the code-base that is not tested and actively maintained with new GX Core or GX Cloud releases; however, we actively welcome ongoing maintenance from the community
+- `not-supported`: an issue that we at GX will not be maintaining, and we will not support PRs or contributions from the community on the topic
 
 ## Contributor license agreement (CLA)
 
@@ -527,15 +532,3 @@ Additionally, Great Expectations adds the following tags to indicate issue statu
 Please make sure you have signed our Contributor License Agreement (either [Individual Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSdA-aWKQ15yBzp8wKcFPpuxIyGwohGU1Hx-6Pa4hfaEbbb3fg/viewform?usp=sf_link) or [Software Grant and Corporate Contributor License Agreement (“Agreement”) v1.0)](https://docs.google.com/forms/d/e/1FAIpQLSf3RZ_ZRWOdymT8OnTxRh5FeIadfANLWUrhaSHadg_E20zBAQ/viewform?usp=sf_link).
 
 We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
-
-## Issue Tags
-
-We use `stalebot` to automatically tag issues without activity as `stale`, and close them if no response is received in one week. Adding the `stalebot-exempt` tag will prevent the bot from trying to close the issue.
-
-Additionally, we try to add tags to indicate the status of key discussion elements:
-
-* `help wanted` covers issues where we have not prioritized the request, but believe the feature is useful and so we would welcome community contributors to help accelerate development.
-
-* `enhacement` and `expectation-request` indicate discussion of potential new features for Great Expectations
-
-* `good first issue` indicates a small-ish task that would be a good way to begin making contributions to Great Expectations

@@ -19,7 +19,7 @@ GX Core is a Python library.  Follow the instructions in this guide to install G
 ## Prerequisites
 
 - <PrereqPythonInstalled/>
-- Recommended. [A Python virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment)
+- Recommended. [A Python virtual environment](/core/set_up_a_gx_environment/install_python.md#optional-create-a-virtual-environment)
 - Internet access
 - Permissions to download and install packages in your environment
 
@@ -55,7 +55,3 @@ Hosted environments such as EMR Spark or Databricks clusters do not provide a fi
 
 </Tabs>
 
-## Next steps
-
-- [Install additional dependencies](/core/installation_and_setup/additional_dependencies/additional_dependencies.md)
-- [Manage Data Contexts](/core/installation_and_setup/manage_data_contexts.md)
