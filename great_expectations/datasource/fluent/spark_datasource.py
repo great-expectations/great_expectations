@@ -210,9 +210,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """  # noqa: E501
+            A BatchRequest object that can be used to obtain a batch from an Asset by calling the
+            get_batch method.
+        """
         if batch_slice is not None:
             raise BuildBatchRequestError(
                 message="batch_slice is not currently supported for this DataAsset "

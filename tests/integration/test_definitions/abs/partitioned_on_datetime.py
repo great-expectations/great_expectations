@@ -33,23 +33,22 @@ batch_definition = asset.add_batch_definition_monthly(
     regex=re.compile(r"yellow_tripdata_sample_(?P<year>.*)-(?P<month>.*)\.csv"),
 )
 
-# first batch request: not passing any parameters
+# first check: getting all identifiers
 batch_request = batch_definition.build_batch_request()
-batch_list = asset.get_batch_list_from_batch_request(batch_request)
-assert len(batch_list) == 3
-assert batch_list[0].metadata == {
+batch_identifiers_list = asset.get_batch_identifiers_list(batch_request)
+assert len(batch_identifiers_list) == 3
+assert batch_identifiers_list[0] == {
     "year": "2019",
     "month": "01",
     "path": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
 }
 
-# second batch request: passing in parameters
+# second batch request: getting the batch
 second_batch_request = batch_definition.build_batch_request(
     batch_parameters={"year": "2019", "month": "02"}
 )
-second_batch_list = asset.get_batch_list_from_batch_request(second_batch_request)
-assert len(second_batch_list) == 1
-assert second_batch_list[0].metadata == {
+second_batch_list = asset.get_batch(second_batch_request)
+assert second_batch_list.metadata == {
     "year": "2019",
     "month": "02",
     "path": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02.csv",

@@ -695,8 +695,8 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
+            A BatchRequest object that can be used to obtain a batch from an Asset by calling the
+            get_batch method.
         """  # noqa: E501
         if options is not None and not self._batch_parameters_are_valid(
             options=options, partitioner=partitioner
@@ -796,7 +796,7 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec
 
-        This is called by get_batch_list_from_batch_request to generate the batches.
+        This is called by get_batch to generate the batch.
 
         Returns:
             A dictionary that will be passed to self._create_batch_spec(**returned_dict)

@@ -343,8 +343,8 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
             partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
+            A BatchRequest object that can be used to obtain a batch from an asset by calling the
+            get_batch method.
         """  # noqa: E501
         raise NotImplementedError(
             """One must implement "build_batch_request" on a DataAsset subclass."""

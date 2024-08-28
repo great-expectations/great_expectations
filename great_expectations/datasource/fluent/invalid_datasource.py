@@ -34,7 +34,8 @@ if TYPE_CHECKING:
 
 # Controls which methods should raise an error when called on an InvalidDatasource
 METHOD_SHOULD_RAISE_ERROR: Final[set] = {
-    "get_batch_list_from_batch_request",
+    "get_batch",
+    "get_batch_identifiers_list",
     "add_batch_definition",
 }
 
