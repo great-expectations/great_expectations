@@ -429,7 +429,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         (None, "03", "yellow_tripdata_sample_2018-04.csv", 0),
     ],
 )
-def test_get_batch_list_batch_count(
+def test_get_batch_identifiers_list_count(
     year: Optional[str],
     month: Optional[str],
     path: Optional[str],
@@ -445,12 +445,12 @@ def test_get_batch_list_batch_count(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == batch_count
+    batch_identifier_list = asset.get_batch_identifiers_list(request)
+    assert len(batch_identifier_list) == batch_count
 
 
 @pytest.mark.unit
-def test_get_batch_list_from_partially_specified_batch_request(
+def test_get_batch_identifiers_list_from_partially_specified_batch_request(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     # Verify test directory has files that don't match what we will query for
@@ -474,7 +474,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
-    batches = asset.get_batch_list_from_batch_request(request)
+    batches = asset.get_batch_identifiers_list(request)
     assert (len(batches)) == 12
     batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
@@ -525,8 +525,8 @@ def test_pandas_slice_batch_count(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
-    batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
-    assert len(batches) == expected_batch_count
+    batch_identifiers_list = asset.get_batch_identifiers_list(batch_request=batch_request)
+    assert len(batch_identifiers_list) == expected_batch_count
 
 
 def bad_batching_regex_config(
@@ -596,7 +596,7 @@ def test_csv_asset_batch_metadata(
         )
     )
 
-    batches = pandas_filesystem_datasource.get_batch_list_from_batch_request(batch_request)
+    batch_identifiers_list = pandas_filesystem_datasource.get_batch_identifiers_list(batch_request)
 
     substituted_batch_metadata: BatchMetadata = copy.deepcopy(asset_specified_metadata)
     substituted_batch_metadata.update(
@@ -610,7 +610,7 @@ def test_csv_asset_batch_metadata(
 
     for i, month in enumerate(months):
         substituted_batch_metadata["month"] = month
-        actual_metadata = copy.deepcopy(batches[i].metadata)
+        actual_metadata = copy.deepcopy(batch_identifiers_list[i])
         # not testing path for the purposes of this test
         actual_metadata.pop("path")
         actual_metadata.pop("year")

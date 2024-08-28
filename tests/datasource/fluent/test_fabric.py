@@ -130,7 +130,7 @@ class TestFabricPowerBI:
         )
         my_asset = add_asset_fn(f"my_{asset_type}_asset", **asset_kwargs)
         batch_request = my_asset.build_batch_request()
-        my_asset.get_batch_list_from_batch_request(batch_request)
+        my_asset.get_batch(batch_request)
 
         _, captured_kwargs = capture_reader_fn_params
         print(f"keyword args:\n{pf(captured_kwargs[-1])}")

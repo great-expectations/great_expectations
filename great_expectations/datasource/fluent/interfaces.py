@@ -762,6 +762,10 @@ class Datasource(
         data_asset = self.get_asset(batch_request.data_asset_name)
         return data_asset.get_batch(batch_request)
 
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        data_asset = self.get_asset(batch_request.data_asset_name)
+        return data_asset.get_batch_identifiers_list(batch_request)
+
     def get_assets_as_dict(self) -> MutableMapping[str, _DataAssetT]:
         """Returns available DataAsset objects as dictionary, with corresponding name as key.
 
