@@ -10813,11 +10813,16 @@ div.literal-block-wrapper div[class*=highlight-] pre {
   box-shadow: none
 }
 
-code.literal {
+code .literal {
   background-color: var(--pst-color-surface);
   border: 1px solid var(--pst-color-on-surface);
   border-radius: .25rem;
-  padding: .1rem .25rem
+  padding: .1rem .25rem;
+}
+
+[data-theme='dark'] code .literal {
+  background-color: var(--nero-black-color);
+  border: 1px solid var(--gray-900);
 }
 
 figure a.headerlink {

@@ -219,9 +219,9 @@
 
 [data-theme='dark'] {
     .feedbackCard {
-        background-color: #404041;
-        border-color: #404041;
-        box-shadow: 0 3px 6px #00000029;
+        background-color: var(--payne-gray-color);
+        border-color: var(--payne-gray-color);
+        box-shadow: var(--default-box-shadow);
     }
 
     .feedbackCardTitle {
@@ -251,5 +251,10 @@
     .modal .modalHeader img {
         background-color: transparent;
         margin: auto;
+    }
+
+    .submitButton:disabled {
+        color: var(--light-gray-dark-theme);
+        background-color: var(--concrete-gray-color);
     }
 }

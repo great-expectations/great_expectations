@@ -23,12 +23,12 @@
 
 /* You can override the default Infima variables here. */
 :root {
-    --ifm-font-color-base: #404041;
-    --ifm-navbar-link-color: #404041;
-    --ifm-menu-color: #404041;
+    --ifm-font-color-base: var(--payne-gray-color);
+    --ifm-navbar-link-color: var(--payne-gray-color);
+    --ifm-menu-color: var(--payne-gray-color);
     --ifm-footer-title-color: #FF8D3A;
     --ifm-footer-link-color: #F8F8F8;
-    --ifm-footer-background-color: #404041;
+    --ifm-footer-background-color: var(--payne-gray-color);
     --ifm-color-primary: #ff6310;
     --ifm-color-primary-dark: #fd326b;
     --ifm-color-primary-darker: #fc215f;
@@ -105,6 +105,12 @@
       --dark-orange-dark-theme: #66371D;
       --card-background-dark-theme: #3C3C3C;
       --light-gray-dark-theme: #6E6E6E;
+      --payne-gray-color: #404041;
+      --pale-white-color: #FAFAFA;
+      --nero-black-color: #262626;
+      --concrete-gray-color: #363637;
+  
+      --default-box-shadow: 0 3px 6px #00000029;
 }
 
 .markdown a,
@@ -118,7 +124,7 @@ p > a {
 }
 
 h3 {
-    color: #404041;
+    color: var(--payne-gray-color);
 }
 
 [data-theme='dark'] .markdown img{
@@ -307,11 +313,11 @@ li p + ol {
 }
 
 :root[data-theme='dark'] {
-  --ifm-font-color-base: #FAFAFA;
-  --ifm-navbar-link-color: #FAFAFA;
-  --ifm-menu-color: #FAFAFA;
-  --ifm-background-color: #262626;
-  --ifm-navbar-background-color: #262626;
+  --ifm-font-color-base: var(--pale-white-color);
+  --ifm-navbar-link-color: var(--pale-white-color);
+  --ifm-menu-color: var(--pale-white-color);
+  --ifm-background-color: var(--nero-black-color);
+  --ifm-navbar-background-color: var(--nero-black-color);
 }
 
 [data-theme='dark'] .markdown h3{

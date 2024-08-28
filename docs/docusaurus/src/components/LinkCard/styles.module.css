@@ -59,7 +59,7 @@
 [data-theme='dark'] .linkCard {
     background-color: var(--card-background-dark-theme);
     border-color: #4E4E4E;
-    box-shadow: 0 3px 6px #00000029;
+    box-shadow: var(--default-box-shadow);
 }
 
 [data-theme='dark'] :global(.markdown) .linkCard img {
