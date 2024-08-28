@@ -303,7 +303,8 @@ class ExpectationSuite(SerializableDictDot):
     def __repr__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def __deepcopy__(self, memo: dict):

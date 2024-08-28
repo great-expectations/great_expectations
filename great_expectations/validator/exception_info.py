@@ -64,7 +64,8 @@ class ExceptionInfo(SerializableDotDict):
     def __ne__(self, other):  # type: ignore[explicit-override]
         return not self.__eq__(other=other)
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @override

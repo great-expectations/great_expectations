@@ -408,7 +408,8 @@ class ExpectationConfiguration(SerializableDictDot):
     def __repr__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict())
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @override

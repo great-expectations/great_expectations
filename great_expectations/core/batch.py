@@ -236,7 +236,8 @@ class LegacyBatchDefinition(SerializableDictDot):
             return NotImplemented
         return self.id == other.id
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @override
@@ -877,7 +878,8 @@ class Batch(SerializableDictDot):
 
         return IDDict({}).to_id()
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def head(self, n_rows: int = 5, fetch_all: bool = False) -> pd.DataFrame:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from typing import Optional, Tuple, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -53,7 +54,8 @@ class MetricConfiguration:
     def __repr__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return self.__repr__()
 
     @property

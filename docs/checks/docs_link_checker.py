@@ -23,6 +23,7 @@ from typing import List, Optional
 
 import click
 import requests
+from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -43,7 +44,8 @@ class LinkReport:
         self.file = file
         self.message = message
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return f"{self.message}: File: {self.file}, Link: {self.link}"
 
 

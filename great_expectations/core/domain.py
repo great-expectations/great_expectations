@@ -131,7 +131,8 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
     def __repr__(self):  # type: ignore[explicit-override]
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return self.__repr__()
 
     def __eq__(self, other):  # type: ignore[explicit-override]

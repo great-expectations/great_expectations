@@ -17,6 +17,8 @@ import subprocess
 from dataclasses import dataclass
 from typing import List, Set, Tuple
 
+from typing_extensions import override
+
 from .public_api_report import (
     CodeParser,
     Definition,
@@ -48,7 +50,8 @@ class DocstringError:
     raw_error: str
     line_number: int
 
-    def __str__(self):  # type: ignore[explicit-override]
+    @override
+    def __str__(self):
         return self.raw_error
 
 
