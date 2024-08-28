@@ -102,7 +102,7 @@ class InvalidAsset(DataAsset):
     @override
     def sort_batches(
         self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
-    ) -> None:
+    ) -> List[Batch]:
         self._raise_type_error()
 
     @override
