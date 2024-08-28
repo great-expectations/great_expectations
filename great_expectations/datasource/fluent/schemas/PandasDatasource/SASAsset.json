@@ -487,7 +487,7 @@
         },
         "BatchDefinition": {
             "title": "BatchDefinition",
-            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
+            "description": "--Public API--Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
                 "id": {
