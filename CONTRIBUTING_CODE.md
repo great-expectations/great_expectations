@@ -500,13 +500,13 @@ Test the performance of code changes to determine they perform as expected. BigQ
 
     - [HACKATHON] for submissions to an active Great Expectations Hackathon.
 
-    In the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place. For example: Closes #123”, linking to a relevant discuss or slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
+4. In the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place. For example: Closes #123”, linking to a relevant [Discourse](https://discourse.greatexpectations.io/) or Slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
 
-4. If this is your first Great Expectations contribution, you'll be prompted to complete the Contributor License Agreement (CLA). Complete the CLA and add `@cla-bot check` as a comment to the pull request (PR) to indicate that you’ve completed it.
+5. If this is your first Great Expectations contribution, you'll be prompted to complete the Contributor License Agreement (CLA). Complete the CLA and add `@cla-bot check` as a comment to the pull request (PR) to indicate that you’ve completed it.
 
-5. Wait for the Continuous Integration (CI) checks to complete and then correct any syntax or formatting issues.
+6. Wait for the Continuous Integration (CI) checks to complete and then correct any syntax or formatting issues.
 
-    A Great Expectations team member reviews, approves, and merges your PR. Depending on your GitHub notification settings, you'll be notified when there are comments or when your changes are successfully merged.
+7. A Great Expectations team member reviews, approves, and merges your PR. Depending on your GitHub notification settings, you'll be notified when there are comments or when your changes are successfully merged.
 
 ## Issue labels
 
