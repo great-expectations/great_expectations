@@ -48,7 +48,7 @@ DATA_QUALITY_ISSUES = ["Schema"]
 class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_table_columns_to_match_ordered_list is a \
+    ExpectTableColumnsToMatchOrderedList is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     BatchExpectations are one of the most common types of Expectation.

@@ -34,7 +34,7 @@ SUPPORTED_DATA_SOURCES = [
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_pair_values_to_be_in_set is a \
+    ExpectColumnPairValuesToBeInSet is a \
     [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
 
     Column Pair Map Expectations are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns.

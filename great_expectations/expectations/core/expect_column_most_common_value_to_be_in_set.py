@@ -62,7 +62,7 @@ DATA_QUALITY_ISSUES = ["Sets"]
 class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_most_common_value_to_be_in_set is a \
+    ExpectColumnMostCommonValueToBeInSet is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.

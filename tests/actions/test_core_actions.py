@@ -194,13 +194,11 @@ class TestActionSerialization:
         },
         UpdateDataDocsAction: {
             "name": "my_data_docs_action",
-            "notify_on": "all",
             "site_names": EXAMPLE_SITE_NAMES,
             "type": "update_data_docs",
         },
         SNSNotificationAction: {
             "name": "my_sns_action",
-            "notify_on": "all",
             "sns_message_subject": None,
             "sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN,
             "type": "sns",
@@ -208,7 +206,6 @@ class TestActionSerialization:
         APINotificationAction: {
             "name": "my_api_action",
             "type": "api",
-            "notify_on": "all",
             "url": EXAMPLE_URL,
         },
     }

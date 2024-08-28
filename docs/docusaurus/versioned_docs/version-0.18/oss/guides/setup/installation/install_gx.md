@@ -3,8 +3,7 @@ sidebar_label: "Install GX with Data Source dependencies"
 title: "Install Great Expectations with Data Source dependencies"
 id: install_gx
 description: Install Great Expectations locally, or in a hosted environment.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 ---
 
 import Preface from './components_local/_preface.mdx'

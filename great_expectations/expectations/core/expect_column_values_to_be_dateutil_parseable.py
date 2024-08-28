@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
     """Expect the column entries to be parsable using dateutil.
 
-    expect_column_values_to_be_dateutil_parseable is a \
+    ExpectColumnValuesToBeDateutilParseable is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations)
 
     Args:

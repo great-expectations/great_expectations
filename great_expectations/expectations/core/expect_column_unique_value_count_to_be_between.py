@@ -67,7 +67,7 @@ DATA_QUALITY_ISSUES = ["Cardinality"]
 class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_unique_value_count_to_be_between is a \
+    ExpectColumnUniqueValueCountToBeBetween is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -110,7 +110,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
           representing the number of unique values the column
 
     See Also:
-        [expect_column_proportion_of_unique_values_to_be_between](https://greatexpectations.io/expectations/expect_column_proportion_of_unique_values_to_be_between)
+        [ExpectColumnProportionOfUniqueValuesToBeBetween](https://greatexpectations.io/expectations/expect_column_proportion_of_unique_values_to_be_between)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

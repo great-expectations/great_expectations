@@ -76,14 +76,20 @@ class CrudMethodType(str, Enum):
 CrudMethodInfoFn: TypeAlias = Callable[..., Tuple[CrudMethodType, Type["Datasource"]]]
 
 
-class _SourceFactories:
+@public_api
+class DataSourceManager:
     """
-    Contains a collection of datasource factory methods in the format `.add_<TYPE_NAME>()`
+    Contains methods to interact with data sources from the gx context
 
-    Contains a `.type_lookup` dict-like two way mapping between previously registered `Datasource`
-    or `DataAsset` types and a simplified name for those types.
+    This contains a collection of dynamically generated datasource factory methods in the format
+    `.add_<TYPE_NAME>()`.
+
+    It also contains general data source manipulation methods such as `all()`, `get()` and
+    `delete()`.
     """
 
+    # A dict-like two way mapping between previously registered `Datasource` or `DataAsset` types
+    # and a simplified name for those types.
     type_lookup: ClassVar = TypeLookup()
     __crud_registry: ClassVar[Dict[str, CrudMethodInfoFn]] = {}
 
@@ -108,7 +114,7 @@ class _SourceFactories:
 
         An `.add_pandas_filesystem()` pandas_filesystem factory method will be added to `context.sources`.
 
-        >>> class PandasFilesystemDatasource(_PandasDatasource):
+        >>> class PandasFilesystemDatasource(_PandasFilePathDatasource):
         >>>     type: str = 'pandas_filesystem'
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
@@ -307,21 +313,23 @@ class _SourceFactories:
             # add the public api decorator
             public_api(getattr(ds_type, add_asset_factory_method_name))
 
-            def _read_asset_factory(
-                self: Datasource, asset_name: str | None = None, **kwargs
-            ) -> Validator:
-                name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
-                asset = asset_type(name=name, **kwargs)
-                self._add_asset(asset)
-                batch_request = asset.build_batch_request()
-                # TODO: raise error if `_data_context` not set
-                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
+            if getattr(ds_type, "ADD_READER_METHODS", False):
 
-            _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
-                _read_asset_factory, asset_type, exclude={"type"}
-            )
-            read_asset_factory_method_name = f"read_{asset_type_name}"
-            setattr(ds_type, read_asset_factory_method_name, _read_asset_factory)
+                def _read_asset_factory(
+                    self: Datasource, asset_name: str | None = None, **kwargs
+                ) -> Validator:
+                    name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
+                    asset = asset_type(name=name, **kwargs)
+                    self._add_asset(asset)
+                    batch_request = asset.build_batch_request()
+                    # TODO: raise error if `_data_context` not set
+                    return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
+
+                _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+                    _read_asset_factory, asset_type, exclude={"type"}
+                )
+                read_asset_factory_method_name = f"read_{asset_type_name}"
+                setattr(ds_type, read_asset_factory_method_name, _read_asset_factory)
 
         else:
             logger.debug(
@@ -572,7 +580,7 @@ class _SourceFactories:
         def delete_datasource(name: str) -> None:
             logger.debug(f"Delete {datasource_type} with {name}")
             self._validate_current_datasource_type(name, datasource_type)
-            self._data_context._delete_fluent_datasource(datasource_name=name)
+            self._data_context._delete_fluent_datasource(name=name)
             self._data_context._save_project_config()
 
         delete_datasource.__doc__ = doc_string
@@ -588,14 +596,15 @@ class _SourceFactories:
         Args:
             name: The name of the given datasource.
         """
-        self._data_context.delete_datasource(datasource_name=name)
+        self._data_context.delete_datasource(name=name)
 
     @public_api
     def all(self) -> DatasourceDict:
         return self._data_context._datasources
 
-    def get(self, datasource_name: str) -> Datasource:
-        return self.all()[datasource_name]
+    @public_api
+    def get(self, name: str) -> Datasource:
+        return self.all()[name]
 
     def __getattr__(self, attr_name: str):
         try:
@@ -635,8 +644,8 @@ def _iter_all_registered_types(
     Iterate through all registered Datasource and DataAsset types.
     Returns tuples of the registered type name and the actual type/class.
     """
-    for ds_name in _SourceFactories.type_lookup.type_names():
-        ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
+    for ds_name in DataSourceManager.type_lookup.type_names():
+        ds_type: Type[Datasource] = DataSourceManager.type_lookup[ds_name]
         if include_datasource:
             yield ds_name, ds_type
 

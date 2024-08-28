@@ -19,9 +19,18 @@ At runtime, a Checkpoint can take in a `batch_parameters` dictionary that select
 - <PrereqPreconfiguredDataContext/>.
 - <PrereqCheckpoint/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 In this procedure your Data Context is assumed to be stored in the variable `context` and your Checkpoint is assumed to be stored in the variable `checkpoint`.
 
@@ -43,19 +52,14 @@ In this procedure your Data Context is assumed to be stored in the variable `con
 
    You then pass a dictionary to the `expectation_parameters` argument of a Checkpoint's `run` method.  The contents of this dictionary consist of keys that were defined for parameters when the Checkpoint's Expectations were created, paired with the values that should be used for the corresponding parmeters when the Checkpoint runs.
 
-   Below is an example of an `ExpectColumnValuesToBeBetween` Expectation that is set to accept parameters at runtime, and an `expectation_parameters` dictionary that provides those parameters:
+   Below is an example of an `ExpectColumnValuesToBeBetween` Expectation that is set to accept parameters at runtime:
 
-   ```python title="Python"
-   expectation = ExpectColumnValuesToBeBetween(
-      column="fare",
-      min_value={"$PARAMETER": "expect_fare_minimum_to_be_above"},
-      max_value={"$PARAMETER": "expect_fare_maximum_to_be_below"}
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py - example Expectation"
+   ```
    
-   expectation_parameters = {
-      "expect_fare_minimum_to_be_above": 5.00,
-      "expect_fare_maximum_to_be_below": 1000.00,
-   }
+   And this is an `expectation_parameters` dictionary that provides those parameters:
+   
+   ```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py - define Expectation Parameters"
    ```
 
   If none of the Expectations in a Validation Definition are configured to accept runtime Expectation parameters, the `expectation_parameters` argument can be omitted from the Checkpoint's `run(...)` method.
@@ -66,11 +70,7 @@ In this procedure your Data Context is assumed to be stored in the variable `con
 
    A Checkpoint is executed through its `run(...)` method.  Pass the Batch and Expectation parameters to the `batch_parameters` and `expectation_parameters` arguments of the Checkpoint's ` run(...)` method:
 
-   ```python
-   validation_results = checkpoint.run(
-      batch_parameters=batch_parameters,
-      expectation_parameters=expectation_parameters
-   )
+   ```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py - run a Checkpoint"
    ```
    
    After the Checkpoint runs it will pass the Validation Results that are generated to its Actions and execute them.  Finally, the Validation Results will be returned by the `run(...)` method. 
@@ -79,23 +79,7 @@ In this procedure your Data Context is assumed to be stored in the variable `con
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python"
-import great_expectations as gx
-
-context = gx.get_context()
-checkpoint = context.checkpoints.get("my_checkpoint")
-
-batch_parameters = {"day": 1, "month": 12, "year": 2024}
-   
-expectation_parameters = {
-   "expect_fare_minimum_to_be_above": 5.00,
-   "expect_fare_maximum_to_be_below": 1000.00,
-}
-
-validation_results = checkpoint.run(
-   batch_parameters=batch_parameters,
-   expectation_parameters=expectation_parameters
-)
+```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py - full code example"
 ```
 
 </TabItem>

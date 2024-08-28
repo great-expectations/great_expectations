@@ -24,9 +24,16 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 ## Create an Expectation Suite
 
-<Tabs>
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Import the GX Core library and the `ExpectationSuite` class:
 
@@ -69,9 +76,16 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 ## Get an existing Expectation Suite
 
-<Tabs>
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -97,7 +111,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Get the Expectation Suite to rename.  This could be an [existing Expectation Suite you retrieve from your Data Context](#get-an-existing-expectation-suite) or a [new Expectation Suite](#create-an-expectation-suite) that you have referenced earlier in your code.
 
@@ -130,7 +144,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. <StepRequestADataContext/>.
 
@@ -161,7 +175,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. [Create a new](#create-an-expectation-suite) or [get an existing](#get-an-existing-expectation-suite) Expectation Suite.
 
@@ -200,7 +214,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. [Get an existing Expectation Suite](#get-an-existing-expectation-suite) that contains Expectations or [add some Expectations to a new Expectation Suite](#add-expectations-to-an-expectation-suite).
 
@@ -226,7 +240,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. [Get the Expectation to edit](#get-an-expectation-from-an-expectation-suite) from its Expectation Suite.
 
@@ -261,7 +275,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. [Get an existing Expectation Suite](#get-an-existing-expectation-suite) that contains Expectations, or [add some Expectations to a new Expectation Suite](#add-expectations-to-an-expectation-suite). 
 
@@ -292,7 +306,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 <Tabs>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. [Get the Expectation Suite containing the Expectation to delete](#get-an-existing-expectation-suite).
 

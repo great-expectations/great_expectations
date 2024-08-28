@@ -4,7 +4,7 @@ from inspect import Parameter, Signature
 from typing import TYPE_CHECKING, Callable, ForwardRef, Protocol, Type
 
 from great_expectations.datasource.fluent import Datasource, PandasFilesystemDatasource
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.type_lookup import TypeLookup
@@ -88,7 +88,7 @@ def print_add_asset_method_signatures(
 
 
 def print_datasource_crud_signatures(
-    source_factories: _SourceFactories,
+    source_factories: DataSourceManager,
     method_name_templates: tuple[str, ...] = (
         "add_{0}",
         "update_{0}",
@@ -119,5 +119,5 @@ if __name__ == "__main__":
     print_add_asset_method_signatures(PandasFilesystemDatasource)
 
     print_datasource_crud_signatures(
-        source_factories=_SourceFactories("dummy_context"),  # type: ignore[arg-type]
+        source_factories=DataSourceManager("dummy_context"),  # type: ignore[arg-type]
     )

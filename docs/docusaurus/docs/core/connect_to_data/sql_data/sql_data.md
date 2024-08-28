@@ -3,6 +3,7 @@ title: Connect to SQL data
 description: Connect to data in SQL databases and organize that data into Batches for retrieval and validation.
 hide_feedback_survey: false
 hide_title: false
+toc_max_heading_level: 2
 ---
 
 import TabItem from '@theme/TabItem';
@@ -29,10 +30,6 @@ All other SQL dialects are handled through the python module `SQLAlchemy`.  You 
 ## Configure credentials
 
 <ConfigureCredentials/>
-
-## Reference a Secrets Manager
-
-<SecretsManagers/>
 
 ## Create a SQL Data Source
 

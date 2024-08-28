@@ -2,12 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
+from great_expectations.core.added_diagnostics import (
+    BatchDefinitionAddedDiagnostics,
+)
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotAddedError,
+)
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
@@ -20,6 +27,7 @@ if TYPE_CHECKING:
 PartitionerT = TypeVar("PartitionerT", ColumnPartitioner, FileNamePartitioner, None)
 
 
+@public_api
 class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     """Configuration for a batch of data.
 
@@ -36,6 +44,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     _data_asset: Any = pydantic.PrivateAttr()
 
     @property
+    @public_api
     def data_asset(self) -> DataAsset[Any, PartitionerT]:
         return self._data_asset
 
@@ -52,6 +61,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
             partitioner=self.partitioner,
         )
 
+    @public_api
     def get_batch(self, batch_parameters: Optional[BatchParameters] = None) -> Batch:
         """
         Retrieves a batch from the underlying asset. Defaults to the last batch
@@ -72,11 +82,16 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         return batch_list[-1]
 
-    def save(self) -> None:
-        self.data_asset._save_batch_definition(self)
+    def is_added(self) -> BatchDefinitionAddedDiagnostics:
+        return BatchDefinitionAddedDiagnostics(
+            errors=[] if self.id else [BatchDefinitionNotAddedError(name=self.name)]
+        )
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
+        diagnostics = self.is_added()
+        diagnostics.raise_for_error()
+
         asset = self.data_asset
         data_source = asset.datasource
 
@@ -90,7 +105,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         )
         batch_definition_bundle = _IdentifierBundle(
             name=self.name,
-            id=self.id,
+            id=str(self.id) if self.id else None,
         )
 
         return _EncodedValidationData(

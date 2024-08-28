@@ -1,5 +1,5 @@
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_pandas.py - full example">
-import great_epectations as gx
+import great_expectations as gx
 
 context = gx.get_context()
 
@@ -12,11 +12,11 @@ azure_options = {
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_source/_abs/_pandas.py - add Data Source">
 # Create the Data Source:
-data_source = gx.data_sources.add_pandas_abs(
+data_source = context.data_sources.add_pandas_abs(
     name=data_source_name, azure_options=azure_options
 )
 # </snippet>
 # </snippet>
 
 # Retrieve the Data Source:
-data_source = context.data_sources.get("nyc_taxi_data")
+data_source = context.data_sources.get(data_source_name)
