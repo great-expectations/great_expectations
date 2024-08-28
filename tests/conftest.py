@@ -18,7 +18,6 @@ import numpy as np
 import packaging
 import pandas as pd
 import pytest
-from typing_extensions import override
 
 import great_expectations as gx
 from great_expectations.analytics.config import ENV_CONFIG
@@ -340,8 +339,7 @@ class TestMarkerCoverage:
     name: str
     markers: set[str]
 
-    @override
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override] # FIXME
         return f"{self.path}, {self.name}, {self.markers}"
 
 
