@@ -230,7 +230,8 @@ class LegacyBatchDefinition(SerializableDictDot):
     def batching_regex(self) -> re.Pattern | None:
         return self._batching_regex
 
-    def __eq__(self, other):  # type: ignore[explicit-override]
+    @override
+    def __eq__(self, other):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
@@ -407,7 +408,8 @@ class BatchRequestBase(SerializableDictDot):
 
         return result
 
-    def __eq__(self, other):  # type: ignore[explicit-override]
+    @override
+    def __eq__(self, other):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
