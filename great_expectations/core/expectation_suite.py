@@ -33,6 +33,7 @@ from great_expectations.core.added_diagnostics import (
     ExpectationSuiteAddedDiagnostics,
 )
 from great_expectations.core.serdes import _IdentifierBundle
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.exceptions.exceptions import (
     ExpectationSuiteNotAddedError,
 )
@@ -104,14 +105,10 @@ class ExpectationSuite(SerializableDictDot):
         self.meta = meta
         self.notes = notes
 
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         self._store = project_manager.get_expectations_store()
 
     @property
     def _include_rendered_content(self) -> bool:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.is_using_cloud()
 
     @property
