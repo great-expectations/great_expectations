@@ -51,7 +51,7 @@ class MetricConfiguration:
 
         self._metric_dependencies: IDDict = IDDict({})
 
-    def __repr__(self):  # type: ignore[explicit-override]
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         return json.dumps(self.to_json_dict(), indent=2)
 
     @override

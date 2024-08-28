@@ -51,9 +51,9 @@ class MetricStore(Store):
 
         super().__init__(store_backend=store_backend, store_name=store_name)
 
-    def serialize(self, value):  # type: ignore[explicit-override]
+    def serialize(self, value):  # type: ignore[explicit-override] # FIXME
         return json.dumps({"value": value})
 
-    def deserialize(self, value):  # type: ignore[explicit-override]
+    def deserialize(self, value):  # type: ignore[explicit-override] # FIXME
         if value:
             return json.loads(value)["value"]

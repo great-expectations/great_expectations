@@ -109,7 +109,7 @@ def sqlachemy_execution_engine_mock_cls(
             validate_batch_spec(batch_spec)
             return BatchData(self), BatchMarkers(ge_load_time=None)
 
-        def execute_partitioned_query(self, partitioned_query):  # type: ignore[explicit-override]
+        def execute_partitioned_query(self, partitioned_query):  # type: ignore[explicit-override] # FIXME
             class Row:
                 def __init__(self, attributes):
                     for k, v in attributes.items():

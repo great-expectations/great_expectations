@@ -134,7 +134,7 @@ class RenderedContent:
         """
         return {}
 
-    def __eq__(self, other):  # type: ignore[explicit-override]
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
@@ -506,7 +506,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         )
         return string
 
-    def __eq__(self, other):  # type: ignore[explicit-override]
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         return str(self) == str(other)
 
 

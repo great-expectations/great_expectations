@@ -55,13 +55,13 @@ class ExceptionInfo(SerializableDotDict):
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
 
-    def __eq__(self, other):  # type: ignore[explicit-override]
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         return self.id == other.id
 
-    def __ne__(self, other):  # type: ignore[explicit-override]
+    def __ne__(self, other):  # type: ignore[explicit-override] # FIXME
         return not self.__eq__(other=other)
 
     @override
