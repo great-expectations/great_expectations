@@ -42,8 +42,8 @@ def run_checkpoint_and_data_doc(
         context.suites.add(ExpectationSuite(name=suite_name))
     except DataContextError:
         ...
+
     context.suites.get(name=suite_name)
-    # noinspection PyTypeChecker
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name,
@@ -56,8 +56,8 @@ def run_checkpoint_and_data_doc(
     batch_def = asset.add_batch_definition(name="my_batch_definition")
 
     # Configure and run a checkpoint
-    validation_definition = ValidationDefinition(
-        name="my_validation_definition", suite=suite, data=batch_def
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="my_validation_definition", suite=suite, data=batch_def)
     )
     metadata = validator.active_batch.metadata  # type: ignore[union-attr] # active_batch could be None
     if isinstance(datasource, PandasDatasource):
@@ -101,8 +101,7 @@ def run_checkpoint_and_data_doc(
         assert r.success
         assert r.expectation_config
         assert (
-            r.result["observed_value"]
-            == expected_metric_values[r.expectation_config.expectation_type]["value"]
+            r.result["observed_value"] == expected_metric_values[r.expectation_config.type]["value"]
         )
 
         assert r.rendered_content is None

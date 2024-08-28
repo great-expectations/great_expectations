@@ -88,9 +88,9 @@ def data_asset(
         datasource=datasource,
         asset_name=asset_name,
     )
-    datasource.delete_asset(asset_name=asset_name)
+    datasource.delete_asset(name=asset_name)
     with pytest.raises(get_missing_data_asset_error_type):
-        datasource.get_asset(asset_name=asset_name)
+        datasource.get_asset(name=asset_name)
 
 
 @pytest.fixture(scope="module")
@@ -103,7 +103,7 @@ def batch_request(
     if isinstance(data_asset, DataFrameAsset):
         with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
             data_asset.build_batch_request()
-        batch_request = data_asset.build_batch_request(dataframe=pandas_test_df)
+        batch_request = data_asset.build_batch_request(options={"dataframe": pandas_test_df})
     else:
         batch_request = data_asset.build_batch_request()
     return batch_request
@@ -120,7 +120,7 @@ def expectation_suite(
     """
     expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_be_null",
+            type="expect_column_values_to_not_be_null",
             kwargs={
                 "column": "string",
                 "mostly": 1,

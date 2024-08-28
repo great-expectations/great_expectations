@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import weakref
 from abc import ABCMeta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -62,6 +63,8 @@ def get_user_friendly_error_message(
             errors = error_json.get("errors")
         if errors:
             support_message.append(json.dumps(errors))
+        else:
+            support_message.append(json.dumps(error_json))
 
     except json.JSONDecodeError:
         support_message.append(f"Please contact the Great Expectations team at {SUPPORT_EMAIL}")
@@ -75,15 +78,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GXCloudRESTResource.DATA_CONTEXT: "data_context_config",
         GXCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
         GXCloudRESTResource.EXPECTATION_SUITE: "suite",
-        GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "result",
-        GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
         GXCloudRESTResource.VALIDATION_RESULT: "result",
         GXCloudRESTResource.VALIDATION_DEFINITION: "validation_definition",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GXCloudRESTResource, Set[str]] = {
         GXCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
-        GXCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
         GXCloudRESTResource.VALIDATION_RESULT: {
             "checkpoint_id",
             "expectation_suite_id",
@@ -92,30 +92,25 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     RESOURCE_PLURALITY_LOOKUP_DICT: bidict = bidict(  # type: ignore[misc] # Keywords must be str
         **{  # type: ignore[arg-type]
-            GXCloudRESTResource.BATCH: "batches",
             GXCloudRESTResource.CHECKPOINT: "checkpoints",
+            GXCloudRESTResource.DATASOURCE: "datasources",
             GXCloudRESTResource.DATA_ASSET: "data_assets",
             GXCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
-            GXCloudRESTResource.DATASOURCE: "datasources",
-            GXCloudRESTResource.EXPECTATION: "expectations",
             GXCloudRESTResource.EXPECTATION_SUITE: "expectation_suites",
-            GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
-            GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
-            GXCloudRESTResource.VALIDATION_RESULT: "validation_results",
             GXCloudRESTResource.VALIDATION_DEFINITION: "validation_definitions",
+            GXCloudRESTResource.VALIDATION_RESULT: "validation_results",
         }
     )
 
     _ENDPOINT_VERSION_LOOKUP: dict[str, EndpointVersion] = {
-        GXCloudRESTResource.CHECKPOINT: EndpointVersion.V0,
-        GXCloudRESTResource.DATASOURCE: EndpointVersion.V0,
-        GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V0,
-        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V0,
+        GXCloudRESTResource.CHECKPOINT: EndpointVersion.V1,
+        GXCloudRESTResource.DATASOURCE: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_ASSET: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V1,
+        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V1,
         GXCloudRESTResource.EXPECTATION_SUITE: EndpointVersion.V1,
-        GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: EndpointVersion.V0,
-        GXCloudRESTResource.RENDERED_DATA_DOC: EndpointVersion.V0,
-        GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
-        GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V0,
+        GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V1,
+        GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V1,
     }
     # we want to support looking up EndpointVersion from either GXCloudRESTResource
     # or a pluralized version of it, as defined by RESOURCE_PLURALITY_LOOKUP_DICT.
@@ -167,6 +162,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             _ = self.store_backend_id
 
         self._session = create_session(access_token=self._ge_cloud_credentials["access_token"])
+        # Finalizer to close the session when the object is garbage collected.
+        # https://docs.python.org/3.11/library/weakref.html#weakref.finalize
+        self._finalizer = weakref.finalize(self, close_session, self._session)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
@@ -232,19 +230,25 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
-                str(response.text),
+                str(response.text),  # type: ignore[possibly-undefined] # will be present for json error
                 str(jsonError),
             )
-            raise StoreBackendError(f"Unable to get object in GX Cloud Store Backend: {jsonError}")  # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to get object in GX Cloud Store Backend: {jsonError}"
+            ) from jsonError
         except requests.HTTPError as http_err:
             raise StoreBackendError(  # noqa: TRY003
                 f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"  # noqa: E501
-            )
+            ) from http_err
+        except requests.ConnectionError as conn_err:
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to get object in GX Cloud Store Backend: {conn_err}"
+            ) from conn_err
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
-            )
+            ) from timeout_exc
 
     @override
     def _move(self) -> None:  # type: ignore[override]
@@ -310,12 +314,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             raise StoreBackendError(  # noqa: TRY003
                 f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"  # noqa: E501
-            )
+            ) from http_exc
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
-            )
+            ) from timeout_exc
         except Exception as e:
             logger.debug(repr(e))
             raise StoreBackendError(  # noqa: TRY003
@@ -334,7 +338,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return True
         if not (kwarg_names <= self.allowed_set_kwargs):
             extra_kwargs = kwarg_names - self.allowed_set_kwargs
-            raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')  # noqa: TRY003
+            raise ValueError(  # noqa: TRY003
+                f'Invalid kwargs: {(", ").join(extra_kwargs)}'
+            )
         return None
 
     @override
@@ -404,10 +410,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
                 "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
-            )
+            ) from timeout_exc
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(f"Unable to set object in GX Cloud Store Backend: {e}") from e  # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to set object in GX Cloud Store Backend: {e}"
+            ) from e
 
     @property
     def ge_cloud_base_url(self) -> str:
@@ -454,7 +462,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return keys
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(f"Unable to list keys in GX Cloud Store Backend: {e}")  # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to list keys in GX Cloud Store Backend: {e}"
+            ) from e
 
     @override
     def get_url_for_key(  # type: ignore[override]
@@ -507,15 +517,17 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.exception(http_exc)  # noqa: TRY401
             raise StoreBackendError(  # noqa: TRY003
                 f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"  # noqa: E501
-            )
+            ) from http_exc
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
                 "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
-            )
+            ) from timeout_exc
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(f"Unable to delete object in GX Cloud Store Backend: {e!r}")  # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to delete object in GX Cloud Store Backend: {e!r}"
+            ) from e
 
     def _get_one_or_none_from_response_data(
         self,
@@ -617,10 +629,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         resource_type, _id, _resource_name = key
         try:
             GXCloudRESTResource(resource_type)
-        except ValueError:
+        except ValueError as e:
             raise TypeError(  # noqa: TRY003
                 f"The provided resource_type {resource_type} is not a valid GXCloudRESTResource"
-            )
+            ) from e
 
     @classmethod
     def construct_versioned_url(
@@ -650,7 +662,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return url
 
     @classmethod
-    def construct_versioned_payload(  # noqa: PLR0913
+    def construct_versioned_payload(
         cls,
         resource_type: str,
         organization_id: str,
@@ -688,7 +700,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @classmethod
-    def _construct_json_payload_v0(  # noqa: PLR0913
+    def _construct_json_payload_v0(
         cls,
         resource_type: str,
         organization_id: str,
@@ -725,3 +737,17 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @property
     def _is_v1_resource(self) -> bool:
         return self._ENDPOINT_VERSION_LOOKUP.get(self.ge_cloud_resource_type) == EndpointVersion.V1
+
+
+def close_session(session: requests.Session):
+    """Close the session.
+    Used by a finalizer to close the session when the GXCloudStoreBackend is garbage collected.
+
+    This is not a bound method on the GXCloudStoreBackend class because of this note
+    in the Python docs (https://docs.python.org/3.11/library/weakref.html#weakref.finalize):
+    Note It is important to ensure that func, args and kwargs do not own any references to obj,
+    either directly or indirectly, since otherwise obj will never be garbage collected.
+    In particular, func should not be a bound method of obj.
+
+    """
+    session.close()

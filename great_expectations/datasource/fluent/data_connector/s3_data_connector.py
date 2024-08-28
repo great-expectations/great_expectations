@@ -1,18 +1,18 @@
 from __future__ import annotations
 
+import copy
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Generator, List, Optional, Type
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector.util import (
-    list_s3_keys,
-    sanitize_prefix_for_gcs_and_s3,
-)
 from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.file_path_data_connector import (
+    sanitize_prefix_for_gcs_and_s3,
 )
 
 if TYPE_CHECKING:
@@ -40,7 +40,6 @@ class S3DataConnector(FilePathDataConnector):
         data_asset_name: The name of the DataAsset using this DataConnector instance
         s3_client: Reference to instantiated AWS S3 client handle
         bucket (str): bucket for S3
-        batching_regex: A regex pattern for partitioning data references
         prefix (str): S3 prefix
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)
@@ -60,7 +59,6 @@ class S3DataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         s3_client: BaseClient,
         bucket: str,
         prefix: str = "",
@@ -84,9 +82,6 @@ class S3DataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=re.compile(
-                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
-            ),
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -95,7 +90,6 @@ class S3DataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         s3_client: BaseClient,
         bucket: str,
         prefix: str = "",
@@ -109,7 +103,6 @@ class S3DataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "S3DataConnector" instance
             data_asset_name: The name of the DataAsset using this "S3DataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             s3_client: S3 Client reference handle
             bucket: bucket for S3
             prefix: S3 prefix
@@ -124,7 +117,6 @@ class S3DataConnector(FilePathDataConnector):
         return S3DataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             s3_client=s3_client,
             bucket=bucket,
             prefix=prefix,
@@ -135,10 +127,9 @@ class S3DataConnector(FilePathDataConnector):
         )
 
     @classmethod
-    def build_test_connection_error_message(  # noqa: PLR0913
+    def build_test_connection_error_message(
         cls,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         bucket: str,
         prefix: str = "",
         delimiter: str = "/",
@@ -148,7 +139,6 @@ class S3DataConnector(FilePathDataConnector):
 
         Args:
             data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             bucket: bucket for S3
             prefix: S3 prefix
             delimiter: S3 delimiter
@@ -157,11 +147,10 @@ class S3DataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """  # noqa: E501
-        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
+        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" found using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex.pattern,
                 "bucket": bucket,
                 "prefix": prefix,
                 "delimiter": delimiter,
@@ -218,3 +207,69 @@ requires "file_path_template_map_fn: Callable" to be set.
         }
 
         return self._file_path_template_map_fn(**template_arguments)
+
+    @override
+    def _preprocess_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        regex = re.compile(f"{re.escape(self._sanitized_prefix)}{regex.pattern}")
+        return super()._preprocess_batching_regex(regex=regex)
+
+
+def list_s3_keys(  # noqa: C901 - too complex
+    s3, query_options: dict, iterator_dict: dict, recursive: bool = False
+) -> Generator[str, None, None]:
+    """
+    For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
+    specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
+    search for files using RegEx only at the level specified by that bucket and prefix.  This restriction for the
+    ConfiguredAssetS3DataConnector is needed, because paths on S3 are comprised not only the leaf file name but the
+    full path that includes both the prefix and the file name.  Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
+    :param s3: s3 client connection
+    :param query_options: s3 query attributes ("Bucket", "Prefix", "Delimiter", "MaxKeys")
+    :param iterator_dict: dictionary to manage "NextContinuationToken" (if "IsTruncated" is returned from S3)
+    :param recursive: True for InferredAssetS3DataConnector and False for ConfiguredAssetS3DataConnector (see above)
+    :return: string valued key representing file path on S3 (full prefix and leaf file name)
+    """  # noqa: E501
+    if iterator_dict is None:
+        iterator_dict = {}
+
+    if "continuation_token" in iterator_dict:
+        query_options.update({"ContinuationToken": iterator_dict["continuation_token"]})
+
+    logger.debug(f"Fetching objects from S3 with query options: {query_options}")
+
+    s3_objects_info: dict = s3.list_objects_v2(**query_options)
+
+    if not any(key in s3_objects_info for key in ["Contents", "CommonPrefixes"]):
+        raise ValueError("S3 query may not have been configured correctly.")  # noqa: TRY003
+
+    if "Contents" in s3_objects_info:
+        keys: List[str] = [item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0]
+        yield from keys
+
+    if recursive and "CommonPrefixes" in s3_objects_info:
+        common_prefixes: List[Dict[str, Any]] = s3_objects_info["CommonPrefixes"]
+        for prefix_info in common_prefixes:
+            query_options_tmp: dict = copy.deepcopy(query_options)
+            query_options_tmp.update({"Prefix": prefix_info["Prefix"]})
+            # Recursively fetch from updated prefix
+            yield from list_s3_keys(
+                s3=s3,
+                query_options=query_options_tmp,
+                iterator_dict={},
+                recursive=recursive,
+            )
+
+    if s3_objects_info["IsTruncated"]:
+        iterator_dict["continuation_token"] = s3_objects_info["NextContinuationToken"]
+        # Recursively fetch more
+        yield from list_s3_keys(
+            s3=s3,
+            query_options=query_options,
+            iterator_dict=iterator_dict,
+            recursive=recursive,
+        )
+
+    if "continuation_token" in iterator_dict:
+        # Make sure we clear the token once we've gotten fully through
+        del iterator_dict["continuation_token"]

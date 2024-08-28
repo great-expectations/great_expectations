@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility import aws, pyspark, trino
+from great_expectations.compatibility import aws, pydantic, pyspark, trino
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
@@ -15,6 +15,7 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -74,17 +75,35 @@ except (ImportError, KeyError):
     clickhouse_sqlalchemy = None
     ch_types = None
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values of a specified data type."
+TYPE__DESCRIPTION = """
+    A string representing the data type that each column should have as entries. \
+    Valid types are defined by the current backend implementation and are dynamically loaded.
+    """
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Schema"]
+
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
-    """Expect a column to contain values of a specified data type.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_values_to_be_of_type is a \
+    ExpectColumnValuesToBeOfType is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
     for typed-column backends, and also for Pandas Datasources where the column dtype and provided \
     type_ are unambiguous constraints (any dtype except 'object' or dtype of 'object' with \
     type_ specified as 'object').
 
-    For Pandas columns with dtype of 'object' expect_column_values_to_be_of_type will
+    For Pandas columns with dtype of 'object' ExpectColumnValuesToBeOfType will
     independently check each row's type.
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -93,16 +112,17 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         type\\_ (str): \
-            A string representing the data type that each column should have as entries. Valid types are defined \
-            by the current backend implementation and are dynamically loaded. For example, valid types for \
-            Pandas Datasources include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
-            whereas valid types for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for Spark Datasources include \
-            'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
-            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
-            fail the expectation, while `Timestamp` would pass with valid data.
+            {TYPE__DESCRIPTION}
+            For example, valid types for Pandas Datasources include any numpy dtype values \
+            (such as 'int64') or native python types (such as 'int'), whereas valid types \
+            for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. \
+            Valid types for Spark Datasources include 'StringType', 'BooleanType' and other \
+            pyspark-defined type names. Note that the strings representing these \
+            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` \
+            will be unrecognized and fail the expectation, while `Timestamp` would pass with valid data.
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -124,14 +144,21 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See also:
-        [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
+        [ExpectColumnValuesToBeInTypeList](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Schema
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -148,13 +175,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -163,10 +190,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -176,13 +203,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 3,
                     "unexpected_percent": 100.0,
@@ -195,16 +222,15 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 100.0,
                     "unexpected_percent_nonmissing": 100.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    type_: str
+    type_: str = pydantic.Field(description=TYPE__DESCRIPTION)
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -212,6 +238,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.of_type"
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -227,6 +254,37 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "column",
         "type_",
     )
+
+    class Config:
+        title = "Expect column values to be of type"
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeOfType]) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @override
     @classmethod
@@ -566,7 +624,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(  # noqa: C901, PLR0911, PLR0912
+def _get_dialect_type_module(  # noqa: C901, PLR0911
     execution_engine,
 ):
     if execution_engine.dialect_module is None:

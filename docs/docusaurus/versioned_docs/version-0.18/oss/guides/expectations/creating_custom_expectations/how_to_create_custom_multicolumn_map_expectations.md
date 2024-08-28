@@ -27,7 +27,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`MulticolumnMapExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/multicolumn_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
+You can find the template file for a custom [`MulticolumnMapExpectation` here](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/docs/docusaurus/versioned_docs/version-0.18/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py#L4). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
 cp multicolumn_map_expectation_template.py /SOME_DIRECTORY/expect_multicolumn_values_to_be_multiples_of_three.py
@@ -290,5 +290,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](/oss/contributing/contributing_maturity.md#expectation-contributions) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_multicolumn_values_to_be_multiples_of_three.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py)
+- [expect_multicolumn_values_to_be_multiples_of_three.py](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/docs/docusaurus/versioned_docs/version-0.18/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py#L4)
 :::

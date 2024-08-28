@@ -169,7 +169,7 @@
         },
         "BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__": {
             "title": "BatchDefinition[Union[FileNamePartitionerYearly, FileNamePartitionerMonthly, FileNamePartitionerDaily, FileNamePartitionerPath]]",
-            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
+            "description": "--Public API--Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
                 "id": {
@@ -243,12 +243,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [

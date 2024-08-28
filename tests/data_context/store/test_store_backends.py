@@ -876,7 +876,7 @@ def test_TupleGCSStoreBackend_base_public_path():
             ("BBB",), b"bbb", content_encoding=None, content_type="image/png"
         )
 
-    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
+    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())  # noqa: DTZ003
     key = ValidationResultIdentifier(
         ExpectationSuiteIdentifier(name="my_suite_name"),
         run_id,
@@ -993,7 +993,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
         with pytest.raises(InvalidKeyError):
             my_store.get(("non_existent_key",))
 
-    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
+    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())  # noqa: DTZ003
     key = ValidationResultIdentifier(
         ExpectationSuiteIdentifier(name="my_suite_name"),
         run_id,
@@ -1345,13 +1345,11 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("config_version",),
         ("data_context_id",),
         ("data_docs_sites",),
-        ("datasources",),
         ("expectations_store_name",),
         ("fluent_datasources",),
         ("plugins_directory",),
         ("progress_bars",),
         ("stores",),
-        ("suite_parameter_store_name",),
         ("validation_results_store_name",),
     ]
 
@@ -1406,85 +1404,10 @@ def test_InlineStoreBackend(empty_data_context) -> None:
 
 
 @pytest.mark.filesystem
-def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
-    path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
-        empty_data_context.root_directory, empty_data_context.GX_YML
-    )
-
-    # 1. Set simple string config value and confirm it persists in the GX.yml
-
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.CONFIG_VERSION,
-    )
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["config_version"] == 3.0
-
-    new_config_version: float = 5.0
-    key = DataContextVariableKey()
-    tuple_ = key.to_tuple()
-
-    inline_store_backend.set(tuple_, new_config_version)
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["config_version"] == new_config_version
-
-    # 2. Set nested dictionary config value and confirm it persists in the GX.yml
-
-    inline_store_backend = InlineStoreBackend(
-        data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.DATASOURCES,
-    )
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["datasources"] == {}
-
-    datasource_config_string: str = """
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: my/base/dir/
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-        """
-    datasource_config: dict = yaml.load(datasource_config_string)
-
-    key = DataContextVariableKey(
-        resource_name="my_datasource",
-    )
-    tuple_ = key.to_tuple()
-
-    inline_store_backend.set(tuple_, datasource_config)
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    datasources: dict = config_commented_map_from_yaml["datasources"]
-    assert len(datasources) == 1
-    assert datasources["my_datasource"] == datasource_config
-
-
-@pytest.mark.filesystem
 def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
     inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.DATASOURCES,
+        resource_type=DataContextVariableSchema.FLUENT_DATASOURCES,
     )
 
     datasource_config_a = empty_data_context.data_sources.add_pandas(name="a")

@@ -5,8 +5,8 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     import numpy as np

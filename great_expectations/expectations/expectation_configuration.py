@@ -24,10 +24,6 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.suite_parameters import (
     build_suite_parameters,
 )
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    ensure_json_serializable,
-)
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
     InvalidExpectationConfigurationError,
@@ -36,6 +32,10 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    ensure_json_serializable,  # noqa: TID251
+)
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
@@ -121,7 +121,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def __init__(  # noqa: PLR0913
         self,
-        expectation_type: str,
+        type: str,
         kwargs: dict,
         meta: Optional[dict] = None,
         notes: str | list[str] | None = None,
@@ -130,9 +130,9 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_context: Optional[ExpectationContext] = None,
         rendered_content: Optional[List[RenderedAtomicContent]] = None,
     ) -> None:
-        if not isinstance(expectation_type, str):
+        if not isinstance(type, str):
             raise InvalidExpectationConfigurationError("expectation_type must be a string")  # noqa: TRY003
-        self._expectation_type = expectation_type
+        self._type = type
         if not isinstance(kwargs, dict):
             raise InvalidExpectationConfigurationError(  # noqa: TRY003
                 "expectation configuration kwargs must be a dict."
@@ -196,8 +196,8 @@ class ExpectationConfiguration(SerializableDictDot):
         self._expectation_context = value
 
     @property
-    def expectation_type(self) -> str:
-        return self._expectation_type
+    def type(self) -> str:
+        return self._type
 
     @property
     def kwargs(self) -> dict:
@@ -218,7 +218,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def _get_default_custom_kwargs(self) -> KWargDetailsDict:
         # NOTE: this is a holdover until class-first expectations control their
         # defaults, and so defaults are inherited.
-        if self.expectation_type.startswith("expect_column_pair"):
+        if self.type.startswith("expect_column_pair"):
             return {
                 "domain_kwargs": (
                     "column_A",
@@ -235,7 +235,7 @@ class ExpectationConfiguration(SerializableDictDot):
                     "condition_parser": None,
                 },
             }
-        elif self.expectation_type.startswith("expect_column"):
+        elif self.type.startswith("expect_column"):
             return {
                 "domain_kwargs": ("column", "row_condition", "condition_parser"),
                 # NOTE: this is almost certainly incomplete; subclasses should override
@@ -332,7 +332,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def applies_to_same_domain(
         self, other_expectation_configuration: ExpectationConfiguration
     ) -> bool:
-        if self.expectation_type != other_expectation_configuration.expectation_type:
+        if self.type != other_expectation_configuration.type:
             return False
         return self.get_domain_kwargs() == other_expectation_configuration.get_domain_kwargs()
 
@@ -361,7 +361,7 @@ class ExpectationConfiguration(SerializableDictDot):
         if match_type == "domain":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,  # type: ignore[union-attr] # could be dict
+                    self.type == other.type,  # type: ignore[union-attr] # could be dict
                     self.get_domain_kwargs() == other.get_domain_kwargs(),  # type: ignore[union-attr] # could be dict
                 )
             )
@@ -369,7 +369,7 @@ class ExpectationConfiguration(SerializableDictDot):
         if match_type == "success":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,  # type: ignore[union-attr] # could be dict
+                    self.type == other.type,  # type: ignore[union-attr] # could be dict
                     self.get_success_kwargs() == other.get_success_kwargs(),  # type: ignore[union-attr] # could be dict
                 )
             )
@@ -377,7 +377,7 @@ class ExpectationConfiguration(SerializableDictDot):
         if match_type == "runtime":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,  # type: ignore[union-attr] # could be dict
+                    self.type == other.type,  # type: ignore[union-attr] # could be dict
                     self.kwargs == other.kwargs,  # type: ignore[union-attr] # could be dict
                 )
             )
@@ -395,7 +395,7 @@ class ExpectationConfiguration(SerializableDictDot):
         other_meta: dict = convert_to_json_serializable(other.meta)
         return all(
             (
-                self.expectation_type == other.expectation_type,
+                self.type == other.type,
                 this_kwargs == other_kwargs,
                 this_meta == other_meta,
             )
@@ -433,7 +433,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def _get_expectation_impl(self) -> Type[Expectation]:
-        return get_expectation_impl(self.expectation_type)
+        return get_expectation_impl(self.type)
 
     def to_domain_obj(self) -> Expectation:
         expectation_impl = self._get_expectation_impl()
@@ -447,7 +447,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this expectation."""
-        if self.expectation_type.startswith("expect_table_"):
+        if self.type.startswith("expect_table_"):
             return MetricDomainTypes.TABLE
 
         if "column" in self.kwargs:
@@ -472,9 +472,9 @@ class ExpectationConfiguration(SerializableDictDot):
 
 
 class ExpectationConfigurationSchema(Schema):
-    expectation_type = fields.Str(
+    type = fields.Str(
         required=True,
-        error_messages={"required": "expectation_type missing in expectation configuration"},
+        error_messages={"required": "type missing in expectation configuration"},
     )
     kwargs = fields.Dict(
         required=False,

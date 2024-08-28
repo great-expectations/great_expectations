@@ -22,26 +22,22 @@ def test_SlackRenderer_render():
         validation_result=validation_result,
         data_docs_pages=data_docs_pages,
         notify_with=notify_with,
-        show_failed_expectations=True,
+        validation_result_urls=["file:///localsite/index.html"],
     )
 
-    assert (
-        output
-        == [
-            {
-                "text": {
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite Name*: `my_suite`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
-                    "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *3* of *3* expectations were met",  # noqa: E501
-                    "type": "mrkdwn",
-                },
-                "type": "section",
+    assert output == [
+        {
+            "text": {
+                "text": "*Asset*: __no_data_asset_name__  *Expectation Suite*: my_suite",
+                "type": "mrkdwn",
             },
-            {
-                "text": {
-                    "text": "*DataDocs* can be found here: `file:///localsite/index.html` \n (Please copy and paste link into a browser to view)\n",  # noqa: E501
-                    "type": "mrkdwn",
-                },
-                "type": "section",
+            "type": "section",
+        },
+        {
+            "text": {
+                "text": "*DataDocs* can be found here: `file:///localsite/index.html` \n (Please copy and paste link into a browser to view)\n",  # noqa: E501
+                "type": "mrkdwn",
             },
-        ]
-    )
+            "type": "section",
+        },
+    ]

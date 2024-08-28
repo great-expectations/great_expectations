@@ -44,10 +44,6 @@ PROJECT_HELP_COMMENT = f"""
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
 config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
-
-# Datasources tell Great Expectations where your data lives and how to get it.
-# Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
-datasources: {{}}
 """  # noqa: E501
 
 CONFIG_VARIABLES_INTRO = """
@@ -85,9 +81,6 @@ VALIDATIONS_STORE_STRING = yaml.dump(
         ]
     }
 ).replace("\n", "\n  ")[:-2]
-SUITE_PARAMETER_STORE_STRING = yaml.dump(
-    DataContextConfigDefaults.DEFAULT_STORES.value["suite_parameter_store"]
-)
 CHECKPOINT_STORE_STRING = yaml.dump(
     {"checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]}
 ).replace("\n", "\n  ")[:-2]
@@ -112,21 +105,12 @@ stores:
 # Stores are configurable places to store things like Expectations, Validations
 # Data Docs, and more. These are for advanced users only - most users can simply
 # leave this section alone.
-#
-# Three stores are required: expectations, validations, and
-# suite_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, etc.
   {EXPECTATIONS_STORE_STRING}
   {VALIDATIONS_STORE_STRING}
-  suite_parameter_store:
-    # Suite Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/docs/reference/suite_parameters/
-    {SUITE_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
   {VALIDATION_DEFINITION_STORE_STRING}
 expectations_store_name: expectations_store
 validation_results_store_name: validation_results_store
-suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
 data_docs_sites:

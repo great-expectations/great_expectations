@@ -14,10 +14,10 @@ def test_expect_column_values_as_string_to_be_positive_integers_pass(
     empty_data_context: AbstractDataContext,
 ):
     df = pd.DataFrame({"a": ["1", "2", "3", "4", "5"]})
-    data_asset = empty_data_context.data_sources.pandas_default.add_dataframe_asset(
-        "my_dataframe", dataframe=df
+    data_asset = empty_data_context.data_sources.pandas_default.add_dataframe_asset("my_dataframe")
+    batch = data_asset.add_batch_definition_whole_dataframe("my_batch_definition").get_batch(
+        batch_parameters={"dataframe": df}
     )
-    batch = data_asset.add_batch_definition_whole_dataframe("my_batch_definition").get_batch()
 
     result = batch.validate(ExpectColumnValuesAsStringToBePositiveInteger(column="a"))
 
@@ -30,10 +30,10 @@ def test_expect_column_values_as_string_to_be_positive_integers_fail(
 ):
     df = pd.DataFrame({"a": ["1", "2", "3", "4", "a"]})
 
-    data_asset = empty_data_context.data_sources.pandas_default.add_dataframe_asset(
-        "my_dataframe", dataframe=df
+    data_asset = empty_data_context.data_sources.pandas_default.add_dataframe_asset("my_dataframe")
+    batch = data_asset.add_batch_definition_whole_dataframe("my_batch_definition").get_batch(
+        batch_parameters={"dataframe": df}
     )
-    batch = data_asset.add_batch_definition_whole_dataframe("my_batch_definition").get_batch()
 
     result = batch.validate(ExpectColumnValuesAsStringToBePositiveInteger(column="a"))
 

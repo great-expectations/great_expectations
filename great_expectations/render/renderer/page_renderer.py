@@ -659,7 +659,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
             # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
             if (
-                expectation.expectation_type == "expect_table_columns_to_match_ordered_list"
+                expectation.type == "expect_table_columns_to_match_ordered_list"
                 and expectation.kwargs.get("column_list")
             ):
                 exp_column_list: List[str] = expectation.kwargs["column_list"]

@@ -1,13 +1,11 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
 config_version: 3
-datasources:
 fluent_datasources:
 
 plugins_directory: plugins/
 
 checkpoint_store_name: checkpoint_store
-suite_parameter_store_name: suite_parameter_store
 validation_results_store_name: validation_results_store
 expectations_store_name: expectations_store
 
@@ -23,10 +21,6 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-
-  suite_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: SuiteParameterStore
 
   checkpoint_store:
     class_name: CheckpointStore

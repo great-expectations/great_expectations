@@ -308,5 +308,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](/oss/contributing/contributing_maturity.md#expectation-contributions) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_batch_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py)
+- [expect_batch_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/docs/docusaurus/versioned_docs/version-0.18/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py#L4)
 :::

@@ -43,10 +43,15 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.constants import (
+    CURRENT_GX_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
+)
 from great_expectations.types import DictDot, SerializableDictDot
-from great_expectations.types.configurations import ClassConfigSchema
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    deep_filter_properties_iterable,
+)
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -62,13 +67,6 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-CURRENT_GX_CONFIG_VERSION = 3
-FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
-MINIMUM_SUPPORTED_CONFIG_VERSION = 2
-DEFAULT_USAGE_STATISTICS_URL = (
-    "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-)
 
 
 # NOTE 121822: (kilo59) likely won't moving to marshmallow v4 so we don't care about this
@@ -1043,212 +1041,6 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(AbstractConfig):
-    def __init__(  # noqa: C901, PLR0912, PLR0913
-        self,
-        name: Optional[
-            str
-        ] = None,  # Note: name is optional currently to avoid updating all documentation within
-        # the scope of this work.
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        module_name: str = "great_expectations.datasource",
-        execution_engine=None,
-        data_connectors=None,
-        data_asset_type=None,
-        batch_kwargs_generators=None,
-        connection_string=None,
-        credentials=None,
-        introspection=None,
-        tables=None,
-        boto3_options=None,
-        azure_options=None,
-        gcs_options=None,
-        credentials_info=None,
-        reader_method=None,
-        reader_options=None,
-        limit=None,
-        **kwargs,
-    ) -> None:
-        super().__init__(id=id, name=name)
-        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
-        self._class_name = class_name
-        self._module_name = module_name
-        if execution_engine is not None:
-            self.execution_engine = execution_engine
-        if data_connectors is not None and isinstance(data_connectors, dict):
-            self.data_connectors = data_connectors
-
-        # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()  # noqa: E501
-        if data_asset_type is None:
-            if class_name == "PandasDatasource":
-                data_asset_type = {
-                    "class_name": "PandasDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-            elif class_name == "SqlAlchemyDatasource":
-                data_asset_type = {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-        if data_asset_type is not None:
-            self.data_asset_type = data_asset_type
-        if batch_kwargs_generators is not None:
-            self.batch_kwargs_generators = batch_kwargs_generators
-        if connection_string is not None:
-            self.connection_string = connection_string
-        if credentials is not None:
-            self.credentials = credentials
-        if introspection is not None:
-            self.introspection = introspection
-        if tables is not None:
-            self.tables = tables
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
-        if azure_options is not None:
-            self.azure_options = azure_options
-        if gcs_options is not None:
-            self.gcs_options = gcs_options
-        if credentials_info is not None:
-            self.credentials_info = credentials_info
-        if reader_method is not None:
-            self.reader_method = reader_method
-        if reader_options is not None:
-            self.reader_options = reader_options
-        if limit is not None:
-            self.limit = limit
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    @property
-    def class_name(self):
-        return self._class_name
-
-    @property
-    def module_name(self):
-        return self._module_name
-
-    @public_api
-    @override
-    def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this DatasourceConfig.
-
-        Returns:
-            A JSON-serializable dict representation of this DatasourceConfig.
-        """
-        # # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
-        # make this refactoring infeasible at the present time.
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-        return serializeable_dict
-
-
-class DatasourceConfigSchema(AbstractConfigSchema):
-    class Meta:
-        unknown = INCLUDE
-
-    # Note: name is optional currently to avoid updating all documentation within
-    # the scope of this work.
-    name = fields.String(
-        required=False,
-        allow_none=True,
-    )
-    id = fields.String(
-        required=False,
-        allow_none=True,
-    )
-
-    class_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="Datasource",
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.datasource",
-    )
-    force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
-    persist = fields.Bool(required=False, allow_none=True)
-    spark_config = fields.Raw(required=False, allow_none=True)
-    execution_engine = fields.Nested(ExecutionEngineConfigSchema, required=False, allow_none=True)
-    data_connectors = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DataConnectorConfigSchema),
-        required=False,
-        allow_none=True,
-    )
-
-    data_asset_type = fields.Nested(ClassConfigSchema, required=False, allow_none=True)
-
-    # TODO: Update to generator-specific
-    # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))  # noqa: E501
-    batch_kwargs_generators = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
-    )
-    connection_string = fields.String(required=False, allow_none=True)
-    credentials = fields.Raw(required=False, allow_none=True)
-    introspection = fields.Dict(required=False, allow_none=True)
-    tables = fields.Dict(required=False, allow_none=True)
-    boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    azure_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    gcs_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    # BigQuery Service Account Credentials
-    # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
-    credentials_info = fields.Dict(required=False, allow_none=True)
-    reader_method = fields.String(required=False, allow_none=True)
-    reader_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    limit = fields.Integer(required=False, allow_none=True)
-
-    # noinspection PyUnusedLocal
-    @validates_schema
-    def validate_schema(self, data, **kwargs):
-        if "generators" in data:
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '  # noqa: E501
-                'GX that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'  # noqa: E501
-            )
-        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.  # noqa: E501
-        if data["class_name"][0] == "$":
-            return
-
-        if (
-            "connection_string" in data
-            or "credentials" in data
-            or "introspection" in data
-            or "tables" in data
-        ) and not (
-            data["class_name"]  # noqa: E713 # membership check
-            in [
-                "SqlAlchemyDatasource",
-            ]
-        ):
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                f"""Your current configuration uses one or more keys in a data source that are required only by a
-sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
-                """  # noqa: E501
-            )
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_datasource_config(self, data, **kwargs):
-        # Add names to data connectors
-        for data_connector_name, data_connector_config in data.get("data_connectors", {}).items():
-            data_connector_config["name"] = data_connector_name
-        return DatasourceConfig(**data)
-
-
 class ProgressBarsConfig(DictDot):
     def __init__(
         self,
@@ -1277,7 +1069,12 @@ class GXCloudConfig(DictDot):
         if access_token is None:
             raise ValueError("Access token cannot be None.")  # noqa: TRY003
 
-        self.base_url = base_url
+        # The base url doesn't point to a specific resource but is the prefix for constructing GX
+        # cloud urls. We want it to end in a '/' so we can manipulate it using tools such as
+        # urllib.parse.urljoin. `urljoin` will strip the last part of the path if it thinks it is
+        # a specific resource  (ie not trailing /). So we append a '/' to the base_url if it
+        # doesn't exist.
+        self.base_url = base_url if base_url[-1] == "/" else base_url + "/"
         self.organization_id = organization_id
         self.access_token = access_token
 
@@ -1303,12 +1100,6 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
     )
-    datasources = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DatasourceConfigSchema),
-        required=False,
-        allow_none=True,
-    )
     fluent_datasources = fields.Dict(
         keys=fields.Str(),
         required=False,
@@ -1317,7 +1108,6 @@ class DataContextConfigSchema(Schema):
     )
     expectations_store_name = fields.Str()
     validation_results_store_name = fields.Str()
-    suite_parameter_store_name = fields.Str()
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
@@ -1400,39 +1190,6 @@ class DataContextConfigSchema(Schema):
                 validation_error=ValidationError(message="config version too high"),
             )
 
-        if data["config_version"] < CURRENT_GX_CONFIG_VERSION and (
-            "checkpoint_store_name" in data
-            or any(
-                store_config["class_name"] == "CheckpointStore"
-                for store_config in data["stores"].values()
-            )
-        ):
-            raise gx_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(  # noqa: E501
-                    data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
-                ),
-                validation_error=ValidationError(
-                    message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(  # noqa: E501
-                        data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
-                    )
-                ),
-            )
-
-        if (
-            data["config_version"] >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE
-            and "validation_operators" in data
-            and data["validation_operators"] is not None
-        ):
-            logger.warning(
-                f"""You appear to be using a legacy capability with the latest config version \
-({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
-are being deprecated.  Please consult the V3 API migration guide \
-https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and \
-update your configuration to be compatible with the version number {CURRENT_GX_CONFIG_VERSION}.\n    (This message \
-will appear repeatedly until your configuration is updated.)
-"""  # noqa: E501
-            )
-
 
 class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VERSION = CURRENT_GX_CONFIG_VERSION
@@ -1452,8 +1209,6 @@ class DataContextConfigDefaults(enum.Enum):
         f"{VALIDATION_DEFINITIONS_BASE_DIRECTORY}/"
     )
 
-    DEFAULT_SUITE_PARAMETER_STORE_NAME = "suite_parameter_store"
-    DEFAULT_SUITE_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = "suite_parameters/"
     DATA_DOCS_BASE_DIRECTORY = "data_docs"
     DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
 
@@ -1503,7 +1258,6 @@ class DataContextConfigDefaults(enum.Enum):
             "base_directory": DEFAULT_VALIDATION_DEFINITION_STORE_BASE_DIRECTORY_RELATIVE_NAME,
         },
     }
-    DEFAULT_SUITE_PARAMETER_STORE = {"class_name": "SuiteParameterStore"}
     DEFAULT_CHECKPOINT_STORE = {
         "class_name": "CheckpointStore",
         "store_backend": {
@@ -1516,7 +1270,6 @@ class DataContextConfigDefaults(enum.Enum):
         DEFAULT_EXPECTATIONS_STORE_NAME: DEFAULT_EXPECTATIONS_STORE,
         DEFAULT_VALIDATIONS_STORE_NAME: DEFAULT_VALIDATIONS_STORE,
         DEFAULT_VALIDATION_DEFINITION_STORE_NAME: DEFAULT_VALIDATION_DEFINITION_STORE,
-        DEFAULT_SUITE_PARAMETER_STORE_NAME: DEFAULT_SUITE_PARAMETER_STORE,
         DEFAULT_CHECKPOINT_STORE_NAME: DEFAULT_CHECKPOINT_STORE,
     }
 
@@ -1546,7 +1299,6 @@ class BaseStoreBackendDefaults(DictDot):
         self,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,  # noqa: E501
         validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
-        suite_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,  # noqa: E501
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
         stores: Optional[dict] = None,
@@ -1554,7 +1306,6 @@ class BaseStoreBackendDefaults(DictDot):
     ) -> None:
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.validation_definition_store_name = (
             DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value
@@ -1586,7 +1337,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         checkpoint_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
         validation_results_store_name: Overrides default if supplied
-        suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
     """
 
@@ -1605,7 +1355,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         checkpoint_store_prefix: str = "checkpoints",
         expectations_store_name: str = "expectations_S3_store",
         validation_results_store_name: str = "validation_results_S3_store",
-        suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_S3_store",
     ) -> None:
         # Initialize base defaults
@@ -1626,7 +1375,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.stores = {
             expectations_store_name: {
@@ -1653,7 +1401,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validation_definition_store_prefix,
                 },
             },
-            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1745,7 +1492,6 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "InMemoryStoreBackend",
                 },
             },
-            self.suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
             self.checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1790,7 +1536,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         checkpoint_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
         validation_results_store_name: Overrides default if supplied
-        suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
     """  # noqa: E501
 
@@ -1815,7 +1560,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         checkpoint_store_prefix: str = "checkpoints",
         expectations_store_name: str = "expectations_GCS_store",
         validation_results_store_name: str = "validation_results_GCS_store",
-        suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_GCS_store",
     ) -> None:
         # Initialize base defaults
@@ -1848,7 +1592,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.stores = {
             expectations_store_name: {
@@ -1878,7 +1621,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validation_definition_store_prefix,
                 },
             },
-            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1916,7 +1658,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         checkpoint_store_credentials: Overrides default_credentials if supplied
         expectations_store_name: Overrides default if supplied
         validation_results_store_name: Overrides default if supplied
-        suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
     """  # noqa: E501
 
@@ -1929,7 +1670,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         checkpoint_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
         validation_results_store_name: str = "validation_results_database_store",
-        suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_database_store",
     ) -> None:
         # Initialize base defaults
@@ -1948,7 +1688,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
 
         self.stores = {
@@ -1973,7 +1712,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": validation_definition_store_credentials,
                 },
             },
-            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1998,12 +1736,9 @@ class DataContextConfig(BaseYamlConfig):
 
     Args:
         config_version (Optional[float]): config version of this DataContext.
-        datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
-            DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
         validation_results_store_name (Optional[str]): name of ValidationResultsStore to be used by DataContext.
-        suite_parameter_store_name (Optional[str]): name of SuiteParamterStore to be used by DataContext.
         checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
         plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
@@ -2019,19 +1754,12 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally or for metrics calculations.
     """  # noqa: E501
 
-    def __init__(  # noqa: C901, PLR0913
+    def __init__(  # noqa: PLR0913
         self,
         config_version: Optional[float] = None,
-        datasources: Optional[
-            Union[
-                Dict[str, DatasourceConfig],
-                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
-            ]
-        ] = None,
         fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validation_results_store_name: Optional[str] = None,
-        suite_parameter_store_name: Optional[str] = None,
         checkpoint_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
@@ -2056,21 +1784,15 @@ class DataContextConfig(BaseYamlConfig):
                 expectations_store_name = store_backend_defaults.expectations_store_name
             if validation_results_store_name is None:
                 validation_results_store_name = store_backend_defaults.validation_results_store_name
-            if suite_parameter_store_name is None:
-                suite_parameter_store_name = store_backend_defaults.suite_parameter_store_name
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
             if checkpoint_store_name is None:
                 checkpoint_store_name = store_backend_defaults.checkpoint_store_name
 
         self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.plugins_directory = plugins_directory
         self.stores = self._init_stores(stores)
@@ -2236,7 +1958,6 @@ class CheckpointValidationDefinitionSchema(AbstractConfigSchema):
 
 
 dataContextConfigSchema = DataContextConfigSchema()
-datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()

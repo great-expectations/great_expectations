@@ -27,7 +27,6 @@ from typing_extensions import TypeAlias
 
 from great_expectations._docs_decorators import (
     deprecated_argument,
-    new_argument,
 )
 from great_expectations._docs_decorators import (
     public_api as public_api,
@@ -37,7 +36,7 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import ColumnPartitioner
-from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
     CSVEngine,
@@ -60,7 +59,6 @@ _EXCLUDE_TYPES_FROM_JSON: list[Type]
 MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
 AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 logger: Logger
-_PandasDataFrameT = TypeVar("_PandasDataFrameT")
 
 class PandasDatasourceError(Exception): ...
 
@@ -122,16 +120,13 @@ class XMLAsset(_PandasDataAsset): ...
 
 class DataFrameAsset(_PandasDataAsset):
     type: Literal["dataframe"]
-    dataframe: _PandasDataFrameT  # type: ignore[valid-type]
 
-    @new_argument(
-        argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
-        version="0.16.15",
-    )
     @override
-    def build_batch_request(  # type: ignore[override]
-        self, dataframe: Optional[pd.DataFrame] = None
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters] = ...,
+        batch_slice: Optional[BatchSlice] = ...,
+        partitioner: Optional[ColumnPartitioner] = ...,
     ) -> BatchRequest: ...
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
@@ -384,7 +379,7 @@ class PandasDatasource(_PandasDatasource):
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
     ) -> JSONAsset: ...
-    def add_orc_asset(  # noqa: PLR0913
+    def add_orc_asset(
         self,
         name: str,
         path: pydantic.FilePath | pydantic.AnyUrl,
@@ -405,7 +400,7 @@ class PandasDatasource(_PandasDatasource):
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> Optional[ParquetAsset]: ...
-    def add_pickle_asset(  # noqa: PLR0913
+    def add_pickle_asset(
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
@@ -427,7 +422,7 @@ class PandasDatasource(_PandasDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
     ) -> SASAsset: ...
-    def add_spss_asset(  # noqa: PLR0913
+    def add_spss_asset(
         self,
         name: str,
         path: pydantic.FilePath,
@@ -765,7 +760,7 @@ class PandasDatasource(_PandasDatasource):
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
     ) -> Batch: ...
-    def read_orc(  # noqa: PLR0913
+    def read_orc(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         *,
@@ -786,7 +781,7 @@ class PandasDatasource(_PandasDatasource):
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> Batch: ...
-    def read_pickle(  # noqa: PLR0913
+    def read_pickle(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         *,
@@ -808,7 +803,7 @@ class PandasDatasource(_PandasDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
     ) -> Batch: ...
-    def read_spss(  # noqa: PLR0913
+    def read_spss(
         self,
         path: pydantic.FilePath,
         *,

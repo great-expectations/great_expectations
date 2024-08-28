@@ -18,8 +18,8 @@ from pyparsing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, SerializableDotDict
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.core.domain import Domain

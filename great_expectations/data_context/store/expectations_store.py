@@ -36,7 +36,7 @@ class ExpectationConfigurationDTO(pydantic.BaseModel):
         extra = pydantic.Extra.ignore
 
     id: str
-    expectation_type: str
+    type: str
     rendered_content: List[dict] = pydantic.Field(default_factory=list)
     kwargs: dict
     meta: Union[dict, None]
@@ -260,11 +260,10 @@ class ExpectationsStore(Store):
                     local_suite=value,
                     cloud_suite=cloud_suite,
                 )
-        except gx_exceptions.StoreBackendError as exc:
+        except gx_exceptions.StoreBackendError as e:
             # todo: this generic error clobbers more informative errors coming from the store
-            raise gx_exceptions.ExpectationSuiteError(  # noqa: TRY003
-                f"Could not find an existing ExpectationSuite named {value.name}."
-            ) from exc
+
+            raise gx_exceptions.ExpectationSuiteNotAddedError(name=value.name) from e
 
     def _add_ids_on_create(self, suite: ExpectationSuite) -> ExpectationSuite:
         """This method handles adding IDs to suites and expectations for non-cloud backends.

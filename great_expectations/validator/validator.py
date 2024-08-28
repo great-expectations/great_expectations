@@ -27,7 +27,7 @@ import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
-from great_expectations._docs_decorators import deprecated_argument, public_api
+from great_expectations._docs_decorators import deprecated_argument
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -38,7 +38,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import CheckpointValidationDefinition
 from great_expectations.exceptions import (
     GreatExpectationsError,
@@ -52,6 +51,7 @@ from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
 )
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
@@ -126,7 +126,6 @@ class ValidationDependencies:
         return list(self.metric_configurations.values())
 
 
-@public_api
 class Validator:
     """Validator is the key object used to create Expectations, validate Expectations, and get Metrics for Expectations.
 
@@ -187,7 +186,7 @@ class Validator:
 
     @property
     def _include_rendered_content(self) -> bool:
-        from great_expectations import project_manager
+        from great_expectations.data_context.data_context.context_factory import project_manager
 
         return project_manager.is_using_cloud()
 
@@ -278,14 +277,13 @@ class Validator:
         return self._expectation_suite.name
 
     @expectation_suite_name.setter
-    def expectation_suite_name(self, expectation_suite_name: str) -> None:
+    def expectation_suite_name(self, name: str) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""  # noqa: E501
-        self._expectation_suite.name = expectation_suite_name
+        self._expectation_suite.name = name
 
     def load_batch_list(self, batch_list: Sequence[Batch | FluentBatch]) -> None:
         self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
 
-    @public_api
     def get_metric(
         self,
         metric: MetricConfiguration,
@@ -341,7 +339,6 @@ class Validator:
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
 
-    @public_api
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         """Convenience method to obtain Batch columns.
 
@@ -353,7 +350,6 @@ class Validator:
         """
         return self._metrics_calculator.columns(domain_kwargs=domain_kwargs)
 
-    @public_api
     def head(
         self,
         n_rows: int = 5,
@@ -539,7 +535,7 @@ class Validator:
 
                     if not configuration:
                         configuration = ExpectationConfiguration(
-                            expectation_type=name, kwargs=expectation_kwargs, meta=meta
+                            type=name, kwargs=expectation_kwargs, meta=meta
                         )
 
                     validation_result = ExpectationValidationResult(
@@ -693,7 +689,7 @@ class Validator:
             # Validating
             try:
                 assert (
-                    configuration.expectation_type is not None
+                    configuration.type is not None
                 ), "Given configuration should include expectation type"
             except AssertionError as e:
                 raise InvalidExpectationConfigurationError(str(e))
@@ -843,7 +839,6 @@ class Validator:
 
         return evrs
 
-    @public_api
     def remove_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -949,7 +944,6 @@ class Validator:
 
         self._default_expectation_args[argument] = value
 
-    @public_api
     def get_expectation_suite(  # noqa: C901, PLR0912, PLR0913
         self,
         discard_failed_expectations: bool = True,
@@ -1041,7 +1035,6 @@ class Validator:
             logger.info(message + settings_message)
         return expectation_suite
 
-    @public_api
     def save_expectation_suite(  # noqa: PLR0913
         self,
         filepath: Optional[str] = None,
@@ -1089,7 +1082,6 @@ class Validator:
         else:
             raise ValueError("Unable to save config: filepath or data_context must be available.")  # noqa: TRY003
 
-    @public_api
     @deprecated_argument(
         argument_name="run_id",
         message="Only the str version of this argument is deprecated. run_id should be a RunIdentifier or dict. Support will be removed in 0.16.0.",  # noqa: E501

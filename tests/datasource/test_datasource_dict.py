@@ -4,11 +4,7 @@ from typing import TYPE_CHECKING, Callable
 
 import pytest
 
-from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.types.base import (
-    datasourceConfigSchema,
-)
 from great_expectations.datasource.datasource_dict import (
     CacheableDatasourceDict,
     DatasourceDict,
@@ -29,7 +25,7 @@ class DatasourceStoreSpy(DatasourceStore):
         self.get_count = 0
         self.remove_key_count = 0
 
-        super().__init__(serializer=DictConfigSerializer(schema=datasourceConfigSchema))
+        super().__init__()
 
         datasource_configs = datasource_configs or []
         for config in datasource_configs:
@@ -285,3 +281,18 @@ def test_cacheable_datasource_dict___getitem___with_fds(
     retrieved_fds = datasource_dict[pandas_fds.name]
     assert store.get_count == 1
     assert retrieved_fds.dict() == pandas_fds.dict()
+
+
+@pytest.mark.unit
+def test_cacheable_datasource_dict_set_datasource_adds_ids(
+    build_cacheable_datasource_dict_with_store_spy: Callable,
+    pandas_fds: PandasDatasource,
+):
+    datasource_dict = build_cacheable_datasource_dict_with_store_spy(
+        datasource_configs=[pandas_fds],
+        populate_cache=False,
+    )
+
+    assert pandas_fds.id is None
+    updated_fds = datasource_dict.set_datasource(pandas_fds.name, pandas_fds)
+    assert updated_fds.id is not None

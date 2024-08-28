@@ -59,7 +59,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
         domain_type=MetricDomainTypes.COLUMN,
     )
-    def _spark(  # noqa: PLR0913
+    def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs,
@@ -230,7 +230,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
                     "string_template": {
                         "template": exception_message_template_str,
                         "params": {
-                            "expectation_type": result.expectation_config.expectation_type,
+                            "expectation_type": result.expectation_config.type,
                             "exception_message": result.exception_info[
                                 "exception_message"
                             ],

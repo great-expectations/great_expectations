@@ -1,14 +1,24 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Literal, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Literal, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_LIST_DESCRIPTION,
+    IGNORE_ROW_IF_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     substitute_none_for_missing,
@@ -21,14 +31,33 @@ if TYPE_CHECKING:
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect that the sum of row values in a specified column list "
+    "is the same for each row, and equal to a specified sum total."
+)
+SUM_TOTAL_DESCRIPTION = "Expected sum of columns"
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Data integrity"]
+
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
-    """Expect that the sum of row values in a specified column list is the same for each row, and equal to a specified sum total.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_multicolumn_sum_to_equal is a \
+    ExpectMulticolumnSumToEqual is a \
     [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
 
     Multicolumn Map Expectations are evaluated for a set of columns and ask a yes/no question about the row-wise relationship between those columns.
@@ -36,15 +65,15 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
-        column_list (tuple or list): Set of columns to be checked
-        sum_total (int or float): expected sum of columns
+        column_list (tuple or list): {COLUMN_LIST_DESCRIPTION}
+        sum_total (int or float): {SUM_TOTAL_DESCRIPTION}
 
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
-            If specified, sets the condition on which a given row is to be ignored. Default "neither".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "neither".
         mostly (None or a float between 0 and 1): \
-            Successful if at least `mostly` fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -62,11 +91,18 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Data Integrity
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2   test3
@@ -84,31 +120,31 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
                     "partial_unexpected_list": [
-                      {
+                      {{
                         "test": 4,
                         "test2": 4,
                         "test3": -3
-                      }
+                      }}
                     ],
                     "missing_count": 0,
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -118,40 +154,43 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
                     "partial_unexpected_list": [
-                      {
+                      {{
                         "test": 4,
                         "test2": 4,
                         "test3": -3
-                      }
+                      }}
                     ],
                     "missing_count": 0,
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    sum_total: float
+    sum_total: float = pydantic.Field(description=SUM_TOTAL_DESCRIPTION)
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
-        "all_values_are_missing"
+        pydantic.Field(
+            default="all_values_are_missing",
+            description=IGNORE_ROW_IF_DESCRIPTION,
+        )
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": [
             "core expectation",
@@ -162,6 +201,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "multicolumn_sum.equal"
     success_keys = ("mostly", "sum_total")
@@ -169,6 +209,80 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         "column_list",
         "sum_total",
     )
+
+    class Config:
+        title = "Expect multicolumn sum to equal"
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectMulticolumnSumToEqual]) -> None:
+            MulticolumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
+
+    @classmethod
+    def _prescriptive_template(
+        cls,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column_list", RendererValueType.ARRAY),
+            ("sum_total", RendererValueType.NUMBER),
+            ("mostly", RendererValueType.NUMBER),
+            ("ignore_row_if", RendererValueType.STRING),
+        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        params = renderer_configuration.params
+
+        template_str = ""
+        if params.column_list:
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            template_str += "Sum across columns " + cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
+            )
+            template_str += " must be $sum_total, at least $mostly_pct % of the time."
+        else:
+            template_str += " must be $sum_total."
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

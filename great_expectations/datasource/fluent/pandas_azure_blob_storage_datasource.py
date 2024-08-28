@@ -127,7 +127,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 asset.test_connection()
 
     @override
-    def _build_data_connector(  # noqa: PLR0913
+    def _build_data_connector(
         self,
         data_asset: FileDataAsset,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
@@ -148,7 +148,6 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             azure_client=self._get_azure_client(),
-            batching_regex=data_asset.batching_regex,
             account_name=self._account_name,
             container=abs_container,
             name_starts_with=abs_name_starts_with,
@@ -161,7 +160,6 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
                 account_name=self._account_name,
                 container=abs_container,
                 name_starts_with=abs_name_starts_with,

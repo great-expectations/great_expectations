@@ -10,32 +10,6 @@
 # It is auto-generated and usually does not need to be changed.
 config_version: 3
 
-# Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations datasource new` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
-datasources:
-  my_pandas_runtime_datasource:
-    class_name: Datasource
-    execution_engine:
-      class_name: PandasExecutionEngine
-    data_connectors:
-      my_data_connector:
-        module_name: great_expectations.datasource.data_connector
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - an_example_key
-          - another_example_key
-  my_spark_datasource:
-    class_name: Datasource
-    execution_engine:
-      class_name: SparkDFExecutionEngine
-    data_connectors:
-      my_data_connector:
-        module_name: great_expectations.datasource.data_connector
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - an_example_key
-          - another_example_key
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
@@ -46,10 +20,6 @@ stores:
   # Stores are configurable places to store things like Expectations, Validations
   # Data Docs, and more. These are for advanced users only - most users can simply
   # leave this section alone.
-  #
-  # Three stores are required: expectations, validations, and
-  # suite_parameters, and must exist with a valid store entry. Additional
-  # stores can be configured for uses such as data_docs, validation_operators, etc.
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
@@ -68,15 +38,9 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  suite_parameter_store:
-    # Evaluation Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/en/latest/reference/core_concepts/suite_parameters.html
-    class_name: SuiteParameterStore
-
 expectations_store_name: expectations_store
 checkpoint_store_name: checkpoint_store
 validation_results_store_name: validation_results_store
-suite_parameter_store_name: suite_parameter_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These

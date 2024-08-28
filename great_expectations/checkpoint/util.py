@@ -45,7 +45,7 @@ def send_slack_notification(
         return None
     except requests.HTTPError:
         logger.warning(
-            "Request to Slack webhook " f"returned error {response.status_code}: {response.text}"
+            "Request to Slack webhook " f"returned error {response.status_code}: {response.text}"  # type: ignore[possibly-undefined] # ok for httperror
         )
         return None
 
@@ -79,7 +79,7 @@ def send_opsgenie_alert(query: str, message: str, settings: dict) -> bool:
         logger.warning(f"Failed to connect to Opsgenie: {e}")
         return False
     except requests.HTTPError as e:
-        logger.warning(f"Request to Opsgenie API returned error {response.status_code}: {e}")
+        logger.warning(f"Request to Opsgenie API returned error {response.status_code}: {e}")  # type: ignore[possibly-undefined] # ok for httperror
         return False
     return True
 
@@ -93,7 +93,7 @@ def send_microsoft_teams_notifications(payload: dict, microsoft_teams_webhook: s
         logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
         return None
     except requests.HTTPError as e:
-        logger.warning(f"Request to Microsoft Teams API returned error {response.status_code}: {e}")
+        logger.warning(f"Request to Microsoft Teams API returned error {response.status_code}: {e}")  # type: ignore[possibly-undefined] # ok for httperror
         return None
 
     return "Microsoft Teams notification succeeded."

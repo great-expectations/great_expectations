@@ -54,7 +54,7 @@ def test_load_class_raises_error_when_module_name_is_not_string():
 @pytest.mark.filterwarnings(
     "ignore:SQLAlchemy is not installed*:UserWarning:great_expectations.data_context.util"
 )
-def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
+def test_password_masker_mask_db_url(  # noqa: PLR0915, C901- 11
     monkeypatch, tmp_path
 ):
     """
@@ -342,44 +342,6 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
                 store_config["store_backend"]["ge_cloud_credentials"]["access_token"]
                 != ge_cloud_access_token
             )
-
-
-@pytest.mark.unit
-def test_sanitize_config_masks_execution_engine_connection_strings(
-    data_context_config_dict_with_datasources, conn_string_password
-):
-    # test that datasource credentials have been properly masked
-    unaltered_datasources = data_context_config_dict_with_datasources["datasources"]
-    config_with_creds_masked = PasswordMasker.sanitize_config(
-        data_context_config_dict_with_datasources
-    )
-    masked_datasources = config_with_creds_masked["datasources"]
-
-    # iterate through the processed datasources and check for correctness
-    for name, processed_config in masked_datasources.items():
-        # check if processed_config["execution_engine"]["connection_string"] exists
-        if processed_config.get("execution_engine") and processed_config["execution_engine"].get(
-            "connection_string"
-        ):
-            # check if the connection string contains a password
-            if (
-                conn_string_password
-                in unaltered_datasources[name]["execution_engine"]["connection_string"]
-            ):
-                # it does contain a password, so make sure its masked
-                assert (
-                    conn_string_password
-                    not in processed_config["execution_engine"]["connection_string"]
-                )
-            else:
-                # it doesn't contain a password, so make sure it's unaltered
-                assert processed_config == unaltered_datasources[name]
-
-        # processed_config either doesn't have an `execution_engine` field,
-        # or a `connection_string` field
-        else:
-            # expect this config to be unaltered
-            assert processed_config == unaltered_datasources[name]
 
 
 @pytest.mark.unit

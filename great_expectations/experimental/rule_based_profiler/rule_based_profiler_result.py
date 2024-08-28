@@ -3,13 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationSuite,  # noqa: TCH001
 )
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
@@ -20,12 +18,12 @@ from great_expectations.experimental.rule_based_profiler.parameter_container imp
     ParameterNode,  # noqa: TCH001
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
 
 
-@public_api
 @dataclass(frozen=True)
 class RuleBasedProfilerResult(SerializableDictDot):
     """
@@ -101,7 +99,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
             "citation": self.citation,
         }
 
-    @public_api
     @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """
@@ -112,13 +109,12 @@ class RuleBasedProfilerResult(SerializableDictDot):
         """
         return self.to_dict()
 
-    @public_api
-    def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
+    def get_expectation_suite(self, name: str) -> ExpectationSuite:
         """
         Retrieve the `ExpectationSuite` generated during the `RuleBasedProfiler` run.
 
         Args:
-            expectation_suite_name: The name of the desired `ExpectationSuite`.
+            name: The name of the desired `ExpectationSuite`.
 
         Returns:
             `ExpectationSuite`
@@ -126,7 +122,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,
             expectation_suite=None,
-            expectation_suite_name=expectation_suite_name,
+            expectation_suite_name=name,
             component_name=self.__class__.__name__,
             persist=False,
         )

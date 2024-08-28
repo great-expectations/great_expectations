@@ -3,8 +3,7 @@ sidebar_label: "Manage SQL Data Assets"
 title: "Manage SQL Data Assets"
 id: sql_data_assets
 description: Connect Great Expectations to SQL Data Assets.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, SQL]
 ---
 

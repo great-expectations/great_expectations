@@ -16,7 +16,7 @@ from great_expectations.datasource.fluent import (
     InvalidDatasource,
     TestConnectionError,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 
 pytestmark = pytest.mark.unit
 
@@ -31,7 +31,6 @@ _EXCLUDE_METHODS: Final[set[str]] = {
     "get_batch_definition",  # DataAsset
     "get_execution_engine",
     "json",
-    "parse_order_by_sorters",
     "update_batch_definition_field_set",  # DataAsset
     "yaml",
 }
@@ -50,29 +49,28 @@ DATA_ASSET_PUBLIC_METHODS: Final[list[str]] = [
 class TestPublicMethodsAreOverridden:
     """
     Ensure that applicable Datasource/DataAsset public methods are overridden.
-    Applicable public methods are those that would typically be called when a users is trying to run some action on a Datasource
-    and would want to know if the Datasource is invalid.
+    Applicable public methods are those that would typically be called when a users is trying to run
+    some action on a Datasource and would want to know if the Datasource is invalid.
 
-    If a method is not overridden, it will be inherited from the base class and will not be present in the InvalidDatasource.__dict__.
-    """  # noqa: E501
+    If a method is not overridden, it will be inherited from the base class and will not be present
+    in the InvalidDatasource.__dict__.
+    """
 
     @pytest.mark.parametrize("base_ds_method_name", DATASOURCE_PUBLIC_METHODS)
     def test_datasource_methods(self, base_ds_method_name: str):
         """Ensure that InvalidDatasource overrides the applicable Datasource methods."""
-        for base_ds_method_name in DATASOURCE_PUBLIC_METHODS:
-            method = getattr(InvalidDatasource, base_ds_method_name, None)
-            assert method, f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
-            with pytest.raises(TypeError):
-                method()
+        method = getattr(InvalidDatasource, base_ds_method_name, None)
+        assert method, f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
+        with pytest.raises(TypeError):
+            method()
 
     @pytest.mark.parametrize("base_ds_method_name", DATA_ASSET_PUBLIC_METHODS)
     def test_data_asset(self, base_ds_method_name: str):
         """Ensure that InvalidAsset overrides the applicable DataAsset methods."""
-        for base_ds_method_name in DATA_ASSET_PUBLIC_METHODS:
-            method = getattr(InvalidAsset, base_ds_method_name, None)
-            assert method, f"Expected {base_ds_method_name} to be defined on InvalidAsset"
-            with pytest.raises(TypeError):
-                method()
+        method = getattr(InvalidAsset, base_ds_method_name, None)
+        assert method, f"Expected {base_ds_method_name} to be defined on InvalidAsset"
+        with pytest.raises(TypeError):
+            method()
 
 
 @pytest.fixture(scope="module")
@@ -102,7 +100,7 @@ class InvalidDSFactory(Protocol):
 def invalid_datasource_factory() -> InvalidDSFactory:
     def _invalid_ds_fct(config: dict) -> InvalidDatasource:
         try:
-            ds_type: type[Datasource] = _SourceFactories.type_lookup[config["type"]]
+            ds_type: type[Datasource] = DataSourceManager.type_lookup[config["type"]]
             ds_type(**config)
         except (pydantic.ValidationError, LookupError) as config_error:
             return InvalidDatasource(**config, config_error=config_error)
@@ -271,7 +269,7 @@ class TestInvalidDatasource:
 def rand_invalid_datasource_with_assets(
     invalid_datasource_factory: InvalidDSFactory,
 ) -> InvalidDatasource:
-    random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
+    random_ds_type = random.choice([t for t in DataSourceManager.type_lookup.type_names()])
     invalid_ds = invalid_datasource_factory(
         {
             "name": "my invalid ds",
@@ -292,7 +290,7 @@ class TestInvalidDataAsset:
     def test_connection_raises_informative_error(
         self, invalid_datasource_factory: InvalidDSFactory
     ):
-        random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
+        random_ds_type = random.choice([t for t in DataSourceManager.type_lookup.type_names()])
         print(f"{random_ds_type=}")
         invalid_datasource: InvalidDatasource = invalid_datasource_factory(
             {

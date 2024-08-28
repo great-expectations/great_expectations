@@ -16,10 +16,12 @@ from typing import (
     Literal,
     Optional,
     Protocol,
+    Sequence,
     Tuple,
     Type,
     Union,
     cast,
+    overload,
 )
 
 from typing_extensions import Annotated
@@ -63,8 +65,6 @@ from great_expectations.datasource.fluent.interfaces import (
     DatasourceT,
     GxDatasourceWarning,
     PartitionerProtocol,
-    Sorter,
-    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -88,9 +88,67 @@ if TYPE_CHECKING:
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
+DEFAULT_QUOTE_CHARACTERS: Final[Tuple[str, str]] = ('"', "'")
+
+
+@overload
+def to_lower_if_not_quoted(value: str, quote_characters: Sequence[str] = ...) -> str: ...
+
+
+@overload
+def to_lower_if_not_quoted(value: None, quote_characters: Sequence[str] = ...) -> None: ...
+
+
+def to_lower_if_not_quoted(
+    value: str | None,
+    quote_characters: Sequence[str] = DEFAULT_QUOTE_CHARACTERS,
+) -> str | None:
+    """
+    Convert a string to lowercase if it is not enclosed in quotes.
+    """
+    if not value:
+        return value
+    for char in quote_characters:
+        if value.startswith(char) and value.endswith(char):
+            LOGGER.warning(
+                f"The {value} string is bracketed by quotes,"
+                " so it will not be converted to lowercase."
+                " May cause sqlalchemy case-sensitivity issues."
+            )
+            return value
+    LOGGER.info(f"Setting {value} to lowercase to ensure sqlalchemy case-insensitivity.")
+    return value.lower()
+
 
 class SQLDatasourceError(Exception):
     pass
+
+
+class SQLAlchemyCreateEngineError(SQLDatasourceError):
+    """
+    An error creating a SQLAlchemy `Engine` object.
+
+    Not to be confused with the GX `SQLAlchemyExecutionEngine`.
+    """
+
+    @overload
+    def __init__(self, addendum: str | None = ..., cause: Exception = ...): ...
+
+    @overload
+    def __init__(self, addendum: str = ..., cause: Exception | None = ...): ...
+
+    def __init__(
+        self,
+        addendum: str | None = None,
+        cause: Exception | None = None,
+    ):
+        """Must provide a `cause`, `addendum`, or both."""
+        message = "Unable to create SQLAlchemy Engine"
+        if cause:
+            message += f": due to {cause!r}"
+        if addendum:
+            message += f": {addendum}"
+        super().__init__(message)
 
 
 class _Partitioner(PartitionerProtocol, Protocol):
@@ -646,7 +704,9 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerYearly(column_name=column, sort_ascending=sort_ascending),
+            partitioner=ColumnPartitionerYearly(
+                method_name="partition_on_year", column_name=column, sort_ascending=sort_ascending
+            ),
         )
 
     @public_api
@@ -655,7 +715,11 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerMonthly(column_name=column, sort_ascending=sort_ascending),
+            partitioner=ColumnPartitionerMonthly(
+                method_name="partition_on_year_and_month",
+                column_name=column,
+                sort_ascending=sort_ascending,
+            ),
         )
 
     @public_api
@@ -664,7 +728,11 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerDaily(column_name=column, sort_ascending=sort_ascending),
+            partitioner=ColumnPartitionerDaily(
+                method_name="partition_on_year_and_month_and_day",
+                column_name=column,
+                sort_ascending=sort_ascending,
+            ),
         )
 
     @override
@@ -859,7 +927,11 @@ class TableAsset(_SQLAsset):
 
     @staticmethod
     def _is_bracketed_by_quotes(target: str) -> bool:
-        """Returns True if the target string is bracketed by quotes.
+        """
+        Returns True if the target string is bracketed by quotes.
+
+        Override this method if the quote characters are different than `'` or `"` in the
+        target database, such as backticks in Databricks SQL.
 
         Arguments:
             target: A string to check if it is bracketed by quotes.
@@ -867,20 +939,36 @@ class TableAsset(_SQLAsset):
         Returns:
             True if the target string is bracketed by quotes.
         """
-        return any(target.startswith(quote) and target.endswith(quote) for quote in ["'", '"'])
+        return any(
+            target.startswith(quote) and target.endswith(quote)
+            for quote in DEFAULT_QUOTE_CHARACTERS
+        )
+
+    @classmethod
+    def _to_lower_if_not_bracketed_by_quotes(cls, target: str) -> str:
+        """Returns the target string in lowercase if it is not bracketed by quotes.
+        This is used to ensure case-insensitivity in sqlalchemy queries.
+
+        Arguments:
+            target: A string to convert to lowercase if it is not bracketed by quotes.
+
+        Returns:
+            The target string in lowercase if it is not bracketed by quotes.
+        """
+        return to_lower_if_not_quoted(target, quote_characters=DEFAULT_QUOTE_CHARACTERS)
 
 
 def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
     """
     Warns if a more specific datasource type may be more appropriate based on the connection string connector prefix.
     """  # noqa: E501
-    from great_expectations.datasource.fluent.sources import _SourceFactories
+    from great_expectations.datasource.fluent.sources import DataSourceManager
 
     connector: str = connection_string.split("://")[0].split("+")[0]
 
     type_lookup_plus: dict[str, str] = {
-        n: _SourceFactories.type_lookup[n].__name__
-        for n in _SourceFactories.type_lookup.type_names()
+        n: DataSourceManager.type_lookup[n].__name__
+        for n in DataSourceManager.type_lookup.type_names()
     }
     # type names are not always exact match to connector strings
     type_lookup_plus.update(
@@ -960,9 +1048,7 @@ class SQLDatasource(Datasource):
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501
                 # one possible case is a missing plugin (e.g. psycopg2)
-                raise SQLDatasourceError(  # noqa: TRY003
-                    "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
-                ) from e
+                raise SQLAlchemyCreateEngineError(cause=e) from e
             self._cached_connection_string = self.connection_string
         return self._engine
 
@@ -1019,22 +1105,18 @@ class SQLDatasource(Datasource):
             engine: sqlalchemy.Engine = self.get_engine()
             engine.connect()
         except Exception as e:
-            raise TestConnectionError(  # noqa: TRY003
-                "Attempt to connect to datasource failed with the following error message: "
-                f"{e!s}"
-            ) from e
+            raise TestConnectionError(cause=e) from e
         if self.assets and test_assets:
             for asset in self.assets:
                 asset._datasource = self
                 asset.test_connection()
 
     @public_api
-    def add_table_asset(  # noqa: PLR0913
+    def add_table_asset(
         self,
         name: str,
         table_name: str = "",
         schema_name: Optional[str] = None,
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -1043,7 +1125,6 @@ class SQLDatasource(Datasource):
             name: The name of this table asset.
             table_name: The table where the data resides.
             schema_name: The schema that holds the table.
-            order_by: A list of Sorters or Sorter strings.
             batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
@@ -1051,12 +1132,12 @@ class SQLDatasource(Datasource):
             The type of this object will match the necessary type for this datasource.
             eg, it could be a TableAsset or a SqliteTableAsset.
         """  # noqa: E501
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
+        if schema_name:
+            schema_name = self._TableAsset._to_lower_if_not_bracketed_by_quotes(schema_name)
         asset = self._TableAsset(
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)
@@ -1066,7 +1147,6 @@ class SQLDatasource(Datasource):
         self,
         name: str,
         query: str,
-        order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> QueryAsset:
         """Adds a query asset to this datasource.
@@ -1074,7 +1154,6 @@ class SQLDatasource(Datasource):
         Args:
             name: The name of this table asset.
             query: The SELECT query to selects the data to validate. It must begin with the "SELECT".
-            order_by: A list of Sorters or Sorter strings.
             batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
@@ -1082,11 +1161,9 @@ class SQLDatasource(Datasource):
             The type of this object will match the necessary type for this datasource.
             eg, it could be a QueryAsset or a SqliteQueryAsset.
         """  # noqa: E501
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = self._QueryAsset(
             name=name,
             query=query,
-            order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)

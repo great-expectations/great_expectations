@@ -291,7 +291,7 @@ class ExpectationDoctor:
         augmented_library_metadata["problems"] = problems
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
 
-    def _get_maturity_checklist(  # noqa: PLR0913
+    def _get_maturity_checklist(
         self,
         library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics],
         description: ExpectationDescriptionDiagnostics,
@@ -484,7 +484,7 @@ class ExpectationDoctor:
                     for test in tests:
                         if test.output.get("success"):
                             return ExpectationConfiguration(
-                                expectation_type=self._expectation.expectation_type,
+                                type=self._expectation.expectation_type,
                                 kwargs=test.input,
                             )
 
@@ -495,7 +495,7 @@ class ExpectationDoctor:
                     for test in tests:
                         if test.input:
                             return ExpectationConfiguration(
-                                expectation_type=self._expectation.expectation_type,
+                                type=self._expectation.expectation_type,
                                 kwargs=test.input,
                             )
         return None

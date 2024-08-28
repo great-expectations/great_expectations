@@ -17,7 +17,6 @@ from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
@@ -37,6 +36,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     MapMetricProvider,
 )
+from great_expectations.util import convert_to_json_serializable
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -357,7 +357,7 @@ def test_pandas_unexpected_rows_basic_result_format(
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "mostly": 0.9,
@@ -396,7 +396,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "mostly": 0.9,
@@ -436,7 +436,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "mostly": 0.9,
@@ -481,7 +481,7 @@ def test_pandas_unexpected_rows_complete_result_format(
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -528,7 +528,7 @@ def test_expectation_configuration_has_result_format(
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -557,7 +557,7 @@ def test_pandas_default_complete_result_format(
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -598,7 +598,7 @@ def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -652,7 +652,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
     expected_evr_without_unexpected_rows,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -676,7 +676,7 @@ def test_pandas_specify_not_include_unexpected_rows(
     expected_evr_without_unexpected_rows,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -697,7 +697,7 @@ def test_pandas_specify_not_include_unexpected_rows(
 @pytest.mark.unit
 def test_include_unexpected_rows_without_explicit_result_format_raises_error():
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -718,7 +718,7 @@ def test_spark_single_column_complete_result_format(
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -774,7 +774,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -846,7 +846,7 @@ def test_spark_single_column_summary_result_format(
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -899,7 +899,7 @@ def test_spark_single_column_basic_result_format(
     spark_dataframe_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -948,7 +948,7 @@ def test_sqlite_single_column_complete_result_format(
     sqlite_table_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -990,7 +990,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
     sqlite_table_for_unexpected_rows_with_index,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -1045,7 +1045,7 @@ def test_sqlite_single_column_summary_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],
@@ -1080,7 +1080,7 @@ def test_sqlite_single_column_basic_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "animals",
             "value_set": ["cat", "fish", "dog"],

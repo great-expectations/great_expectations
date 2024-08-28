@@ -23,7 +23,8 @@ warn_redundant_casts = true
 show_error_codes = true
 enable_error_code = [
     'ignore-without-code',
-    'explicit-override'
+    'explicit-override',
+    'possibly-undefined'
 ]
 # The following list of codes are globally ignored, do not add to this list
 disable_error_code = [
@@ -182,7 +183,6 @@ module = [
     "great_expectations.compatibility.docstring_parser",
     "great_expectations.data_context.*",
     "great_expectations.dataset.*",
-    "great_expectations.datasource.data_connector.*",
     "great_expectations.expectations.core.*",
     "great_expectations.expectations.metrics.column_map_metrics.*",
     "great_expectations.expectations.metrics.column_pair_map_metrics.*",
@@ -422,6 +422,8 @@ If you are working in a configuration file you may use the inline comment \
 # TODO: remove pydantic once our min version is pydantic v2
 "pydantic".msg = "Please do not import pydantic directly, import from great_expectations.compatibility.pydantic instead."
 "pkg_resources".msg = "pkg_resources module has been deprecated. Use importlib.resources or importlib.metada instead."
+"great_expectations.util.convert_to_json_serializable".msg = "Use pydantic for serialization."
+"great_expectations.util.ensure_json_serializable".msg = "Use pydantic for serialization."
 
 
 # -----------------------------------------------------------------
@@ -441,6 +443,10 @@ filterwarnings = [
     # https://pytest-mock.readthedocs.io/en/latest/remarks.html#usage-as-context-manager
     "default::pytest_mock.plugin.PytestMockWarning",
 
+    # Find and fix ruff DTZ violations
+    'once: datetime.datetime.utc.*\(\) is deprecated .*:DeprecationWarning',
+
+
     # the pkg_resources module distributed with setuptools has been deprecated
     # we should never use it but it is used in some of our dependencies
     # https://setuptools.pypa.io/en/latest/pkg_resources.html
@@ -458,6 +464,9 @@ filterwarnings = [
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
+    # pkg_resources is deprecated as an API, but third party libraries still use it
+    'ignore: Deprecated call to `pkg_resources.declare_namespace\(.*\)`',
+
 
     # --------------------------------------- Great Expectations Warnings ----------------------------------
     # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
@@ -556,7 +565,7 @@ filterwarnings = [
     'ignore: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.',
     # Example Actual Warning: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
     # Found when runing pytest tests/test_definitions/test_expectations_v3_api.py
-    'ignore: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection:UserWarning',
+    'ignore: pandas only supports SQLAlchemy connectable \(engine/connection\) or database string URI or sqlite3 DBAPI2 connection:UserWarning',
     # Example Actual Warning: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
     'ignore: In a future version of pandas, parsing datetimes with mixed time zones will raise an error:FutureWarning',
     # Example Actual Warning: DeprecationWarning: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.
@@ -632,6 +641,10 @@ filterwarnings = [
     # Example Actual Warning:
     # sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     'ignore: Deprecated API features detected! These feature\(s\) are not compatible with SQLAlchemy 2\.0\.',
+    # snowflake
+    # Warning is emitted when snowflake-sqlalchemy 1.6 is installed alongside sqlalchemy 1
+    "module: The GenericFunction 'flatten' is already registered and is going to be overridden:sqlalchemy.exc.SAWarning"
+
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
@@ -674,3 +687,17 @@ testpaths = "tests"
 mock_use_standalone_module = false
 # https://docs.pytest.org/en/7.1.x/how-to/logging.html#how-to-manage-logging
 log_level = "info"
+
+[tool.coverage.report]
+# https://coverage.readthedocs.io/en/7.5.1/config.html
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # type-checking imports don't exist at runtime
+    "if TYPE_CHECKING:",
+    # Don't complain if tests don't hit NotImplementedError:
+    "raise NotImplementedError",
+    # Don't complain if non-runnable code isn't run:
+    "if __name__ == .__main__.:",
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+    ]

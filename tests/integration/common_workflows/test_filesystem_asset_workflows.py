@@ -52,7 +52,7 @@ def pandas_file_system_asset(context: AbstractDataContext) -> PandasCSVAsset:
         DATASOURCE_NAME,
         base_directory="tests/test_sets/taxi_yellow_tripdata_samples/first_ten_trips_in_each_file",  # type: ignore [arg-type]
     )
-    data_asset = datasource.add_csv_asset(name=ASSET_NAME, batching_regex=BATCHING_REGEX)
+    data_asset = datasource.add_csv_asset(name=ASSET_NAME)
 
     return data_asset
 
@@ -93,7 +93,6 @@ def spark_file_system_asset(context: AbstractDataContext) -> SparkCSVAsset:
     )
     data_asset = datasource.add_csv_asset(
         name=ASSET_NAME,
-        batching_regex=BATCHING_REGEX,
         header=True,
         infer_schema=True,
     )
@@ -235,14 +234,17 @@ def test_validation_definition_run(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
     batch_parameters: Optional[Dict],
+    context: AbstractDataContext,
     request: pytest.FixtureRequest,
 ) -> None:
     """Ensure ValidationDefinition::run works"""
 
     batch_definition = request.getfixturevalue(batch_definition_fixture_name)
-    suite = ExpectationSuite("my suite", expectations=[expectation, EXPECT_10_ROWS])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=batch_definition, suite=suite
+    suite = context.suites.add(
+        ExpectationSuite("my suite", expectations=[expectation, EXPECT_10_ROWS])
+    )
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="whatever", data=batch_definition, suite=suite)
     )
     result = validation_definition.run(batch_parameters=batch_parameters)
 
@@ -263,9 +265,11 @@ def test_checkpoint_run(
     """Ensure Checkpoint::run works"""
 
     batch_definition = request.getfixturevalue(batch_definition_fixture_name)
-    suite = ExpectationSuite("my suite", expectations=[expectation, EXPECT_10_ROWS])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=batch_definition, suite=suite
+    suite = context.suites.add(
+        ExpectationSuite("my suite", expectations=[expectation, EXPECT_10_ROWS])
+    )
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="whatever", data=batch_definition, suite=suite)
     )
     checkpoint = context.checkpoints.add(
         Checkpoint(name="whatever", validation_definitions=[validation_definition])

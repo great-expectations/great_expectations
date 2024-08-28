@@ -9,7 +9,7 @@ from pprint import pformat as pf
 from typing import Set, Type
 
 from great_expectations.compatibility.pydantic import ModelMetaclass
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class MetaDatasource(ModelMetaclass):
     ) -> MetaDatasource:
         """
         MetaDatasource hook that runs when a new `Datasource` is defined.
-        This methods binds a factory method for the defined `Datasource` to `_SourceFactories` class which becomes
+        This methods binds a factory method for the defined `Datasource` to `DataSourceManager` class which becomes
         available as part of the `DataContext`.
 
         Also binds asset adding methods according to the declared `asset_types`.
@@ -48,5 +48,5 @@ class MetaDatasource(ModelMetaclass):
             )
         # instantiate new TypeLookup to prevent child classes conflicts with parent class asset types  # noqa: E501
         cls._type_lookup = TypeLookup()
-        _SourceFactories.register_datasource(cls)
+        DataSourceManager.register_datasource(cls)
         return cls

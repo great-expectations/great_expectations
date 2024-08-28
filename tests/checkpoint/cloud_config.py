@@ -101,45 +101,6 @@ def _cloud_config(data_dir):
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
         "data_docs_sites": {},
-        "datasources": {
-            "taxi_datasource": {
-                "class_name": "Datasource",
-                "data_connectors": {
-                    "default_runtime_data_connector_name": {
-                        "assets": {
-                            "taxi_data": {
-                                "batch_identifiers": ["runtime_batch_identifier_name"],
-                                "class_name": "Asset",
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                            }
-                        },
-                        "class_name": "RuntimeDataConnector",
-                        "id": "e0af346c-32ea-44e6-8908-b559c4162a70",
-                        "module_name": "great_expectations.datasource.data_connector",
-                        "name": "default_runtime_data_connector_name",
-                    },
-                    "taxi_data_connector": {
-                        "base_directory": str(data_dir),
-                        "class_name": "InferredAssetFilesystemDataConnector",
-                        "default_regex": {
-                            "group_names": ["data_asset_name"],
-                            "pattern": "(.*)",
-                        },
-                        "id": "997a7842-195b-4374-a71b-e52f192068d1",
-                        "module_name": "great_expectations.datasource.data_connector",
-                        "name": "taxi_data_connector",
-                    },
-                },
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "id": "eb0c729d-9457-43a0-8b40-6ec6c79c0fef",
-                "module_name": "great_expectations.datasource",
-                "name": "taxi_datasource",
-            }
-        },
-        "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "default_expectations_store",
         "plugins_directory": "plugins/",
         "progress_bars": {
@@ -161,7 +122,6 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "default_expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
@@ -187,10 +147,6 @@ def _cloud_config(data_dir):
                     "ge_cloud_resource_type": "validation_result",
                     "suppress_store_backend_id": True,
                 },
-            },
-            "suite_parameter_store": {
-                "class_name": "SuiteParameterStore",
-                "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
                 "class_name": "ExpectationsStore",

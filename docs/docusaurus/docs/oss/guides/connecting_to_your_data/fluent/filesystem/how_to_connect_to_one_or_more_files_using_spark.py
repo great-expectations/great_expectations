@@ -35,7 +35,7 @@ datasource = context.data_sources.add_spark_filesystem(
 )
 # </snippet>
 
-assert datasource_name in context.datasources
+assert datasource_name in context.data_sources.all()
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py define_add_csv_asset_args">
@@ -45,9 +45,7 @@ batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py add_asset">
-datasource.add_csv_asset(
-    name=asset_name, batching_regex=batching_regex, header=True, infer_schema=True
-)
+datasource.add_csv_asset(name=asset_name, header=True, infer_schema=True)
 # </snippet>
 
 assert datasource.get_asset_names() == {"my_taxi_data_asset"}
@@ -55,7 +53,12 @@ assert datasource.get_asset_names() == {"my_taxi_data_asset"}
 my_asset = datasource.get_asset(asset_name)
 assert my_asset
 
-my_batch_request = my_asset.build_batch_request({"year": "2019", "month": "03"})
+my_batch_definition = my_asset.add_batch_definition_monthly(
+    name="my_monthly_batch_definition", regex=batching_regex
+)
+my_batch_request = my_batch_definition.build_batch_request(
+    batch_parameters={"year": "2019", "month": "03"}
+)
 batches = my_asset.get_batch_list_from_batch_request(my_batch_request)
 assert len(batches) == 1
 assert set(batches[0].columns()) == {

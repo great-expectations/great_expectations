@@ -12,7 +12,9 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.core.partitioners import ColumnPartitionerMonthly
+from great_expectations.core.partitioners import (
+    ColumnPartitionerMonthly,
+)
 from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
 from great_expectations.datasource.fluent import (
     BatchRequest,
@@ -41,7 +43,7 @@ def default_pandas_data(
     pandas_ds.read_csv(
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
-    asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
+    asset = pandas_ds.get_asset(name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 
@@ -63,7 +65,7 @@ def pandas_sql_data(
         sql=sa.text("SELECT * FROM my_table"),
         con=con,
     )
-    asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
+    asset = pandas_ds.get_asset(name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 
@@ -72,7 +74,9 @@ def pandas_filesystem_datasource(
     test_backends,
     context: AbstractDataContext,
 ) -> PandasFilesystemDatasource:
-    relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+    relative_path = pathlib.Path(
+        "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files"
+    )
     csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     pandas_ds = context.data_sources.add_pandas_filesystem(
         name="my_pandas",
@@ -89,11 +93,11 @@ def pandas_data(
     pandas_ds = pandas_filesystem_datasource(test_backends=test_backends, context=context)
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-        order_by=["year", "month"],
         batch_metadata={"my_pipeline": "${pipeline_filename}"},
     )
-    batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="monthly_batch_def", regex=batching_regex)
+    batch_request = batch_def.build_batch_request(batch_parameters={"year": "2019", "month": "01"})
     return context, pandas_ds, asset, batch_request
 
 
@@ -160,12 +164,12 @@ def spark_data(
     spark_ds = spark_filesystem_datasource(test_backends=test_backends, context=context)
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
-        order_by=["year", "month"],
     )
-    batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_definition = asset.add_batch_definition_monthly("my_batch_def", regex=batching_regex)
+    batch_request = batch_definition.build_batch_request({"year": "2019", "month": "01"})
     return context, spark_ds, asset, batch_request
 
 
@@ -181,10 +185,10 @@ def multibatch_pandas_data(
     )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-        order_by=["year", "month"],
     )
-    batch_request = asset.build_batch_request({"year": "2020"})
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_definition = asset.add_batch_definition_monthly("monthly_batch_def", regex=batching_regex)
+    batch_request = batch_definition.build_batch_request({"year": "2020"})
     return context, pandas_ds, asset, batch_request
 
 
@@ -219,12 +223,12 @@ def multibatch_spark_data(
     )
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
-        order_by=["year", "month"],
     )
-    batch_request = asset.build_batch_request({"year": "2020"})
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_definition = asset.add_batch_definition_monthly("monthly_batch_def", regex=batching_regex)
+    batch_request = batch_definition.build_batch_request({"year": "2020"})
     return context, spark_ds, asset, batch_request
 
 

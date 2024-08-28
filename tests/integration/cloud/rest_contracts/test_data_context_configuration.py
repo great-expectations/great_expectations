@@ -36,7 +36,7 @@ def test_data_context_configuration(
     provider_state = "the Data Context exists"
     scenario = "a request for a Data Context"
     method = "GET"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/data-context-configuration"
+    path = f"/api/v1/organizations/{EXISTING_ORGANIZATION_ID}/data-context-configuration"
     status = 200
     response_body = GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY
 
@@ -64,4 +64,4 @@ def test_data_context_configuration(
         )
 
     # assert
-    assert ctx.datasources is not None
+    assert ctx.data_sources.all() is not None

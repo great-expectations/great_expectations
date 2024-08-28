@@ -140,10 +140,15 @@ def yellow_trip_pandas_data_context(
 def test_validator_default_expectation_args__pandas(basic_datasource: PandasDatasource):
     asset = basic_datasource.add_dataframe_asset(
         "my_asset",
-        dataframe=pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]}),
     )
-    batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
-    batch = batch_definition.get_batch()
+    batch_definition = asset.add_batch_definition_whole_dataframe(
+        name="my batch definition",
+    )
+    batch = batch_definition.get_batch(
+        batch_parameters={
+            "dataframe": pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+        }
+    )
 
     my_validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
 
@@ -164,7 +169,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
         name="validating_taxi_data",
         expectations=[
             ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_between",
+                type="expect_column_values_to_be_between",
                 kwargs={
                     "column": "passenger_count",
                     "min_value": 0,
@@ -194,15 +199,16 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 
 @pytest.mark.big
 def test_graph_validate(in_memory_runtime_context, basic_datasource: PandasDatasource):
-    asset = basic_datasource.add_dataframe_asset(
-        "my_asset",
-        dataframe=pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]}),
-    )
+    asset = basic_datasource.add_dataframe_asset("my_asset")
     batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
-    batch = batch_definition.get_batch()
+    batch = batch_definition.get_batch(
+        batch_parameters={
+            "dataframe": pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+        },
+    )
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "b",
             "mostly": 0.9,
@@ -241,15 +247,18 @@ def test_graph_validate_with_runtime_config(
 ):
     asset = basic_datasource.add_dataframe_asset(
         "my_asset",
-        dataframe=pd.DataFrame(
-            {"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]}
-        ),
     )
     batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
-    batch = batch_definition.get_batch()
+    batch = batch_definition.get_batch(
+        {
+            "dataframe": pd.DataFrame(
+                {"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]}
+            )
+        },
+    )
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        type="expect_column_value_z_scores_to_be_less_than",
         kwargs={"column": "b", "mostly": 1.0, "threshold": 2.0, "double_sided": True},
     )
     result = Validator(
@@ -297,12 +306,12 @@ def test_graph_validate_with_exception(basic_datasource: PandasDatasource, mocke
         raise Exception("Mock Error")  # noqa: TRY002
 
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-    asset = basic_datasource.add_dataframe_asset("my_asset", dataframe=df)
+    asset = basic_datasource.add_dataframe_asset("my_asset")
     batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
-    batch = batch_definition.get_batch()
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "b",
             "mostly": 0.9,
@@ -329,12 +338,12 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
     in_memory_runtime_context, basic_datasource: PandasDatasource
 ):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-    asset = basic_datasource.add_dataframe_asset("my_asset", dataframe=df)
+    asset = basic_datasource.add_dataframe_asset("my_asset")
     batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
-    batch = batch_definition.get_batch()
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
+        type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
     with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
@@ -376,7 +385,7 @@ def test_validator_validate_substitutes_suite_parameters(
     column_name = "my_column"
     datasource = context.data_sources.add_pandas(name="my_datasource")
     asset = datasource.add_dataframe_asset(
-        "my_asset", dataframe=pd.DataFrame({column_name: [0, 1, 2, 3, 4]})
+        "my_asset",
     )
     suite = context.suites.add(ExpectationSuite(suite_name))
     suite.add_expectation(
@@ -385,7 +394,9 @@ def test_validator_validate_substitutes_suite_parameters(
         )
     )
     validator = context.get_validator(
-        batch_request=asset.build_batch_request(),
+        batch_request=asset.build_batch_request(
+            options={"dataframe": pd.DataFrame({column_name: [0, 1, 2, 3, 4]})}
+        ),
         expectation_suite_name=suite_name,
     )
 
@@ -405,12 +416,15 @@ def test_rendered_content_bool_only_respected(result_format: str | dict):
     context = get_context(mode="ephemeral")
     csv_asset = context.data_sources.pandas_default.add_dataframe_asset(
         "df",
-        dataframe=pd.DataFrame(
-            data=[1, 2, 3],
-            columns=["numbers_i_can_count_to"],
-        ),
     )
-    batch_request = csv_asset.build_batch_request()
+    batch_request = csv_asset.build_batch_request(
+        options={
+            "dataframe": pd.DataFrame(
+                data=[1, 2, 3],
+                columns=["numbers_i_can_count_to"],
+            )
+        }
+    )
     expectation_suite_name = "test_result_format_suite"
     context.suites.add(ExpectationSuite(name=expectation_suite_name))
 
@@ -488,7 +502,7 @@ def test__get_attr___raises_attribute_error_with_invalid_attr(
 def test_graph_validate_with_two_expectations_and_first_expectation_without_additional_configuration(  # noqa: E501
     in_memory_runtime_context, basic_datasource: PandasDatasource
 ):
-    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    in_memory_runtime_context.data_sources.all()["my_datasource"] = basic_datasource
     df = pd.DataFrame(
         [
             "A",
@@ -530,19 +544,19 @@ def test_graph_validate_with_two_expectations_and_first_expectation_without_addi
         ],
         columns=["var"],
     )
-    asset = basic_datasource.add_dataframe_asset("my_asset", dataframe=df)
+    asset = basic_datasource.add_dataframe_asset("my_asset")
     batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
-    batch = batch_definition.get_batch()
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
     expectation_configuration_expect_column_values_to_be_null = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_null",
+        type="expect_column_values_to_be_null",
         kwargs={
             "column": "var",
         },
     )
 
     expectation_configuration_expect_column_values_to_be_in_set = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "var",
             "value_set": ["B", "C", "D", "F", "G", "H"],
@@ -636,7 +650,7 @@ def test_graph_validate_with_two_expectations_and_first_expectation_without_addi
 def test_graph_validate_with_two_expectations_and_first_expectation_with_result_format_complete(
     in_memory_runtime_context, basic_datasource: PandasDatasource
 ):
-    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    in_memory_runtime_context.data_sources.all()["my_datasource"] = basic_datasource
     df = pd.DataFrame(
         [
             "A",
@@ -679,19 +693,19 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
         columns=["var"],
     )
 
-    asset = basic_datasource.add_dataframe_asset("my_asset", dataframe=df)
+    asset = basic_datasource.add_dataframe_asset("my_asset")
     batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
-    batch = batch_definition.get_batch()
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
     expectation_configuration_expect_column_values_to_be_null = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_null",
+        type="expect_column_values_to_be_null",
         kwargs={
             "column": "var",
         },
     )
 
     expectation_configuration_expect_column_values_to_be_in_set = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "var",
             "value_set": ["B", "C", "D", "F", "G", "H"],
@@ -813,20 +827,20 @@ def test_validator_with_exception_info_in_result():
         result = validator.graph_validate(
             configurations=[
                 ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_be_unique",
+                    type="expect_column_values_to_be_unique",
                     kwargs={
                         "column": "animals",
                     },
                 ),
                 ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_be_in_set",
+                    type="expect_column_values_to_be_in_set",
                     kwargs={
                         "column": "animals",
                         "value_set": ["cat", "fish", "dog"],
                     },
                 ),
                 ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_not_be_null",
+                    type="expect_column_values_to_not_be_null",
                     kwargs={
                         "column": "animals",
                     },

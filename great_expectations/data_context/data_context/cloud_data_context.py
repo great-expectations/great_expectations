@@ -45,14 +45,14 @@ from great_expectations.data_context.store.datasource_store import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.store.metric_store import SuiteParameterStore
-from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
+from great_expectations.data_context.store.validation_results_store import (
+    ValidationResultsStore,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
     assetConfigSchema,
-    datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -63,24 +63,23 @@ from great_expectations.exceptions.exceptions import DataContextError
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.datasource.new_datasource import BaseDatasource
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
 
 
-def _extract_fluent_datasources(config_dict: dict) -> dict:
-    """
-    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
-    We need to extract the fluent datasources otherwise the data context will attempt eager config
-    substitutions and other inappropriate operations.
-    """
-    datasources = config_dict.get("datasources", {})
-    fds_names: list[str] = []
-    for ds_name, ds in datasources.items():
-        if "type" in ds:
-            fds_names.append(ds_name)
-    return {name: datasources.pop(name) for name in fds_names}
+class NoUserIdError(Exception):
+    def __init__(self):
+        super().__init__("No user id in /account/me response")
+
+
+class OrganizationIdNotSpecifiedError(Exception):
+    def __init__(self):
+        super().__init__(
+            "A request to GX Cloud is being attempted without an organization id configured. "
+            "Maybe you need to set the environment variable GX_CLOUD_ORGANIZATION_ID?"
+        )
 
 
 @public_api
@@ -147,9 +146,13 @@ class CloudDataContext(SerializableDataContext):
         if not ENV_CONFIG.gx_analytics_enabled:
             return None
 
-        response = self._request_cloud_backend(cloud_config=self.ge_cloud_config, uri="accounts/me")
+        response = self._request_cloud_backend(
+            cloud_config=self.ge_cloud_config, resource="accounts/me"
+        )
         data = response.json()
-        user_id = data["user_id"]
+        user_id = data.get("user_id") or data.get("id")
+        if not user_id:
+            raise NoUserIdError()
         return uuid.UUID(user_id)
 
     @override
@@ -242,38 +245,41 @@ class CloudDataContext(SerializableDataContext):
         :return: the configuration object retrieved from the Cloud API
         """  # noqa: E501
         response = cls._request_cloud_backend(
-            cloud_config=cloud_config, uri="data-context-configuration"
+            cloud_config=cloud_config, resource="data_context_configuration"
         )
         config = cls._prepare_v1_config(config=response.json())
         return DataContextConfig(**config)
 
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
+        # FluentDatasources are nested under the "datasources" key and need to be separated
+        # to prevent downstream issues
+        # This should be done before datasources are popped from the config below until
+        # fluent_datasourcse are renamed datasourcess ()
+        v1_data_sources = config.pop("data_sources", [])
+        config["fluent_datasources"] = {ds["name"]: ds for ds in v1_data_sources}
+
         # Various context variables are no longer top-level keys in V1
         for var in (
+            "datasources",
             "notebooks",
             "concurrency",
             "include_rendered_content",
             "profiler_store_name",
             "anonymous_usage_statistics",
+            "evaluation_parameter_store_name",
+            "suite_parameter_store_name",
         ):
             val = config.pop(var, None)
             if val:
                 logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
 
-        # FluentDatasources are nested under the "datasources" key and need to be separated
-        # to prevent downstream issues
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
-
-        # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
+        # V1 renamed Validations to ValidationResults
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
         cls._change_key_from_v0_to_v1(
             config,
-            "evaluation_parameter_store_name",
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-        )
-        cls._change_key_from_v0_to_v1(
-            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
+            "validations_store_name",
+            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
         )
 
         config = cls._prepare_stores_config(config=config)
@@ -290,17 +296,15 @@ class CloudDataContext(SerializableDataContext):
         for name, store in stores.items():
             # Certain stores have been renamed in V1
             cls._change_value_from_v0_to_v1(
-                store,
-                "class_name",
-                "EvaluationParameterStore",
-                SuiteParameterStore.__name__,
-            )
-            cls._change_value_from_v0_to_v1(
                 store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
             )
 
             # Profiler stores are no longer supported in V1
-            if store.get("class_name") == "ProfilerStore":
+            if store.get("class_name") in [
+                "ProfilerStore",
+                "EvaluationParameterStore",
+                "SuiteParameterStore",
+            ]:
                 to_delete.append(name)
 
         for name in to_delete:
@@ -326,13 +330,16 @@ class CloudDataContext(SerializableDataContext):
         return config
 
     @classmethod
-    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
+    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, resource: str) -> Response:
         access_token = cloud_config.access_token
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
+        if not organization_id:
+            raise OrganizationIdNotSpecifiedError()
 
-        session = create_session(access_token=access_token)
-        response = session.get(f"{base_url}/organizations/{organization_id}/{uri}")
+        with create_session(access_token=access_token) as session:
+            url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
+            response = session.get(url)
 
         try:
             response.raise_for_status()
@@ -409,23 +416,20 @@ class CloudDataContext(SerializableDataContext):
     ) -> Dict[GXCloudEnvironmentVariable, Optional[str]]:
         cloud_base_url = (
             cloud_base_url
-            or cls._get_cloud_env_var(
-                primary_environment_variable=GXCloudEnvironmentVariable.BASE_URL,
-                deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_BASE_URL,
+            or cls._get_global_config_value(
+                environment_variable=GXCloudEnvironmentVariable.BASE_URL,
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
             or CLOUD_DEFAULT_BASE_URL
         )
-        cloud_organization_id = cloud_organization_id or cls._get_cloud_env_var(
-            primary_environment_variable=GXCloudEnvironmentVariable.ORGANIZATION_ID,
-            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID,
+        cloud_organization_id = cloud_organization_id or cls._get_global_config_value(
+            environment_variable=GXCloudEnvironmentVariable.ORGANIZATION_ID,
             conf_file_section="ge_cloud_config",
             conf_file_option="organization_id",
         )
-        cloud_access_token = cloud_access_token or cls._get_cloud_env_var(
-            primary_environment_variable=GXCloudEnvironmentVariable.ACCESS_TOKEN,
-            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN,
+        cloud_access_token = cloud_access_token or cls._get_global_config_value(
+            environment_variable=GXCloudEnvironmentVariable.ACCESS_TOKEN,
             conf_file_section="ge_cloud_config",
             conf_file_option="access_token",
         )
@@ -434,33 +438,6 @@ class CloudDataContext(SerializableDataContext):
             GXCloudEnvironmentVariable.ORGANIZATION_ID: cloud_organization_id,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: cloud_access_token,
         }
-
-    @classmethod
-    def _get_cloud_env_var(
-        cls,
-        primary_environment_variable: GXCloudEnvironmentVariable,
-        deprecated_environment_variable: GXCloudEnvironmentVariable,
-        conf_file_section: str,
-        conf_file_option: str,
-    ) -> Optional[str]:
-        """
-        Utility to gradually deprecate environment variables prefixed with `GE`.
-
-        This method is aimed to initially attempt retrieval with the `GX` prefix
-        and only attempt to grab the deprecated value if unsuccessful.
-        """
-        val = cls._get_global_config_value(
-            environment_variable=primary_environment_variable,
-            conf_file_section=conf_file_section,
-            conf_file_option=conf_file_option,
-        )
-        if val:
-            return val
-        return cls._get_global_config_value(
-            environment_variable=deprecated_environment_variable,
-            conf_file_section=conf_file_section,
-            conf_file_option=conf_file_option,
-        )
 
     @override
     def _init_datasources(self) -> None:
@@ -488,7 +465,6 @@ class CloudDataContext(SerializableDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
         return datasource_store
 
@@ -513,7 +489,7 @@ class CloudDataContext(SerializableDataContext):
         return data_asset_store
 
     def _delete_asset(self, id: str) -> bool:
-        """Delete a DataAsset. Cloud will also update the corresponding DatasourceConfig."""
+        """Delete a DataAsset. Cloud will also update the corresponding Datasource."""
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.DATA_ASSET,
             id=id,
@@ -658,13 +634,9 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: BaseDatasource | FluentDatasource | None = None,
+        datasource: FluentDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | None:
-        if datasource and not isinstance(datasource, FluentDatasource):
-            raise TypeError(  # noqa: TRY003
-                "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."  # noqa: E501
-            )
+    ) -> FluentDatasource | None:
         return super()._add_datasource(
             name=name,
             initialize=initialize,

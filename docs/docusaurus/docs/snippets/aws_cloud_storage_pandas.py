@@ -30,7 +30,6 @@ great_expectations_yaml = yaml.load(great_expectations_yaml_file_path.read_text(
 stores = great_expectations_yaml["stores"]
 pop_stores = [
     "checkpoint_store",
-    "suite_parameter_store",
     "validation_results_store",
     "validation_definition_store",
 ]
@@ -85,8 +84,8 @@ configured_expectations_store["stores"]["expectations_S3_store"]["store_backend"
 
 # add and set the new expectation store
 context.add_store(
-    store_name=configured_expectations_store["expectations_store_name"],
-    store_config=configured_expectations_store["stores"]["expectations_S3_store"],
+    name=configured_expectations_store["expectations_store_name"],
+    config=configured_expectations_store["stores"]["expectations_S3_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
@@ -108,7 +107,6 @@ stores = great_expectations_yaml["stores"]
 # popping the rest out so that we can do the comparison. They aren't going anywhere dont worry
 pop_stores = [
     "checkpoint_store",
-    "suite_parameter_store",
     "expectations_store",
     "expectations_S3_store",
     "validation_definition_store",
@@ -169,10 +167,8 @@ configured_validation_results_store["stores"]["validation_results_S3_store"][
 
 # add and set the new validation store
 context.add_store(
-    store_name=configured_validation_results_store["validation_results_store_name"],
-    store_config=configured_validation_results_store["stores"][
-        "validation_results_S3_store"
-    ],
+    name=configured_validation_results_store["validation_results_store_name"],
+    config=configured_validation_results_store["stores"]["validation_results_S3_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
@@ -229,17 +225,22 @@ datasource = context.data_sources.add_or_update_pandas_s3(
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_pandas_s3_asset">
 asset = datasource.add_csv_asset(
     name="csv_taxi_s3_asset",
-    batching_regex=r".*_(?P<year>\d{4})\.csv",
+)
+batch_definition = asset.add_batch_definition_yearly(
+    name="Yearly Taxi Data",
+    regex=r".*_(?P<year>\d{4})\.csv",
 )
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_batch_request">
-request = asset.build_batch_request({"year": "2021"})
+batch_parameters = {"year": "2021"}
+request = batch_definition.build_batch_request(batch_parameters=batch_parameters)
 # </snippet>
 
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_batch_list">
-batches = asset.get_batch_list_from_batch_request(request)
+batch_parameters = {"year": "2021"}
+batch = batch_definition.get_batch(batch_parameters=batch_parameters)
 # </snippet>
 
 config = context.fluent_datasources["s3_datasource"].yaml()

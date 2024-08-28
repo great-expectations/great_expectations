@@ -22,8 +22,8 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark, sqlalchemy
@@ -125,7 +125,7 @@ def _parse_great_expectations_condition(row_condition: str):
 
 
 # noinspection PyUnresolvedReferences
-def parse_condition_to_spark(  # type: ignore[return] # return or raise exists for all branches  # noqa: C901, PLR0911, PLR0912
+def parse_condition_to_spark(  # type: ignore[return] # return or raise exists for all branches  # noqa: C901, PLR0911
     row_condition: str,
 ) -> pyspark.Column:
     parsed = _parse_great_expectations_condition(row_condition)

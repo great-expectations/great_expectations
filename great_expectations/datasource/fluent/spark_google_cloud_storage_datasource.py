@@ -127,7 +127,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                 asset.test_connection()
 
     @override
-    def _build_data_connector(  # noqa: PLR0913
+    def _build_data_connector(
         self,
         data_asset: SPARK_PATH_ASSET_UNION,
         gcs_prefix: str = "",
@@ -145,7 +145,6 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             gcs_client=self._get_gcs_client(),
-            batching_regex=data_asset.batching_regex,
             bucket_or_name=self.bucket_or_name,
             prefix=gcs_prefix,
             delimiter=gcs_delimiter,
@@ -158,7 +157,6 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
                 bucket_or_name=self.bucket_or_name,
                 prefix=gcs_prefix,
                 delimiter=gcs_delimiter,

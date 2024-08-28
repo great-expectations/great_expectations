@@ -5,7 +5,7 @@ import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generator, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -33,9 +33,9 @@ from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
@@ -195,7 +195,7 @@ def build_tuple_filesystem_store_backend(
     }
     store_backend_config.update(**kwargs)
     return Store.build_store_from_config(
-        store_config=store_backend_config,
+        config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
     )
@@ -283,7 +283,7 @@ def build_configuration_store(
         "store_backend": store_backend,
     }
     configuration_store: ConfigurationStore = Store.build_store_from_config(  # type: ignore[assignment]
-        store_config=store_config,
+        config=store_config,
         module_name=module_name,
         runtime_environment=None,
     )
@@ -742,18 +742,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         connection_string=connection_string
     )
-    data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "temp_data_connector",
-        },
-        runtime_environment={
-            "execution_engine": execution_engine,
-            "datasource_name": "temp_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-    introspection_output = data_connector._introspect_db()
+    introspection_output = introspect_db(execution_engine=execution_engine)
 
     tables_to_drop: List[str] = []
     tables_dropped: List[str] = []
@@ -772,6 +761,103 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         warnings.warn(f"Warning: Tables skipped: {tables_skipped}")
 
     return tables_dropped
+
+
+def introspect_db(  # noqa: C901, PLR0912
+    execution_engine: SqlAlchemyExecutionEngine,
+    schema_name: Union[str, None] = None,
+    ignore_information_schemas_and_system_tables: bool = True,
+    information_schemas: Optional[List[str]] = None,
+    system_tables: Optional[List[str]] = None,
+    include_views=True,
+) -> List[Dict[str, str]]:
+    # This code was broken out from the InferredAssetSqlDataConnector when it was removed
+    if information_schemas is None:
+        information_schemas = [
+            "INFORMATION_SCHEMA",  # snowflake, mssql, mysql, oracle
+            "information_schema",  # postgres, redshift, mysql
+            "performance_schema",  # mysql
+            "sys",  # mysql
+            "mysql",  # mysql
+        ]
+
+    if system_tables is None:
+        system_tables = ["sqlite_master"]  # sqlite
+
+    engine: sqlalchemy.Engine = execution_engine.engine
+    inspector: sqlalchemy.Inspector = sa.inspect(engine)
+
+    selected_schema_name = schema_name
+
+    tables: List[Dict[str, str]] = []
+    all_schema_names: List[str] = inspector.get_schema_names()
+    for schema in all_schema_names:
+        if ignore_information_schemas_and_system_tables and schema_name in information_schemas:
+            continue
+
+        if selected_schema_name is not None and schema_name != selected_schema_name:
+            continue
+
+        table_names: List[str] = inspector.get_table_names(schema=schema)
+        for table_name in table_names:
+            if ignore_information_schemas_and_system_tables and (table_name in system_tables):
+                continue
+
+            tables.append(
+                {
+                    "schema_name": schema,
+                    "table_name": table_name,
+                    "type": "table",
+                }
+            )
+
+        # Note Abe 20201112: This logic is currently untested.
+        if include_views:
+            # Note: this is not implemented for bigquery
+            try:
+                view_names = inspector.get_view_names(schema=schema)
+            except NotImplementedError:
+                # Not implemented by Athena dialect
+                pass
+            else:
+                for view_name in view_names:
+                    if ignore_information_schemas_and_system_tables and (
+                        view_name in system_tables
+                    ):
+                        continue
+
+                    tables.append(
+                        {
+                            "schema_name": schema,
+                            "table_name": view_name,
+                            "type": "view",
+                        }
+                    )
+
+    # SQLAlchemy's introspection does not list "external tables" in Redshift Spectrum (tables whose data is stored on S3).  # noqa: E501
+    # The following code fetches the names of external schemas and tables from a special table
+    # 'svv_external_tables'.
+    try:
+        if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
+            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+            result = execution_engine.execute_query(
+                sa.text("select schemaname, tablename from svv_external_tables")
+            ).fetchall()
+            for row in result:
+                tables.append(
+                    {
+                        "schema_name": row[0],
+                        "table_name": row[1],
+                        "type": "table",
+                    }
+                )
+    except Exception as e:
+        # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this  # noqa: E501
+        # exception is highly unlikely to fire.
+        if "UndefinedTable" not in str(e):
+            raise e  # noqa: TRY201
+
+    return tables
 
 
 @contextmanager
@@ -862,7 +948,7 @@ def get_default_mysql_url() -> str:
     Returns:
         String of default connection to Docker container
     """
-    return "mysql+pymysql://root@localhost/test_ci"
+    return "mysql+pymysql://root@127.0.0.1/test_ci"
 
 
 def get_default_trino_url() -> str:

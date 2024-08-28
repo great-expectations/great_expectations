@@ -15,7 +15,6 @@ from great_expectations.core.partitioners import ColumnPartitioner
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context import get_context as get_gx_context
-from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -24,14 +23,15 @@ from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import (
     _FLUENT_DATASOURCES_KEY,
 )
+from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
 from great_expectations.datasource.fluent.sources import (
+    DataSourceManager,
     TypeRegistrationError,
-    _SourceFactories,
 )
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -74,14 +74,14 @@ class DataContext:
     @validate_arguments
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
         self.root_directory = context_root_dir
-        self._data_sources: _SourceFactories = _SourceFactories(self)  # type: ignore[arg-type]
+        self._data_sources: DataSourceManager = DataSourceManager(self)  # type: ignore[arg-type]
         self._datasources: Dict[str, Datasource] = {}
         self.config_provider: _ConfigurationProvider | None = None
         logger.info(f"Available Factories - {self._data_sources.factories}")
         logger.debug(f"`type_lookup` mapping ->\n{pf(self._data_sources.type_lookup)}")
 
     @property
-    def data_sources(self) -> _SourceFactories:
+    def data_sources(self) -> DataSourceManager:
         return self._data_sources
 
     @property
@@ -96,14 +96,14 @@ class DataContext:
         self._datasources[datasource.name] = datasource
         return datasource
 
-    def get_datasource(self, datasource_name: str) -> Datasource:
+    def get_datasource(self, name: str) -> Datasource:
         # NOTE: this same method exists on AbstractDataContext
         # TODO (kilo59): implement as __getitem__ ?
         try:
-            return self._datasources[datasource_name]
+            return self._datasources[name]
         except KeyError as exc:
             raise LookupError(
-                f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"  # noqa: E501
+                f"'{name}' not found. Available datasources are {list(self._datasources.keys())}"
             ) from exc
 
     def _save_project_config(self) -> None: ...
@@ -130,12 +130,12 @@ class DummyDataAsset(DataAsset):
 
 
 @pytest.fixture(scope="function")
-def context_sources_cleanup() -> Generator[_SourceFactories, None, None]:
+def context_sources_cleanup() -> Generator[DataSourceManager, None, None]:
     """Return the sources object and reset types/factories on teardown"""
     try:
         # setup
-        sources_copy = copy.deepcopy(_SourceFactories._SourceFactories__crud_registry)  # type: ignore[attr-defined]
-        type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
+        sources_copy = copy.deepcopy(DataSourceManager._DataSourceManager__crud_registry)  # type: ignore[attr-defined]
+        type_lookup_copy = copy.deepcopy(DataSourceManager.type_lookup)
         sources = get_context().data_sources
 
         assert (
@@ -144,15 +144,15 @@ def context_sources_cleanup() -> Generator[_SourceFactories, None, None]:
 
         yield sources
     finally:
-        _SourceFactories._SourceFactories__crud_registry = sources_copy  # type: ignore[attr-defined]
-        _SourceFactories.type_lookup = type_lookup_copy
+        DataSourceManager._DataSourceManager__crud_registry = sources_copy  # type: ignore[attr-defined]
+        DataSourceManager.type_lookup = type_lookup_copy
 
 
 @pytest.fixture(scope="function")
-def empty_sources(context_sources_cleanup) -> Generator[_SourceFactories, None, None]:
-    _SourceFactories._SourceFactories__crud_registry.clear()  # type: ignore[attr-defined]
-    _SourceFactories.type_lookup.clear()
-    assert not _SourceFactories.type_lookup
+def empty_sources(context_sources_cleanup) -> Generator[DataSourceManager, None, None]:
+    DataSourceManager._DataSourceManager__crud_registry.clear()  # type: ignore[attr-defined]
+    DataSourceManager.type_lookup.clear()
+    assert not DataSourceManager.type_lookup
     yield context_sources_cleanup
 
 
@@ -164,7 +164,7 @@ class DummyExecutionEngine(ExecutionEngine):
 @pytest.mark.unit
 class TestMetaDatasource:
     def test__new__only_registers_expected_number_of_datasources_factories_and_types(
-        self, empty_sources: _SourceFactories
+        self, empty_sources: DataSourceManager
     ):
         assert len(empty_sources.factories) == 0
         assert len(empty_sources.type_lookup) == 0
@@ -185,7 +185,7 @@ class TestMetaDatasource:
         assert "my_test" in empty_sources.type_lookup
 
     def test__new__registers_sources_factory_method(
-        self, context_sources_cleanup: _SourceFactories
+        self, context_sources_cleanup: DataSourceManager
     ):
         expected_method_name = "add_my_test"
 
@@ -208,7 +208,7 @@ class TestMetaDatasource:
         ), f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
 
     def test_registered_sources_factory_method_has_correct_signature(
-        self, context_sources_cleanup: _SourceFactories
+        self, context_sources_cleanup: DataSourceManager
     ):
         expected_method_name = "add_my_test"
 
@@ -242,7 +242,7 @@ class TestMetaDatasource:
             assert param_name in ds_factory_method_sig.parameters
             print("✅")
 
-    def test__new__updates_asset_type_lookup(self, context_sources_cleanup: _SourceFactories):
+    def test__new__updates_asset_type_lookup(self, context_sources_cleanup: DataSourceManager):
         class FooAsset(DummyDataAsset):
             type: str = "foo"
 
@@ -272,7 +272,7 @@ class TestMetaDatasource:
 
 @pytest.mark.unit
 class TestMisconfiguredMetaDatasource:
-    def test_ds_type_field_not_set(self, empty_sources: _SourceFactories):
+    def test_ds_type_field_not_set(self, empty_sources: DataSourceManager):
         with pytest.raises(
             TypeRegistrationError,
             match=r"`MissingTypeDatasource` is missing a `type` attribute",
@@ -290,7 +290,7 @@ class TestMisconfiguredMetaDatasource:
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
 
-    def test_ds_execution_engine_type_not_defined(self, empty_sources: _SourceFactories):
+    def test_ds_execution_engine_type_not_defined(self, empty_sources: DataSourceManager):
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
 
@@ -300,7 +300,7 @@ class TestMisconfiguredMetaDatasource:
         with pytest.raises(NotImplementedError):
             MissingExecEngineTypeDatasource(name="name").get_execution_engine()
 
-    def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
+    def test_ds_assets_type_field_not_set(self, empty_sources: DataSourceManager):
         with pytest.raises(
             TypeRegistrationError,
             match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",  # noqa: E501
@@ -324,7 +324,7 @@ class TestMisconfiguredMetaDatasource:
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
 
-    def test_ds_test_connection_not_defined(self, empty_sources: _SourceFactories):
+    def test_ds_test_connection_not_defined(self, empty_sources: DataSourceManager):
         class MissingTestConnectionDatasource(Datasource):
             type: str = "valid"
 
@@ -403,7 +403,21 @@ def assert_fluent_datasource_content(
 ):
     config = yaml.load(config_file_path.read_text())
     assert _FLUENT_DATASOURCES_KEY in config
-    assert config[_FLUENT_DATASOURCES_KEY] == fluent_datasource_config
+    config_from_gx_yaml = config[_FLUENT_DATASOURCES_KEY]
+    assert isinstance(config_from_gx_yaml, dict)
+    config_from_gx_yaml_without_ids = _remove_ids(config_from_gx_yaml)
+    assert config_from_gx_yaml_without_ids == fluent_datasource_config
+
+
+def _remove_ids(config: dict) -> dict:
+    for data_source in config.values():
+        data_source.pop("id")
+        for asset in data_source.get("assets", {}).values():
+            asset.pop("id")
+            for batch_definition in asset.get("batch_definitions", []):
+                batch_definition.pop("id")
+
+    return config
 
 
 @pytest.fixture
@@ -411,13 +425,13 @@ def context_with_fluent_datasource(
     context_config_data: Tuple[AbstractDataContext, pathlib.Path, pathlib.Path],
 ) -> Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]:
     context, config_file_path, data_dir = context_config_data
-    assert len(context.datasources) == 0
+    assert len(context.data_sources.all()) == 0
     context.data_sources.add_pandas_filesystem(
         name=DEFAULT_CRUD_DATASOURCE_NAME,
         base_directory=data_dir,
         data_context_root_directory=config_file_path.parent,
     )
-    assert len(context.datasources) == 1
+    assert len(context.data_sources.all()) == 1
     assert_fluent_datasource_content(
         config_file_path=config_file_path,
         fluent_datasource_config={
@@ -446,7 +460,7 @@ def test_add_datasource_with_datasource_object(context_with_fluent_datasource, u
         context.data_sources.add_pandas_filesystem(new_datasource)
     else:
         context.data_sources.add_pandas_filesystem(datasource=new_datasource)
-    assert len(context.datasources) == 2
+    assert len(context.data_sources.all()) == 2
     assert_fluent_datasource_content(
         config_file_path=config_file_path,
         fluent_datasource_config={
@@ -515,9 +529,9 @@ def test_update_datasource_with_datasource_object(
     # Add an asset and update datasource
     (data_dir / "1.csv").touch()
     if use_positional_arg:
-        datasource.add_csv_asset("csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+        datasource.add_csv_asset("csv_asset")
     else:
-        datasource.add_csv_asset(name="csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+        datasource.add_csv_asset(name="csv_asset")
 
     context.data_sources.update_pandas_filesystem(datasource=datasource)
     assert_fluent_datasource_content(
@@ -529,7 +543,6 @@ def test_update_datasource_with_datasource_object(
                 "type": "pandas_filesystem",
                 "assets": {
                     "csv_asset": {
-                        "batching_regex": "(?P<file_name>.*).csv",
                         "type": "csv",
                     },
                 },

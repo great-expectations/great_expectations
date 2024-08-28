@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -28,21 +29,39 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectTableColumnsToMatchSet(BatchExpectation):
-    """Expect the columns to match an unordered set.
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns in a table to match an unordered set."
+COLUMN_SET_DESCRIPTION = "The column names, in any order."
+EXACT_MATCH_DESCRIPTION = (
+    "If True, the list of columns must exactly match the observed columns. "
+    "If False, observed columns must include column_set but additional columns will pass."
+)
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Schema"]
 
-    expect_table_columns_to_match_set is a \
+
+class ExpectTableColumnsToMatchSet(BatchExpectation):
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
+
+    ExpectTableColumnsToMatchSet is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     BatchExpectations are one of the most common types of Expectation.
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
 
     Args:
-        column_set (list of str): \
-            The column names, in any order.
+        column_set (list of str): {COLUMN_SET_DESCRIPTION}
         exact_match (boolean): \
-            If True, the list of columns must exactly match the observed columns. \
-            If False, observed columns must include column_set but additional columns will pass. Default True.
+            {EXACT_MATCH_DESCRIPTION} Default True.
 
     Other Parameters:
         result_format (str or None): \
@@ -61,11 +80,18 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Schema
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -82,28 +108,28 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       "test",
                       "test2"
                     ],
-                    "details": {
-                      "mismatched": {
+                    "details": {{
+                      "mismatched": {{
                         "unexpected": [
                           "test2"
                         ]
-                      }
-                    }
-                  },
-                  "meta": {},
+                      }}
+                    }}
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -113,37 +139,39 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       "test",
                       "test2"
                     ],
-                    "details": {
-                      "mismatched": {
+                    "details": {{
+                      "mismatched": {{
                         "unexpected": [
                           "test"
                         ],
                         "missing": [
                           "test3"
                         ]
-                      }
-                    }
-                  },
-                  "meta": {},
+                      }}
+                    }}
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    column_set: Union[list, set, SuiteParameterDict, None]
-    exact_match: Union[bool, None]
+    column_set: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
+        description=COLUMN_SET_DESCRIPTION
+    )
+    exact_match: Union[bool, None] = pydantic.Field(description=EXACT_MATCH_DESCRIPTION)
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
         "contributors": [
@@ -153,6 +181,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     metric_dependencies = ("table.columns",)
     success_keys = (
@@ -163,6 +192,37 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         "column_set",
         "exact_match",
     )
+
+    class Config:
+        title = "Expect table columns to match set"
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchSet]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

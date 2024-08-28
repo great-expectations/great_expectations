@@ -25,15 +25,16 @@ datasource = context.data_sources.add_pandas_s3(
 )
 # </snippet>
 
-assert datasource_name in context.datasources
+assert datasource_name in context.data_sources.all()
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_pandas.py add_asset">
 asset_name = "my_taxi_data_asset"
 s3_prefix = "data/taxi_yellow_tripdata_samples/"
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-data_asset = datasource.add_csv_asset(
-    name=asset_name, batching_regex=batching_regex, s3_prefix=s3_prefix
+data_asset = datasource.add_csv_asset(name=asset_name, s3_prefix=s3_prefix)
+batch_definition = data_asset.add_batch_definition_monthly(
+    "Monthly Taxi Data", regex=batching_regex
 )
 # </snippet>
 
@@ -41,10 +42,9 @@ assert data_asset
 
 assert datasource.get_asset_names() == {"my_taxi_data_asset"}
 
-my_batch_request = data_asset.build_batch_request({"year": "2019", "month": "03"})
-batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
-assert len(batches) == 1
-assert set(batches[0].columns()) == {
+batch_parameters = {"year": "2019", "month": "03"}
+batch = batch_definition.get_batch(batch_parameters=batch_parameters)
+assert set(batch.columns()) == {
     "vendor_id",
     "pickup_datetime",
     "dropoff_datetime",

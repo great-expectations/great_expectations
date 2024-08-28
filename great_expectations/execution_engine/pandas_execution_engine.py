@@ -22,7 +22,6 @@ from typing import (
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws, azure, google
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     execute_pandas_reader_fn,
@@ -67,7 +66,6 @@ HASH_THRESHOLD = 1e9
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
 
-@public_api
 class PandasExecutionEngine(ExecutionEngine):
     """PandasExecutionEngine instantiates the ExecutionEngine API to support computations using Pandas.
 
@@ -260,7 +258,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 )
             logger.debug(f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}")
             reader_fn: DataFrameFactoryFn = self._get_reader_fn(reader_method, s3_url.key)
-            buf = BytesIO(s3_object["Body"].read())
+            buf = BytesIO(s3_object["Body"].read())  # type: ignore[possibly-undefined] # FIXME
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
@@ -484,7 +482,6 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
         """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""  # noqa: E501
         return {}  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).  # noqa: E501
 
-    @public_api
     @override
     def get_domain_records(  # noqa: C901, PLR0912
         self,
@@ -594,7 +591,6 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
 
         return data
 
-    @public_api
     @override
     def get_compute_domain(
         self,

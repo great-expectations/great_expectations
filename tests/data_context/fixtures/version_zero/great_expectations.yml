@@ -1,13 +1,3 @@
-datasources:
-  edw:
-    type: sqlalchemy
-    batch_kwargs_generators:
-      default:
-        type: queries
-    data_asset_type:
-      class_name: SqlAlchemyDataset
-    profile: edw
-
 plugins_directory: plugins/
 validation_results_stores:
   remote:

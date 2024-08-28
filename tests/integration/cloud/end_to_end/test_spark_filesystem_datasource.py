@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING, Iterator
 import pandas as pd
 import pytest
 
-from great_expectations.datasource.data_connector.util import normalize_directory_path
+from great_expectations.datasource.fluent.data_connector.filesystem_data_connector import (
+    normalize_directory_path,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -93,9 +95,9 @@ def data_asset(
         datasource=datasource,
         asset_name=asset_name,
     )
-    datasource.delete_asset(asset_name=asset_name)
+    datasource.delete_asset(name=asset_name)
     with pytest.raises(get_missing_data_asset_error_type):
-        datasource.get_asset(asset_name=asset_name)
+        datasource.get_asset(name=asset_name)
 
 
 @pytest.fixture(scope="module")
@@ -114,7 +116,7 @@ def expectation_suite(
     Those assertions can be found in the expectation_suite fixture."""
     expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_be_null",
+            type="expect_column_values_to_not_be_null",
             kwargs={
                 "column": "name",
                 "mostly": 1,

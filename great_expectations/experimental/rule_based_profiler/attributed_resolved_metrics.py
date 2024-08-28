@@ -9,9 +9,11 @@ import pandas as pd
 
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    deep_filter_properties_iterable,
+)
 
 if TYPE_CHECKING:
     from great_expectations.experimental.rule_based_profiler.metric_computation_result import (
@@ -62,7 +64,8 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:  # no
                     first_value_type: type = type(next(values_iterator))
                     current_type: type
                     if not all(
-                        type(current_value) == first_value_type for current_value in values_iterator
+                        type(current_value) == first_value_type  # noqa: E721 # ?
+                        for current_value in values_iterator
                     ):
                         return True
 

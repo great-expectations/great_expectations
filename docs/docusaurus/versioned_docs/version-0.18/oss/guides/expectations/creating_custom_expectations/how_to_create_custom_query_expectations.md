@@ -1,5 +1,6 @@
 ---
 title: Create a Custom Query Expectation
+toc_max_heading_level: 2
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
@@ -48,18 +49,18 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 :::
 
-## Copy and rename the template file
+### Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/query_expectation_template.py).
+You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/docs/docusaurus/versioned_docs/version-0.18/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py#L4).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
 cp query_expectation_template.py /SOME_DIRECTORY/expect_queried_table_row_count_to_equal.py
 ```
 
-### Storing Expectation files
+#### Storing Expectation files
 
 During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
 
@@ -69,7 +70,7 @@ During development, you don't need to store Expectation files in a specific loca
 
 For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
 
-## Generate a diagnostic checklist for your Expectation
+### Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -97,7 +98,7 @@ Completeness checklist for ExpectQueryToMatchSomeCriteria:
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
 This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/oss/contributing/contributing_maturity.md#expectation-contributions) at an Experimental level.
 
-## Change the Expectation class name and add a docstring
+### Change the Expectation class name and add a docstring
 
 Now we're going to begin laying the groundwork for the functionality of your Custom Expectation.
 
@@ -142,14 +143,14 @@ Completeness checklist for ExpectQueriedTableRowCountToBe:
 ...
 ```
 
-### Metric classes
+#### Metric classes
 
 If you've built a Custom Expectation before, you may have noticed that the template doesn't contain a <TechnicalTag tag="metric" text="Metric"/> class.
 
 While you are still able to create a Custom Metric for your Custom Expectation if needed, the nature of `QueryExpectations`
 allows us to provide a small number of generic `query.*` Metrics are capable of supporting many use-cases.
 
-## Add example cases
+### Add example cases
 
 You're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve the following purposes:
 
@@ -172,7 +173,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `out` is based on the <TechnicalTag tag="validation_result" text="Validation Result" /> returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
-### The only_for key
+#### The only_for key
 
 <code>only_for</code> is an optional key you can pass to offer more granular control over which backends and SQL dialects your tests are run against.
 
@@ -196,7 +197,7 @@ Completeness checklist for ExpectQueriedTableRowCountToBe:
 For more information on tests and example cases, see [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-## Implement a Query & Connect a Metric to your Expectation
+### Implement a Query & Connect a Metric to your Expectation
 
 The query is the core of a `QueryExpectation`; this query is what defines the scope of your expectations for your data.
 
@@ -245,7 +246,7 @@ Becomes:
 ```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies"
 ```
 
-### Other parameters
+#### Other parameters
 
 Expectation Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
 
@@ -253,7 +254,7 @@ Expectation Default Kwarg Values (Optional) - Default values for success keys an
 
 Metric Condition Value Keys (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
 
-## Validate
+### Validate
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
@@ -284,7 +285,7 @@ Completeness checklist for ExpectQueriedTableRowCountToBe:
 ...
 ```
 
-## Linting
+### Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -326,18 +327,18 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 :::
 
-## Copy and rename the template file
+### Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/query_expectation_template.py).
+You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/docs/docusaurus/versioned_docs/version-0.18/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py#L4).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
 cp query_expectation_template.py /SOME_DIRECTORY/expect_queried_column_value_frequency_to_meet_threshold.py
 ```
 
-### Storing Expectation files
+#### Storing Expectation files
 
 During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
 
@@ -347,7 +348,7 @@ During development, you don't need to store Expectation files in a specific loca
 
 For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
 
-## Generate a diagnostic checklist for your Expectation
+### Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -375,7 +376,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
 This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](/oss/contributing/contributing_maturity.md#expectation-contributions) at an Experimental level.
 
-## Change the Expectation class name and add a docstring
+### Change the Expectation class name and add a docstring
 
 Now we're going to begin laying the groundwork for the functionality of your Custom Expectation.
 
@@ -420,14 +421,14 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ...
 ```
 
-### Metric classes
+#### Metric classes
 
 If you've built a Custom Expectation before, you may have noticed that the template doesn't contain a <TechnicalTag tag="metric" text="Metric"/> class.
 
 While you are still able to create a Custom Metric for your Custom Expectation if needed, the nature of `QueryExpectations`
 allows us to provide a small number of generic `query.*` Metrics are capable of supporting many use-cases.
 
-### Add example cases
+#### Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -449,7 +450,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `out` is based on the <TechnicalTag tag="validation_result" text="Validation Result" /> returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
-### The only_for key
+#### The only_for key
 
 <code>only_for</code> is an optional key you can pass to offer more granular control over which backends and SQL dialects your tests are run against.
 
@@ -473,7 +474,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 For more information on tests and example cases, see our guide on [how to create example cases for a Custom Expectation](./how_to_use_custom_expectations.md).
 :::
 
-## Implement a Query & Connect a Metric to your Expectation
+### Implement a Query & Connect a Metric to your Expectation
 
 The query is the core of a `QueryExpectation`; this query is what defines the scope of your expectations for your data.
 
@@ -525,7 +526,7 @@ Becomes:
 ```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies"
 ```
 
-### Other parameters
+#### Other parameters
 
 Expectation Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
 
@@ -533,7 +534,7 @@ Expectation Default Kwarg Values (Optional) - Default values for success keys an
 
 Metric Condition Value Keys (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
 
-## Validate
+### Validate
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
@@ -564,7 +565,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ...
 ```
 
-### Linting
+#### Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 

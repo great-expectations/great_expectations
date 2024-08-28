@@ -1,4 +1,3 @@
-import re
 from logging import Logger
 from typing import Any, ClassVar, Literal, Optional, Type
 
@@ -13,7 +12,6 @@ from great_expectations.datasource.fluent.data_connector import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     BatchMetadata,
-    SortersDefinition,
 )
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
@@ -39,12 +37,10 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         abs_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
-        order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...

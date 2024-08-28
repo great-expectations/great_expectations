@@ -10,8 +10,6 @@ To learn more about Expectation Suites, see [Expectation Suites](/reference/lear
 
 ## Prerequisites
 
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 - You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
 ## Create an Expectation Suite
@@ -26,31 +24,33 @@ If you have specific business requirements, or you want to examine specific data
 
 4. Enter a name for the Expectation Suite in the **Expectation Suite name** field.
 
-5. Click **Create Suite**. 
+5. Click **Create**. 
 
-7. Add Expectations to the Expectation Suite. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+6. Add Expectations to the Expectation Suite. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
-8. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
+7. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
-## Edit an Expectation Suite name
+## Edit an Expectation Suite
 
-1. In GX Cloud, click **Expectation Suites**.
+1. In GX Cloud, click **Data Assets**.
 
-2. Click **Edit** for the Expectation Suite you want to edit.
+2. Click the Expectations tab.
 
-3. Edit the Expectation Suite name and then click **Save**.
+3. Select an Expectation Suite in the Expectation Suites list.
 
-4. Update the Expectation Suite name in all code that included the previous Expectation Suite name.
+4. Click **Edit** on the schedule component for the Expectation Suite you want to edit.
+
+5. Edit the Expectation Suite name or validation schedule and then click **Save**.
+
+6. Optional. If the Expectation Suite name was changed, update the name in all code that included the previous Expectation Suite name.
 
 ## Delete an Expectation Suite
 
-1. In GX Cloud, delete all Checkpoints associated with the Expectation Suite. See [Delete a Checkpoint](/cloud/checkpoints/manage_checkpoints.md#delete-a-checkpoint). 
+1. Click **Expectation Suites**.
 
-2. Click **Expectation Suites**.
+2. Click **Delete** for the Expectation Suite you want to delete.
 
-3. Click **Delete** for the Expectation Suite you want to delete.
-
-4. Click **Delete**.
+3. Click **Delete**.
 
 ## Related documentation
 

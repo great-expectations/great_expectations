@@ -4,8 +4,7 @@ from typing import Mapping
 
 import pytest
 
-from great_expectations import set_context
-from great_expectations.core.serializer import DictConfigSerializer
+from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -16,16 +15,15 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
     ProgressBarsConfig,
-    datasourceConfigSchema,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 
 
 class DatasourceStoreSpy(DatasourceStore):
     def __init__(self) -> None:
         self.save_count = 0
-        super().__init__(serializer=DictConfigSerializer(schema=datasourceConfigSchema))
+        super().__init__()
 
     def set(self, key, value, **kwargs):
         ret = super().set(key=key, value=value, **kwargs)
@@ -123,11 +121,11 @@ def in_memory_data_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
     context = EphemeralDataContextSpy(project_config=config)
-    ds_type = _SourceFactories.type_lookup[fluent_datasource_config["type"]]
+    ds_type = DataSourceManager.type_lookup[fluent_datasource_config["type"]]
     fluent_datasources = {
         fluent_datasource_config["name"]: ds_type(**fluent_datasource_config),
     }
-    context.datasources.update(fluent_datasources)
+    context.data_sources.all().update(fluent_datasources)
     set_context(context)
     return context
 
@@ -140,8 +138,8 @@ def test_add_store(in_memory_data_context: EphemeralDataContextSpy):
     num_store_configs_before = len(context.config.stores)
 
     context.add_store(
-        store_name="my_new_store",
-        store_config={
+        name="my_new_store",
+        config={
             "module_name": "great_expectations.data_context.store",
             "class_name": "ExpectationsStore",
         },

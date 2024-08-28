@@ -14,7 +14,7 @@ With Admin permissions, you can add users, edit organization roles, and delete u
 
     - **Email** - Enter the user's email address.
 
-    - **Organization Role** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Checkpoints and Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
+    - **Organization Role** - Select **Viewer**, **Editor**, or **Admin**. Viewers can view Validation Results, Editors can create and edit Expectations and can create access tokens, and Admins can perform all GX Cloud administrative functions.
 
 3. Click **Invite**.
 

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -36,14 +38,42 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the proportion of unique values to be between a minimum value and a maximum value."
+)
+MIN_VALUE_DESCRIPTION = (
+    "The minimum proportion of unique values (Proportions are on the range 0 to 1)."
+)
+MAX_VALUE_DESCRIPTION = (
+    "The maximum proportion of unique values (Proportions are on the range 0 to 1)."
+)
+STRICT_MIN_DESCRIPTION = (
+    "If True, the minimum proportion of unique values" " must be strictly larger than min_value."
+)
+STRICT_MAX_DESCRIPTION = (
+    "If True, the maximum proportion of unique values" " must be strictly smaller than max_value."
+)
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Cardinality"]
+
 
 class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation):
-    """Expect the proportion of unique values to be between a minimum value and a maximum value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
     values for a proportion of 0.4.
 
-    expect_column_proportion_of_unique_values_to_be_between is a \
+    ExpectColumnProportionOfUniqueValuesToBeBetween is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -52,15 +82,15 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         min_value (float or None): \
-            The minimum proportion of unique values. (Proportions are on the range 0 to 1)
+           {MIN_VALUE_DESCRIPTION}
         max_value (float or None): \
-            The maximum proportion of unique values. (Proportions are on the range 0 to 1)
+            {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            If True, the minimum proportion of unique values must be strictly larger than min_value, default=False
+            {STRICT_MIN_DESCRIPTION} default=False
         strict_max (boolean): \
-            If True, the maximum proportion of unique values must be strictly smaller than max_value, default=False
+            {STRICT_MAX_DESCRIPTION} default=False
 
     Other Parameters:
         result_format (str or None): \
@@ -86,14 +116,21 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
           representing the proportion of unique values in the column
 
     See Also:
-        [expect_column_unique_value_count_to_be_between](https://greatexpectations.io/expectations/expect_column_unique_value_count_to_be_between)
+        [ExpectColumnUniqueValueCountToBeBetween](https://greatexpectations.io/expectations/expect_column_unique_value_count_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Cardinality
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -109,21 +146,21 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                     column="test",
                     min_value=0,
                     max_value=0.8
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": .75
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -133,27 +170,31 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                     max_value=0.5,
                     strict_min=False,
                     strict_max=True
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": .5
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
-    strict_min: bool = False
-    strict_max: bool = False
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MAX_VALUE_DESCRIPTION
+    )
+    strict_min: bool = pydantic.Field(False, description=STRICT_MIN_DESCRIPTION)
+    strict_max: bool = pydantic.Field(False, description=STRICT_MAX_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -164,6 +205,8 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+
+    _library_metadata = library_metadata
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.unique_proportion",)
@@ -183,6 +226,39 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
     )
 
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
+
+    class Config:
+        title = "Expect column proportion of unique values to be between"
+
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnProportionOfUniqueValuesToBeBetween]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(  # noqa: C901 - too complex

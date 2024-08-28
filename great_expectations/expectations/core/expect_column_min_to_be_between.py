@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
@@ -11,6 +12,7 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -38,10 +40,35 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
-    """Expect the column minimum to be between a minimum value and a maximum value.
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column minimum to be between a minimum value and a maximum value."
+)
+MIN_VALUE_DESCRIPTION = "The minimal column minimum allowed."
+MAX_VALUE_DESCRIPTION = "The maximal column minimum allowed."
+STRICT_MIN_DESCRIPTION = (
+    "If True, the minimal column minimum must be strictly larger than min_value, default=False"
+)
+STRICT_MAX_DESCRIPTION = (
+    "If True, the maximal column minimum must be strictly smaller than max_value, default=False"
+)
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Numerical data"]
 
-    expect_column_min_to_be_between is a \
+
+class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
+
+    ExpectColumnMinToBeBetween is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -50,15 +77,15 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name
+            {COLUMN_DESCRIPTION}
         min_value (comparable type or None): \
-            The minimal column minimum allowed.
+            {MIN_VALUE_DESCRIPTION}
         max_value (comparable type or None): \
-            The maximal column minimum allowed.
+            {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            If True, the minimal column minimum must be strictly larger than min_value, default=False
+            {STRICT_MIN_DESCRIPTION}
         strict_max (boolean): \
-            If True, the maximal column minimum must be strictly smaller than max_value, default=False
+            {STRICT_MAX_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -84,14 +111,21 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
             representing the actual column min
 
     See Also:
-        [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
+        [ExpectColumnMaxToBeBetween](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Numerical Data
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -110,18 +144,18 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": .8
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -134,27 +168,30 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 1
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
-    strict_min: bool = False
-    strict_max: bool = False
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MAX_VALUE_DESCRIPTION
+    )
+    strict_min: bool = pydantic.Field(default=False, description=STRICT_MAX_DESCRIPTION)
+    strict_max: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -162,6 +199,7 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.min",)
@@ -179,6 +217,37 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         "strict_min",
         "strict_max",
     )
+
+    class Config:
+        title = "Expect column minimum to be between"
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMinToBeBetween]) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @override

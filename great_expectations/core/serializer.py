@@ -5,20 +5,20 @@ from great_expectations.compatibility.typing_extensions import override
 """Serializer class interface definition.
 
 Serializers determine how to write an object to disk, json, etc.
-A serializer comprises the object destination and name e.g. YAMLReadyDictDatasourceConfigSerializer.
+A serializer comprises the object destination and name e.g. YAMLReadyDictMyModelConfigSerializer.
 A base implementation (DictConfigSerializer) is provided if no modification needs to be included for the specific object / destination pair.
 
 Typical usage example:
 
-datasource_config = DatasourceConfig(...)
-serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-serialized_value = serializer.serialize(datasource_config)
+config = ModelConfig(...)
+serializer = DictConfigSerializer(schema=modelConfigSchema)
+serialized_value = serializer.serialize(config)
 """  # noqa: E501
 
 import abc
 from typing import TYPE_CHECKING
 
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from marshmallow import Schema

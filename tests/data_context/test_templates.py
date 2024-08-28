@@ -21,10 +21,6 @@ stores:
 # Stores are configurable places to store things like Expectations, Validations
 # Data Docs, and more. These are for advanced users only - most users can simply
 # leave this section alone.
-#
-# Three stores are required: expectations, validations, and
-# suite_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, etc.
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
@@ -36,11 +32,6 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-
-  suite_parameter_store:
-    # Suite Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/docs/reference/suite_parameters/
-    class_name: SuiteParameterStore
 
   checkpoint_store:
     class_name: CheckpointStore
@@ -57,7 +48,6 @@ stores:
 
 expectations_store_name: expectations_store
 validation_results_store_name: validation_results_store
-suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
@@ -92,11 +82,7 @@ def project_help_comment():
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
-config_version: 3
-
-# Datasources tell Great Expectations where your data lives and how to get it.
-# Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
-datasources: {}
+config_version: 4
 """  # noqa: E501
     return PROJECT_HELP_COMMENT
 

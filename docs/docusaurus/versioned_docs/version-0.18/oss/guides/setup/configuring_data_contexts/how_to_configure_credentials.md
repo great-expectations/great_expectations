@@ -1,5 +1,6 @@
 ---
 title: Configure credentials
+toc_max_heading_level: 2
 ---
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
@@ -42,7 +43,7 @@ These can then be loaded into the `connection_string` parameter when we are addi
 
 <TabItem value="yaml">
 
-## Using the `config_variables.yml` file 
+### Using the `config_variables.yml` file 
 
 A more advanced option is to use the config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod). 
 
@@ -63,7 +64,7 @@ Then the config variable can be loaded into the `connection_string` parameter wh
 ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
 ```
 
-## Additional Notes
+### Additional Notes
 
 - The default ``config_variables.yml`` file located at ``great_expectations/uncommitted/config_variables.yml`` applies to deployments using  ``FileSystemDataContexts``.
 - To view the full script used in this page, see it on GitHub: [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py)
@@ -85,7 +86,7 @@ Select one of the following secret manager applications:
 
 Configure your Great Expectations project to substitute variables from the AWS Secrets Manager.
 
-## Prerequisites
+### Prerequisites
 
 - An AWS Secrets Manager instance. See [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html).
 
@@ -99,7 +100,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-## Setup
+### Setup
 
 To use AWS Secrets Manager, you may need to install the ``great_expectations`` package with its ``aws_secrets`` extra requirement:
 
@@ -161,7 +162,7 @@ pg_datasource = context.sources.add_or_update_sql(
 
 Configure your Great Expectations project to substitute variables from the GCP Secrets Manager.
 
-## Prerequisites
+### Prerequisites
 
 - Configured a secret manager and secrets in the cloud with [GCP Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart)
 
@@ -175,7 +176,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-## Setup
+### Setup
 
 To use GCP Secret Manager, you may need to install the ``great_expectations`` package with its ``gcp`` extra requirement:
 
@@ -230,7 +231,7 @@ pg_datasource = context.sources.add_or_update_sql(
 
 Configure your Great Expectations project to substitute variables from the Azure Key Vault.
 
-## Prerequisites
+### Prerequisites
 
 - [Set up a working deployment of Great Expectations](/oss/guides/setup/setup_overview.md)
 - Configured a secret manager and secrets in the cloud with [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
@@ -245,7 +246,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-## Setup
+### Setup
 
 To use Azure Key Vault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
 

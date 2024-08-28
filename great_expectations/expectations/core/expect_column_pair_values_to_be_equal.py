@@ -1,10 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_A_DESCRIPTION,
+    COLUMN_B_DESCRIPTION,
+    IGNORE_ROW_IF_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -27,11 +34,25 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the values in column A to be the same as column B."
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Data integrity"]
+
 
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
-    """Expect the values in column A to be the same as column B.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_pair_values_to_be_equal is a \
+    ExpectColumnPairValuesToBeEqual is a \
     [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
 
     Column Pair Map Expectations are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns.
@@ -39,17 +60,15 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
-        column_A (str): \
-            The first column name
-        column_B (str): \
-            The second column name
+        column_A (str): {COLUMN_A_DESCRIPTION}
+        column_B (str): {COLUMN_B_DESCRIPTION}
 
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
-            If specified, sets the condition on which a given row is to be ignored. Default "neither".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "neither".
         mostly (None or a float between 0 and 1): \
-            Successful if at least `mostly` fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -67,11 +86,18 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Data Integrity
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -89,13 +115,13 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -109,10 +135,10 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -123,13 +149,13 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -143,18 +169,18 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
-        "both_values_are_missing"
+        pydantic.Field(default="both_values_are_missing", description=IGNORE_ROW_IF_DESCRIPTION)
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": [
             "core expectation",
@@ -165,6 +191,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
     map_metric = "column_pair_values.equal"
     success_keys = (
         "column_A",
@@ -176,6 +203,39 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "column_A",
         "column_B",
     )
+
+    class Config:
+        title = "Expect column pair values to be equal"
+
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnPairValuesToBeEqual]
+        ) -> None:
+            ColumnPairMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(
@@ -196,7 +256,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
 
         if not params.column_A or not params.column_B:
             template_str += (
-                "Unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column. "
+                "Unrecognized kwargs for ExpectColumnPairValuesToBeEqual: missing column. "
             )
 
         if not params.mostly or params.mostly.value == 1.0:
@@ -240,7 +300,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
 
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = (
-                " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+                " unrecognized kwargs for ExpectColumnPairValuesToBeEqual: missing column."
             )
             params["row_condition"] = None
 

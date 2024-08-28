@@ -12,10 +12,7 @@ from great_expectations.compatibility.pyspark import (
 )
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    get_sql_dialect_floating_point_infinity_value,
-)
+from great_expectations.core.util import get_sql_dialect_floating_point_infinity_value
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -25,6 +22,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -37,7 +35,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
     value_keys = ("bins",)
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: PLR0913
+    def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -57,7 +55,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         return list(hist)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913
+    def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -210,7 +208,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         return convert_to_json_serializable(list(execution_engine.execute_query(query).fetchone()))
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: C901, PLR0913
+    def _spark(  # noqa: C901
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

@@ -209,7 +209,7 @@ def test_expectation_suite_validation_result_returns_expected_shape(
                                 "min_value": 0.0,
                                 "max_value": 6.0,
                             },
-                            "expectation_type": "expect_column_values_to_be_between",
+                            "type": "expect_column_values_to_be_between",
                         }
                     ),
                 }
@@ -239,7 +239,7 @@ def test_expectation_suite_validation_result_returns_expected_shape(
                                 "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
                                 "column": "trip_distance",
                             },
-                            "expectation_type": "expect_column_values_to_not_be_null",
+                            "type": "expect_column_values_to_not_be_null",
                         }
                     ),
                 }
@@ -304,3 +304,34 @@ def test_expectation_suite_validation_result_returns_expected_shape(
         },
         indent=4,
     )
+
+
+@pytest.mark.unit
+def test_render_updates_rendered_content():
+    evr = ExpectationValidationResult(
+        success=False,
+        expectation_config=gxe.ExpectColumnValuesToBeBetween(
+            column="passenger_count",
+            min_value=0,
+            max_value=6,
+            notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",  # noqa: E501
+        ).configuration,
+        result={
+            "element_count": 100000,
+            "unexpected_count": 1,
+            "unexpected_percent": 0.001,
+            "partial_unexpected_list": [7.0],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.001,
+            "unexpected_percent_nonmissing": 0.001,
+            "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
+            "partial_unexpected_index_list": [48422],
+        },
+    )
+
+    assert evr.rendered_content is None
+
+    evr.render()
+
+    assert evr.rendered_content is not None

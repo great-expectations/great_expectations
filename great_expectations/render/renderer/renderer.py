@@ -48,17 +48,17 @@ class Renderer:
     @classmethod
     def _get_expectation_type(cls, ge_object):
         if isinstance(ge_object, ExpectationConfiguration):
-            return ge_object.expectation_type
+            return ge_object.type
 
         elif isinstance(ge_object, ExpectationValidationResult):
             # This is a validation
-            return ge_object.expectation_config.expectation_type
+            return ge_object.expectation_config.type
 
     # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_evr_by_type(cls, evrs, type_):
         for evr in evrs:
-            if evr.expectation_config.expectation_type == type_:
+            if evr.expectation_config.type == type_:
                 return evr
 
     # TODO: When we implement a ValidationResultSuite class, this method will move there.
@@ -66,7 +66,7 @@ class Renderer:
     def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
         ret = []
         for evr in evrs:
-            if evr.expectation_config.expectation_type == type_ and (
+            if evr.expectation_config.type == type_ and (
                 not column_ or column_ == evr.expectation_config.kwargs.get("column")
             ):
                 ret.append(evr)

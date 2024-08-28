@@ -39,7 +39,6 @@ great_expectations_yaml = yaml.load(great_expectations_yaml_file_path.read_text(
 stores = great_expectations_yaml["stores"]
 pop_stores = [
     "checkpoint_store",
-    "suite_parameter_store",
     "validation_results_store",
     "validation_definition_store",
 ]
@@ -97,8 +96,8 @@ configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend
 
 # add and set the new expectation store
 context.add_store(
-    store_name=configured_expectations_store["expectations_store_name"],
-    store_config=configured_expectations_store["stores"]["expectations_GCS_store"],
+    name=configured_expectations_store["expectations_store_name"],
+    config=configured_expectations_store["stores"]["expectations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
@@ -122,7 +121,6 @@ stores = great_expectations_yaml["stores"]
 # popping the rest out so taht we can do the comparison. They aren't going anywhere dont worry
 pop_stores = [
     "checkpoint_store",
-    "suite_parameter_store",
     "expectations_store",
     "expectations_GCS_store",
     "validation_definition_store",
@@ -179,8 +177,8 @@ configured_validation_results_store["stores"]["validation_results_GCS_store"][
 
 # add and set the new validation store
 context.add_store(
-    store_name=configured_validation_results_store["validation_results_store_name"],
-    store_config=configured_validation_results_store["stores"][
+    name=configured_validation_results_store["validation_results_store_name"],
+    config=configured_validation_results_store["stores"][
         "validation_results_GCS_store"
     ],
 )

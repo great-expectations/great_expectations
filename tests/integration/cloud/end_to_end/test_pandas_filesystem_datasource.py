@@ -79,7 +79,6 @@ def csv_asset(
 ) -> CSVAsset:
     return datasource.add_csv_asset(
         name=asset_name,
-        batching_regex="data.csv",
     )
 
 
@@ -89,7 +88,6 @@ def parquet_asset(
 ) -> ParquetAsset:
     return datasource.add_parquet_asset(
         name=asset_name,
-        batching_regex="data.parquet",
     )
 
 
@@ -105,9 +103,9 @@ def data_asset(
         datasource=datasource,
         asset_name=asset_name,
     )
-    datasource.delete_asset(asset_name=asset_name)
+    datasource.delete_asset(name=asset_name)
     with pytest.raises(get_missing_data_asset_error_type):
-        datasource.get_asset(asset_name=asset_name)
+        datasource.get_asset(name=asset_name)
 
 
 @pytest.fixture(scope="module")
@@ -126,7 +124,7 @@ def expectation_suite(
     Those assertions can be found in the expectation_suite fixture."""
     expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_be_null",
+            type="expect_column_values_to_not_be_null",
             kwargs={
                 "column": "name",
                 "mostly": 1,

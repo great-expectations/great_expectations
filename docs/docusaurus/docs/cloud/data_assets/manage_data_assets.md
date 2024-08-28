@@ -16,7 +16,7 @@ A Data Asset is a collection of records that you create when you connect to your
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to data](/core/manage_and_access_data/connect_to_data/connect_to_data.md) in the GX 1.0 documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to data](/core/manage_and_access_data/connect_to_data/connect_to_data.md) in the GX Core documentation. 
 
 <Tabs
   groupId="manage-data-assets"
@@ -32,8 +32,6 @@ Define the data you want GX Cloud to access within Snowflake.
 ### Prerequisites
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud).
-
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
 
 - You have a Snowflake database, schema, and table.
 
@@ -83,17 +81,11 @@ Define the data you want GX Cloud to access within Snowflake.
     
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
 
-9. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 8.
 
-    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
+10. Click **Finish**.
 
-    - **Column of datetime type** - Enter the name of the column containing the date and time data.
-
-10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
-
-11. Click **Finish**.
-
-12. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+11. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -103,8 +95,6 @@ Define the data you want GX Cloud to access within PostgreSQL.
 ### Prerequisites
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud).
-
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
 
 - You have a PostgreSQL database, schema, and table.
 
@@ -132,21 +122,14 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 7. Complete the following fields:
 
-    - **Table name**: Enter a name for the table you're creating in the Data Asset.
-    
+    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique across all Data Sources in GX Cloud.
 
-8. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+8. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 7.
+9. Click **Finish**.
 
-    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
-
-    - **Column of datetime type** - Enter the name of the column containing the date and time data.
-
-9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
-
-10. Click **Finish**.
-
-11. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+10. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 </Tabs>
@@ -230,15 +213,9 @@ Additional Data Assets can only be added to Data Sources created in GX Cloud.
 
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
 
-5. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+5. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 4.
 
-    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
-
-    - **Column of datetime type** - Enter the name of the column containing the date and time data.
-
-6. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 4.
-
-7. Click **Finish**.
+6. Click **Finish**.
 
 
 ## Edit Data Source settings

@@ -88,7 +88,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         )
 
     @classmethod
-    def _render_list(  # noqa: C901, PLR0912, PLR0913
+    def _render_list(  # noqa: C901, PLR0912
         cls,
         render_object: list,
         exception_list_content_block: bool,
@@ -214,7 +214,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(  # noqa: C901, PLR0912, PLR0913
+    def _render_other(  # noqa: C901
         cls,
         render_object: Any,
         exception_list_content_block: bool,

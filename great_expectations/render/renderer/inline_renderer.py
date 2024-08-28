@@ -65,11 +65,11 @@ class InlineRenderer(Renderer):
         expectation_type: str
         renderer_types: List[AtomicRendererType]
         if isinstance(render_object, ExpectationConfiguration):
-            expectation_type = render_object.expectation_type
+            expectation_type = render_object.type
             renderer_types = [AtomicRendererType.PRESCRIPTIVE]
         elif isinstance(render_object, ExpectationValidationResult):
             if render_object.expectation_config:
-                expectation_type = render_object.expectation_config.expectation_type
+                expectation_type = render_object.expectation_config.type
             else:
                 raise InlineRendererError(  # noqa: TRY003
                     "ExpectationValidationResult passed to InlineRenderer._get_atomic_rendered_content_for_object is missing an expectation_config."  # noqa: E501
@@ -215,30 +215,3 @@ class InlineRenderer(Renderer):
         )
 
         return self._get_atomic_rendered_content_for_object(render_object=render_object)
-
-    @staticmethod
-    def replace_or_keep_existing_rendered_content(
-        existing_rendered_content: Optional[List[RenderedAtomicContent]],
-        new_rendered_content: List[RenderedAtomicContent],
-        failed_renderer_type: Union[AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType],
-    ) -> List[RenderedAtomicContent]:
-        new_rendered_content_block_names: List[
-            Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
-        ] = [rendered_content_block.name for rendered_content_block in new_rendered_content]
-
-        existing_rendered_content_block_names: List[
-            Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
-        ] = []
-        if existing_rendered_content is not None:
-            existing_rendered_content_block_names = [
-                rendered_content_block.name for rendered_content_block in existing_rendered_content
-            ]
-
-        if (
-            (existing_rendered_content is None)
-            or (failed_renderer_type not in new_rendered_content_block_names)
-            or (failed_renderer_type in existing_rendered_content_block_names)
-        ):
-            return new_rendered_content
-        else:
-            return existing_rendered_content

@@ -1,6 +1,6 @@
 {
     "title": "DatabricksSQLDatasource",
-    "description": "--Public API--Adds a DatabricksSQLDatasource to the data context.\n\nArgs:\n    name: The name of this DatabricksSQL datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"databricks://token:<token>@<host>:<port>/<database>?http_path=<http_path>&catalog=<catalog>&schema=<schema>\"\"\n    assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values\n        are TableAsset or QueryAsset objects.",
+    "description": "--Public API--Adds a DatabricksSQLDatasource to the data context.\n\nArgs:\n    name: The name of this DatabricksSQL datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the Databricks SQL database.\n        For example: \"databricks://token:<token>@<host>:<port>?http_path=<http_path>&catalog=<catalog>&schema=<schema>\"\"\n    assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values\n        are TableAsset or QueryAsset objects.",
     "type": "object",
     "properties": {
         "type": {
@@ -49,7 +49,13 @@
                 {
                     "type": "string",
                     "writeOnly": true,
-                    "format": "password"
+                    "format": "password",
+                    "description": "Contains config templates to be substituted at runtime. Runtime values will never be serialized.",
+                    "pattern": ".*(?<!\\\\)\\$\\{(.*?)\\}|(?<!\\\\)\\$([_a-zA-Z][_a-zA-Z0-9]*).*",
+                    "examples": [
+                        "hello_${NAME}",
+                        "${MY_CFG_VAR}"
+                    ]
                 },
                 {
                     "type": "string",
@@ -74,7 +80,13 @@
                     {
                         "type": "string",
                         "writeOnly": true,
-                        "format": "password"
+                        "format": "password",
+                        "description": "Contains config templates to be substituted at runtime. Runtime values will never be serialized.",
+                        "pattern": ".*(?<!\\\\)\\$\\{(.*?)\\}|(?<!\\\\)\\$([_a-zA-Z][_a-zA-Z0-9]*).*",
+                        "examples": [
+                            "hello_${NAME}",
+                            "${MY_CFG_VAR}"
+                        ]
                     },
                     {}
                 ]
@@ -107,7 +119,6 @@
         },
         "PartitionerColumnValue": {
             "title": "PartitionerColumnValue",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -134,7 +145,6 @@
         },
         "PartitionerMultiColumnValue": {
             "title": "PartitionerMultiColumnValue",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_names": {
@@ -164,7 +174,6 @@
         },
         "PartitionerDividedInteger": {
             "title": "PartitionerDividedInteger",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "divisor": {
@@ -196,7 +205,6 @@
         },
         "PartitionerModInteger": {
             "title": "PartitionerModInteger",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "mod": {
@@ -228,7 +236,6 @@
         },
         "ColumnPartitionerYearly": {
             "title": "ColumnPartitionerYearly",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -255,7 +262,6 @@
         },
         "ColumnPartitionerMonthly": {
             "title": "ColumnPartitionerMonthly",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -282,7 +288,6 @@
         },
         "ColumnPartitionerDaily": {
             "title": "ColumnPartitionerDaily",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -309,7 +314,6 @@
         },
         "PartitionerDatetimePart": {
             "title": "PartitionerDatetimePart",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "datetime_parts": {
@@ -344,7 +348,6 @@
         },
         "PartitionerConvertedDatetime": {
             "title": "PartitionerConvertedDatetime",
-            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -376,7 +379,7 @@
         },
         "BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__": {
             "title": "BatchDefinition[Union[PartitionerColumnValue, PartitionerMultiColumnValue, PartitionerDividedInteger, PartitionerModInteger, ColumnPartitionerYearly, ColumnPartitionerMonthly, ColumnPartitionerDaily, PartitionerDatetimePart, PartitionerConvertedDatetime]]",
-            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
+            "description": "--Public API--Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
                 "id": {

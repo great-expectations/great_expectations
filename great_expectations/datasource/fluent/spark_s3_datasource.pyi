@@ -1,4 +1,3 @@
-import re
 from logging import Logger
 from typing import Any, ClassVar, Literal, Optional, Type
 
@@ -9,9 +8,6 @@ from great_expectations.datasource.fluent.config_str import (
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
-)
-from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition,
 )
 
 logger: Logger
@@ -31,12 +27,10 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,
         s3_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
-        order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...
