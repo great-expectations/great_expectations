@@ -68,7 +68,7 @@ DATA_QUALITY_ISSUES = ["Sets"]
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_values_to_be_in_set is a \
+    ExpectColumnValuesToBeInSet is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -101,7 +101,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
+        [ExpectColumnValuesToNotBeInSet](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

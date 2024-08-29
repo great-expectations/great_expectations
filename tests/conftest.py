@@ -24,11 +24,13 @@ from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
@@ -337,7 +339,7 @@ class TestMarkerCoverage:
     name: str
     markers: set[str]
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override] # FIXME
         return f"{self.path}, {self.name}, {self.markers}"
 
 
@@ -2172,6 +2174,35 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
         store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     )
     return get_context(project_config=project_config, mode="ephemeral")
+
+
+@pytest.fixture
+def arbitrary_batch_definition(empty_data_context: AbstractDataContext) -> BatchDefinition:
+    return (
+        empty_data_context.data_sources.add_pandas("my_datasource_with_batch_def")
+        .add_dataframe_asset("my_asset")
+        .add_batch_definition_whole_dataframe(name="my_dataframe_batch_definition")
+    )
+
+
+@pytest.fixture
+def arbitrary_suite(empty_data_context: AbstractDataContext) -> ExpectationSuite:
+    return empty_data_context.suites.add(ExpectationSuite("my_suite"))
+
+
+@pytest.fixture
+def arbitrary_validation_definition(
+    empty_data_context: AbstractDataContext,
+    arbitrary_suite: ExpectationSuite,
+    arbitrary_batch_definition: BatchDefinition,
+) -> ValidationDefinition:
+    return empty_data_context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=arbitrary_suite,
+            data=arbitrary_batch_definition,
+        )
+    )
 
 
 @pytest.fixture

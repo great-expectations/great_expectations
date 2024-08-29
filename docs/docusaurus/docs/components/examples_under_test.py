@@ -8,6 +8,18 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 docs_tests = []
 
+install_gx = [
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests -k "verify_gx_version" tests/integration/test_script_runner.py
+        name="verify_gx_version",
+        user_flow_script="docs/docusaurus/docs/core/set_up_a_gx_environment/_install_gx/_local_installation_verification.py",
+        # data_dir="",
+        # data_context_dir="",
+        backend_dependencies=[],
+    ),
+]
+
 try_gx = [
     IntegrationTestFixture(
         # To test, run:
@@ -549,6 +561,8 @@ learn_data_quality_use_cases = [
 
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
 # into `test_script_runner.py` and actually used in CI checks).
+docs_tests.extend(install_gx)
+
 docs_tests.extend(try_gx)
 
 docs_tests.extend(create_a_data_context)
