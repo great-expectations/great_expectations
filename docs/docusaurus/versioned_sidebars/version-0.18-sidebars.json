@@ -1,8 +1,8 @@
 {
-  "gx_oss": [
+  "gx_core": [
     {
       "type": "doc",
-      "id": "oss/intro",
+      "id": "core/introduction/introduction",
       "label": "About GX OSS"
     },
     {
