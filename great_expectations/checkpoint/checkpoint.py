@@ -31,7 +31,7 @@ from great_expectations.core.added_diagnostics import CheckpointAddedDiagnostics
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT, ResultFormatUnion
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_definition import ValidationDefinition
@@ -72,7 +72,7 @@ class Checkpoint(BaseModel):
     name: str
     validation_definitions: List[ValidationDefinition]
     actions: List[CheckpointAction] = Field(default_factory=list)
-    result_format: Union[ResultFormat, dict] = ResultFormat.SUMMARY
+    result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT
     id: Union[str, None] = None
 
     class Config:
@@ -190,7 +190,7 @@ class Checkpoint(BaseModel):
         self,
         batch_parameters: Dict[str, Any] | None,
         expectation_parameters: Dict[str, Any] | None,
-        result_format: ResultFormat | dict,
+        result_format: ResultFormatUnion,
         run_id: RunIdentifier,
     ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:
         run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
