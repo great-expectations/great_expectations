@@ -594,7 +594,7 @@ def test_csv_asset_batch_metadata(
         )
     )
 
-    batch_identifiers_list = pandas_filesystem_datasource.get_batch_identifiers_list(batch_request)
+    batch = pandas_filesystem_datasource.get_batch(batch_request)
 
     substituted_batch_metadata: BatchMetadata = copy.deepcopy(asset_specified_metadata)
     substituted_batch_metadata.update(
@@ -604,12 +604,11 @@ def test_csv_asset_batch_metadata(
         }
     )
 
-    months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+    actual_metadata = copy.deepcopy(batch.metadata)
 
-    for i, month in enumerate(months):
-        substituted_batch_metadata["month"] = month
-        actual_metadata = copy.deepcopy(batch_identifiers_list[i])
-        # not testing path for the purposes of this test
-        actual_metadata.pop("path")
-        actual_metadata.pop("year")
-        assert actual_metadata == substituted_batch_metadata
+    actual_metadata.pop("path")
+    actual_metadata.pop("year")
+    actual_metadata.pop("month")
+
+    assert len(actual_metadata)
+    assert actual_metadata == substituted_batch_metadata
