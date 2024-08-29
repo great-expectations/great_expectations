@@ -623,6 +623,8 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             sorted_metadata_dicts = self.sort_batch_identifiers_list(
                 unsorted_metadata_dicts, sql_partitioner
             )
+        else:
+            sorted_metadata_dicts = unsorted_metadata_dicts
         sorted_metadata_dicts = sorted_metadata_dicts[batch_request.batch_slice]
         batch_metadata = sorted_metadata_dicts[-1]
         request_index = unsorted_metadata_dicts.index(batch_metadata)
