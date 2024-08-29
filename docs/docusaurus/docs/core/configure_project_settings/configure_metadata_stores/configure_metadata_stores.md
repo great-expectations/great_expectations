@@ -15,7 +15,7 @@ import PrereqFileDataContext from '../../_core_components/prerequisites/_file_da
 
 Stores are used by GX to store and retreive information ranging from project metadata such as Expectation Suite configurations to the Validation Results generated when Checkpoints are run.
 
-Ephemeral Data Contexts store this information in memory, while GX Cloud Data Contexts store this information online.  File Data Contexts, however, store this information in files thata can be copied or shared between other File Data Contexts.
+Ephemeral Data Contexts store this information in memory, while GX Cloud Data Contexts store this information online.  File Data Contexts, however, store this information in files that can be copied or shared between other File Data Contexts.
 
 By default, Store files are created in folders within the `base_folder` of the File Data Context.  However, you can update your Data Context to specify where these Stores should reside, or to indicate existing Stores to load when the Data Context is initialized.
 
@@ -40,18 +40,14 @@ By default, Store files are created in folders within the `base_folder` of the F
 
 1. Load a File Data Context.
 
-   Because Store configurations are loaded when a Data Context is initialized, an Ephemeral Data Context will always initialize with default in-memory Stores and any changes to them will not persist when a new Ephemeral Data Context is initialized. 
-
-   GX Cloud accounts manage Stores for you online, and do not support custom Store configurations.
-
-   Therefore, only File Data Contexts can have customized Store configurations.  This procedure assumes you have a File Data Context loaded as the variable `context`:
+   This procedure assumes you have a File Data Context loaded as the variable `context`:
 
    ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - retrieve a File Data Context"
    ```
 
 2. Determine the Store to update.
 
-   GX utilizes 5 Stores for different types of data and metadata.  These Stores are the Expectations Store, Validation Definitions Store, Checkpoint Store, Validation Results Store, and the Suite Parameter Store.  All Stores can be accessed by passing a corresponding key to a Data Context's `variables.config.stores` attribute.  
+   GX utilizes 4 Stores for different types of data and metadata.  These Stores are the Expectations Store, Validation Definitions Store, Checkpoint Store, and the Validation Results Store.  All Stores can be accessed by passing a corresponding key to a Data Context's `variables.config.stores` attribute.
 
    The `variables.config.stores` attribute gives access to the configuration values prior to any string substitution that may take palce, which also allows you to include string substitution references in your configuration.  To view the resolved path after string substitution takes place, use `variables.stores`.  For more information on how to configure string substitution references and values see [Configure credentials](/core/configure_project_settings/configure_credentials/configure_credentials.md).
 
