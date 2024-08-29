@@ -94,8 +94,7 @@ The examples given in this section provide insight into how and when to apply mi
 
 **GX solution**: When `NULL` values are expected in a column, we can use GX to check for the presence of a small percentage of missing values following data transformation. This approach helps identify if NULL values have been inappropriately replaced.
 
-```
-python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py incorrectly_defaulted_values"
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py incorrectly_defaulted"
 ```
 
 In this example, we're expecting at least 0.1% of the values in the `sender_account_number` column
