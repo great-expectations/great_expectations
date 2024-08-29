@@ -8,7 +8,6 @@ import uuid
 from typing import Dict, List, Union
 
 import pytest
-from typing_extensions import override
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
@@ -682,8 +681,7 @@ class ExpectSkyToBeColor(BatchExpectation):
     ) -> None:
         raise ValueError("This renderer is broken!")
 
-    @override
-    def _validate(  # type: ignore[override]
+    def _validate(  # type: ignore[override,explicit-override] # FIXME
         self,
         **kwargs: dict,
     ) -> Dict[str, Union[bool, dict]]:
