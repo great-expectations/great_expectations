@@ -28,7 +28,7 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 ### GX Cloud components
 
-- **GX Cloud data storage** - Stores your organization's Data Source, Data Asset, Expectation Suite, and Checkpoint configurations and your organization's Validation run histories and Data Asset descriptive metrics.
+- **GX Cloud data storage** - Stores the configurations for your organization's Data Sources, Data Assets, Expectation Suites, and Checkpoints alongside your organization's Validation Result histories and Data Asset descriptive metrics.
 
 - **GX Cloud web UI** - A web interface that allows you to manage and validate your organization's data quality without running Python code and enables shared visibility into your organization's Validation Results and Checkpoint run history. It's browser- and platform-independent.
 
