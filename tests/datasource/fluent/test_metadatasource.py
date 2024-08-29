@@ -388,7 +388,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         def test_connection(self): ...
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
-            asset = RedAsset(name=asset_name)
+            asset = RedAsset(name=asset_name)  # type: ignore[call-arg] # ?
             self._add_asset(asset=asset)
             return asset
 
