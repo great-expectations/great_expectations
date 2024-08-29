@@ -6,6 +6,13 @@ import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom';
 import WasThisHelpful from "../src/components/WasThisHelpful";
 
+// Todo: replace this with a mock server if we need to do more fetch requests: https://testing-library.com/docs/react-testing-library/example-intro/#full-example
+global.fetch = jest.fn(() =>
+    Promise.resolve({
+        ok: true
+    })
+);
+
 describe('"Was this Helpful?" section', () => {
 
     const posthog = {
@@ -23,27 +30,21 @@ describe('"Was this Helpful?" section', () => {
         expect(screen.getByText('No')).not.toBeDisabled();
     });
 
-    test("Buttons should be disabled when 'Yes' button has been clicked", async () => {
+    test("Buttons should disappear and Thank You alert displayed when Yes is clicked", async () => {
         render(
             <WasThisHelpful/>
         );
+
         await userEvent.click(screen.getByText('Yes'));
 
-        expect(screen.getByText('Yes')).toBeDisabled();
-        expect(screen.getByText('No')).toBeDisabled();
-    });
-
-    test("Buttons should be disabled when 'No' button has been clicked", async () => {
-        await selectingNoInWasThisHelpful();
-
-        expect(screen.getByText('Yes')).toBeDisabled();
-        expect(screen.getByText('No')).toBeDisabled();
+        expect(screen.queryByText('Yes')).not.toBeInTheDocument();
+        expect(screen.queryByText(THANK_YOU_MESSAGE));
     });
 
     test("Feedback Modal should pop-up when 'No' button has been clicked", async () => {
         await selectingNoInWasThisHelpful();
 
-        expect(screen.getByText('Tell us more')).toBeInTheDocument();
+        expect(screen.queryByText('What is the problem?')).toBeInTheDocument();
     });
 
     test("Submit button in Feedback Modal is disabled when description is blank", async () => {
@@ -60,14 +61,22 @@ describe('"Was this Helpful?" section', () => {
         expect(screen.getByText("Submit")).not.toBeDisabled();
     });
 
-    test("After clicking the submit button, the Feedback modal disappears", async () => {
+    test("After clicking the submit button, the Feedback modal disappears and Thank You alert displayed", async () => {
         await selectingNoInWasThisHelpful();
 
         await completeRequiredFields();
 
         await userEvent.click(screen.getByText("Submit"));
 
-        expect(screen.queryByText('Tell us more')).not.toBeInTheDocument();
+        expect(screen.queryByText('What is the problem?')).not.toBeInTheDocument();
+        expect(screen.queryByText(THANK_YOU_MESSAGE));
+    });
+
+    test("After clicking No, the Thank You alert is not displayed while the modal is open", async () => {
+        await selectingNoInWasThisHelpful();
+
+        expect(screen.queryByText('What is the problem?')).toBeInTheDocument();
+        expect(screen.queryByText(THANK_YOU_MESSAGE)).not.toBeInTheDocument();
     });
 
     async function selectingNoInWasThisHelpful() {
@@ -78,11 +87,13 @@ describe('"Was this Helpful?" section', () => {
     }
 
     async function completeRequiredFields() {
-        const descriptionBox = screen.getByPlaceholderText('Provide as much detail as possible about the issue you ' +
-                                              'experienced or where improvement is needed. Detailed feedback helps ' +
-                                                          'us better identify the problem and determine a solution.');
+        await userEvent.click(screen.getByLabelText('Language Typo'));
+
+        const descriptionBox = screen.getByPlaceholderText("Describe the typo that you've found.");
 
         await userEvent.type(descriptionBox, 'I have a problem');
     }
+
+    const THANK_YOU_MESSAGE = "Thank you for helping us improve our documentation!"
 
 });

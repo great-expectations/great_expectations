@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36" version="24.7.7">
+  <diagram name="common-workflow-steps" id="kMudZOk_4hsH4u6O0GoN">
+    <mxGraphModel dx="1229" dy="991" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-23" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#9EA0A1;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="770" y="70" width="180" height="370" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-22" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#9EA0A1;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="530" y="70" width="180" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-21" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#9EA0A1;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="290" y="70" width="180" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-20" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#9EA0A1;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="40" y="70" width="180" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;startSize=4;endSize=4;sourcePerimeterSpacing=2;targetPerimeterSpacing=2;" parent="1" source="RtIyawpBjxdj1EDCbMUZ-1" target="RtIyawpBjxdj1EDCbMUZ-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-1" value="Set up a GX environment" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fillColor=#FF9B67;" parent="1" vertex="1">
+          <mxGeometry x="20" y="80" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;startSize=4;endSize=4;sourcePerimeterSpacing=2;targetPerimeterSpacing=2;" parent="1" source="RtIyawpBjxdj1EDCbMUZ-2" target="RtIyawpBjxdj1EDCbMUZ-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-2" value="Connect to data" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fillColor=#FF9B67;" parent="1" vertex="1">
+          <mxGeometry x="280" y="80" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;endArrow=block;endFill=1;startSize=4;endSize=4;sourcePerimeterSpacing=2;targetPerimeterSpacing=2;" parent="1" source="RtIyawpBjxdj1EDCbMUZ-3" target="RtIyawpBjxdj1EDCbMUZ-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-3" value="Define Expectations" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fillColor=#FF9B67;" parent="1" vertex="1">
+          <mxGeometry x="520" y="80" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-4" value="Run Validations" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fillColor=#FF9B67;" parent="1" vertex="1">
+          <mxGeometry x="760" y="80" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-5" value="Data Source" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="310" y="140" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-6" value="Data Asset" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="310" y="200" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-7" value="Batch Definition" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="310" y="260" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-8" value="Batch" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="310" y="320" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-9" value="Data Context" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="60" y="140" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-10" value="Expectation" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="550" y="140" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-11" value="Expectation Suite" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="550" y="200" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-12" value="Validation Definition" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="790" y="140" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-13" value="Validation Result" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="790" y="200" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-14" value="Checkpoint" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="790" y="260" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-15" value="Actions" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="790" y="320" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="RtIyawpBjxdj1EDCbMUZ-16" value="Data Docs" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fillColor=#FCEFC3;" parent="1" vertex="1">
+          <mxGeometry x="790" y="380" width="140" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

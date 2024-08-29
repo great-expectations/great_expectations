@@ -11,12 +11,13 @@ from unittest.mock import patch as mock_patch
 
 import pytest
 
-from great_expectations import get_context, project_manager
+from great_expectations import get_context
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -49,7 +50,6 @@ def data_context_config_dict() -> dict:
     config: dict = {
         "config_version": 3.0,
         "plugins_directory": "plugins/",
-        "suite_parameter_store_name": "suite_parameter_store",
         "validation_results_store_name": "validation_results_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
@@ -61,10 +61,6 @@ def data_context_config_dict() -> dict:
                     "class_name": "TupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
                 },
-            },
-            "suite_parameter_store": {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "SuiteParameterStore",
             },
         },
         "data_docs_sites": {},
@@ -217,10 +213,6 @@ def progress_bars() -> ProgressBarsConfig:
             id="validation_results_store getter",
         ),
         pytest.param(
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-            id="suite_parameter_store getter",
-        ),
-        pytest.param(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store getter",
         ),
@@ -306,11 +298,6 @@ def test_data_context_variables_get_with_substitutions(
             "my_validation_results_store",
             DataContextVariableSchema.VALIDATIONS_STORE_NAME,
             id="validation_results_store setter",
-        ),
-        pytest.param(
-            "my_suite_parameter_store",
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-            id="suite_parameter_store setter",
         ),
         pytest.param(
             "my_checkpoint_store",
@@ -401,10 +388,6 @@ def test_data_context_variables_save(
                     "class_name": "TupleFilesystemStoreBackend",
                     "base_directory": "expectations/",
                 },
-            },
-            "suite_parameter_store": {
-                "module_name": "great_expectations.data_context.store",
-                "class_name": "SuiteParameterStore",
             },
             "checkpoint_store": {"class_name": "CheckpointStore"},
             "validation_results_store": {"class_name": "ValidationResultsStore"},

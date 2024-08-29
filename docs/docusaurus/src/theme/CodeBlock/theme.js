@@ -14,7 +14,7 @@ const codeBlockTheme = {
             color: "#B6C647"
         }
     }, {
-        types: ["builtin", "changed", "keyword", "interpolation-punctuation"],
+        types: ["builtin", "changed", "keyword", "interpolation-punctuation", "boolean"],
         style: {
             color: "#F3C62D"
         }

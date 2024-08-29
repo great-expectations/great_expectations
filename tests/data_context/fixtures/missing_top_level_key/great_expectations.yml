@@ -1,7 +1,6 @@
 # This must be missing required keys
 config_version: 4
 expectations_store_name: expectations_store
-suite_parameter_store_name: "foo"
 stores: "foo"
 validation_results_store_name: "foo"
 data_docs: "foo"

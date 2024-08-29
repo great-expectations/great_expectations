@@ -10,8 +10,6 @@ Expectation Suites contain multiple Expectations for a single Data Asset. Like E
 
 ## Prerequisites
 
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 - You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
 ## Create an Expectation Suite
@@ -26,9 +24,7 @@ If you have specific business requirements, or you want to examine specific data
 
 4. Enter a name for the Expectation Suite in the **Expectation Suite name** field.
 
-5. Select a validation schedule frequency and start time for your Expectation Suite.
-
-6. Click **Create Suite**. 
+5. Click **Create**. 
 
 7. Add Expectations to the Expectation Suite. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
@@ -50,13 +46,11 @@ If you have specific business requirements, or you want to examine specific data
 
 ## Delete an Expectation Suite
 
-1. In GX Cloud, delete all Checkpoints associated with the Expectation Suite. See [Delete a Checkpoint](/cloud/checkpoints/manage_checkpoints.md#delete-a-checkpoint). 
+1. Click **Expectation Suites**.
 
-2. Click **Expectation Suites**.
+2. Click **Delete** for the Expectation Suite you want to delete.
 
-3. Click **Delete** for the Expectation Suite you want to delete.
-
-4. Click **Delete**.
+3. Click **Delete**.
 
 ## Related documentation
 

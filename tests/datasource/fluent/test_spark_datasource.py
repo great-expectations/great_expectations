@@ -7,12 +7,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import TestConnectionError
 from great_expectations.datasource.fluent.spark_datasource import (
     DataFrameAsset,
     SparkConfig,
 )
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.util import is_candidate_subset_of_target
 
 if TYPE_CHECKING:
@@ -36,13 +37,6 @@ def test_dataframe_asset(
     spark_df_from_pandas_df,
     test_df_pandas,
 ):
-    # validates that a dataframe object is passed
-    with pytest.raises(pydantic.ValidationError) as exc_info:
-        _ = DataFrameAsset(name="malformed_asset", dataframe={})
-
-    errors_dict = exc_info.value.errors()[0]
-    assert errors_dict["loc"][0] == "dataframe"
-
     datasource = empty_data_context.data_sources.add_spark(name="my_spark_datasource")
 
     pandas_df = test_df_pandas
@@ -55,19 +49,16 @@ def test_dataframe_asset(
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(datasource.assets) == 1
 
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-
-    dataframe_asset = datasource.add_dataframe_asset(
+    datasource.add_dataframe_asset(
         name="my_second_dataframe_asset",
     )
     assert len(datasource.assets) == 2
 
-    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-
-    assert all(
-        asset.dataframe is not None and asset.dataframe.toPandas().equals(pandas_df)
-        for asset in datasource.assets
-    )
+    for i, asset in enumerate(datasource.assets):
+        bd = asset.add_batch_definition_whole_dataframe(name=f"bd_{i}")
+        batch = bd.get_batch(batch_parameters={"dataframe": spark_df})
+        assert isinstance(batch.data, SparkDFBatchData)
+        assert batch.data.dataframe.toPandas().equals(pandas_df)
 
 
 @pytest.mark.spark
@@ -98,7 +89,7 @@ def test_spark_data_asset_batch_metadata(
     assert dataframe_asset.batch_metadata == batch_metadata
 
     batch_list = dataframe_asset.get_batch_list_from_batch_request(
-        dataframe_asset.build_batch_request(dataframe=spark_df)
+        dataframe_asset.build_batch_request(options={"dataframe": spark_df})
     )
     assert len(batch_list) == 1
     substituted_batch_metadata = copy.deepcopy(batch_metadata)
@@ -144,10 +135,10 @@ def test_build_batch_request_raises_if_missing_dataframe(
         name="my_spark_datasource"
     ).add_dataframe_asset(name="my_dataframe_asset")
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(BuildBatchRequestError) as e:
         dataframe_asset.build_batch_request()
 
-    assert "Cannot build batch request for dataframe asset without a dataframe" in str(e.value)
+    assert "options must contain exactly 1 key, 'dataframe'" in str(e.value)
 
 
 @pytest.mark.spark

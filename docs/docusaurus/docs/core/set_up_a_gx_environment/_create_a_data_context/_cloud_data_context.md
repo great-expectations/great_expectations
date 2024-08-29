@@ -12,9 +12,16 @@ import PrereqGxInstallation from '../../_core_components/prerequisites/_gx_insta
 
 ## Create a Cloud Data Context
 
-<Tabs queryString="cloud-tab">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
 
-<TabItem value="procedure" label="Procedure">
+<TabItem value="instructions" label="Instructions">
 
 1. Run the following code to request a GX Cloud Data Context:
 

@@ -45,8 +45,9 @@ from great_expectations.data_context.store.datasource_store import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.store.metric_store import SuiteParameterStore
-from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
+from great_expectations.data_context.store.validation_results_store import (
+    ValidationResultsStore,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
@@ -266,20 +267,19 @@ class CloudDataContext(SerializableDataContext):
             "include_rendered_content",
             "profiler_store_name",
             "anonymous_usage_statistics",
+            "evaluation_parameter_store_name",
+            "suite_parameter_store_name",
         ):
             val = config.pop(var, None)
             if val:
                 logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
 
-        # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
+        # V1 renamed Validations to ValidationResults
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
         cls._change_key_from_v0_to_v1(
             config,
-            "evaluation_parameter_store_name",
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-        )
-        cls._change_key_from_v0_to_v1(
-            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
+            "validations_store_name",
+            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
         )
 
         config = cls._prepare_stores_config(config=config)
@@ -296,17 +296,15 @@ class CloudDataContext(SerializableDataContext):
         for name, store in stores.items():
             # Certain stores have been renamed in V1
             cls._change_value_from_v0_to_v1(
-                store,
-                "class_name",
-                "EvaluationParameterStore",
-                SuiteParameterStore.__name__,
-            )
-            cls._change_value_from_v0_to_v1(
                 store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
             )
 
             # Profiler stores are no longer supported in V1
-            if store.get("class_name") == "ProfilerStore":
+            if store.get("class_name") in [
+                "ProfilerStore",
+                "EvaluationParameterStore",
+                "SuiteParameterStore",
+            ]:
                 to_delete.append(name)
 
         for name in to_delete:
@@ -339,9 +337,9 @@ class CloudDataContext(SerializableDataContext):
         if not organization_id:
             raise OrganizationIdNotSpecifiedError()
 
-        session = create_session(access_token=access_token)
-        url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
-        response = session.get(url)
+        with create_session(access_token=access_token) as session:
+            url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
+            response = session.get(url)
 
         try:
             response.raise_for_status()

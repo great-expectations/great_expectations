@@ -12,8 +12,9 @@ data_source = context.get_datasource(data_source_name)
 # Define the Data Asset's parameters:
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_data_asset/_abs/_directory_asset.py - define Data Asset parameters">
 asset_name = "abs_directory_asset"
-abs_container = "my_container"
+abs_container = "superconductive-public"
 abs_name_starts_with = "data/taxi_yellow_tripdata_samples/"
+data_directory = "data/taxi_yellow_tripdata_samples/"
 # </snippet>
 
 # Add the Data Asset to the Data Source:
@@ -22,6 +23,7 @@ directory_csv_asset = data_source.add_directory_csv_asset(
     name=asset_name,
     abs_container=abs_container,
     abs_name_starts_with=abs_name_starts_with,
+    data_directory=data_directory,
 )
 # </snippet>
 # </snippet>

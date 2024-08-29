@@ -58,7 +58,7 @@ DATA_QUALITY_ISSUES = ["Distribution"]
 class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_sum_to_be_between is a \
+    ExpectColumnSumToBeBetween is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
     Column Aggregate Expectations are one of the most common types of Expectation.
@@ -326,6 +326,8 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
                 template_str = f"sum must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"sum must be {at_least_str} $min_value."
+            else:
+                raise ValueError("unresolvable template_str")  # noqa: TRY003
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -338,16 +340,11 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
+        styling = runtime_configuration.get("styling") if runtime_configuration else None
         return [
             RenderedStringTemplateContent(
-                **{  # type: ignore[arg-type]
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": runtime_configuration.get("styling"),
-                    },
-                }
+                content_block_type="string_template",
+                string_template={"template": template_str, "params": params, "styling": styling},
             )
         ]
 

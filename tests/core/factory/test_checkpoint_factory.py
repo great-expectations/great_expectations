@@ -1,9 +1,15 @@
+import re
 from unittest import mock
+from unittest.mock import ANY as ANY_TEST_ARG
 
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations.analytics.events import CheckpointCreatedEvent, CheckpointDeletedEvent
+from great_expectations.analytics.events import (
+    CheckpointCreatedEvent,
+    CheckpointDeletedEvent,
+    DomainObjectAllDeserializationEvent,
+)
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
@@ -16,15 +22,16 @@ from great_expectations.exceptions import DataContextError
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_uses_store_get(mocker: MockerFixture):
+def test_checkpoint_factory_get_uses_store_get(
+    mocker: MockerFixture,
+    arbitrary_validation_definition: ValidationDefinition,
+):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    )
+    checkpoint = Checkpoint(name=name, validation_definitions=[arbitrary_validation_definition])
     store.get.return_value = checkpoint
     factory = CheckpointFactory(store=store)
 
@@ -38,14 +45,15 @@ def test_checkpoint_factory_get_uses_store_get(mocker: MockerFixture):
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_raises_error_on_missing_key(mocker: MockerFixture):
+def test_checkpoint_factory_get_raises_error_on_missing_key(
+    mocker: MockerFixture,
+    arbitrary_validation_definition: ValidationDefinition,
+):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
-    checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    )
+    checkpoint = Checkpoint(name=name, validation_definitions=[arbitrary_validation_definition])
     store.get.return_value = checkpoint
     factory = CheckpointFactory(store=store)
 
@@ -58,7 +66,9 @@ def test_checkpoint_factory_get_raises_error_on_missing_key(mocker: MockerFixtur
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
+def test_checkpoint_factory_add_uses_store_add(
+    mocker: MockerFixture, arbitrary_validation_definition: ValidationDefinition
+):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
@@ -66,9 +76,7 @@ def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
     key = store.get_key.return_value
     store.get.return_value = None
     factory = CheckpointFactory(store=store)
-    checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    )
+    checkpoint = Checkpoint(name=name, validation_definitions=[arbitrary_validation_definition])
     store.get.return_value = checkpoint
 
     # Act
@@ -166,13 +174,15 @@ def _test_checkpoint_factory_add_success(context):
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_def = asset.add_batch_definition("my_batch_definition")
-    suite = ExpectationSuite(name="my_suite")
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+    )
 
     checkpoint = Checkpoint(
         name=name,
-        validation_definitions=[
-            ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
-        ],
+        validation_definitions=[validation_definition],
     )
     with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
         context.checkpoints.get(name)
@@ -200,14 +210,16 @@ def _test_checkpoint_factory_delete_success(context):
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_def = asset.add_batch_definition("my_batch_definition")
-    suite = ExpectationSuite(name="my_suite")
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+    )
 
     context.checkpoints.add(
         checkpoint=Checkpoint(
             name=name,
-            validation_definitions=[
-                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition],
         )
     )
 
@@ -237,22 +249,26 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
     ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
     batch_def = asset.add_batch_definition("my_batch_definition")
-    suite = ExpectationSuite(name="my_suite")
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition_a = context.validation_definitions.add(
+        ValidationDefinition(name="val def a", data=batch_def, suite=suite)
+    )
 
     checkpoint_a = context.checkpoints.add(
         Checkpoint(
             name="a",
-            validation_definitions=[
-                ValidationDefinition(name="val def a", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition_a],
         )
+    )
+
+    validation_definition_b = context.validation_definitions.add(
+        ValidationDefinition(name="val def b", data=batch_def, suite=suite)
     )
     checkpoint_b = context.checkpoints.add(
         Checkpoint(
             name="b",
-            validation_definitions=[
-                ValidationDefinition(name="val def b", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition_b],
         )
     )
 
@@ -263,6 +279,64 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
     # Assert
     assert [r.name for r in result] == [checkpoint_a.name, checkpoint_b.name]
     assert result == [checkpoint_a, checkpoint_b]
+
+
+@pytest.mark.unit
+def test_checkpoint_factory_all_with_bad_config(
+    in_memory_runtime_context: AbstractDataContext, mocker: MockerFixture
+):
+    analytics_submit_mock = mocker.patch(
+        "great_expectations.data_context.store.store.submit_analytics_event"
+    )
+
+    # Arrange
+    context: AbstractDataContext = in_memory_runtime_context
+    ds = context.data_sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
+    batch_def = asset.add_batch_definition("my_batch_definition")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    checkpoint_1 = context.checkpoints.add(
+        Checkpoint(
+            name="1",
+            validation_definitions=[
+                context.validation_definitions.add(
+                    ValidationDefinition(name="vd1", data=batch_def, suite=suite)
+                )
+            ],
+        )
+    )
+    checkpoint_2 = context.checkpoints.add(
+        Checkpoint(
+            name="2",
+            validation_definitions=[
+                context.validation_definitions.add(
+                    ValidationDefinition(name="vd2", data=batch_def, suite=suite)
+                )
+            ],
+        )
+    )
+    # Verify our checkpoints are added
+    assert sorted(context.checkpoints.all(), key=lambda cp: cp.name) == [checkpoint_1, checkpoint_2]
+
+    # Make checkpoint_2 invalid. Pydantic will validate the object at creation time
+    # but we can invalidate via assignment.
+    checkpoint_2.validation_definitions = None  # type: ignore[assignment] # done intentionally for test
+    checkpoint_2.save()
+
+    # Act
+    result = context.checkpoints.all()
+
+    # Assert
+    assert result == [checkpoint_1]
+    analytics_submit_mock.assert_called_once_with(
+        DomainObjectAllDeserializationEvent(
+            error_type=ANY_TEST_ARG,
+            store_name="CheckpointStore",
+        )
+    )
+    analytics_submit_args = analytics_submit_mock.call_args[0][0]
+    assert re.match("pydantic.*ValidationError", analytics_submit_args.error_type)
 
 
 class TestCheckpointFactoryAnalytics:
@@ -280,13 +354,15 @@ class TestCheckpointFactoryAnalytics:
         ds = context.data_sources.add_pandas("my_datasource")
         asset = ds.add_csv_asset("my_asset", "data.csv")
         batch_def = asset.add_batch_definition("my_batch_definition")
-        suite = ExpectationSuite(name="my_suite")
+
+        suite = context.suites.add(ExpectationSuite(name="my_suite"))
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+        )
 
         checkpoint = Checkpoint(
             name=name,
-            validation_definitions=[
-                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition],
         )
 
         # Act
@@ -296,7 +372,12 @@ class TestCheckpointFactoryAnalytics:
             _ = context.checkpoints.add(checkpoint=checkpoint)
 
         # Assert
-        mock_submit.assert_called_once_with(event=CheckpointCreatedEvent(checkpoint_id=mock.ANY))
+        mock_submit.assert_called_once_with(
+            event=CheckpointCreatedEvent(
+                checkpoint_id=mock.ANY,
+                validation_definition_ids=[mock.ANY for _ in checkpoint.validation_definitions],
+            )
+        )
 
     @pytest.mark.filesystem
     def test_checkpoint_factory_delete_emits_event_filesystem(self, empty_data_context):
@@ -312,13 +393,15 @@ class TestCheckpointFactoryAnalytics:
         ds = context.data_sources.add_pandas("my_datasource")
         asset = ds.add_csv_asset("my_asset", "data.csv")
         batch_def = asset.add_batch_definition("my_batch_definition")
-        suite = ExpectationSuite(name="my_suite")
+
+        suite = context.suites.add(ExpectationSuite(name="my_suite"))
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
+        )
 
         checkpoint = Checkpoint(
             name=name,
-            validation_definitions=[
-                ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
-            ],
+            validation_definitions=[validation_definition],
         )
         checkpoint = context.checkpoints.add(checkpoint=checkpoint)
 

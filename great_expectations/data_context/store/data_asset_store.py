@@ -12,7 +12,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     assetConfigSchema,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -93,7 +93,7 @@ class DataAssetStore(Store):
         See parent 'Store.deserialize()' for more information
         """
         type_ = value.get("type")
-        data_asset_model = _SourceFactories.type_lookup.get(type_)
+        data_asset_model = DataSourceManager.type_lookup.get(type_)
         if not data_asset_model:
             raise LookupError(f"Unknown DataAsset 'type': '{type_}'")  # noqa: TRY003
         return data_asset_model(**value)

@@ -4,7 +4,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
@@ -24,8 +24,6 @@ from great_expectations.core.util import in_jupyter_notebook
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render import (
-    AtomicDiagnosticRendererType,
-    AtomicPrescriptiveRendererType,
     AtomicRendererType,
     RenderedAtomicContent,
     RenderedAtomicContentSchema,
@@ -94,7 +92,7 @@ class ExpectationValidationResult(SerializableDictDot):
         result: Optional[dict] = None,
         meta: Optional[dict] = None,
         exception_info: Optional[dict] = None,
-        rendered_content: Optional[RenderedAtomicContent] = None,
+        rendered_content: Union[RenderedAtomicContent, List[RenderedAtomicContent], None] = None,
         **kwargs: dict,
     ) -> None:
         if result and not self.validate_result_dict(result):
@@ -118,7 +116,7 @@ class ExpectationValidationResult(SerializableDictDot):
         }
         self.rendered_content = rendered_content
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
         # NOTE: JPC - 20200213 - need to spend some time thinking about whether we want to
         # consistently allow dict as a comparison alternative in situations like these...
@@ -161,7 +159,7 @@ class ExpectationValidationResult(SerializableDictDot):
             # if invalid comparisons are attempted, the objects are not equal.
             return False
 
-    def __ne__(self, other):
+    def __ne__(self, other):  # type: ignore[explicit-override] # FIXME
         # Negated implementation of '__eq__'. TODO the method should be deleted when it will coincide with __eq__.  # noqa: E501
         # return not self == other
         if not isinstance(other, self.__class__):
@@ -250,31 +248,18 @@ class ExpectationValidationResult(SerializableDictDot):
 
         rendered_content: List[RenderedAtomicContent] = inline_renderer.get_rendered_content()
 
-        diagnostic_rendered_content: List[RenderedAtomicContent] = [
+        self.rendered_content = [
             content_block
             for content_block in rendered_content
             if content_block.name.startswith(AtomicRendererType.DIAGNOSTIC)
         ]
 
-        self.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
-            existing_rendered_content=self.rendered_content,
-            new_rendered_content=diagnostic_rendered_content,
-            failed_renderer_type=AtomicDiagnosticRendererType.FAILED,
-        )
-
-        prescriptive_rendered_content: List[RenderedAtomicContent] = [
-            content_block
-            for content_block in rendered_content
-            if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)
-        ]
-
-        self.expectation_config.rendered_content = (  # type: ignore[union-attr] # config could be None
-            inline_renderer.replace_or_keep_existing_rendered_content(
-                existing_rendered_content=self.expectation_config.rendered_content,  # type: ignore[union-attr] # config could be None
-                new_rendered_content=prescriptive_rendered_content,
-                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
-            )
-        )
+        if self.expectation_config:
+            self.expectation_config.rendered_content = [
+                content_block
+                for content_block in rendered_content
+                if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)
+            ]
 
     @staticmethod
     def validate_result_dict(result):
@@ -435,6 +420,7 @@ class ExpectationValidationResultSchema(Schema):
 class ExpectationSuiteValidationResultMeta(TypedDict):
     active_batch_definition: LegacyBatchDefinition
     batch_markers: BatchMarkers
+    batch_parameters: dict | None
     batch_spec: BatchSpec
     checkpoint_id: Optional[str]
     checkpoint_name: str
@@ -536,7 +522,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             return self.meta["active_batch_definition"].data_asset_name
         return None
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
@@ -551,9 +537,10 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @override
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 

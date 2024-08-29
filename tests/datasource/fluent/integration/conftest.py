@@ -43,7 +43,7 @@ def default_pandas_data(
     pandas_ds.read_csv(
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
-    asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
+    asset = pandas_ds.get_asset(name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 
@@ -65,7 +65,7 @@ def pandas_sql_data(
         sql=sa.text("SELECT * FROM my_table"),
         con=con,
     )
-    asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
+    asset = pandas_ds.get_asset(name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 
@@ -93,7 +93,6 @@ def pandas_data(
     pandas_ds = pandas_filesystem_datasource(test_backends=test_backends, context=context)
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        order_by=["year", "month"],
         batch_metadata={"my_pipeline": "${pipeline_filename}"},
     )
     batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
@@ -167,7 +166,6 @@ def spark_data(
         name="csv_asset",
         header=True,
         infer_schema=True,
-        order_by=["year", "month"],
     )
     batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     batch_definition = asset.add_batch_definition_monthly("my_batch_def", regex=batching_regex)
@@ -187,7 +185,6 @@ def multibatch_pandas_data(
     )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        order_by=["year", "month"],
     )
     batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     batch_definition = asset.add_batch_definition_monthly("monthly_batch_def", regex=batching_regex)
@@ -228,7 +225,6 @@ def multibatch_spark_data(
         name="csv_asset",
         header=True,
         infer_schema=True,
-        order_by=["year", "month"],
     )
     batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     batch_definition = asset.add_batch_definition_monthly("monthly_batch_def", regex=batching_regex)

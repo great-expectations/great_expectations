@@ -20,3 +20,5 @@ context = gx.get_context(mode="ephemeral")
 print(context)
 # </snippet>
 # </snippet>
+
+assert type(context).__name__ == "EphemeralDataContext"

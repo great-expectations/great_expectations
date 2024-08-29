@@ -53,7 +53,7 @@ DATA_QUALITY_ISSUES = ["Volume"]
 class ExpectTableRowCountToBeBetween(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_table_row_count_to_be_between is a \
+    ExpectTableRowCountToBeBetween is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     BatchExpectations are one of the most common types of Expectation.
@@ -89,7 +89,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
           no maximum.
 
     See Also:
-        [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
+        [ExpectTableRowCountToEqual](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -295,17 +295,17 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
+            else:
+                raise ValueError("unresolvable template_str")  # noqa: TRY003
 
         return [
             RenderedStringTemplateContent(
-                **{  # type: ignore[arg-type]
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 

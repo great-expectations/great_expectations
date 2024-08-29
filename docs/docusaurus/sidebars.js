@@ -2,29 +2,19 @@ module.exports = {
   gx_core: [
     {
       type: 'category',
-      label: 'Introduction to Great Expectations',
+      label: 'Introduction to GX Core',
       link: {type: 'doc', id: 'core/introduction/introduction'},
       items: [
         {
           type: 'doc',
-          id: 'core/introduction/about_gx',
-          label: 'About GX'
-        },
-        {
-          type: 'doc',
           id: 'core/introduction/gx_overview',
-          label: 'GX overview'
+          label: 'GX Core overview'
         },
         {
           type: 'doc',
           id: 'core/introduction/try_gx',
-          label: 'Try GX'
-        },
-        {
-          type: 'doc',
-          id: 'core/introduction/community_resources',
-          label: 'Community resources'
-        },
+          label: 'Try GX Core'
+        }
       ],
     },
     {
@@ -133,10 +123,27 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Configure project settings',
+      link: {type: 'doc', id: 'core/configure_project_settings/configure_project_settings'},
+      items: [
+        {type: 'doc', id: 'core/configure_project_settings/configure_metadata_stores/configure_metadata_stores'},
+        {type: 'doc', id: 'core/configure_project_settings/configure_data_docs/configure_data_docs'},
+        {type: 'doc', id: 'core/configure_project_settings/configure_credentials/configure_credentials'},
+        {type: 'doc', id: 'core/configure_project_settings/access_secrets_managers/access_secrets_managers'},
+        {type: 'doc', id: 'core/configure_project_settings/toggle_analytics_events/toggle_analytics_events'}
+      ]
+    },
+    {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
     },
+    {
+      type: 'doc',
+      id: 'core/introduction/community_resources',
+      label: 'Community resources'
+    }
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
@@ -152,13 +159,8 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'GX Agent',
-              href: '/docs/cloud/about_gx#gx-agent',
-            },
-            {
-              type: 'link',
-              label: 'GX Cloud deployment patterns',
-              href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
+              label: 'GX Cloud deployment options',
+              href: '/docs/cloud/about_gx#gx-cloud-deployment-options',
             },
             {
               type: 'link',
@@ -175,9 +177,12 @@ module.exports = {
               label: 'Supported browsers',
               href: '/docs/cloud/about_gx#supported-browsers',
             },
+            { 
+              type: 'doc', 
+              id: 'cloud/deploy_gx_agent' 
+            },
           ]
         },
-        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',
@@ -314,43 +319,23 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Manage Checkpoints',
-          link: { type: 'doc', id: 'cloud/checkpoints/manage_checkpoints' },
+          label: 'Manage schedules',
+          link: { type: 'doc', id: 'cloud/schedules/manage_schedules' },
           items: [
             {
               type: 'link',
-              label: 'Add a Checkpoint',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint',
+              label: 'Add a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#create-a-schedule-for-an-existing-expectation-suite',
             },
             {
               type: 'link',
-              label: 'Run a Checkpoint',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#run-a-checkpoint',
-            },
-            {
-              "type": "link",
-              "label": "Add a Validation to a Checkpoint",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-to-a-checkpoint"
+              label: 'Edit a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#edit-a-schedule',
             },
             {
               type: 'link',
-              label: 'Edit a Checkpoint name',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-name',
-            },
-            {
-              type: 'link',
-              label: 'Edit a Checkpoint configuration',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration',
-            },
-            {
-              "type": "link",
-              "label": "Configure the Checkpoint result format parameter",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#configure-the-checkpoint-result-format-parameter"
-            },
-            {
-              type: 'link',
-              label: 'Delete a Checkpoint',
-              href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
+              label: 'Disable a schedule',
+              href: '/docs/cloud/schedules/manage_schedules#disable-a-schedule',
             },
           ]
         },
@@ -437,7 +422,10 @@ module.exports = {
       link: { type: 'doc', id: 'reference/learn/data_quality_use_cases/dq_use_cases_lp' },
       items: [
         'reference/learn/data_quality_use_cases/schema',
-        'reference/learn/data_quality_use_cases/missingness'
+        'reference/learn/data_quality_use_cases/missingness',
+        'reference/learn/data_quality_use_cases/distribution',
+        'reference/learn/data_quality_use_cases/freshness',
+        'reference/learn/data_quality_use_cases/volume'
       ]
     },
       'reference/learn/usage_statistics',

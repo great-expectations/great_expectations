@@ -244,7 +244,7 @@ def test_delete_batch_definition__success(
 ):
     assert persisted_batch_definition in data_asset_with_batch_definition.batch_definitions
 
-    data_asset_with_batch_definition.delete_batch_definition(persisted_batch_definition)
+    data_asset_with_batch_definition.delete_batch_definition(persisted_batch_definition.name)
 
     assert data_asset_with_batch_definition.batch_definitions == []
 
@@ -255,7 +255,7 @@ def test_delete_batch_definition__persists(
     data_asset_with_batch_definition: DataAsset,
     persisted_batch_definition: BatchDefinition,
 ):
-    data_asset_with_batch_definition.delete_batch_definition(persisted_batch_definition)
+    data_asset_with_batch_definition.delete_batch_definition(persisted_batch_definition.name)
 
     loaded_datasource = file_context_with_assets.get_datasource(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
@@ -269,7 +269,7 @@ def test_delete_batch_definition__unsaved_batch_definition(empty_data_asset: Dat
     batch_definition = BatchDefinition[None](name="uh oh")
 
     with pytest.raises(ValueError, match="does not exist"):
-        empty_data_asset.delete_batch_definition(batch_definition)
+        empty_data_asset.delete_batch_definition(batch_definition.name)
 
 
 @pytest.mark.unit
@@ -290,11 +290,11 @@ def test_fields_set(empty_data_asset: DataAsset):
     assert "batch_definitions" in asset.__fields_set__
 
     # delete one of the batch configs and ensure we still have it in the set
-    asset.delete_batch_definition(batch_definition_a)
+    asset.delete_batch_definition(batch_definition_a.name)
     assert "batch_definitions" in asset.__fields_set__
 
     # delete the remaining batch config and ensure we don't have it in the set
-    asset.delete_batch_definition(batch_definition_b)
+    asset.delete_batch_definition(batch_definition_b.name)
     assert "batch_definitions" not in asset.__fields_set__
 
 
@@ -334,7 +334,7 @@ def _test_delete_batch_definition__does_not_clobber_other_assets(
         datasource = context.get_datasource(datasource_name)
         assert isinstance(datasource, Datasource)
         asset = datasource.get_asset(asset_name)
-        asset.delete_batch_definition(asset.batch_definitions[0])
+        asset.delete_batch_definition(asset.batch_definitions[0].name)
 
     loaded_datasource = context.get_datasource(datasource_name)
     assert isinstance(loaded_datasource, Datasource)

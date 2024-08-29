@@ -10,8 +10,6 @@ To learn more about Validations, see [Validator](/reference/learn/terms/validato
 
 ## Prerequisites
 
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 - You have created an [Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 ## Run a Validation
