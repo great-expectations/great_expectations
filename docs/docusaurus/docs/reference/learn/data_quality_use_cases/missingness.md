@@ -90,16 +90,18 @@ The examples given in this section provide insight into how and when to apply mi
 
 ### Incorrectly defaulted values
 
-**Context**: Values may be incorrectly defaulted during data transformation and `NULL`s, replaced with zeroes or empty strings, and change the business meaning of the data. Transformations that change data from a source format to different destination format, for example, from DataFrame to CSV, are susceptible to this edge case.
+**Context**: During data transformation processes, `NULL` values may be incorrectly replaced with default values such as zeroes or empty strings. This can occur when moving data from a source format to a different destination format. For example, a `NULL` in the `sender_account_number` column might be replaced with a '0' or an empty string. This transformation changes the business meaning of the data, as a `NULL` (indicating missing information) carries a different significance than a '0' (suggesting an actual account number of zero).
 
-**GX solution**: When `NULL`s are expected in a column, check for the presence of a small percentage of missing values following data transformation.
+**GX solution**: When `NULL` values are expected in a column, we can use GX to check for the presence of a small percentage of missing values following data transformation. This approach helps identify if NULL values have been inappropriately replaced.
 
-::: TODO
-need a sample data column for this case.
-:::
-
-```python title=""
 ```
+python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py incorrectly_defaulted_values"
+```
+
+In this example, we're expecting at least 0.1% of the values in the `sender_account_number` column
+to be `NULL`. The 'mostly' parameter is set to 0.001, meaning the Expectation will pass if at least 0.1%
+of the values are NULL. This low percentage allows for the presence of valid NULL values while
+still catching cases where NULLs might have been incorrectly defaulted.
 
 ### System anomalies
 

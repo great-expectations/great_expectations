@@ -80,6 +80,12 @@ suite.add_expectation(
 )
 
 suite.add_expectation(
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py incorrectly_defaulted">
+    gxe.ExpectColumnValuesToBeNull(column="sender_account_number", mostly=0.001)
+    # </snippet>
+)
+
+suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py system_anomalies">
     gxe.ExpectColumnValuesToBeNull(column="errors")
     # </snippet>
