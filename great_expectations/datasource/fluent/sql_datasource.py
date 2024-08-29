@@ -581,35 +581,19 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
 
     @override
     def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
-        from great_expectations.core import IDDict
-
         self._validate_batch_request(batch_request)
-
-        output: List[dict] = []
         if batch_request.partitioner:
             sql_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
         else:
             sql_partitioner = None
-        batch_spec_kwargs: dict[str, str | dict | None]
-        for request in self._fully_specified_batch_requests(batch_request):
-            batch_spec_kwargs = self._create_batch_spec_kwargs()
-            if sql_partitioner:
-                batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
-                batch_spec_kwargs["partitioner_kwargs"] = (
-                    sql_partitioner.partitioner_method_kwargs()
-                )
-                # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
-                # it is hardcoded to a dict above, so we cast it here.
-                cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    sql_partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
-                        request.options
-                    )
-                )
-            # Creating the batch_spec is our hook into the execution engine.
-            batch_spec = self._create_batch_spec(batch_spec_kwargs)
 
-            output.append(IDDict(batch_spec["batch_identifiers"]))
-        return output
+        requests = self._fully_specified_batch_requests(batch_request)
+        metadata_dicts = [self._get_batch_metadata_from_batch_request(r) for r in requests]
+
+        if sql_partitioner:
+            metadata_dicts = self.sort_batch_identifiers_list(metadata_dicts, sql_partitioner)
+
+        return metadata_dicts[batch_request.batch_slice]
 
     @override
     def get_batch(self, batch_request: BatchRequest) -> Batch:
@@ -636,13 +620,10 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
         requests = self._fully_specified_batch_requests(batch_request)
         metadata_dicts = [self._get_batch_metadata_from_batch_request(r) for r in requests]
         if sql_partitioner:
-            sorted_metadata_dicts = self.sort_batch_identifiers_list(
-                metadata_dicts, sql_partitioner
-            )
-        else:
-            sorted_metadata_dicts = metadata_dicts
-        batch_metadata = sorted_metadata_dicts[-1]
-        request_index = sorted_metadata_dicts.index(batch_metadata)
+            metadata_dicts = self.sort_batch_identifiers_list(metadata_dicts, sql_partitioner)
+        metadata_dicts = metadata_dicts[batch_request.batch_slice]
+        batch_metadata = metadata_dicts[-1]
+        request_index = metadata_dicts.index(batch_metadata)
         request = requests[request_index]
         batch_spec_kwargs = self._create_batch_spec_kwargs()
         if sql_partitioner:

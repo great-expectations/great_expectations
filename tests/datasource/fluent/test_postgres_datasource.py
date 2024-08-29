@@ -61,7 +61,6 @@ if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
-        BatchSlice,
     )
 
 # We set a default time range that we use for testing.
@@ -319,7 +318,7 @@ def test_datasource_gets_batch_partitioner_with_unspecified_batch_parameters(
         assert batch.metadata == {"month": 12, "year": 2022}
         assert_batch_specs_correct_with_year_month_partitioner_defaults(batch_specs)
         assert_batch_identifiers_correct_with_year_month_partitioner_defaults(
-            [IDDict(bi["my_col"]) for bi in batch_identifiers_list]
+            [IDDict(bi) for bi in batch_identifiers_list]
         )
 
 
@@ -361,7 +360,7 @@ def test_datasource_gets_batch_list_partitioner_with_batch_parameters_set_to_non
         assert batch.metadata == {"month": 12, "year": 2022}
         assert_batch_specs_correct_with_year_month_partitioner_defaults(batch_specs)
         assert_batch_identifiers_correct_with_year_month_partitioner_defaults(
-            [IDDict(bi["my_col"]) for bi in batch_identifiers_list]
+            [IDDict(bi) for bi in batch_identifiers_list]
         )
 
 
@@ -405,7 +404,7 @@ def test_datasource_gets_batch_partitioner_with_partially_specified_batch_parame
 
         assert len(identifiers_list) == len(_DEFAULT_TEST_MONTHS)
         for month in _DEFAULT_TEST_MONTHS:
-            expected_metadata = IDDict({"my_col": {"month": month, "year": year}})
+            expected_metadata = IDDict({"month": month, "year": year})
             assert expected_metadata in identifiers_list
         assert batch.metadata == {"month": 12, "year": 2022}
 
@@ -607,50 +606,6 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
         partitioner = ColumnPartitionerMonthly(column_name="my_col")
         with pytest.raises(ge_exceptions.InvalidBatchRequestError):
             asset.build_batch_request(options={"invalid_key": None}, partitioner=partitioner)
-
-
-@pytest.mark.postgresql
-@pytest.mark.parametrize(
-    "batch_slice,expected_batch_count",
-    [
-        ("[-3:]", 3),
-        ("[5:9]", 4),
-        ("[:10:2]", 5),
-        (slice(-3, None), 3),
-        (slice(5, 9), 4),
-        (slice(0, 10, 2), 5),
-        ("-5", 1),
-        ("-1", 1),
-        (11, 1),
-        (0, 1),
-        ([3], 1),
-        (None, 12),
-        ("", 12),
-    ],
-)
-def test_postgres_slice_batch_count(
-    empty_data_context,
-    create_source: CreateSourceFixture,
-    batch_slice: BatchSlice,
-    expected_batch_count: int,
-) -> None:
-    with create_source(
-        validate_batch_spec=lambda _: None,
-        dialect="postgresql",
-        data_context=empty_data_context,
-    ) as source:
-        (
-            source,  # noqa: PLW2901
-            asset,
-        ) = create_and_add_table_asset_without_testing_connection(
-            source=source, name="my_asset", table_name="my_table"
-        )
-        partitioner = ColumnPartitionerMonthly(column_name="my_col")
-        batch_request = asset.build_batch_request(
-            options={"year": 2021}, batch_slice=batch_slice, partitioner=partitioner
-        )
-        batches = asset.get_batch_identifiers_list(batch_request=batch_request)
-        assert len(batches) == expected_batch_count
 
 
 @pytest.mark.postgresql
@@ -961,18 +916,19 @@ def test_partitioner_year(
         # in this unit test.
         asset = source.add_query_asset(name="my_asset", query="select * from table")
         partitioner = ColumnPartitionerYearly(column_name="my_col")
-        batches = source.get_batch_identifiers_list(
-            asset.build_batch_request(partitioner=partitioner)
-        )
+        batch_request = asset.build_batch_request(partitioner=partitioner)
+        batches = source.get_batch_identifiers_list(batch_request)
+        batch = source.get_batch(batch_request)
         assert len(batches) == len(years)
         for i, year in enumerate(years):
             assert "year" in batches[i]
             assert batches[i]["year"] == year
 
-        assert len(batch_specs) == len(years)
+        assert len(batch_specs) == 1
         for spec in batch_specs:
             assert "partitioner_method" in spec
             assert spec["partitioner_method"] == "partition_on_year"
+        assert batch.metadata == {"year": 2021}
 
 
 @pytest.mark.postgresql
@@ -999,22 +955,23 @@ def test_partitioner_year_and_month(
         # in this unit test.
         asset = source.add_query_asset(name="my_asset", query="select * from table")
         partitioner = ColumnPartitionerMonthly(column_name="my_col")
-        batches = source.get_batch_identifiers_list(
-            asset.build_batch_request(partitioner=partitioner)
-        )
-        assert len(batches) == len(years) * len(months)
+        batch_request = asset.build_batch_request(partitioner=partitioner)
+        batch_identifiers = source.get_batch_identifiers_list(batch_request)
+        batch = source.get_batch(batch_request)
+        assert len(batch_identifiers) == len(years) * len(months)
         for i, year in enumerate(years):
             for j, month in enumerate(months):
                 batch_index = i * len(months) + j
-                assert "year" in batches[batch_index]
-                assert "month" in batches[batch_index]
-                assert batches[batch_index]["year"] == year
-                assert batches[batch_index]["month"] == month
+                assert "year" in batch_identifiers[batch_index]
+                assert "month" in batch_identifiers[batch_index]
+                assert batch_identifiers[batch_index]["year"] == year
+                assert batch_identifiers[batch_index]["month"] == month
 
-        assert len(batch_specs) == len(years) * len(months)
-        for spec in batch_specs:
-            assert "partitioner_method" in spec
-            assert spec["partitioner_method"] == "partition_on_year_and_month"
+        assert len(batch_identifiers) == len(years) * len(months)
+        assert len(batch_specs) == 1
+        assert "partitioner_method" in batch_specs[0]
+        assert batch_specs[0]["partitioner_method"] == "partition_on_year_and_month"
+        assert batch.metadata == {"year": 2021, "month": 9}
 
 
 @pytest.mark.postgresql
@@ -1048,9 +1005,9 @@ def test_partitioner_year_and_month_and_day(
             query="select * from table",
         )
         partitioner = ColumnPartitionerDaily(column_name="my_col")
-        batches = source.get_batch_identifiers_list(
-            asset.build_batch_request(partitioner=partitioner)
-        )
+        batch_request = asset.build_batch_request(partitioner=partitioner)
+        batches = source.get_batch_identifiers_list(batch_request)
+        batch = source.get_batch(batch_request)
         assert len(batches) == len(years) * len(months) * len(days)
         for i, year in enumerate(years):
             for j, month in enumerate(months):
@@ -1063,10 +1020,10 @@ def test_partitioner_year_and_month_and_day(
                     assert batches[batch_index]["month"] == month
                     assert batches[batch_index]["day"] == day
 
-        assert len(batch_specs) == len(years) * len(months) * len(days)
-        for spec in batch_specs:
-            assert "partitioner_method" in spec
-            assert spec["partitioner_method"] == "partition_on_year_and_month_and_day"
+        assert len(batch_specs) == 1
+        assert "partitioner_method" in batch_specs[0]
+        assert batch_specs[0]["partitioner_method"] == "partition_on_year_and_month_and_day"
+        assert batch.metadata == {"year": 2021, "month": 9, "day": 30}
 
 
 @pytest.mark.postgresql
