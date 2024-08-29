@@ -356,7 +356,7 @@ class TestMisconfiguredMetaDatasource:
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
-    class SampleAsset(Datasource):
+    class SampleAsset(DataAsset):
         @override
         def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
             raise NotImplementedError
@@ -388,7 +388,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         def test_connection(self): ...
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
-            asset = RedAsset(name=asset_name)  # type: ignore[call-arg] # ?
+            asset = RedAsset(name=asset_name)
             self._add_asset(asset=asset)
             return asset
 
