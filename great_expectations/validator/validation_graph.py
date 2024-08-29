@@ -70,7 +70,7 @@ class MetricEdge:
 
         return self.left.id, None
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         return f"<{self._left.__repr__()}|{self._right.__repr__()}>"
 
 
@@ -360,7 +360,7 @@ class ValidationGraph:
             ):
                 metric_kwargs[key] = default_kwarg_values[key]
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         edge: MetricEdge
         return ", ".join([edge.__repr__() for edge in self._edges])
 
