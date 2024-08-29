@@ -12,6 +12,7 @@ from great_expectations.core.result_format import (
     DEFAULT_RESULT_FORMAT,
     ResultFormat,
 )
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 from great_expectations.validator.validator import Validator as OldValidator
 from great_expectations.validator.validator import calc_validation_statistics
@@ -42,8 +43,6 @@ class Validator:
         self._batch_definition = batch_definition
         self._batch_parameters = batch_parameters
         self.result_format = result_format
-
-        from great_expectations.data_context.data_context.context_factory import project_manager
 
         self._get_validator = project_manager.get_validator
 
@@ -101,8 +100,6 @@ class Validator:
 
     @property
     def _include_rendered_content(self) -> bool:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.is_using_cloud()
 
     @cached_property

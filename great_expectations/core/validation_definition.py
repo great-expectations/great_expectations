@@ -8,7 +8,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Extra,
-    PrivateAttr,
     ValidationError,
     validator,
 )
@@ -106,13 +105,6 @@ class ValidationDefinition(BaseModel):
     data: BatchDefinition
     suite: ExpectationSuite
     id: Union[str, None] = None
-    _validation_results_store: ValidationResultsStore = PrivateAttr()
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-
-        # TODO: Migrate this to model_post_init when we get to pydantic 2
-        self._validation_results_store = project_manager.get_validation_results_store()
 
     @property
     @public_api
@@ -127,6 +119,10 @@ class ValidationDefinition(BaseModel):
     @property
     def data_source(self) -> Datasource:
         return self.asset.datasource
+
+    @property
+    def _validation_results_store(self) -> ValidationResultsStore:
+        return project_manager.get_validation_results_store()
 
     def is_added(self) -> ValidationDefinitionAddedDiagnostics:
         validation_definition_diagnostics = ValidationDefinitionAddedDiagnostics(
@@ -338,9 +334,6 @@ class ValidationDefinition(BaseModel):
 
     @public_api
     def save(self) -> None:
-        """Persists the ValidationDefinition."""
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
 
@@ -351,9 +344,6 @@ class ValidationDefinition(BaseModel):
 
         We need to persist a validation_definition before it can be run. If user calls runs but
         hasn't persisted it we add it for them."""
-
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
 

@@ -13,7 +13,7 @@ Use the information provided here to install GX on an EMR Spark cluster and inst
    sc.install_pypi_package("great_expectations")
    ```
 
-2. Create an in-code Data Context. See [Instantiate an Ephemeral Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=ephemeral#initialize-a-new-data-context).
+2. Create an in-code Data Context. See [Instantiate an Ephemeral Data Context](/core/set_up_a_gx_environment/create_a_data_context.md?context_type=ephemeral#create-an-ephemeral-data-context).
 
 3. Copy the Python code at the end of **How to instantiate an Ephemeral Data Context** into a cell in your EMR Spark notebook, or use the other examples to customize your configuration. The code instantiates and configures a Data Context for an EMR Spark cluster.
 

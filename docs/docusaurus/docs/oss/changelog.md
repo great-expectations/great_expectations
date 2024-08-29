@@ -14,6 +14,31 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.0.1
+* [BUGFIX] Checkpoint references the instance of ValidationDefinition t… ([#10274](https://github.com/great-expectations/great_expectations/pull/10274))
+* [DOCS] Promote 1.0 to the last version ([#10261](https://github.com/great-expectations/great_expectations/pull/10261))
+* [DOCS] Updates broken internal link in GX Cloud docs for v1.0 and v0.18 ([#10247](https://github.com/great-expectations/great_expectations/pull/10247))
+* [DOCS] Adds query strings and headers to all full code examples in GX Core docs ([#10258](https://github.com/great-expectations/great_expectations/pull/10258))
+* [DOCS] Replaces references to "GX OSS" and "GX 1.0" with "GX Core" ([#10255](https://github.com/great-expectations/great_expectations/pull/10255))
+* [DOCS] Quick fix to code block in test an Expectation guide ([#10267](https://github.com/great-expectations/great_expectations/pull/10267))
+* [DOCS] Update docstrings to reference Expectations by class name instead of validator method ([#10268](https://github.com/great-expectations/great_expectations/pull/10268))
+* [DOCS] Remove DatabricksSQL references to a `/database` path in connection string. ([#10273](https://github.com/great-expectations/great_expectations/pull/10273))
+* [DOCS] Update application_integration_support.md ([#10280](https://github.com/great-expectations/great_expectations/pull/10280))
+* [DOCS] Correct database name in Databricks SQL docstring ([#10148](https://github.com/great-expectations/great_expectations/pull/10148))
+* [DOCS] LAK-1048: Update instructions to add assets ([#10200](https://github.com/great-expectations/great_expectations/pull/10200)) (thanks @allisongx)
+* [DOCS] Corrects typo in `results_url` to `result_url` ([#10283](https://github.com/great-expectations/great_expectations/pull/10283))
+* [DOCS] Remove examples dir ([#10293](https://github.com/great-expectations/great_expectations/pull/10293))
+* [DOCS] Updates to support and contribution docs to align with updated support posture ([#10298](https://github.com/great-expectations/great_expectations/pull/10298)) (thanks @molliemarie)
+* [DOCS] Updates method for checking the version of the installed GX Core library ([#10286](https://github.com/great-expectations/great_expectations/pull/10286))
+* [DOCS] Removes orphaned pages and content held over from OSS docs. ([#10260](https://github.com/great-expectations/great_expectations/pull/10260))
+* [MAINTENANCE] Loosen raumel pin for CVE-2019-20478 ([#10266](https://github.com/great-expectations/great_expectations/pull/10266))
+* [MAINTENANCE] Prevent CI from emitting analytics events ([#10263](https://github.com/great-expectations/great_expectations/pull/10263))
+* [MAINTENANCE] Add public api decorators to validation definition ([#10282](https://github.com/great-expectations/great_expectations/pull/10282))
+* [MAINTENANCE] Ignore Azure CI when emitting analytics events ([#10291](https://github.com/great-expectations/great_expectations/pull/10291))
+* [MAINTENANCE] Add validation definition ids to checkpoint creation events ([#10290](https://github.com/great-expectations/great_expectations/pull/10290))
+* [MAINTENANCE] mypy 1.11.2 ([#10142](https://github.com/great-expectations/great_expectations/pull/10142))
+* [MAINTENANCE] Remove override of `ValidationDefinition` init ([#10278](https://github.com/great-expectations/great_expectations/pull/10278))
+
 ### 1.0.0
 * [BUGFIX] Always rerender content (#10257)
 * [BUGFIX] Ensure that all diagnostics for a Checkpoint's children validation definitions appear in error messages (#10250)
