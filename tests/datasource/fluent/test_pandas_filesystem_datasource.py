@@ -476,7 +476,7 @@ def test_get_batch_identifiers_list_from_partially_specified_batch_request(
     )
     batches = asset.get_batch_identifiers_list(request)
     assert (len(batches)) == 12
-    batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
+    batch_filenames = [pathlib.Path(batch["path"]).stem for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
@@ -485,9 +485,7 @@ def test_get_batch_identifiers_list_from_partially_specified_batch_request(
         month: str
 
     expected_year_month = {YearMonth(year="2018", month=format(m, "02d")) for m in range(1, 13)}
-    batch_year_month = {
-        YearMonth(year=batch.metadata["year"], month=batch.metadata["month"]) for batch in batches
-    }
+    batch_year_month = {YearMonth(year=batch["year"], month=batch["month"]) for batch in batches}
     assert expected_year_month == batch_year_month
 
 

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Optional
 
 import pytest
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import FileNamePartitionerYearly
 from great_expectations.datasource.fluent.batch_request import BatchParameters
@@ -15,13 +16,27 @@ from great_expectations.exceptions.exceptions import (
 )
 
 if TYPE_CHECKING:
+    from typing import List
+
     import pytest_mock
+
+    from great_expectations.datasource.fluent.batch_request import BatchRequest
+
+
+class DataAssetForTests(DataAsset):
+    @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        raise NotImplementedError
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        raise NotImplementedError
 
 
 @pytest.fixture
 def mock_data_asset(monkeypatch, mocker: pytest_mock.MockerFixture) -> DataAsset:
     monkeypatch.setattr(DataAsset, "build_batch_request", mocker.Mock())
-    data_asset: DataAsset = DataAsset(name="my_data_asset", type="table")
+    data_asset: DataAsset = DataAssetForTests(name="my_data_asset", type="table")
 
     return data_asset
 

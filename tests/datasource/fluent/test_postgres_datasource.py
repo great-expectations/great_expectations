@@ -378,7 +378,7 @@ def test_datasource_gets_batch_list_partitioner_with_partially_specified_batch_p
             source=source, name="my_asset", table_name="my_table"
         )
         partitioner = ColumnPartitionerMonthly(column_name="my_col")
-        batches = source.get_batch_identifiers_list(
+        metadatas = source.get_batch_identifiers_list(
             asset.build_batch_request(options={"year": year}, partitioner=partitioner)
         )
         assert len(batch_specs) == len(_DEFAULT_TEST_MONTHS)
@@ -394,8 +394,7 @@ def test_datasource_gets_batch_list_partitioner_with_partially_specified_batch_p
             }
             assert spec in batch_specs
 
-        assert len(batches) == len(_DEFAULT_TEST_MONTHS)
-        metadatas = [batch.metadata for batch in batches]
+        assert len(metadatas) == len(_DEFAULT_TEST_MONTHS)
         for month in _DEFAULT_TEST_MONTHS:
             expected_metadata = {"month": month, "year": year}
             assert expected_metadata in metadatas
@@ -957,7 +956,7 @@ def test_partitioner_year(
         )
         assert len(batches) == len(years)
         for i, year in enumerate(years):
-            assert "year" in batches[i].metadata
+            assert "year" in batches[i]
             assert batches[i]["year"] == year
 
         assert len(batch_specs) == len(years)
@@ -997,10 +996,10 @@ def test_partitioner_year_and_month(
         for i, year in enumerate(years):
             for j, month in enumerate(months):
                 batch_index = i * len(months) + j
-                assert "year" in batches[batch_index].metadata
-                assert "month" in batches[batch_index].metadata
-                assert batches[batch_index].metadata["year"] == year
-                assert batches[batch_index].metadata["month"] == month
+                assert "year" in batches[batch_index]
+                assert "month" in batches[batch_index]
+                assert batches[batch_index]["year"] == year
+                assert batches[batch_index]["month"] == month
 
         assert len(batch_specs) == len(years) * len(months)
         for spec in batch_specs:
@@ -1047,12 +1046,12 @@ def test_partitioner_year_and_month_and_day(
             for j, month in enumerate(months):
                 for k, day in enumerate(days):
                     batch_index = i * len(months) * len(days) + j * len(days) + k
-                    assert "year" in batches[batch_index].metadata
-                    assert "month" in batches[batch_index].metadata
-                    assert "day" in batches[batch_index].metadata
-                    assert batches[batch_index].metadata["year"] == year
-                    assert batches[batch_index].metadata["month"] == month
-                    assert batches[batch_index].metadata["day"] == day
+                    assert "year" in batches[batch_index]
+                    assert "month" in batches[batch_index]
+                    assert "day" in batches[batch_index]
+                    assert batches[batch_index]["year"] == year
+                    assert batches[batch_index]["month"] == month
+                    assert batches[batch_index]["day"] == day
 
         assert len(batch_specs) == len(years) * len(months) * len(days)
         for spec in batch_specs:

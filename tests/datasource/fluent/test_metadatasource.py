@@ -40,6 +40,7 @@ yaml = YAMLHandler()
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.datasource_dict import DatasourceDict
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 logger = logging.getLogger(__name__)
@@ -127,6 +128,14 @@ class DummyDataAsset(DataAsset):
         partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
+
+    @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        raise NotImplementedError
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        raise NotImplementedError
 
 
 @pytest.fixture(scope="function")
@@ -341,18 +350,27 @@ class TestMisconfiguredMetaDatasource:
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
-    class RedAsset(DataAsset):
+    class SampleDataAsset(DataAsset):
+        @override
+        def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+            raise NotImplementedError
+
+        @override
+        def get_batch(self, batch_request: BatchRequest) -> Batch:
+            raise NotImplementedError
+
+    class RedAsset(SampleDataAsset):
         type = "red"
 
         def test_connection(self): ...
 
-    class BlueAsset(DataAsset):
+    class BlueAsset(SampleDataAsset):
         type = "blue"
 
         @override
         def test_connection(self): ...
 
-    class PurpleDatasource(Datasource):
+    class PurpleDatasource(SampleDataAsset):
         asset_types = [RedAsset, BlueAsset]
         type: str = "purple"
 
