@@ -90,17 +90,14 @@ The examples given in this section provide insight into how and when to apply mi
 
 ### Incorrectly defaulted values
 
-**Context**: During data transformation processes, `NULL` values may be incorrectly replaced with default values such as zeroes or empty strings. This can occur when moving data from a source format to a different destination format. For example, a `NULL` in the `sender_account_number` column might be replaced with a '0' or an empty string. This transformation changes the business meaning of the data, as a `NULL` (indicating missing information) carries a different significance than a '0' (suggesting an actual account number of zero).
+**Context**: During data transformation processes, `NULL` values may be incorrectly replaced with default values such as zeroes or empty strings. This can occur when moving data from a source format to a different destination format. Depending on the field, this erroneous transformation can change the business meaning of the data. For instance, a `NULL` account number would indicate missing information and carry different significance to an account number of `0`, which would indicate an actual account number of zero.
 
-**GX solution**: When `NULL` values are expected in a column, we can use GX to check for the presence of a small percentage of missing values following data transformation. This approach helps identify if NULL values have been inappropriately replaced.
+**GX solution**: When `NULL` values are expected in a column, use GX to check for the presence of a small percentage of missing values following data transformation. This approach helps identify if `NULL` values have been inappropriately replaced.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py incorrectly_defaulted"
 ```
 
-In this example, we're expecting at least 0.1% of the values in the `sender_account_number` column
-to be `NULL`. The 'mostly' parameter is set to 0.001, meaning the Expectation will pass if at least 0.1%
-of the values are NULL. This low percentage allows for the presence of valid NULL values while
-still catching cases where NULLs might have been incorrectly defaulted.
+Setting a low percentage for the `mostly` parameter allows for the presence of valid `NULL` values while still catching cases where `NULL`s might have been incorrectly defaulted.
 
 ### System anomalies
 
