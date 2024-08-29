@@ -316,7 +316,13 @@ class TestMisconfiguredMetaDatasource:
         ):
 
             class MissingTypeAsset(DataAsset):
-                pass
+                @override
+                def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+                    raise NotImplementedError
+
+                @override
+                def get_batch(self, batch_request: BatchRequest) -> Batch:
+                    raise NotImplementedError
 
             class BadAssetDatasource(Datasource):
                 type: str = "valid"
@@ -350,7 +356,7 @@ class TestMisconfiguredMetaDatasource:
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
-    class SampleDataAsset(DataAsset):
+    class SampleAsset(Datasource):
         @override
         def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
             raise NotImplementedError
@@ -359,18 +365,18 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         def get_batch(self, batch_request: BatchRequest) -> Batch:
             raise NotImplementedError
 
-    class RedAsset(SampleDataAsset):
+    class RedAsset(SampleAsset):
         type = "red"
 
         def test_connection(self): ...
 
-    class BlueAsset(SampleDataAsset):
+    class BlueAsset(SampleAsset):
         type = "blue"
 
         @override
         def test_connection(self): ...
 
-    class PurpleDatasource(SampleDataAsset):
+    class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
         type: str = "purple"
 
