@@ -7,7 +7,6 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
-import ReleaseVersionBox from '../../components/versions/_gx_version_code_box.mdx'
 import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
 Start here to learn how to connect to data, create Expectations, validate data, and review Validation Results. This is an ideal place to start if you're new to GX Core and want to experiment with features and see what it offers.
@@ -22,7 +21,7 @@ To complement your code exploration, check out the [GX Core overview](/core/intr
 
 GX Core is a Python library you can install with the Python `pip` tool.
 
-For more comprehensive guidance on setting up a Python environment, installing GX Core, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/installation_and_setup/install_gx.md).
+For more comprehensive guidance on setting up a Python environment, installing GX Core, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/set_up_a_gx_environment/set_up_a_gx_environment.md).
 
 1. Run the following terminal command to install the GX Core library:
 
@@ -38,9 +37,7 @@ For more comprehensive guidance on setting up a Python environment, installing G
    print(gx.__version__)
    ```
 
-   The following output appears when GX Core is successfully installed:
-
-   <ReleaseVersionBox/>
+   If GX was installed correctly, the version number of the installed GX library will be printed.
 
 
 ## Sample data
@@ -214,6 +211,6 @@ Run the following steps in a Python interpreter, IDE, notebook, or script.
 
 - Go to the [Expectations Gallery](https://greatexpectations.io/expectations) and experiment with other Expectations.
 
-- If you're ready to start using GX Core with your own data, the [Set up a GX environment](/core/installation_and_setup/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
+- If you're ready to start using GX Core with your own data, the [Set up a GX environment](/core/set_up_a_gx_environment/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
 
 - <GxCloudAdvert/>

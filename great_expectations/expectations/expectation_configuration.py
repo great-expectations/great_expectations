@@ -384,7 +384,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
         return False
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         """ExpectationConfiguration equality does include meta, but ignores instance identity."""
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
@@ -401,13 +401,14 @@ class ExpectationConfiguration(SerializableDictDot):
             )
         )
 
-    def __ne__(self, other):
+    def __ne__(self, other):  # type: ignore[explicit-override] # FIXME
         # By using the == operator, the returned NotImplemented is handled correctly.
         return not self == other
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         return json.dumps(self.to_json_dict())
 
+    @override
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
