@@ -618,12 +618,14 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
 
         batch_spec_kwargs: dict[str, str | dict | None]
         requests = self._fully_specified_batch_requests(batch_request)
-        metadata_dicts = [self._get_batch_metadata_from_batch_request(r) for r in requests]
+        unsorted_metadata_dicts = [self._get_batch_metadata_from_batch_request(r) for r in requests]
         if sql_partitioner:
-            metadata_dicts = self.sort_batch_identifiers_list(metadata_dicts, sql_partitioner)
-        metadata_dicts = metadata_dicts[batch_request.batch_slice]
-        batch_metadata = metadata_dicts[-1]
-        request_index = metadata_dicts.index(batch_metadata)
+            sorted_metadata_dicts = self.sort_batch_identifiers_list(
+                unsorted_metadata_dicts, sql_partitioner
+            )
+        sorted_metadata_dicts = sorted_metadata_dicts[batch_request.batch_slice]
+        batch_metadata = sorted_metadata_dicts[-1]
+        request_index = unsorted_metadata_dicts.index(batch_metadata)
         request = requests[request_index]
         batch_spec_kwargs = self._create_batch_spec_kwargs()
         if sql_partitioner:

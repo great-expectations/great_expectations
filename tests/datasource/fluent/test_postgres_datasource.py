@@ -1026,6 +1026,40 @@ def test_partitioner_year_and_month_and_day(
         assert batch.metadata == {"year": 2021, "month": 9, "day": 30}
 
 
+@pytest.mark.parametrize(
+    ("sort_ascending", "expected_metadata"), [(True, {"year": 2021}), (False, {"year": 2020})]
+)
+@pytest.mark.postgresql
+def test_get_batch_partitioner__sort_ascending_respected(
+    empty_data_context,
+    create_source: CreateSourceFixture,
+    sort_ascending: bool,
+    expected_metadata: dict,
+):
+    years = [2020, 2021]
+    batch_specs = []
+
+    def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
+        batch_specs.append(spec)
+
+    with create_source(
+        validate_batch_spec=collect_batch_spec,
+        dialect="postgresql",
+        data_context=empty_data_context,
+        partitioner_query_response=[{"year": year} for year in years],
+    ) as source:
+        # We use a query asset because then we don't have to mock out db connection tests
+        # in this unit test.
+        asset = source.add_query_asset(
+            name="my_asset",
+            query="select * from table",
+        )
+        partitioner = ColumnPartitionerYearly(column_name="my_col", sort_ascending=sort_ascending)
+        batch_request = asset.build_batch_request(partitioner=partitioner)
+        batch = source.get_batch(batch_request)
+        assert batch.metadata == expected_metadata
+
+
 @pytest.mark.postgresql
 @pytest.mark.parametrize(
     [
