@@ -31,7 +31,7 @@ assert batch_identifiers_list[0] == {
 # Get a specific batch by month
 batch_request = batch_definition.build_batch_request({"year": "2019", "month": "02"})
 batch = data_asset.get_batch(batch_request)
-assert batch == {
+assert batch.metadata == {
     "year": "2019",
     "month": "02",
     "path": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02.csv",
