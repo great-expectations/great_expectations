@@ -127,7 +127,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                 asset.test_connection()
 
     @override
-    def _build_data_connector(  # noqa: PLR0913
+    def _build_data_connector(
         self,
         data_asset: SPARK_PATH_ASSET_UNION,
         gcs_prefix: str = "",

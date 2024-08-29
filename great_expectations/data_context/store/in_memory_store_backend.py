@@ -19,7 +19,7 @@ class InMemoryStoreBackend(StoreBackend):
     """Uses an in-memory dictionary as a store backend."""
 
     # noinspection PyUnusedLocal
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         runtime_environment=None,
         fixed_length_key=False,
@@ -51,7 +51,7 @@ class InMemoryStoreBackend(StoreBackend):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def _get(self, key):
+    def _get(self, key):  # type: ignore[explicit-override] # FIXME
         try:
             return self._store[key]
         except KeyError as e:
@@ -70,10 +70,10 @@ class InMemoryStoreBackend(StoreBackend):
         self._store[dest_key] = self._store[source_key]
         self._store.pop(source_key)
 
-    def list_keys(self, prefix=()):
+    def list_keys(self, prefix=()):  # type: ignore[explicit-override] # FIXME
         return [key for key in self._store if key[: len(prefix)] == prefix]
 
-    def _has_key(self, key):
+    def _has_key(self, key):  # type: ignore[explicit-override] # FIXME
         return key in self._store
 
     @override

@@ -29,7 +29,7 @@ class SqlAlchemyQueryStore(Store):
 
     _key_class: ClassVar[Type] = StringKey
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         credentials,
         queries=None,
@@ -93,10 +93,10 @@ class SqlAlchemyQueryStore(Store):
             return StringKey(key)
         return key
 
-    def get(self, key):
+    def get(self, key):  # type: ignore[explicit-override] # FIXME
         return super().get(self._convert_key(key))
 
-    def set(self, key, value):
+    def set(self, key, value):  # type: ignore[explicit-override] # FIXME
         return super().set(self._convert_key(key), value)
 
     def get_query_result(self, key, query_parameters=None):

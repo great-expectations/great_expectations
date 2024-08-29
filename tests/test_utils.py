@@ -195,7 +195,7 @@ def build_tuple_filesystem_store_backend(
     }
     store_backend_config.update(**kwargs)
     return Store.build_store_from_config(
-        store_config=store_backend_config,
+        config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
     )
@@ -283,7 +283,7 @@ def build_configuration_store(
         "store_backend": store_backend,
     }
     configuration_store: ConfigurationStore = Store.build_store_from_config(  # type: ignore[assignment]
-        store_config=store_config,
+        config=store_config,
         module_name=module_name,
         runtime_environment=None,
     )
@@ -790,22 +790,22 @@ def introspect_db(  # noqa: C901, PLR0912
     selected_schema_name = schema_name
 
     tables: List[Dict[str, str]] = []
-    schema_names: List[str] = inspector.get_schema_names()
-    for schema_name in schema_names:
+    all_schema_names: List[str] = inspector.get_schema_names()
+    for schema in all_schema_names:
         if ignore_information_schemas_and_system_tables and schema_name in information_schemas:
             continue
 
         if selected_schema_name is not None and schema_name != selected_schema_name:
             continue
 
-        table_names: List[str] = inspector.get_table_names(schema=schema_name)
+        table_names: List[str] = inspector.get_table_names(schema=schema)
         for table_name in table_names:
             if ignore_information_schemas_and_system_tables and (table_name in system_tables):
                 continue
 
             tables.append(
                 {
-                    "schema_name": schema_name,
+                    "schema_name": schema,
                     "table_name": table_name,
                     "type": "table",
                 }
@@ -815,7 +815,7 @@ def introspect_db(  # noqa: C901, PLR0912
         if include_views:
             # Note: this is not implemented for bigquery
             try:
-                view_names = inspector.get_view_names(schema=schema_name)
+                view_names = inspector.get_view_names(schema=schema)
             except NotImplementedError:
                 # Not implemented by Athena dialect
                 pass
@@ -828,7 +828,7 @@ def introspect_db(  # noqa: C901, PLR0912
 
                     tables.append(
                         {
-                            "schema_name": schema_name,
+                            "schema_name": schema,
                             "table_name": view_name,
                             "type": "view",
                         }

@@ -35,7 +35,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
     value_keys = ("bins",)
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: PLR0913
+    def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -55,7 +55,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         return list(hist)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913
+    def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -208,7 +208,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         return convert_to_json_serializable(list(execution_engine.execute_query(query).fetchone()))
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: C901, PLR0913
+    def _spark(  # noqa: C901
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

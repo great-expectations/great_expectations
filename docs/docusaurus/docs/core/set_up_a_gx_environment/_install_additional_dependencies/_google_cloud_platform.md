@@ -3,7 +3,7 @@ import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_
 import RecommendedVirtualEnvironment from '../../_core_components/prerequisites/_recommended_virtual_environment.md';
 import InfoUsingAVirtualEnvironment from '../../_core_components/admonitions/_if_you_are_using_a_virtual_environment.md';
 
-To validate Google Cloud Platform (GCP) data with {GxData.product_name}, you create your GX Python environment, configure your GCP credentials, and install {GxData.product_name} locally with the additional dependencies to support GCP.
+To validate Google Cloud Platform (GCP) data with GX Core, you create your GX Python environment, configure your GCP credentials, and install GX Core locally with the additional dependencies to support GCP.
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ To validate Google Cloud Platform (GCP) data with {GxData.product_name}, you cre
 
 2. Install the Python dependencies for GCP support. 
 
-   Run the following terminal command to install {GxData.product_name} with the additional dependencies for GCP support:
+   Run the following terminal command to install GX Core with the additional dependencies for GCP support:
 
    :::info
    <InfoUsingAVirtualEnvironment/>

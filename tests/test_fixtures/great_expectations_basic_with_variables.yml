@@ -7,7 +7,6 @@ expectations_store_name: expectations_store
 checkpoint_store_name: checkpoint_store
 
 plugins_directory: plugins/
-suite_parameter_store_name: suite_parameter_store
 validation_results_store_name: validation_store
 
 data_docs_sites:
@@ -23,8 +22,5 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
-  suite_parameter_store:
-    module_name: great_expectations.data_context.store
-    class_name: SuiteParameterStore
   validation_store:
     class_name: ValidationResultsStore

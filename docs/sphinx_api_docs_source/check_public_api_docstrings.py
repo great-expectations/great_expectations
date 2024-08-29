@@ -48,7 +48,7 @@ class DocstringError:
     raw_error: str
     line_number: int
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override] # FIXME
         return self.raw_error
 
 
@@ -107,7 +107,9 @@ def run_ruff(paths: List[pathlib.Path]) -> List[str]:
     _log_with_timestamp("Running ruff")
     # --select D option to enable pydocstyle errors in ruff
     # https://github.com/charliermarsh/ruff#pydocstyle-d
-    cmds = ["ruff", "check", "--select", "D"] + [str(p) for p in paths]
+    cmds = ["ruff", "check", "--select", "D", "--output-format=concise"] + [
+        str(p) for p in paths
+    ]
     raw_results: subprocess.CompletedProcess = subprocess.run(
         cmds,
         capture_output=True,

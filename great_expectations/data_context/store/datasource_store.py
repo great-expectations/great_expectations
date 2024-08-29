@@ -21,22 +21,21 @@ from great_expectations.datasource.fluent import (
     GxInvalidDatasourceWarning,
     InvalidDatasource,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
-    from typing import Literal
-
     from typing_extensions import TypedDict
 
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.datasource.fluent.fluent_base_model import MappingIntStrAny
 
     class DataPayload(TypedDict):
         id: str
-        attributes: dict
-        type: Literal["datasource"]
+        type: str
+        name: str
 
     class CloudResponsePayloadTD(TypedDict):
         data: DataPayload | list[DataPayload]
@@ -87,7 +86,20 @@ class DatasourceStore(Store):
         """
         See parent 'Store.serialize()' for more information
         """
-        return value._json_dict()
+        # DataAsset.order_by is not supported by v1, but has not yet been removed,
+        # so we drop it before serialization and alert the user with a warning.
+        if any(asset.order_by for asset in value.assets):
+            asset_names = [asset.name for asset in value.assets if asset.order_by]
+
+            warnings.warn(
+                f"Datasource {value.name} has one or more DataAssets that define a non-empty "
+                "order_by field. This property is no longer supported, and will be "
+                "silently dropped during serialization. The following DataAsset(s) are affected: "
+                + ", ".join(asset_names),
+                category=UserWarning,
+            )
+        exclude: MappingIntStrAny = {"assets": {"__all__": {"order_by"}}}
+        return value._json_dict(exclude=exclude)
 
     @override
     def deserialize(self, value: dict | FluentDatasource) -> FluentDatasource:
@@ -102,7 +114,7 @@ class DatasourceStore(Store):
             if not type_:
                 raise ValueError("Datasource type is missing")  # noqa: TRY003
             try:
-                datasource_model = _SourceFactories.type_lookup[type_]
+                datasource_model = DataSourceManager.type_lookup[type_]
                 return datasource_model(**value)
             except (PydanticValidationError, LookupError) as config_error:
                 warnings.warn(
@@ -136,34 +148,31 @@ class DatasourceStore(Store):
     @override
     @staticmethod
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:  # type: ignore[override]
-        datasource_id: str = data["id"]
-        datasource_config_dict: dict = data["attributes"]["datasource_config"]
-        datasource_config_dict["id"] = datasource_id
-        return datasource_config_dict
+        return data  # type: ignore[return-value]
 
-    def retrieve_by_name(self, datasource_name: str) -> FluentDatasource:
+    def retrieve_by_name(self, name: str) -> FluentDatasource:
         """Retrieves a Datasource persisted in the store by it's given name.
 
         Args:
-            datasource_name: The name of the Datasource to retrieve.
+            name: The name of the Datasource to retrieve.
 
         Returns:
             The Datasource persisted in the store that is associated with the given
-            input datasource_name.
+            input name.
 
         Raises:
             ValueError if a Datasource is not found.
         """
         datasource_key: Union[DataContextVariableKey, GXCloudIdentifier] = (
-            self.store_backend.build_key(name=datasource_name)
+            self.store_backend.build_key(name=name)
         )
         if not self.has_key(datasource_key):
             raise ValueError(  # noqa: TRY003
-                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."  # noqa: E501
+                f"Unable to load datasource `{name}` -- no configuration found or invalid configuration."  # noqa: E501
             )
 
         datasource_config: FluentDatasource = copy.deepcopy(self.get(datasource_key))  # type: ignore[arg-type]
-        datasource_config.name = datasource_name
+        datasource_config.name = name
         return datasource_config
 
     def delete(self, datasource_config: FluentDatasource) -> None:
@@ -232,8 +241,8 @@ class DatasourceStore(Store):
 
         return return_value
 
-    def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
+    def _determine_datasource_key(self, name: str) -> DataContextVariableKey:
         datasource_key = DataContextVariableKey(
-            resource_name=datasource_name,
+            resource_name=name,
         )
         return datasource_key

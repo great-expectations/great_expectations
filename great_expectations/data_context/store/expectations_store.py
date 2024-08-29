@@ -219,7 +219,7 @@ class ExpectationsStore(Store):
         suite = ExpectationSuite(**suite_dict)
         return suite_identifier, suite
 
-    def _add(self, key, value, **kwargs):
+    def _add(self, key, value, **kwargs):  # type: ignore[explicit-override] # FIXME
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
             value: ExpectationSuite = self._add_ids_on_create(value)
@@ -242,7 +242,7 @@ class ExpectationsStore(Store):
                 f"An ExpectationSuite named {value.name} already exists."
             ) from exc
 
-    def _update(self, key, value, **kwargs):
+    def _update(self, key, value, **kwargs):  # type: ignore[explicit-override] # FIXME
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
             value: ExpectationSuite = self._add_ids_on_update(value)
@@ -263,7 +263,7 @@ class ExpectationsStore(Store):
         except gx_exceptions.StoreBackendError as e:
             # todo: this generic error clobbers more informative errors coming from the store
 
-            raise gx_exceptions.ExpectationSuiteNotAddedToStoreError() from e
+            raise gx_exceptions.ExpectationSuiteNotAddedError(name=value.name) from e
 
     def _add_ids_on_create(self, suite: ExpectationSuite) -> ExpectationSuite:
         """This method handles adding IDs to suites and expectations for non-cloud backends.
@@ -326,14 +326,14 @@ class ExpectationsStore(Store):
             )
         return super()._validate_key(key=key)
 
-    def serialize(self, value):
+    def serialize(self, value):  # type: ignore[explicit-override] # FIXME
         if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
             val = self._expectationSuiteSchema.dump(value)
             return val
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
-    def deserialize(self, value):
+    def deserialize(self, value):  # type: ignore[explicit-override] # FIXME
         if isinstance(value, dict):
             return self._expectationSuiteSchema.load(value)
         elif isinstance(value, str):

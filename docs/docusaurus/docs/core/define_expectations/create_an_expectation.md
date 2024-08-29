@@ -17,9 +17,18 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.
 
-<Tabs>
+### Procedure
 
-<TabItem value="procedure" label="Procedure">
+<Tabs 
+   queryString="procedure"
+   defaultValue="instructions"
+   values={[
+      {value: 'instructions', label: 'Instructions'},
+      {value: 'sample_code', label: 'Sample code'}
+   ]}
+>
+
+<TabItem value="instructions" label="Instructions">
 
 1. Choose an Expectation to create.
 
@@ -55,12 +64,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
    
       In this example the `ExpectColumnMaxToBeBetween` Expectation is created and all of its parameters are defined in advance while leaving `strict_min` and `strict_max` as their default values:
 
-      ```python title="Python"
-      preset_expectation = gxe.ExpectColumnMaxToBeBetween(
-          column="passenger_count",
-          min_value=4,
-          max_value=6
-      )
+      ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/create_an_expectation.py - preset expectation"
       ```
 
    </TabItem>
@@ -73,29 +77,12 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
       In this example, `ExpectColumnMaxToBeBetween` is created for both the `passenger_count` and the `fare` fields, and the values for `min_value` and `max_value` in each Expectation will be passed in at runtime.  To differentiate between the parameters for each Expectation a more specific key is set for finding each parameter in the runtime `expectation_parameters` dictionary:
    
-      ```python title="Python"
-      passenger_expectation = gxe.ExpectColumnMaxToBeBetween(
-         column="passenger_count",
-         min_value={"$PARAMETER": "expect_passenger_max_to_be_above"},
-         max_value={"$PARAMETER": "expect_passenger_max_to_be_below"}
-      )
-
-      fare_expectation = gxe.ExpectColumnMaxToBeBetween(
-         column="fare",
-         min_value={"$PARAMETER": "expect_fare_max_to_be_above"},
-         max_value={"$PARAMETER": "expect_fare_max_to_be_below"}
-      )
+      ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/create_an_expectation.py - dynamic expectations"
       ```
 
       The runtime `expectation_parameters` dictionary for the above example would look like:
    
-      ```python title="Python"
-      runtime_expectation_parameters = {
-         "expect_passenger_max_to_be_above": 4,
-         "expect_passenger_max_to_be_below": 6,
-         "expect_fare_max_to_be_above": 10.00,
-         "expect_fare_max_to_be_below": 500.00
-      }
+      ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/create_an_expectation.py - example expectation_parameters"
       ``` 
 
    </TabItem>
@@ -106,40 +93,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="sample_code" label="Sample code">
 
-   ```python title="Python"
-   # All Expectations are found in the `expectations` module:
-   from great_expectations import expectations as gxe
-   
-   # This Expectation has all values set in advance:
-   preset_expectation = gxe.ExpectColumnMaxToBeBetween(
-       column="passenger_count",
-       min_value=1,
-       max_value=6
-   )
-   
-   # In this case, two Expectations are created that will be passed
-   #  parameters at runtime, and unique lookups are defined for each
-   #  Expectations' parameters.
-
-   passenger_expectation = gxe.ExpectColumnMaxToBeBetween(
-      column="passenger_count",
-      min_value={"$PARAMETER": "expect_passenger_max_to_be_above"},
-      max_value={"$PARAMETER": "expect_passenger_max_to_be_below"}
-   )
-   fare_expectation = gxe.ExpectColumnMaxToBeBetween(
-      column="fare",
-      min_value={"$PARAMETER": "expect_fare_max_to_be_above"},
-      max_value={"$PARAMETER": "expect_fare_max_to_be_below"}
-   )
-   
-   # A dictionary containing the parameters for both of the above
-   #   Expectations would look like:
-   runtime_expectation_parameters = {
-      "expect_passenger_max_to_be_above": 4,
-      "expect_passenger_max_to_be_below": 6,
-      "expect_fare_max_to_be_above": 10.00,
-      "expect_fare_max_to_be_below": 500.00
-   }
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/create_an_expectation.py - full code example"
    ```
 
 </TabItem>

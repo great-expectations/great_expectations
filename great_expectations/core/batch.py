@@ -121,7 +121,7 @@ class LegacyBatchDefinition(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
 
-        assert type(batch_identifiers) == IDDict
+        assert type(batch_identifiers) == IDDict  # noqa: E721 # legacy code
 
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
@@ -230,12 +230,14 @@ class LegacyBatchDefinition(SerializableDictDot):
     def batching_regex(self) -> re.Pattern | None:
         return self._batching_regex
 
+    @override
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         return self.id == other.id
 
+    @override
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
@@ -406,6 +408,7 @@ class BatchRequestBase(SerializableDictDot):
 
         return result
 
+    @override
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
@@ -877,6 +880,7 @@ class Batch(SerializableDictDot):
 
         return IDDict({}).to_id()
 
+    @override
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
@@ -970,7 +974,7 @@ def batch_request_contains_runtime_parameters(
 
 
 @overload
-def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with None
+def get_batch_request_as_dict(
     batch_request: BatchRequestBase
     | FluentBatchRequest
     | dict

@@ -10,7 +10,7 @@ Often, open source (OSS) applications have a reputation for being unfriendly and
 
 ## Ask a question
 
-GX has a [Discourse community forum](https://discourse.greatexpectations.io/) that includes categories for [GX OSS Support](https://discourse.greatexpectations.io/c/oss-support/) and [GX Cloud Support](https://discourse.greatexpectations.io/c/cloud-support/). Here you'll find guidance on [what information to provide to get your questions answered quickly](https://discourse.greatexpectations.io/t/how-to-get-your-questions-answered/1191).  
+GX has a [Discourse community forum](https://discourse.greatexpectations.io/) that includes categories for [GX Core Support](https://discourse.greatexpectations.io/c/oss-support/) and [GX Cloud Support](https://discourse.greatexpectations.io/c/cloud-support/). Here you'll find guidance on [what information to provide to get your questions answered quickly](https://discourse.greatexpectations.io/t/how-to-get-your-questions-answered/1191).  
 
 <!--
 You can also use [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions/4951).
@@ -41,7 +41,7 @@ If you're interested in helping out, review the [GitHub issues list](https://git
 
 ## Connect with our community
 
-Join the GX [public Slack channel](https://greatexpectations.io/slack) to connect with other GX users and see how they're using GX. Before you post for the first time, review the [Slack Guidelines](https://discourse.greatexpectations.io/t/slack-guidelines/1195).
+Join the [GX Discourse forum](https://discourse.greatexpectations.io/) to connect with other GX users and see how they're using GX. Before you post for the first time, review the [Discourse guidelines](https://discourse.greatexpectations.io/t/discourse-guidelines/1230).
 
 ## GX Cloud
 

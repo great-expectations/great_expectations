@@ -3,8 +3,7 @@ sidebar_label: "Connect to SQL database Data Assets"
 title: "Connect to SQL database Data Assets"
 id: connect_sql_source_data
 description: Connect to Data Assets stored on SQL databases.
-toc_min_heading_level: 2
-toc_max_heading_level: 2
+hide_table_of_contents: true
 ---
 
 import Prerequisites from '../../../../../components/_prerequisites.jsx'
@@ -336,7 +335,7 @@ The following code examples use a Databricks SQL connection string. A connection
 The following code is an example of a Databricks SQL connection string format:
 
 ```python
-my_connection_string = f"databricks://token:{token}@{host}:{port}/{database}?http_path={http_path}&catalog={catalog}&schema={schema}"
+my_connection_string = f"databricks://token:{token}@{host}:{port}?http_path={http_path}&catalog={catalog}&schema={schema}"
 ```
 
 ### Create a Databricks SQL Data Source

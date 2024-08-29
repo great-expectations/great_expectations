@@ -33,9 +33,6 @@ from great_expectations.datasource.fluent.data_asset.path.spark.text_asset impor
 from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition,
-)
 
 logger: Logger
 
@@ -54,7 +51,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0)
         # path: PathOrPaths,
         # NA - path determined by asset
@@ -156,7 +152,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
         data_directory: str | pathlib.Path = ...,
         # Spark Directory Reader Options ^^^
@@ -261,7 +256,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
         path_glob_filter: Optional[Union[bool, str]] = None,
         modified_before: Optional[Union[bool, str]] = None,
@@ -290,7 +284,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
         data_directory: str | pathlib.Path = ...,
         # Spark Directory Reader Options ^^^
@@ -322,7 +315,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
         path_glob_filter: Optional[Union[bool, str]] = None,
         modified_before: Optional[Union[bool, str]] = None,
@@ -347,7 +339,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
         data_directory: str | pathlib.Path = ...,
         # Spark Directory Reader Options ^^^
@@ -375,7 +366,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0)
         # path: Union[str, List[str], RDD[str]],
         # NA - path determined by asset
@@ -451,7 +441,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
         data_directory: str | pathlib.Path = ...,
         # Spark Directory Reader Options ^^^
@@ -530,7 +519,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
         path_glob_filter: Optional[Union[bool, str]] = None,
         modified_before: Optional[Union[bool, str]] = None,
@@ -558,7 +546,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
         data_directory: str | pathlib.Path = ...,
         # Spark Directory Reader Options ^^^
@@ -583,13 +570,12 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> DirectoryTextAsset: ...
-    def add_delta_asset(  # noqa: PLR0913
+    def add_delta_asset(
         self,
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Delta Specific Options vvv
         timestamp_as_of: Optional[str] = None,
         version_as_of: Optional[str] = None,
@@ -601,7 +587,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
         data_directory: str | pathlib.Path = ...,
         # Spark Directory Reader Options ^^^

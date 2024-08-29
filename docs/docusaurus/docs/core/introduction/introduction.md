@@ -1,6 +1,6 @@
 ---
-title: Introduction to Great Expectations
-description: Learn about the key features of GX, how to connect with the GX community, and try GX in Python.
+title: Introduction to GX Core
+description: Learn about GX Core components and workflows and try out the GX Core Python library.
 hide_feedback_survey: true
 hide_title: true
 ---
@@ -11,41 +11,25 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Learn about the key features of Great Expectations (GX).  Connect with the GX community, and try GX in Python using provided sample data.
+  Learn about key Great Expectations (GX) Core components and workflows. Use the GX Core Python library and provided sample data to create a data validation workflow.
 </OverviewCard>
 
 <LinkCardGrid>
 
   <LinkCard 
     topIcon 
-    label="About GX"
-    description="Learn about the key features of GX."
-    to="/core/introduction/about_gx" 
-    icon="/img/expectation_icon.svg" 
-  />
-
-  <LinkCard 
-    topIcon 
-    label="GX overview"
-    description="Learn about the major components of GX and how they interact."
+    label="GX Core overview"
+    description="Learn about GX Core components and workflows."
     to="/core/introduction/gx_overview" 
-    icon="/img/expectation_icon.svg" 
+    icon="/img/overview_icon.svg" 
   />
 
   <LinkCard 
     topIcon 
-    label="Try GX"
-    description="Set up a local GX deployment and give it a test run using sample data."
+    label="Try GX Core"
+    description="Walk through example GX Core workflows using sample data."
     to="/core/introduction/try_gx" 
-    icon="/img/expectation_icon.svg" 
-  />
-
-  <LinkCard 
-      topIcon 
-      label="Community resources"
-      description="Learn how to connect with the GX community, where to ask questions about GX, and how to contribute to the GX open source code and documentation."
-      to="/core/introduction/community_resources" 
-      icon="/img/expectation_icon.svg"
+    icon="/img/workflow_icon.svg" 
   />
 
 </LinkCardGrid>
