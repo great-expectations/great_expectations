@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 class MetricTypesMeta(enum.EnumMeta):
     """Metaclass definition for MetricTypes that allows for membership checking."""
 
-    def __contains__(cls, item):
+    def __contains__(cls, item):  # type: ignore[explicit-override] # FIXME
         return item in cls.__members__.values()
 
 

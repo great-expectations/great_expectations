@@ -6,7 +6,6 @@ hide_table_of_contents: true
 pagination_next: null
 pagination_prev: null
 slug: '/oss/'
-displayed_sidebar: gx_oss
 hide_feedback_survey: true
 ---
 

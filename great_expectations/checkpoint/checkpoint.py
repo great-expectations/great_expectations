@@ -31,10 +31,11 @@ from great_expectations.core.added_diagnostics import CheckpointAddedDiagnostics
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT, ResultFormatUnion
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -71,7 +72,7 @@ class Checkpoint(BaseModel):
     name: str
     validation_definitions: List[ValidationDefinition]
     actions: List[CheckpointAction] = Field(default_factory=list)
-    result_format: Union[ResultFormat, dict] = ResultFormat.SUMMARY
+    result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT
     id: Union[str, None] = None
 
     class Config:
@@ -121,8 +122,6 @@ class Checkpoint(BaseModel):
     def _validate_validation_definitions(
         cls, validation_definitions: list[ValidationDefinition] | list[dict]
     ) -> list[ValidationDefinition]:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         if validation_definitions and isinstance(validation_definitions[0], dict):
             validation_definition_store = project_manager.get_validation_definition_store()
             identifier_bundles = [
@@ -191,7 +190,7 @@ class Checkpoint(BaseModel):
         self,
         batch_parameters: Dict[str, Any] | None,
         expectation_parameters: Dict[str, Any] | None,
-        result_format: ResultFormat | dict,
+        result_format: ResultFormatUnion,
         run_id: RunIdentifier,
     ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:
         run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
@@ -281,8 +280,6 @@ class Checkpoint(BaseModel):
 
     @public_api
     def save(self) -> None:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
 
@@ -294,8 +291,6 @@ class Checkpoint(BaseModel):
         We need to persist a checkpoint before it can be run. If user calls runs but hasn't
         persisted it we add it for them.
         """
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
 

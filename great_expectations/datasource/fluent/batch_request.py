@@ -119,6 +119,7 @@ class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
         property_set_methods = {"batch_slice": "update_batch_slice"}
         validate_assignment = True
 
+    @override
     def __setattr__(self, key, val):
         method = self.__config__.property_set_methods.get(key)
         if method is None:

@@ -38,6 +38,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.base import CheckpointValidationDefinition
 from great_expectations.exceptions import (
     GreatExpectationsError,
@@ -186,8 +187,6 @@ class Validator:
 
     @property
     def _include_rendered_content(self) -> bool:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.is_using_cloud()
 
     @property

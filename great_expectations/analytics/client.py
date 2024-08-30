@@ -67,4 +67,9 @@ def init(  # noqa: PLR0913
 
 
 def _in_gx_ci() -> bool:
-    return os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
+    return (
+        # GitHub Actions
+        os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
+        # Azure Pipelines
+        or os.getenv("System.TeamProject") == "great_expectations"
+    )
