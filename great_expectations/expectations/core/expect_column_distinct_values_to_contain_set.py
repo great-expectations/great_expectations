@@ -58,7 +58,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectColumnDistinctValuesToContainSet is a \
-    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
+    Column Aggregate Expectation.
 
     Column Aggregate Expectations are one of the most common types of Expectation.
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
