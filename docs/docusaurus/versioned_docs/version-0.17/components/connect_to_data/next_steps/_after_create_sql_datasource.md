@@ -1,2 +1,0 @@
-- [Use a Data Asset to connect to the data in a SQL table](/guides/connecting_to_your_data/fluent/database/sql_data_assets.md)
-- [Use a Data Asset to connect to the results of a SQL query](/guides/connecting_to_your_data/fluent/database/sql_data_assets.md)

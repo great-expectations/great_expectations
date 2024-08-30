@@ -1,1 +1,0 @@
-- [Organize a SQL Data Asset into multiple Batches](/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
