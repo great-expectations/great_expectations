@@ -1322,6 +1322,11 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
+    if pyspark.ConnectDataFrame and isinstance(data, pyspark.ConnectDataFrame):  # type: ignore[truthy-function]
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
+
     # SQLAlchemy serialization
     if LegacyRow and isinstance(data, LegacyRow):
         return dict(data)
