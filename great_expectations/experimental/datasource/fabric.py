@@ -37,9 +37,13 @@ from great_expectations.datasource.fluent.interfaces import (
     Sorter,
     TestConnectionError,
 )
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 
 if TYPE_CHECKING:
     from great_expectations.core.batch_spec import FabricReaderMethods
+    from great_expectations.core.partitioners import ColumnPartitioner
+    from great_expectations.datasource.fluent import BatchParameters
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
     )
@@ -132,13 +136,42 @@ class _PowerBIAsset(DataAsset):
         return batch_list
 
     @override
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters] = None,
+        batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
+    ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
+        Args:
+            options: This is not currently supported and must be {}/None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
+            partitioner: This is not currently supported and must be None for this data asset.
+
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """  # noqa: E501
+            A `BatchRequest` object that can be used to obtain a batch list from a Datasource by
+            calling the `get_batch_list_from_batch_request()` method.
+        """
+        asset_type_name: str = self.__class__.__name__
+        if options:
+            raise BuildBatchRequestError(
+                message=f"options is not currently supported for {asset_type_name} "
+                "and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise BuildBatchRequestError(
+                message=f"batch_slice is not currently supported for {asset_type_name} "
+                "and must be None."
+            )
+
+        if partitioner is not None:
+            raise BuildBatchRequestError(
+                message=f"partitioner is not currently supported for {asset_type_name} "
+                "and must be None."
+            )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
