@@ -145,7 +145,7 @@ class _PowerBIAsset(DataAsset):
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: This is not currently supported and must be {}/None for this data asset.
+            options: This is not currently supported and must be {} or None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
 
