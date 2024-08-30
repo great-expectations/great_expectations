@@ -626,7 +626,11 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             sorted_metadata_dicts = unsorted_metadata_dicts
         sorted_metadata_dicts = sorted_metadata_dicts[batch_request.batch_slice]
         batch_metadata = sorted_metadata_dicts[-1]
+
+        # we've sorted the metadata, but not the requests, so we need the index of our
+        # batch_metadata from the original unsorted list so that we get the right request
         request_index = unsorted_metadata_dicts.index(batch_metadata)
+
         request = requests[request_index]
         batch_spec_kwargs = self._create_batch_spec_kwargs()
         if sql_partitioner:
