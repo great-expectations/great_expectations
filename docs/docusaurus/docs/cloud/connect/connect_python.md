@@ -87,7 +87,7 @@ Environment variables securely store your GX Cloud access credentials.
 
     The code example uses the default Data Source for Pandas to access the `.csv` data from the file at the specified URL path.
 
-    Alternatively, if you have already configured Data in GX Cloud you can use it instead.  To see your available Data Sources, run:
+    Alternatively, if you have already configured your data in GX Cloud you can use it instead.  To see your available Data Sources, run:
 
     ```title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - list data sources"
     ```

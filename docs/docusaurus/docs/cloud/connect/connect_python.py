@@ -31,11 +31,9 @@ print(context.list_datasources())
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/cloud/connect/connect_python.py - retrieve a data asset">
-data_source_name = "replace this with the name of your Data Source"
-asset_name = "replace this with the name of your Data Source's Data Asset"
-batch_definition_name = (
-    "replace this with the name of your Data Asset's Batch Definition"
-)
+data_source_name = "my_data_source"
+asset_name = "my_data_asset"
+batch_definition_name = "my_batch_definition"
 batch = (
     gx.context.data_sources.get(data_source_name)
     .get_asset(asset_name)
