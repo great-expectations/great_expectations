@@ -27,6 +27,8 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import IDDict
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import FabricBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
@@ -76,8 +78,6 @@ class _PowerBIAsset(DataAsset):
 
     @override
     def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
-        from great_expectations.core import IDDict
-
         return [IDDict(batch_request.options)]
 
     @override
@@ -106,10 +106,6 @@ class _PowerBIAsset(DataAsset):
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-        # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core import IDDict
-        from great_expectations.core.batch import LegacyBatchDefinition
-
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,

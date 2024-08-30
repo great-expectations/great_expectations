@@ -32,6 +32,8 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import IDDict
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import (
     BatchSpec,
     RuntimeQueryBatchSpec,
@@ -606,9 +608,6 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
         Returns:
             A list Batch that matches the options specified in the batch request.
         """
-        from great_expectations.core import IDDict
-        from great_expectations.core.batch import LegacyBatchDefinition
-
         self._validate_batch_request(batch_request)
 
         if batch_request.partitioner:

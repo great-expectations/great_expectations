@@ -29,6 +29,8 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import IDDict
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchParameters, BatchRequest
 from great_expectations.datasource.fluent.constants import (
@@ -268,8 +270,6 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
     @override
     def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
-        from great_expectations.core import IDDict
-
         return [IDDict(batch_request.options)]
 
     @override
@@ -283,9 +283,6 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-        # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core import IDDict
-        from great_expectations.core.batch import LegacyBatchDefinition
 
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
