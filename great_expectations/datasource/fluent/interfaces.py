@@ -529,7 +529,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
 
     def sort_legacy_batch_definitions(
         self,
-        batch_definition_list: List[LegacyBatchDefinition],
+        legacy_batch_definition_list: List[LegacyBatchDefinition],
         partitioner: PartitionerSortingProtocol,
     ) -> List[LegacyBatchDefinition]:
         """Sorts batch_definition_list in the order configured by the partitioner."""
@@ -537,7 +537,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
         def get_value(key: str) -> Callable[[LegacyBatchDefinition], Any]:
             return lambda bd: bd.batch_identifiers[key]
 
-        return self._sort_batch_data_list(batch_definition_list, partitioner, get_value)
+        return self._sort_batch_data_list(legacy_batch_definition_list, partitioner, get_value)
 
     def sort_batch_identifiers_list(
         self, batch_identfiers_list: List[dict], partitioner: PartitionerSortingProtocol
