@@ -1181,7 +1181,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_request_list = [batch_request]  # type: ignore[list-item]
         for batch_req in batch_request_list:
             computed_batch_list.append(
-                self.get_batch_list(
+                self.get_last_batch(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
                     data_asset_name=data_asset_name,
@@ -1301,7 +1301,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return validator
 
-    def get_batch_list(  # noqa: PLR0913
+    def get_last_batch(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1374,7 +1374,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`)
 
         """  # noqa: E501
-        return self._get_batch_list(
+        return self._get_last_batch(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -1398,7 +1398,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _get_batch_list(  # noqa: PLR0913
+    def _get_last_batch(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
