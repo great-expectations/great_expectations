@@ -195,7 +195,7 @@ class TestFabricPowerBI:
         with pytest.raises(BuildBatchRequestError):
             power_bi_datasource.add_powerbi_dax_asset(
                 "my_dax_asset", dax_string="my_dax_string"
-            ).build_batch_request(options="not valid")
+            ).build_batch_request(options={"not": "valid"})
 
 
 if __name__ == "__main__":
