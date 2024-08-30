@@ -92,7 +92,7 @@ Environment variables securely store your GX Cloud access credentials.
     ```title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - list data sources"
     ```
   
-    Using the printed information you can get the name of one of your existing Data Sources and the name of one of its Data Assets.  Then, you can retrieve a Batch of data by updating the values for `data_source_name`, `data_asset_name`, and `batch_definition_name` in the following code and executing it:
+    Using the printed information you can get the name of one of your existing Data Sources, one of its Data Assets, and the name of a Batch Definition on the Data Asset.  Then, you can retrieve a Batch of data by updating the values for `data_source_name`, `data_asset_name`, and `batch_definition_name` in the following code and executing it:
 
     ```python title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - retrieve a data asset"
     ```
