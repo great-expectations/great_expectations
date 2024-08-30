@@ -31,6 +31,7 @@ from great_expectations.datasource.fluent.interfaces import (
     PartitionerSortingProtocol,
     TestConnectionError,
 )
+from great_expectations.exceptions.exceptions import NoAvailableBatchesError
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -139,8 +140,8 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
         )
 
         batch_definitions = self._get_batch_definition_list(batch_request)
-        if len(batch_definitions) == 0:
-            raise ValueError("No batch found")  # noqa: TRY003
+        if not batch_definitions:
+            raise NoAvailableBatchesError()
 
         # Pick the last, which most likely corresponds to the most recent, batch in the list
         if sortable_partitioner := self._get_sortable_partitioner(batch_request.partitioner):

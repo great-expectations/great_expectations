@@ -30,6 +30,7 @@ from great_expectations.datasource.fluent.data_connector import (
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.sources import _get_field_details
+from great_expectations.exceptions.exceptions import NoAvailableBatchesError
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -612,3 +613,36 @@ def test_csv_asset_batch_metadata(
 
     assert len(actual_metadata)
     assert actual_metadata == substituted_batch_metadata
+
+
+@pytest.mark.parametrize(
+    ("sort_ascending", "expected_metadata"),
+    [
+        (True, {"year": "2020", "month": "12", "path": "yellow_tripdata_sample_2020-12.csv"}),
+        (False, {"year": "2018", "month": "01", "path": "yellow_tripdata_sample_2018-01.csv"}),
+    ],
+)
+@pytest.mark.unit
+def test_get_batch_respects_order_ascending(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+    sort_ascending: bool,
+    expected_metadata: dict,
+) -> None:
+    asset = pandas_filesystem_datasource.add_csv_asset(name="csv_asset")
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(
+        name="batch def", regex=regex, sort_ascending=sort_ascending
+    )
+    batch = batch_def.get_batch()
+    assert batch.metadata == expected_metadata
+
+
+@pytest.mark.unit
+def test_raises_if_no_matching_batches(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+) -> None:
+    asset = pandas_filesystem_datasource.add_csv_asset(name="csv_asset")
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=regex)
+    with pytest.raises(NoAvailableBatchesError):
+        batch_def.get_batch(batch_parameters={"year": "1995", "month": "01"})

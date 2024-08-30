@@ -46,6 +46,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SqlPartitionerYearAndMonth,
     TableAsset,
 )
+from great_expectations.exceptions.exceptions import NoAvailableBatchesError
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from tests.datasource.fluent.conftest import (
     _DEFAULT_TEST_MONTHS,
@@ -1058,6 +1059,34 @@ def test_get_batch_partitioner__sort_ascending_respected(
         batch_request = asset.build_batch_request(partitioner=partitioner)
         batch = source.get_batch(batch_request)
         assert batch.metadata == expected_metadata
+
+
+@pytest.mark.postgresql
+def test_get_batch_raises_if_no_batches_available(
+    empty_data_context,
+    create_source: CreateSourceFixture,
+):
+    batch_specs = []
+
+    def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
+        batch_specs.append(spec)
+
+    with create_source(
+        validate_batch_spec=collect_batch_spec,
+        dialect="postgresql",
+        data_context=empty_data_context,
+        partitioner_query_response=[],
+    ) as source:
+        # We use a query asset because then we don't have to mock out db connection tests
+        # in this unit test.
+        asset = source.add_query_asset(
+            name="my_asset",
+            query="select * from table",
+        )
+        partitioner = ColumnPartitionerYearly(column_name="my_col")
+        batch_request = asset.build_batch_request(partitioner=partitioner, options={"year": 1995})
+        with pytest.raises(NoAvailableBatchesError):
+            source.get_batch(batch_request)
 
 
 @pytest.mark.postgresql

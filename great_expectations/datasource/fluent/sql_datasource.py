@@ -69,6 +69,7 @@ from great_expectations.datasource.fluent.interfaces import (
     PartitionerProtocol,
     TestConnectionError,
 )
+from great_expectations.exceptions.exceptions import NoAvailableBatchesError
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
@@ -618,6 +619,10 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
         batch_spec_kwargs: dict[str, str | dict | None]
         requests = self._fully_specified_batch_requests(batch_request)
         unsorted_metadata_dicts = [self._get_batch_metadata_from_batch_request(r) for r in requests]
+
+        if not unsorted_metadata_dicts:
+            raise NoAvailableBatchesError()
+
         if sql_partitioner:
             sorted_metadata_dicts = self.sort_batch_identifiers_list(
                 unsorted_metadata_dicts, sql_partitioner

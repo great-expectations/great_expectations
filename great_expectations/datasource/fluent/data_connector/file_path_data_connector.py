@@ -92,7 +92,7 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """  # noqa: E501
-        batch_definition_list: List[LegacyBatchDefinition] = (
+        legacy_batch_definition_list: List[LegacyBatchDefinition] = (
             self._get_unfiltered_batch_definition_list(batch_request=batch_request)
         )
 
@@ -113,11 +113,11 @@ class FilePathDataConnector(DataConnector):
         batch_filter_obj: BatchFilter = build_batch_filter(
             data_connector_query_dict=data_connector_query_dict  # type: ignore[arg-type]
         )
-        batch_definition_list = batch_filter_obj.select_from_data_connector_query(
-            batch_definition_list=batch_definition_list
+        legacy_batch_definition_list = batch_filter_obj.select_from_data_connector_query(
+            batch_definition_list=legacy_batch_definition_list
         )
 
-        return batch_definition_list
+        return legacy_batch_definition_list
 
     @override
     def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> PathBatchSpec:
