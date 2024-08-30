@@ -43,7 +43,7 @@ from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_definition import BatchDefinition, PartitionerT
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
 )
@@ -67,6 +67,8 @@ from great_expectations.datasource.fluent.data_connector import (
 if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
+
+    from great_expectations.core.result_format import ResultFormatUnion
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -1114,37 +1116,36 @@ class Batch:
         )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
 
-    @property
-    def result_format(self) -> str | dict | ResultFormat:
-        # We always `return a ResultFormat`. However to prevent having to do #ignore[assignment] we return  # noqa: E501
-        # `str | ResultFormat`. When the getter/setter have different types mypy gets confused on lines like:  # noqa: E501
-        # batch.result_format = "SUMMARY"
-        # See:
-        # https://github.com/python/mypy/issues/3004
-        return self._validator.result_format
-
-    @result_format.setter
-    def result_format(self, result_format: str | ResultFormat):
-        # We allow a str result_format because this is an interactive workflow
-        self._validator.result_format = ResultFormat(result_format)
+    @overload
+    def validate(
+        self,
+        expect: Expectation,
+        *,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+    ) -> ExpectationValidationResult: ...
 
     @overload
-    def validate(self, expect: Expectation) -> ExpectationValidationResult: ...
-
-    @overload
-    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult: ...
+    def validate(
+        self,
+        expect: ExpectationSuite,
+        *,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+    ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
     def validate(
-        self, expect: Expectation | ExpectationSuite
+        self,
+        expect: Expectation | ExpectationSuite,
+        *,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
         from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
 
         if isinstance(expect, Expectation):
-            return self._validate_expectation(expect)
+            return self._validate_expectation(expect, result_format=result_format)
         elif isinstance(expect, ExpectationSuite):
-            return self._validate_expectation_suite(expect)
+            return self._validate_expectation_suite(expect, result_format=result_format)
         else:
             # If we are type checking, we should never fall through to this case. However, exploratory  # noqa: E501
             # workflows are not being type checked.
@@ -1152,16 +1153,25 @@ class Batch:
                 f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"  # noqa: E501
             )
 
-    def _validate_expectation(self, expect: Expectation) -> ExpectationValidationResult:
-        return self._validator.validate_expectation(expect)
+    def _validate_expectation(
+        self,
+        expect: Expectation,
+        result_format: ResultFormatUnion,
+    ) -> ExpectationValidationResult:
+        return self._create_validator(
+            result_format=result_format,
+        ).validate_expectation(expect)
 
     def _validate_expectation_suite(
-        self, expect: ExpectationSuite
+        self,
+        expect: ExpectationSuite,
+        result_format: ResultFormatUnion,
     ) -> ExpectationSuiteValidationResult:
-        return self._validator.validate_expectation_suite(expect)
+        return self._create_validator(
+            result_format=result_format,
+        ).validate_expectation_suite(expect)
 
-    @functools.cached_property
-    def _validator(self) -> V1Validator:
+    def _create_validator(self, *, result_format: ResultFormatUnion) -> V1Validator:
         from great_expectations.validator.v1_validator import Validator as V1Validator
 
         context = self.datasource.data_context
@@ -1180,4 +1190,5 @@ class Batch:
         return V1Validator(
             batch_definition=batch_definition,
             batch_parameters=self.batch_request.options,
+            result_format=result_format,
         )

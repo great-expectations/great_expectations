@@ -49,6 +49,11 @@ GX Cloud deployments can be tailored to meet your specific business requirements
 ### Fully hosted
 In a fully hosted deployment, you get started with GX Cloud by connecting directly to your organization's cloud data stores via the GX Cloud UI. This is the fastest path to setup.
 
+If you are using this option please ensure that the GX Cloud IPs are in your organizations allow list for ingress traffic.
+- 44.209.54.123
+- 54.235.167.60
+- 34.194.243.19
+
 ### Org-hosted GX Agent
 
 In an org-hosted deployment, you run the GX Agent in your organization's deployment environment. The GX Agent is an intermediary between GX Cloud and your organization's deployment environment data stores. Organization users can interact with GX Cloud using the web UI, the GX Core client, or both.
