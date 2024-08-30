@@ -35,6 +35,11 @@ except (ImportError, AttributeError):
     Bucketizer = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
+    from pyspark.sql.connect.dataframe import DataFrame as ConnectDataFrame
+except (ImportError, AttributeError):
+    ConnectDataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
     from pyspark.sql import Column
 except (ImportError, AttributeError):
     Column = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]

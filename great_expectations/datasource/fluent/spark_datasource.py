@@ -5,6 +5,7 @@ import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    Any,
     ClassVar,
     Dict,
     Generic,
@@ -12,6 +13,7 @@ from typing import (
     Literal,
     Optional,
     Type,
+    TypeGuard,
     TypeVar,
     Union,
 )
@@ -27,7 +29,7 @@ from great_expectations.compatibility.pydantic import (
     StrictInt,
     StrictStr,
 )
-from great_expectations.compatibility.pyspark import DataFrame, pyspark
+from great_expectations.compatibility.pyspark import ConnectDataFrame, DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchParameters, BatchRequest
@@ -228,9 +230,10 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         if not (options is not None and "dataframe" in options and len(options) == 1):
             raise BuildBatchRequestError(message="options must contain exactly 1 key, 'dataframe'.")
 
-        if not isinstance(options["dataframe"], DataFrame):
+        if not self.is_spark_data_frame(options["dataframe"]):
             raise BuildBatchRequestError(
-                message="Can not build batch request for dataframe asset " "without a dataframe."
+                message="Cannot build batch request for dataframe asset; "
+                f"received dataframe of type {type(options['dataframe'])}."
             )
 
         return BatchRequest(
@@ -238,6 +241,10 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             data_asset_name=self.name,
             options=options,
         )
+
+    @staticmethod
+    def is_spark_data_frame(df: Any) -> TypeGuard[Union[DataFrame, ConnectDataFrame]]:
+        return isinstance(df, (DataFrame, ConnectDataFrame))
 
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -252,7 +259,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             and batch_request.options
             and len(batch_request.options) == 1
             and "dataframe" in batch_request.options
-            and isinstance(batch_request.options["dataframe"], DataFrame)
+            and self.is_spark_data_frame(batch_request.options["dataframe"])
         ):
             expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
