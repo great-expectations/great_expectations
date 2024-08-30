@@ -37,6 +37,11 @@
                 }
             ]
         },
+        "description": {
+            "title": "Description",
+            "description": "A short description of your Expectation",
+            "type": "string"
+        },
         "catch_exceptions": {
             "title": "Catch Exceptions",
             "default": false,
