@@ -343,22 +343,27 @@ module.exports = {
           type: 'category',
           label: 'Manage alerts',
           link: { type: 'doc', id: 'cloud/alerts/manage_alerts' },
-          items: [
+            items: [
             {
-              type: 'link',
-              label: 'Add a Slack alert',
-              href: '/docs/cloud/alerts/manage_alerts#add-a-slack-alert',
+              type: "link",
+              label: "Auto-Subscription to an email alert",
+              href: "/docs/cloud/alerts/manage_alerts#auto-subscription-to-an-email-alert"
             },
             {
-              type: 'link',
-              label: 'Edit a Slack alert',
-              href: '/docs/cloud/alerts/manage_alerts#edit-a-slack-alert',
+              type: "link",
+              label: "Enable an email alert",
+              href: "/docs/cloud/alerts/manage_alerts#enable-an-email-alert"
             },
             {
-              type: 'link',
-              label: 'Delete a Slack alert',
-              href: '/docs/cloud/alerts/manage_alerts#delete-a-slack-alert',
+              type: "link",
+              label: "Disable an email alert",
+              href: "/docs/cloud/alerts/manage_alerts#disable-an-email-alert"
             },
+            {
+              type: "link",
+              label: "Delete an email alert",
+              href: "/docs/cloud/alerts/manage_alerts#delete-an-email-alert"
+            }
           ]
         },
         {
