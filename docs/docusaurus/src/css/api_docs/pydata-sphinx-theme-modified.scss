@@ -10292,7 +10292,7 @@ nav.page-toc ul > li {
 div.deprecated, div.versionadded, div.versionchanged {
   border: 1px solid;
   border-radius: .25rem;
-  box-shadow: none !important;
+  box-shadow: none;
   margin: 1.5625em auto;
   overflow: hidden;
   padding: 0 .6rem;
@@ -10344,13 +10344,13 @@ div.deprecated > p:before, div.versionadded > p:before, div.versionchanged > p:b
 }
 
 div.versionadded {
-  background-color: #F8F9EC;
-  border: 1px solid #B6C647;
+  background-color: var(--ifm-color-success-contrast-background);
+  border: 1px solid var(--ifm-color-success-dark);
   border-left-width: 6px;
 
   cite {
-    background-color: #b6c64733;
-    border-color: #b6c647;
+    background-color: var(--ifm-color-success-contrast-background);
+    border-color: var(--ifm-color-success-dark);
   }
 
   .added:before {
@@ -10367,8 +10367,8 @@ div.versionchanged p:before {
 }
 
 div.deprecated {
-  background-color: #FEF6F9;
-  border: 1px solid #E54F54;
+  background-color: var(--ifm-color-danger-contrast-background);
+  border: 1px solid var(--ifm-color-danger-dark);
   border-left-width: 6px;
 
   .deprecated:before {
@@ -10376,8 +10376,8 @@ div.deprecated {
   }
 
   cite {
-    background-color: #FEF6F9;
-    border-color: #E54F54;
+    background-color: var(--ifm-color-danger-contrast-background);
+    border-color: var(--ifm-color-danger-dark);
   }
 }
 
