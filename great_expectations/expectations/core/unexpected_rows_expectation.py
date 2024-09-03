@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from string import Formatter
 from typing import TYPE_CHECKING, ClassVar, Tuple, Union
 
@@ -10,6 +11,9 @@ from great_expectations.expectations.expectation import BatchExpectation
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationValidationResult
     from great_expectations.execution_engine import ExecutionEngine
+
+
+logger = logging.getLogger(__name__)
 
 
 class UnexpectedRowsExpectation(BatchExpectation):
@@ -38,7 +42,16 @@ class UnexpectedRowsExpectation(BatchExpectation):
     def _validate_query(cls, query: str) -> str:
         parsed_fields = [f[1] for f in Formatter().parse(query)]
         if "batch" not in parsed_fields:
-            raise ValueError("Query must contain {batch} parameter.")  # noqa: TRY003
+            batch_warning_message = (
+                "To refer to the Data Asset's batch, the unexpected_rows_query "
+                "should contain the {batch} parameter. "
+                "Otherwise data outside of the configured batch will be queried."
+            )
+            # instead of raising a disruptive warning, we print and log info
+            # in order to make the user aware of the potential for querying
+            # data outside the configured batch
+            print(batch_warning_message)
+            logger.info(batch_warning_message)
 
         return query
 
