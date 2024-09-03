@@ -270,6 +270,10 @@ class ValidationDefinition(BaseModel):
             batch_parameters_copy = {k: v for k, v in batch_parameters.items()}
             if "dataframe" in batch_parameters_copy:
                 batch_parameters_copy["dataframe"] = DATAFRAME_INDICATOR
+                results.meta["active_batch_definition"]["batch_identifiers"]["dataframe"] = (
+                    DATAFRAME_INDICATOR
+                )
+
             results.meta["batch_parameters"] = batch_parameters_copy
         else:
             results.meta["batch_parameters"] = None
