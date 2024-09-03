@@ -38,7 +38,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     """Expect the column entries to be JSON objects matching a given JSON schema.
 
     ExpectColumnValuesToMatchJsonSchema is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+    Column Map Expectation.
 
     Args:
         column (str): \
