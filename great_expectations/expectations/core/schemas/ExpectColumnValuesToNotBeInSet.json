@@ -81,9 +81,6 @@
             "description": "A set of objects used for comparison.",
             "anyOf": [
                 {
-                    "type": "object"
-                },
-                {
                     "title": "Value Set",
                     "description": "A set of objects used for comparison.",
                     "oneOf": [
@@ -144,6 +141,9 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "type": "object"
                 }
             ]
         },
