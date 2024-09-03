@@ -50,10 +50,16 @@ class UnexpectedRowsExpectation(BatchExpectation):
         execution_engine: ExecutionEngine | None = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metric_value = metrics["unexpected_rows_query.table"]
+        unexpected_row_count = len(metric_value)
+        observed_value = f"{unexpected_row_count} unexpected "
+        if unexpected_row_count == 1:
+            observed_value += "row"
+        else:
+            observed_value += "rows"
         return {
-            "success": len(metric_value) == 0,
+            "success": unexpected_row_count == 0,
             "result": {
-                "observed_value": len(metric_value),
+                "observed_value": observed_value,
                 "details": {"unexpected_rows": metric_value},
             },
         }
