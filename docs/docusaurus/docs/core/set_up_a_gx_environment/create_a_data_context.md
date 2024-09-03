@@ -18,7 +18,7 @@ All scripts that utilize GX Core should start with the creation of a Data Contex
 
 The following are the available Data Context types:
 
-- **File Data Context:** A persistent Data Context that stores metadata and configuration information as YAML files. File Data Contexts allow you to re-use previously configured Expectation Suites, Data Sources, and Checkpoints.
+- **File Data Context:** A persistent Data Context that stores metadata and configuration information as YAML files within a file system. File Data Contexts allow you to re-use previously configured Expectation Suites, Data Sources, and Checkpoints.
 
 - **Ephemeral Data Context:** A temporary Data Context that stores metadata and configuration information in memory. This Data Context will not persist beyond the current Python session. Ephemeral Data Contexts are useful when you don’t have write permissions to a file system or if you are going to engage in data exploration without needing to save your results.
 
