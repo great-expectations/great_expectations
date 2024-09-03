@@ -37,6 +37,10 @@
                 }
             ]
         },
+        "description": {
+            "title": "Description",
+            "type": "string"
+        },
         "catch_exceptions": {
             "title": "Catch Exceptions",
             "default": true,
