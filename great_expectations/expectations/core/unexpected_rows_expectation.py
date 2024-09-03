@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 from string import Formatter
-from typing import ClassVar, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, Tuple, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationValidationResult
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationValidationResult
+    from great_expectations.execution_engine import ExecutionEngine
 
 
 class UnexpectedRowsExpectation(BatchExpectation):
