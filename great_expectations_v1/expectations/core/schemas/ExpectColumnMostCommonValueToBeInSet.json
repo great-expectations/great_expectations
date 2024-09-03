@@ -72,9 +72,6 @@
             "description": "A list of potential values to match.",
             "anyOf": [
                 {
-                    "type": "object"
-                },
-                {
                     "title": "Value Set",
                     "description": "A set of objects used for comparison.",
                     "oneOf": [
@@ -135,6 +132,9 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "type": "object"
                 }
             ]
         },

@@ -188,7 +188,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Optional[Union[SuiteParameterDict, ValueSet]] = pydantic.Field(
+    value_set: Union[Optional[ValueSet], SuiteParameterDict] = pydantic.Field(
         description=VALUE_SET_DESCRIPTION
     )
 
