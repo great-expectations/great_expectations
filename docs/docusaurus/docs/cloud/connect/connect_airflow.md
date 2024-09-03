@@ -20,7 +20,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 - You have [created an Expectation Suite](/cloud/expectation_suites/manage_expectation_suites.md) and [added Expectations](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 
-## Run Airflow Standalone to create a freshh local Airflow environment
+## Run Airflow Standalone to create a fresh local Airflow environment
 
 1. The `airflow standalone` command initializes the database, creates a user, and starts all components.
 
