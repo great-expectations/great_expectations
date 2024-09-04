@@ -5,7 +5,7 @@
     gap: 0.25rem;
     align-items: flex-start;
     font-size: var(--p-tiny-font-size);
-    padding-right: 2rem;
+    padding: var(--ifm-navbar-item-padding-vertical) 2rem var(--ifm-navbar-item-padding-vertical) 0.25rem;
 }
 
 .githubBadgeNoErrors {
@@ -62,3 +62,4 @@ a:hover {
         display: none;
     }
 }
+

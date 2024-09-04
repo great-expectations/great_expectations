@@ -34,7 +34,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
      Note that all instances of any duplicates are considered failed
 
      ExpectMulticolumnvaluesToBeUnique is a \
-     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+     Column Map Expectation.
 
      For example:
      ::

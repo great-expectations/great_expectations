@@ -22,7 +22,7 @@
   }
   
   html[data-theme="dark"] .linkCard[href]:hover {
-    background-color: var(--orange-900);
+    background-color: var(--dark-orange-dark-theme);
   }
   
   .linkCard__icon {
@@ -55,3 +55,14 @@
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+
+[data-theme='dark'] .linkCard {
+    background-color: var(--card-background-dark-theme);
+    border-color: #4E4E4E;
+    box-shadow: var(--default-box-shadow);
+}
+
+[data-theme='dark'] :global(.markdown) .linkCard img {
+    background-color: transparent;
+    margin: 0;
+}
