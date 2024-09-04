@@ -351,14 +351,9 @@ module.exports = {
             },
             {
               type: "link",
-              label: "Enable an email alert",
-              href: "/docs/cloud/alerts/manage_alerts#enable-an-email-alert"
+              label: "Update an email alert",
+              href: "/docs/cloud/alerts/manage_alerts#update-an-email-alert"
             },
-            {
-              type: "link",
-              label: "Disable an email alert",
-              href: "/docs/cloud/alerts/manage_alerts#disable-an-email-alert"
-            }
           ]
         },
         {

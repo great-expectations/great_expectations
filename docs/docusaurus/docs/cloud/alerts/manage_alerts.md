@@ -8,21 +8,15 @@ Stay informed about the health of the Data Assets that you care about by enablin
 
 ## Auto-Subscription to an email alert
 
-You are automatically subscribed to email alerts for any Data Asset you create in GX Cloud. An email will be sent whenever the Data Asset fails validation.
+GX will send you an email whenever a Data Asset you want to track fails validation.
+Alerts will be enabled by default for any Data Asset you create and disabled by default for all other Data Assets.
 
 
-## Enable an email alert
+## Update an email alert
 
-You can also manually enable or manage email alerts for any Data Asset in GX Cloud:
-
-1. In GX Cloud, click **Data Assets**.
-2. Click a Data Asset in the **Data Assets** list.
-3. Click the **Expectations** tab and then **Alerts**.
-4. Click the **toggle switch** to enable email alerts for the Data Asset.
-
-## Disable an email alert
+You can also manage email alerts for any Data Asset in GX Cloud:
 
 1. In GX Cloud, click **Data Assets**.
 2. Click a Data Asset in the **Data Assets** list.
 3. Click the **Expectations** tab and then **Alerts**.
-4. Click the **toggle switch** to disable email alerts for the Data Asset.
+4. Click the **toggle switch** to enable or disable email alerts for the Data Asset.
