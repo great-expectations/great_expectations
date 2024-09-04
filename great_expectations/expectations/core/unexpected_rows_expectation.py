@@ -8,7 +8,6 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render.renderer_configuration import (
-    AddParamArgs,
     RendererConfiguration,
     RendererValueType,
 )
@@ -65,12 +64,10 @@ class UnexpectedRowsExpectation(BatchExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: AddParamArgs = (("unexpected_rows_query", RendererValueType.STRING),)
-        for name, param_type in add_param_args:
-            renderer_configuration.add_param(name=name, param_type=param_type)
-
-        renderer_configuration.template_str = "$unexpected_rows_query"
-
+        renderer_configuration.add_param(name="description", param_type=RendererValueType.STRING)
+        params = renderer_configuration.params
+        renderer_configuration.template_str = "$description" if params.description else ""
+        renderer_configuration.query = params.unexpected_rows_query
         return renderer_configuration
 
     @override

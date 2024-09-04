@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+import logging
 from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
@@ -27,6 +28,9 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.interfaces import Batch
     from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class FakeMulticolumnExpectation(MulticolumnMapExpectation):
@@ -269,9 +273,14 @@ def test_unrecognized_expectation_arg_raises_error():
         pytest.param("SELECT * FROM {active_batch}", id="legacy syntax"),
     ],
 )
-def test_unexpected_rows_expectation_invalid_query_raises_error(query: str):
-    with pytest.raises(pydantic.ValidationError):
+def test_unexpected_rows_expectation_invalid_query_info_message(query: str, caplog, capfd):
+    # info log is emitted
+    with caplog.at_level(logging.INFO):
         UnexpectedRowsExpectation(unexpected_rows_query=query)
+
+    # stdout is printed to console
+    out, _ = capfd.readouterr()
+    assert "{batch}" in out
 
 
 @pytest.fixture
@@ -306,7 +315,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
         pytest.param(
             "SELECT * FROM {batch} WHERE passenger_count > 7",
             True,
-            0,
+            "0 unexpected rows",
             [],
             id="success",
         ),
@@ -314,7 +323,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
             # There is a single instance where passenger_count == 7
             "SELECT * FROM {batch} WHERE passenger_count > 6",
             False,
-            1,
+            "1 unexpected row",
             [
                 {
                     "?": 48422,

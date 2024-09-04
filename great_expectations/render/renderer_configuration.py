@@ -152,6 +152,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         MetaNotes(format=MetaNotesFormat.STRING, content=[]), allow_mutation=False
     )
     template_str: str = Field("", allow_mutation=True)
+    query: str = Field("", allow_mutation=True)
     header_row: List[RendererTableValue] = Field([], allow_mutation=True)
     table: List[List[RendererTableValue]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
