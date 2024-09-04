@@ -39,9 +39,7 @@ data_asset = datasource.add_table_asset(name="data asset", table_name="transfers
 batch_definition = data_asset.add_batch_definition_whole_table("batch definition")
 batch = batch_definition.get_batch()
 
-suite = context.suites.add(
-    gx.ExpectationSuite(name="example missingness expectations")
-)
+suite = context.suites.add(gx.ExpectationSuite(name="example missingness expectations"))
 
 #############################
 # Start Expectation snippets.

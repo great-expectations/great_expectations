@@ -46,7 +46,6 @@ def add_column_to_transfers_table() -> None:
 import pandas as pd
 
 import great_expectations as gx
-import great_expectations.expectations as gxe
 
 # Create Data Context.
 context = gx.get_context()
@@ -60,9 +59,7 @@ datasource = context.data_sources.add_postgres(
 data_asset = datasource.add_table_asset(name="data asset", table_name="transfers")
 
 # Create Expectation Suite and add Expectations.
-suite = context.suites.add(
-    gx.ExpectationSuite(name="schema expectations")
-)
+suite = context.suites.add(gx.ExpectationSuite(name="schema expectations"))
 
 suite.add_expectation(
     gxe.ExpectTableColumnsToMatchSet(
@@ -92,9 +89,7 @@ validation_definition = context.validation_definitions.add(
 
 # Define Checkpoint, run it, and capture result.
 checkpoint = context.checkpoints.add(
-    gx.Checkpoint(
-        name="checkpoint", validation_definitions=[validation_definition]
-    )
+    gx.Checkpoint(name="checkpoint", validation_definitions=[validation_definition])
 )
 
 checkpoint_result_1 = checkpoint.run()
