@@ -358,11 +358,6 @@ module.exports = {
               type: "link",
               label: "Disable an email alert",
               href: "/docs/cloud/alerts/manage_alerts#disable-an-email-alert"
-            },
-            {
-              type: "link",
-              label: "Delete an email alert",
-              href: "/docs/cloud/alerts/manage_alerts#delete-an-email-alert"
             }
           ]
         },
