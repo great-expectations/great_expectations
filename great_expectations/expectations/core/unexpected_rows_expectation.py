@@ -8,6 +8,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
     RendererConfiguration,
     RendererValueType,
 )
@@ -77,7 +78,7 @@ class UnexpectedRowsExpectation(BatchExpectation):
         if "batch" not in parsed_fields:
             batch_warning_message = (
                 "unexpected_rows_query should contain the {batch} parameter. "
-                "Otherwise data outside of the configured batch will be queried."
+                "Otherwise data outside the configured batch will be queried."
             )
             # instead of raising a disruptive warning, we print and log info
             # in order to make the user aware of the potential for querying
@@ -119,10 +120,17 @@ class UnexpectedRowsExpectation(BatchExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(name="description", param_type=RendererValueType.STRING)
-        params = renderer_configuration.params
-        renderer_configuration.template_str = "$description" if params.description else ""
-        renderer_configuration.query = params.unexpected_rows_query
+        add_param_args: AddParamArgs = (
+            ("description", RendererValueType.STRING),
+            ("unexpected_rows_query", RendererValueType.STRING),
+        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        renderer_configuration.template_str = (
+            "$description" if renderer_configuration.params.description else ""
+        )
+        renderer_configuration.query = "$unexpected_rows_query"
         return renderer_configuration
 
     @override

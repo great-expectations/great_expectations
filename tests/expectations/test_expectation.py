@@ -373,6 +373,45 @@ def test_unexpected_rows_expectation_validate(
     assert unexpected_rows == expected_unexpected_rows
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "description, unexpected_rows_query",
+    [
+        pytest.param(
+            "passenger_count should be less than or equal to 7",
+            "SELECT * FROM {batch} WHERE passenger_count > 7",
+            id="with description",
+        ),
+        pytest.param(
+            None,
+            "SELECT * FROM {batch} WHERE passenger_count > 7",
+            id="no description",
+        ),
+    ],
+)
+def test_unexpected_rows_expectation_render(
+    description: str | None,
+    unexpected_rows_query: str,
+):
+    expectation = UnexpectedRowsExpectation(
+        description=description,
+        unexpected_rows_query=unexpected_rows_query,
+    )
+    expectation.render()
+    assert (
+        expectation.rendered_content[0].value.params.get("description", {}).get("value")
+        == description
+    )
+    assert (
+        expectation.rendered_content[0].value.params.get("unexpected_rows_query").get("value")
+        == unexpected_rows_query
+    )
+
+    template = "$description" if description else ""
+    assert expectation.rendered_content[0].value.template == template
+    assert expectation.rendered_content[0].value.query == "$unexpected_rows_query"
+
+
 class TestSuiteParameterOptions:
     """Tests around the suite_parameter_options property of Expectations.
 
