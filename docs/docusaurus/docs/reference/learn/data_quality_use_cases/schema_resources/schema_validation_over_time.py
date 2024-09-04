@@ -15,7 +15,6 @@ import pathlib
 import psycopg2
 
 import great_expectations as gx
-import great_expectations.expectations as gxe
 from tests.test_utils import load_data_into_test_database
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
@@ -46,6 +45,7 @@ def add_column_to_transfers_table() -> None:
 import pandas as pd
 
 import great_expectations as gx
+import great_expectations.expectations as gxe
 
 # Create Data Context.
 context = gx.get_context()
