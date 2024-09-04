@@ -384,7 +384,6 @@ def test_expectation_suite_validation_asset_name_access(
                             "id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
                             "kwargs": {
                                 "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
-                                "column": "passenger_count",
                             },
                             "type": "expect_column_values_to_be_between",
                         }
