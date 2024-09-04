@@ -48,20 +48,20 @@ The following table defines the GX versions supported by GX Cloud and GX OSS.
 
 The following table defines the supported GX Cloud and GX OSS integrations.
 
-| Integration Type      | GX Cloud                   | GX OSS                                                                        |
-| --------------------- | -------------------------- | ----------------------------------------------------------------------------- |
-| Data Sources¹         | Snowflake<br/> PostgreSQL² | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>Spark<br/>Pandas |
-| Configuration Stores³ | In-app                     | File system                                                                   |
-| Actions               | Slack                      | Slack <br/>email<br/>Microsoft Teams<br/>PagerDuty                            |
-| Credential Store      | Environment variables      | Environment variables <br/> YAML⁴                                             |
-| Orchestrator          | Airflow ⁵⁶                 | Airflow ⁵⁶                                                                    |
+| Integration Type                 | GX Cloud                              | GX OSS                                                                        |
+|----------------------------------|---------------------------------------|-------------------------------------------------------------------------------|
+| Data Sources<sup>1</sup>         | Snowflake<br/> PostgreSQL<sup>2</sup> | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>Spark<br/>Pandas |
+| Configuration Stores<sup>3</sup> | In-app                                | File system                                                                   |
+| Actions                          | Slack                                 | Slack <br/>email<br/>Microsoft Teams<br/>PagerDuty                            |
+| Credential Store                 | Environment variables                 | Environment variables <br/> YAML<sup>4</sup>                                  |
+| Orchestrator                     | Airflow <sup>5</sup><sup>6</sup>      | Airflow <sup>5</sup><sup>6</sup>                                              |
 
-¹ We've also seen GX work with the following data sources in the past but we can't guarentee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
-² Support for BigQuery in GX Cloud will be available in a future release.<br/>
-³ This includes configuration storage for Expectations, Checkpoints, Validation Definitions, and Validation Result<br/>
-⁴ config_variables.yml<br/>
-⁵ Although only Airflow is supported, GX Cloud and GX Core should work with any orchestrator that executes Python code.<br/>
-⁶ Airflow version 2.9.0+ required<br/>
+<sup>1</sup> We've also seen GX work with the following data sources in the past but we can't guarentee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
+<sup>2</sup> Support for BigQuery in GX Cloud will be available in a future release.<br/>
+<sup>3</sup> This includes configuration storage for Expectations, Checkpoints, Validation Definitions, and Validation Result<br/>
+<sup>4</sup> config_variables.yml<br/>
+<sup>5</sup> Although only Airflow is supported, GX Cloud and GX Core should work with any orchestrator that executes Python code.<br/>
+<sup>6</sup> Airflow version 2.9.0+ required<br/>
 
 ### GX components
 
@@ -80,11 +80,11 @@ The following integrated applications, operating systems, and programming langua
 
 The following table lists the operating systems supported by the community.
 
-| GX Cloud | GX OSS    |
-| -------- | --------- |
-| N/A      | Windows ¹ |
+| GX Cloud | GX OSS   |
+| -------- | -------- |
+| N/A      | Windows <sup>1</sup> |
 
-¹ Untested and unsupported by GX.
+<sup>1</sup> Untested and unsupported by GX.
 
 ### Integrations
 
