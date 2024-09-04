@@ -9,7 +9,9 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResultMeta
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResultMeta,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
