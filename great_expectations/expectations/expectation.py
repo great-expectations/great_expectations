@@ -1645,6 +1645,7 @@ SUPPORTED_DATA_SOURCES = [
     "SQLite",
 ]
 
+
 class UnexpectedRowsExpectation(BatchExpectation):
     __doc__ = f"""{UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION }
 
