@@ -7,6 +7,11 @@ from typing import TYPE_CHECKING, ClassVar, Tuple, Union
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
+    RendererConfiguration,
+    RendererValueType,
+)
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationValidationResult
@@ -20,7 +25,7 @@ class UnexpectedRowsExpectation(BatchExpectation):
     """
     UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
 
-    UnexpectedRowsExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
+    If subclassing UnexpectedRowsExpectation, one can implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
     One is written by default, but can be overridden.
     A successful validation is one where the unexpected_rows_query returns no rows.
 
@@ -43,8 +48,7 @@ class UnexpectedRowsExpectation(BatchExpectation):
         parsed_fields = [f[1] for f in Formatter().parse(query)]
         if "batch" not in parsed_fields:
             batch_warning_message = (
-                "To refer to the Data Asset's batch, the unexpected_rows_query "
-                "should contain the {batch} parameter. "
+                "unexpected_rows_query should contain the {batch} parameter. "
                 "Otherwise data outside of the configured batch will be queried."
             )
             # instead of raising a disruptive warning, we print and log info
@@ -54,6 +58,20 @@ class UnexpectedRowsExpectation(BatchExpectation):
             logger.info(batch_warning_message)
 
         return query
+
+    @classmethod
+    @override
+    def _prescriptive_template(
+        cls,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (("unexpected_rows_query", RendererValueType.STRING),)
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        renderer_configuration.template_str = "$unexpected_rows_query"
+
+        return renderer_configuration
 
     @override
     def _validate(
