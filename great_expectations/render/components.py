@@ -768,7 +768,7 @@ class RenderedAtomicValue(DictDot):
         header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        query: Optional[str] = None,
+        code_block: Optional[str] = None,
         header_row: Optional[List[RendererTableValue]] = None,
         table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
@@ -780,7 +780,7 @@ class RenderedAtomicValue(DictDot):
         # StringValueType
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
-        self.query: Optional[str] = query
+        self.code_block: Optional[str] = code_block
 
         # TableType
         self.header_row: Optional[List[RendererTableValue]] = header_row
@@ -852,7 +852,7 @@ class RenderedAtomicValueSchema(Schema):
     # for StringValueType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
-    query = fields.String(required=False, allow_none=True)
+    code_block = fields.Dict(required=False, allow_none=True)
 
     # for TableType
     header_row = fields.List(fields.Dict, required=False, allow_none=True)
@@ -876,7 +876,7 @@ class RenderedAtomicValueSchema(Schema):
         "table",
         "graph",
         "meta_notes",
-        "query",
+        "code_block",
     )
 
     @staticmethod

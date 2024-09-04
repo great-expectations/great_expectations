@@ -137,6 +137,20 @@ class MetaNotes(TypedDict):
     content: List[str]
 
 
+class CodeBlockLanguage(str, Enum):
+    JSON = "json"
+    PYTHON = "python"
+    SQL = "sql"
+    YAML = "yaml"
+
+
+class CodeBlock(TypedDict):
+    """A code block of a specified language to be rendered."""
+
+    code_template_str: str
+    language: CodeBlockLanguage
+
+
 class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererParams]):
     """
     Configuration object built for each renderer. Operations to be performed strictly on this object at the renderer
@@ -152,7 +166,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         MetaNotes(format=MetaNotesFormat.STRING, content=[]), allow_mutation=False
     )
     template_str: str = Field("", allow_mutation=True)
-    query: str = Field("", allow_mutation=True)
+    code_block: CodeBlock = Field({}, allow_mutation=True)
     header_row: List[RendererTableValue] = Field([], allow_mutation=True)
     table: List[List[RendererTableValue]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)

@@ -409,7 +409,11 @@ def test_unexpected_rows_expectation_render(
 
     template = "$description" if description else ""
     assert expectation.rendered_content[0].value.template == template
-    assert expectation.rendered_content[0].value.query == "$unexpected_rows_query"
+    assert (
+        expectation.rendered_content[0].value.code_block.get("code_template_str")
+        == "$unexpected_rows_query"
+    )
+    assert expectation.rendered_content[0].value.code_block.get("language") == "sql"
 
 
 class TestSuiteParameterOptions:

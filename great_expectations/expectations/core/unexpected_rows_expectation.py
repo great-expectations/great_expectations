@@ -9,6 +9,8 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render.renderer_configuration import (
     AddParamArgs,
+    CodeBlock,
+    CodeBlockLanguage,
     RendererConfiguration,
     RendererValueType,
 )
@@ -130,7 +132,10 @@ class UnexpectedRowsExpectation(BatchExpectation):
         renderer_configuration.template_str = (
             "$description" if renderer_configuration.params.description else ""
         )
-        renderer_configuration.query = "$unexpected_rows_query"
+        renderer_configuration.code_block = CodeBlock(
+            code_template_str="$unexpected_rows_query",
+            language=CodeBlockLanguage.SQL,
+        )
         return renderer_configuration
 
     @override
