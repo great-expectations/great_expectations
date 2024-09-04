@@ -54,7 +54,7 @@ The following table defines the supported GX Cloud and GX OSS integrations.
 | Configuration Stores<sup>3</sup> | In-app                                | File system                                                                   |
 | Actions                          | Slack                                 | Slack <br/>email<br/>Microsoft Teams<br/>PagerDuty                            |
 | Credential Store                 | Environment variables                 | Environment variables <br/> YAML<sup>4</sup>                                  |
-| Orchestrator                     | Airflow <sup>5</sup><sup>6</sup>      | Airflow <sup>5</sup><sup>6</sup>                                              |
+| Orchestrator                     | Airflow <sup>5</sup> <sup>6</sup>     | Airflow <sup>5</sup> <sup>6</sup>                                             |
 
 <sup>1</sup> We've also seen GX work with the following data sources in the past but we can't guarentee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
 <sup>2</sup> Support for BigQuery in GX Cloud will be available in a future release.<br/>
