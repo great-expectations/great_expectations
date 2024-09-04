@@ -346,8 +346,8 @@ module.exports = {
             items: [
             {
               type: "link",
-              label: "Auto-Subscription to an email alert",
-              href: "/docs/cloud/alerts/manage_alerts#auto-subscription-to-an-email-alert"
+              label: "Email alert default settings",
+              href: "/docs/cloud/alerts/manage_alerts#email-alert-default-settings"
             },
             {
               type: "link",
