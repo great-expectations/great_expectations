@@ -378,7 +378,7 @@ def test_expectation_suite_validation_asset_name_access(
                     "expectation_config": ExpectationConfiguration(
                         **{
                             "meta": {},
-                            "notes": "Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
+                            "notes": "Test notes",
                             "id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
                             "kwargs": {
                                 "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
