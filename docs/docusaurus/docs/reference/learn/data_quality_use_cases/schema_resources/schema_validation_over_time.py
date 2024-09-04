@@ -41,7 +41,7 @@ def add_column_to_transfers_table() -> None:
     connection.close()
 
 
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full sample code">
+# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full example code">
 import pandas as pd
 
 import great_expectations as gx
