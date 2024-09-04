@@ -528,7 +528,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             {
                 "template": renderer_configuration.template_str,
                 "params": renderer_configuration.params.dict(),
-                "query": renderer_configuration.query,
+                "query": renderer_configuration.query or None,
                 "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
