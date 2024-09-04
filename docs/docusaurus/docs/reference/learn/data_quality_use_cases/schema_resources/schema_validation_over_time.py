@@ -46,6 +46,7 @@ def add_column_to_transfers_table() -> None:
 import pandas as pd
 
 import great_expectations as gx
+import great_expectations.expectations as gxe
 
 # Create Data Context.
 context = gx.get_context()
