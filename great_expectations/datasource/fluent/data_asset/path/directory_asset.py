@@ -100,7 +100,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
                 datasource_name=self._data_connector.datasource_name,
                 data_connector_name=_DATA_CONNECTOR_NAME,
                 data_asset_name=self._data_connector.data_asset_name,
-                batch_identifiers=make_batch_identifier(batch_identifiers.options),
+                batch_identifiers=make_batch_identifier(batch_identifiers),
             )
             batch_definition_list = [batch_definition]
         else:
