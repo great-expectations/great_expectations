@@ -9,7 +9,9 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResultMeta
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResultMeta,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -306,6 +308,7 @@ def test_expectation_suite_validation_result_returns_expected_shape(
         indent=4,
     )
 
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "validation_result_url",
@@ -322,26 +325,26 @@ def test_expectation_suite_validation_asset_name_access(
         meta=ExpectationSuiteValidationResultMeta(
             **{
                 "active_batch_definition": {
-                  "batch_identifiers": {},
-                  "data_asset_name": "taxi_data_1.csv",
-                  "data_connector_name": "default_inferred_data_connector_name",
-                  "datasource_name": "pandas"
+                    "batch_identifiers": {},
+                    "data_asset_name": "taxi_data_1.csv",
+                    "data_connector_name": "default_inferred_data_connector_name",
+                    "datasource_name": "pandas",
                 },
                 "batch_markers": {
-                  "ge_load_time": "20220727T154327.630107Z",
-                  "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612"
+                    "ge_load_time": "20220727T154327.630107Z",
+                    "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612",
                 },
                 "batch_spec": {
-                  "path": "/Users/username/work/gx_example_projects/great_expectations/../data/taxi_data_1.csv"
+                    "path": "/Users/username/work/gx_example_projects/great_expectations/../data/taxi_data_1.csv"
                 },
                 "checkpoint_name": "single_validation_checkpoint",
                 "expectation_suite_name": "taxi_suite_1",
                 "great_expectations_version": "0.15.15",
                 "run_id": {
-                  "run_name": "20220727-114327-my-run-name-template",
-                  "run_time": "2022-07-27T11:43:27.625252+00:00"
+                    "run_name": "20220727-114327-my-run-name-template",
+                    "run_time": "2022-07-27T11:43:27.625252+00:00",
                 },
-                "validation_time": "20220727T154327.701100Z"
+                "validation_time": "20220727T154327.701100Z",
             }
         ),
         success=True,
@@ -378,7 +381,6 @@ def test_expectation_suite_validation_asset_name_access(
                         **{
                             "meta": {},
                             "notes": "Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
-                            # noqa: E501
                             "id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
                             "kwargs": {
                                 "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
@@ -397,6 +399,7 @@ def test_expectation_suite_validation_asset_name_access(
     )
 
     assert svr.asset_name == "taxi_data_1.csv"
+
 
 @pytest.mark.unit
 def test_render_updates_rendered_content():
