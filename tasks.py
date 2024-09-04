@@ -492,7 +492,7 @@ def docker(
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
-def type_schema(  # noqa: C901, PLR0912 - too complex
+def type_schema(  # noqa: C901 - too complex
     ctx: Context,
     sync: bool = False,
     clean: bool = False,
@@ -515,6 +515,7 @@ def type_schema(  # noqa: C901, PLR0912 - too complex
         _iter_all_registered_types,
     )
     from great_expectations_v1.expectations import core
+    from great_expectations_v1.expectations.expectation import UnexpectedRowsExpectation
 
     data_source_schema_dir_root: Final[pathlib.Path] = (
         GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
@@ -630,6 +631,7 @@ def type_schema(  # noqa: C901, PLR0912 - too complex
         core.ExpectColumnValuesToNotMatchLikePatternList,
         core.ExpectColumnValuesToNotMatchRegex,
         core.ExpectColumnValuesToNotMatchRegexList,
+        UnexpectedRowsExpectation,
     ]
     for x in supported_expectations:
         schema_path = expectation_dir.joinpath(f"{x.__name__}.json")

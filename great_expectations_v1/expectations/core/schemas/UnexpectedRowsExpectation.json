@@ -1,0 +1,131 @@
+{
+    "title": "Custom Expectation with SQL",
+    "description": "This Expectation will fail validation if the query returns one or more rows. The WHERE clause defines the fail criteria.\n\nUnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries     as the core logic for an Expectation. UnexpectedRowsExpectations must implement     a `_validate(...)` method containing logic for determining whether data returned     by the executed query is successfully validated. One is written by default, but     can be overridden.\n\nA successful validation is one where the unexpected_rows_query returns no rows.\n\nUnexpectedRowsExpectation is a     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).\n\nBatchExpectations are one of the most common types of Expectation.\nThey are evaluated for an entire Batch, and answer a semantic question about the Batch itself.\n\nArgs:\n    unexpected_rows_query (str): A SQL or Spark-SQL query to be executed for validation.\n\nReturns:\n    An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)\n\nSupported Datasources:\n    [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [SQLite](https://docs.greatexpectations.io/docs/application_integration_support/)",
+    "type": "object",
+    "properties": {
+        "id": {
+            "title": "Id",
+            "type": "string"
+        },
+        "meta": {
+            "title": "Meta",
+            "type": "object"
+        },
+        "notes": {
+            "title": "Notes",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "result_format": {
+            "title": "Result Format",
+            "default": "BASIC",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/ResultFormat"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short description of your Expectation",
+            "type": "string"
+        },
+        "catch_exceptions": {
+            "title": "Catch Exceptions",
+            "default": false,
+            "type": "boolean"
+        },
+        "rendered_content": {
+            "title": "Rendered Content",
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        },
+        "batch_id": {
+            "title": "Batch Id",
+            "type": "string"
+        },
+        "row_condition": {
+            "title": "Row Condition",
+            "type": "string"
+        },
+        "condition_parser": {
+            "title": "Condition Parser",
+            "type": "string"
+        },
+        "unexpected_rows_query": {
+            "title": "Unexpected Rows Query",
+            "type": "string"
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "expectation_class": {
+                    "title": "Expectation Class",
+                    "type": "string",
+                    "const": "UnexpectedRowsExpectation"
+                },
+                "expectation_type": {
+                    "title": "Expectation Type",
+                    "type": "string",
+                    "const": "unexpected_rows_expectation"
+                },
+                "domain_type": {
+                    "title": "Domain Type",
+                    "type": "string",
+                    "const": "table",
+                    "description": "Batch"
+                },
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": []
+                },
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "This Expectation will fail validation if the query returns one or more rows. The WHERE clause defines the fail criteria."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "PostgreSQL",
+                        "Snowflake",
+                        "SQLite"
+                    ]
+                }
+            }
+        }
+    },
+    "required": [
+        "unexpected_rows_query"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "ResultFormat": {
+            "title": "ResultFormat",
+            "description": "An enumeration.",
+            "enum": [
+                "BOOLEAN_ONLY",
+                "BASIC",
+                "COMPLETE",
+                "SUMMARY"
+            ],
+            "type": "string"
+        }
+    }
+}
