@@ -1,10 +1,10 @@
 Environment variables provide the quickest way to securely set up your credentials. 
 
-You can set environment variables by replacing the values in `<>` with your information and entering `export <VARIABLE_NAME>=<VALUE>` commands in the terminal or adding the commands to your `~/.bashrc` file.  If you use the `export` command from the terminal, the environment variables will not persist beyond the current session.  If you add them to the `~/.bashrc` file, the variables will be exported each time you log in.
+You can set environment variables by replacing the values in `<>` with your information and entering `export <VARIABLE_NAME>=<VALUE>` commands in the terminal or adding the commands to your `~/.bashrc` file.  If you use the `export` command from the terminal, the environment variables will not persist beyond the current session.  However, if you add them to your shell config file (`~/.bashrc` for Bash, `~./zshrc` for Z Shell), the variables will be exported each time you log in.
 
 You can export credentials as individual components, or as an entire connection string (or token).  For example:
 
-```bash title="Terminal or ~/.bashrc"
+```bash title="Terminal, ~/.bashrc, or ~/.zshrc"
 export MY_POSTGRES_USERNAME=<USERNAME>
 export MY_POSTGRES_PASSWORD=<PASSWORD>
 ```

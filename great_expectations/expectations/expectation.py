@@ -313,7 +313,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     meta: Union[dict, None] = None
     notes: Union[str, List[str], None] = None
     result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
-    description: Union[str, None] = None
+    description: Union[str, None] = pydantic.Field(
+        default=None, description="A short description of your Expectation"
+    )
 
     catch_exceptions: bool = False
     rendered_content: Optional[List[RenderedAtomicContent]] = None

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from string import Formatter
-from typing import TYPE_CHECKING, ClassVar, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Tuple, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -20,19 +20,48 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class UnexpectedRowsExpectation(BatchExpectation):
-    """
-    UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
+EXPECTATION_SHORT_DESCRIPTION = (
+    "This Expectation will fail validation if the query returns one or more rows. "
+    "The WHERE clause defines the fail criteria."
+)
+UNEXPECTED_ROWS_QUERY_DESCRIPTION = "A SQL or Spark-SQL query to be executed for validation."
+SUPPORTED_DATA_SOURCES = [
+    "PostgreSQL",
+    "Snowflake",
+    "SQLite",
+]
 
-    If subclassing UnexpectedRowsExpectation, one can implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
-    One is written by default, but can be overridden.
+
+class UnexpectedRowsExpectation(BatchExpectation):
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION }
+
+    UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries \
+    as the core logic for an Expectation. UnexpectedRowsExpectations must implement \
+    a `_validate(...)` method containing logic for determining whether data returned \
+    by the executed query is successfully validated. One is written by default, but \
+    can be overridden.
+
     A successful validation is one where the unexpected_rows_query returns no rows.
 
-    Args:
-        unexpected_rows_query (str): A SQL or Spark-SQL query to be executed for validation.
-    """  # noqa: E501
+    UnexpectedRowsExpectation is a \
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
-    unexpected_rows_query: str
+    BatchExpectations are one of the most common types of Expectation.
+    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
+
+    Args:
+        unexpected_rows_query (str): {UNEXPECTED_ROWS_QUERY_DESCRIPTION}
+
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+    """
+
+    unexpected_rows_query: str = pydantic.Field(description=UNEXPECTED_ROWS_QUERY_DESCRIPTION)
 
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query.table",)
     success_keys: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query",)
@@ -57,6 +86,32 @@ class UnexpectedRowsExpectation(BatchExpectation):
             logger.info(batch_warning_message)
 
         return query
+
+    class Config:
+        title = "Custom Expectation with SQL"
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[UnexpectedRowsExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": [],
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @override

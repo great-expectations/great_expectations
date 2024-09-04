@@ -48,9 +48,7 @@ batch_definition = data_asset.add_batch_definition_whole_table("batch definition
 batch = batch_definition.get_batch()
 
 # Create Expectation Suite with strict type and column Expectations. Validate data.
-strict_suite = context.suites.add(
-    gx.core.expectation_suite.ExpectationSuite(name="strict checks")
-)
+strict_suite = context.suites.add(gx.ExpectationSuite(name="strict checks"))
 
 strict_suite.add_expectation(
     gxe.ExpectTableColumnsToMatchOrderedList(
@@ -71,9 +69,7 @@ strict_suite.add_expectation(
 strict_results = batch.validate(strict_suite)
 
 # Create Expectation Suite with relaxed type and column Expectations. Validate data.
-relaxed_suite = context.suites.add(
-    gx.core.expectation_suite.ExpectationSuite(name="relaxed checks")
-)
+relaxed_suite = context.suites.add(gx.ExpectationSuite(name="relaxed checks"))
 
 relaxed_suite.add_expectation(
     gxe.ExpectTableColumnsToMatchSet(

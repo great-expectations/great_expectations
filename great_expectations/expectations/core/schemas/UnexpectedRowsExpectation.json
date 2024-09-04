@@ -1,6 +1,6 @@
 {
-    "title": "UnexpectedRowsExpectation",
-    "description": "UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.\n\nUnexpectedRowsExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.\nOne is written by default, but can be overridden.\nA successful validation is one where the unexpected_rows_query returns no rows.\n\nArgs:\n    unexpected_rows_query (str): A SQL or Spark-SQL query to be executed for validation.",
+    "title": "Custom Expectation with SQL",
+    "description": "This Expectation will fail validation if the query returns one or more rows. The WHERE clause defines the fail criteria.\n\nUnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries     as the core logic for an Expectation. UnexpectedRowsExpectations must implement     a `_validate(...)` method containing logic for determining whether data returned     by the executed query is successfully validated. One is written by default, but     can be overridden.\n\nA successful validation is one where the unexpected_rows_query returns no rows.\n\nUnexpectedRowsExpectation is a     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).\n\nBatchExpectations are one of the most common types of Expectation.\nThey are evaluated for an entire Batch, and answer a semantic question about the Batch itself.\n\nArgs:\n    unexpected_rows_query (str): A SQL or Spark-SQL query to be executed for validation.\n\nReturns:\n    An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)\n\nSupported Datasources:\n    [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [SQLite](https://docs.greatexpectations.io/docs/application_integration_support/)",
     "type": "object",
     "properties": {
         "id": {
@@ -39,6 +39,7 @@
         },
         "description": {
             "title": "Description",
+            "description": "A short description of your Expectation",
             "type": "string"
         },
         "catch_exceptions": {
@@ -87,6 +88,25 @@
                     "type": "string",
                     "const": "table",
                     "description": "Batch"
+                },
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": []
+                },
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "This Expectation will fail validation if the query returns one or more rows. The WHERE clause defines the fail criteria."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "PostgreSQL",
+                        "Snowflake",
+                        "SQLite"
+                    ]
                 }
             }
         }
