@@ -15,7 +15,7 @@ This article assumes basic familiarity with GX components and workflows. If you'
 
 ## Data preview
 
-The examples in this guide use a sample transaction dataset, available as a [CSV file on GitHub](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/missingness.csv). This dataset contains fields prone to missing data, ideal for demonstrating GX's capabilities.
+The examples in this guide use a sample transaction dataset, available as a [CSV file on GitHub](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/missingness.csv).
 
 | type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_date       | errors |
 |----------|------------------------|--------------------|-----------------|---------------------|--------|
@@ -56,7 +56,7 @@ Ensures that values within a specific column are not `NULL`.
 <br/>
 
 :::tip[GX tips for missingness Expectations]
-- Use the `mostly` argument in `ExpectColumnValuesToBeNull` and `ExpectColumnValuesToNotBeNull` to set different tolerance levels for null and non-null values. This allows you to tailor your data quality checks to different columns. For example, you might allow more null values in a 'customer_feedback' column than in an 'errors' column. Adjust these levels based on your data patterns and business needs to create more flexible and appropriate checks.
+- Use the `mostly` argument in `ExpectColumnValuesToBeNull` and `ExpectColumnValuesToNotBeNull` to set different tolerance levels for null and non-null values. This allows you to tailor your data quality checks to different columns. For example, you might allow more null values in a `customer_feedback` column than in an `errors` column. Adjust these levels based on your data patterns and business needs to create more flexible and appropriate checks.
 - Use these Expectations to track data as it progresses through your pipeline. Apply `ExpectColumnValuesToBeNull` to fields expected to be empty in early stages, and `ExpectColumnValuesToNotBeNull` to those same fields in later stages.
 :::
 
@@ -101,7 +101,7 @@ Setting a low percentage for the `mostly` parameter allows for the presence of v
 
 ### System anomalies
 
-**Context**: This use case differs significantly from the previously discussed cases, as it reflects an expectation about the system being monitored rather than just data quality. Here, GX can serve a dual role: ensuring data quality and performing a more classical alerting/observability function. For example, an increase in error rates might lead to an error field being unexpectedly populated.
+**Context**: This use case differs significantly from the previously discussed cases, as it reflects an expectation about the system being monitored rather than just data quality. Here, GX can serve a dual role: ensuring data quality and performing a more classical alerting & observability function. For example, an increase in error rates might lead to an error field being unexpectedly populated.
 
 **GX solution**: Ensure fields that should typically be `NULL`, such as those that denote errors, remain unpopulated under normal circumstances.
 
