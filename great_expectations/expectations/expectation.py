@@ -1635,12 +1635,15 @@ representation."""  # noqa: E501
 
 
 UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION = (
-    "This Expectation will fail validation if the query returns one or more rows.  "
+    "This Expectation will fail validation if the query returns one or more rows. "
     "The WHERE clause defines the fail criteria."
 )
 UNEXPECTED_ROWS_QUERY_DESCRIPTION = "A SQL or Spark-SQL query to be executed for validation."
-SUPPORTED_DATA_SOURCES = ["SQL", "Spark-SQL"]
-
+SUPPORTED_DATA_SOURCES = [
+    "PostgreSQL",
+    "Snowflake",
+    "SQLite",
+]
 
 class UnexpectedRowsExpectation(BatchExpectation):
     __doc__ = f"""{UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION }
@@ -1668,11 +1671,10 @@ class UnexpectedRowsExpectation(BatchExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
     """
 
     unexpected_rows_query: str
-
-    description = UNEXPECTED_ROWS_QUERY_DESCRIPTION
 
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query.table",)
     success_keys: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query",)
