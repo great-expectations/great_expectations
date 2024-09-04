@@ -61,7 +61,7 @@ data_asset = datasource.add_table_asset(name="data asset", table_name="transfers
 
 # Create Expectation Suite and add Expectations.
 suite = context.suites.add(
-    gx.core.expectation_suite.ExpectationSuite(name="schema expectations")
+    gx.ExpectationSuite(name="schema expectations")
 )
 
 suite.add_expectation(
@@ -83,7 +83,7 @@ batch = batch_definition.get_batch()
 
 # Validate Batch.
 validation_definition = context.validation_definitions.add(
-    gx.core.validation_definition.ValidationDefinition(
+    gx.ValidationDefinition(
         name="validation definition",
         data=batch_definition,
         suite=suite,
@@ -92,7 +92,7 @@ validation_definition = context.validation_definitions.add(
 
 # Define Checkpoint, run it, and capture result.
 checkpoint = context.checkpoints.add(
-    gx.checkpoint.checkpoint.Checkpoint(
+    gx.Checkpoint(
         name="checkpoint", validation_definitions=[validation_definition]
     )
 )

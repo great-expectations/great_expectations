@@ -49,7 +49,7 @@ batch = batch_definition.get_batch()
 
 # Create Expectation Suite with strict type and column Expectations. Validate data.
 strict_suite = context.suites.add(
-    gx.core.expectation_suite.ExpectationSuite(name="strict checks")
+    gx.ExpectationSuite(name="strict checks")
 )
 
 strict_suite.add_expectation(
@@ -72,7 +72,7 @@ strict_results = batch.validate(strict_suite)
 
 # Create Expectation Suite with relaxed type and column Expectations. Validate data.
 relaxed_suite = context.suites.add(
-    gx.core.expectation_suite.ExpectationSuite(name="relaxed checks")
+    gx.ExpectationSuite(name="relaxed checks")
 )
 
 relaxed_suite.add_expectation(
