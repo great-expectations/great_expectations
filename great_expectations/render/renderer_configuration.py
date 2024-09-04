@@ -145,7 +145,15 @@ class CodeBlockLanguage(str, Enum):
 
 
 class CodeBlock(TypedDict):
-    """A code block of a specified language to be rendered."""
+    """A code block of a specified language to be rendered.
+    The code_template_str uses $variable substitution of RendererConfiguration.params.
+    e.g. RendererConfiguration.params: python_code_block_1, python_code_block_2
+
+    CodeBlock(
+        code_template_str="$python_code_block_1\n\n$python_code_block_2",
+        language=CodeBlockLanguage.PYTHON,
+    )
+    """
 
     code_template_str: str
     language: CodeBlockLanguage
