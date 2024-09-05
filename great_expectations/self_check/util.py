@@ -50,12 +50,12 @@ from great_expectations.core import (
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
-    IDDict,
 )
 from great_expectations.core.batch import Batch, LegacyBatchDefinition
 from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.exceptions.exceptions import (
     ExecutionEngineError,
     InvalidExpectationConfigurationError,
@@ -536,7 +536,7 @@ def _get_test_validator_with_data_pandas(  # noqa: C901
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
+        batch_identifiers=make_batch_identifier({}),
         batch_spec_passthrough=None,
     )
 
@@ -681,7 +681,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
+        batch_identifiers=make_batch_identifier({}),
         batch_spec_passthrough=None,
     )
     return build_spark_validator_with_data(
@@ -918,7 +918,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
             datasource_name="my_test_datasource",
             data_connector_name="my_sql_data_connector",
             data_asset_name="my_asset",
-            batch_identifiers=IDDict(),
+            batch_identifiers=make_batch_identifier({}),
         )
 
     batch = Batch(data=batch_data, batch_definition=batch_definition)  # type: ignore[arg-type] # got SqlAlchemyBatchData
