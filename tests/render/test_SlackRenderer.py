@@ -2,6 +2,7 @@ import pytest
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
+    ExpectationSuiteValidationResultMeta,
 )
 from great_expectations.render.renderer import SlackRenderer
 
@@ -10,6 +11,29 @@ from great_expectations.render.renderer import SlackRenderer
 def test_SlackRenderer_render():
     validation_result = ExpectationSuiteValidationResult(
         success=True,
+        meta=ExpectationSuiteValidationResultMeta(
+            **{
+                "active_batch_definition": {
+                    "batch_identifiers": {},
+                    "data_asset_name": "taxi_data_1.csv",
+                    "data_connector_name": "default_inferred_data_connector_name",
+                    "datasource_name": "pandas",
+                },
+                "batch_markers": {
+                    "ge_load_time": "20220727T154327.630107Z",
+                    "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612",
+                },
+                "batch_spec": {"path": "../data/taxi_data_1.csv"},
+                "checkpoint_name": "single_validation_checkpoint",
+                "expectation_suite_name": "taxi_suite_1",
+                "great_expectations_version": "0.15.15",
+                "run_id": {
+                    "run_name": "20220727-114327-my-run-name-template",
+                    "run_time": "2022-07-27T11:43:27.625252+00:00",
+                },
+                "validation_time": "20220727T154327.701100Z",
+            }
+        ),
         statistics={"successful_expectations": 3, "evaluated_expectations": 3},
         results=[],
         suite_name="my_suite",
@@ -28,7 +52,7 @@ def test_SlackRenderer_render():
     assert output == [
         {
             "text": {
-                "text": "*Asset*: __no_data_asset_name__  *Expectation Suite*: my_suite",
+                "text": "*Asset*: taxi_data_1.csv  *Expectation Suite*: my_suite",
                 "type": "mrkdwn",
             },
             "type": "section",
