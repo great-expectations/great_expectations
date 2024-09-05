@@ -446,6 +446,7 @@ class ExpectationConfiguration(SerializableDictDot):
             id=self.id,
             meta=self.meta,
             notes=self.notes,
+            description=self.description,
             rendered_content=self.rendered_content,
             **self.kwargs,
         )
