@@ -2566,7 +2566,7 @@ class UnexpectedRowsExpectation:
 
     def __new__(
         cls,
-        unexpected_rows_query: str,
+        unexpected_rows_query: str | None = None,
         description: str | None = None,
     ):
         # deprecated-v1.0.2
@@ -2581,8 +2581,8 @@ class UnexpectedRowsExpectation:
         )
 
         return CoreUnexpectedRowsExpectation(
-            unexpected_rows_query=unexpected_rows_query,
-            description=description,
+            unexpected_rows_query=unexpected_rows_query or cls.unexpected_rows_query,
+            description=description or cls.description,
         )
 
 
