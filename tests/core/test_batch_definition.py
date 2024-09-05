@@ -13,6 +13,7 @@ from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
     BatchDefinitionNotFreshError,
+    ResourcesNotFreshError,
 )
 
 if TYPE_CHECKING:
@@ -150,8 +151,11 @@ def test_identifier_bundle_no_id_raises_error(in_memory_runtime_context):
 
     batch_definition.id = None
 
-    with pytest.raises(BatchDefinitionNotAddedError):
+    with pytest.raises(ResourcesNotFreshError) as e:
         batch_definition.identifier_bundle()
+
+    assert len(e.value.errors) == 1
+    assert isinstance(e.value.errors[0], BatchDefinitionNotAddedError)
 
 
 @pytest.mark.parametrize(
