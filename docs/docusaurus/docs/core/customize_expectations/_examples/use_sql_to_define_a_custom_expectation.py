@@ -40,9 +40,7 @@ import great_expectations as gx
 # <snippet name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - define a custom UnexpectedRowsExpectation">
 # <snippet name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - define the query for an UnexpectedRowsExpectation">
 # <snippet name="docs/docusaurus/docs/core/customize_expectations/_examples/use_sql_to_define_a_custom_expectation.py - define a more descriptive name for an UnexpectedRowsExpectation">
-class ExpectPassengerCountToBeLegal(
-    gx.expectations.expectation.UnexpectedRowsExpectation
-):
+class ExpectPassengerCountToBeLegal(gx.expectations.UnexpectedRowsExpectation):
     # </snippet>
     unexpected_rows_query: str = (
         "SELECT * FROM {batch} WHERE passenger_count > 6 or passenger_count < 0"
