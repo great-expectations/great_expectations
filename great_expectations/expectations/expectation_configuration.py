@@ -442,7 +442,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def to_domain_obj(self) -> Expectation:
         expectation_impl = self._get_expectation_impl()
-        kwargs = {
+        kwargs: dict[Any, Any] = {
             "id": self.id,
             "meta": self.meta,
             "notes": self.notes,
@@ -450,10 +450,8 @@ class ExpectationConfiguration(SerializableDictDot):
         }
         if self.description:
             kwargs.update({"description": self.description})
-        return expectation_impl(
-            **kwargs,
-            **self.kwargs,
-        )
+        kwargs.update(self.kwargs)
+        return expectation_impl(**kwargs)
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this expectation."""
