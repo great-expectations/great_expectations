@@ -344,9 +344,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         self_dict = self.dict()
         other_dict = other.dict()
 
+        # Simplify notes and meta equality - falsiness is equivalent
         for attr in ("notes", "meta"):
-            self_dict.pop(attr, None)
-            other_dict.pop(attr, None)
+            self_val = self_dict.pop(attr, None) or None
+            other_val = other_dict.pop(attr, None) or None
+            if self_val != other_val:
+                return False
 
         return self_dict == other_dict
 
