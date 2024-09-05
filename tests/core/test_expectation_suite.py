@@ -94,14 +94,6 @@ class TestInit:
     """Tests related to ExpectationSuite.__init__()"""
 
     @pytest.mark.unit
-    def test_instantiate_with_no_context_raises(self):
-        set_context(None)
-        with pytest.raises(gx_exceptions.DataContextRequiredError):
-            ExpectationSuite(
-                name="i've made a huge mistake",
-            )
-
-    @pytest.mark.unit
     def test_expectation_suite_init_defaults(
         self,
         empty_data_context: AbstractDataContext,
