@@ -14,6 +14,36 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.0.2
+* [FEATURE] Allow setting result format when calling batch.validate ([#10281](https://github.com/great-expectations/great_expectations/pull/10281))
+* [BUGFIX] FabricPowerBIDatasource 1.0 - TypeError: _PowerBIAsset.build_batch_request() got an unexpected keyword argument 'options' ([#10318](https://github.com/great-expectations/great_expectations/pull/10318))
+* [BUGFIX] Prevent pydantic type coercion of Value Sets ([#10325](https://github.com/great-expectations/great_expectations/pull/10325))
+* [BUGFIX] B/v1 509/remove df from result ([#10338](https://github.com/great-expectations/great_expectations/pull/10338))
+* [BUGFIX] Patch `SlackRenderer` and `EmailRenderer` `active_batch_definition` issues ([#10344](https://github.com/great-expectations/great_expectations/pull/10344))
+* [BUGFIX] Show FDS Asset name in DataDocs ([#9953](https://github.com/great-expectations/great_expectations/pull/9953))
+* [DOCS] Update README.md ([#10294](https://github.com/great-expectations/great_expectations/pull/10294))
+* [DOCS] Fix gx core sidebar inconsistency in version 0.18 ([#10302](https://github.com/great-expectations/great_expectations/pull/10302)) (thanks @JessSaavedra)
+* [DOCS] Fix GX Core failing build ([#10300](https://github.com/great-expectations/great_expectations/pull/10300)) (thanks @JessSaavedra)
+* [DOCS] update allow list ips ([#10308](https://github.com/great-expectations/great_expectations/pull/10308))
+* [DOCS] Corrects typo in description for ExpectColumnMaxToBeBetween's min_value arg ([#10285](https://github.com/great-expectations/great_expectations/pull/10285))
+* [DOCS] Add pathname to Docs JIRA tickets description ([#10312](https://github.com/great-expectations/great_expectations/pull/10312)) (thanks @JessSaavedra)
+* [DOCS] Delete legacy version 0.17 files from docs ([#10279](https://github.com/great-expectations/great_expectations/pull/10279)) (thanks @JessSaavedra)
+* [DOCS] Theme selector ([#10181](https://github.com/great-expectations/great_expectations/pull/10181)) (thanks @deborahniesz)
+* [DOCS] Corrects description of printed Validation Results object as json instead of yaml ([#10287](https://github.com/great-expectations/great_expectations/pull/10287))
+* [DOCS] Updates Data Asset prerequisite for create a Validation Definition guide to Batch Definition ([#10288](https://github.com/great-expectations/great_expectations/pull/10288))
+* [DOCS] Updates descriptions of Data Contexts with general use cases for each. ([#10292](https://github.com/great-expectations/great_expectations/pull/10292))
+* [DOCS] Updated airflow docs for core 1.0 compatibility ([#10319](https://github.com/great-expectations/great_expectations/pull/10319))
+* [DOCS] Indicate named parameters in reference table by including the value types ([#10299](https://github.com/great-expectations/great_expectations/pull/10299))
+* [DOCS] Updates to "Connect to GX Cloud with Python" guide ([#10315](https://github.com/great-expectations/great_expectations/pull/10315))
+* [DOCS] Fix bad typo ([#10329](https://github.com/great-expectations/great_expectations/pull/10329))
+* [DOCS] Removes dead links to old docs from Expectation docstrings ([#10317](https://github.com/great-expectations/great_expectations/pull/10317))
+* [DOCS] Adds instructions on persisting environment variables in Z Shell to the configure credentials guide ([#10330](https://github.com/great-expectations/great_expectations/pull/10330))
+* [DOCS] Data quality tech doc on Missingness ([#10134](https://github.com/great-expectations/great_expectations/pull/10134)) (thanks @Quantisan)
+* [DOCS] Regenerate superscript numbers ([#10337](https://github.com/great-expectations/great_expectations/pull/10337)) (thanks @JessSaavedra)
+* [DOCS] Replace Slack alerts with email alerts ([#10320](https://github.com/great-expectations/great_expectations/pull/10320))
+* [MAINTENANCE] Add metadata to UnexpectedRowsExpectation ([#10311](https://github.com/great-expectations/great_expectations/pull/10311)) (thanks @ashmortar)
+* [MAINTENANCE] `UnexpectedRowsExpectation` renderer and validation improvements ([#10334](https://github.com/great-expectations/great_expectations/pull/10334))
+
 ### 1.0.1
 * [BUGFIX] Checkpoint references the instance of ValidationDefinition t… ([#10274](https://github.com/great-expectations/great_expectations/pull/10274))
 * [DOCS] Promote 1.0 to the last version ([#10261](https://github.com/great-expectations/great_expectations/pull/10261))
