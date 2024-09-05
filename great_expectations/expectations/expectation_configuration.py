@@ -502,12 +502,14 @@ class ExpectationConfigurationSchema(Schema):
             allow_none=True,
         )
     )
+    description = fields.Str(required=False, allow_none=True)
 
     REMOVE_KEYS_IF_NONE = [
         "id",
         "expectation_context",
         "rendered_content",
         "notes",
+        "description",
     ]
 
     @pre_dump
