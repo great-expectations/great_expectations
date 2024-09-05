@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import styles from './styles.module.scss';
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import ThemedImage from '@theme/ThemedImage';
 
 export default function GithubNavbarItem({ owner, repository, className }) {
 
@@ -9,6 +10,7 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
 
     useEffect(() => {
+
         fetch(`https://api.github.com/repos/${owner}/${repository}`)
             .then(response => response.json())
             .then(data => {
@@ -29,22 +31,26 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const githubLogoImg = useBaseUrl(`img/github.svg`);
     const starIcon = useBaseUrl(`img/star.svg`);
     const forkIcon = useBaseUrl(`img/code-branch.svg`);
+    const githubMarkDarkImg = useBaseUrl(`img/github-mark-dark.svg`);
+    const githubLogoDarkImg = useBaseUrl(`img/github-dark.svg`);
+    const starDarkIcon = useBaseUrl(`img/star-dark.svg`);
+    const forkDarkIcon = useBaseUrl(`img/code-branch-dark.svg`);
 
     return repository && (
         <a href={`https://github.com/${owner}/${repository}`} target="_blank"
            className={ className + ' ' + styles.githubBadge + ' ' + (showGithubBadgeInfo ? styles.githubBadgeNoErrors : '')}>
-            <img src={githubMarkImg} className={styles.githubMark}
+            <ThemedImage sources={{ dark: githubMarkDarkImg, light: githubMarkImg}} className={styles.githubMark}
                  alt="Github Invertocat Logo"/>
             { showGithubBadgeInfo && (<div className={styles.githubBadgeInfo}>
-                <img src={githubLogoImg} className={styles.githubLogo}
+                <ThemedImage sources={{ dark: githubLogoDarkImg, light: githubLogoImg}} className={styles.githubLogo}
                      alt="Github Logo"/>
                 <div className={styles.githubStats}>
                     <span>
-                        <img src={starIcon} alt="Github Stargazers Count"/>
+                        <ThemedImage sources={{ dark: starDarkIcon, light: starIcon}} alt="Github Stargazers Count"/>
                         {starsCount}
                     </span>
                     <span>
-                        <img src={forkIcon} alt="Github Forks Count"/>
+                        <ThemedImage sources={{ dark: forkDarkIcon, light: forkIcon}} alt="Github Forks Count"/>
                         {forksCount}
                     </span>
                 </div>

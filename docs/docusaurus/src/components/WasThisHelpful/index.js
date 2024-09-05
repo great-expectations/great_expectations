@@ -74,7 +74,7 @@ export default function WasThisHelpful(){
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({...formData, pathname })
                 });
                 if (response.ok) {
                     setIsOpen(false)

@@ -2,7 +2,7 @@ a.cardContainer {
     --ifm-link-color: var(--ifm-color-emphasis-800);
     --ifm-link-hover-color: var(--ifm-color-emphasis-700);
     --ifm-link-hover-decoration: none;
-  
+
     box-shadow: 0 1.5px 3px 0 rgb(0 0 0 / 15%);
     border: 1px solid var(--ifm-color-emphasis-200);
     transition: all var(--ifm-transition-fast) ease;
@@ -11,30 +11,35 @@ a.cardContainer {
     color: var(--ifm-font-color-base);
     text-decoration: none;
   }
-  
+
   a.cardContainer:hover {
     color: var(--ifm-font-color-base);
     border-color: var(--ifm-color-primary);
     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 20%);
   }
-  
+
   .cardContainer *:last-child {
     margin-bottom: 0;
   }
-  
+
   .cardTitle {
     font-size: 1.2rem;
     display: flex;
     align-items: center;
     gap: 0.7rem;
   }
-  
+
   .cardTitle img {
     /* vertical-align: middle; */
     max-height: 30px;
     width: auto;
   }
-  
+
   .cardDescription {
     font-size: 0.8rem;
   }
+
+[data-theme='dark'] :global(.markdown) .cardTitle img {
+    background-color: transparent;
+    margin: 0;
+}

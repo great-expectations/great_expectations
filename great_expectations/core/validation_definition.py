@@ -11,6 +11,7 @@ from great_expectations.compatibility.pydantic import (
     ValidationError,
     validator,
 )
+from great_expectations.constants import DATAFRAME_REPLACEMENT_STR
 from great_expectations.core.added_diagnostics import (
     ValidationDefinitionAddedDiagnostics,
 )
@@ -18,7 +19,7 @@ from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
 )
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -38,13 +39,12 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
+    from great_expectations.core.result_format import ResultFormatUnion
     from great_expectations.data_context.store.validation_results_store import (
         ValidationResultsStore,
     )
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
-
-DATAFRAME_INDICATOR = "<DATAFRAME>"
 
 
 @public_api
@@ -217,7 +217,7 @@ class ValidationDefinition(BaseModel):
         checkpoint_id: Optional[str] = None,
         batch_parameters: Optional[BatchParameters] = None,
         expectation_parameters: Optional[dict[str, Any]] = None,
-        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         """
@@ -268,7 +268,7 @@ class ValidationDefinition(BaseModel):
         if batch_parameters:
             batch_parameters_copy = {k: v for k, v in batch_parameters.items()}
             if "dataframe" in batch_parameters_copy:
-                batch_parameters_copy["dataframe"] = DATAFRAME_INDICATOR
+                batch_parameters_copy["dataframe"] = DATAFRAME_REPLACEMENT_STR
             results.meta["batch_parameters"] = batch_parameters_copy
         else:
             results.meta["batch_parameters"] = None

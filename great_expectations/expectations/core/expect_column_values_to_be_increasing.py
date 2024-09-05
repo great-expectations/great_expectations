@@ -40,7 +40,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     is strictly increasing--equal values are treated as failures.
 
     ExpectColumnValuesToBeIncreasing is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+    Column Map Expectation.
 
     Args:
         column (str): \
