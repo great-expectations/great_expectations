@@ -769,7 +769,7 @@ class RenderedAtomicValue(DictDot):
         header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        code_block: Optional[str] = None,
+        code_block: Optional[CodeBlock] = None,
         header_row: Optional[List[RendererTableValue]] = None,
         table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
