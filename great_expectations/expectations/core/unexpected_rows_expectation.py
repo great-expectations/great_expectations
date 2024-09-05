@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from string import Formatter
-from typing import TYPE_CHECKING, ClassVar, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, Optional, Tuple, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -16,7 +16,10 @@ from great_expectations.render.renderer_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationValidationResult
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.execution_engine import ExecutionEngine
 
 
@@ -119,9 +122,10 @@ class UnexpectedRowsExpectation(BatchExpectation):
     @override
     def _validate(
         self,
+        configuration: ExpectationConfiguration,
         metrics: dict,
-        runtime_configuration: dict | None = None,
-        execution_engine: ExecutionEngine | None = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metric_value = metrics["unexpected_rows_query.table"]
         unexpected_row_count = len(metric_value)
