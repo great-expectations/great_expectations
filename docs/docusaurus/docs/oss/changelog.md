@@ -19,7 +19,7 @@ Before we completely remove the functionality in a new major release, there will
 * [BUGFIX] FabricPowerBIDatasource 1.0 - TypeError: _PowerBIAsset.build_batch_request() got an unexpected keyword argument 'options' ([#10318](https://github.com/great-expectations/great_expectations/pull/10318))
 * [BUGFIX] Prevent pydantic type coercion of Value Sets ([#10325](https://github.com/great-expectations/great_expectations/pull/10325))
 * [BUGFIX] B/v1 509/remove df from result ([#10338](https://github.com/great-expectations/great_expectations/pull/10338))
-* [BUGFIX] Patch `SlackRenderer` and `EmailRenderer` `active_batch_definition` issues ([#10344](https://github.com/great-expectations/great_expectations/pull/10344))
+* [BUGFIX] Patch `SlackRenderer` and `EmailRenderer` `active_batch_definition` issues ([#10344](https://github.com/great-expectations/great_expectations/pull/10344)) (thanks @masfworld)
 * [BUGFIX] Show FDS Asset name in DataDocs ([#9953](https://github.com/great-expectations/great_expectations/pull/9953))
 * [DOCS] Update README.md ([#10294](https://github.com/great-expectations/great_expectations/pull/10294))
 * [DOCS] Fix gx core sidebar inconsistency in version 0.18 ([#10302](https://github.com/great-expectations/great_expectations/pull/10302))
@@ -38,10 +38,10 @@ Before we completely remove the functionality in a new major release, there will
 * [DOCS] Fix bad typo ([#10329](https://github.com/great-expectations/great_expectations/pull/10329))
 * [DOCS] Removes dead links to old docs from Expectation docstrings ([#10317](https://github.com/great-expectations/great_expectations/pull/10317))
 * [DOCS] Adds instructions on persisting environment variables in Z Shell to the configure credentials guide ([#10330](https://github.com/great-expectations/great_expectations/pull/10330))
-* [DOCS] Data quality tech doc on Missingness ([#10134](https://github.com/great-expectations/great_expectations/pull/10134)) (thanks @Quantisan)
+* [DOCS] Data quality tech doc on Missingness ([#10134](https://github.com/great-expectations/great_expectations/pull/10134))
 * [DOCS] Regenerate superscript numbers ([#10337](https://github.com/great-expectations/great_expectations/pull/10337))
 * [DOCS] Replace Slack alerts with email alerts ([#10320](https://github.com/great-expectations/great_expectations/pull/10320))
-* [MAINTENANCE] Add metadata to UnexpectedRowsExpectation ([#10311](https://github.com/great-expectations/great_expectations/pull/10311)) (thanks @ashmortar)
+* [MAINTENANCE] Add metadata to UnexpectedRowsExpectation ([#10311](https://github.com/great-expectations/great_expectations/pull/10311))
 * [MAINTENANCE] `UnexpectedRowsExpectation` renderer and validation improvements ([#10334](https://github.com/great-expectations/great_expectations/pull/10334))
 
 ### 1.0.1
