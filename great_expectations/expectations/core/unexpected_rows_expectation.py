@@ -8,7 +8,6 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render.renderer_configuration import (
-    AddParamArgs,
     CodeBlock,
     CodeBlockLanguage,
     RendererConfiguration,
@@ -122,15 +121,8 @@ class UnexpectedRowsExpectation(BatchExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: AddParamArgs = (
-            ("description", RendererValueType.STRING),
-            ("unexpected_rows_query", RendererValueType.STRING),
-        )
-        for name, param_type in add_param_args:
-            renderer_configuration.add_param(name=name, param_type=param_type)
-
-        renderer_configuration.template_str = (
-            "$description" if renderer_configuration.params.description else ""
+        renderer_configuration.add_param(
+            name="unexpected_rows_query", param_type=RendererValueType.STRING
         )
         renderer_configuration.code_block = CodeBlock(
             code_template_str="$unexpected_rows_query",
