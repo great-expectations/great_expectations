@@ -3580,32 +3580,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         )
 
 
-class UnexpectedRowsExpectation:
-    unexpected_rows_query: str
-    description: str | None = None
-
-    def __new__(
-        cls,
-        unexpected_rows_query: str | None = None,
-        description: str | None = None,
-    ):
-        # deprecated-v1.0.2
-        warnings.warn(
-            "Importing UnexpectedRowsExpectation from great_expectations.expectations.expectation "
-            "is deprecated. Please import UnexpectedRowsExpectation from "
-            "great_expectations.expectations instead.",
-            category=DeprecationWarning,
-        )
-        from great_expectations.expectations import (
-            UnexpectedRowsExpectation as CoreUnexpectedRowsExpectation,
-        )
-
-        return CoreUnexpectedRowsExpectation(
-            unexpected_rows_query=unexpected_rows_query or cls.unexpected_rows_query,
-            description=description or cls.description,
-        )
-
-
 def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     result_format: dict,
     success: bool,
