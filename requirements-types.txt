@@ -1,13 +1,15 @@
+--requirement reqs/requirements-dev-sqlalchemy2.txt
 --requirement requirements.txt
 --requirement reqs/requirements-dev-lite.txt
 --requirement reqs/requirements-dev-spark.txt
 --requirement reqs/requirements-dev-azure.txt
 --requirement reqs/requirements-dev-contrib.txt
 --requirement reqs/requirements-dev-cloud.txt
---requirement reqs/requirements-dev-sqlalchemy2.txt # force sqlalchemy 2 because it exports types
 --requirement docs/sphinx_api_docs_source/requirements-dev-api-docs.txt
-# typing stubs
 pandas-stubs
+# force sqlalchemy 2 because it exports types
+sqlalchemy>2.0
+# typing stubs
 types-beautifulsoup4
 types-colorama
 types-decorator
