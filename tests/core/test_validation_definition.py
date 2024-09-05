@@ -893,5 +893,5 @@ def test_is_fresh(
     )
     diagnostics = validation_definition.is_fresh()
 
-    assert diagnostics.is_fresh is is_fresh
+    assert diagnostics.success is is_fresh
     assert [type(err) for err in diagnostics.errors] == error_list

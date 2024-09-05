@@ -166,7 +166,7 @@ class Checkpoint(BaseModel):
             raise CheckpointRunWithoutValidationDefinitionError()
 
         diagnostics = self.is_fresh()
-        if not diagnostics.is_fresh:
+        if not diagnostics.success:
             # The checkpoint itself is not added but all children are - we can add it for the user
             if not diagnostics.parent_added and diagnostics.children_added:
                 self._add_to_store()

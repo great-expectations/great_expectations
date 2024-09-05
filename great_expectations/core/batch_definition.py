@@ -86,7 +86,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
     def is_fresh(self) -> BatchDefinitionFreshnessDiagnostics:
         diagnostics = self._is_added()
-        if not diagnostics.is_fresh:
+        if not diagnostics.success:
             return diagnostics
         return self._is_fresh()
 

@@ -35,7 +35,7 @@ class FreshnessDiagnostics:
     errors: list[ResourceNotFreshError]
 
     @property
-    def is_fresh(self) -> bool:
+    def success(self) -> bool:
         return len(self.errors) == 0
 
     @abstractmethod
@@ -51,7 +51,7 @@ class FreshnessDiagnostics:
 class _ChildFreshnessDiagnostics(FreshnessDiagnostics):
     @override
     def raise_for_error(self) -> None:
-        if not self.is_fresh:
+        if not self.success:
             raise self.errors[0]  # Child node so only one error
 
 
@@ -86,7 +86,7 @@ class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
 
     @override
     def raise_for_error(self) -> None:
-        if not self.is_fresh:
+        if not self.success:
             raise self.raise_for_error_class(errors=self.errors)
 
 
