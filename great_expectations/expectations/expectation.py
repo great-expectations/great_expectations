@@ -336,6 +336,23 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         default=None
     )
 
+    @override
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Expectation):
+            return False
+
+        self_dict = self.dict()
+        other_dict = other.dict()
+
+        # Simplify notes and meta equality - falsiness is equivalent
+        for attr in ("notes", "meta"):
+            self_val = self_dict.pop(attr, None) or None
+            other_val = other_dict.pop(attr, None) or None
+            if self_val != other_val:
+                return False
+
+        return self_dict == other_dict
+
     @pydantic.validator("result_format")
     def _validate_result_format(cls, result_format: ResultFormat | dict) -> ResultFormat | dict:
         if isinstance(result_format, dict) and "result_format" not in result_format:
