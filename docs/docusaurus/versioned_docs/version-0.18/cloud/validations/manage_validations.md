@@ -10,8 +10,6 @@ To learn more about Validations, see [Validator](/reference/learn/terms/validato
 
 ## Prerequisites
 
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 - You have created an [Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 ## Run a Validation
@@ -71,6 +69,12 @@ To make the identification of Data Assets containing partitions easier, partitio
     - To view the run history for specific Validation, select a Validation in the **Run History** pane.
     
     - To view the run history of all Validations, select **All Runs** to view a graph showing the Validation run history for all columns.
+
+:::tip
+
+Items in run history with a calendar icon are run on a GX-managed schedule.
+
+:::
 
 6. Optional. Hover over a circle in the Validation timeline to view details about a specific Validation run, including the observed values.
 

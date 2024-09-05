@@ -30,7 +30,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/data_context/store/database_store_backend.py Name: DatabaseStoreBackend",
     "File: great_expectations/data_context/store/expectations_store.py Name: ExpectationsStore",
     "File: great_expectations/data_context/store/metric_store.py Name: MetricStore",
-    "File: great_expectations/data_context/store/metric_store.py Name: SuiteParameterStore",
     "File: great_expectations/data_context/store/query_store.py Name: SqlAlchemyQueryStore",
     "File: great_expectations/data_context/store/store.py Name: add",
     "File: great_expectations/data_context/store/store.py Name: update",

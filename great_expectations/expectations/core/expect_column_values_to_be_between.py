@@ -63,8 +63,8 @@ SUPPORTED_DATA_SOURCES = [
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_values_to_be_between is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations)
+    ExpectColumnValuesToBeBetween is a \
+    Column Map Expectation
 
     Column Map Expectations are one of the most common types of Expectation.
     They are evaluated for a single column and ask a yes/no question for every row in that column.
@@ -107,7 +107,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         * If max_value is None, then min_value is treated as a lower bound, and there is no maximum value checked.
 
     See Also:
-        [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
+        [ExpectColumnValueLengthsToBeBetween](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

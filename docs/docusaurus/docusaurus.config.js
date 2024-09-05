@@ -74,10 +74,23 @@ module.exports = {
       contextualSearch: true,
     },
     prism: {
+      additionalLanguages: ['bash'],
       theme: require('./src/theme/CodeBlock/theme'),
+      magicComments: [
+        // Remember to extend the default highlight class name as well!
+        {
+          className: 'theme-code-block-highlighted-line',
+          line: 'highlight-next-line',
+          block: {start: 'highlight-start', end: 'highlight-end'},
+        },
+        {
+          className: 'code-block-hide-line',
+          line: 'Hide this',
+        },
+      ]
     },
     colorMode: {
-      disableSwitch: true,
+      disableSwitch: false,
     },
     zoomSelector: '.markdown :not(em) > img',
     // announcementBar: {
@@ -94,6 +107,7 @@ module.exports = {
       logo: {
         alt: 'Great Expectations',
         src: 'img/GXDocs.svg',
+        srcDark: 'img/GXDocs-dark.svg',
         href: 'https://greatexpectations.io',
       },
       items: [
@@ -113,6 +127,11 @@ module.exports = {
           type: 'search',
           position: 'left',
           className: 'custom-search-bar',
+        },
+        {
+          type: 'custom-colorModeToggle',
+          position: 'left',
+          className: 'color-mode-toggle',
         },
         {
           type: 'custom-githubNavbarItem',
@@ -135,8 +154,8 @@ module.exports = {
         },
         {
           type: 'doc',
-          label: 'GX OSS',
-          docId: 'oss/oss',
+          label: 'GX Core',
+          docId: 'core/introduction/introduction',
           position: 'right',
         },
         {
@@ -202,7 +221,7 @@ module.exports = {
               to: 'https://greatexpectations.io/gx-cloud',
             },
             {
-              label: 'GX OSS',
+              label: 'GX Core',
               to: 'https://greatexpectations.io/gx-oss',
             },
             {
@@ -268,14 +287,13 @@ module.exports = {
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
           // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
+          lastVersion: 'current',
           versions: {
             current: {
-              label: '1.0 prerelease',
-              path: '1.0-prerelease',
+              label: '1.0.1',
             },
             ['0.18']: {
               label: '0.18.17',
-              path: '',
             },
           },
           admonitions: {

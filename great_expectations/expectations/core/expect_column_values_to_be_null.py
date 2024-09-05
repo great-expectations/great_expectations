@@ -64,8 +64,8 @@ DATA_QUALITY_ISSUES = ["Missingness"]
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_values_to_be_null is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+    ExpectColumnValuesToBeNull is a \
+    Column Map Expectation.
 
     Column Map Expectations are one of the most common types of Expectation.
     They are evaluated for a single column and ask a yes/no question for every row in that column.
@@ -94,7 +94,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_values_to_not_be_null](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null)
+        [ExpectColumnValuesToNotBeNull](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

@@ -52,8 +52,8 @@ DATA_QUALITY_ISSUES = ["Distribution"]
 class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_pair_values_a_to_be_greater_than_b is a \
-    [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
+    ExpectColumnPairValuesAToBeGreaterThanB is a \
+    Column Pair Map Expectation.
 
     Column Pair Map Expectations are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns.
     Based on the result, they then calculate the percentage of rows that gave a positive answer.

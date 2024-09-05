@@ -157,14 +157,14 @@ class ValidationResultsStore(Store):
 
         return suite_validation_result_dict
 
-    def serialize(self, value):
+    def serialize(self, value):  # type: ignore[explicit-override] # FIXME
         if self.cloud_mode:
             return value.to_json_dict()
         return self._expectationSuiteValidationResultSchema.dumps(
             value.to_json_dict(), indent=2, sort_keys=True
         )
 
-    def deserialize(self, value):
+    def deserialize(self, value):  # type: ignore[explicit-override] # FIXME
         if isinstance(value, dict):
             return self._expectationSuiteValidationResultSchema.load(value)
         else:
@@ -204,4 +204,4 @@ class ValidationResultsStore(Store):
 
     @staticmethod
     def parse_result_url_from_gx_cloud_ref(ref: GXCloudResourceRef) -> str | None:
-        return ref.response["data"]["attributes"]["validation_result"]["display_url"]
+        return ref.response["data"]["result_url"]

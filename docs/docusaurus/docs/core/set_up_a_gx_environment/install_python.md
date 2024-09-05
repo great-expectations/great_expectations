@@ -6,7 +6,7 @@ import GxData from '../_core_components/_data.jsx';
 import PythonVersion from '../_core_components/_python_version.md';
 import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
 
-To use Great Expectations (GX) you need to install Python and the {GxData.product_name} Python library. GX also recommends you set up a virtual environment for your GX Python projects.
+To use Great Expectations (GX) you need to install Python and the GX Core Python library. GX also recommends you set up a virtual environment for your GX Python projects.
 
 ## Prerequisites
 

@@ -5,7 +5,6 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.analytics.config import (
-    DUMMY_UUID,
     ENV_CONFIG,
     Config,
     get_config,
@@ -24,23 +23,23 @@ TESTING_UUID = UUID("00000000-c000-0000-0000-000000000000")
             Config(
                 organization_id=TESTING_UUID,
                 user_id=TESTING_UUID,
-                data_context_id=DUMMY_UUID,
-                oss_id=DUMMY_UUID,
+                data_context_id=None,
+                oss_id=None,
                 cloud_mode=False,
             ),
             TESTING_UUID,
             {
                 "user_id": TESTING_UUID,
                 "organization_id": TESTING_UUID,
-                "data_context_id": DUMMY_UUID,
-                "oss_id": DUMMY_UUID,
+                "data_context_id": None,
+                "oss_id": None,
                 "service": "gx-core",
             },
         ),
         (
             Config(),
-            DUMMY_UUID,
-            {"data_context_id": DUMMY_UUID, "oss_id": DUMMY_UUID, "service": "gx-core"},
+            None,
+            {"data_context_id": None, "oss_id": None, "service": "gx-core"},
         ),
     ],
 )
@@ -94,7 +93,12 @@ def test_ephemeral_context_init(monkeypatch):
     mock_submit.assert_called_once_with(
         mock.ANY,
         "data_context.initialized",
-        {"data_context_id": mock.ANY, "oss_id": mock.ANY, "service": "gx-core"},
+        {
+            "data_context_id": mock.ANY,
+            "oss_id": mock.ANY,
+            "service": "gx-core",
+            "gx_version": mock.ANY,
+        },
         groups={"data_context": mock.ANY},
     )
 
@@ -124,6 +128,11 @@ def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
     mock_submit.assert_called_once_with(
         mock.ANY,
         "data_context.initialized",
-        {"data_context_id": mock.ANY, "oss_id": mock.ANY, "service": "gx-core"},
+        {
+            "data_context_id": mock.ANY,
+            "oss_id": mock.ANY,
+            "service": "gx-core",
+            "gx_version": mock.ANY,
+        },
         groups={"data_context": mock.ANY},
     )

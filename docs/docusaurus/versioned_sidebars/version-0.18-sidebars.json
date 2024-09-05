@@ -1,317 +1,8 @@
 {
-  "gx_cloud": [
+  "gx_core": [
     {
       "type": "doc",
-      "id": "cloud/why_gx_cloud"
-    },
-    {
-      "type": "category",
-      "label": "GX Cloud deployment patterns and architecture",
-      "link": {
-        "type": "doc",
-        "id": "cloud/about_gx"
-      },
-      "items": [
-        {
-          "type": "link",
-          "label": "GX Cloud architecture",
-          "href": "/docs/cloud/about_gx#gx-cloud-architecture"
-        },
-        {
-          "type": "link",
-          "label": "GX Agent",
-          "href": "/docs/cloud/about_gx#gx-agent"
-        },
-        {
-          "type": "link",
-          "label": "GX Cloud deployment patterns",
-          "href": "/docs/cloud/about_gx#gx-cloud-deployment-patterns"
-        },
-        {
-          "type": "link",
-          "label": "GX Cloud workflow",
-          "href": "/docs/cloud/about_gx#gx-cloud-workflow"
-        },
-        {
-          "type": "link",
-          "label": "Roles and responsibilities",
-          "href": "/docs/cloud/about_gx#roles-and-responsibilities"
-        },
-        {
-          "type": "link",
-          "label": "Supported browsers",
-          "href": "/docs/cloud/about_gx#supported-browsers"
-        }
-      ]
-    },
-    {
-      "type": "doc",
-      "id": "cloud/deploy_gx_agent"
-    },
-    {
-      "type": "category",
-      "label": "Connect GX Cloud",
-      "link": {
-        "type": "doc",
-        "id": "cloud/connect/connect_lp"
-      },
-      "items": [
-        "cloud/connect/connect_postgresql",
-        "cloud/connect/connect_snowflake",
-        "cloud/connect/connect_airflow",
-        "cloud/connect/connect_python"
-      ]
-    },
-    {
-      "type": "category",
-      "label": "Manage Data Assets",
-      "link": {
-        "type": "doc",
-        "id": "cloud/data_assets/manage_data_assets"
-      },
-      "items": [
-        {
-          "type": "link",
-          "label": "Create a Data Asset",
-          "href": "/docs/cloud/data_assets/manage_data_assets#create-a-data-asset"
-        },
-        {
-          "type": "link",
-          "label": "View Data Asset metrics",
-          "href": "/docs/cloud/data_assets/manage_data_assets#view-data-asset-metrics"
-        },
-        {
-          "type": "link",
-          "label": "Add an Expectation to a Data Asset column",
-          "href": "/docs/cloud/data_assets/manage_data_assets#add-an-expectation-to-a-data-asset-column"
-        },
-        {
-          "type": "link",
-          "label": "Add a Data Asset to an Existing Data Source",
-          "href": "/docs/cloud/data_assets/manage_data_assets#add-a-data-asset-to-an-existing-data-source"
-        },
-        {
-          "type": "link",
-          "label": "Edit Data Source settings",
-          "href": "/docs/cloud/data_assets/manage_data_assets#edit-data-source-settings"
-        },
-        {
-          "type": "link",
-          "label": "Edit a Data Asset",
-          "href": "/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset"
-        },
-        {
-          "type": "link",
-          "label": "Secure your GX API Data Source connection strings",
-          "href": "/docs/cloud/data_assets/manage_data_assets#secure-your-gx-api-data-source-connection-strings"
-        },
-        {
-          "type": "link",
-          "label": "Delete a Data Asset",
-          "href": "/docs/cloud/data_assets/manage_data_assets#delete-a-data-asset"
-        }
-      ]
-    },
-    {
-      "type": "category",
-      "label": "Manage Expectations",
-      "link": {
-        "type": "doc",
-        "id": "cloud/expectations/manage_expectations"
-      },
-      "items": [
-        {
-          "type": "link",
-          "label": "Available Expectations",
-          "href": "/docs/cloud/expectations/manage_expectations#available-expectations"
-        },
-        {
-          "type": "link",
-          "label": "Add an Expectation",
-          "href": "/docs/cloud/expectations/manage_expectations#add-an-expectation"
-        },
-        {
-          "type": "link",
-          "label": "Edit an Expectation",
-          "href": "/docs/cloud/expectations/manage_expectations#edit-an-expectation"
-        },
-        {
-          "type": "link",
-          "label": "View Expectation history",
-          "href": "/docs/cloud/expectations/manage_expectations#view-expectation-history"
-        },
-        {
-          "type": "link",
-          "label": "Delete an Expectation",
-          "href": "/docs/cloud/expectations/manage_expectations#delete-an-expectation"
-        }
-      ]
-    },
-    {
-      "type": "category",
-      "label": "Manage Expectation Suites",
-      "link": {
-        "type": "doc",
-        "id": "cloud/expectation_suites/manage_expectation_suites"
-      },
-      "items": [
-        {
-          "type": "link",
-          "label": "Create an Expectation Suite ",
-          "href": "/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite"
-        },
-        {
-          "type": "link",
-          "label": "Edit an Expectation Suite name",
-          "href": "/docs/cloud/expectation_suites/manage_expectation_suites#edit-an-expectation-suite-name"
-        },
-        {
-          "type": "link",
-          "label": "Delete an Expectation Suite",
-          "href": "/docs/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite"
-        }
-      ]
-    },
-    {
-      "type": "category",
-      "label": "Manage Validations",
-      "link": {
-        "type": "doc",
-        "id": "cloud/validations/manage_validations"
-      },
-      "items": [
-        {
-          "type": "link",
-          "label": "Run a Validation",
-          "href": "/docs/cloud/validations/manage_validations#run-a-validation"
-        },
-        {
-          "type": "link",
-          "label": "Run a Validation on a Data Asset containing partitions",
-          "href": "/docs/cloud/validations/manage_validations#run-a-validation-on-a-data-asset-containing-partitions"
-        },
-        {
-          "type": "link",
-          "label": "View Validation run history",
-          "href": "/docs/cloud/validations/manage_validations#view-validation-run-history"
-        }
-      ]
-    },
-    {
-      "type": "category",
-      "label": "Manage Checkpoints",
-      "link": {
-        "type": "doc",
-        "id": "cloud/checkpoints/manage_checkpoints"
-      },
-      "items": [
-        {
-          "type": "link",
-          "label": "Add a Checkpoint",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint"
-        },
-        {
-          "type": "link",
-          "label": "Run a Checkpoint",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#run-a-checkpoint"
-        },
-        {
-          "type": "link",
-          "label": "Add a Validation to a Checkpoint",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-to-a-checkpoint"
-        },
-        {
-          "type": "link",
-          "label": "Edit a Checkpoint name",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-name"
-        },
-        {
-          "type": "link",
-          "label": "Edit a Checkpoint configuration",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration"
-        },
-        {
-          "type": "link",
-          "label": "Configure the Checkpoint result format parameter",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#configure-the-checkpoint-result-format-parameter"
-        },
-        {
-          "type": "link",
-          "label": "Delete a Checkpoint",
-          "href": "/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint"
-        }
-      ]
-    },
-    {
-      "type": "category",
-      "label": "Manage alerts",
-      "link": {
-        "type": "doc",
-        "id": "cloud/alerts/manage_alerts"
-      },
-      "items": [
-        {
-          "type": "link",
-          "label": "Add a Slack alert",
-          "href": "/docs/cloud/alerts/manage_alerts#add-a-slack-alert"
-        },
-        {
-          "type": "link",
-          "label": "Edit a Slack alert",
-          "href": "/docs/cloud/alerts/manage_alerts#edit-a-slack-alert"
-        },
-        {
-          "type": "link",
-          "label": "Delete a Slack alert",
-          "href": "/docs/cloud/alerts/manage_alerts#delete-a-slack-alert"
-        }
-      ]
-    },
-    {
-      "type": "category",
-      "label": "Manage users and access tokens",
-      "link": {
-        "type": "doc",
-        "id": "cloud/users/manage_users"
-      },
-      "items": [
-        {
-          "type": "link",
-          "label": "Invite a user",
-          "href": "/docs/cloud/users/manage_users#invite-a-user"
-        },
-        {
-          "type": "link",
-          "label": "Edit a user role",
-          "href": "/docs/cloud/users/manage_users#edit-a-user-role"
-        },
-        {
-          "type": "link",
-          "label": "Delete a user",
-          "href": "/docs/cloud/users/manage_users#delete-a-user"
-        },
-        {
-          "type": "link",
-          "label": "Create a user access token",
-          "href": "/docs/cloud/users/manage_users#create-a-user-access-token"
-        },
-        {
-          "type": "link",
-          "label": "Create an organization access token",
-          "href": "/docs/cloud/users/manage_users#create-an-organization-access-token"
-        },
-        {
-          "type": "link",
-          "label": "Delete a user or organization access token",
-          "href": "/docs/cloud/users/manage_users#delete-a-user-or-organization-access-token"
-        }
-      ]
-    }
-  ],
-  "gx_oss": [
-    {
-      "type": "doc",
-      "id": "oss/intro",
+      "id": "core/introduction/introduction",
       "label": "About GX OSS"
     },
     {
@@ -542,6 +233,287 @@
     {
       "type": "doc",
       "id": "oss/changelog"
+    }
+  ],
+  "gx_cloud": [
+    {
+      "type": "doc",
+      "id": "cloud/why_gx_cloud"
+    },
+    {
+      "type": "category",
+      "label": "GX Cloud deployment patterns and architecture",
+      "link": {
+        "type": "doc",
+        "id": "cloud/about_gx"
+      },
+      "items": [
+        {
+          "type": "link",
+          "label": "GX Cloud architecture",
+          "href": "/docs/cloud/about_gx#gx-cloud-architecture"
+        },
+        {
+          "type": "link",
+          "label": "GX Cloud deployment options",
+          "href": "/docs/cloud/about_gx#gx-cloud-deployment-options"
+        },
+        {
+          "type": "link",
+          "label": "GX Cloud workflow",
+          "href": "/docs/cloud/about_gx#gx-cloud-workflow"
+        },
+        {
+          "type": "link",
+          "label": "Roles and responsibilities",
+          "href": "/docs/cloud/about_gx#roles-and-responsibilities"
+        },
+        {
+          "type": "link",
+          "label": "Supported browsers",
+          "href": "/docs/cloud/about_gx#supported-browsers"
+        },
+        {
+          "type": "doc",
+          "id": "cloud/deploy_gx_agent"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Connect GX Cloud",
+      "link": {
+        "type": "doc",
+        "id": "cloud/connect/connect_lp"
+      },
+      "items": [
+        "cloud/connect/connect_postgresql",
+        "cloud/connect/connect_snowflake",
+        "cloud/connect/connect_airflow",
+        "cloud/connect/connect_python"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Manage Data Assets",
+      "link": {
+        "type": "doc",
+        "id": "cloud/data_assets/manage_data_assets"
+      },
+      "items": [
+        {
+          "type": "link",
+          "label": "Create a Data Asset",
+          "href": "/docs/cloud/data_assets/manage_data_assets#create-a-data-asset"
+        },
+        {
+          "type": "link",
+          "label": "View Data Asset metrics",
+          "href": "/docs/cloud/data_assets/manage_data_assets#view-data-asset-metrics"
+        },
+        {
+          "type": "link",
+          "label": "Add an Expectation to a Data Asset column",
+          "href": "/docs/cloud/data_assets/manage_data_assets#add-an-expectation-to-a-data-asset-column"
+        },
+        {
+          "type": "link",
+          "label": "Add a Data Asset to an Existing Data Source",
+          "href": "/docs/cloud/data_assets/manage_data_assets#add-a-data-asset-to-an-existing-data-source"
+        },
+        {
+          "type": "link",
+          "label": "Edit Data Source settings",
+          "href": "/docs/cloud/data_assets/manage_data_assets#edit-data-source-settings"
+        },
+        {
+          "type": "link",
+          "label": "Edit a Data Asset",
+          "href": "/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset"
+        },
+        {
+          "type": "link",
+          "label": "Secure your GX API Data Source connection strings",
+          "href": "/docs/cloud/data_assets/manage_data_assets#secure-your-gx-api-data-source-connection-strings"
+        },
+        {
+          "type": "link",
+          "label": "Delete a Data Asset",
+          "href": "/docs/cloud/data_assets/manage_data_assets#delete-a-data-asset"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Manage Expectations",
+      "link": {
+        "type": "doc",
+        "id": "cloud/expectations/manage_expectations"
+      },
+      "items": [
+        {
+          "type": "link",
+          "label": "Available Expectations",
+          "href": "/docs/cloud/expectations/manage_expectations#available-expectations"
+        },
+        {
+          "type": "link",
+          "label": "Add an Expectation",
+          "href": "/docs/cloud/expectations/manage_expectations#add-an-expectation"
+        },
+        {
+          "type": "link",
+          "label": "Edit an Expectation",
+          "href": "/docs/cloud/expectations/manage_expectations#edit-an-expectation"
+        },
+        {
+          "type": "link",
+          "label": "View Expectation history",
+          "href": "/docs/cloud/expectations/manage_expectations#view-expectation-history"
+        },
+        {
+          "type": "link",
+          "label": "Delete an Expectation",
+          "href": "/docs/cloud/expectations/manage_expectations#delete-an-expectation"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Manage Expectation Suites",
+      "link": {
+        "type": "doc",
+        "id": "cloud/expectation_suites/manage_expectation_suites"
+      },
+      "items": [
+        {
+          "type": "link",
+          "label": "Create an Expectation Suite ",
+          "href": "/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite"
+        },
+        {
+          "type": "link",
+          "label": "Edit an Expectation Suite name",
+          "href": "/docs/cloud/expectation_suites/manage_expectation_suites#edit-an-expectation-suite-name"
+        },
+        {
+          "type": "link",
+          "label": "Delete an Expectation Suite",
+          "href": "/docs/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Manage Validations",
+      "link": {
+        "type": "doc",
+        "id": "cloud/validations/manage_validations"
+      },
+      "items": [
+        {
+          "type": "link",
+          "label": "Run a Validation",
+          "href": "/docs/cloud/validations/manage_validations#run-a-validation"
+        },
+        {
+          "type": "link",
+          "label": "Run a Validation on a Data Asset containing partitions",
+          "href": "/docs/cloud/validations/manage_validations#run-a-validation-on-a-data-asset-containing-partitions"
+        },
+        {
+          "type": "link",
+          "label": "View Validation run history",
+          "href": "/docs/cloud/validations/manage_validations#view-validation-run-history"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Manage schedules",
+      "link": { "type": "doc", "id": "cloud/schedules/manage_schedules" },
+      "items": [
+        {
+          "type": "link",
+          "label": "Add a schedule",
+          "href": "/docs/cloud/schedules/manage_schedules#create-a-schedule-for-an-existing-expectation-suite"
+        },
+        {
+          "type": "link",
+          "label": "Edit a schedule",
+          "href": "/docs/cloud/schedules/manage_schedules#edit-a-schedule"
+        },
+        {
+          "type": "link",
+          "label": "Disable a schedule",
+          "href": "/docs/cloud/schedules/manage_schedules#disable-a-schedule"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Manage alerts",
+      "link": {
+        "type": "doc",
+        "id": "cloud/alerts/manage_alerts"
+      },
+      "items": [
+        {
+          "type": "link",
+          "label": "Add a Slack alert",
+          "href": "/docs/cloud/alerts/manage_alerts#add-a-slack-alert"
+        },
+        {
+          "type": "link",
+          "label": "Edit a Slack alert",
+          "href": "/docs/cloud/alerts/manage_alerts#edit-a-slack-alert"
+        },
+        {
+          "type": "link",
+          "label": "Delete a Slack alert",
+          "href": "/docs/cloud/alerts/manage_alerts#delete-a-slack-alert"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Manage users and access tokens",
+      "link": {
+        "type": "doc",
+        "id": "cloud/users/manage_users"
+      },
+      "items": [
+        {
+          "type": "link",
+          "label": "Invite a user",
+          "href": "/docs/cloud/users/manage_users#invite-a-user"
+        },
+        {
+          "type": "link",
+          "label": "Edit a user role",
+          "href": "/docs/cloud/users/manage_users#edit-a-user-role"
+        },
+        {
+          "type": "link",
+          "label": "Delete a user",
+          "href": "/docs/cloud/users/manage_users#delete-a-user"
+        },
+        {
+          "type": "link",
+          "label": "Create a user access token",
+          "href": "/docs/cloud/users/manage_users#create-a-user-access-token"
+        },
+        {
+          "type": "link",
+          "label": "Create an organization access token",
+          "href": "/docs/cloud/users/manage_users#create-an-organization-access-token"
+        },
+        {
+          "type": "link",
+          "label": "Delete a user or organization access token",
+          "href": "/docs/cloud/users/manage_users#delete-a-user-or-organization-access-token"
+        }
+      ]
     }
   ],
   "gx_apis": [

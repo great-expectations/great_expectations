@@ -36,8 +36,8 @@ if TYPE_CHECKING:
 class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     """Expect the column entries to be strings representing a date or time with a given format.
 
-    expect_column_values_to_match_strftime_format is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+    ExpectColumnValuesToMatchStrftimeFormat is a \
+    Column Map Expectation.
 
     Args:
         column (str): \

@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to match an unordered set."
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns in a table to match an unordered set."
 COLUMN_SET_DESCRIPTION = "The column names, in any order."
 EXACT_MATCH_DESCRIPTION = (
     "If True, the list of columns must exactly match the observed columns. "
@@ -52,8 +52,8 @@ DATA_QUALITY_ISSUES = ["Schema"]
 class ExpectTableColumnsToMatchSet(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_table_columns_to_match_set is a \
-    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
+    ExpectTableColumnsToMatchSet is a \
+    Batch Expectation.
 
     BatchExpectations are one of the most common types of Expectation.
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.

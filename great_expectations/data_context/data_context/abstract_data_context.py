@@ -84,7 +84,7 @@ from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
 from great_expectations.datasource.fluent.interfaces import (
     Datasource as FluentDatasource,
 )
-from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.validator import Validator
 
@@ -104,9 +104,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
-    )
-    from great_expectations.data_context.store import (
-        SuiteParameterStore,
     )
     from great_expectations.data_context.store.checkpoint_store import CheckpointStore
     from great_expectations.data_context.store.datasource_store import DatasourceStore
@@ -143,7 +140,6 @@ yaml = YAMLHandler()
 T = TypeVar("T", dict, list, str)
 
 
-@public_api
 class AbstractDataContext(ConfigPeer, ABC):
     """Base class for all Data Contexts that contains shared functionality.
 
@@ -248,14 +244,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._suite_parameter_dependencies: dict = {}
 
-        self._init_factories()
+        self._init_data_source_manager()
 
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
 
-    def _init_factories(self) -> None:
-        self._data_sources: _SourceFactories = _SourceFactories(self)
+    def _init_data_source_manager(self) -> None:
+        self._data_sources: DataSourceManager = DataSourceManager(self)
 
         self._suites: SuiteFactory | None = None
         if expectations_store := self.stores.get(self.expectations_store_name):
@@ -342,7 +338,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """  # noqa: E501
-        return self.variables.save_config()
+        return self.variables.save()
 
     @public_api
     def update_project_config(
@@ -453,7 +449,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.variables.expectations_store_name
 
     @expectations_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def expectations_store_name(self, value: str) -> None:
         """Set the name of the expectations store.
@@ -470,19 +465,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.expectations_store_name]
 
     @property
-    def suite_parameter_store_name(self) -> Optional[str]:
-        return self.variables.suite_parameter_store_name
-
-    @property
-    def suite_parameter_store(self) -> SuiteParameterStore:
-        return self.stores[self.suite_parameter_store_name]
-
-    @property
     def validation_results_store_name(self) -> Optional[str]:
         return self.variables.validation_results_store_name
 
     @validation_results_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def validation_results_store_name(self, value: str) -> None:
         """Set the name of the validations store.
@@ -519,7 +505,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return None
 
     @checkpoint_store_name.setter
-    @public_api
     @new_method_or_class(version="0.17.2")
     def checkpoint_store_name(self, value: str) -> None:
         """Set the name of the checkpoint store.
@@ -535,7 +520,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.checkpoint_store_name]
 
     @property
-    def data_sources(self) -> _SourceFactories:
+    @public_api
+    def data_sources(self) -> DataSourceManager:
         return self._data_sources
 
     @property
@@ -556,18 +542,18 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         # We currently don't allow one to overwrite a datasource with this internal method
-        if datasource_name in self.datasources:
+        if datasource_name in self.data_sources.all():
             raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"Can not write the fluent datasource {datasource_name} because a datasource of that "  # noqa: E501
                 "name already exists in the data context."
             )
 
         if not datasource:
-            ds_type = _SourceFactories.type_lookup[kwargs["type"]]
+            ds_type = DataSourceManager.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
         assert isinstance(datasource, FluentDatasource)
 
-        return_obj = self.datasources.set_datasource(name=datasource_name, ds=datasource)
+        return_obj = self.data_sources.all().set_datasource(name=datasource_name, ds=datasource)
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
         if save_changes:
@@ -589,14 +575,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if not datasource:
-            ds_type = _SourceFactories.type_lookup[kwargs["type"]]
+            ds_type = DataSourceManager.type_lookup[kwargs["type"]]
             updated_datasource = ds_type(**kwargs)
         else:
             updated_datasource = datasource
 
         updated_datasource._rebuild_asset_data_connectors()
 
-        updated_datasource = self.datasources.set_datasource(
+        updated_datasource = self.data_sources.all().set_datasource(
             name=datasource_name, ds=updated_datasource
         )
         updated_datasource._data_context = self  # TODO: move from here?
@@ -605,20 +591,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(updated_datasource, FluentDatasource)
         return updated_datasource
 
-    def _delete_fluent_datasource(self, datasource_name: str, _call_store: bool = True) -> None:
+    def _delete_fluent_datasource(self, name: str, _call_store: bool = True) -> None:
         """
         _call_store = False allows for local deletes without deleting the persisted storage datasource.
         This should generally be avoided.
         """  # noqa: E501
-        self.fluent_config.pop(datasource_name, None)
-        datasource = self.datasources.get(datasource_name)
+        self.fluent_config.pop_datasource(name, None)
+        datasource = self.data_sources.all().get(name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
                 self._datasource_store.delete(datasource)
         else:
             # Raise key error instead?
-            logger.info(f"No Datasource '{datasource_name}' to delete")
-        self.datasources.pop(datasource_name, None)
+            logger.info(f"No Datasource '{name}' to delete")
+        self.data_sources.all().pop(name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -652,7 +638,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_argument(
         argument_name="datasource",
         version="0.15.49",
@@ -723,7 +708,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
         return datasource
 
-    @public_api
     def update_datasource(
         self,
         datasource: FluentDatasource,
@@ -736,11 +720,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The updated Datasource.
         """
-        if isinstance(datasource, FluentDatasource):
-            self._update_fluent_datasource(datasource=datasource)
-        else:
-            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
-        return datasource
+        return self._update_fluent_datasource(datasource=datasource)
 
     @overload
     def add_or_update_datasource(
@@ -768,7 +748,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_datasource(
         self,
@@ -793,19 +772,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         if "type" in kwargs:
             assert name, 'Fluent Datasource kwargs must include the keyword "name"'
             kwargs["name"] = name
-            if name in self.datasources:
+            if name in self.data_sources.all():
                 self._update_fluent_datasource(**kwargs)
             else:
                 self._add_fluent_datasource(**kwargs)
-            return_datasource = self.datasources[name]
+            return_datasource = self.data_sources.all()[name]
         else:
             if datasource is None:
                 raise ValueError("Either datasource or kwargs are required")  # noqa: TRY003
-            if datasource.name in self.datasources:
+            if datasource.name in self.data_sources.all():
                 self._update_fluent_datasource(datasource=datasource)
             else:
                 self._add_fluent_datasource(datasource=datasource)
-            return_datasource = self.datasources[datasource.name]
+            return_datasource = self.data_sources.all()[datasource.name]
 
         return return_datasource
 
@@ -844,13 +823,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
             validation_results_store_name,
-            suite_parameter_store_name,
             checkpoint_store_name
         """  # noqa: E501
         active_store_names: List[str] = [
             self.expectations_store_name,  # type: ignore[list-item]
             self.validation_results_store_name,  # type: ignore[list-item]
-            self.suite_parameter_store_name,  # type: ignore[list-item]
         ]
 
         try:
@@ -864,12 +841,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
-    @public_api
-    def get_datasource(self, datasource_name: str = "default") -> FluentDatasource:
+    def get_datasource(self, name: str = "default") -> FluentDatasource:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
         Args:
-            datasource_name: The name of the target datasource.
+            name: The name of the target datasource.
 
         Returns:
             The target datasource.
@@ -877,33 +853,32 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ValueError: The input `datasource_name` is None.
         """
-        if datasource_name is None:
+        if name is None:
             raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")  # noqa: TRY003
 
         try:
-            datasource = self.datasources[datasource_name]
+            datasource = self.data_sources.all()[name]
         except KeyError as e:
             raise ValueError(str(e)) from e
 
         datasource._data_context = self
         return datasource
 
-    @public_api
-    def add_store(self, store_name: str, store_config: StoreConfigTypedDict) -> Store:
+    def add_store(self, name: str, config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.
 
         Args:
-            store_name: the name to associate with the created store.
-            store_config: the config to use to construct the store.
+            name: the name to associate with the created store.
+            config: the config to use to construct the store.
 
         Returns:
             The instantiated Store.
         """
-        store = self._build_store_from_config(store_name, store_config)
+        store = self._build_store_from_config(name, config)
 
         # Both the config and the actual stores need to be kept in sync
-        self.config.stores[store_name] = store_config
-        self._stores[store_name] = store
+        self.config.stores[name] = config
+        self._stores[name] = store
 
         self._save_project_config()
         return store
@@ -985,29 +960,27 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.variables.data_docs_sites = sites
             self._save_project_config()
 
-    @public_api
     @new_method_or_class(version="0.15.48")
-    def delete_store(self, store_name: str) -> None:
+    def delete_store(self, name: str) -> None:
         """Delete an existing Store from the DataContext.
 
         Args:
-            store_name: The name of the Store to be deleted.
+            name: The name of the Store to be deleted.
 
         Raises:
             StoreConfigurationError if the target Store is not found.
         """
-        if store_name not in self.config.stores and store_name not in self._stores:
+        if name not in self.config.stores and name not in self._stores:
             raise gx_exceptions.StoreConfigurationError(  # noqa: TRY003
-                f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
+                f'Attempted to delete a store named: "{name}". It is not a configured store.'
             )
 
         # Both the config and the actual stores need to be kept in sync
-        self.config.stores.pop(store_name, None)
-        self._stores.pop(store_name, None)
+        self.config.stores.pop(name, None)
+        self._stores.pop(name, None)
 
         self._save_project_config()
 
-    @public_api
     def list_datasources(self) -> List[dict]:
         """List the configurations of the datasources associated with this context.
 
@@ -1016,29 +989,27 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A list of dictionaries representing datasource configurations.
         """
-        return [ds.dict() for ds in self.datasources.values()]
+        return [ds.dict() for ds in self.data_sources.all().values()]
 
-    @public_api
-    def delete_datasource(self, datasource_name: Optional[str]) -> None:
+    def delete_datasource(self, name: Optional[str]) -> None:
         """Delete a given Datasource by name.
 
         Note that this method causes deletion from the underlying DatasourceStore.
 
         Args:
-            datasource_name: The name of the target datasource.
+            name: The name of the target datasource.
 
         Raises:
             ValueError: The `datasource_name` isn't provided or cannot be found.
         """
 
-        if not datasource_name:
+        if not name:
             raise ValueError("Datasource names must be a datasource name")  # noqa: TRY003
 
-        self._delete_fluent_datasource(datasource_name)
+        self._delete_fluent_datasource(name)
 
         self._save_project_config()
 
-    @public_api
     def get_validator(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -1211,13 +1182,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             # batch_request could actually be None here since we do explicit None checks in the
             # sum check above while here we do a truthy check.
             batch_request_list = [batch_request]  # type: ignore[list-item]
-        for batch_request in batch_request_list:
+        for batch_req in batch_request_list:
             computed_batch_list.extend(
                 self.get_batch_list(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
                     data_asset_name=data_asset_name,
-                    batch_request=batch_request,
+                    batch_request=batch_req,
                     batch_data=batch_data,
                     data_connector_query=data_connector_query,
                     batch_identifiers=batch_identifiers,
@@ -1333,7 +1304,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return validator
 
-    @public_api
     def get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -1480,7 +1450,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         datasource_name = result.datasource_name
 
-        datasource = self.datasources.get(datasource_name)
+        datasource = self.data_sources.all().get(datasource_name)
         if not datasource:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
@@ -1501,7 +1471,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return datasource_names
 
-    @public_api
     def get_available_data_asset_names(
         self,
         datasource_names: str | list[str] | None = None,
@@ -1897,35 +1866,33 @@ class AbstractDataContext(ConfigPeer, ABC):
             return config_var_provider.get_values()
         return {}
 
-    def _build_store_from_config(
-        self, store_name: str, store_config: dict | StoreConfigTypedDict
-    ) -> Store:
+    def _build_store_from_config(self, name: str, config: dict | StoreConfigTypedDict) -> Store:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:
         # adding the data_context_id from the project_config
         # to the store_config under the key manually_initialize_store_backend_id
-        if (store_name == self.expectations_store_name) and store_config.get("store_backend"):
-            store_config["store_backend"].update(
+        if (name == self.expectations_store_name) and config.get("store_backend"):
+            config["store_backend"].update(
                 {"manually_initialize_store_backend_id": self.variables.data_context_id}
             )
 
         # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
         if (
-            store_name not in [store["name"] for store in self.list_active_stores()]  # type: ignore[index]
-            and store_config.get("store_backend") is not None
+            name not in [store["name"] for store in self.list_active_stores()]  # type: ignore[index]
+            and config.get("store_backend") is not None
         ):
-            store_config["store_backend"].update({"suppress_store_backend_id": True})
+            config["store_backend"].update({"suppress_store_backend_id": True})
 
         new_store = Store.build_store_from_config(
-            store_name=store_name,
-            store_config=store_config,
+            name=name,
+            config=config,
             module_name=module_name,
             runtime_environment={
                 "root_directory": self.root_directory,
             },
         )
-        self._stores[store_name] = new_store
+        self._stores[name] = new_store
         return new_store
 
     # properties
@@ -1939,15 +1906,13 @@ class AbstractDataContext(ConfigPeer, ABC):
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
         return self.variables.progress_bars
 
-    @property
-    def datasources(self) -> DatasourceDict:
-        """A single holder for all Datasources in this context"""
-        return self._datasources
-
+    # TODO: All datasources should now be fluent so we should be able to delete this
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
         return {
-            name: ds for (name, ds) in self.datasources.items() if isinstance(ds, FluentDatasource)
+            name: ds
+            for (name, ds) in self.data_sources.all().items()
+            if isinstance(ds, FluentDatasource)
         }
 
     @property
@@ -2084,7 +2049,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             return self.variables.data_context_id
 
-    def get_validation_result(  # noqa: C901, PLR0913
+    def get_validation_result(  # noqa: C901
         self,
         expectation_suite_name,
         run_id=None,
@@ -2390,7 +2355,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def save_config_variable(
         self,
-        config_variable_name: str,
+        name: str,
         value: Any,
         skip_if_substitution_variable: bool = True,
     ) -> None:
@@ -2398,7 +2363,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
 
         Args:
-            config_variable_name: name of the property
+            name: name of the property
             value: the value to save for the property
             skip_if_substitution_variable: set to False to escape $ in values in substitution variable form e.g. ${SOME_VAR} -> r"\${SOME_VAR}" or $SOME_VAR -> r"\$SOME_VAR"
 
@@ -2411,7 +2376,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.DOLLAR_SIGN_ESCAPE_STRING,
             skip_if_substitution_variable=skip_if_substitution_variable,
         )
-        config_variables[config_variable_name] = value
+        config_variables[name] = value
         # Required to call _variables instead of variables property because we don't want to trigger substitutions  # noqa: E501
         config = self._variables.config
         config_variables_filepath = config.config_variables_file_path

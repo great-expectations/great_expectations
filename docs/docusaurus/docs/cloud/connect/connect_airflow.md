@@ -19,10 +19,8 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 - You have [created an Expectation Suite](/cloud/expectation_suites/manage_expectation_suites.md) and [added Expectations](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
-- You have [added a Checkpoint to your Expectation](/cloud/checkpoints/manage_checkpoints.md#add-a-checkpoint).
 
-
-## Run Airflow Standalone to create a freshh local Airflow environment
+## Run Airflow Standalone to create a fresh local Airflow environment
 
 1. The `airflow standalone` command initializes the database, creates a user, and starts all components.
 
@@ -56,16 +54,15 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 2. Open the `gx_dag.py` DAG file and add the following code:
 
-    ```python title="Python"
+    ```python
     import os
-    import great_expectations as gx
     import pendulum
+    import great_expectations as gx
     from airflow.decorators import dag, task
-
 
     @dag(
         schedule=None,
-        start_date=pendulum.datetime(2023, 8, 9),
+        start_date=pendulum.datetime(2024, 9, 1),
         catchup=False,
     )
     def gx_dag_with_deco():
@@ -75,22 +72,21 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
         @task
         def run_checkpoint():
             print("Running Checkpoint")
-            # Replace <YOUR_ACCESS_TOKEN>, <YOUR_CLOUD_ORGANIZATION_ID>, and <CHECKPOINT_NAME> with your credentials
+            # Replace <YOUR_ACCESS_TOKEN>, <YOUR_CLOUD_ORGANIZATION_ID> with your credentials
             # You can also set GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID as environment variables
-            GX_CLOUD_ACCESS_TOKEN = ""
-            GX_CLOUD_ORGANIZATION_ID = ""
-            # alternativey set CHECKPOINT_NAME to be a runtime parameter
-            CHECKPOINT_NAME = ""
+            GX_CLOUD_ACCESS_TOKEN = "<YOUR_ACCESS_TOKEN>"
+            GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"
+            # Find the checkpoint id in the GX Cloud UI beside the Validate button
+            CHECKPOINT_ID = ""
             context = gx.get_context(
-                cloud_access_token=GX_CLOUD_ACCESS_TOKEN,
-                cloud_organization_id=GX_CLOUD_ORGANIZATION_ID,
+                mode="cloud", 
+                cloud_organization_id=GX_CLOUD_ACCESS_TOKEN, 
+                cloud_access_token=GX_CLOUD_ORGANIZATION_ID
             )
-            checkpoint = context.get_checkpoint(name=CHECKPOINT_NAME)
+            checkpoint = next(c for c in context.checkpoints.all() if c.id == CHECKPOINT_ID)
             checkpoint.run()
-            return f"Checkpoint ran: {CHECKPOINT_NAME}"
-
+            return f"Checkpoint ran: {CHECKPOINT_ID}"
         run_checkpoint()
-
 
     run_this = gx_dag_with_deco()
     ```

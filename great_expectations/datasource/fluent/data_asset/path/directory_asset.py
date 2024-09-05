@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Generic, Optional
 from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.partitioners import (
     ColumnPartitioner,
@@ -17,6 +16,7 @@ from great_expectations.core.partitioners import (
     ColumnPartitionerYearly,
 )
 from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.data_asset.path.dataframe_partitioners import (
     DataframePartitioner,
@@ -47,7 +47,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerDaily(column_name=column),
+            partitioner=ColumnPartitionerDaily(
+                method_name="partition_on_year_and_month_and_day", column_name=column
+            ),
         )
 
     @public_api
@@ -55,7 +57,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerMonthly(column_name=column),
+            partitioner=ColumnPartitionerMonthly(
+                method_name="partition_on_year_and_month", column_name=column
+            ),
         )
 
     @public_api
@@ -63,7 +67,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=ColumnPartitionerYearly(column_name=column),
+            partitioner=ColumnPartitionerYearly(
+                method_name="partition_on_year", column_name=column
+            ),
         )
 
     @public_api
@@ -94,7 +100,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
                 datasource_name=self._data_connector.datasource_name,
                 data_connector_name=_DATA_CONNECTOR_NAME,
                 data_asset_name=self._data_connector.data_asset_name,
-                batch_identifiers=IDDict(batch_identifiers),
+                batch_identifiers=make_batch_identifier(batch_identifiers),
             )
             batch_definition_list = [batch_definition]
         else:

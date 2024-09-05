@@ -51,8 +51,8 @@ SUPPORTED_DATA_SOURCES = [
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_value_z_scores_to_be_less_than is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
+    ExpectColumnValueZScoresToBeLessThan is a \
+    Column Map Expectation \
     for typed-column backends, and also for PandasExecutionEngine where the column \
     dtype and provided type_ are unambiguous constraints \
     (any dtype except 'object' or dtype of 'object' with type_ specified as 'object').

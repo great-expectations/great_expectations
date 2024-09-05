@@ -66,8 +66,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an
     np.NaN in pandas. Empty strings don't count as null unless they have been coerced to a null type.
 
-    expect_column_values_to_not_be_null is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+    ExpectColumnValuesToNotBeNull is a \
+    Column Map Expectation.
 
     Column Map Expectations are one of the most common types of Expectation.
     They are evaluated for a single column and ask a yes/no question for every row in that column.
@@ -97,7 +97,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
+        [ExpectColumnValuesToBeNull](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     )
 
 
-EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to exactly match a specified list."
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns in a table to exactly match a specified list."
 COLUMN_LIST_DESCRIPTION = "The column names, in the correct order."
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
@@ -48,8 +48,8 @@ DATA_QUALITY_ISSUES = ["Schema"]
 class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_table_columns_to_match_ordered_list is a \
-    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
+    ExpectTableColumnsToMatchOrderedList is a \
+    Batch Expectation.
 
     BatchExpectations are one of the most common types of Expectation.
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.

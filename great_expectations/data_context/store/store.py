@@ -13,9 +13,13 @@ from typing import (
     Type,
 )
 
+from marshmallow import ValidationError as MarshmallowValidationError
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.analytics import submit as submit_analytics_event
+from great_expectations.analytics.events import DomainObjectAllDeserializationEvent
+from great_expectations.compatibility.pydantic import ValidationError as PydanticValidationError
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
@@ -26,7 +30,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.exceptions import (
+    ClassInstantiationError,
+    DataContextError,
+    StoreBackendError,
+)
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `NotRequired`, so it can't be imported at runtime
@@ -233,7 +241,38 @@ class Store:
         if self.cloud_mode:
             objs = self.gx_cloud_response_json_to_object_collection(objs)
 
-        return list(map(self.deserialize, objs))
+        deserializable_objs: list[Any] = []
+        bad_objs: list[Any] = []
+        for obj in objs:
+            try:
+                deserializable_objs.append(self.deserialize(obj))
+            except (
+                MarshmallowValidationError,
+                PydanticValidationError,
+                StoreBackendError,
+            ) as e:
+                bad_objs.append(obj)
+                self.submit_all_deserialization_event(e)
+            except Exception as e:
+                # For a general error we want to log so we can understand if there
+                # is user pain here and then we reraise.
+                self.submit_all_deserialization_event(e)
+                raise
+
+        if bad_objs:
+            prefix = "\n    SKIPPED: "
+            skipped = prefix + prefix.join([str(bad) for bad in bad_objs])
+            logger.warning(f"Skipping Bad Configs:{skipped}")
+        return deserializable_objs
+
+    def submit_all_deserialization_event(self, e: Exception):
+        error_type = type(e)
+        submit_analytics_event(
+            DomainObjectAllDeserializationEvent(
+                error_type=f"{error_type.__module__}.{error_type.__qualname__}",
+                store_name=type(self).__name__,
+            )
+        )
 
     def set(self, key: DataContextKey, value: Any, **kwargs) -> Any:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
@@ -248,9 +287,12 @@ class Store:
         """
         return self._add(key=key, value=value, **kwargs)
 
-    def _add(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def _add(self, key: DataContextKey, value: Any, **kwargs) -> Any:
         self._validate_key(key)
-        return self._store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
+        output = self._store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
+        if hasattr(value, "id") and hasattr(output, "id"):
+            value.id = output.id
+        return output
 
     def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -307,30 +349,30 @@ class Store:
 
     @staticmethod
     def build_store_from_config(
-        store_name: Optional[str] = None,
-        store_config: StoreConfigTypedDict | dict | None = None,
+        name: Optional[str] = None,
+        config: StoreConfigTypedDict | dict | None = None,
         module_name: str = "great_expectations.data_context.store",
         runtime_environment: Optional[dict] = None,
     ) -> Store:
-        if store_config is None or module_name is None:
+        if config is None or module_name is None:
             raise gx_exceptions.StoreConfigurationError(  # noqa: TRY003
                 "Cannot build a store without both a store_config and a module_name"
             )
 
         try:
             config_defaults: dict = {
-                "store_name": store_name,
+                "store_name": name,
                 "module_name": module_name,
             }
             new_store = instantiate_class_from_config(
-                config=store_config,
+                config=config,
                 runtime_environment=runtime_environment,
                 config_defaults=config_defaults,
             )
         except gx_exceptions.DataContextError as e:
             logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
-            class_name: str = store_config["class_name"]
-            module_name = store_config.get("module_name", module_name)
+            class_name: str = config["class_name"]
+            module_name = config.get("module_name", module_name)
             raise gx_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,

@@ -42,6 +42,7 @@ class AtomicPrescriptiveRendererType(str, Enum):
     FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
     SUMMARY = ".".join([AtomicRendererType.PRESCRIPTIVE, "summary"])
 
+    @override
     def __str__(self):
         return self.value
 
@@ -52,6 +53,7 @@ class AtomicDiagnosticRendererType(str, Enum):
     FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
     OBSERVED_VALUE = ".".join([AtomicRendererType.DIAGNOSTIC, "observed_value"])
 
+    @override
     def __str__(self):
         return self.value
 
@@ -132,7 +134,7 @@ class RenderedContent:
         """
         return {}
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
@@ -192,7 +194,7 @@ class RenderedComponentContent(RenderedContent):
 
 
 class RenderedHeaderContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         header,
         subheader=None,
@@ -229,7 +231,7 @@ class RenderedHeaderContent(RenderedComponentContent):
 
 
 class RenderedGraphContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         graph,
         header=None,
@@ -336,7 +338,7 @@ class RenderedTableContent(RenderedComponentContent):
 
 
 class RenderedTabsContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
@@ -497,18 +499,19 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         d["string_template"] = self.string_template
         return d
 
+    @override
     def __str__(self):
         string = pTemplate(self.string_template["template"]).safe_substitute(
             self.string_template["params"]
         )
         return string
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         return str(self) == str(other)
 
 
 class RenderedBulletListContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         bullet_list,
         header=None,
@@ -545,7 +548,7 @@ class RenderedBulletListContent(RenderedComponentContent):
 
 
 class ValueListContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         value_list,
         header=None,
@@ -582,7 +585,7 @@ class ValueListContent(RenderedComponentContent):
 
 
 class TextContent(RenderedComponentContent):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)

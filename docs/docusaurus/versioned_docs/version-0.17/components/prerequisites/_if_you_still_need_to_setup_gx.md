@@ -1,1 +1,0 @@
-See [Install Great Expectations with source data system dependencies](/guides/setup/installation/install_gx.md).

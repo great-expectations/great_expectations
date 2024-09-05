@@ -56,8 +56,8 @@ def run_checkpoint_and_data_doc(
     batch_def = asset.add_batch_definition(name="my_batch_definition")
 
     # Configure and run a checkpoint
-    validation_definition = ValidationDefinition(
-        name="my_validation_definition", suite=suite, data=batch_def
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(name="my_validation_definition", suite=suite, data=batch_def)
     )
     metadata = validator.active_batch.metadata  # type: ignore[union-attr] # active_batch could be None
     if isinstance(datasource, PandasDatasource):

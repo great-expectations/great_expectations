@@ -78,12 +78,12 @@ DATA_QUALITY_ISSUES = ["Schema"]
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_values_to_be_in_type_list is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
+    ExpectColumnValuesToBeInTypeList is a \
+    Column Map Expectation \
     for typed-column backends, and also for Pandas Datasources where the column dtype provides an \
     unambiguous constraints (any dtype except 'object').
 
-    For Pandas columns with dtype of 'object' expect_column_values_to_be_in_type_list will \
+    For Pandas columns with dtype of 'object' ExpectColumnValuesToBeInTypeList will \
     independently check each row's type.
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -121,7 +121,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See also:
-        [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
+        [ExpectColumnValuesToBeOfType](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

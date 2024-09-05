@@ -7,11 +7,11 @@ context.data_sources.add_pandas_filesystem(
 )
 # </snippet>
 
-assert "my_pandas_datasource" in context.datasources
+assert "my_pandas_datasource" in context.data_sources.all()
 
 
 # <snippet name="docs/docusaurus/docs/snippets/connect_to_your_data_overview config">
-datasource = context.datasources["my_pandas_datasource"]
+datasource = context.data_sources.all()["my_pandas_datasource"]
 print(datasource)
 # </snippet>
 

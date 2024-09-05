@@ -7,14 +7,6 @@ description: Connect to a GX Cloud account and validate data from a Python scrip
 
 Learn how to use GX Cloud from a Python script or interpreter, such as a Jupyter Notebook. You'll install Great Expectations, configure your GX Cloud environment variables, connect to sample data, build your first Expectation, validate data, and review the validation results through Python code.
 
-:::tip Get the most out of GX Cloud
-
-To get the most out of GX Cloud, GX recommends deploying the GX Agent. If you do not deploy the GX Agent, some features and functionality might be unavailable. To deploy the GX Agent, see [Deploy the GX Agent](../deploy_gx_agent.md).
-
-If you don't want to deploy the GX Agent, use the GX API to create a Data Source for your GX Cloud organization. See [Manage Data Sources](/core/manage_and_access_data/manage_data_sources/manage_data_sources.md).
-
-:::
-
 ## Prerequisites
 
 - You have internet access and download permissions.
@@ -69,7 +61,7 @@ Environment variables securely store your GX Cloud access credentials.
     ```
 
     :::note
-   After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [GX OSS guides](/core/introduction/about_gx.md).
+   After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [GX Core guides](/core/introduction/introduction.md).
     :::
 
 2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
@@ -78,10 +70,13 @@ Environment variables securely store your GX Cloud access credentials.
 
 - Run the following Python code to create a Data Context object:
 
-    ```python title="Python" name="tutorials/quickstart/quickstart.py get_context"
+    ```python title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - get cloud context"
     ```
   
-    The Data Context will detect the previously set environment variables and connect to your GX Cloud account.
+    The Data Context will detect the previously set environment variables and connect to your GX Cloud account.  You can verify that you have a GX Cloud Data Context with:
+
+    ```python title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - verify context type"
+    ```
 
 ## Connect to a Data Asset
 
@@ -91,6 +86,16 @@ Environment variables securely store your GX Cloud access credentials.
     ```
 
     The code example uses the default Data Source for Pandas to access the `.csv` data from the file at the specified URL path.
+
+    Alternatively, if you have already configured your data in GX Cloud you can use it instead.  To see your available Data Sources, run:
+
+    ```title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - list data sources"
+    ```
+  
+    Using the printed information you can get the name of one of your existing Data Sources, one of its Data Assets, and the name of a Batch Definition on the Data Asset.  Then, you can retrieve a Batch of data by updating the values for `data_source_name`, `data_asset_name`, and `batch_definition_name` in the following code and executing it:
+
+    ```python title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - retrieve a data asset"
+    ```
 
 ## Create Expectations
 

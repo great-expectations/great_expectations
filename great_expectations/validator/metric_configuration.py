@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Optional, Tuple, Union
 
-from great_expectations._docs_decorators import public_api
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -11,7 +11,6 @@ from great_expectations.experimental.metric_repository.metrics import MetricType
 from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 
-@public_api
 class MetricConfiguration:
     """An interface for configuring Metrics.
 
@@ -52,9 +51,10 @@ class MetricConfiguration:
 
         self._metric_dependencies: IDDict = IDDict({})
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @override
     def __str__(self):
         return self.__repr__()
 
@@ -159,7 +159,6 @@ class MetricConfiguration:
             self.metric_value_kwargs_id,
         )
 
-    @public_api
     def to_json_dict(self) -> dict:
         """Returns a JSON-serializable dict representation of this MetricConfiguration.
 

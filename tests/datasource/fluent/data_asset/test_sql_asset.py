@@ -34,7 +34,6 @@ def postgres_asset(empty_data_context, create_source: CreateSourceFixture, monke
             name="query_asset",
             table_name="my_table",
             batch_metadata=asset_specified_metadata,
-            order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
 

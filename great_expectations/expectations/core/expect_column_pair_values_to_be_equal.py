@@ -52,8 +52,8 @@ DATA_QUALITY_ISSUES = ["Data integrity"]
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_pair_values_to_be_equal is a \
-    [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
+    ExpectColumnPairValuesToBeEqual is a \
+    Column Pair Map Expectation.
 
     Column Pair Map Expectations are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns.
     Based on the result, they then calculate the percentage of rows that gave a positive answer.
@@ -256,7 +256,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
 
         if not params.column_A or not params.column_B:
             template_str += (
-                "Unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column. "
+                "Unrecognized kwargs for ExpectColumnPairValuesToBeEqual: missing column. "
             )
 
         if not params.mostly or params.mostly.value == 1.0:
@@ -300,7 +300,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
 
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = (
-                " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+                " unrecognized kwargs for ExpectColumnPairValuesToBeEqual: missing column."
             )
             params["row_condition"] = None
 

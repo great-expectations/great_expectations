@@ -51,7 +51,6 @@ def build_in_code_data_context_project_config(
                     "prefix": validation_results_store_prefix,
                 },
             },
-            "suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
         }
     project_config = DataContextConfig(
@@ -62,7 +61,6 @@ def build_in_code_data_context_project_config(
         checkpoint_store_name="checkpoint_store",
         expectations_store_name="expectations_S3_store",
         validation_results_store_name="validation_results_S3_store",
-        suite_parameter_store_name="suite_parameter_store",
         data_docs_sites={
             "s3_site": {
                 "class_name": "SiteBuilder",
@@ -295,7 +293,6 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
                 "prefix": validation_results_store_prefix,
             },
         },
-        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "inactive_expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -312,7 +309,6 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
                 "prefix": validation_results_store_prefix,
             },
         },
-        "inactive_suite_parameter_store": {"class_name": "SuiteParameterStore"},
     }
     in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
@@ -349,19 +345,6 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
         ).store_backend._suppress_store_backend_id
         is False
     )
-    # InMemoryStoreBackend created for suite_parameters_store & inactive_suite_parameters_store  # noqa: E501
-    assert (
-        in_code_data_context.stores.get(
-            "inactive_suite_parameter_store"
-        ).store_backend._suppress_store_backend_id
-        is False
-    )
-    assert (
-        in_code_data_context.stores.get(
-            "suite_parameter_store"
-        ).store_backend._suppress_store_backend_id
-        is False
-    )
 
 
 @pytest.mark.aws_deps
@@ -373,7 +356,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
     Trying to create a data context with unreachable ACTIVE stores should show a warning message once per store
     e.g. Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store
     Active stores are those named in:
-    "expectations_store_name", "validation_results_store_name", "suite_parameter_store_name"
+    "expectations_store_name", "validation_results_store_name"
     """  # noqa: E501
 
     bucket = "leakybucket"
@@ -405,7 +388,6 @@ def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
                 "prefix": validation_results_store_prefix,
             },
         },
-        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
     }
     in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
@@ -437,7 +419,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
 
     Trying to create a data context with unreachable INACTIVE stores should show no warning messages
     Inactive stores are those NOT named in:
-    "expectations_store_name", "validation_results_store_name", "suite_parameter_store_name"
+    "expectations_store_name", "validation_results_store_name"
     """
 
     bucket = "leakybucket"
@@ -469,7 +451,6 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
                 "prefix": validation_results_store_prefix,
             },
         },
-        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "inactive_expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -486,7 +467,6 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
                 "prefix": validation_results_store_prefix,
             },
         },
-        "inactive_suite_parameter_store": {"class_name": "SuiteParameterStore"},
     }
     in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",

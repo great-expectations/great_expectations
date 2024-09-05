@@ -61,8 +61,8 @@ SUPPORTED_DATA_SOURCES = [
 class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_values_to_not_be_in_set is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+    ExpectColumnValuesToNotBeInSet is a \
+    Column Map Expectation.
 
     Column Map Expectations are one of the most common types of Expectation.
     They are evaluated for a single column and ask a yes/no question for every row in that column.
@@ -94,7 +94,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set)
+        [ExpectColumnValuesToBeInSet](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -177,7 +177,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Optional[Union[SuiteParameterDict, ValueSet]] = pydantic.Field(
+    value_set: Union[Optional[ValueSet], SuiteParameterDict] = pydantic.Field(
         description=VALUE_SET_DESCRIPTION
     )
 

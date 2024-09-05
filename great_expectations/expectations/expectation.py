@@ -314,7 +314,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     meta: Union[dict, None] = None
     notes: Union[str, List[str], None] = None
     result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
-    description: ClassVar[Union[str, None]] = None
+    description: Union[str, None] = pydantic.Field(
+        default=None, description="A short description of your Expectation"
+    )
 
     catch_exceptions: bool = False
     rendered_content: Optional[List[RenderedAtomicContent]] = None
@@ -357,6 +359,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             raise RuntimeError(  # noqa: TRY003
                 "Expectation must be added to ExpectationSuite before it can be saved."
             )
+        if self._include_rendered_content:
+            self.render()
+
         updated_self = self._save_callback(self)
         self.id = updated_self.id
 
@@ -372,6 +377,16 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
             register_renderer(object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj)
+
+    def render(self) -> None:
+        """
+        Renders content using the atomic prescriptive renderer for each expectation configuration associated with
+           this ExpectationSuite to ExpectationConfiguration.rendered_content.
+        """  # noqa: E501
+        from great_expectations.render.renderer.inline_renderer import InlineRenderer
+
+        inline_renderer = InlineRenderer(render_object=self.configuration)
+        self.rendered_content = inline_renderer.get_rendered_content()
 
     @abstractmethod
     def _validate(
@@ -1186,8 +1201,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         pass  # no-op
 
     # Renamed from validate due to collision with Pydantic method of the same name
-    @public_api
-    def validate_(  # noqa: PLR0913
+    def validate_(
         self,
         validator: Validator,
         suite_parameters: Optional[dict] = None,
@@ -1257,6 +1271,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             id=id,
             rendered_content=rendered_content,
         )
+
+    @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        return project_manager.is_using_cloud()
 
     def __copy__(self):
         return self.copy(update={"id": None}, deep=True)
@@ -1614,17 +1634,46 @@ representation."""  # noqa: E501
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
-class UnexpectedRowsExpectation(BatchExpectation, ABC):
-    """
-    UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
+UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION = (
+    "This Expectation will fail validation if the query returns one or more rows. "
+    "The WHERE clause defines the fail criteria."
+)
+UNEXPECTED_ROWS_QUERY_DESCRIPTION = "A SQL or Spark-SQL query to be executed for validation."
+SUPPORTED_DATA_SOURCES = [
+    "PostgreSQL",
+    "Snowflake",
+    "SQLite",
+]
 
-    UnexpectedRowsExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
-    One is written by default, but can be overridden.
+
+class UnexpectedRowsExpectation(BatchExpectation):
+    __doc__ = f"""{UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION }
+
+    UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries \
+    as the core logic for an Expectation. UnexpectedRowsExpectations must implement \
+    a `_validate(...)` method containing logic for determining whether data returned \
+    by the executed query is successfully validated. One is written by default, but \
+    can be overridden.
+
     A successful validation is one where the unexpected_rows_query returns no rows.
 
+    UnexpectedRowsExpectation is a \
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
+
+    BatchExpectations are one of the most common types of Expectation.
+    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
+
     Args:
-        unexpected_rows_query (str): A SQL or Spark-SQL query to be executed for validation.
-    """  # noqa: E501
+        unexpected_rows_query (str): {UNEXPECTED_ROWS_QUERY_DESCRIPTION}
+
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+    Supported Datasources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+    """
 
     unexpected_rows_query: str
 
@@ -1635,6 +1684,32 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
         "row_condition",
         "condition_parser",
     )
+
+    class Config:
+        title = "Custom Expectation with SQL"
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[UnexpectedRowsExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": [],
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @pydantic.validator("unexpected_rows_query")
     def _validate_query(cls, query: str) -> str:
@@ -2699,7 +2774,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 partial_unexpected_counts = [
                     {"value": key, "count": value}
                     for key, value in sorted(
-                        Counter(immutable_unexpected_list).most_common(
+                        Counter(immutable_unexpected_list).most_common(  # type: ignore[possibly-undefined] # FIXME
                             result_format["partial_unexpected_count"]
                         ),
                         key=lambda x: (-x[1], x[0]),

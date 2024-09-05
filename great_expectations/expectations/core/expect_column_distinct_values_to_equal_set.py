@@ -57,8 +57,8 @@ DATA_QUALITY_ISSUES = ["Sets"]
 class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_distinct_values_to_equal_set is a \
-    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
+    ExpectColumnDistinctValuesToEqualSet is a \
+    Column Aggregate Expectation.
 
     Column Aggregate Expectations are one of the most common types of Expectation.
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
@@ -87,8 +87,8 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_distinct_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_be_in_set)
-        [expect_column_distinct_values_to_contain_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
+        [ExpectColumnDistinctValuesToBeInSet](https://greatexpectations.io/expectations/expect_column_distinct_values_to_be_in_set)
+        [ExpectColumnDistinctValuesToContainSet](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -184,7 +184,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Optional[Union[SuiteParameterDict, ValueSet]] = pydantic.Field(
+    value_set: Union[Optional[ValueSet], SuiteParameterDict] = pydantic.Field(
         description=VALUE_SET_DESCRIPTION
     )
 

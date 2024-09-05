@@ -31,7 +31,7 @@ class TableHead(TableMetricProvider):
     default_kwarg_values = {"n_rows": 5, "fetch_all": False}
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: PLR0913
+    def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -52,7 +52,7 @@ class TableHead(TableMetricProvider):
         return df.head(n=n_rows)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913
+    def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -93,7 +93,7 @@ class TableHead(TableMetricProvider):
         return df  # type: ignore[return-value]
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: PLR0913
+    def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

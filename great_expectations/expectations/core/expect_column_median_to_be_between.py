@@ -63,8 +63,8 @@ DATA_QUALITY_ISSUES = ["Numerical data"]
 class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_median_to_be_between is a \
-    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
+    ExpectColumnMedianToBeBetween is a \
+    Column Aggregate Expectation.
 
     Column Aggregate Expectations are one of the most common types of Expectation.
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
@@ -106,8 +106,8 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
             representing the true median for the column
 
     See Also:
-        [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
-        [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
+        [ExpectColumnMeanToBeBetween](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
+        [ExpectColumnStdevToBeBetween](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
@@ -332,6 +332,8 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
                 template_str = f"median must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"median must be {at_least_str} $min_value."
+            else:
+                raise ValueError("unresolvable template_str")  # noqa: TRY003
 
         if include_column_name:
             template_str = f"$column {template_str}"

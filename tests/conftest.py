@@ -20,16 +20,17 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations import project_manager, set_context
 from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
@@ -39,6 +40,10 @@ from great_expectations.data_context import (
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
+)
+from great_expectations.data_context.data_context.context_factory import (
+    project_manager,
+    set_context,
 )
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -334,7 +339,7 @@ class TestMarkerCoverage:
     name: str
     markers: set[str]
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override] # FIXME
         return f"{self.path}, {self.name}, {self.markers}"
 
 
@@ -940,7 +945,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
     dataframe_asset_name = "my_dataframe_asset"
     asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
-    _ = asset.build_batch_request(dataframe=df)
+    _ = asset.build_batch_request(options={"dataframe": df})
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -995,7 +1000,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
     dataframe_asset_name = "my_dataframe_asset"
     asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
-    _ = asset.build_batch_request(dataframe=spark_df)
+    _ = asset.build_batch_request(options={"dataframe": spark_df})
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -1663,9 +1668,6 @@ def empty_ge_cloud_data_context_config(
 ):
     config_yaml_str = f"""
 stores:
-  default_suite_parameter_store:
-    class_name: SuiteParameterStore
-
   default_expectations_store:
     class_name: ExpectationsStore
     store_backend:
@@ -1710,7 +1712,6 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
-suite_parameter_store_name: default_suite_parameter_store
 expectations_store_name: default_expectations_store
 validation_results_store_name: default_validation_results_store
 checkpoint_store_name: default_checkpoint_store
@@ -2173,6 +2174,35 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
         store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     )
     return get_context(project_config=project_config, mode="ephemeral")
+
+
+@pytest.fixture
+def arbitrary_batch_definition(empty_data_context: AbstractDataContext) -> BatchDefinition:
+    return (
+        empty_data_context.data_sources.add_pandas("my_datasource_with_batch_def")
+        .add_dataframe_asset("my_asset")
+        .add_batch_definition_whole_dataframe(name="my_dataframe_batch_definition")
+    )
+
+
+@pytest.fixture
+def arbitrary_suite(empty_data_context: AbstractDataContext) -> ExpectationSuite:
+    return empty_data_context.suites.add(ExpectationSuite("my_suite"))
+
+
+@pytest.fixture
+def arbitrary_validation_definition(
+    empty_data_context: AbstractDataContext,
+    arbitrary_suite: ExpectationSuite,
+    arbitrary_batch_definition: BatchDefinition,
+) -> ValidationDefinition:
+    return empty_data_context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=arbitrary_suite,
+            data=arbitrary_batch_definition,
+        )
+    )
 
 
 @pytest.fixture

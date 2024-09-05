@@ -36,8 +36,8 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     If 'strictly=True', then this expectation is only satisfied if each consecutive value \
     is strictly decreasing--equal values are treated as failures.
 
-    expect_column_values_to_be_decreasing is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations)
+    ExpectColumnValuesToBeDecreasing is a \
+    Column Map Expectation
 
     Args:
         column (str): \
@@ -67,7 +67,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
-        [expect_column_values_to_be_increasing](https://greatexpectations.io/expectations/expect_column_values_to_be_increasing)
+        [ExpectColumnValuesToBeIncreasing](https://greatexpectations.io/expectations/expect_column_values_to_be_increasing)
     """  # noqa: E501
 
     strictly: Union[bool, None] = None

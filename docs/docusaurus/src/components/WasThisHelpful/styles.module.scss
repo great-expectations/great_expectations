@@ -113,7 +113,7 @@
 .modalHeaderCloseButton {
     align-self: flex-end;
     cursor: pointer;
-    height: 8px;
+    height: 12px;
     margin: auto;
 }
 
@@ -123,7 +123,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.75rem;
     overflow-y: auto;
 }
 
@@ -184,7 +184,7 @@
     border: none;
     transition: background-color 0.3s ease;
     padding: 0.75rem;
-    margin: 1rem 0 2rem;
+    margin-bottom: 0.5rem;
 
     &:enabled {
         background-color: var(--ifm-color-primary);
@@ -198,11 +198,63 @@
     &:disabled {
         background-color: var(--gray-400);
     }
+
+    .errorMessage + & {
+        margin-top: 0;
+    }
+}
+
+.errorMessage {
+    color: var(--ifm-color-danger-dark);
+    font-size: var(--p-md-font-size);
+    margin: 0;
 }
 
 @media (max-width: $mobile-sm-breakpoint) {
     .modal {
         height: 100%;
         max-height: unset;
+    }
+}
+
+[data-theme='dark'] {
+    .feedbackCard {
+        background-color: var(--payne-gray-color);
+        border-color: var(--payne-gray-color);
+        box-shadow: var(--default-box-shadow);
+    }
+
+    .feedbackCardTitle {
+        color: var(--ifm-font-color-base);
+    }
+
+    .feedbackButton:enabled:hover {
+        background-color: var(--dark-orange-dark-theme);
+    }
+
+    .feedbackDivider {
+        border-color: var(--light-gray-dark-theme);
+    }
+
+    .modal {
+        background-color: #222222;
+    }
+
+    .modalTextInput {
+        border-color: #F4F4F7;
+    }
+
+    .modalTextLabel {
+        color: var(--ifm-font-color-base);
+    }
+
+    .modal .modalHeader img {
+        background-color: transparent;
+        margin: auto;
+    }
+
+    .submitButton:disabled {
+        color: var(--light-gray-dark-theme);
+        background-color: var(--concrete-gray-color);
     }
 }

@@ -68,8 +68,8 @@ DATA_QUALITY_ISSUES = ["Numerical data"]
 class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
-    expect_column_min_to_be_between is a \
-    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
+    ExpectColumnMinToBeBetween is a \
+    Column Aggregate Expectation.
 
     Column Aggregate Expectations are one of the most common types of Expectation.
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
@@ -111,7 +111,7 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
             representing the actual column min
 
     See Also:
-        [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
+        [ExpectColumnMaxToBeBetween](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

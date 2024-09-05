@@ -30,7 +30,7 @@ class ColumnValuesBetweenCount(MetricProvider):
     )
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: C901, PLR0912, PLR0913
+    def _pandas(  # noqa: C901, PLR0912
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -84,7 +84,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         return np.count_nonzero(series)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913
+    def _sqlalchemy(  # noqa: C901, PLR0912
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -183,7 +183,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         ).scalar()
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: C901, PLR0912, PLR0913
+    def _spark(  # noqa: C901, PLR0912
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
