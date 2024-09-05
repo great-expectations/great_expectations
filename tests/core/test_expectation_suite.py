@@ -1103,7 +1103,7 @@ def test_is_fresh(in_memory_runtime_context, id: str | None, is_fresh: bool, num
     suite.id = id  # Stores will add an ID but manually overriding for test
     diagnostics = suite.is_fresh()
 
-    assert diagnostics.is_fresh is is_fresh
+    assert diagnostics.success is is_fresh
     assert len(diagnostics.errors) == num_errors
     assert all(
         isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in diagnostics.errors
@@ -1189,6 +1189,6 @@ def test_is_fresh_freshness(in_memory_runtime_context):
     suite.expectations = [gxe.ExpectColumnDistinctValuesToBeInSet(column="a", value_set=[1, 2, 3])]
 
     diagnostics = suite.is_fresh()
-    assert diagnostics.is_fresh is False
+    assert diagnostics.success is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteNotFreshError)

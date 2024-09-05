@@ -172,7 +172,7 @@ def test_is_fresh(in_memory_runtime_context, id: str | None, is_fresh: bool, num
     batch_definition.id = id  # Fluent API will add an ID but manually overriding for test
     diagnostics = batch_definition.is_fresh()
 
-    assert diagnostics.is_fresh is is_fresh
+    assert diagnostics.success is is_fresh
     assert len(diagnostics.errors) == num_errors
     assert all(isinstance(err, BatchDefinitionNotAddedError) for err in diagnostics.errors)
 
@@ -193,6 +193,6 @@ def test_is_fresh_freshness(empty_cloud_context_fluent):
     batch_definition.partitioner = partitioner
 
     diagnostics = batch_definition.is_fresh()
-    assert diagnostics.is_fresh is False
+    assert diagnostics.success is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], BatchDefinitionNotFreshError)
