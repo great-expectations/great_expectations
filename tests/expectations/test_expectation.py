@@ -302,6 +302,21 @@ class TestSuiteParameterOptions:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    "column_a,column_b,expected",
+    [
+        pytest.param("foo", "foo", True, id="equivalent_columns"),
+        pytest.param("foo", "bar", False, id="different_columns"),
+    ],
+)
+def test_expectation_equality(column_a: str, column_b: str, expected: bool):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(column=column_a, min_value=0, max_value=10)
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(column=column_b, min_value=0, max_value=10)
+
+    assert (expectation_a == expectation_b) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     "notes_a,notes_b,expected",
     [
         pytest.param(None, None, True, id="both_none"),
