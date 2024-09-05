@@ -4,7 +4,7 @@ import great_expectations as gx
 # These imports need to be cleaned up
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.expectations.expectation import UnexpectedRowsExpectation
+from great_expectations.expectations import UnexpectedRowsExpectation
 
 # </snippet>
 
