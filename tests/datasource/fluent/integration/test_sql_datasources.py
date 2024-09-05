@@ -232,9 +232,9 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
 
-        with gx_engine.get_connection() as conn:
-            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=sa_engine.dialect.name)
-            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=sa_engine.dialect.name)
+        with gx_engine.get_connection() as conn:  # type: ignore[var-annotated]
+            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=sa_engine.dialect.name)  # type: ignore[arg-type]
+            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=sa_engine.dialect.name)  # type: ignore[arg-type]
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
@@ -703,7 +703,7 @@ def _raw_query_check_column_exists(
     gx_execution_engine: SqlAlchemyExecutionEngine,
 ) -> bool:
     """Use a simple 'SELECT {column_name_param} from {qualified_table_name};' query to check if the column exists.'"""  # noqa: E501
-    with gx_execution_engine.get_connection() as connection:
+    with gx_execution_engine.get_connection() as connection:  # type: ignore[var-annotated]
         query = f"""SELECT {column_name_param} FROM {qualified_table_name} LIMIT 1;"""
         print(f"query:\n  {query}")
         # an exception will be raised if the column does not exist
@@ -772,7 +772,7 @@ class TestColumnIdentifiers:
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
 
-        if _is_quote_char_dialect_mismatch(dialect, column_name):
+        if _is_quote_char_dialect_mismatch(dialect, column_name):  # type: ignore[arg-type]
             pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
 
         if _requires_fix(param_id):

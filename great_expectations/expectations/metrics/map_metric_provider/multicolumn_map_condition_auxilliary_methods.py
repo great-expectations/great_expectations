@@ -152,11 +152,11 @@ def _sqlalchemy_multicolumn_map_condition_values(
 
     column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs["column_list"]
 
-    column_selector = [sa.column(column_name) for column_name in column_list]
+    column_selector = [sa.column(column_name) for column_name in column_list]  # type: ignore[var-annotated]
     query = sa.select(*column_selector).where(boolean_mapped_unexpected_values)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        selectable = get_sqlalchemy_selectable(selectable)
-        query = query.select_from(selectable)
+        selectable = get_sqlalchemy_selectable(selectable)  # type: ignore[arg-type]
+        query = query.select_from(selectable)  # type: ignore[arg-type]
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -195,10 +195,10 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 """  # noqa: E501
         )
 
-    selectable = get_sqlalchemy_selectable(selectable)
+    selectable = get_sqlalchemy_selectable(selectable)  # type: ignore[arg-type]
 
     return execution_engine.execute_query(
-        sa.select(sa.func.count()).select_from(selectable)
+        sa.select(sa.func.count()).select_from(selectable)  # type: ignore[arg-type]
     ).scalar()
 
 

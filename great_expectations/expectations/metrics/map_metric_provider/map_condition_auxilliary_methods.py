@@ -293,7 +293,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # The integral values are cast to SQL Numeric in order to avoid a bug in AWS Redshift (converted to integer later).  # noqa: E501
-    count_case_statement: List[sqlalchemy.Label] = sa.case(
+    count_case_statement: List[sqlalchemy.Label] = sa.case(  # type: ignore[assignment]
         (
             unexpected_condition,
             sa.sql.expression.cast(1, sa.Numeric),
@@ -301,14 +301,14 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         else_=sa.sql.expression.cast(0, sa.Numeric),
     ).label("condition")
 
-    count_selectable: sqlalchemy.Select = sa.select(count_case_statement)
+    count_selectable: sqlalchemy.Select = sa.select(count_case_statement)  # type: ignore[call-overload]
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        selectable = get_sqlalchemy_selectable(selectable)
-        count_selectable = count_selectable.select_from(selectable)
+        selectable = get_sqlalchemy_selectable(selectable)  # type: ignore[arg-type]
+        count_selectable = count_selectable.select_from(selectable)  # type: ignore[arg-type]
 
     try:
         if execution_engine.dialect_name == GXSqlDialect.MSSQL:
-            with execution_engine.get_connection() as connection:
+            with execution_engine.get_connection() as connection:  # type: ignore[var-annotated]
                 if not connection.closed:
                     temp_table_obj = _generate_temp_table(
                         connection=connection,
@@ -325,22 +325,22 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                             metrics=metrics,
                         )
             inner_case_query: sqlalchemy.Insert = temp_table_obj.insert().from_select(
-                [count_case_statement],
+                [count_case_statement],  # type: ignore[list-item]
                 count_selectable,
             )
-            execution_engine.execute_query_in_transaction(inner_case_query)
+            execution_engine.execute_query_in_transaction(inner_case_query)  # type: ignore[arg-type]
 
-            count_selectable = temp_table_obj
+            count_selectable = temp_table_obj  # type: ignore[assignment]
 
-        count_selectable = get_sqlalchemy_selectable(count_selectable)
+        count_selectable = get_sqlalchemy_selectable(count_selectable)  # type: ignore[assignment]
         unexpected_count_query: sqlalchemy.Select = (
-            sa.select(
+            sa.select(  # type: ignore[assignment]
                 sa.func.sum(sa.column("condition")).label("unexpected_count"),
             )
-            .select_from(count_selectable)
+            .select_from(count_selectable)  # type: ignore[arg-type]
             .alias("UnexpectedCountSubquery")
         )
-        unexpected_count: Union[float, int] = execution_engine.execute_query(
+        unexpected_count: Union[float, int] = execution_engine.execute_query(  # type: ignore[assignment]
             sa.select(
                 unexpected_count_query.c[
                     f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
@@ -384,11 +384,11 @@ def _sqlalchemy_map_condition_rows(
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     table_columns: list[str] = metrics["table.columns"]
-    column_selector = [sa.column(column_name) for column_name in table_columns]
+    column_selector = [sa.column(column_name) for column_name in table_columns]  # type: ignore[var-annotated]
     query = sa.select(*column_selector).where(unexpected_condition)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        selectable = get_sqlalchemy_selectable(selectable)
-        query = query.select_from(selectable)
+        selectable = get_sqlalchemy_selectable(selectable)  # type: ignore[arg-type]
+        query = query.select_from(selectable)  # type: ignore[arg-type]
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -461,12 +461,12 @@ def _sqlalchemy_map_condition_query(  # noqa: C901 - too complex
                     f"Please check your configuration and try again."
                 )
 
-            column_selector.append(sa.column(column_name))
+            column_selector.append(sa.column(column_name))  # type: ignore[arg-type]
 
     for column_name in domain_column_name_list:
-        column_selector.append(sa.column(column_name))
+        column_selector.append(sa.column(column_name))  # type: ignore[arg-type]
 
-    unexpected_condition_query_with_selected_columns: sa.select = sa.select(*column_selector).where(
+    unexpected_condition_query_with_selected_columns: sa.select = sa.select(*column_selector).where(  # type: ignore[valid-type]
         unexpected_condition
     )
     source_table_and_schema: sa.Table = get_sqlalchemy_source_table_and_schema(execution_engine)
@@ -474,8 +474,8 @@ def _sqlalchemy_map_condition_query(  # noqa: C901 - too complex
     source_table_and_schema_as_selectable: Union[sa.Table, sa.Select] = get_sqlalchemy_selectable(
         source_table_and_schema
     )
-    final_select_statement: sa.select = (
-        unexpected_condition_query_with_selected_columns.select_from(
+    final_select_statement: sa.select = (  # type: ignore[valid-type]
+        unexpected_condition_query_with_selected_columns.select_from(  # type: ignore[attr-defined]
             source_table_and_schema_as_selectable
         )
     )
@@ -543,27 +543,27 @@ def _sqlalchemy_map_condition_index(  # noqa: C901 - too complex
                 message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '  # noqa: E501
                 f"Please check your configuration and try again."
             )
-        column_selector.append(sa.column(column_name))
+        column_selector.append(sa.column(column_name))  # type: ignore[arg-type]
 
     # the last column we SELECT is the column the Expectation is being run on
     for column_name in domain_column_name_list:
-        column_selector.append(sa.column(column_name))
+        column_selector.append(sa.column(column_name))  # type: ignore[arg-type]
 
     domain_records_as_selectable: sa.sql.Selectable = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
-    unexpected_condition_query_with_selected_columns: sa.select = sa.select(*column_selector).where(
+    unexpected_condition_query_with_selected_columns: sa.select = sa.select(*column_selector).where(  # type: ignore[valid-type]
         unexpected_condition
     )
 
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        domain_records_as_selectable = get_sqlalchemy_selectable(domain_records_as_selectable)
+        domain_records_as_selectable = get_sqlalchemy_selectable(domain_records_as_selectable)  # type: ignore[arg-type]
 
     # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`  # noqa: E501
-    final_query: sa.select = unexpected_condition_query_with_selected_columns.select_from(
+    final_query: sa.select = unexpected_condition_query_with_selected_columns.select_from(  # type: ignore[valid-type,attr-defined]
         domain_records_as_selectable
     ).limit(result_format["partial_unexpected_count"])
-    query_result: List[sqlalchemy.Row] = execution_engine.execute_query(final_query).fetchall()
+    query_result: List[sqlalchemy.Row] = execution_engine.execute_query(final_query).fetchall()  # type: ignore[assignment]
 
     exclude_unexpected_values: bool = result_format.get("exclude_unexpected_values", False)
 
