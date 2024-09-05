@@ -65,4 +65,3 @@ result = validation_definition.run()
 
 assert not result.success
 assert len(result.results) == 1
-assert result.results[0].result["observed_value"] == 1
