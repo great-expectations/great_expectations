@@ -252,11 +252,11 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
-    def is_added(self) -> ExpectationSuiteAddedDiagnostics:
+    def is_fresh(self) -> ExpectationSuiteAddedDiagnostics:
         diagnostics = ExpectationSuiteAddedDiagnostics(
             errors=[] if self.id else [ExpectationSuiteNotAddedError(name=self.name)]
         )
-        if not diagnostics.is_added:
+        if not diagnostics.is_fresh:
             return diagnostics
         return self._is_fresh()
 
@@ -614,7 +614,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        diagnostics = self.is_added()
+        diagnostics = self.is_fresh()
         diagnostics.raise_for_error()
 
         return _IdentifierBundle(name=self.name, id=self.id)

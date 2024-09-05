@@ -186,7 +186,7 @@ class TestCheckpointSerialization:
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ), mock.patch.object(
             ValidationDefinition,
-            "is_added",
+            "is_fresh",
             return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
         ):
             yield in_memory_context.validation_definitions.add(vc)
@@ -207,7 +207,7 @@ class TestCheckpointSerialization:
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ), mock.patch.object(
             ValidationDefinition,
-            "is_added",
+            "is_fresh",
             return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
         ):
             yield in_memory_context.validation_definitions.add(vc)
@@ -498,13 +498,13 @@ class TestCheckpointResult:
     def mock_suite(self, mocker: MockerFixture):
         suite = mocker.Mock(spec=ExpectationSuite)
         suite.name = self.suite_name
-        suite.is_added.return_value = ExpectationSuiteAddedDiagnostics(errors=[])
+        suite.is_fresh.return_value = ExpectationSuiteAddedDiagnostics(errors=[])
         return suite
 
     @pytest.fixture
     def mock_batch_def(self, mocker: MockerFixture):
         bd = mocker.Mock(spec=BatchDefinition)
-        bd._copy_and_set_values().is_added.return_value = BatchDefinitionAddedDiagnostics(errors=[])
+        bd._copy_and_set_values().is_fresh.return_value = BatchDefinitionAddedDiagnostics(errors=[])
         return bd
 
     @pytest.fixture
@@ -921,7 +921,7 @@ class TestCheckpointResult:
 
 
 @pytest.mark.parametrize(
-    "id,validation_def_id,suite_id,batch_def_id,is_added,error_list",
+    "id,validation_def_id,suite_id,batch_def_id,is_fresh,error_list",
     [
         pytest.param(
             str(uuid.uuid4()),
@@ -1087,13 +1087,13 @@ class TestCheckpointResult:
     ],
 )
 @pytest.mark.unit
-def test_is_added(
+def test_is_fresh(
     in_memory_runtime_context,
     id: str | None,
     validation_def_id: str | None,
     suite_id: str | None,
     batch_def_id: str | None,
-    is_added: bool,
+    is_fresh: bool,
     error_list: list[Type[ResourceNotAddedError]],
 ):
     context = in_memory_runtime_context
@@ -1119,7 +1119,7 @@ def test_is_added(
             )
         ],
     )
-    diagnostics = checkpoint.is_added()
+    diagnostics = checkpoint.is_fresh()
 
-    assert diagnostics.is_added is is_added
+    assert diagnostics.is_fresh is is_fresh
     assert [type(err) for err in diagnostics.errors] == error_list

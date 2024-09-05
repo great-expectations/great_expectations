@@ -84,11 +84,11 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         return batch_list[-1]
 
-    def is_added(self) -> BatchDefinitionAddedDiagnostics:
+    def is_fresh(self) -> BatchDefinitionAddedDiagnostics:
         diagnostics = BatchDefinitionAddedDiagnostics(
             errors=[] if self.id else [BatchDefinitionNotAddedError(name=self.name)]
         )
-        if not diagnostics.is_added:
+        if not diagnostics.is_fresh:
             return diagnostics
         return self._is_fresh()
 
@@ -106,7 +106,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
-        diagnostics = self.is_added()
+        diagnostics = self.is_fresh()
         diagnostics.raise_for_error()
 
         asset = self.data_asset

@@ -1090,20 +1090,20 @@ def test_identifier_bundle_no_id_raises_error():
 
 
 @pytest.mark.parametrize(
-    "id,is_added,num_errors",
+    "id,is_fresh,num_errors",
     [
         pytest.param(str(uuid.uuid4()), True, 0, id="added"),
         pytest.param(None, False, 1, id="not_added"),
     ],
 )
 @pytest.mark.unit
-def test_is_added(in_memory_runtime_context, id: str | None, is_added: bool, num_errors: int):
+def test_is_fresh(in_memory_runtime_context, id: str | None, is_fresh: bool, num_errors: int):
     context = in_memory_runtime_context
     suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.id = id  # Stores will add an ID but manually overriding for test
-    diagnostics = suite.is_added()
+    diagnostics = suite.is_fresh()
 
-    assert diagnostics.is_added is is_added
+    assert diagnostics.is_fresh is is_fresh
     assert len(diagnostics.errors) == num_errors
     assert all(
         isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in diagnostics.errors
@@ -1181,14 +1181,14 @@ def test_save_on_individual_expectation_updates_rendered_content(
 
 
 @pytest.mark.unit
-def test_is_added_freshness(in_memory_runtime_context):
+def test_is_fresh_freshness(in_memory_runtime_context):
     context = in_memory_runtime_context
 
     suite = context.suites.add(ExpectationSuite(name="my_suite"))
 
     suite.expectations = [gxe.ExpectColumnDistinctValuesToBeInSet(column="a", value_set=[1, 2, 3])]
 
-    diagnostics = suite.is_added()
-    assert diagnostics.is_added is False
+    diagnostics = suite.is_fresh()
+    assert diagnostics.is_fresh is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteChangesNotAddedError)

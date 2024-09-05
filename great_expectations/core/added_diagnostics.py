@@ -34,7 +34,7 @@ class AddedDiagnostics:
     errors: list[ResourceNotAddedError]
 
     @property
-    def is_added(self) -> bool:
+    def is_fresh(self) -> bool:
         return len(self.errors) == 0
 
     @abstractmethod
@@ -50,7 +50,7 @@ class AddedDiagnostics:
 class _ChildAddedDiagnostics(AddedDiagnostics):
     @override
     def raise_for_error(self) -> None:
-        if not self.is_added:
+        if not self.is_fresh:
             raise self.errors[0]  # Child node so only one error
 
 
@@ -85,7 +85,7 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
 
     @override
     def raise_for_error(self) -> None:
-        if not self.is_added:
+        if not self.is_fresh:
             raise self.raise_for_error_class(errors=self.errors)
 
 

@@ -792,7 +792,7 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
 
 
 @pytest.mark.parametrize(
-    "id,suite_id,batch_def_id,is_added,error_list",
+    "id,suite_id,batch_def_id,is_fresh,error_list",
     [
         pytest.param(
             str(uuid.uuid4()),
@@ -865,12 +865,12 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
     ],
 )
 @pytest.mark.unit
-def test_is_added(
+def test_is_fresh(
     in_memory_runtime_context,
     id: str | None,
     suite_id: str | None,
     batch_def_id: str | None,
-    is_added: bool,
+    is_fresh: bool,
     error_list: list[Type[ResourceNotAddedError]],
 ):
     context = in_memory_runtime_context
@@ -891,7 +891,7 @@ def test_is_added(
         suite=suite,
         data=batch_definition,
     )
-    diagnostics = validation_definition.is_added()
+    diagnostics = validation_definition.is_fresh()
 
-    assert diagnostics.is_added is is_added
+    assert diagnostics.is_fresh is is_fresh
     assert [type(err) for err in diagnostics.errors] == error_list
