@@ -42,7 +42,7 @@ class ResourceNotFreshError(DataContextError):
     pass
 
 
-class ResourcesNotAddedError(ValueError):
+class ResourcesNotFreshError(ValueError):
     def __init__(self, errors: list[ResourceNotFreshError]) -> None:
         self._errors = errors
         super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
@@ -111,11 +111,11 @@ class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
         )
 
 
-class CheckpointRelatedResourcesNotAddedError(ResourcesNotAddedError):
+class CheckpointRelatedResourcesNotFreshError(ResourcesNotFreshError):
     pass
 
 
-class ValidationDefinitionRelatedResourcesNotAddedError(ResourcesNotAddedError):
+class ValidationDefinitionRelatedResourcesNotFreshError(ResourcesNotFreshError):
     pass
 
 

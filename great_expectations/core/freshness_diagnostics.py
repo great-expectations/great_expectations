@@ -8,12 +8,12 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
     CheckpointNotAddedError,
-    CheckpointRelatedResourcesNotAddedError,
+    CheckpointRelatedResourcesNotFreshError,
     ExpectationSuiteNotAddedError,
     ResourceNotFreshError,
-    ResourcesNotAddedError,
+    ResourcesNotFreshError,
     ValidationDefinitionNotAddedError,
-    ValidationDefinitionRelatedResourcesNotAddedError,
+    ValidationDefinitionRelatedResourcesNotFreshError,
 )
 
 
@@ -69,7 +69,7 @@ class ExpectationSuiteFreshnessDiagnostics(_ChildFreshnessDiagnostics):
 class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
     parent_error_class: ClassVar[Type[ResourceNotFreshError]]
     children_error_classes: ClassVar[Tuple[Type[ResourceNotFreshError], ...]]
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]]
+    raise_for_error_class: ClassVar[Type[ResourcesNotFreshError]]
 
     def update_with_children(self, *children_diagnostics: FreshnessDiagnostics) -> None:
         for diagnostics in children_diagnostics:
@@ -97,8 +97,8 @@ class ValidationDefinitionFreshnessDiagnostics(_ParentFreshnessDiagnostics):
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
-        ValidationDefinitionRelatedResourcesNotAddedError
+    raise_for_error_class: ClassVar[Type[ResourcesNotFreshError]] = (
+        ValidationDefinitionRelatedResourcesNotFreshError
     )
 
 
@@ -108,6 +108,6 @@ class CheckpointFreshnessDiagnostics(_ParentFreshnessDiagnostics):
     children_error_classes: ClassVar[Tuple[Type[ResourceNotFreshError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
-        CheckpointRelatedResourcesNotAddedError
+    raise_for_error_class: ClassVar[Type[ResourcesNotFreshError]] = (
+        CheckpointRelatedResourcesNotFreshError
     )

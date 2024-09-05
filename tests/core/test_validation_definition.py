@@ -46,7 +46,7 @@ from great_expectations.exceptions.exceptions import (
     ExpectationSuiteNotAddedError,
     ResourceNotFreshError,
     ValidationDefinitionNotAddedError,
-    ValidationDefinitionRelatedResourcesNotAddedError,
+    ValidationDefinitionRelatedResourcesNotFreshError,
 )
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
@@ -433,7 +433,7 @@ class TestValidationRun:
         validation_definition.suite.id = None
         validation_definition.data.id = None
 
-        with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError) as e:
+        with pytest.raises(ValidationDefinitionRelatedResourcesNotFreshError) as e:
             validation_definition.run()
 
         assert [type(err) for err in e.value.errors] == [
@@ -774,7 +774,7 @@ def test_identifier_bundle_with_existing_id(validation_definition: ValidationDef
 def test_identifier_bundle_no_id_raises_error(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
-    with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError):
+    with pytest.raises(ValidationDefinitionRelatedResourcesNotFreshError):
         validation_definition.identifier_bundle()
 
 

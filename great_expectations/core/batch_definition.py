@@ -96,11 +96,22 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         )
 
     def _is_fresh(self) -> BatchDefinitionFreshnessDiagnostics:
-        # TODO: Add error handling
         datasource_dict = project_manager.get_datasources()
-        datasource = datasource_dict[self.data_asset.datasource.name]
-        asset = datasource.get_asset(self.data_asset.name)
-        batch_def = asset.get_batch_definition(self.name)
+
+        try:
+            datasource = datasource_dict[self.data_asset.datasource.name]
+        except KeyError:
+            pass
+
+        try:
+            asset = datasource.get_asset(self.data_asset.name)
+        except LookupError:
+            pass
+
+        try:
+            batch_def = asset.get_batch_definition(self.name)
+        except KeyError:
+            pass
 
         return BatchDefinitionFreshnessDiagnostics(
             errors=[] if self == batch_def else [BatchDefinitionNotFreshError(name=self.name)]
