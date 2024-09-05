@@ -173,7 +173,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     meta_notes: MetaNotes = Field(
         MetaNotes(format=MetaNotesFormat.STRING, content=[]), allow_mutation=False
     )
-    template_str: str | None = Field(None, allow_mutation=True)
+    template_str: Optional[str] = Field(None, allow_mutation=True)
     code_block: CodeBlock = Field({}, allow_mutation=True)
     header_row: List[RendererTableValue] = Field([], allow_mutation=True)
     table: List[List[RendererTableValue]] = Field([], allow_mutation=True)
