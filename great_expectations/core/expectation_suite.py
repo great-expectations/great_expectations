@@ -253,15 +253,22 @@ class ExpectationSuite(SerializableDictDot):
         self._store.update(key=key, value=self)
 
     def is_fresh(self) -> ExpectationSuiteFreshnessDiagnostics:
-        diagnostics = ExpectationSuiteFreshnessDiagnostics(
-            errors=[] if self.id else [ExpectationSuiteNotAddedError(name=self.name)]
-        )
+        diagnostics = self._is_added()
         if not diagnostics.is_fresh:
             return diagnostics
+        return self._is_fresh()
 
+    def _is_added(self) -> ExpectationSuiteFreshnessDiagnostics:
+        return ExpectationSuiteFreshnessDiagnostics(
+            errors=[] if self.id else [ExpectationSuiteNotAddedError(name=self.name)]
+        )
+
+    def _is_fresh(self) -> ExpectationSuiteFreshnessDiagnostics:
+        # TODO: Add error handling here
         key = self._store.get_key(name=self.name, id=self.id)
         suite_dict = self._store.get(key=key)
         suite = ExpectationSuite(**suite_dict)
+
         return ExpectationSuiteFreshnessDiagnostics(
             errors=[] if self == suite else [ExpectationSuiteNotFreshError(name=self.name)]
         )
