@@ -448,7 +448,7 @@ class ExpectationConfiguration(SerializableDictDot):
             "notes": self.notes,
             "rendered_content": self.rendered_content,
         }
-        # it's possible description could be a class variable
+        # it's possible description could be subclassed as a class variable
         # since we have documented it that way in the past
         if self.description:
             kwargs.update({"description": self.description})

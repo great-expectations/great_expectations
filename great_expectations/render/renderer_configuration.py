@@ -319,7 +319,8 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             values["expectation_type"] = expectation_configuration.type
             values["kwargs"] = expectation_configuration.kwargs
             # description is the template_str override
-            values["template_str"] = expectation_configuration.description
+            if expectation_configuration.description:
+                values["template_str"] = expectation_configuration.description
             raw_configuration: ExpectationConfiguration = (
                 expectation_configuration.get_raw_configuration()
             )
@@ -343,7 +344,8 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             values["expectation_type"] = values["configuration"].type
             values["kwargs"] = values["configuration"].kwargs
             # description is the template_str override
-            values["template_str"] = values["configuration"].description
+            if values["configuration"].description:
+                values["template_str"] = values["configuration"].description
 
         return values
 
