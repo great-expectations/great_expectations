@@ -320,3 +320,23 @@ def test_expectation_equality_with_notes(
     )
 
     assert (expectation_a == expectation_b) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "meta_a,meta_b,expected",
+    [
+        pytest.param(None, None, True, id="both_none"),
+        pytest.param({}, None, True, id="both_falsy"),
+        pytest.param({"author": "Bob Dylan"}, None, False, id="actual_meta"),
+    ],
+)
+def test_expectation_equality_with_meta(meta_a: dict | None, meta_b: dict | None, expected: bool):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, meta=meta_a
+    )
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, meta=meta_b
+    )
+
+    assert (expectation_a == expectation_b) is expected
