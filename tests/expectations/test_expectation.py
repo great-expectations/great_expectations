@@ -357,6 +357,7 @@ def test_unexpected_rows_expectation_validate(
     unexpected_rows = res["details"]["unexpected_rows"]
     assert unexpected_rows == expected_unexpected_rows
 
+
 class TestSuiteParameterOptions:
     """Tests around the suite_parameter_options property of Expectations.
 

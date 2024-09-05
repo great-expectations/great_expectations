@@ -51,7 +51,6 @@ from great_expectations.core.partitioners import (
     PartitionerModInteger,
     PartitionerMultiColumnValue,
 )
-from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
@@ -630,7 +629,7 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             )
         else:
             sorted_metadata_dicts = unsorted_metadata_dicts
-            
+
         sorted_metadata_dicts = sorted_metadata_dicts[batch_request.batch_slice]
         batch_metadata = sorted_metadata_dicts[-1]
 
