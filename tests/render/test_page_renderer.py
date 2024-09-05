@@ -9,6 +9,7 @@ import mistune
 import pytest
 
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -555,23 +556,44 @@ def test_asset_name_is_part_of_resource_info_index(mocker: MockerFixture):
         "add_resource_info_to_index_links_dict",
     )
 
-    asset_name = "my_asset"
-    validator = context.data_sources.pandas_default.read_csv(
+    data_asset = context.data_sources.pandas_default.add_csv_asset(
+        "my_asset",
         "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
-        asset_name=asset_name,
     )
 
-    validator.expect_column_values_to_not_be_null("pickup_datetime")
-    validator.expect_column_values_to_be_between("passenger_count", min_value=1, max_value=6)
-    validator.save_expectation_suite(discard_failed_expectations=False)
+    batch_definition = data_asset.add_batch_definition_whole_dataframe("my_batch")
 
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_quickstart_checkpoint",
-        validator=validator,
+    # Create Expectation Suite containing two Expectations.
+    suite = context.suites.add(ExpectationSuite(name="expectations"))
+    suite.add_expectation(
+        gx.expectations.ExpectColumnValuesToBeBetween(
+            column="passenger_count", min_value=1, max_value=6
+        )
+    )
+    suite.add_expectation(
+        gx.expectations.ExpectColumnValuesToBeBetween(column="fare_amount", min_value=0)
+    )
+
+    # Create Validation Definition.
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="validation definition",
+            data=batch_definition,
+            suite=suite,
+        )
+    )
+
+    # Create Checkpoint, run Checkpoint, and capture result.
+    checkpoint = context.checkpoints.add(
+        gx.checkpoint.checkpoint.Checkpoint(
+            name="checkpoint", validation_definitions=[validation_definition]
+        )
     )
 
     checkpoint.run()
 
+    # check `DefaultSiteIndexBuilder.add_resource_info_to_index_links_dict` has the asset name
+    add_resource_info_spy.assert_called()
     last_call = add_resource_info_spy.call_args_list[-1]
     print(f"Last call kwargs:\n{pf(last_call.kwargs, depth=1)}")
-    assert last_call.kwargs["asset_name"] == asset_name
+    assert last_call.kwargs["asset_name"] == data_asset.name
