@@ -88,9 +88,9 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         diagnostics = BatchDefinitionAddedDiagnostics(
             errors=[] if self.id else [BatchDefinitionNotAddedError(name=self.name)]
         )
-        if diagnostics.is_added:
-            diagnostics = self._is_fresh()
-        return diagnostics
+        if not diagnostics.is_added:
+            return diagnostics
+        return self._is_fresh()
 
     def _is_fresh(self) -> BatchDefinitionAddedDiagnostics:
         datasource_dict = project_manager.get_datasources()

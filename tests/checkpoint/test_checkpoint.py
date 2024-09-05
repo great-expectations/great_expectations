@@ -1104,6 +1104,9 @@ def test_is_added(
     )
     batch_definition.id = batch_def_id  # Fluent API will add an ID but manually overriding for test
 
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    suite.id = suite_id  # Store will add an ID but manually overriding for test
+
     checkpoint = Checkpoint(
         name="my_checkpoint",
         id=id,
@@ -1111,7 +1114,7 @@ def test_is_added(
             ValidationDefinition(
                 name="my_validation_definition",
                 id=validation_def_id,
-                suite=ExpectationSuite(name="my_suite", id=suite_id),
+                suite=suite,
                 data=batch_definition,
             )
         ],

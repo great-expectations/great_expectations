@@ -65,6 +65,14 @@ class ExpectationSuiteNotAddedError(ResourceNotAddedError):
         )
 
 
+class ExpectationSuiteChangesNotAddedError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ExpectationSuite '{name}' has changed since it has last been saved. "
+            "Please update with `<SUITE_OBJECT>.save()`, then try your action again."
+        )
+
+
 class ValidationDefinitionError(DataContextError):
     pass
 

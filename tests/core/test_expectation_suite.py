@@ -1077,11 +1077,14 @@ class TestExpectationSuiteAnalytics:
 
 
 @pytest.mark.unit
-def test_identifier_bundle_with_existing_id():
-    suite = ExpectationSuite(name="my_suite", id="fa34fbb7-124d-42ff-9760-e410ee4584a0")
+def test_identifier_bundle_with_existing_id(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    suite_id = suite.id
 
     assert suite.identifier_bundle() == _IdentifierBundle(
-        name="my_suite", id="fa34fbb7-124d-42ff-9760-e410ee4584a0"
+        name="my_suite",
+        id=suite_id,
     )
 
 
@@ -1102,8 +1105,10 @@ def test_identifier_bundle_no_id_raises_error():
     ],
 )
 @pytest.mark.unit
-def test_is_added(id: str | None, is_added: bool, num_errors: int):
-    suite = ExpectationSuite(name="my_suite", id=id)
+def test_is_added(in_memory_runtime_context, id: str | None, is_added: bool, num_errors: int):
+    context = in_memory_runtime_context
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    suite.id = id  # Stores will add an ID but manually overriding for test
     diagnostics = suite.is_added()
 
     assert diagnostics.is_added is is_added

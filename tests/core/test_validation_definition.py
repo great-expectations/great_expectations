@@ -392,6 +392,7 @@ class TestValidationRun:
     ):
         expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        cloud_validation_definition.suite.save()
         mock_validator.graph_validate.return_value = [
             ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
         ]
@@ -415,6 +416,7 @@ class TestValidationRun:
     ):
         expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        cloud_validation_definition.suite.save()
         mock_validator.graph_validate.return_value = [
             ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
         ]
@@ -880,10 +882,13 @@ def test_is_added(
     )
     batch_definition.id = batch_def_id  # Fluent API will add an ID but manually overriding for test
 
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    suite.id = suite_id  # Store will add an ID but manually overriding for test
+
     validation_definition = ValidationDefinition(
         name="my_validation_definition",
         id=id,
-        suite=ExpectationSuite(name="my_suite", id=suite_id),
+        suite=suite,
         data=batch_definition,
     )
     diagnostics = validation_definition.is_added()
