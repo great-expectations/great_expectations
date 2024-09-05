@@ -11,6 +11,7 @@ from great_expectations.compatibility.pydantic import (
     ValidationError,
     validator,
 )
+from great_expectations.constants import DATAFRAME_REPLACEMENT_STR
 from great_expectations.core.added_diagnostics import (
     ValidationDefinitionAddedDiagnostics,
 )
@@ -44,8 +45,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
-
-DATAFRAME_INDICATOR = "<DATAFRAME>"
 
 
 @public_api
@@ -269,7 +268,7 @@ class ValidationDefinition(BaseModel):
         if batch_parameters:
             batch_parameters_copy = {k: v for k, v in batch_parameters.items()}
             if "dataframe" in batch_parameters_copy:
-                batch_parameters_copy["dataframe"] = DATAFRAME_INDICATOR
+                batch_parameters_copy["dataframe"] = DATAFRAME_REPLACEMENT_STR
             results.meta["batch_parameters"] = batch_parameters_copy
         else:
             results.meta["batch_parameters"] = None

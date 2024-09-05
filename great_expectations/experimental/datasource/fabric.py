@@ -29,6 +29,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import FabricBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
@@ -106,14 +107,13 @@ class _PowerBIAsset(DataAsset):
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core import IDDict
         from great_expectations.core.batch import LegacyBatchDefinition
 
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
-            batch_identifiers=IDDict(batch_request.options),
+            batch_identifiers=make_batch_identifier(batch_request.options),
             batch_spec_passthrough=None,
         )
 

@@ -188,7 +188,7 @@ Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_
 
 **Goal**: Validate a table's schema over time with a defined Expectation Suite of schema Expectations, and use Checkpoint results and Validation history to determine when breaking changes were made to a table.
 
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full sample code"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full example code"
 ```
 
 **Result**:

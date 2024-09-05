@@ -6,6 +6,7 @@ import uuid
 from typing import TYPE_CHECKING, List, Type
 from unittest import mock
 
+import pandas as pd
 import pytest
 
 import great_expectations as gx
@@ -24,6 +25,7 @@ from great_expectations.checkpoint.checkpoint import (
     CheckpointResult,
 )
 from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.constants import DATAFRAME_REPLACEMENT_STR
 from great_expectations.core.added_diagnostics import (
     BatchDefinitionAddedDiagnostics,
     ExpectationSuiteAddedDiagnostics,
@@ -784,6 +786,44 @@ class TestCheckpointResult:
         )
 
         return Checkpoint(name=self.checkpoint_name, validation_definitions=[validation_definition])
+
+    @pytest.mark.unit
+    def test_checkpoint_result_does_not_contain_dataframe(self, tmp_path: pathlib.Path):
+        df = pd.DataFrame({"passenger_count": [1, 2, 3, 4, 5]})
+
+        context = gx.get_context(mode="ephemeral")
+        ds = context.data_sources.add_pandas(self.datasource_name)
+        asset = ds.add_dataframe_asset(name=self.asset_name)
+        batch_definition = asset.add_batch_definition_whole_dataframe(self.batch_definition_name)
+
+        suites = context.suites.add(
+            ExpectationSuite(
+                name=self.suite_name,
+                expectations=[
+                    gxe.ExpectColumnValuesToBeBetween(
+                        column=self.column_name, min_value=0, max_value=6
+                    )
+                ],
+            )
+        )
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(
+                name=self.validation_definition_name, data=batch_definition, suite=suites
+            )
+        )
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
+            result_format="COMPLETE",
+        )
+        results = checkpoint.run(batch_parameters={"dataframe": df})
+        assert len(results.run_results) == 1
+        result = list(results.run_results.values())[0]
+        assert result.meta["batch_parameters"]["dataframe"] == DATAFRAME_REPLACEMENT_STR
+        assert (
+            result.meta["active_batch_definition"]["batch_identifiers"]["dataframe"]
+            == DATAFRAME_REPLACEMENT_STR
+        )
 
     @pytest.mark.filesystem
     def test_checkpoint_run_result_shape(self, tmp_path: pathlib.Path):
