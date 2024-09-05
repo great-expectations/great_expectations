@@ -1186,3 +1186,17 @@ def test_save_on_individual_expectation_updates_rendered_content(
         4,
         5,
     ]
+
+
+@pytest.mark.unit
+def test_is_added_freshness(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    suite.expectations = [gxe.ExpectColumnDistinctValuesToBeInSet(column="a", value_set=[1, 2, 3])]
+
+    diagnostics = suite.is_added()
+    assert diagnostics.is_added is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteChangesNotAddedError)
