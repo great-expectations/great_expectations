@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import mistune
 import pytest
 
+from great_expectations.checkpoint import UpdateDataDocsAction
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.util import file_relative_path
@@ -586,7 +587,9 @@ def test_asset_name_is_part_of_resource_info_index(mocker: MockerFixture):
     # Create Checkpoint, run Checkpoint, and capture result.
     checkpoint = context.checkpoints.add(
         gx.checkpoint.checkpoint.Checkpoint(
-            name="checkpoint", validation_definitions=[validation_definition]
+            name="checkpoint",
+            validation_definitions=[validation_definition],
+            actions=[UpdateDataDocsAction(name="update_data_docs")],
         )
     )
 
