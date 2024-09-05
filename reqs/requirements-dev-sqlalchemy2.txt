@@ -1,7 +1,3 @@
-# Do not `pip install -r` this file locally or in CI (outside of StaticTypeCheck).
-# It only exists to be included in requirements-dev.txt, which should only be used in the Dockerfile.tests file.
-# Do not add any dependencies here that are not compatible with sqlalchemy>=2.0
-sqlalchemy-bigquery>=1.11.0
 --requirement requirements-dev-databricks.txt
 --requirement requirements-dev-mssql.txt
 --requirement requirements-dev-mysql.txt
@@ -11,3 +7,7 @@ sqlalchemy-bigquery>=1.11.0
 --requirement requirements-dev-vertica.txt
 snowflake-sqlalchemy>=1.6
 sqlalchemy>=2.0
+# Do not `pip install -r` this file locally or in CI (outside of StaticTypeCheck).
+# It only exists to be included in requirements-dev.txt, which should only be used in the Dockerfile.tests file.
+# Do not add any dependencies here that are not compatible with sqlalchemy>=2.0
+sqlalchemy-bigquery>=1.11.0
