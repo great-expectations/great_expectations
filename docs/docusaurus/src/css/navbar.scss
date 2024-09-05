@@ -4,10 +4,6 @@
   --navbar-background-color: #F9F9FB;
 }
 
-.navbar--fixed-top {
-  opacity: .95;
-}
-
 .navbar__link {
   font-weight: 700;
   font-size: 14px;
@@ -81,8 +77,10 @@
     padding: 0.5em var(--ifm-navbar-padding-horizontal);
 
     /* The number in this rule corresponds to the amount of links that
-      will be positioned in the right end of the tabs in the navbar */
-    &:nth-last-child(2) {
+      will be positioned in the right end of the tabs in the navbar,
+       CURRENTLY the last three items are Resources, the color mode toggle
+       (not displayed since it has a .hidden class) and the Expectations Gallery */
+    &:nth-last-child(3) {
       margin-left: auto;
     }
   }
@@ -90,6 +88,11 @@
   .navbar__link {
     text-transform: unset;
   }
+}
+
+[data-theme='dark'] .navbar__items--right {
+  background-color: #2e2f32;
+  border-bottom: 1px solid var(--gray-900);
 }
 
 .navbar__inner > div:first-child .navbar__item.dropdown {
@@ -114,6 +117,14 @@
     border-bottom: none;
     color: var(--ifm-navbar-link-color);
   }
+}
+
+[data-theme='dark'] .navbar__link--active {
+  color: var(--ifm-color-primary);
+}
+
+[data-theme='dark'] .navbar__link::after {
+  filter: invert(1);
 }
 
 .header-cloud-link {
@@ -143,7 +154,15 @@
     box-shadow: 0 3px 6px -1px var(--orange-300);
   }
 
+  [data-theme='dark'] .navbar-sidebar .header-cloud-link {
+    box-shadow: none;
+  }
+
   .navbar-sidebar .github-badge {
+    display: none;
+  }
+
+  .navbar-sidebar .color-mode-toggle {
     display: none;
   }
 }

@@ -90,7 +90,7 @@ module.exports = {
       ]
     },
     colorMode: {
-      disableSwitch: true,
+      disableSwitch: false,
     },
     zoomSelector: '.markdown :not(em) > img',
     // announcementBar: {
@@ -107,6 +107,7 @@ module.exports = {
       logo: {
         alt: 'Great Expectations',
         src: 'img/GXDocs.svg',
+        srcDark: 'img/GXDocs-dark.svg',
         href: 'https://greatexpectations.io',
       },
       items: [
@@ -126,6 +127,11 @@ module.exports = {
           type: 'search',
           position: 'left',
           className: 'custom-search-bar',
+        },
+        {
+          type: 'custom-colorModeToggle',
+          position: 'left',
+          className: 'color-mode-toggle',
         },
         {
           type: 'custom-githubNavbarItem',
@@ -284,7 +290,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '1.0.0',
+              label: '1.0.1',
             },
             ['0.18']: {
               label: '0.18.17',
