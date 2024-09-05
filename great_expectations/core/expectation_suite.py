@@ -258,9 +258,7 @@ class ExpectationSuite(SerializableDictDot):
         )
         if not diagnostics.is_fresh:
             return diagnostics
-        return self._is_fresh()
 
-    def _is_fresh(self) -> ExpectationSuiteAddedDiagnostics:
         key = self._store.get_key(name=self.name, id=self.id)
         suite_dict = self._store.get(key=key)
         suite = ExpectationSuite(**suite_dict)

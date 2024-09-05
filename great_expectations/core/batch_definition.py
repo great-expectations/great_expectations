@@ -90,9 +90,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         )
         if not diagnostics.is_fresh:
             return diagnostics
-        return self._is_fresh()
 
-    def _is_fresh(self) -> BatchDefinitionAddedDiagnostics:
         datasource_dict = project_manager.get_datasources()
         datasource = datasource_dict[self.data_asset.datasource.name]
         asset = datasource.get_asset(self.data_asset.name)
