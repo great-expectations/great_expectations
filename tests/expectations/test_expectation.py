@@ -298,3 +298,25 @@ class TestSuiteParameterOptions:
             max_value={"$PARAMETER": self.SUITE_PARAMETER_VALUE},
         )
         assert expectation.suite_parameter_options == (self.SUITE_PARAMETER_VALUE,)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "notes_a,notes_b,expected",
+    [
+        pytest.param(None, None, True, id="both_none"),
+        pytest.param([], None, True, id="both_falsy"),
+        pytest.param("my_notes", None, False, id="actual_notes"),
+    ],
+)
+def test_expectation_equality_with_notes(
+    notes_a: str | list[str] | None, notes_b: str | list[str] | None, expected: bool
+):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, notes=notes_a
+    )
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, notes=notes_b
+    )
+
+    assert (expectation_a == expectation_b) is expected
