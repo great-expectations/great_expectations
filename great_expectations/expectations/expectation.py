@@ -2561,6 +2561,9 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
 
 
 class UnexpectedRowsExpectation:
+    unexpected_rows_query: str
+    description: str | None = None
+
     def __new__(
         cls,
         unexpected_rows_query: str,
