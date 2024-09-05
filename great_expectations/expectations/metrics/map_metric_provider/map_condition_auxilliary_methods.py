@@ -560,7 +560,7 @@ def _sqlalchemy_map_condition_index(  # noqa: C901 - too complex
         domain_records_as_selectable = get_sqlalchemy_selectable(domain_records_as_selectable)  # type: ignore[arg-type]
 
     # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`  # noqa: E501
-    final_query: sa.select = unexpected_condition_query_with_selected_columns.select_from(  # type: ignore[valid-type]
+    final_query: sa.select = unexpected_condition_query_with_selected_columns.select_from(  # type: ignore[valid-type,attr-defined]
         domain_records_as_selectable
     ).limit(result_format["partial_unexpected_count"])
     query_result: List[sqlalchemy.Row] = execution_engine.execute_query(final_query).fetchall()  # type: ignore[assignment]
