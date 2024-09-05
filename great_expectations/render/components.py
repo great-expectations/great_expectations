@@ -17,6 +17,7 @@ from great_expectations.types import DictDot
 if TYPE_CHECKING:
     from great_expectations.compatibility.pydantic import fields as pydantic_fields
     from great_expectations.render.renderer_configuration import (
+        CodeBlock,
         MetaNotes,
         RendererTableValue,
     )
@@ -780,7 +781,7 @@ class RenderedAtomicValue(DictDot):
         # StringValueType
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
-        self.code_block: Optional[str] = code_block
+        self.code_block: Optional[CodeBlock] = code_block
 
         # TableType
         self.header_row: Optional[List[RendererTableValue]] = header_row
