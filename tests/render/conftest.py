@@ -49,7 +49,15 @@ def v1_checkpoint_result(mocker: pytest_mock.MockFixture):
     result_a = mocker.MagicMock(
         spec=ExpectationSuiteValidationResult,
         suite_name="my_bad_suite",
-        meta={},
+        # Converted LegacyBatchDefinition within V1 Validator
+        meta={
+            "active_batch_definition": {
+                "datasource_name": "my_first_ds",
+                "data_connector_name": "my_first_dc",
+                "data_asset_name": "my_first_asset",
+                "batch_identifiers": {},
+            }
+        },
         statistics={"successful_expectations": 3, "evaluated_expectations": 5},
         batch_id="my_batch",
         success=False,
@@ -58,7 +66,9 @@ def v1_checkpoint_result(mocker: pytest_mock.MockFixture):
     result_b = mocker.MagicMock(
         spec=ExpectationSuiteValidationResult,
         suite_name="my_good_suite",
-        meta={"run_id": "my_run_id"},
+        meta={
+            "run_id": "my_run_id",
+        },
         statistics={"successful_expectations": 1, "evaluated_expectations": 1},
         batch_id="my_other_batch",
         success=True,
