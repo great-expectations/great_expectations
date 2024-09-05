@@ -17,6 +17,7 @@ from great_expectations.types import DictDot
 if TYPE_CHECKING:
     from great_expectations.compatibility.pydantic import fields as pydantic_fields
     from great_expectations.render.renderer_configuration import (
+        CodeBlock,
         MetaNotes,
         RendererTableValue,
     )
@@ -768,6 +769,7 @@ class RenderedAtomicValue(DictDot):
         header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
+        code_block: Optional[CodeBlock] = None,
         header_row: Optional[List[RendererTableValue]] = None,
         table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
@@ -779,6 +781,7 @@ class RenderedAtomicValue(DictDot):
         # StringValueType
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
+        self.code_block: Optional[CodeBlock] = code_block
 
         # TableType
         self.header_row: Optional[List[RendererTableValue]] = header_row
@@ -850,6 +853,7 @@ class RenderedAtomicValueSchema(Schema):
     # for StringValueType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
+    code_block = fields.Dict(required=False, allow_none=True)
 
     # for TableType
     header_row = fields.List(fields.Dict, required=False, allow_none=True)
@@ -873,6 +877,7 @@ class RenderedAtomicValueSchema(Schema):
         "table",
         "graph",
         "meta_notes",
+        "code_block",
     )
 
     @staticmethod
