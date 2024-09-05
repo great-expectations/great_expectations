@@ -53,6 +53,7 @@ def run_checkpoint_and_data_doc(
     validator.expect_column_median_to_be_between(column="passenger_count", min_value=1, max_value=4)
 
     suite = validator.expectation_suite
+    suite.save()
     batch_def = asset.add_batch_definition(name="my_batch_definition")
 
     # Configure and run a checkpoint

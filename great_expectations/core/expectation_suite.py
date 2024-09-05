@@ -46,6 +46,7 @@ from great_expectations.util import (
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
+    from great_expectations.data_context.store.expectations_store import ExpectationsStore
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
@@ -106,7 +107,9 @@ class ExpectationSuite(SerializableDictDot):
         self.meta = meta
         self.notes = notes
 
-        self._store = project_manager.get_expectations_store()
+    @property
+    def _store(self) -> ExpectationsStore:
+        return project_manager.get_expectations_store()
 
     @property
     def _include_rendered_content(self) -> bool:
