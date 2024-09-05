@@ -519,7 +519,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                     columns_table_query.c.column_precision,
                 )
                 .select_from(
-                    tables_table_query.join(  # type: ignore[call-arg]
+                    tables_table_query.join(  # type: ignore[call-arg,arg-type]
                         right=columns_table_query,
                         onclause=inner_join_conditions,
                         isouter=False,
@@ -600,7 +600,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                     columns_table_query.c.column_data_type,
                 )
                 .select_from(
-                    tables_table_query.join(  # type: ignore[call-arg]
+                    tables_table_query.join(  # type: ignore[call-arg,arg-type]
                         right=columns_table_query, onclause=conditions, isouter=False
                     )
                 )
@@ -643,9 +643,9 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
-                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)  # type: ignore[assignment]
+                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)  # type: ignore[assignment,arg-type]
                 else:
-                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)  # type: ignore[assignment]
+                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)  # type: ignore[assignment,arg-type]
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
