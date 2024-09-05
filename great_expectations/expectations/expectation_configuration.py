@@ -442,12 +442,16 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def to_domain_obj(self) -> Expectation:
         expectation_impl = self._get_expectation_impl()
+        kwargs = {
+            "id": self.id,
+            "meta": self.meta,
+            "notes": self.notes,
+            "rendered_content": self.rendered_content,
+        }
+        if self.description:
+            kwargs.update({"description": self.description})
         return expectation_impl(
-            id=self.id,
-            meta=self.meta,
-            notes=self.notes,
-            description=self.description,
-            rendered_content=self.rendered_content,
+            **kwargs,
             **self.kwargs,
         )
 
