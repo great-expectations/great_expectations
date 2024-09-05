@@ -1,12 +1,17 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import pytest
 
-from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.fluent.interfaces import Batch
-from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 from great_expectations.expectations import UnexpectedRowsExpectation
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.interfaces import Batch
+    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 
 
 @pytest.fixture
