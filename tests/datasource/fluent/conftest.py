@@ -99,7 +99,7 @@ def sqlachemy_execution_engine_mock_cls(
             # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in  # noqa: E501
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
-            self.engine = MockSaEngine(dialect=Dialect(dialect))
+            self.engine = MockSaEngine(dialect=Dialect(dialect))  # type: ignore[assignment]
             self._create_temp_table = create_temp_table
 
         @override

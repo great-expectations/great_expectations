@@ -63,7 +63,7 @@ class QueryColumnPair(QueryMetricProvider):
         else:
             query = query.format(column_A=column_A, column_B=column_B, batch=f"({selectable})")
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()
+        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()  # type: ignore[assignment]
 
         return [element._asdict() for element in result]
 

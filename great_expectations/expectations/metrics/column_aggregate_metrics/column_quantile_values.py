@@ -68,7 +68,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         column_name = accessor_domain_kwargs["column"]
-        column = sa.column(column_name)
+        column = sa.column(column_name)  # type: ignore[var-annotated]
         dialect_name = execution_engine.dialect_name
         quantiles = metric_value_kwargs["quantiles"]
         allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
@@ -96,7 +96,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             )
         elif dialect_name.lower() == GXSqlDialect.CLICKHOUSE:
             return _get_column_quantiles_clickhouse(
-                column=column,
+                column=column,  # type: ignore[arg-type]
                 quantiles=quantiles,
                 selectable=selectable,
                 execution_engine=execution_engine,
@@ -180,7 +180,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 "SparkDFExecutionEngine requires relative error to be False or to be a float between 0 and 1."  # noqa: E501
             )
 
-        return df.approxQuantile(column, list(quantiles), allow_relative_error)
+        return df.approxQuantile(column, list(quantiles), allow_relative_error)  # type: ignore[attr-defined]
 
 
 def _get_column_quantiles_mssql(
@@ -188,14 +188,14 @@ def _get_column_quantiles_mssql(
 ) -> list:
     # mssql requires over(), so we add an empty over() clause
     selects: list[sqlalchemy.WithinGroup] = [
-        sa.func.percentile_disc(quantile).within_group(column.asc()).over()
+        sa.func.percentile_disc(quantile).within_group(column.asc()).over()  # type: ignore[misc]
         for quantile in quantiles
     ]
     quantiles_query: sqlalchemy.Select = sa.select(*selects).select_from(selectable)
 
     try:
         quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
-        return list(quantiles_results)
+        return list(quantiles_results)  # type: ignore[arg-type]
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
@@ -209,13 +209,14 @@ def _get_column_quantiles_bigquery(
 ) -> list:
     # BigQuery does not support "WITHIN", so we need a special case for it
     selects: list[sqlalchemy.WithinGroup] = [
-        sa.func.percentile_disc(column, quantile).over() for quantile in quantiles
+        sa.func.percentile_disc(column, quantile).over()
+        for quantile in quantiles  # type: ignore[misc]
     ]
     quantiles_query: sqlalchemy.Select = sa.select(*selects).select_from(selectable)
 
     try:
         quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
-        return list(quantiles_results)
+        return list(quantiles_results)  # type: ignore[arg-type]
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
@@ -261,14 +262,14 @@ def _get_column_quantiles_mysql(
             )
             .label(f"q_{idx}")
         )
-        selects.append(quantile_column)
+        selects.append(quantile_column)  # type: ignore[arg-type]
     quantiles_query: sqlalchemy.Select = (
         sa.select(*selects).distinct().order_by(percent_rank_query.columns.p.desc())
     )
 
     try:
         quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
-        return list(quantiles_results)
+        return list(quantiles_results)  # type: ignore[arg-type]
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
@@ -287,7 +288,7 @@ def _get_column_quantiles_trino(
 
     try:
         quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
-        return list(quantiles_results)[0]
+        return list(quantiles_results)[0]  # type: ignore[arg-type]
     except (sqlalchemy.ProgrammingError, trino.trinoexceptions.TrinoUserError) as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
@@ -302,7 +303,7 @@ def _get_column_quantiles_clickhouse(
     quantiles_list = list(quantiles)
     sql_approx: str = f"quantilesExact({', '.join([str(x) for x in quantiles_list])})({column})"
     selects_approx: list[sqlalchemy.TextClause] = [sa.text(sql_approx)]
-    quantiles_query: sqlalchemy.Select = sa.select(selects_approx).select_from(selectable)
+    quantiles_query: sqlalchemy.Select = sa.select(selects_approx).select_from(selectable)  # type: ignore[call-overload]
     try:
         quantiles_results = execution_engine.execute(quantiles_query).fetchone()[0]
         return quantiles_results
@@ -341,7 +342,7 @@ def _get_column_quantiles_sqlite(
         ]
         return list(
             itertools.chain.from_iterable(
-                [list(quantile_result) for quantile_result in quantiles_results]
+                [list(quantile_result) for quantile_result in quantiles_results]  # type: ignore[arg-type]
             )
         )
     except sqlalchemy.ProgrammingError as pe:
@@ -364,7 +365,7 @@ def _get_column_quantiles_athena(
     try:
         quantiles_results = execution_engine.execute_query(quantiles_query_approx).fetchone()
         # the ast literal eval is needed because the method is returning a json string and not a dict  # noqa: E501
-        results = ast.literal_eval(quantiles_results[0])
+        results = ast.literal_eval(quantiles_results[0])  # type: ignore[index]
         return results
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -392,7 +393,7 @@ def _get_column_quantiles_generic_sqlalchemy(
 
     try:
         quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
-        return list(quantiles_results)
+        return list(quantiles_results)  # type: ignore[arg-type]
     except sqlalchemy.ProgrammingError:
         # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;  # noqa: E501
         # use approximate percentile_disc or percentile_cont instead.
@@ -410,7 +411,7 @@ def _get_column_quantiles_generic_sqlalchemy(
                     quantiles_results = execution_engine.execute_query(
                         quantiles_query_approx
                     ).fetchone()
-                    return list(quantiles_results)
+                    return list(quantiles_results)  # type: ignore[arg-type]
                 except sqlalchemy.ProgrammingError as pe:
                     exception_message: str = "An SQL syntax Exception occurred."
                     exception_traceback: str = traceback.format_exc()

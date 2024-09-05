@@ -10,119 +10,119 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
 try:
     import sqlalchemy
 except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy.sql.selectable import Subquery
 except (ImportError, AttributeError):
-    Subquery = SQLALCHEMY_NOT_IMPORTED
+    Subquery = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy import engine
 except ImportError:
-    engine = SQLALCHEMY_NOT_IMPORTED
+    engine = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy import dialects
 except ImportError:
-    dialects = SQLALCHEMY_NOT_IMPORTED
+    dialects = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy import inspect
 except ImportError:
-    inspect = SQLALCHEMY_NOT_IMPORTED
+    inspect = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy.dialects import sqlite
 except (ImportError, AttributeError):
-    sqlite = SQLALCHEMY_NOT_IMPORTED
+    sqlite = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy.dialects import registry
 except (ImportError, AttributeError):
-    registry = SQLALCHEMY_NOT_IMPORTED
+    registry = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy.engine import Dialect
 except (ImportError, AttributeError):
-    Dialect = SQLALCHEMY_NOT_IMPORTED
+    Dialect = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.engine import Inspector
 except (ImportError, AttributeError):
-    Inspector = SQLALCHEMY_NOT_IMPORTED
+    Inspector = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.engine import reflection
 except (ImportError, AttributeError):
-    reflection = SQLALCHEMY_NOT_IMPORTED
+    reflection = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy.engine import Connection
 except (ImportError, AttributeError):
-    Connection = SQLALCHEMY_NOT_IMPORTED
+    Connection = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.engine import Engine
 except (ImportError, AttributeError):
-    Engine = SQLALCHEMY_NOT_IMPORTED
+    Engine = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.engine import Row
 except (ImportError, AttributeError):
-    Row = SQLALCHEMY_NOT_IMPORTED
+    Row = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.engine.row import RowProxy
 except (ImportError, AttributeError):
-    RowProxy = SQLALCHEMY_NOT_IMPORTED
+    RowProxy = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
-    from sqlalchemy.engine.row import LegacyRow
+    from sqlalchemy.engine.row import LegacyRow  # type: ignore[attr-defined]
 except (ImportError, AttributeError):
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.engine.default import DefaultDialect
 except (ImportError, AttributeError):
-    DefaultDialect = SQLALCHEMY_NOT_IMPORTED
+    DefaultDialect = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.engine import url
     from sqlalchemy.engine.url import URL
 except (ImportError, AttributeError):
-    url = SQLALCHEMY_NOT_IMPORTED
-    URL = SQLALCHEMY_NOT_IMPORTED
+    url = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
+    URL = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.exc import DatabaseError
 except (ImportError, AttributeError):
-    DatabaseError = SQLALCHEMY_NOT_IMPORTED
+    DatabaseError = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.exc import IntegrityError
 except (ImportError, AttributeError):
-    IntegrityError = SQLALCHEMY_NOT_IMPORTED
+    IntegrityError = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.exc import NoSuchTableError
 except (ImportError, AttributeError):
-    NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
+    NoSuchTableError = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.exc import OperationalError
 except (ImportError, AttributeError):
-    OperationalError = SQLALCHEMY_NOT_IMPORTED
+    OperationalError = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.exc import ProgrammingError
 except (ImportError, AttributeError):
-    ProgrammingError = SQLALCHEMY_NOT_IMPORTED
+    ProgrammingError = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
 except (ImportError, AttributeError):
-    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
+    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.orm import declarative_base
@@ -132,122 +132,122 @@ except (ImportError, AttributeError):
 try:
     from sqlalchemy.sql import functions
 except (ImportError, AttributeError):
-    functions = SQLALCHEMY_NOT_IMPORTED
+    functions = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy.sql import Insert
 except (ImportError, AttributeError):
-    Insert = SQLALCHEMY_NOT_IMPORTED
+    Insert = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.elements import literal
 except (ImportError, AttributeError):
-    literal = SQLALCHEMY_NOT_IMPORTED
+    literal = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from sqlalchemy.sql.elements import TextClause
 except (ImportError, AttributeError):
-    TextClause = SQLALCHEMY_NOT_IMPORTED
+    TextClause = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.elements import quoted_name
 except (ImportError, AttributeError):
-    quoted_name = SQLALCHEMY_NOT_IMPORTED
+    quoted_name = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.elements import _anonymous_label
 except (ImportError, AttributeError):
-    _anonymous_label = SQLALCHEMY_NOT_IMPORTED
+    _anonymous_label = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.elements import ColumnElement
 except (ImportError, AttributeError):
-    ColumnElement = SQLALCHEMY_NOT_IMPORTED
+    ColumnElement = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import Cast
 except (ImportError, AttributeError):
-    Cast = SQLALCHEMY_NOT_IMPORTED
+    Cast = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import ColumnOperators
 except (ImportError, AttributeError):
-    ColumnOperators = SQLALCHEMY_NOT_IMPORTED
+    ColumnOperators = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import CTE
 except (ImportError, AttributeError):
-    CTE = SQLALCHEMY_NOT_IMPORTED
+    CTE = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import BinaryExpression
 except (ImportError, AttributeError):
-    BinaryExpression = SQLALCHEMY_NOT_IMPORTED
+    BinaryExpression = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import BooleanClauseList
 except (ImportError, AttributeError):
-    BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
+    BooleanClauseList = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import ColumnClause
 except (ImportError, AttributeError):
-    ColumnClause = SQLALCHEMY_NOT_IMPORTED
+    ColumnClause = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import Label
 except (ImportError, AttributeError):
-    Label = SQLALCHEMY_NOT_IMPORTED
+    Label = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import Select
 except (ImportError, AttributeError):
-    Select = SQLALCHEMY_NOT_IMPORTED
+    Select = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql import Selectable
 except (ImportError, AttributeError):
-    Selectable = SQLALCHEMY_NOT_IMPORTED
+    Selectable = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import TableClause
 except (ImportError, AttributeError):
-    TableClause = SQLALCHEMY_NOT_IMPORTED
+    TableClause = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import TextualSelect
 except (ImportError, AttributeError):
-    TextualSelect = SQLALCHEMY_NOT_IMPORTED
+    TextualSelect = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.expression import WithinGroup
 except (ImportError, AttributeError):
-    WithinGroup = SQLALCHEMY_NOT_IMPORTED
+    WithinGroup = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.sql.operators import custom_op
 except (ImportError, AttributeError):
-    custom_op = SQLALCHEMY_NOT_IMPORTED
+    custom_op = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
-    from sqlalchemy.engine.cursor import LegacyCursorResult
+    from sqlalchemy.engine.cursor import LegacyCursorResult  # type: ignore[attr-defined]
 except (ImportError, AttributeError):
     LegacyCursorResult = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.engine.cursor import CursorResult
 except (ImportError, AttributeError):
-    CursorResult = SQLALCHEMY_NOT_IMPORTED
+    CursorResult = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy.pool import StaticPool
 except (ImportError, AttributeError):
-    StaticPool = SQLALCHEMY_NOT_IMPORTED
+    StaticPool = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     from sqlalchemy import Table
 except (ImportError, AttributeError):
-    Table = SQLALCHEMY_NOT_IMPORTED
+    Table = SQLALCHEMY_NOT_IMPORTED  # type: ignore[misc]
 
 try:
     __version__: str | None = sqlalchemy.__version__

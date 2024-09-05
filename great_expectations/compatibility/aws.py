@@ -55,4 +55,4 @@ except (ImportError, AttributeError):
 try:
     from pyathena.sqlalchemy_athena import types as athenatypes
 except (ImportError, AttributeError):
-    athenatypes = ATHENA_NOT_IMPORTED
+    athenatypes = ATHENA_NOT_IMPORTED  # type: ignore[assignment]
