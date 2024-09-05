@@ -99,6 +99,9 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -1597,7 +1600,10 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def get_docs_sites_urls(
         self,
-        resource_identifier: Any | None = None,
+        resource_identifier: ExpectationSuiteIdentifier
+        | ValidationResultIdentifier
+        | str
+        | None = None,
         site_name: Optional[str] = None,
         only_if_exists: bool = True,
         site_names: Optional[List[str]] = None,
@@ -2050,7 +2056,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_identifier=None,
         validation_results_store_name=None,
         failed_only=False,
-    ):
+    ) -> ExpectationValidationResult | dict:
         """Get validation results from a configured store.
 
         Args:
@@ -2181,10 +2187,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def build_data_docs(
         self,
         site_names: list[str] | None = None,
-        resource_identifiers: list | None = None,
+        resource_identifiers: list[ExpectationSuiteIdentifier]
+        | list[ValidationResultIdentifier]
+        | None = None,
         dry_run: bool = False,
         build_index: bool = True,
-    ) -> dict:
+    ) -> dict[str, str]:
         """Build Data Docs for your project.
 
         --Documentation--
