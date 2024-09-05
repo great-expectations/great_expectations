@@ -36,6 +36,7 @@ from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent import BatchParameters, BatchRequest
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -142,12 +143,11 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
-            batch_identifiers=IDDict(batch_request.options),
+            batch_identifiers=make_batch_identifier(batch_request.options),
             batch_spec_passthrough=None,
         )
 
@@ -458,12 +458,11 @@ class DataFrameAsset(_PandasDataAsset):
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
-            batch_identifiers=IDDict(batch_request.options),
+            batch_identifiers=make_batch_identifier(batch_request.options),
             batch_spec_passthrough=None,
         )
 
@@ -1426,7 +1425,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
@@ -1453,7 +1452,7 @@ class PandasDatasource(_PandasDatasource):
     @public_api
     def read_sql(
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
@@ -1483,7 +1482,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
@@ -1510,7 +1509,7 @@ class PandasDatasource(_PandasDatasource):
     @public_api
     def read_sql_query(
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,

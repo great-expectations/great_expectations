@@ -33,6 +33,7 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchParameters, BatchRequest
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
@@ -283,12 +284,11 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
-            batch_identifiers=IDDict(batch_request.options),
+            batch_identifiers=make_batch_identifier(batch_request.options),
             batch_spec_passthrough=None,
         )
 

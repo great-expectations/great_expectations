@@ -62,12 +62,12 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
 
         distinct_values: List[sqlalchemy.Row]
         if hasattr(column, "is_not"):
-            distinct_values = execution_engine.execute_query(
-                sa.select(column).where(column.is_not(None)).distinct().select_from(selectable)
+            distinct_values = execution_engine.execute_query(  # type: ignore[assignment]
+                sa.select(column).where(column.is_not(None)).distinct().select_from(selectable)  # type: ignore[arg-type]
             ).fetchall()
         else:
-            distinct_values = execution_engine.execute_query(
-                sa.select(column).where(column.isnot(None)).distinct().select_from(selectable)
+            distinct_values = execution_engine.execute_query(  # type: ignore[assignment]
+                sa.select(column).where(column.isnot(None)).distinct().select_from(selectable)  # type: ignore[arg-type]
             ).fetchall()
         # Vectorized operation is not faster here due to overhead of converting to and from numpy array  # noqa: E501
         return {row[0] for row in distinct_values}

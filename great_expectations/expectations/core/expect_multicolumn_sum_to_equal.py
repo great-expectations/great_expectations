@@ -58,7 +58,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectMulticolumnSumToEqual is a \
-    [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
+    Multicolumn Map Expectation.
 
     Multicolumn Map Expectations are evaluated for a set of columns and ask a yes/no question about the row-wise relationship between those columns.
     Based on the result, they then calculate the percentage of rows that gave a positive answer.

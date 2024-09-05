@@ -51,6 +51,7 @@ from great_expectations.core.partitioners import (
     PartitionerModInteger,
     PartitionerMultiColumnValue,
 )
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
@@ -629,6 +630,7 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             )
         else:
             sorted_metadata_dicts = unsorted_metadata_dicts
+            
         sorted_metadata_dicts = sorted_metadata_dicts[batch_request.batch_slice]
         batch_metadata = sorted_metadata_dicts[-1]
 
@@ -876,7 +878,7 @@ class TableAsset(_SQLAsset):
 
         from great_expectations.compatibility import sqlalchemy
 
-        if sqlalchemy.quoted_name:
+        if sqlalchemy.quoted_name:  # type: ignore[truthy-function]
             if isinstance(table_name, sqlalchemy.quoted_name):
                 return table_name
 
@@ -928,7 +930,7 @@ class TableAsset(_SQLAsset):
 
         This can be used in a from clause for a query against this data.
         """
-        return sa.text(self.qualified_name)
+        return sa.text(self.qualified_name)  # type: ignore[return-value]
 
     @override
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:

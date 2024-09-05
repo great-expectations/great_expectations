@@ -1,9 +1,0 @@
-# <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/advanced/config_variables.yml my_query_store_creds">
-my_query_store_creds:
-  drivername: postgresql
-  host: localhost
-  port: 5432
-  username: postgres
-  password:
-  database: test_ci
-# </snippet>

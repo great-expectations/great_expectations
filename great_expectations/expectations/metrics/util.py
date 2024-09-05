@@ -41,7 +41,7 @@ try:
     import psycopg2  # noqa: F401
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: TID251
 except (ImportError, KeyError):
-    sqlalchemy_psycopg2 = None
+    sqlalchemy_psycopg2 = None  # type: ignore[assignment]
 
 try:
     import snowflake
@@ -373,7 +373,7 @@ def get_sqlalchemy_column_metadata(
         inspector = execution_engine.get_inspector()
         try:
             # if a custom query was passed
-            if sqlalchemy.TextClause and isinstance(table_selectable, sqlalchemy.TextClause):
+            if sqlalchemy.TextClause and isinstance(table_selectable, sqlalchemy.TextClause):  # type: ignore[truthy-function]
                 if hasattr(table_selectable, "selected_columns"):
                     # New in version 1.4.
                     columns = table_selectable.selected_columns.columns
@@ -386,7 +386,7 @@ def get_sqlalchemy_column_metadata(
                 table_name = str(table_selectable)
                 if execution_engine.dialect_name == GXSqlDialect.SNOWFLAKE:
                     table_name = table_name.lower()
-                columns = inspector.get_columns(
+                columns = inspector.get_columns(  # type: ignore[assignment]
                     table_name=table_name,
                     schema=schema_name,
                 )
@@ -447,7 +447,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
         if dialect.name.lower() == "mssql":
             # Get column names and types from the database
             # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
-            tables_table_clause: sqlalchemy.TableClause = sa.table(
+            tables_table_clause: sqlalchemy.TableClause = sa.table(  # type: ignore[assignment]
                 "tables",
                 sa.column("object_id"),
                 sa.column("schema_id"),
@@ -455,7 +455,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 schema="sys",
             ).alias("sys_tables_table_clause")
             tables_table_query: sqlalchemy.Select = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     tables_table_clause.columns.object_id.label("object_id"),
                     sa.func.schema_name(tables_table_clause.columns.schema_id).label("schema_name"),
                     tables_table_clause.columns.name.label("table_name"),
@@ -463,7 +463,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 .select_from(tables_table_clause)
                 .alias("sys_tables_table_subquery")
             )
-            columns_table_clause: sqlalchemy.TableClause = sa.table(
+            columns_table_clause: sqlalchemy.TableClause = sa.table(  # type: ignore[assignment]
                 "columns",
                 sa.column("object_id"),
                 sa.column("user_type_id"),
@@ -474,7 +474,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 schema="sys",
             ).alias("sys_columns_table_clause")
             columns_table_query: sqlalchemy.Select = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     columns_table_clause.columns.object_id.label("object_id"),
                     columns_table_clause.columns.user_type_id.label("user_type_id"),
                     columns_table_clause.columns.column_id.label("column_id"),
@@ -485,24 +485,24 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 .select_from(columns_table_clause)
                 .alias("sys_columns_table_subquery")
             )
-            types_table_clause: sqlalchemy.TableClause = sa.table(
+            types_table_clause: sqlalchemy.TableClause = sa.table(  # type: ignore[assignment]
                 "types",
                 sa.column("user_type_id"),
                 sa.column("name"),
                 schema="sys",
             ).alias("sys_types_table_clause")
             types_table_query: sqlalchemy.Select = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     types_table_clause.columns.user_type_id.label("user_type_id"),
                     types_table_clause.columns.name.label("column_data_type"),
                 )
                 .select_from(types_table_clause)
                 .alias("sys_types_table_subquery")
             )
-            inner_join_conditions: sqlalchemy.BinaryExpression = sa.and_(
+            inner_join_conditions: sqlalchemy.BinaryExpression = sa.and_(  # type: ignore[assignment]
                 *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
             )
-            outer_join_conditions: sqlalchemy.BinaryExpression = sa.and_(
+            outer_join_conditions: sqlalchemy.BinaryExpression = sa.and_(  # type: ignore[assignment]
                 *(
                     columns_table_query.columns.user_type_id
                     == types_table_query.columns.user_type_id,
@@ -519,7 +519,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                     columns_table_query.c.column_precision,
                 )
                 .select_from(
-                    tables_table_query.join(
+                    tables_table_query.join(  # type: ignore[call-arg,arg-type]
                         right=columns_table_query,
                         onclause=inner_join_conditions,
                         isouter=False,
@@ -529,14 +529,14 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                         isouter=True,
                     )
                 )
-                .where(tables_table_query.c.table_name == selectable.name)
+                .where(tables_table_query.c.table_name == selectable.name)  # type: ignore[attr-defined]
                 .order_by(
                     tables_table_query.c.schema_name.asc(),
                     tables_table_query.c.table_name.asc(),
                     columns_table_query.c.column_id.asc(),
                 )
             )
-            col_info_tuples_list: List[tuple] = connection.execute(col_info_query).fetchall()
+            col_info_tuples_list: List[tuple] = connection.execute(col_info_query).fetchall()  # type: ignore[assignment]
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
                 {
@@ -548,7 +548,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
             ]
         elif dialect.name.lower() == "trino":
             try:
-                table_name = selectable.name
+                table_name = selectable.name  # type: ignore[attr-defined]
             except AttributeError:
                 table_name = selectable
                 if str(table_name).lower().startswith("select"):
@@ -564,7 +564,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 schema="information_schema",
             )
             tables_table_query = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     sa.column("table_schema").label("schema_name"),
                     sa.column("table_name").label("table_name"),
                 )
@@ -577,7 +577,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 schema="information_schema",
             )
             columns_table_query = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     sa.column("column_name").label("column_name"),
                     sa.column("table_name").label("table_name"),
                     sa.column("table_schema").label("schema_name"),
@@ -593,14 +593,14 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 )
             )
             col_info_query = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     tables_table_query.c.schema_name,
                     tables_table_query.c.table_name,
                     columns_table_query.c.column_name,
                     columns_table_query.c.column_data_type,
                 )
                 .select_from(
-                    tables_table_query.join(
+                    tables_table_query.join(  # type: ignore[call-arg,arg-type]
                         right=columns_table_query, onclause=conditions, isouter=False
                     )
                 )
@@ -622,9 +622,9 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
 
             # in sqlalchemy > 2.0.0 this is a Subquery, which we need to convert into a Selectable
             if not col_info_query.supports_execution:
-                col_info_query = sa.select(col_info_query)
+                col_info_query = sa.select(col_info_query)  # type: ignore[call-overload]
 
-            col_info_tuples_list = connection.execute(col_info_query).fetchall()
+            col_info_tuples_list = connection.execute(col_info_query).fetchall()  # type: ignore[assignment]
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
                 {
@@ -635,21 +635,21 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
             ]
         else:
             # if a custom query was passed
-            if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
+            if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):  # type: ignore[truthy-function]
                 query: sqlalchemy.TextClause = selectable
-            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
+            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):  # type: ignore[truthy-function]
                 query = sa.select(sa.text("*")).select_from(selectable).limit(1)
             else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
-                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
+                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)  # type: ignore[assignment,arg-type]
                 else:
-                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
+                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)  # type: ignore[assignment,arg-type]
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
-            col_names: List[str] = result_object._metadata.keys
+            col_names: List[str] = result_object._metadata.keys  # type: ignore[assignment]
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
 
@@ -1151,7 +1151,7 @@ def sql_statement_with_post_compile_to_string(
         String representation of select_statement
 
     """  # noqa: E501
-    sqlalchemy_connection: sa.engine.base.Connection = engine.engine
+    sqlalchemy_connection: sa.engine.base.Connection = engine.engine  # type: ignore[assignment]
     compiled = select_statement.compile(
         sqlalchemy_connection,
         compile_kwargs={"render_postcompile": True},
@@ -1160,7 +1160,7 @@ def sql_statement_with_post_compile_to_string(
     dialect_name: str = engine.dialect_name
 
     if dialect_name in ["sqlite", "trino", "mssql"]:
-        params = (repr(compiled.params[name]) for name in compiled.positiontup)
+        params = (repr(compiled.params[name]) for name in compiled.positiontup)  # type: ignore[union-attr]
         query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
 
     else:

@@ -79,7 +79,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectColumnValuesToBeInTypeList is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
+    Column Map Expectation \
     for typed-column backends, and also for Pandas Datasources where the column dtype provides an \
     unambiguous constraints (any dtype except 'object').
 

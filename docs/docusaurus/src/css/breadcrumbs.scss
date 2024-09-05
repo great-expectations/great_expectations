@@ -16,3 +16,9 @@
 .breadcrumbs:has(li:only-child) {
   display: none;
 }
+
+[data-theme='dark'] .breadcrumbs__item:not(:last-child)::after{
+  background: url('/img/separator-dark.svg') center;
+  opacity: 1;
+  filter: invert(0);
+}

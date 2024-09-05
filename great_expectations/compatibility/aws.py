@@ -43,16 +43,16 @@ except (ImportError, AttributeError):
     redshiftdialect = REDSHIFT_NOT_IMPORTED
 
 try:
-    import pyathena
+    import pyathena  # type: ignore[import-not-found]
 except ImportError:
-    pyathena = ATHENA_NOT_IMPORTED  # type: ignore[assignment]
+    pyathena = ATHENA_NOT_IMPORTED
 
 try:
     from pyathena import sqlalchemy_athena
 except (ImportError, AttributeError):
-    sqlalchemy_athena = ATHENA_NOT_IMPORTED  # type: ignore[assignment]
+    sqlalchemy_athena = ATHENA_NOT_IMPORTED
 
 try:
-    from pyathena.sqlalchemy_athena import types as athenatypes
+    from pyathena.sqlalchemy_athena import types as athenatypes  # type: ignore[import-not-found]
 except (ImportError, AttributeError):
     athenatypes = ATHENA_NOT_IMPORTED

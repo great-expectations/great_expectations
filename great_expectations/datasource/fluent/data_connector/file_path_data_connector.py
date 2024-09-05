@@ -13,6 +13,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_connector import (
     DataConnector,
@@ -240,7 +241,7 @@ class FilePathDataConnector(DataConnector):
             datasource_name=self._datasource_name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self._data_asset_name,
-            batch_identifiers=IDDict({"path": data_directory}),
+            batch_identifiers=make_batch_identifier({"path": data_directory}),
         )
         return [batch_definition]
 
@@ -437,7 +438,7 @@ class FilePathDataConnector(DataConnector):
                 group_name: str = f"{self._unnamed_regex_group_prefix}{group_idx}"
                 group_name_to_group_value_mapping[group_name] = matched_group_value
 
-        batch_identifiers = IDDict(group_name_to_group_value_mapping)
+        batch_identifiers = make_batch_identifier(group_name_to_group_value_mapping)
 
         return batch_identifiers
 

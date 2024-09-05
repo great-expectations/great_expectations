@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Any, Dict, List
+import logging
+from typing import Any, Dict, List
 
 import pytest
 
 import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations import UnexpectedRowsExpectation
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ColumnPairMapExpectation,
@@ -21,12 +20,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
-    from great_expectations.datasource.fluent.interfaces import Batch
-    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
+LOGGER = logging.getLogger(__name__)
 
 
 class FakeMulticolumnExpectation(MulticolumnMapExpectation):
@@ -363,7 +357,6 @@ def test_unexpected_rows_expectation_validate(
     unexpected_rows = res["details"]["unexpected_rows"]
     assert unexpected_rows == expected_unexpected_rows
 
-
 class TestSuiteParameterOptions:
     """Tests around the suite_parameter_options property of Expectations.
 
@@ -408,3 +401,66 @@ class TestSuiteParameterOptions:
             max_value={"$PARAMETER": self.SUITE_PARAMETER_VALUE},
         )
         assert expectation.suite_parameter_options == (self.SUITE_PARAMETER_VALUE,)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "column_a,column_b,expected",
+    [
+        pytest.param("foo", "foo", True, id="equivalent_columns"),
+        pytest.param("foo", "bar", False, id="different_columns"),
+    ],
+)
+def test_expectation_equality(column_a: str, column_b: str, expected: bool):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(column=column_a, min_value=0, max_value=10)
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(column=column_b, min_value=0, max_value=10)
+
+    assert (expectation_a == expectation_b) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "notes_a,notes_b,expected",
+    [
+        pytest.param(None, None, True, id="both_none"),
+        pytest.param([], None, True, id="both_falsy"),
+        pytest.param("my_notes", None, False, id="missing_notes"),
+        pytest.param("my_notes", "my_other_notes", False, id="different_notes"),
+        pytest.param("my_notes", "my_notes", True, id="equivalent_notes"),
+    ],
+)
+def test_expectation_equality_with_notes(
+    notes_a: str | list[str] | None, notes_b: str | list[str] | None, expected: bool
+):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, notes=notes_a
+    )
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, notes=notes_b
+    )
+
+    assert (expectation_a == expectation_b) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "meta_a,meta_b,expected",
+    [
+        pytest.param(None, None, True, id="both_none"),
+        pytest.param({}, None, True, id="both_falsy"),
+        pytest.param({"author": "Bob Dylan"}, None, False, id="missing_meta"),
+        pytest.param(
+            {"author": "Bob Dylan"}, {"author": "John Lennon"}, False, id="different_meta"
+        ),
+        pytest.param({"author": "Bob Dylan"}, {"author": "Bob Dylan"}, True, id="equivalent_meta"),
+    ],
+)
+def test_expectation_equality_with_meta(meta_a: dict | None, meta_b: dict | None, expected: bool):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, meta=meta_a
+    )
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, meta=meta_b
+    )
+
+    assert (expectation_a == expectation_b) is expected
