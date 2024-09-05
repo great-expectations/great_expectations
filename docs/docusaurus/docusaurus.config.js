@@ -55,8 +55,8 @@ module.exports = {
           href: 'https://greatexpectations.io/cloud',
         },
         secondary: {
-          label: 'Why GX Cloud?',
-          href: 'https://docs.greatexpectations.io/docs/cloud/why_gx_cloud',
+          label: 'GX Cloud overview',
+          href: 'https://docs.greatexpectations.io/docs/cloud',
         },
       },
     },

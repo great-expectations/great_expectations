@@ -4,6 +4,8 @@ title: 'GX Cloud overview'
 hide_title: true
 description: Learn about GX Cloud components and workflows.
 hide_feedback_survey: true
+pagination_next: null
+pagination_prev: null
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
