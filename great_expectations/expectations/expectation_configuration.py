@@ -100,9 +100,11 @@ class ExpectationConfiguration(SerializableDictDot):
     """Defines the parameters and name of a specific Expectation.
 
     Args:
-        expectation_type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
+        type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
         kwargs: The keyword arguments to pass to the expectation class.
         meta: A dictionary of metadata to attach to the expectation.
+        notes: Notes about this expectation.
+        description: The description of the expectation. This will be rendered instead of the default template.
         success_on_last_run: Whether the expectation succeeded on the last run.
         id: The corresponding GX Cloud ID for the expectation.
         expectation_context: The context for the expectation.
@@ -125,6 +127,7 @@ class ExpectationConfiguration(SerializableDictDot):
         kwargs: dict,
         meta: Optional[dict] = None,
         notes: str | list[str] | None = None,
+        description: str | None = None,
         success_on_last_run: Optional[bool] = None,
         id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
@@ -146,6 +149,7 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.notes = notes
+        self.description = description
         self.success_on_last_run = success_on_last_run
         self._id = id
         self._expectation_context = expectation_context
