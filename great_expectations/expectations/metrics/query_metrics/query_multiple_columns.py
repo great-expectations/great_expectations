@@ -76,7 +76,7 @@ class QueryMultipleColumns(QueryMetricProvider):
                 batch=f"({selectable})",
             )
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()
+        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()  # type: ignore[assignment,arg-type]
 
         return [element._asdict() for element in result]
 
