@@ -519,7 +519,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     @property
     def asset_name(self) -> str | None:
         if "active_batch_definition" in self.meta:
-            return self.meta["active_batch_definition"].get("data_asset_name")
+            return self.meta["active_batch_definition"].data_asset_name
         return None
 
     def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
