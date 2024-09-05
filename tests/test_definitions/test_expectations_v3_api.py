@@ -33,7 +33,7 @@ pytestmark = pytest.mark.all_backends
 try:
     sqliteDialect = sqlalchemy.sqlite.dialect
 except (ImportError, AttributeError):
-    sqliteDialect = SQLALCHEMY_NOT_IMPORTED
+    sqliteDialect = SQLALCHEMY_NOT_IMPORTED  # type: ignore[assignment]
 
 
 def pytest_generate_tests(metafunc):  # noqa C901 - 35
