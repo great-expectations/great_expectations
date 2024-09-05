@@ -306,7 +306,9 @@ class TestSuiteParameterOptions:
     [
         pytest.param(None, None, True, id="both_none"),
         pytest.param([], None, True, id="both_falsy"),
-        pytest.param("my_notes", None, False, id="actual_notes"),
+        pytest.param("my_notes", None, False, id="missing_notes"),
+        pytest.param("my_notes", "my_other_notes", False, id="different_notes"),
+        pytest.param("my_notes", "my_notes", True, id="equivalent_notes"),
     ],
 )
 def test_expectation_equality_with_notes(
@@ -328,7 +330,11 @@ def test_expectation_equality_with_notes(
     [
         pytest.param(None, None, True, id="both_none"),
         pytest.param({}, None, True, id="both_falsy"),
-        pytest.param({"author": "Bob Dylan"}, None, False, id="actual_meta"),
+        pytest.param({"author": "Bob Dylan"}, None, False, id="missing_meta"),
+        pytest.param(
+            {"author": "Bob Dylan"}, {"author": "John Lennon"}, False, id="different_meta"
+        ),
+        pytest.param({"author": "Bob Dylan"}, {"author": "Bob Dylan"}, True, id="equivalent_meta"),
     ],
 )
 def test_expectation_equality_with_meta(meta_a: dict | None, meta_b: dict | None, expected: bool):
