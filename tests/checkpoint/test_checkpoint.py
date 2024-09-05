@@ -26,16 +26,16 @@ from great_expectations.checkpoint.checkpoint import (
 )
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.constants import DATAFRAME_REPLACEMENT_STR
-from great_expectations.core.added_diagnostics import (
-    BatchDefinitionAddedDiagnostics,
-    ExpectationSuiteAddedDiagnostics,
-    ValidationDefinitionAddedDiagnostics,
-)
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
+)
+from great_expectations.core.freshness_diagnostics import (
+    BatchDefinitionFreshnessDiagnostics,
+    ExpectationSuiteFreshnessDiagnostics,
+    ValidationDefinitionFreshnessDiagnostics,
 )
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
@@ -54,7 +54,7 @@ from great_expectations.exceptions.exceptions import (
     CheckpointRelatedResourcesNotAddedError,
     CheckpointRunWithoutValidationDefinitionError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceNotFreshError,
     ValidationDefinitionNotAddedError,
 )
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
@@ -187,7 +187,7 @@ class TestCheckpointSerialization:
         ), mock.patch.object(
             ValidationDefinition,
             "is_fresh",
-            return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
+            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -208,7 +208,7 @@ class TestCheckpointSerialization:
         ), mock.patch.object(
             ValidationDefinition,
             "is_fresh",
-            return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
+            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -498,13 +498,15 @@ class TestCheckpointResult:
     def mock_suite(self, mocker: MockerFixture):
         suite = mocker.Mock(spec=ExpectationSuite)
         suite.name = self.suite_name
-        suite.is_fresh.return_value = ExpectationSuiteAddedDiagnostics(errors=[])
+        suite.is_fresh.return_value = ExpectationSuiteFreshnessDiagnostics(errors=[])
         return suite
 
     @pytest.fixture
     def mock_batch_def(self, mocker: MockerFixture):
         bd = mocker.Mock(spec=BatchDefinition)
-        bd._copy_and_set_values().is_fresh.return_value = BatchDefinitionAddedDiagnostics(errors=[])
+        bd._copy_and_set_values().is_fresh.return_value = BatchDefinitionFreshnessDiagnostics(
+            errors=[]
+        )
         return bd
 
     @pytest.fixture
@@ -1094,7 +1096,7 @@ def test_is_fresh(
     suite_id: str | None,
     batch_def_id: str | None,
     is_fresh: bool,
-    error_list: list[Type[ResourceNotAddedError]],
+    error_list: list[Type[ResourceNotFreshError]],
 ):
     context = in_memory_runtime_context
     batch_definition = (

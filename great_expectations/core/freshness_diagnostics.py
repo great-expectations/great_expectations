@@ -10,7 +10,7 @@ from great_expectations.exceptions.exceptions import (
     CheckpointNotAddedError,
     CheckpointRelatedResourcesNotAddedError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceNotFreshError,
     ResourcesNotAddedError,
     ValidationDefinitionNotAddedError,
     ValidationDefinitionRelatedResourcesNotAddedError,
@@ -18,20 +18,21 @@ from great_expectations.exceptions.exceptions import (
 
 
 @dataclass
-class AddedDiagnostics:
+class FreshnessDiagnostics:
     """
-    Wrapper around a list of errors; used to determine if a resource has been added successfully.
+    Wrapper around a list of errors; used to determine if a resource has been added successfully
+    and is "fresh" or up-to-date with its persisted equivalent.
 
     Note that some resources may have dependencies on other resources - in order to be considered
-    "added", the root resource and all of its dependencies must be added successfully.
+    "fresh", the root resource and all of its dependencies must be "fresh".
     For example, a Checkpoint may have dependencies on ValidationDefinitions, which may have
     dependencies on ExpectationSuites and BatchDefinitions.
 
-    GX requires that all resources are added successfully before they can be used to prevent
+    GX requires that all resources are persisted successfully before they can be used to prevent
     unexpected behavior.
     """
 
-    errors: list[ResourceNotAddedError]
+    errors: list[ResourceNotFreshError]
 
     @property
     def is_fresh(self) -> bool:
@@ -47,7 +48,7 @@ class AddedDiagnostics:
 
 
 @dataclass
-class _ChildAddedDiagnostics(AddedDiagnostics):
+class _ChildFreshnessDiagnostics(FreshnessDiagnostics):
     @override
     def raise_for_error(self) -> None:
         if not self.is_fresh:
@@ -55,22 +56,22 @@ class _ChildAddedDiagnostics(AddedDiagnostics):
 
 
 @dataclass
-class BatchDefinitionAddedDiagnostics(_ChildAddedDiagnostics):
+class BatchDefinitionFreshnessDiagnostics(_ChildFreshnessDiagnostics):
     pass
 
 
 @dataclass
-class ExpectationSuiteAddedDiagnostics(_ChildAddedDiagnostics):
+class ExpectationSuiteFreshnessDiagnostics(_ChildFreshnessDiagnostics):
     pass
 
 
 @dataclass
-class _ParentAddedDiagnostics(AddedDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]]
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]]
+class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
+    parent_error_class: ClassVar[Type[ResourceNotFreshError]]
+    children_error_classes: ClassVar[Tuple[Type[ResourceNotFreshError], ...]]
     raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]]
 
-    def update_with_children(self, *children_diagnostics: AddedDiagnostics) -> None:
+    def update_with_children(self, *children_diagnostics: FreshnessDiagnostics) -> None:
         for diagnostics in children_diagnostics:
             # Child errors should be prepended to parent errors so diagnostics are in order
             self.errors = diagnostics.errors + self.errors
@@ -90,9 +91,9 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
 
 
 @dataclass
-class ValidationDefinitionAddedDiagnostics(_ParentAddedDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]] = ValidationDefinitionNotAddedError
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
+class ValidationDefinitionFreshnessDiagnostics(_ParentFreshnessDiagnostics):
+    parent_error_class: ClassVar[Type[ResourceNotFreshError]] = ValidationDefinitionNotAddedError
+    children_error_classes: ClassVar[Tuple[Type[ResourceNotFreshError], ...]] = (
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
@@ -102,9 +103,9 @@ class ValidationDefinitionAddedDiagnostics(_ParentAddedDiagnostics):
 
 
 @dataclass
-class CheckpointAddedDiagnostics(_ParentAddedDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]] = CheckpointNotAddedError
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
+class CheckpointFreshnessDiagnostics(_ParentFreshnessDiagnostics):
+    parent_error_class: ClassVar[Type[ResourceNotFreshError]] = CheckpointNotAddedError
+    children_error_classes: ClassVar[Tuple[Type[ResourceNotFreshError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
     raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (

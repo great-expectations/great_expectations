@@ -27,10 +27,10 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
-from great_expectations.core.added_diagnostics import CheckpointAddedDiagnostics
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
+from great_expectations.core.freshness_diagnostics import CheckpointFreshnessDiagnostics
 from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT, ResultFormatUnion
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
@@ -269,8 +269,8 @@ class Checkpoint(BaseModel):
 
         return priority_actions + secondary_actions
 
-    def is_fresh(self) -> CheckpointAddedDiagnostics:
-        checkpoint_diagnostics = CheckpointAddedDiagnostics(
+    def is_fresh(self) -> CheckpointFreshnessDiagnostics:
+        checkpoint_diagnostics = CheckpointFreshnessDiagnostics(
             errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
         )
         validation_definition_diagnostics = [vd.is_fresh() for vd in self.validation_definitions]

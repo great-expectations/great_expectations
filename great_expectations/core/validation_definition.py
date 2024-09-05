@@ -12,12 +12,12 @@ from great_expectations.compatibility.pydantic import (
     validator,
 )
 from great_expectations.constants import DATAFRAME_REPLACEMENT_STR
-from great_expectations.core.added_diagnostics import (
-    ValidationDefinitionAddedDiagnostics,
-)
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
+)
+from great_expectations.core.freshness_diagnostics import (
+    ValidationDefinitionFreshnessDiagnostics,
 )
 from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT
 from great_expectations.core.run_identifier import RunIdentifier
@@ -123,8 +123,8 @@ class ValidationDefinition(BaseModel):
     def _validation_results_store(self) -> ValidationResultsStore:
         return project_manager.get_validation_results_store()
 
-    def is_fresh(self) -> ValidationDefinitionAddedDiagnostics:
-        validation_definition_diagnostics = ValidationDefinitionAddedDiagnostics(
+    def is_fresh(self) -> ValidationDefinitionFreshnessDiagnostics:
+        validation_definition_diagnostics = ValidationDefinitionFreshnessDiagnostics(
             errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
         )
         suite_diagnostics = self.suite.is_fresh()

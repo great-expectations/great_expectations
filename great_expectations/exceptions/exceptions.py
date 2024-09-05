@@ -38,17 +38,17 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
-class ResourceNotAddedError(DataContextError):
+class ResourceNotFreshError(DataContextError):
     pass
 
 
 class ResourcesNotAddedError(ValueError):
-    def __init__(self, errors: list[ResourceNotAddedError]) -> None:
+    def __init__(self, errors: list[ResourceNotFreshError]) -> None:
         self._errors = errors
         super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
 
     @property
-    def errors(self) -> list[ResourceNotAddedError]:
+    def errors(self) -> list[ResourceNotFreshError]:
         return self._errors
 
 
@@ -56,7 +56,7 @@ class ExpectationSuiteError(DataContextError):
     pass
 
 
-class ExpectationSuiteNotAddedError(ResourceNotAddedError):
+class ExpectationSuiteNotAddedError(ResourceNotFreshError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
@@ -65,7 +65,7 @@ class ExpectationSuiteNotAddedError(ResourceNotAddedError):
         )
 
 
-class ExpectationSuiteChangesNotAddedError(ResourceNotAddedError):
+class ExpectationSuiteNotFreshError(ResourceNotFreshError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ExpectationSuite '{name}' has changed since it has last been saved. "
@@ -77,7 +77,7 @@ class ValidationDefinitionError(DataContextError):
     pass
 
 
-class ValidationDefinitionNotAddedError(ResourceNotAddedError):
+class ValidationDefinitionNotAddedError(ResourceNotFreshError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
@@ -94,7 +94,7 @@ class CheckpointNotFoundError(CheckpointError):
     pass
 
 
-class CheckpointNotAddedError(ResourceNotAddedError):
+class CheckpointNotAddedError(ResourceNotFreshError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"Checkpoint '{name}' must be added to the DataContext before it can be updated. "
@@ -445,7 +445,7 @@ class BatchDefinitionError(DataContextError):
         super().__init__(self.message)
 
 
-class BatchDefinitionNotAddedError(ResourceNotAddedError):
+class BatchDefinitionNotAddedError(ResourceNotFreshError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"BatchDefinition '{name}' must be added to the DataContext before it can be updated. "
@@ -453,7 +453,7 @@ class BatchDefinitionNotAddedError(ResourceNotAddedError):
         )
 
 
-class BatchDefinitionChangesNotAddedError(ResourceNotAddedError):
+class BatchDefinitionNotFreshError(ResourceNotFreshError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"BatchDefinition '{name}' has changed since it has last been saved. "

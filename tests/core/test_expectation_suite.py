@@ -1191,4 +1191,4 @@ def test_is_fresh_freshness(in_memory_runtime_context):
     diagnostics = suite.is_fresh()
     assert diagnostics.is_fresh is False
     assert len(diagnostics.errors) == 1
-    assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteChangesNotAddedError)
+    assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteNotFreshError)

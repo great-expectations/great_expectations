@@ -29,14 +29,14 @@ from great_expectations.analytics.events import (
     ExpectationSuiteExpectationUpdatedEvent,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.added_diagnostics import (
-    ExpectationSuiteAddedDiagnostics,
+from great_expectations.core.freshness_diagnostics import (
+    ExpectationSuiteFreshnessDiagnostics,
 )
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.exceptions.exceptions import (
-    ExpectationSuiteChangesNotAddedError,
     ExpectationSuiteNotAddedError,
+    ExpectationSuiteNotFreshError,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
@@ -252,8 +252,8 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
-    def is_fresh(self) -> ExpectationSuiteAddedDiagnostics:
-        diagnostics = ExpectationSuiteAddedDiagnostics(
+    def is_fresh(self) -> ExpectationSuiteFreshnessDiagnostics:
+        diagnostics = ExpectationSuiteFreshnessDiagnostics(
             errors=[] if self.id else [ExpectationSuiteNotAddedError(name=self.name)]
         )
         if not diagnostics.is_fresh:
@@ -262,8 +262,8 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         suite_dict = self._store.get(key=key)
         suite = ExpectationSuite(**suite_dict)
-        return ExpectationSuiteAddedDiagnostics(
-            errors=[] if self == suite else [ExpectationSuiteChangesNotAddedError(name=self.name)]
+        return ExpectationSuiteFreshnessDiagnostics(
+            errors=[] if self == suite else [ExpectationSuiteNotFreshError(name=self.name)]
         )
 
     def _has_been_saved(self) -> bool:

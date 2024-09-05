@@ -7,15 +7,15 @@ from great_expectations.compatibility import pydantic
 
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
-from great_expectations.core.added_diagnostics import (
-    BatchDefinitionAddedDiagnostics,
+from great_expectations.core.freshness_diagnostics import (
+    BatchDefinitionFreshnessDiagnostics,
 )
 from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.exceptions.exceptions import (
-    BatchDefinitionChangesNotAddedError,
     BatchDefinitionNotAddedError,
+    BatchDefinitionNotFreshError,
 )
 
 if TYPE_CHECKING:
@@ -84,8 +84,8 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
 
         return batch_list[-1]
 
-    def is_fresh(self) -> BatchDefinitionAddedDiagnostics:
-        diagnostics = BatchDefinitionAddedDiagnostics(
+    def is_fresh(self) -> BatchDefinitionFreshnessDiagnostics:
+        diagnostics = BatchDefinitionFreshnessDiagnostics(
             errors=[] if self.id else [BatchDefinitionNotAddedError(name=self.name)]
         )
         if not diagnostics.is_fresh:
@@ -96,10 +96,8 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         asset = datasource.get_asset(self.data_asset.name)
         batch_def = asset.get_batch_definition(self.name)
 
-        return BatchDefinitionAddedDiagnostics(
-            errors=[]
-            if self == batch_def
-            else [BatchDefinitionChangesNotAddedError(name=self.name)]
+        return BatchDefinitionFreshnessDiagnostics(
+            errors=[] if self == batch_def else [BatchDefinitionNotFreshError(name=self.name)]
         )
 
     def identifier_bundle(self) -> _EncodedValidationData:

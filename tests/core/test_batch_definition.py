@@ -11,8 +11,8 @@ from great_expectations.core.partitioners import FileNamePartitionerYearly
 from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 from great_expectations.exceptions.exceptions import (
-    BatchDefinitionChangesNotAddedError,
     BatchDefinitionNotAddedError,
+    BatchDefinitionNotFreshError,
 )
 
 if TYPE_CHECKING:
@@ -195,4 +195,4 @@ def test_is_fresh_freshness(empty_cloud_context_fluent):
     diagnostics = batch_definition.is_fresh()
     assert diagnostics.is_fresh is False
     assert len(diagnostics.errors) == 1
-    assert isinstance(diagnostics.errors[0], BatchDefinitionChangesNotAddedError)
+    assert isinstance(diagnostics.errors[0], BatchDefinitionNotFreshError)

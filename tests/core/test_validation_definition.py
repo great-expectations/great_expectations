@@ -44,7 +44,7 @@ from great_expectations.datasource.fluent.pandas_datasource import (
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceNotFreshError,
     ValidationDefinitionNotAddedError,
     ValidationDefinitionRelatedResourcesNotAddedError,
 )
@@ -871,7 +871,7 @@ def test_is_fresh(
     suite_id: str | None,
     batch_def_id: str | None,
     is_fresh: bool,
-    error_list: list[Type[ResourceNotAddedError]],
+    error_list: list[Type[ResourceNotFreshError]],
 ):
     context = in_memory_runtime_context
 
