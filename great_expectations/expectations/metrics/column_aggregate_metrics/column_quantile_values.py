@@ -209,8 +209,8 @@ def _get_column_quantiles_bigquery(
 ) -> list:
     # BigQuery does not support "WITHIN", so we need a special case for it
     selects: list[sqlalchemy.WithinGroup] = [
-        sa.func.percentile_disc(column, quantile).over()
-        for quantile in quantiles  # type: ignore[misc]
+        sa.func.percentile_disc(column, quantile).over()  # type: ignore[misc]
+        for quantile in quantiles
     ]
     quantiles_query: sqlalchemy.Select = sa.select(*selects).select_from(selectable)
 
