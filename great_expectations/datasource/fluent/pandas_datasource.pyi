@@ -434,7 +434,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(  # noqa: PLR0913
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -448,7 +448,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(  # noqa: PLR0913
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -814,7 +814,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Batch: ...
     def read_sql(  # noqa: PLR0913
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         asset_name: Optional[str] = ...,
@@ -828,7 +828,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Batch: ...
     def read_sql_query(  # noqa: PLR0913
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         asset_name: Optional[str] = ...,

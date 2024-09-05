@@ -1427,7 +1427,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
@@ -1454,7 +1454,7 @@ class PandasDatasource(_PandasDatasource):
     @public_api
     def read_sql(
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
@@ -1484,7 +1484,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
@@ -1511,7 +1511,7 @@ class PandasDatasource(_PandasDatasource):
     @public_api
     def read_sql_query(
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,

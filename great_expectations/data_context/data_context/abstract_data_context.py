@@ -89,10 +89,10 @@ from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.validator import Validator
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
-if not SQLAlchemyError:
+if not SQLAlchemyError:  # type: ignore[truthy-function]
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will  # noqa: E501
     # just fall through
-    SQLAlchemyError = gx_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError  # type: ignore[misc]
 
 
 if TYPE_CHECKING:

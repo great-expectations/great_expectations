@@ -266,9 +266,9 @@ class DatabaseStoreBackend(StoreBackend):
                     .values(**cols)
                 )
             else:
-                ins = self._table.insert().values(**cols)
+                ins = self._table.insert().values(**cols)  # type: ignore[assignment]
         else:
-            ins = self._table.insert().values(**cols)
+            ins = self._table.insert().values(**cols)  # type: ignore[assignment]
 
         try:
             with self.engine.begin() as connection:
