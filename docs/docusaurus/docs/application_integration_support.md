@@ -28,7 +28,7 @@ The following table defines the GX Cloud, GX Core, and Community Supported integ
 | Credential Store      | Environment variables      | Environment variables <br/> YAML⁴                                             | None                              |
 | Orchestrator          | Airflow ⁵⁶                 | Airflow ⁵⁶                                                                    | None                              |
 
-¹ We've also seen GX work with the following data sources in the past but we can't guarentee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
+¹ We've also seen GX work with the following data sources in the past but we can't guarantee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
 ² Support for BigQuery in GX Cloud will be available in a future release.<br/>
 ³ This includes configuration storage for Expectations, Checkpoints, Validation Definitions, and Validation Result<br/>
 ⁴ config_variables.yml<br/>
@@ -52,7 +52,7 @@ The following table defines the operating systems supported by GX Cloud and GX C
 | ----------- | --------- | --------- |
 | Mac/Linux ¹ | Mac/Linux | Mac/Linux |
 
-¹ GX does not currently support Windows. However, we've seen users successfuly deploying GX on Windows.
+¹ GX does not currently support Windows. However, we've seen users successfully run GX on Windows.
 
 ### Python versions
 
@@ -69,3 +69,15 @@ The following table defines the GX versions supported by GX Cloud and GX Core.
 | GX Cloud | GX Core | Community |
 | -------- | ------- | --------- |
 | ≥1.0     | ≥1.0    | ≥1.0      |
+
+### Web browsers
+
+The following web browsers are supported by GX Cloud.
+
+- [Google Chrome](https://www.google.com/chrome/) — the latest version is fully supported
+
+- [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/) — the latest version is fully supported
+
+- [Apple Safari](https://www.apple.com/safari/) — the latest version is fully supported
+
+- [Microsoft Edge](https://www.microsoft.com/en-us/edge?ep=82&form=MA13KI&es=24) — the latest version is fully supported

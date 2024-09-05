@@ -81,7 +81,7 @@ Use the information provided here to view your organization ID or create a new a
 
 ## Deploy the GX Agent
 
-The GX Agent allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
+The GX Agent allows you to securely access your data without connecting to it or interacting with it directly. 
 
 ### Prerequisites
 
@@ -258,8 +258,8 @@ If you encounter an issue deploying the GX Agent or performing a GX Cloud task, 
 
 Want to continue testing GX Cloud features and functionality?
 
-- [Create a Data Asset](./data_assets/manage_data_assets.md#create-a-data-asset)
+- [Create a Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset)
 
 Ready to connect GX Cloud to your deployment environment?
 
-- [Connect GX Cloud](./connect/connect_lp.md)
+- [Connect GX Cloud](/cloud/connect/connect_lp.md)

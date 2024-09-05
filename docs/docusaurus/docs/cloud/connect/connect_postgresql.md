@@ -9,7 +9,7 @@ import Tabs from '@theme/Tabs';
 
 ## Prerequisites
 
-- You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](/cloud/users/manage_users.md#roles-and-responsibilities).
 
 - You have a PostgreSQL database, schema, and table.
 
