@@ -143,7 +143,7 @@ class DatabricksTableAsset(SqlTableAsset):
 
         from great_expectations.compatibility import sqlalchemy
 
-        if sqlalchemy.quoted_name:
+        if sqlalchemy.quoted_name:  # type: ignore[truthy-function]
             if isinstance(table_name, sqlalchemy.quoted_name):
                 return table_name
 

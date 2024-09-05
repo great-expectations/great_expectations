@@ -75,10 +75,10 @@ class TableHead(TableMetricProvider):
         if metric_value_kwargs["fetch_all"]:
             limit = None
 
-        selectable = sa.select("*").select_from(selectable).limit(limit).selectable
+        selectable = sa.select("*").select_from(selectable).limit(limit).selectable  # type: ignore[assignment,arg-type]
 
         try:
-            with execution_engine.get_connection() as con:
+            with execution_engine.get_connection() as con:  # type: ignore[var-annotated]
                 df = pandas_read_sql(
                     sql=selectable,
                     con=con,

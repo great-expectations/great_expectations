@@ -857,7 +857,7 @@ class TableAsset(_SQLAsset):
 
         from great_expectations.compatibility import sqlalchemy
 
-        if sqlalchemy.quoted_name:
+        if sqlalchemy.quoted_name:  # type: ignore[truthy-function]
             if isinstance(table_name, sqlalchemy.quoted_name):
                 return table_name
 
@@ -909,7 +909,7 @@ class TableAsset(_SQLAsset):
 
         This can be used in a from clause for a query against this data.
         """
-        return sa.text(self.qualified_name)
+        return sa.text(self.qualified_name)  # type: ignore[return-value]
 
     @override
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:

@@ -1021,11 +1021,11 @@ def get_sqlalchemy_selectable(
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """  # noqa: E501
-    if sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select):
+    if sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select):  # type: ignore[truthy-function]
         if version.parse(sa.__version__) >= version.parse("1.4"):
-            selectable = selectable.subquery()
+            selectable = selectable.subquery()  # type: ignore[assignment]
         else:
-            selectable = selectable.alias()
+            selectable = selectable.alias()  # type: ignore[assignment]
     return selectable
 
 
@@ -1327,10 +1327,10 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return dict(data)
 
     # sqlalchemy text for SqlAlchemy 2 compatibility
-    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
+    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):  # type: ignore[truthy-function]
         return str(data)
 
-    if Row and isinstance(data, Row):
+    if Row and isinstance(data, Row):  # type: ignore[truthy-function]
         return str(data)
 
     if isinstance(data, decimal.Decimal):
@@ -1345,7 +1345,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if pyspark.types and isinstance(data, pyspark.types.StructType):
         return dict(data.jsonValue())
 
-    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
+    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):  # type: ignore[truthy-function]
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
@@ -1460,11 +1460,11 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
     if isinstance(data, RunIdentifier):
         return
 
-    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
+    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):  # type: ignore[truthy-function]
         # TextClause is handled manually by convert_to_json_serializable()
         return
 
-    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
+    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):  # type: ignore[truthy-function]
         # Connection module is handled manually by convert_to_json_serializable()
         return
 
