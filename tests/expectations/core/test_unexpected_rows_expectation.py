@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.expectations import UnexpectedRowsExpectation
+from great_expectations.expectations.core import UnexpectedRowsExpectation
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext

@@ -69,9 +69,7 @@ class UnexpectedRowsExpectation(BatchExpectation):
         [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
     """
 
-    unexpected_rows_query: str = pydantic.Field(
-        description=UNEXPECTED_ROWS_QUERY_DESCRIPTION
-    )
+    unexpected_rows_query: str
 
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query.table",)
     success_keys: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query",)
