@@ -7,6 +7,7 @@ from great_expectations.expectations import (
 )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "expectation,expected_serialization",
     [
