@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from string import Formatter
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Tuple, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Tuple, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -93,34 +93,6 @@ class UnexpectedRowsExpectation(BatchExpectation):
             logger.info(batch_warning_message)
 
         return query
-
-    class Config:
-        title = "Custom Expectation with SQL"
-
-        @staticmethod
-        def schema_extra(
-            schema: Dict[str, Any], model: Type[UnexpectedRowsExpectation]
-        ) -> None:
-            BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"]["properties"].update(
-                {
-                    "data_quality_issues": {
-                        "title": "Data Quality Issues",
-                        "type": "array",
-                        "const": [],
-                    },
-                    "short_description": {
-                        "title": "Short Description",
-                        "type": "string",
-                        "const": EXPECTATION_SHORT_DESCRIPTION,
-                    },
-                    "supported_data_sources": {
-                        "title": "Supported Data Sources",
-                        "type": "array",
-                        "const": SUPPORTED_DATA_SOURCES,
-                    },
-                }
-            )
 
     @classmethod
     @override
