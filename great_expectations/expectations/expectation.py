@@ -524,6 +524,7 @@ class Expectation(metaclass=MetaExpectation):
             {
                 "template": renderer_configuration.template_str,
                 "params": renderer_configuration.params.dict(),
+                "code_block": renderer_configuration.code_block or None,
                 "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
@@ -3576,6 +3577,32 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             unexpected_index_list=unexpected_index_list,
             unexpected_index_query=unexpected_index_query,
             unexpected_index_column_names=unexpected_index_column_names,
+        )
+
+
+class UnexpectedRowsExpectation:
+    unexpected_rows_query: str
+    description: str | None = None
+
+    def __new__(
+        cls,
+        unexpected_rows_query: str | None = None,
+        description: str | None = None,
+    ):
+        # deprecated-v1.0.2
+        warnings.warn(
+            "Importing UnexpectedRowsExpectation from great_expectations.expectations.expectation "
+            "is deprecated. Please import UnexpectedRowsExpectation from "
+            "great_expectations.expectations instead.",
+            category=DeprecationWarning,
+        )
+        from great_expectations.expectations import (
+            UnexpectedRowsExpectation as CoreUnexpectedRowsExpectation,
+        )
+
+        return CoreUnexpectedRowsExpectation(
+            unexpected_rows_query=unexpected_rows_query or cls.unexpected_rows_query,
+            description=description or cls.description,
         )
 
 

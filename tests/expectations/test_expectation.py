@@ -1,12 +1,17 @@
 import itertools
+import logging
 from typing import Any, Dict, List
 
 import pytest
 
+import great_expectations.expectations as gxe
+from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+LOGGER = logging.getLogger(__name__)
 
 
 class FakeMulticolumnExpectation(expectation.MulticolumnMapExpectation):
@@ -216,3 +221,98 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
             metrics=metrics_dict,
             configuration=expectation_configuration,
         )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_property():
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="foo", min_value=0, max_value=10
+    )
+
+    assert expectation.configuration == ExpectationConfiguration(
+        type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "foo",
+            "min_value": 0,
+            "max_value": 10,
+        },
+    )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_property_recognizes_state_changes():
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="foo", min_value=0, max_value=10
+    )
+
+    expectation.column = "bar"
+    expectation.min_value = 5
+    expectation.max_value = 15
+
+    assert expectation.configuration == ExpectationConfiguration(
+        type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "bar",
+            "min_value": 5,
+            "max_value": 15,
+        },
+    )
+
+
+@pytest.mark.unit
+def test_unrecognized_expectation_arg_raises_error():
+    with pytest.raises(pydantic.ValidationError, match="extra fields not permitted"):
+        gxe.ExpectColumnMaxToBeBetween(
+            column="foo",
+            min_value=0,
+            max_value=10,
+            mostyl=0.95,  # 'mostly' typo
+        )
+
+
+class TestSuiteParameterOptions:
+    """Tests around the suite_parameter_options property of Expectations.
+
+    Note: evaluation_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
+    """
+
+    SUITE_PARAMETER_MIN = "my_min"
+    SUITE_PARAMETER_MAX = "my_max"
+    SUITE_PARAMETER_VALUE = "my_value"
+
+    @pytest.mark.unit
+    def test_expectation_without_evaluation_parameter(self):
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="foo", min_value=0, max_value=10
+        )
+        assert expectation.suite_parameter_options == tuple()
+
+    @pytest.mark.unit
+    def test_expectation_with_evaluation_parameter(self):
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="foo",
+            min_value=0,
+            max_value={"$PARAMETER": self.SUITE_PARAMETER_MAX},
+        )
+        assert expectation.suite_parameter_options == (self.SUITE_PARAMETER_MAX,)
+
+    @pytest.mark.unit
+    def test_expectation_with_multiple_suite_parameters(self):
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="foo",
+            min_value={"$PARAMETER": self.SUITE_PARAMETER_MIN},
+            max_value={"$PARAMETER": self.SUITE_PARAMETER_MAX},
+        )
+        assert expectation.suite_parameter_options == (
+            self.SUITE_PARAMETER_MAX,
+            self.SUITE_PARAMETER_MIN,
+        )
+
+    @pytest.mark.unit
+    def test_expectation_with_duplicate_suite_parameters(self):
+        expectation = gxe.ExpectColumnValuesToBeBetween(
+            column="foo",
+            min_value={"$PARAMETER": self.SUITE_PARAMETER_VALUE},
+            max_value={"$PARAMETER": self.SUITE_PARAMETER_VALUE},
+        )
+        assert expectation.suite_parameter_options == (self.SUITE_PARAMETER_VALUE,)
