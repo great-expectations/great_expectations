@@ -1,4 +1,4 @@
-from great_expectations.expectations.expectation import Expectation, UnexpectedRowsExpectation
+from great_expectations.expectations.expectation import Expectation
 
 from .core import (
     ExpectColumnDistinctValuesToBeInSet,
@@ -55,4 +55,5 @@ from .core import (
     ExpectTableRowCountToBeBetween,
     ExpectTableRowCountToEqual,
     ExpectTableRowCountToEqualOtherTable,
+    UnexpectedRowsExpectation,
 )
