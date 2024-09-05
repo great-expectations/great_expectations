@@ -49,6 +49,7 @@ from great_expectations.core.partitioners import (
     PartitionerModInteger,
     PartitionerMultiColumnValue,
 )
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
@@ -624,14 +625,13 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             # legacy constraint when computing usage statistics in a validator. We hope to remove
             # it in the future.
             # imports are done inline to prevent a circular dependency with core/batch.py
-            from great_expectations.core import IDDict
             from great_expectations.core.batch import LegacyBatchDefinition
 
             batch_definition = LegacyBatchDefinition(
                 datasource_name=self.datasource.name,
                 data_connector_name=_DATA_CONNECTOR_NAME,
                 data_asset_name=self.name,
-                batch_identifiers=IDDict(batch_spec["batch_identifiers"]),
+                batch_identifiers=make_batch_identifier(batch_spec["batch_identifiers"]),
                 batch_spec_passthrough=None,
             )
 
