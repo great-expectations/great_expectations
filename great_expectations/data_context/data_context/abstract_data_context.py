@@ -37,7 +37,6 @@ from great_expectations.analytics.client import init as init_analytics
 from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.analytics.events import DataContextInitializedEvent
-from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
@@ -87,13 +86,6 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.sources import DataSourceManager
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.validator import Validator
-
-SQLAlchemyError = sqlalchemy.SQLAlchemyError
-if not SQLAlchemyError:  # type: ignore[truthy-function]
-    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will  # noqa: E501
-    # just fall through
-    SQLAlchemyError = gx_exceptions.ProfilerError  # type: ignore[misc]
-
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias

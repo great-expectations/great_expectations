@@ -30,6 +30,7 @@ from .exceptions import (
     InvalidBatchSpecError,
     InvalidCacheValueError,
     InvalidConfigError,
+    InvalidConfigurationYamlError,
     InvalidDataContextConfigError,
     InvalidDataContextKeyError,
     InvalidExpectationConfigurationError,

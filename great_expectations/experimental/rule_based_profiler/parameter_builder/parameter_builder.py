@@ -23,7 +23,6 @@ from typing import (
 import numpy as np
 import pandas as pd
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -34,6 +33,7 @@ from great_expectations.experimental.rule_based_profiler.builder import Builder
 from great_expectations.experimental.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
     get_parameter_value_and_validate_return_type,
@@ -362,7 +362,7 @@ class ParameterBuilder(ABC, Builder):
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """  # noqa: E501
         if not metric_name:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""Utilizing "{self.__class__.__name__}.get_metrics()" requires valid "metric_name" to be \
 specified (empty "metric_name" value detected)."""  # noqa: E501
             )
@@ -374,7 +374,7 @@ specified (empty "metric_name" value detected)."""  # noqa: E501
             parameters=parameters,
         )
         if not batch_ids:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of Batch identifiers."  # noqa: E501
             )
 
@@ -654,7 +654,7 @@ specified (empty "metric_name" value detected)."""  # noqa: E501
                         )
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
-                        raise gx_exceptions.ProfilerExecutionError(
+                        raise ProfilerExecutionError(
                             message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
 numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(metric_value)!s}" was computed).
 """  # noqa: E501
