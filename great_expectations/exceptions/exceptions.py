@@ -130,6 +130,10 @@ class StoreBackendTransientError(StoreBackendError):
     pass
 
 
+class InvalidConfigurationYamlError(DataContextError):
+    pass
+
+
 class InvalidTopLevelConfigKeyError(GreatExpectationsError):
     pass
 
