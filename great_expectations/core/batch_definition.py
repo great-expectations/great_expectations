@@ -15,7 +15,11 @@ from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBu
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
+    BatchDefinitionNotFoundError,
     BatchDefinitionNotFreshError,
+    DataAssetNotFoundError,
+    DatasourceNotFoundError,
+    GreatExpectationsError,
 )
 
 if TYPE_CHECKING:
@@ -23,7 +27,7 @@ if TYPE_CHECKING:
         BatchParameters,
         BatchRequest,
     )
-    from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
+    from great_expectations.datasource.fluent.interfaces import Batch, DataAsset, Datasource
 
 # Depending on the Asset
 PartitionerT = TypeVar("PartitionerT", ColumnPartitioner, FileNamePartitioner, None)
@@ -92,14 +96,41 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     def _is_fresh(self) -> BatchDefinitionFreshnessDiagnostics:
         datasource_dict = project_manager.get_datasources()
 
-        # TODO: Add error handling
-        datasource = datasource_dict[self.data_asset.datasource.name]
-        asset = datasource.get_asset(self.data_asset.name)
-        batch_def = asset.get_batch_definition(self.name)
+        errors: list[GreatExpectationsError] = []
+        datasource: Datasource | None = None
+        asset: DataAsset | None = None
 
-        return BatchDefinitionFreshnessDiagnostics(
-            errors=[] if self == batch_def else [BatchDefinitionNotFreshError(name=self.name)]
-        )
+        datasource_name = self.data_asset.datasource.name
+        try:
+            datasource = datasource_dict[datasource_name]
+        except KeyError:
+            errors.append(DatasourceNotFoundError(f"Could not find datasource '{datasource_name}'"))
+
+        asset_name = self.data_asset.name
+        if datasource:
+            try:
+                asset = datasource.get_asset(asset_name)
+            except LookupError:
+                errors.append(DataAssetNotFoundError(f"Could not find asset '{asset_name}'"))
+        else:
+            errors.append(DataAssetNotFoundError(f"Could not find asset '{asset_name}'"))
+
+        if asset:
+            try:
+                batch_def = asset.get_batch_definition(self.name)
+            except KeyError:
+                errors.append(
+                    BatchDefinitionNotFoundError(f"Could not find batch definition '{self.name}'")
+                )
+        else:
+            errors.append(
+                BatchDefinitionNotFoundError(f"Could not find batch definition '{self.name}'")
+            )
+
+        if self != batch_def:
+            errors.append(BatchDefinitionNotFreshError(name=self.name))
+
+        return BatchDefinitionFreshnessDiagnostics(errors=errors)
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder

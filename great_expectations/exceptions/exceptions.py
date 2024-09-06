@@ -42,14 +42,18 @@ class ResourceNotFreshError(DataContextError):
     pass
 
 
-class ResourcesNotFreshError(ValueError):
-    def __init__(self, errors: list[ResourceNotFreshError]) -> None:
+class AggregateError(ValueError):
+    def __init__(self, errors: list[GreatExpectationsError]) -> None:
         self._errors = errors
         super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
 
     @property
-    def errors(self) -> list[ResourceNotFreshError]:
+    def errors(self) -> list[GreatExpectationsError]:
         return self._errors
+
+
+class ResourcesNotFreshError(AggregateError):
+    pass
 
 
 class ExpectationSuiteError(DataContextError):
@@ -450,6 +454,10 @@ class BatchDefinitionError(DataContextError):
         super().__init__(self.message)
 
 
+class BatchDefinitionNotFoundError(BatchDefinitionError):
+    pass
+
+
 class BatchDefinitionNotAddedError(ResourceNotFreshError):
     def __init__(self, name: str) -> None:
         super().__init__(
@@ -487,6 +495,10 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 
 class DatasourceNotFoundError(DataContextError):
+    pass
+
+
+class DataAssetNotFoundError(DataContextError):
     pass
 
 
