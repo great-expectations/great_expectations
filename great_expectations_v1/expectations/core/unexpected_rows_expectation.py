@@ -4,10 +4,10 @@ import logging
 from string import Formatter
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Tuple, Type, Union
 
-from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.expectations.expectation import BatchExpectation
-from great_expectations.render.renderer_configuration import (
+from great_expectations_v1.compatibility import pydantic
+from great_expectations_v1.compatibility.typing_extensions import override
+from great_expectations_v1.expectations.expectation import BatchExpectation
+from great_expectations_v1.render.renderer_configuration import (
     CodeBlock,
     CodeBlockLanguage,
     RendererConfiguration,
@@ -15,8 +15,8 @@ from great_expectations.render.renderer_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationValidationResult
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations_v1.core import ExpectationValidationResult
+    from great_expectations_v1.execution_engine import ExecutionEngine
 
 
 logger = logging.getLogger(__name__)
