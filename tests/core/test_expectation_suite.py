@@ -1100,7 +1100,9 @@ def test_identifier_bundle_no_id_raises_error():
     ],
 )
 @pytest.mark.unit
-def test_is_fresh(in_memory_runtime_context, id: str | None, is_fresh: bool, num_errors: int):
+def test_is_fresh_is_added(
+    in_memory_runtime_context, id: str | None, is_fresh: bool, num_errors: int
+):
     context = in_memory_runtime_context
     suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.id = id  # Stores will add an ID but manually overriding for test

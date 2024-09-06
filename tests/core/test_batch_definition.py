@@ -132,7 +132,9 @@ def test_identifier_bundle_no_id_raises_error(in_memory_runtime_context):
     ],
 )
 @pytest.mark.unit
-def test_is_fresh(in_memory_runtime_context, id: str | None, is_fresh: bool, num_errors: int):
+def test_is_fresh_is_added(
+    in_memory_runtime_context, id: str | None, is_fresh: bool, num_errors: int
+):
     context = in_memory_runtime_context
     batch_definition = (
         context.data_sources.add_pandas(name="my_pandas_ds")
