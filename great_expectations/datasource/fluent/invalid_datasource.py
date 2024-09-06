@@ -34,7 +34,8 @@ if TYPE_CHECKING:
 
 # Controls which methods should raise an error when called on an InvalidDatasource
 METHOD_SHOULD_RAISE_ERROR: Final[set] = {
-    "get_batch_list_from_batch_request",
+    "get_batch",
+    "get_batch_identifiers_list",
     "add_batch_definition",
 }
 
@@ -92,13 +93,17 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> NoReturn:
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        self._raise_type_error()
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
         self._raise_type_error()
 
     @override
     def sort_batches(
         self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
-    ) -> None:
+    ) -> List[Batch]:
         self._raise_type_error()
 
     @override

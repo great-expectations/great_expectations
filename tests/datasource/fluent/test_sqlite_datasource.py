@@ -163,14 +163,15 @@ def test_sqlite_specific_partitioner(
         # Test getting all batches
         partitioner = partitioner_class(**partitioner_kwargs)
         batch_request = asset.build_batch_request(partitioner=partitioner)
-        all_batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
+        all_batches = asset.get_batch_identifiers_list(batch_request=batch_request)
         assert len(all_batches) == all_batches_cnt
         # Test getting specified batches
-        specified_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request(specified_batch_request, partitioner=partitioner)
-        )
+        batch_request = asset.build_batch_request(specified_batch_request, partitioner=partitioner)
+        specified_batches = asset.get_batch_identifiers_list(batch_request)
         assert len(specified_batches) == specified_batch_cnt
-        assert specified_batches[-1].metadata == last_specified_batch_metadata
+
+        batch = asset.get_batch(batch_request)
+        assert batch.metadata == last_specified_batch_metadata
 
 
 @pytest.mark.unit
@@ -178,5 +179,5 @@ def test_create_temp_table(empty_data_context, create_sqlite_source):
     with create_sqlite_source(data_context=empty_data_context, create_temp_table=False) as source:
         assert source.create_temp_table is False
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
-        _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+        _ = asset.get_batch(asset.build_batch_request())
         assert source._execution_engine._create_temp_table is False
