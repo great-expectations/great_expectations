@@ -32,6 +32,8 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import IDDict
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import (
     BatchSpec,
     RuntimeQueryBatchSpec,
@@ -49,7 +51,6 @@ from great_expectations.core.partitioners import (
     PartitionerModInteger,
     PartitionerMultiColumnValue,
 )
-from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
@@ -68,6 +69,7 @@ from great_expectations.datasource.fluent.interfaces import (
     PartitionerProtocol,
     TestConnectionError,
 )
+from great_expectations.exceptions.exceptions import NoAvailableBatchesError
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
@@ -581,75 +583,93 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
         return batch_requests
 
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
-        """A list of batches that match the BatchRequest.
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        self._validate_batch_request(batch_request)
+        if batch_request.partitioner:
+            sql_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
+        else:
+            sql_partitioner = None
+
+        requests = self._fully_specified_batch_requests(batch_request)
+        metadata_dicts = [self._get_batch_metadata_from_batch_request(r) for r in requests]
+
+        if sql_partitioner:
+            metadata_dicts = self.sort_batch_identifiers_list(metadata_dicts, sql_partitioner)
+
+        return metadata_dicts[batch_request.batch_slice]
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        """Batch that matches the BatchRequest.
 
         Args:
             batch_request: A batch request for this asset. Usually obtained by calling
                 build_batch_request on the asset.
 
         Returns:
-            A list of batches that match the options specified in the batch request.
+            A list Batch that matches the options specified in the batch request.
         """
         self._validate_batch_request(batch_request)
 
-        batch_list: List[Batch] = []
         if batch_request.partitioner:
             sql_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
         else:
             sql_partitioner = None
+
         batch_spec_kwargs: dict[str, str | dict | None]
-        for request in self._fully_specified_batch_requests(batch_request):
-            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-                batch_request=request
-            )
-            batch_spec_kwargs = self._create_batch_spec_kwargs()
-            if sql_partitioner:
-                batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
-                batch_spec_kwargs["partitioner_kwargs"] = (
-                    sql_partitioner.partitioner_method_kwargs()
-                )
-                # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
-                # it is hardcoded to a dict above, so we cast it here.
-                cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    sql_partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
-                        request.options
-                    )
-                )
-            # Creating the batch_spec is our hook into the execution engine.
-            batch_spec = self._create_batch_spec(batch_spec_kwargs)
-            execution_engine: SqlAlchemyExecutionEngine = self.datasource.get_execution_engine()
-            data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
+        requests = self._fully_specified_batch_requests(batch_request)
+        unsorted_metadata_dicts = [self._get_batch_metadata_from_batch_request(r) for r in requests]
 
-            # batch_definition (along with batch_spec and markers) is only here to satisfy a
-            # legacy constraint when computing usage statistics in a validator. We hope to remove
-            # it in the future.
-            # imports are done inline to prevent a circular dependency with core/batch.py
-            from great_expectations.core.batch import LegacyBatchDefinition
+        if not unsorted_metadata_dicts:
+            raise NoAvailableBatchesError()
 
-            batch_definition = LegacyBatchDefinition(
-                datasource_name=self.datasource.name,
-                data_connector_name=_DATA_CONNECTOR_NAME,
-                data_asset_name=self.name,
-                batch_identifiers=make_batch_identifier(batch_spec["batch_identifiers"]),
-                batch_spec_passthrough=None,
-            )
-
-            batch_list.append(
-                Batch(
-                    datasource=self.datasource,
-                    data_asset=self,
-                    batch_request=request,
-                    data=data,
-                    metadata=batch_metadata,
-                    batch_markers=markers,
-                    batch_spec=batch_spec,
-                    batch_definition=batch_definition,
-                )
-            )
         if sql_partitioner:
-            self.sort_batches(batch_list, sql_partitioner)
-        return batch_list[batch_request.batch_slice]
+            sorted_metadata_dicts = self.sort_batch_identifiers_list(
+                unsorted_metadata_dicts, sql_partitioner
+            )
+        else:
+            sorted_metadata_dicts = unsorted_metadata_dicts
+
+        sorted_metadata_dicts = sorted_metadata_dicts[batch_request.batch_slice]
+        batch_metadata = sorted_metadata_dicts[-1]
+
+        # we've sorted the metadata, but not the requests, so we need the index of our
+        # batch_metadata from the original unsorted list so that we get the right request
+        request_index = unsorted_metadata_dicts.index(batch_metadata)
+
+        request = requests[request_index]
+        batch_spec_kwargs = self._create_batch_spec_kwargs()
+        if sql_partitioner:
+            batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
+            batch_spec_kwargs["partitioner_kwargs"] = sql_partitioner.partitioner_method_kwargs()
+            # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
+            # it is hardcoded to a dict above, so we cast it here.
+            cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
+                sql_partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(request.options)
+            )
+        # Creating the batch_spec is our hook into the execution engine.
+        batch_spec = self._create_batch_spec(batch_spec_kwargs)
+        execution_engine: SqlAlchemyExecutionEngine = self.datasource.get_execution_engine()
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
+
+        batch_definition = LegacyBatchDefinition(
+            datasource_name=self.datasource.name,
+            data_connector_name=_DATA_CONNECTOR_NAME,
+            data_asset_name=self.name,
+            batch_identifiers=IDDict(batch_spec["batch_identifiers"]),
+            batch_spec_passthrough=None,
+        )
+
+        return Batch(
+            datasource=self.datasource,
+            data_asset=self,
+            batch_request=request,
+            data=data,
+            metadata=batch_metadata,
+            batch_markers=markers,
+            batch_spec=batch_spec,
+            batch_definition=batch_definition,
+        )
 
     @override
     def build_batch_request(
@@ -669,8 +689,8 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
+            A BatchRequest object that can be used to obtain a batch from an Asset by calling the
+            get_batch method.
         """  # noqa: E501
         if options is not None and not self._batch_parameters_are_valid(
             options=options, partitioner=partitioner
@@ -770,7 +790,7 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec
 
-        This is called by get_batch_list_from_batch_request to generate the batches.
+        This is called by get_batch to generate the batch.
 
         Returns:
             A dictionary that will be passed to self._create_batch_spec(**returned_dict)

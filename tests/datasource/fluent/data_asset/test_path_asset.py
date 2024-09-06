@@ -110,11 +110,11 @@ def validated_pandas_filesystem_datasource(
         ),
     ],
 )
-def test_get_batch_list_from_batch_request__sort_ascending(
+def test_get_batch_identifiers_list__sort_ascending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,
     batching_regex: Union[str, re.Pattern],
 ):
-    """Verify that get_batch_list_from_batch_request respects a partitioner's ascending sort order.
+    """Verify that get_batch_identifiers_list respects a partitioner's ascending sort order.
 
     NOTE: we just happen to be using pandas as the concrete class.
     """
@@ -126,15 +126,15 @@ def test_get_batch_list_from_batch_request__sort_ascending(
     )
     batch_request = batch_definition.build_batch_request()
 
-    batches = asset.get_batch_list_from_batch_request(batch_request)
+    batch_identifiers_list = asset.get_batch_identifiers_list(batch_request)
 
     expected_years = ["2018"] * 12 + ["2019"] * 12 + ["2020"] * 12
     expected_months = [format(m, "02d") for m in range(1, 13)] * 3
 
-    assert (len(batches)) == 36
-    for i, batch in enumerate(batches):
-        assert batch.metadata["year"] == str(expected_years[i])
-        assert batch.metadata["month"] == str(expected_months[i])
+    assert (len(batch_identifiers_list)) == 36
+    for i, batch_identifiers in enumerate(batch_identifiers_list):
+        assert batch_identifiers["year"] == str(expected_years[i])
+        assert batch_identifiers["month"] == str(expected_months[i])
 
 
 @pytest.mark.filesystem
@@ -148,11 +148,11 @@ def test_get_batch_list_from_batch_request__sort_ascending(
         ),
     ],
 )
-def test_get_batch_list_from_batch_request__sort_descending(
+def test_get_batch_identifiers_list__sort_descending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,
     batching_regex: Union[str, re.Pattern],
 ):
-    """Verify that get_batch_list_from_batch_request respects a partitioner's descending sort order.
+    """Verify that get_batch_identifiers_list respects a partitioner's descending sort order.
 
     NOTE: we just happen to be using pandas as the concrete class.
     """
@@ -164,15 +164,15 @@ def test_get_batch_list_from_batch_request__sort_descending(
     )
     batch_request = batch_definition.build_batch_request()
 
-    batches = asset.get_batch_list_from_batch_request(batch_request)
+    batch_identifiers_list = asset.get_batch_identifiers_list(batch_request)
 
     expected_years = list(reversed(["2018"] * 12 + ["2019"] * 12 + ["2020"] * 12))
     expected_months = list(reversed([format(m, "02d") for m in range(1, 13)] * 3))
 
-    assert (len(batches)) == 36
-    for i, batch in enumerate(batches):
-        assert batch.metadata["year"] == str(expected_years[i])
-        assert batch.metadata["month"] == str(expected_months[i])
+    assert (len(batch_identifiers_list)) == 36
+    for i, batch_identifiers in enumerate(batch_identifiers_list):
+        assert batch_identifiers["year"] == str(expected_years[i])
+        assert batch_identifiers["month"] == str(expected_months[i])
 
 
 @pytest.fixture
