@@ -7,12 +7,12 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
     CheckpointNotAddedError,
-    CheckpointRelatedResourcesNotFreshError,
+    CheckpointRelatedResourcesNotAddedError,
     ExpectationSuiteNotAddedError,
     ResourceNotAddedError,
-    ResourcesNotFreshError,
+    ResourcesNotAddedError,
     ValidationDefinitionNotAddedError,
-    ValidationDefinitionRelatedResourcesNotFreshError,
+    ValidationDefinitionRelatedResourcesNotAddedError,
 )
 
 
@@ -31,7 +31,7 @@ class FreshnessDiagnostics:
     unexpected behavior.
     """
 
-    raise_for_error_class: ClassVar[Type[ResourcesNotFreshError]] = ResourcesNotFreshError
+    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = ResourcesNotAddedError
     errors: list[ResourceNotAddedError]
 
     @property
@@ -88,8 +88,8 @@ class ValidationDefinitionFreshnessDiagnostics(_ParentFreshnessDiagnostics):
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourcesNotFreshError]] = (
-        ValidationDefinitionRelatedResourcesNotFreshError
+    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
+        ValidationDefinitionRelatedResourcesNotAddedError
     )
 
 
@@ -99,6 +99,6 @@ class CheckpointFreshnessDiagnostics(_ParentFreshnessDiagnostics):
     children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
-    raise_for_error_class: ClassVar[Type[ResourcesNotFreshError]] = (
-        CheckpointRelatedResourcesNotFreshError
+    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
+        CheckpointRelatedResourcesNotAddedError
     )

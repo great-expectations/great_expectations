@@ -20,6 +20,16 @@ class GreatExpectationsError(Exception):
         super().__init__(message)
 
 
+class GreatExpectationsAggregateError(ValueError):
+    def __init__(self, errors: list[GreatExpectationsError]) -> None:
+        self._errors = errors
+        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
+
+    @property
+    def errors(self) -> list[GreatExpectationsError]:
+        return self._errors
+
+
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
     def __init__(self, message, validation_error=None) -> None:
         self.message = message
@@ -42,17 +52,7 @@ class ResourceNotAddedError(DataContextError):
     pass
 
 
-class AggregateError(ValueError):
-    def __init__(self, errors: list[GreatExpectationsError]) -> None:
-        self._errors = errors
-        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
-
-    @property
-    def errors(self) -> list[GreatExpectationsError]:
-        return self._errors
-
-
-class ResourcesNotFreshError(AggregateError):
+class ResourcesNotAddedError(GreatExpectationsAggregateError):
     pass
 
 
@@ -115,11 +115,11 @@ class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
         )
 
 
-class CheckpointRelatedResourcesNotFreshError(ResourcesNotFreshError):
+class CheckpointRelatedResourcesNotAddedError(ResourcesNotAddedError):
     pass
 
 
-class ValidationDefinitionRelatedResourcesNotFreshError(ResourcesNotFreshError):
+class ValidationDefinitionRelatedResourcesNotAddedError(ResourcesNotAddedError):
     pass
 
 

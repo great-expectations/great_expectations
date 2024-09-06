@@ -51,7 +51,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
     CheckpointNotAddedError,
-    CheckpointRelatedResourcesNotFreshError,
+    CheckpointRelatedResourcesNotAddedError,
     CheckpointRunWithoutValidationDefinitionError,
     ExpectationSuiteNotAddedError,
     ResourceNotAddedError,
@@ -577,7 +577,7 @@ class TestCheckpointResult:
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
 
-        with pytest.raises(CheckpointRelatedResourcesNotFreshError) as e:
+        with pytest.raises(CheckpointRelatedResourcesNotAddedError) as e:
             checkpoint.run()
 
         assert [type(err) for err in e.value.errors] == [
