@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import abstractmethod
 from dataclasses import dataclass
 from typing import ClassVar, Tuple, Type
 
@@ -32,41 +31,41 @@ class FreshnessDiagnostics:
     unexpected behavior.
     """
 
+    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = ResourcesNotAddedError
     errors: list[GreatExpectationsError]
 
     @property
     def success(self) -> bool:
         return len(self.errors) == 0
 
-    @abstractmethod
     def raise_for_error(self) -> None:
         """
         Conditionally raises an error if the resource has not been added successfully;
         should prescribe the correct action(s) to take.
         """
-        raise NotImplementedError
-
-
-@dataclass
-class _ChildFreshnessDiagnostics(FreshnessDiagnostics):
-    @override
-    def raise_for_error(self) -> None:
         if not self.success:
-            raise self.errors[0]  # Child node so only one error
+            raise self.raise_for_error_class(errors=self.errors)
 
 
 @dataclass
-class BatchDefinitionFreshnessDiagnostics(_ChildFreshnessDiagnostics):
+class BatchDefinitionFreshnessDiagnostics(FreshnessDiagnostics):
     pass
 
 
 @dataclass
-class ExpectationSuiteFreshnessDiagnostics(_ChildFreshnessDiagnostics):
+class ExpectationSuiteFreshnessDiagnostics(FreshnessDiagnostics):
     pass
 
 
 @dataclass
 class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
+    """
+    Freshness diagnostics for a class that has a natural parent/child relationship
+    with other classes.
+
+    All errors throughout the hierarchy should be collected in the parent diagnostics object.
+    """
+
     parent_error_class: ClassVar[Type[GreatExpectationsError]]
     children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]]
 
