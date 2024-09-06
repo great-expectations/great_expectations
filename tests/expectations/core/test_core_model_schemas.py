@@ -4,10 +4,9 @@ import pytest
 
 from great_expectations.expectations import core
 from great_expectations.expectations.core import schemas
-from great_expectations.expectations.expectation import MetaExpectation, UnexpectedRowsExpectation
+from great_expectations.expectations.expectation import MetaExpectation
 
 expectation_dictionary = dict(core.__dict__)
-expectation_dictionary.update({"UnexpectedRowsExpectation": UnexpectedRowsExpectation})
 
 
 @pytest.mark.unit

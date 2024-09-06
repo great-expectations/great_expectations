@@ -10,7 +10,6 @@ from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
 from numbers import Number
-from string import Formatter
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -468,7 +467,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, MetaNotes, Optional[dict]]:
+    ) -> Tuple[Optional[str], dict, MetaNotes, Optional[dict]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
@@ -516,6 +515,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             {
                 "template": renderer_configuration.template_str,
                 "params": renderer_configuration.params.dict(),
+                "code_block": renderer_configuration.code_block or None,
                 "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
@@ -1189,7 +1189,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     # Renamed from validate due to collision with Pydantic method of the same name
     @public_api
-    def validate_(
+    def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
         suite_parameters: Optional[dict] = None,
@@ -1249,6 +1249,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         kwargs = self.dict(exclude_defaults=True)
         meta = kwargs.pop("meta", None)
         notes = kwargs.pop("notes", None)
+        description = kwargs.pop("description", None)
         id = kwargs.pop("id", None)
         rendered_content = kwargs.pop("rendered_content", None)
         return ExpectationConfiguration(
@@ -1256,6 +1257,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             kwargs=kwargs,
             meta=meta,
             notes=notes,
+            description=description,
             id=id,
             rendered_content=rendered_content,
         )
@@ -1614,108 +1616,6 @@ representation."""  # noqa: E501
         success = bool(above_min and below_max)
 
         return {"success": success, "result": {"observed_value": metric_value}}
-
-
-UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION = (
-    "This Expectation will fail validation if the query returns one or more rows. "
-    "The WHERE clause defines the fail criteria."
-)
-UNEXPECTED_ROWS_QUERY_DESCRIPTION = "A SQL or Spark-SQL query to be executed for validation."
-SUPPORTED_DATA_SOURCES = [
-    "PostgreSQL",
-    "Snowflake",
-    "SQLite",
-]
-
-
-class UnexpectedRowsExpectation(BatchExpectation):
-    __doc__ = f"""{UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION }
-
-    UnexpectedRowsExpectations facilitate the execution of SQL or Spark-SQL queries \
-    as the core logic for an Expectation. UnexpectedRowsExpectations must implement \
-    a `_validate(...)` method containing logic for determining whether data returned \
-    by the executed query is successfully validated. One is written by default, but \
-    can be overridden.
-
-    A successful validation is one where the unexpected_rows_query returns no rows.
-
-    UnexpectedRowsExpectation is a \
-    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
-
-    BatchExpectations are one of the most common types of Expectation.
-    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
-
-    Args:
-        unexpected_rows_query (str): {UNEXPECTED_ROWS_QUERY_DESCRIPTION}
-
-    Returns:
-        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
-
-    Supported Datasources:
-        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-    """
-
-    unexpected_rows_query: str
-
-    metric_dependencies: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query.table",)
-    success_keys: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query",)
-    domain_keys: ClassVar[Tuple[str, ...]] = (
-        "batch_id",
-        "row_condition",
-        "condition_parser",
-    )
-
-    class Config:
-        title = "Custom Expectation with SQL"
-
-        @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[UnexpectedRowsExpectation]) -> None:
-            BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"]["properties"].update(
-                {
-                    "data_quality_issues": {
-                        "title": "Data Quality Issues",
-                        "type": "array",
-                        "const": [],
-                    },
-                    "short_description": {
-                        "title": "Short Description",
-                        "type": "string",
-                        "const": UNEXPECTED_ROWS_EXPECTATION_SHORT_DESCRIPTION,
-                    },
-                    "supported_data_sources": {
-                        "title": "Supported Data Sources",
-                        "type": "array",
-                        "const": SUPPORTED_DATA_SOURCES,
-                    },
-                }
-            )
-
-    @pydantic.validator("unexpected_rows_query")
-    def _validate_query(cls, query: str) -> str:
-        parsed_fields = [f[1] for f in Formatter().parse(query)]
-        if "batch" not in parsed_fields:
-            raise ValueError("Query must contain {batch} parameter.")  # noqa: TRY003
-
-        return query
-
-    @override
-    def _validate(
-        self,
-        metrics: dict,
-        runtime_configuration: dict | None = None,
-        execution_engine: ExecutionEngine | None = None,
-    ) -> Union[ExpectationValidationResult, dict]:
-        metric_value = metrics["unexpected_rows_query.table"]
-        return {
-            "success": len(metric_value) == 0,
-            "result": {
-                "observed_value": len(metric_value),
-                "details": {"unexpected_rows": metric_value},
-            },
-        }
 
 
 class QueryExpectation(BatchExpectation, ABC):
@@ -2641,6 +2541,32 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             unexpected_index_list=unexpected_index_list,
             unexpected_index_query=unexpected_index_query,
             unexpected_index_column_names=unexpected_index_column_names,
+        )
+
+
+class UnexpectedRowsExpectation:
+    unexpected_rows_query: str
+    description: str | None = None
+
+    def __new__(
+        cls,
+        unexpected_rows_query: str | None = None,
+        description: str | None = None,
+    ):
+        # deprecated-v1.0.2
+        warnings.warn(
+            "Importing UnexpectedRowsExpectation from great_expectations.expectations.expectation "
+            "is deprecated. Please import UnexpectedRowsExpectation from "
+            "great_expectations.expectations instead.",
+            category=DeprecationWarning,
+        )
+        from great_expectations.expectations import (
+            UnexpectedRowsExpectation as CoreUnexpectedRowsExpectation,
+        )
+
+        return CoreUnexpectedRowsExpectation(
+            unexpected_rows_query=unexpected_rows_query or cls.unexpected_rows_query,
+            description=description or cls.description,
         )
 
 

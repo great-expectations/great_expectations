@@ -81,6 +81,19 @@ def config7():
     )
 
 
+@pytest.fixture
+def config8():
+    return ExpectationConfiguration(
+        type="expect_column_values_to_be_in_set",
+        description="The values should be in the specified set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 2, 3, 4],
+        },
+        meta={"notes": "This is another expectation."},
+    )
+
+
 @pytest.mark.unit
 def test_expectation_configuration_equality(config1, config2, config3, config4):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
@@ -137,3 +150,23 @@ def test_expectation_configuration_to_domain_obj(notes: str | list[str] | None):
 
     # Ensure that translation to/from config is consistent
     assert expectation.configuration == config
+
+
+@pytest.mark.unit
+def test_expectation_configuration_to_json_dict(config1, config4, config8):
+    assert config1.to_json_dict() == {
+        "kwargs": {"column": "a", "result_format": "BASIC", "value_set": [1, 2, 3]},
+        "meta": {"notes": "This is an expectation."},
+        "type": "expect_column_values_to_be_in_set",
+    }
+    assert config4.to_json_dict() == {
+        "kwargs": {"column": "a", "result_format": "COMPLETE", "value_set": [1, 2, 3]},
+        "meta": {"notes": "This is another expectation."},
+        "type": "expect_column_values_to_be_in_set",
+    }
+    assert config8.to_json_dict() == {
+        "description": "The values should be in the specified set",
+        "kwargs": {"column": "a", "value_set": [1, 2, 3, 4]},
+        "meta": {"notes": "This is another expectation."},
+        "type": "expect_column_values_to_be_in_set",
+    }
