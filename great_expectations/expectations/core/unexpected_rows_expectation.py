@@ -99,22 +99,23 @@ class UnexpectedRowsExpectation(BatchExpectation):
             InvalidExpectationConfigurationError: if the config is not validated successfully
         """
         super().validate_configuration(configuration)
-        parsed_fields = [
-            f[1]
-            for f in Formatter().parse(
-                configuration.kwargs.get("unexpected_rows_query")
-            )
-        ]
-        if "batch" not in parsed_fields:
-            batch_warning_message = (
-                "unexpected_rows_query should contain the {batch} parameter. "
-                "Otherwise data outside the configured batch will be queried."
-            )
-            # instead of raising a disruptive warning, we print and log info
-            # in order to make the user aware of the potential for querying
-            # data outside the configured batch
-            print(batch_warning_message)
-            logger.info(batch_warning_message)
+        if configuration:
+            parsed_fields = [
+                f[1]
+                for f in Formatter().parse(  # type: ignore[type-var]
+                    configuration.kwargs.get("unexpected_rows_query")
+                )
+            ]
+            if "batch" not in parsed_fields:
+                batch_warning_message = (
+                    "unexpected_rows_query should contain the {batch} parameter. "
+                    "Otherwise data outside the configured batch will be queried."
+                )
+                # instead of raising a disruptive warning, we print and log info
+                # in order to make the user aware of the potential for querying
+                # data outside the configured batch
+                print(batch_warning_message)
+                logger.info(batch_warning_message)
 
     @classmethod
     @override
