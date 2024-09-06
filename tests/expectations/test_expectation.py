@@ -321,7 +321,6 @@ def test_expectation_equality(column_a: str, column_b: str, expected: bool):
     [
         pytest.param(None, None, True, id="both_none"),
         pytest.param([], None, True, id="both_falsy"),
-        pytest.param("my_notes", None, False, id="actual_notes"),
         pytest.param("my_notes", None, False, id="missing_notes"),
         pytest.param("my_notes", "my_other_notes", False, id="different_notes"),
         pytest.param("my_notes", "my_notes", True, id="equivalent_notes"),
