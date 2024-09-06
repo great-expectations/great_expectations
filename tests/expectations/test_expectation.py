@@ -268,9 +268,14 @@ def test_unrecognized_expectation_arg_raises_error():
         pytest.param("SELECT * FROM {active_batch}", id="legacy syntax"),
     ],
 )
-def test_unexpected_rows_expectation_invalid_query_raises_error(query: str):
-    with pytest.raises(pydantic.ValidationError):
+def test_unexpected_rows_expectation_invalid_query_info_message(query: str, caplog, capfd):
+    # info log is emitted
+    with caplog.at_level(logging.INFO):
         UnexpectedRowsExpectation(unexpected_rows_query=query)
+
+    # stdout is printed to console
+    out, _ = capfd.readouterr()
+    assert "{batch}" in out
 
 
 @pytest.fixture
