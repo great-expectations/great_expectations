@@ -280,11 +280,10 @@ class ExpectationSuite(SerializableDictDot):
             )
 
         suite: ExpectationSuite | None
-        if suite_dict:
-            try:
-                suite = self._store.deserialize_suite_dict(suite_dict=suite_dict)
-            except PydanticValidationError:
-                suite = None
+        try:
+            suite = self._store.deserialize_suite_dict(suite_dict=suite_dict)
+        except PydanticValidationError:
+            suite = None
         if not suite:
             return ExpectationSuiteFreshnessDiagnostics(
                 errors=[ExpectationSuiteError(f"Could not deserialize suite '{self.name}'")]
