@@ -4,7 +4,6 @@ import logging
 from string import Formatter
 from typing import TYPE_CHECKING, ClassVar, Optional, Tuple, Union
 
-from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render.renderer_configuration import (
@@ -68,8 +67,6 @@ class UnexpectedRowsExpectation(BatchExpectation):
         [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
     """
 
-    unexpected_rows_query: str
-
     metric_dependencies: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query.table",)
     success_keys: ClassVar[Tuple[str, ...]] = ("unexpected_rows_query",)
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -77,10 +74,37 @@ class UnexpectedRowsExpectation(BatchExpectation):
         "row_condition",
         "condition_parser",
     )
+    default_kwarg_values = {
+        "unexpected_rows_query": None,
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": False,
+    }
+    args_keys = ("unexpected_rows_query",)
 
-    @pydantic.validator("unexpected_rows_query")
-    def _validate_query(cls, query: str) -> str:
-        parsed_fields = [f[1] for f in Formatter().parse(query)]
+    @override
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` whose value is either
+        a number or date.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+
+        Raises:
+            InvalidExpectationConfigurationError: if the config is not validated successfully
+        """
+        super().validate_configuration(configuration)
+        parsed_fields = [
+            f[1]
+            for f in Formatter().parse(
+                configuration.kwargs.get("unexpected_rows_query")
+            )
+        ]
         if "batch" not in parsed_fields:
             batch_warning_message = (
                 "unexpected_rows_query should contain the {batch} parameter. "
@@ -91,8 +115,6 @@ class UnexpectedRowsExpectation(BatchExpectation):
             # data outside the configured batch
             print(batch_warning_message)
             logger.info(batch_warning_message)
-
-        return query
 
     @classmethod
     @override
