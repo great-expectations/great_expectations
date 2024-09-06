@@ -130,19 +130,7 @@ class StoreBackendTransientError(StoreBackendError):
     pass
 
 
-class ParserError(GreatExpectationsError):
-    pass
-
-
-class InvalidConfigurationYamlError(DataContextError):
-    pass
-
-
 class InvalidTopLevelConfigKeyError(GreatExpectationsError):
-    pass
-
-
-class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
@@ -167,14 +155,6 @@ class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
 
 
 class InvalidDataContextConfigError(InvalidBaseYamlConfigError):
-    pass
-
-
-class InvalidCheckpointConfigError(InvalidBaseYamlConfigError):
-    pass
-
-
-class InvalidBatchKwargsError(GreatExpectationsError):
     pass
 
 
@@ -225,42 +205,6 @@ class SuiteParameterError(GreatExpectationsError):
     pass
 
 
-class ProfilerError(GreatExpectationsError):
-    pass
-
-
-class ProfilerConfigurationError(ProfilerError):
-    """A configuration error for a "RuleBasedProfiler" class."""
-
-    pass
-
-
-class ProfilerExecutionError(ProfilerError):
-    """A runtime error for a "RuleBasedProfiler" class."""
-
-    pass
-
-
-class ProfilerNotFoundError(ProfilerError):
-    pass
-
-
-class DataAssistantError(ProfilerError):
-    pass
-
-
-class DataAssistantExecutionError(DataAssistantError):
-    """A runtime error for a "DataAssistant" class."""
-
-    pass
-
-
-class DataAssistantResultExecutionError(DataAssistantError):
-    """A runtime error for a "DataAssistantResult" class."""
-
-    pass
-
-
 class InvalidConfigError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message
@@ -273,13 +217,6 @@ class MissingConfigVariableError(InvalidConfigError):
             missing_config_variable = []
         self.message = message
         self.missing_config_variable = missing_config_variable
-        super().__init__(self.message)
-
-
-class AmbiguousDataAssetNameError(DataContextError):
-    def __init__(self, message, candidates=None) -> None:
-        self.message = message
-        self.candidates = candidates
         super().__init__(self.message)
 
 
@@ -296,10 +233,6 @@ class InvalidExpectationConfigurationError(GreatExpectationsError):
 
 
 class ExpectationNotFoundError(GreatExpectationsError):
-    pass
-
-
-class InvalidValidationResultError(GreatExpectationsError):
     pass
 
 
@@ -429,13 +362,6 @@ class ExpectationSuiteNotFoundError(GreatExpectationsError):
         super().__init__(self.message)
 
 
-class BatchKwargsError(DataContextError):
-    def __init__(self, message, batch_kwargs=None) -> None:
-        self.message = message
-        self.batch_kwargs = batch_kwargs
-        super().__init__(self.message)
-
-
 class BatchDefinitionError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message
@@ -477,16 +403,6 @@ class DatasourceNotFoundError(DataContextError):
 class DataAssetInitializationError(GreatExpectationsError):
     def __init__(self, message: str) -> None:
         self.message = f"Cannot initialize data asset: {message}"
-        super().__init__(self.message)
-
-
-class InvalidConfigValueTypeError(DataContextError):
-    pass
-
-
-class DataConnectorError(DataContextError):
-    def __init__(self, message) -> None:
-        self.message = message
         super().__init__(self.message)
 
 
@@ -558,9 +474,6 @@ class GXCloudConfigurationError(GreatExpectationsError):
     """  # noqa: E501
 
 
+# Only used in tests
 class DatabaseConnectionError(GreatExpectationsError):
     """Error connecting to a database including during an integration test."""
-
-
-class MigrationError(GreatExpectationsError):
-    """Error when using the migration tool."""
