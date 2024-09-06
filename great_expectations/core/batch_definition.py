@@ -109,6 +109,7 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
             except LookupError:
                 pass
 
+        batch_def: BatchDefinition | None = None
         if asset:
             try:
                 batch_def = asset.get_batch_definition(self.name)

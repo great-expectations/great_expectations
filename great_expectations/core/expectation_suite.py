@@ -271,19 +271,25 @@ class ExpectationSuite(SerializableDictDot):
     def _is_fresh(self) -> ExpectationSuiteFreshnessDiagnostics:
         errors: list[GreatExpectationsError] = []
 
-        key = self._store.get_key(name=self.name, id=self.id)
+        suite_dict: dict | None = {}
         try:
+            key = self._store.get_key(name=self.name, id=self.id)
             suite_dict = self._store.get(key=key)
         except StoreBackendError:
-            errors.append(ExpectationSuiteNotFoundError(name=self.name))
+            pass
 
         suite: ExpectationSuite | None = None
-        try:
-            suite = self._store.deserialize_suite_dict(suite_dict=suite_dict)
-        except PydanticValidationError:
-            errors.append(ExpectationSuiteError(f"Could not deserialize suite '{self.name}'"))
+        if suite_dict:
+            try:
+                suite = self._store.deserialize_suite_dict(suite_dict=suite_dict)
+            except PydanticValidationError:
+                pass
 
-        if suite and self != suite:
+        if not suite_dict:
+            errors.append(ExpectationSuiteNotFoundError(name=self.name))
+        if not suite:
+            errors.append(ExpectationSuiteError(f"Could not deserialize suite '{self.name}'"))
+        elif self != suite:
             errors.append(ExpectationSuiteNotFreshError(name=self.name))
 
         return ExpectationSuiteFreshnessDiagnostics(errors=errors)
