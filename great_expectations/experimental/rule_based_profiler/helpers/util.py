@@ -173,7 +173,7 @@ def get_batch_ids(  # noqa: PLR0913
             parameters=parameters,
         )
 
-        batch_list = data_context.get_batch_list(batch_request=batch_request)
+        batch_list = [data_context.get_last_batch(batch_request=batch_request)]
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
 

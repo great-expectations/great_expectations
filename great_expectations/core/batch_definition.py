@@ -73,14 +73,8 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         Returns:
             A Batch of data.
         """
-        batch_list = self.data_asset.get_batch_list_from_batch_request(
-            self.build_batch_request(batch_parameters=batch_parameters)
-        )
-
-        if len(batch_list) == 0:
-            raise ValueError("No batch found")  # noqa: TRY003
-
-        return batch_list[-1]
+        batch_request = self.build_batch_request(batch_parameters=batch_parameters)
+        return self.data_asset.get_batch(batch_request)
 
     def is_added(self) -> BatchDefinitionAddedDiagnostics:
         return BatchDefinitionAddedDiagnostics(

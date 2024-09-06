@@ -41,9 +41,9 @@ def postgres_asset(empty_data_context, create_source: CreateSourceFixture, monke
 
 
 @pytest.mark.postgresql
-def test_get_batch_list_from_batch_request__sort_ascending(postgres_asset):
+def test_get_batch_identifiers_list__sort_ascending(postgres_asset):
     years = [2021, 2022]
-    batches = postgres_asset.get_batch_list_from_batch_request(
+    batches = postgres_asset.get_batch_identifiers_list(
         postgres_asset.build_batch_request(
             partitioner=ColumnPartitionerYearly(column_name="year", sort_ascending=True)
         )
@@ -51,13 +51,13 @@ def test_get_batch_list_from_batch_request__sort_ascending(postgres_asset):
 
     assert len(batches) == len(years)
     for i, year in enumerate([2021, 2022]):
-        batches[i].metadata["year"] = year
+        batches[i]["year"] = year
 
 
 @pytest.mark.postgresql
-def test_get_batch_list_from_batch_request__sort_descending(postgres_asset):
+def test_get_batch_identifiers_list__sort_descending(postgres_asset):
     years = [2021, 2022]
-    batches = postgres_asset.get_batch_list_from_batch_request(
+    batches = postgres_asset.get_batch_identifiers_list(
         postgres_asset.build_batch_request(
             partitioner=ColumnPartitionerYearly(column_name="year", sort_ascending=False)
         )
@@ -65,7 +65,7 @@ def test_get_batch_list_from_batch_request__sort_descending(postgres_asset):
 
     assert len(batches) == len(years)
     for i, year in enumerate([2022, 2021]):
-        batches[i].metadata["year"] = year
+        batches[i]["year"] = year
 
 
 @pytest.fixture

@@ -297,16 +297,16 @@ def test_partitioner(
     )
     partitioner = partitioner_class(**partitioner_kwargs)
     # Test getting all batches
-    all_batches = asset.get_batch_list_from_batch_request(
+    all_batches = asset.get_batch_identifiers_list(
         asset.build_batch_request(partitioner=partitioner)
     )
     assert len(all_batches) == all_batches_cnt
     # Test getting specified batches
-    specified_batches = asset.get_batch_list_from_batch_request(
+    specified_batches = asset.get_batch_identifiers_list(
         asset.build_batch_request(specified_batch_request, partitioner=partitioner)
     )
     assert len(specified_batches) == specified_batch_cnt
-    assert specified_batches[-1].metadata == last_specified_batch_metadata
+    assert specified_batches[-1] == last_specified_batch_metadata
 
 
 @pytest.mark.sqlite
@@ -322,7 +322,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
     )
     partitioner = PartitionerColumnValue(column_name="pickup_date")
     # Test getting all batches
-    all_batches = asset.get_batch_list_from_batch_request(
+    all_batches = asset.get_batch_identifiers_list(
         asset.build_batch_request(partitioner=partitioner)
     )
     assert len(all_batches) == 28
@@ -334,7 +334,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
             {"pickup_date": datetime.date(2019, 2, 1)},
             {"pickup_date": datetime.date(2019, 2, 2)},
         ]
-        specified_batches = asset.get_batch_list_from_batch_request(
+        specified_batches = asset.get_batch_identifiers_list(
             asset.build_batch_request(
                 options={"pickup_date": "2019-02-01"}, partitioner=partitioner
             )
@@ -348,7 +348,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
             {"pickup_date": datetime.datetime(2019, 2, 1)},  # noqa: DTZ001
             {"pickup_date": datetime.datetime(2019, 2, 2)},  # noqa: DTZ001
         ]
-        specified_batches = asset.get_batch_list_from_batch_request(
+        specified_batches = asset.get_batch_identifiers_list(
             asset.build_batch_request(
                 options={"pickup_date": "2019-02-01 00:00:00"}, partitioner=partitioner
             )
@@ -419,12 +419,9 @@ def test_asset_specified_metadata(empty_data_context, add_asset_method, add_asse
     )
     partitioner = ColumnPartitionerMonthly(column_name="pickup_datetime")
     # Test getting all batches
-    batches = asset.get_batch_list_from_batch_request(
-        asset.build_batch_request(partitioner=partitioner)
-    )
-    assert len(batches) == 1
+    batch = asset.get_batch(asset.build_batch_request(partitioner=partitioner))
     # Update the batch_metadata from the request with the metadata inherited from the asset
-    assert batches[0].metadata == {**asset_specified_metadata, "year": 2019, "month": 2}
+    assert batch.metadata == {**asset_specified_metadata, "year": 2019, "month": 2}
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.

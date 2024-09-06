@@ -36,7 +36,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
     asset = datasource.add_table_asset("yellow_tripdata_sample_2022_01")
 
     batch_request = asset.build_batch_request()
-    return asset.get_batch_list_from_batch_request(batch_request)[0]
+    return asset.get_batch(batch_request)
 
 
 @pytest.mark.unit

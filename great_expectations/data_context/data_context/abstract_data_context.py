@@ -1183,8 +1183,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             # sum check above while here we do a truthy check.
             batch_request_list = [batch_request]  # type: ignore[list-item]
         for batch_req in batch_request_list:
-            computed_batch_list.extend(
-                self.get_batch_list(
+            computed_batch_list.append(
+                self.get_last_batch(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
                     data_asset_name=data_asset_name,
@@ -1304,7 +1304,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return validator
 
-    def get_batch_list(  # noqa: PLR0913
+    def get_last_batch(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1327,7 +1327,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_spec_passthrough: Optional[dict] = None,
         batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
-    ) -> List[Batch]:
+    ) -> Batch:
         """Get the list of zero or more batches, based on a variety of flexible input types.
 
         `get_batch_list` is the main user-facing API for getting batches.
@@ -1377,7 +1377,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`)
 
         """  # noqa: E501
-        return self._get_batch_list(
+        return self._get_last_batch(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -1401,7 +1401,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _get_batch_list(  # noqa: PLR0913
+    def _get_last_batch(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1424,7 +1424,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_spec_passthrough: Optional[dict] = None,
         batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
-    ) -> List[Batch]:
+    ) -> Batch:
         result = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -1458,7 +1458,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "please confirm that your configuration is accurate.",
             )
 
-        return datasource.get_batch_list_from_batch_request(batch_request=result)
+        return datasource.get_batch(batch_request=result)
 
     def _validate_datasource_names(self, datasource_names: list[str] | str | None) -> list[str]:
         if datasource_names is None:
