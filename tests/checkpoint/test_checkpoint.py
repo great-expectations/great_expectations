@@ -54,7 +54,7 @@ from great_expectations.exceptions.exceptions import (
     CheckpointRelatedResourcesNotFreshError,
     CheckpointRunWithoutValidationDefinitionError,
     ExpectationSuiteNotAddedError,
-    ResourceNotFreshError,
+    ResourceNotAddedError,
     ValidationDefinitionNotAddedError,
 )
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
@@ -1096,7 +1096,7 @@ def test_is_fresh(
     suite_id: str | None,
     batch_def_id: str | None,
     is_fresh: bool,
-    error_list: list[Type[ResourceNotFreshError]],
+    error_list: list[Type[ResourceNotAddedError]],
 ):
     context = in_memory_runtime_context
     batch_definition = (

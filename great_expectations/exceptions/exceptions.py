@@ -38,7 +38,7 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
-class ResourceNotFreshError(DataContextError):
+class ResourceNotAddedError(DataContextError):
     pass
 
 
@@ -60,7 +60,7 @@ class ExpectationSuiteError(DataContextError):
     pass
 
 
-class ExpectationSuiteNotAddedError(ResourceNotFreshError):
+class ExpectationSuiteNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
@@ -69,7 +69,7 @@ class ExpectationSuiteNotAddedError(ResourceNotFreshError):
         )
 
 
-class ExpectationSuiteNotFreshError(ResourceNotFreshError):
+class ExpectationSuiteNotFreshError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ExpectationSuite '{name}' has changed since it has last been saved. "
@@ -81,7 +81,7 @@ class ValidationDefinitionError(DataContextError):
     pass
 
 
-class ValidationDefinitionNotAddedError(ResourceNotFreshError):
+class ValidationDefinitionNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
@@ -98,7 +98,7 @@ class CheckpointNotFoundError(CheckpointError):
     pass
 
 
-class CheckpointNotAddedError(ResourceNotFreshError):
+class CheckpointNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"Checkpoint '{name}' must be added to the DataContext before it can be updated. "
@@ -458,7 +458,7 @@ class BatchDefinitionNotFoundError(BatchDefinitionError):
     pass
 
 
-class BatchDefinitionNotAddedError(ResourceNotFreshError):
+class BatchDefinitionNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"BatchDefinition '{name}' must be added to the DataContext before it can be updated. "
@@ -466,7 +466,7 @@ class BatchDefinitionNotAddedError(ResourceNotFreshError):
         )
 
 
-class BatchDefinitionNotFreshError(ResourceNotFreshError):
+class BatchDefinitionNotFreshError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"BatchDefinition '{name}' has changed since it has last been saved. "
