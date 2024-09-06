@@ -30,7 +30,6 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.compatibility.pydantic import ValidationError as PydanticValidationError
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.factory.suite_factory import deserialize_suite_dict
 from great_expectations.core.freshness_diagnostics import (
     ExpectationSuiteFreshnessDiagnostics,
 )
@@ -280,7 +279,7 @@ class ExpectationSuite(SerializableDictDot):
 
         suite: ExpectationSuite | None = None
         try:
-            suite = deserialize_suite_dict(suite_dict=suite_dict)
+            suite = self._store.deserialize_suite_dict(suite_dict=suite_dict)
         except PydanticValidationError:
             errors.append(ExpectationSuiteError(f"Could not deserialize suite '{self.name}'"))
 
