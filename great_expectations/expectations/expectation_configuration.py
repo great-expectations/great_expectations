@@ -448,8 +448,11 @@ class ExpectationConfiguration(SerializableDictDot):
             "notes": self.notes,
             "rendered_content": self.rendered_content,
         }
-        # it's possible description could be subclassed as a class variable
-        # since we have documented it that way in the past
+        # it's possible description could be subclassed as a class variable,
+        # because we have documented it that way in the past.
+        # if that is the case, passing a self.description of any type would raise an error
+        # we can't check for the presence of expectation_impl.description
+        # because _get_expectation_impl() only returns registered expectations
         if self.description:
             kwargs.update({"description": self.description})
         kwargs.update(self.kwargs)
