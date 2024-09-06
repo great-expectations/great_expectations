@@ -1,0 +1,17 @@
+# TODO: remove this file once SQLAlchemy 2 is the only supported version
+--requirement requirements-dev-databricks.txt
+--requirement requirements-dev-mssql.txt
+--requirement requirements-dev-mysql.txt
+--requirement requirements-dev-postgresql.txt
+--requirement requirements-dev-trino.txt
+--requirement requirements-dev-hive.txt
+--requirement requirements-dev-vertica.txt
+# Do not `pip install -r` this file locally or in CI (outside of StaticTypeCheck).
+# It only exists to be included in requirements-dev.txt, which should only be used in the Dockerfile.tests file.
+# Do not add any dependencies here that are not compatible with sqlalchemy>=2.0
+# -----------
+# Tempory pins for type checking step
+# TODO: update these pins in their respective requirements files and remove from here
+snowflake-sqlalchemy>=1.6 # min version required for sqlalchemy 2.0
+sqlalchemy>=2.0
+sqlalchemy-bigquery>=1.11.0 # min version required for sqlalchemy 2.0

@@ -89,16 +89,19 @@ from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.validator import Validator
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
-if not SQLAlchemyError:
+if not SQLAlchemyError:  # type: ignore[truthy-function]
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will  # noqa: E501
     # just fall through
-    SQLAlchemyError = gx_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError  # type: ignore[misc]
 
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -1180,8 +1183,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             # sum check above while here we do a truthy check.
             batch_request_list = [batch_request]  # type: ignore[list-item]
         for batch_req in batch_request_list:
-            computed_batch_list.extend(
-                self.get_batch_list(
+            computed_batch_list.append(
+                self.get_last_batch(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
                     data_asset_name=data_asset_name,
@@ -1301,7 +1304,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return validator
 
-    def get_batch_list(  # noqa: PLR0913
+    def get_last_batch(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1324,7 +1327,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_spec_passthrough: Optional[dict] = None,
         batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
-    ) -> List[Batch]:
+    ) -> Batch:
         """Get the list of zero or more batches, based on a variety of flexible input types.
 
         `get_batch_list` is the main user-facing API for getting batches.
@@ -1374,7 +1377,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`)
 
         """  # noqa: E501
-        return self._get_batch_list(
+        return self._get_last_batch(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -1398,7 +1401,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _get_batch_list(  # noqa: PLR0913
+    def _get_last_batch(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1421,7 +1424,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_spec_passthrough: Optional[dict] = None,
         batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
-    ) -> List[Batch]:
+    ) -> Batch:
         result = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -1455,7 +1458,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "please confirm that your configuration is accurate.",
             )
 
-        return datasource.get_batch_list_from_batch_request(batch_request=result)
+        return datasource.get_batch(batch_request=result)
 
     def _validate_datasource_names(self, datasource_names: list[str] | str | None) -> list[str]:
         if datasource_names is None:
@@ -1597,7 +1600,10 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def get_docs_sites_urls(
         self,
-        resource_identifier: Any | None = None,
+        resource_identifier: ExpectationSuiteIdentifier
+        | ValidationResultIdentifier
+        | str
+        | None = None,
         site_name: Optional[str] = None,
         only_if_exists: bool = True,
         site_names: Optional[List[str]] = None,
@@ -2050,7 +2056,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_identifier=None,
         validation_results_store_name=None,
         failed_only=False,
-    ):
+    ) -> ExpectationValidationResult | dict:
         """Get validation results from a configured store.
 
         Args:
@@ -2181,10 +2187,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def build_data_docs(
         self,
         site_names: list[str] | None = None,
-        resource_identifiers: list | None = None,
+        resource_identifiers: list[ExpectationSuiteIdentifier]
+        | list[ValidationResultIdentifier]
+        | None = None,
         dry_run: bool = False,
         build_index: bool = True,
-    ) -> dict:
+    ) -> dict[str, str]:
         """Build Data Docs for your project.
 
         --Documentation--

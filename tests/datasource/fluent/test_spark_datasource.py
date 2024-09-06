@@ -88,10 +88,9 @@ def test_spark_data_asset_batch_metadata(
     )
     assert dataframe_asset.batch_metadata == batch_metadata
 
-    batch_list = dataframe_asset.get_batch_list_from_batch_request(
+    batch = dataframe_asset.get_batch(
         dataframe_asset.build_batch_request(options={"dataframe": spark_df})
     )
-    assert len(batch_list) == 1
     substituted_batch_metadata = copy.deepcopy(batch_metadata)
     substituted_batch_metadata.update(
         {
@@ -99,7 +98,7 @@ def test_spark_data_asset_batch_metadata(
             "curly_pipeline_filename": __file__,
         }
     )
-    assert batch_list[0].metadata == substituted_batch_metadata
+    assert batch.metadata == substituted_batch_metadata
 
 
 @pytest.mark.spark

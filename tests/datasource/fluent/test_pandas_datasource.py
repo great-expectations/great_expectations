@@ -359,7 +359,7 @@ class TestDynamicPandasAssets:
         # read_json on a csv file). We patch the internal call that actually tries to read and create the batch.  # noqa: E501
         # Ideally, we would rewrite this test so we wouldn't need to mock like this.
         mocker.patch(
-            "great_expectations.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch_list_from_batch_request"
+            "great_expectations.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch"
         )
         # read_* normally returns batch but, since we've added a mock in the line above, we get a mock object returned.  # noqa: E501
         # We are calling it here for it's side effect on the default asset so get and inspect that afterwards.  # noqa: E501
@@ -509,11 +509,10 @@ def test_pandas_data_asset_batch_metadata(
     )
     assert csv_asset.batch_metadata == batch_metadata
 
-    batch_list = csv_asset.get_batch_list_from_batch_request(csv_asset.build_batch_request())
-    assert len(batch_list) == 1
+    batch = csv_asset.get_batch(csv_asset.build_batch_request())
 
     # allow mutation of this attribute
-    batch_list[0].metadata["also_this_one"] = "other_batch-level_value"
+    batch.metadata["also_this_one"] = "other_batch-level_value"
 
     substituted_batch_metadata = copy.deepcopy(batch_metadata)
     substituted_batch_metadata.update(
@@ -523,7 +522,7 @@ def test_pandas_data_asset_batch_metadata(
             "also_this_one": "other_batch-level_value",
         }
     )
-    assert batch_list[0].metadata == substituted_batch_metadata
+    assert batch.metadata == substituted_batch_metadata
 
 
 @pytest.mark.filesystem

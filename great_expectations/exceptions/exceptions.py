@@ -199,6 +199,11 @@ class BuildBatchRequestError(GreatExpectationsError):
         super().__init__(f"Bad input to build_batch_request: {message}")
 
 
+class NoAvailableBatchesError(GreatExpectationsError):
+    def __init__(self) -> None:
+        super().__init__("No available batches found.")
+
+
 class InvalidBatchIdError(GreatExpectationsError):
     pass
 

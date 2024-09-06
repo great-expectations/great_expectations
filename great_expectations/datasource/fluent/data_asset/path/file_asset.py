@@ -234,8 +234,8 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
             partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
+            A BatchRequest object that can be used to obtain a batch from an Asset by calling the
+            get_batch method.
 
         Note:
             Option "batch_slice" is supported for all "DataAsset" extensions of this class identically.  This mechanism

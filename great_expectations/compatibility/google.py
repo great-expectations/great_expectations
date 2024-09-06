@@ -12,9 +12,9 @@ with warnings.catch_warnings():
     # DeprecationWarning: pkg_resources is deprecated as an API
     warnings.simplefilter(action="ignore", category=DeprecationWarning)
     try:
-        from google.cloud import secretmanager
+        from google.cloud import secretmanager  # type: ignore[attr-defined]
     except (ImportError, AttributeError):
-        secretmanager = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
+        secretmanager = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 try:
     from google.api_core.exceptions import GoogleAPIError

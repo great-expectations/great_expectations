@@ -302,11 +302,29 @@ class TestSuiteParameterOptions:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    "column_a,column_b,expected",
+    [
+        pytest.param("foo", "foo", True, id="equivalent_columns"),
+        pytest.param("foo", "bar", False, id="different_columns"),
+    ],
+)
+def test_expectation_equality(column_a: str, column_b: str, expected: bool):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(column=column_a, min_value=0, max_value=10)
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(column=column_b, min_value=0, max_value=10)
+
+    assert (expectation_a == expectation_b) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     "notes_a,notes_b,expected",
     [
         pytest.param(None, None, True, id="both_none"),
         pytest.param([], None, True, id="both_falsy"),
         pytest.param("my_notes", None, False, id="actual_notes"),
+        pytest.param("my_notes", None, False, id="missing_notes"),
+        pytest.param("my_notes", "my_other_notes", False, id="different_notes"),
+        pytest.param("my_notes", "my_notes", True, id="equivalent_notes"),
     ],
 )
 def test_expectation_equality_with_notes(
@@ -317,6 +335,30 @@ def test_expectation_equality_with_notes(
     )
     expectation_b = gxe.ExpectColumnValuesToBeBetween(
         column="foo", min_value=0, max_value=10, notes=notes_b
+    )
+
+    assert (expectation_a == expectation_b) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "meta_a,meta_b,expected",
+    [
+        pytest.param(None, None, True, id="both_none"),
+        pytest.param({}, None, True, id="both_falsy"),
+        pytest.param({"author": "Bob Dylan"}, None, False, id="missing_meta"),
+        pytest.param(
+            {"author": "Bob Dylan"}, {"author": "John Lennon"}, False, id="different_meta"
+        ),
+        pytest.param({"author": "Bob Dylan"}, {"author": "Bob Dylan"}, True, id="equivalent_meta"),
+    ],
+)
+def test_expectation_equality_with_meta(meta_a: dict | None, meta_b: dict | None, expected: bool):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, meta=meta_a
+    )
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, meta=meta_b
     )
 
     assert (expectation_a == expectation_b) is expected

@@ -105,13 +105,13 @@ try:
     import psycopg2  # noqa: F401
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: TID251
 except (ImportError, KeyError):
-    sqlalchemy_psycopg2 = None
+    sqlalchemy_psycopg2 = None  # type: ignore[assignment]
 
 try:
     import sqlalchemy_dremio.pyodbc
 
     if sa:
-        sa.dialects.registry.register(GXSqlDialect.DREMIO, "sqlalchemy_dremio.pyodbc", "dialect")
+        sa.dialects.registry.register(GXSqlDialect.DREMIO, "sqlalchemy_dremio.pyodbc", "dialect")  # type: ignore[arg-type]
 except ImportError:
     sqlalchemy_dremio = None
 
@@ -119,7 +119,7 @@ if snowflake.snowflakedialect:
     if sa:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.  # noqa: E501
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sa.dialects.registry.register(GXSqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect")
+        sa.dialects.registry.register(GXSqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect")  # type: ignore[arg-type]
 
 from great_expectations.compatibility.bigquery import (
     _BIGQUERY_MODULE_NAME,
@@ -130,7 +130,7 @@ from great_expectations.compatibility.bigquery import (
 )
 
 if sqla_bigquery and sa:
-    sa.dialects.registry.register(GXSqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "BigQueryDialect")
+    sa.dialects.registry.register(GXSqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "BigQueryDialect")  # type: ignore[arg-type]
 
 try:
     import teradatasqlalchemy.dialect
@@ -421,7 +421,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "name": name,
             "credentials": credentials,
             "data_context": data_context,
-            "engine": engine,
+            "engine": engine,  # type: ignore[dict-item]
             "connection_string": connection_string,
             "url": url,
             "batch_data_dict": batch_data_dict,
@@ -644,7 +644,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         as a subquery wrapped in "(subquery) alias". TextClause must first be converted
         to TextualSelect using sa.columns() before it can be converted to type Subquery
         """
-        if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
+        if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):  # type: ignore[truthy-function]
             selectable = selectable.columns().subquery()
 
         # Filtering by row condition.
@@ -652,7 +652,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             condition_parser = domain_kwargs["condition_parser"]
             if condition_parser == "great_expectations__experimental__":
                 parsed_condition = parse_condition_to_sqlalchemy(domain_kwargs["row_condition"])
-                selectable = sa.select(sa.text("*")).select_from(selectable).where(parsed_condition)
+                selectable = sa.select(sa.text("*")).select_from(selectable).where(parsed_condition)  # type: ignore[arg-type]
             else:
                 raise GreatExpectationsError(  # noqa: TRY003
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."  # noqa: E501
@@ -670,11 +670,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
             # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.  # noqa: E501
             if not isinstance(selectable, (sa.Table, Subquery)):
-                selectable = selectable.subquery()
+                selectable = selectable.subquery()  # type: ignore[attr-defined]
 
             selectable = (
                 sa.select(sa.text("*"))
-                .select_from(selectable)
+                .select_from(selectable)  # type: ignore[arg-type]
                 .where(parse_condition_to_sqlalchemy(filter_condition.condition))
             )
         elif len(filter_conditions) > 1:
@@ -707,7 +707,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if ignore_row_if == "both_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
                     sa.select(sa.text("*"))
-                    .select_from(get_sqlalchemy_selectable(selectable))
+                    .select_from(get_sqlalchemy_selectable(selectable))  # type: ignore[arg-type]
                     .where(
                         sa.not_(
                             sa.and_(
@@ -720,7 +720,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             elif ignore_row_if == "either_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
                     sa.select(sa.text("*"))
-                    .select_from(get_sqlalchemy_selectable(selectable))
+                    .select_from(get_sqlalchemy_selectable(selectable))  # type: ignore[arg-type]
                     .where(
                         sa.not_(
                             sa.or_(
@@ -750,7 +750,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if ignore_row_if == "all_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
                     sa.select(sa.text("*"))
-                    .select_from(get_sqlalchemy_selectable(selectable))
+                    .select_from(get_sqlalchemy_selectable(selectable))  # type: ignore[arg-type]
                     .where(
                         sa.not_(
                             sa.and_(
@@ -765,7 +765,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             elif ignore_row_if == "any_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
                     sa.select(sa.text("*"))
-                    .select_from(get_sqlalchemy_selectable(selectable))
+                    .select_from(get_sqlalchemy_selectable(selectable))  # type: ignore[arg-type]
                     .where(
                         sa.not_(
                             sa.or_(
@@ -1014,19 +1014,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 as a subquery wrapped in "(subquery) alias". TextClause must first be converted
                 to TextualSelect using sa.columns() before it can be converted to type Subquery
                 """
-                if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
+                if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):  # type: ignore[truthy-function]
                     sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.columns().subquery()
                     )
-                elif (sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select)) or (
-                    sqlalchemy.TextualSelect and isinstance(selectable, sqlalchemy.TextualSelect)
+                elif (sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select)) or (  # type: ignore[truthy-function]
+                    sqlalchemy.TextualSelect and isinstance(selectable, sqlalchemy.TextualSelect)  # type: ignore[truthy-function]
                 ):
                     sa_query_object = sa.select(*query["select"]).select_from(selectable.subquery())
                 else:
-                    sa_query_object = sa.select(*query["select"]).select_from(selectable)
+                    sa_query_object = sa.select(*query["select"]).select_from(selectable)  # type: ignore[arg-type]
 
                 logger.debug(f"Attempting query {sa_query_object!s}")
-                res = self.execute_query(sa_query_object).fetchall()
+                res = self.execute_query(sa_query_object).fetchall()  # type: ignore[assignment]
 
                 logger.debug(
                     f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
@@ -1104,14 +1104,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # Note: Athena does not support casting to string, only to varchar
             # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
             # of `CAST(colname AS VARCHAR)` with other dialects.
-            partitioned_query = str(
+            partitioned_query = str(  # type: ignore[assignment]
                 partitioned_query.compile(self.engine, compile_kwargs={"literal_binds": True})
             )
 
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
-            partitioned_query = re.sub(pattern, r"\1 AS VARCHAR)", partitioned_query)
+            partitioned_query = re.sub(pattern, r"\1 AS VARCHAR)", partitioned_query)  # type: ignore[call-overload]
 
-        return self.execute_query(partitioned_query).fetchall()
+        return self.execute_query(partitioned_query).fetchall()  # type: ignore[return-value]
 
     def get_data_for_batch_identifiers(
         self,
@@ -1179,7 +1179,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return (
                     sa.select("*")
-                    .select_from(selectable)
+                    .select_from(selectable)  # type: ignore[arg-type]
                     .where(
                         sa.and_(
                             partition_clause,
@@ -1188,7 +1188,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
 
-        return sa.select("*").select_from(selectable).where(partition_clause)
+        return sa.select("*").select_from(selectable).where(partition_clause)  # type: ignore[arg-type]
 
     def _subselectable(self, batch_spec: BatchSpec) -> sqlalchemy.Selectable:
         table_name = batch_spec.get("table_name")
@@ -1272,14 +1272,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self._inspector is None:
             if version.parse(sa.__version__) < version.parse("1.4"):
                 # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-                self._inspector = sqlalchemy.reflection.Inspector.from_engine(self.engine)
+                self._inspector = sqlalchemy.reflection.Inspector.from_engine(self.engine)  # type: ignore[assignment]
             else:
-                self._inspector = sa.inspect(self.engine)
+                self._inspector = sa.inspect(self.engine)  # type: ignore[assignment]
 
-        return self._inspector
+        return self._inspector  # type: ignore[return-value]
 
-    @contextmanager
-    def get_connection(self) -> sqlalchemy.Connection:
+    @contextmanager  # type: ignore[arg-type]
+    def get_connection(self) -> sqlalchemy.Connection:  # type: ignore[misc]
         """Get a connection for executing queries.
 
         Some databases sqlite/mssql temp tables only persist within a connection,
@@ -1294,7 +1294,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
             try:
                 if not self._connection:
-                    self._connection = self.engine.connect()
+                    self._connection = self.engine.connect()  # type: ignore[assignment]
                 yield self._connection
             finally:
                 # Temp tables only persist within a connection for some dialects,
@@ -1316,7 +1316,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-        with self.get_connection() as connection:
+        with self.get_connection() as connection:  # type: ignore[var-annotated]
             result = connection.execute(query)
 
         return result
@@ -1335,7 +1335,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """  # noqa: E501
-        with self.get_connection() as connection:
+        with self.get_connection() as connection:  # type: ignore[var-annotated]
             if (
                 is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
                 and not connection.closed
