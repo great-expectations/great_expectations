@@ -435,10 +435,10 @@ properly defined inside its intended module and declared correctly by the callin
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
-    def __init__(self, data_asset_name) -> None:
-        self.data_asset_name = data_asset_name
-        self.message = f"No expectation suite found for data_asset_name {data_asset_name}"
-        super().__init__(self.message)
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ExpectationSuite '{name}' not found. Please check the name and try again."
+        )
 
 
 class BatchKwargsError(DataContextError):
@@ -455,7 +455,10 @@ class BatchDefinitionError(DataContextError):
 
 
 class BatchDefinitionNotFoundError(BatchDefinitionError):
-    pass
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"BatchDefinition '{name}' not found. Please check the name and try again."
+        )
 
 
 class BatchDefinitionNotAddedError(ResourceNotAddedError):

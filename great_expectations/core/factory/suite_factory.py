@@ -124,7 +124,13 @@ class SuiteFactory(Factory[ExpectationSuite]):
 
     def _deserialize(self, suite_dict: dict) -> ExpectationSuite:
         # TODO: Move this logic to the store
-        suite = ExpectationSuite(**suite_dict)
-        if self._include_rendered_content:
-            suite.render()
-        return suite
+        return deserialize_suite_dict(
+            suite_dict=suite_dict, include_rendered_content=self._include_rendered_content
+        )
+
+
+def deserialize_suite_dict(suite_dict: dict, include_rendered_content: bool) -> ExpectationSuite:
+    suite = ExpectationSuite(**suite_dict)
+    if include_rendered_content:
+        suite.render()
+    return suite

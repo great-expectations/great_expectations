@@ -28,15 +28,21 @@ from great_expectations.analytics.events import (
     ExpectationSuiteExpectationDeletedEvent,
     ExpectationSuiteExpectationUpdatedEvent,
 )
+from great_expectations.compatibility.pydantic import ValidationError as PydanticValidationError
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.factory.suite_factory import deserialize_suite_dict
 from great_expectations.core.freshness_diagnostics import (
     ExpectationSuiteFreshnessDiagnostics,
 )
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.exceptions.exceptions import (
+    ExpectationSuiteError,
     ExpectationSuiteNotAddedError,
+    ExpectationSuiteNotFoundError,
     ExpectationSuiteNotFreshError,
+    GreatExpectationsError,
+    StoreBackendError,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
@@ -264,14 +270,24 @@ class ExpectationSuite(SerializableDictDot):
         )
 
     def _is_fresh(self) -> ExpectationSuiteFreshnessDiagnostics:
-        # TODO: Add error handling here
-        key = self._store.get_key(name=self.name, id=self.id)
-        suite_dict = self._store.get(key=key)
-        suite = ExpectationSuite(**suite_dict)
+        errors: list[GreatExpectationsError] = []
 
-        return ExpectationSuiteFreshnessDiagnostics(
-            errors=[] if self == suite else [ExpectationSuiteNotFreshError(name=self.name)]
-        )
+        key = self._store.get_key(name=self.name, id=self.id)
+        try:
+            suite_dict = self._store.get(key=key)
+        except StoreBackendError:
+            errors.append(ExpectationSuiteNotFoundError(name=self.name))
+
+        suite: ExpectationSuite | None = None
+        try:
+            suite = deserialize_suite_dict(suite_dict=suite_dict)
+        except PydanticValidationError:
+            errors.append(ExpectationSuiteError(f"Could not deserialize suite '{self.name}'"))
+
+        if suite and self != suite:
+            errors.append(ExpectationSuiteNotFreshError(name=self.name))
+
+        return ExpectationSuiteFreshnessDiagnostics(errors=errors)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""
