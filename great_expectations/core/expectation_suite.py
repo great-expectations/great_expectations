@@ -40,7 +40,6 @@ from great_expectations.exceptions.exceptions import (
     ExpectationSuiteNotAddedError,
     ExpectationSuiteNotFoundError,
     ExpectationSuiteNotFreshError,
-    GreatExpectationsError,
     StoreBackendError,
 )
 from great_expectations.types import SerializableDictDot
@@ -269,30 +268,31 @@ class ExpectationSuite(SerializableDictDot):
         )
 
     def _is_fresh(self) -> ExpectationSuiteFreshnessDiagnostics:
-        errors: list[GreatExpectationsError] = []
-
-        suite_dict: dict | None = {}
+        suite_dict: dict | None
         try:
             key = self._store.get_key(name=self.name, id=self.id)
             suite_dict = self._store.get(key=key)
         except StoreBackendError:
-            pass
+            suite_dict = None
+        if not suite_dict:
+            return ExpectationSuiteFreshnessDiagnostics(
+                errors=[ExpectationSuiteNotFoundError(name=self.name)]
+            )
 
-        suite: ExpectationSuite | None = None
+        suite: ExpectationSuite | None
         if suite_dict:
             try:
                 suite = self._store.deserialize_suite_dict(suite_dict=suite_dict)
             except PydanticValidationError:
-                pass
-
-        if not suite_dict:
-            errors.append(ExpectationSuiteNotFoundError(name=self.name))
+                suite = None
         if not suite:
-            errors.append(ExpectationSuiteError(f"Could not deserialize suite '{self.name}'"))
-        elif self != suite:
-            errors.append(ExpectationSuiteNotFreshError(name=self.name))
+            return ExpectationSuiteFreshnessDiagnostics(
+                errors=[ExpectationSuiteError(f"Could not deserialize suite '{self.name}'")]
+            )
 
-        return ExpectationSuiteFreshnessDiagnostics(errors=errors)
+        return ExpectationSuiteFreshnessDiagnostics(
+            errors=[] if self == suite else [ExpectationSuiteNotFreshError(name=self.name)]
+        )
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""
