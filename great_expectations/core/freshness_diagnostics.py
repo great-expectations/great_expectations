@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import abstractmethod
 from dataclasses import dataclass
 from typing import ClassVar, Tuple, Type
 
@@ -10,7 +9,7 @@ from great_expectations.exceptions.exceptions import (
     CheckpointNotAddedError,
     CheckpointRelatedResourcesNotAddedError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    GreatExpectationsError,
     ResourcesNotAddedError,
     ValidationDefinitionNotAddedError,
     ValidationDefinitionRelatedResourcesNotAddedError,
@@ -18,59 +17,59 @@ from great_expectations.exceptions.exceptions import (
 
 
 @dataclass
-class AddedDiagnostics:
+class FreshnessDiagnostics:
     """
-    Wrapper around a list of errors; used to determine if a resource has been added successfully.
+    Wrapper around a list of errors; used to determine if a resource has been added successfully
+    and is "fresh" or up-to-date with its persisted equivalent.
 
     Note that some resources may have dependencies on other resources - in order to be considered
-    "added", the root resource and all of its dependencies must be added successfully.
+    "fresh", the root resource and all of its dependencies must be "fresh".
     For example, a Checkpoint may have dependencies on ValidationDefinitions, which may have
     dependencies on ExpectationSuites and BatchDefinitions.
 
-    GX requires that all resources are added successfully before they can be used to prevent
+    GX requires that all resources are persisted successfully before they can be used to prevent
     unexpected behavior.
     """
 
-    errors: list[ResourceNotAddedError]
+    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = ResourcesNotAddedError
+    errors: list[GreatExpectationsError]
 
     @property
-    def is_added(self) -> bool:
+    def success(self) -> bool:
         return len(self.errors) == 0
 
-    @abstractmethod
     def raise_for_error(self) -> None:
         """
         Conditionally raises an error if the resource has not been added successfully;
         should prescribe the correct action(s) to take.
         """
-        raise NotImplementedError
+        if not self.success:
+            raise self.raise_for_error_class(errors=self.errors)
 
 
 @dataclass
-class _ChildAddedDiagnostics(AddedDiagnostics):
-    @override
-    def raise_for_error(self) -> None:
-        if not self.is_added:
-            raise self.errors[0]  # Child node so only one error
-
-
-@dataclass
-class BatchDefinitionAddedDiagnostics(_ChildAddedDiagnostics):
+class BatchDefinitionFreshnessDiagnostics(FreshnessDiagnostics):
     pass
 
 
 @dataclass
-class ExpectationSuiteAddedDiagnostics(_ChildAddedDiagnostics):
+class ExpectationSuiteFreshnessDiagnostics(FreshnessDiagnostics):
     pass
 
 
 @dataclass
-class _ParentAddedDiagnostics(AddedDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]]
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]]
-    raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]]
+class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
+    """
+    Freshness diagnostics for a class that has a natural parent/child relationship
+    with other classes.
 
-    def update_with_children(self, *children_diagnostics: AddedDiagnostics) -> None:
+    All errors throughout the hierarchy should be collected in the parent diagnostics object.
+    """
+
+    parent_error_class: ClassVar[Type[GreatExpectationsError]]
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]]
+
+    def update_with_children(self, *children_diagnostics: FreshnessDiagnostics) -> None:
         for diagnostics in children_diagnostics:
             # Child errors should be prepended to parent errors so diagnostics are in order
             self.errors = diagnostics.errors + self.errors
@@ -85,14 +84,14 @@ class _ParentAddedDiagnostics(AddedDiagnostics):
 
     @override
     def raise_for_error(self) -> None:
-        if not self.is_added:
+        if not self.success:
             raise self.raise_for_error_class(errors=self.errors)
 
 
 @dataclass
-class ValidationDefinitionAddedDiagnostics(_ParentAddedDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]] = ValidationDefinitionNotAddedError
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
+class ValidationDefinitionFreshnessDiagnostics(_ParentFreshnessDiagnostics):
+    parent_error_class: ClassVar[Type[GreatExpectationsError]] = ValidationDefinitionNotAddedError
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]] = (
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
@@ -102,9 +101,9 @@ class ValidationDefinitionAddedDiagnostics(_ParentAddedDiagnostics):
 
 
 @dataclass
-class CheckpointAddedDiagnostics(_ParentAddedDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]] = CheckpointNotAddedError
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
+class CheckpointFreshnessDiagnostics(_ParentFreshnessDiagnostics):
+    parent_error_class: ClassVar[Type[GreatExpectationsError]] = CheckpointNotAddedError
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
     raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (

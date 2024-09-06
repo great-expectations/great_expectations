@@ -20,6 +20,16 @@ class GreatExpectationsError(Exception):
         super().__init__(message)
 
 
+class GreatExpectationsAggregateError(ValueError):
+    def __init__(self, errors: list[GreatExpectationsError]) -> None:
+        self._errors = errors
+        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
+
+    @property
+    def errors(self) -> list[GreatExpectationsError]:
+        return self._errors
+
+
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
     def __init__(self, message, validation_error=None) -> None:
         self.message = message
@@ -42,14 +52,8 @@ class ResourceNotAddedError(DataContextError):
     pass
 
 
-class ResourcesNotAddedError(ValueError):
-    def __init__(self, errors: list[ResourceNotAddedError]) -> None:
-        self._errors = errors
-        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
-
-    @property
-    def errors(self) -> list[ResourceNotAddedError]:
-        return self._errors
+class ResourcesNotAddedError(GreatExpectationsAggregateError):
+    pass
 
 
 class ExpectationSuiteError(DataContextError):
@@ -62,6 +66,14 @@ class ExpectationSuiteNotAddedError(ResourceNotAddedError):
             f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
             "Please call `context.suites.add(<SUITE_OBJECT>)`, "
             "then try your action again."
+        )
+
+
+class ExpectationSuiteNotFreshError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ExpectationSuite '{name}' has changed since it has last been saved. "
+            "Please update with `<SUITE_OBJECT>.save()`, then try your action again."
         )
 
 
@@ -360,10 +372,10 @@ properly defined inside its intended module and declared correctly by the callin
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
-    def __init__(self, data_asset_name) -> None:
-        self.data_asset_name = data_asset_name
-        self.message = f"No expectation suite found for data_asset_name {data_asset_name}"
-        super().__init__(self.message)
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ExpectationSuite '{name}' not found. Please check the name and try again."
+        )
 
 
 class BatchDefinitionError(DataContextError):
@@ -372,10 +384,25 @@ class BatchDefinitionError(DataContextError):
         super().__init__(self.message)
 
 
+class BatchDefinitionNotFoundError(BatchDefinitionError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"BatchDefinition '{name}' not found. Please check the name and try again."
+        )
+
+
 class BatchDefinitionNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"BatchDefinition '{name}' must be added to the DataContext before it can be updated. "
+            "Please update using the parent asset or data source, then try your action again."
+        )
+
+
+class BatchDefinitionNotFreshError(ResourceNotAddedError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"BatchDefinition '{name}' has changed since it has last been saved. "
             "Please update using the parent asset or data source, then try your action again."
         )
 
@@ -401,6 +428,10 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 
 class DatasourceNotFoundError(DataContextError):
+    pass
+
+
+class DataAssetNotFoundError(DataContextError):
     pass
 
 

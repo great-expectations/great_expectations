@@ -13,6 +13,8 @@ from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 from great_expectations.exceptions.exceptions import (
     BatchDefinitionNotAddedError,
+    BatchDefinitionNotFreshError,
+    ResourcesNotAddedError,
 )
 
 if TYPE_CHECKING:
@@ -115,22 +117,54 @@ def test_identifier_bundle_no_id_raises_error(in_memory_runtime_context):
 
     batch_definition.id = None
 
-    with pytest.raises(BatchDefinitionNotAddedError):
+    with pytest.raises(ResourcesNotAddedError) as e:
         batch_definition.identifier_bundle()
+
+    assert len(e.value.errors) == 1
+    assert isinstance(e.value.errors[0], BatchDefinitionNotAddedError)
 
 
 @pytest.mark.parametrize(
-    "id,is_added,num_errors",
+    "id,is_fresh,num_errors",
     [
         pytest.param(str(uuid.uuid4()), True, 0, id="added"),
         pytest.param(None, False, 1, id="not_added"),
     ],
 )
 @pytest.mark.unit
-def test_is_added(id: str | None, is_added: bool, num_errors: int):
-    batch_definition = BatchDefinition(name="my_batch_def", id=id)
-    diagnostics = batch_definition.is_added()
+def test_is_fresh_is_added(
+    in_memory_runtime_context, id: str | None, is_fresh: bool, num_errors: int
+):
+    context = in_memory_runtime_context
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+    batch_definition.id = id  # Fluent API will add an ID but manually overriding for test
+    diagnostics = batch_definition.is_fresh()
 
-    assert diagnostics.is_added is is_added
+    assert diagnostics.success is is_fresh
     assert len(diagnostics.errors) == num_errors
     assert all(isinstance(err, BatchDefinitionNotAddedError) for err in diagnostics.errors)
+
+
+@pytest.mark.cloud
+def test_is_fresh_freshness(empty_cloud_context_fluent):
+    # Ephemeral/file use a cacheable datasource dict so freshness
+    # with batch definitions is a Cloud-only concern
+    context = empty_cloud_context_fluent
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+
+    batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    partitioner = FileNamePartitionerYearly(regex=batching_regex)
+    batch_definition.partitioner = partitioner
+
+    diagnostics = batch_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], BatchDefinitionNotFreshError)
