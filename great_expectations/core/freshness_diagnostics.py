@@ -9,7 +9,7 @@ from great_expectations.exceptions.exceptions import (
     CheckpointNotAddedError,
     CheckpointRelatedResourcesNotAddedError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    GreatExpectationsError,
     ResourcesNotAddedError,
     ValidationDefinitionNotAddedError,
     ValidationDefinitionRelatedResourcesNotAddedError,
@@ -32,7 +32,7 @@ class FreshnessDiagnostics:
     """
 
     raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = ResourcesNotAddedError
-    errors: list[ResourceNotAddedError]
+    errors: list[GreatExpectationsError]
 
     @property
     def success(self) -> bool:
@@ -59,8 +59,8 @@ class ExpectationSuiteFreshnessDiagnostics(FreshnessDiagnostics):
 
 @dataclass
 class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]]
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]]
+    parent_error_class: ClassVar[Type[GreatExpectationsError]]
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]]
 
     def update_with_children(self, *children_diagnostics: FreshnessDiagnostics) -> None:
         for diagnostics in children_diagnostics:
@@ -83,8 +83,8 @@ class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
 
 @dataclass
 class ValidationDefinitionFreshnessDiagnostics(_ParentFreshnessDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]] = ValidationDefinitionNotAddedError
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
+    parent_error_class: ClassVar[Type[GreatExpectationsError]] = ValidationDefinitionNotAddedError
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]] = (
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
@@ -95,8 +95,8 @@ class ValidationDefinitionFreshnessDiagnostics(_ParentFreshnessDiagnostics):
 
 @dataclass
 class CheckpointFreshnessDiagnostics(_ParentFreshnessDiagnostics):
-    parent_error_class: ClassVar[Type[ResourceNotAddedError]] = CheckpointNotAddedError
-    children_error_classes: ClassVar[Tuple[Type[ResourceNotAddedError], ...]] = (
+    parent_error_class: ClassVar[Type[GreatExpectationsError]] = CheckpointNotAddedError
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
     raise_for_error_class: ClassVar[Type[ResourcesNotAddedError]] = (
