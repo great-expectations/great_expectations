@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import ClassVar, Tuple, Type
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     CheckpointNotAddedError,
     CheckpointRelatedResourcesNotAddedError,

@@ -41,7 +41,7 @@ from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDataAsset,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     ExpectationSuiteNotAddedError,
     ResourceNotAddedError,

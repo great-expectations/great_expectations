@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 import pytest
 
 import great_expectations as gx
-import great_expectations.exceptions.exceptions as gx_exceptions
+import great_expectations.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import get_context
