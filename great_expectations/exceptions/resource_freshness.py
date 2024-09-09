@@ -5,6 +5,23 @@ A resource is considered "fresh" if it has been added to the DataContext and is 
 its persisted equivalent.
 
 Please see the `FreshnessDiagnostics` class for how these exceptions are aggregated and raised.
+
+
+Hierarchy:
+    GreatExpectationsAggregateError
+        ResourceFreshnessAggregateError
+            CheckpointRelatedResourcesFreshnessError
+            ValidationDefinitionRelatedResourcesFreshnessError
+
+    ResourceFreshnessError
+        ExpectationSuiteNotAddedError
+        ExpectationSuiteNotFreshError
+        BatchDefinitionNotAddedError
+        BatchDefinitionNotFreshError
+        ValidationDefinitionNotAddedError
+        ValidationDefinitionNotFreshError
+        CheckpointNotAddedError
+        CheckpointNotFreshError
 """
 
 from great_expectations.exceptions.exceptions import (
