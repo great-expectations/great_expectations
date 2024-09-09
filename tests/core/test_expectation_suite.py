@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 import pytest
 
 import great_expectations as gx
-import great_expectations.exceptions.exceptions as gx_exceptions
+import great_expectations.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import get_context
@@ -1085,7 +1085,7 @@ def test_identifier_bundle_no_id_raises_error():
     _ = gx.get_context(mode="ephemeral")
     suite = ExpectationSuite(name="my_suite", id=None)
 
-    with pytest.raises(gx_exceptions.ResourcesNotAddedError) as e:
+    with pytest.raises(gx_exceptions.ResourceFreshnessAggregateError) as e:
         suite.identifier_bundle()
 
     assert len(e.value.errors) == 1

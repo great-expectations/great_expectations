@@ -30,7 +30,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     ValidationDefinitionNotAddedError,
 )
 from great_expectations.validator.v1_validator import Validator

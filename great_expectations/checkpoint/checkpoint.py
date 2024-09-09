@@ -40,7 +40,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     CheckpointNotAddedError,
     CheckpointRunWithoutValidationDefinitionError,
 )

@@ -48,13 +48,13 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     CheckpointNotAddedError,
-    CheckpointRelatedResourcesNotAddedError,
+    CheckpointRelatedResourcesFreshnessError,
     CheckpointRunWithoutValidationDefinitionError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
 )
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
@@ -577,7 +577,7 @@ class TestCheckpointResult:
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
 
-        with pytest.raises(CheckpointRelatedResourcesNotAddedError) as e:
+        with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
             checkpoint.run()
 
         assert [type(err) for err in e.value.errors] == [
@@ -1096,7 +1096,7 @@ def test_is_fresh(
     suite_id: str | None,
     batch_def_id: str | None,
     is_fresh: bool,
-    error_list: list[Type[ResourceNotAddedError]],
+    error_list: list[Type[ResourceFreshnessError]],
 ):
     context = in_memory_runtime_context
     batch_definition = (

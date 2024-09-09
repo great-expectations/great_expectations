@@ -41,12 +41,12 @@ from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDataAsset,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
-    ValidationDefinitionRelatedResourcesNotAddedError,
+    ValidationDefinitionRelatedResourcesFreshnessError,
 )
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
@@ -433,7 +433,7 @@ class TestValidationRun:
         validation_definition.suite.id = None
         validation_definition.data.id = None
 
-        with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError) as e:
+        with pytest.raises(ValidationDefinitionRelatedResourcesFreshnessError) as e:
             validation_definition.run()
 
         assert [type(err) for err in e.value.errors] == [
@@ -774,7 +774,7 @@ def test_identifier_bundle_with_existing_id(validation_definition: ValidationDef
 def test_identifier_bundle_no_id_raises_error(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
-    with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError):
+    with pytest.raises(ValidationDefinitionRelatedResourcesFreshnessError):
         validation_definition.identifier_bundle()
 
 
@@ -871,7 +871,7 @@ def test_is_fresh(
     suite_id: str | None,
     batch_def_id: str | None,
     is_fresh: bool,
-    error_list: list[Type[ResourceNotAddedError]],
+    error_list: list[Type[ResourceFreshnessError]],
 ):
     context = in_memory_runtime_context
 
