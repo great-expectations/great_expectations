@@ -132,7 +132,7 @@ Compares the row count of the current table to another table within the same dat
 
 While volume management is a critical component of data quality, it's just one facet of a comprehensive data engineering strategy. To build on the foundations laid in this guide, consider the following steps:
 
-1. Integrate volume-focused Expectations into your CI/CD pipelines, enabling automated checks at key points in your data flow. Follow our step-by-step guide on [integrating Great Expectations with Github Actions](https://greatexpectations.io/blog/github-actions) to streamline your deployment process.
+1. Integrate volume-focused Expectations into your CI/CD pipelines, enabling automated checks at key points in your data flow. Follow our step-by-step guide on [integrating GX with Github Actions](https://greatexpectations.io/blog/github-actions) to streamline your deployment process.
 
 2. Explore the [Expectation Gallery](https://greatexpectations.io/expectations/) to identify Expectations that complement your volume management strategy and address other dimensions of data quality. Experiment with combining different Expectations to create a robust validation framework tailored to your specific data quality challenges.
 
@@ -145,10 +145,10 @@ This combination allows you to monitor for unexpected data growth while simultan
 
 4. Implement a systematic review process for your Expectations suite, ensuring it evolves alongside your data architecture and business requirements. Schedule regular meetings with stakeholders to discuss data quality objectives, review Expectation performance, and identify areas for improvement.
 
-5. Foster collaboration between data engineers, data analysts, and other stakeholders in developing and refining your data quality strategy. Encourage open communication and knowledge sharing to ensure that your data quality initiatives align with the needs of the broader organization. Consider sharing validation results from Great Expectations, which is designed to be useful as stand-alone data documentation, with other stakeholders outside of your team.
+5. Foster collaboration between data engineers, data analysts, and other stakeholders in developing and refining your data quality strategy. Encourage open communication and knowledge sharing to ensure that your data quality initiatives align with the needs of the broader organization. Consider sharing validation results from GX, which is designed to be useful as stand-alone data documentation, with other stakeholders outside of your team.
 
 :::TODO GX link for #5?:::
 
-As you continue to iterate on your data quality strategy, leverage the full spectrum of Great Expectations capabilities to create a robust, scalable, and trustworthy data ecosystem. Explore our broader [data quality series](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md) to gain insights into how other critical aspects of data quality can be seamlessly integrated into your engineering workflows.
+As you continue to iterate on your data quality strategy, leverage the full spectrum of GX capabilities to create a robust, scalable, and trustworthy data ecosystem. Explore our broader [data quality series](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md) to gain insights into how other critical aspects of data quality can be seamlessly integrated into your engineering workflows.
 
 By following these actionable steps and embracing a collaborative, multifaceted approach to data quality, you'll be well-equipped to tackle the ever-evolving challenges of modern data engineering. Together, let's build a future where high-quality, reliable data drives innovation and success across industries.
