@@ -46,11 +46,7 @@ Ensures that the number of rows in a dataset falls within a specified range.
 
 **Use Case**: Validate that daily transaction volumes are within expected bounds, alerting to unusual spikes or drops in activity.
 
-```py
-gxe.ExpectTableRowCountToBeBetween(
-    min_value=1000
-    max_value=1500
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToBeBetween"
 ```
 
 <sup>View `ExpectTableRowCountToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between).</sup>
@@ -62,10 +58,7 @@ Verifies that the dataset contains exactly the specified number of records.
 
 **Use Case**: Ensure that a specific number of records are processed, useful for batch operations or reconciliation tasks.
 
-```py
-gxe.ExpectTableRowCountToEqual(
-    value=300
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqual"
 ```
 
 <sup>View `ExpectTableRowCountToEqual` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal).</sup>
@@ -77,10 +70,7 @@ Compares the row count of the current table to another table within the same dat
 
 **Use Case**: Verify data consistency across different stages of a pipeline or between source and target systems.
 
-```py
-gxe.ExpectTableRowCountToEqualOtherTable(
-    other_table_name="transactions_summary"
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqualOtherTable"
 ```
 
 <sup>View `ExpectTableRowCountToEqualOtherTable` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal_other_table).</sup>
@@ -100,10 +90,7 @@ gxe.ExpectTableRowCountToEqualOtherTable(
 
 **GX solution**: Implement checks to ensure data volume consistency between source and target systems in a data reconciliation process.
 
-```python
-gxe.ExpectTableRowCountToEqualOtherTable(
-    other_table_name="target_system_transactions"
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py reconciliation_across_systems"
 ```
 
 ### Monitoring data volume in real-time streaming pipelines
@@ -112,11 +99,7 @@ gxe.ExpectTableRowCountToEqualOtherTable(
 
 **GX solution**: Implement checks to monitor data volume in real-time streaming pipelines and alert when anomalies are detected.
 
-```python
-gxe.ExpectTableRowCountToBeBetween(
-    min_value=1000,
-    max_value=1500
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py monitoring_streaming_pipelines"
 ```
 
 ### Batch processing verification
@@ -125,10 +108,7 @@ gxe.ExpectTableRowCountToBeBetween(
 
 **GX solution**: Validate that each processed batch contains exactly the expected number of records.
 
-```python
-gxe.ExpectTableRowCountToEqual(
-    value=300
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py batch_processing_verification"
 ```
 
 ## Avoid common volume validation pitfalls
@@ -153,20 +133,7 @@ While volume management is a critical component of data quality, it's just one f
 
 3. Develop a multifaceted approach that combines volume checks with other [crucial data quality aspects](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md), such as data integrity, schema evolution, and distribution analysis. For instance, consider coupling volume checks with schema validation:
 
-```python
-gxe.ExpectTableRowCountToBeBetween(
-    min_value=1000
-    max_value=1500
-)
-
-gxe.ExpectTableColumnsToMatchOrderedList(
-    column_list=[
-        "sender_account_number",
-        "recipient_account_number",
-        "transfer_amount",
-        "transfer_date",
-    ]
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py combined_checks"
 ```
 
 This combination allows you to monitor for unexpected data growth while simultaneously ensuring structural consistency, providing a more robust validation framework.
