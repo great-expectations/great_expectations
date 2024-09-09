@@ -19,5 +19,5 @@ import OverviewCard from '@site/src/components/OverviewCard';
 <LinkCardGrid>
   <LinkCard topIcon label="GX Cloud components" description="Learn about GX Cloud components." to="/cloud/overview/gx_cloud_components" icon="/img/workflow_icon.svg"/>
 
-  <LinkCard topIcon label="Deploy the GX Agent" description="Explore the data validation workflow in GX Cloud." to="/cloud/overview/gx_cloud_workflow" icon="/img/workflow_icon.svg"/>
+  <LinkCard topIcon label="GX Cloud workflows" description="Explore the data validation workflow in GX Cloud." to="/cloud/overview/gx_cloud_workflow" icon="/img/workflow_icon.svg"/>
 </LinkCardGrid>

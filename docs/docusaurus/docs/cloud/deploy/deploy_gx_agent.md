@@ -9,26 +9,25 @@ toc_max_heading_level: 2
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-:::info
 
-For access to the GX Agent, reach out to Support at support@greatexpectations.io.
+The GX Agent is used to run an [agent-enabled deployment](/cloud/deploy/deployment_patterns.md#agent-enabled-deployment) of GX Cloud. If you are running a fully hosted or read-only deployment, you do not need to deploy the GX Agent.
+
+:::info Enable the GX Agent
+
+The GX Agent, and agent-enabled deployments, are not available by default in GX Cloud. To enable the GX Agent for your GX Cloud organization, reach out to GX Support at support@greatexpectations.io.
 
 :::
 
-GX Cloud is a fully hosted data quality solution and you do not need to deploy the GX Agent to make use of its full suite of features. However, you can optionally deploy the GX Agent to exert additional control over how users access GX Cloud and how data is accessed by GX Cloud processes.
+The GX Agent serves as an intermediary between GX Cloud and your organization's data stores. GX Cloud does not connect directly to your data in an agent-enabled deployment, and all data access occurs within the GX Agent. GX Cloud sends jobs to the GX Agent, the GX Agent executes these jobs against your data, and then sends the job results to GX Cloud.
 
-The GX Agent is an intermediary between GX Cloud and your organization's data stores. GX Cloud does not connect directly to your data with this deployment option, and all data access occurs within the GX Agent. GX Cloud sends jobs to the GX Agent, the GX Agent executes these jobs against your data, and then sends the job results to GX Cloud.
+A [local deployment](?env-type=local#deploy-the-gx-agent) of the GX Agent will allow you to test GX Cloud setup or processes from a single machine before moving to a shared production deployment. Alternatively, you can run the GX Agent in your [deployment environment](?env-type=deployment#deploy-the-gx-agent) and leverage GX Cloud while connecting to Data Sources using your organization's environment and infrastructure, for enhanced control and security.
 
-A local deployment of the GX Agent will allow you to test GX Cloud setup or processes from a single machine before moving to a shared production deployment. Alternatively, you can deploy the GX Agent to your development environment and leverage GX Cloud while connecting to Data Sources using your organization's cloud infrastructure, for enhanced control and security.
-
-
-### GX Agent versioning
-GX uses a date-based versioning format for its weekly GX Agent Docker image releases: `YYYYMMMDD.#` for stable releases and `YYYYMMDD.#.dev#` for pre-releases. GX uses the `stable` and `dev` Docker image tags to identify the release type. The `stable` tag indicates the image is fully tested and ready for use. The `dev` tag indicates a pre-release image. This documentation assumes you're using the latest `stable` GX Agent Docker image.
 
 ## Prerequisites
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud).
-- You have reached out to Support at support@greatexpectations.io to request a GX Agent deployment.
+- You have reached out to GX Support at support@greatexpectations.io to request a GX Agent deployment.
+- You have a [Docker instance](https://docs.docker.com/get-docker/) or [kubectl](https://kubernetes.io/docs/tasks/tools/).
 
 ## Get your access token and organization ID
 
@@ -81,20 +80,15 @@ Use the information provided here to view your organization ID or create a new a
 
 ## Deploy the GX Agent
 
-The GX Agent allows you to securely access your data without connecting to it or interacting with it directly. 
-
-### Prerequisites
-
-- You have a GX Cloud access token and organization ID. See [Get your access token and organization ID](#get-your-access-token-and-organization-id). 
-
-- You have a [Docker instance](https://docs.docker.com/get-docker/) or [kubectl](https://kubernetes.io/docs/tasks/tools/).
+The GX Agent allows you to securely access your data without connecting to it or interacting with it directly.
 
 <Tabs
   groupId="deploy-agent"
+  queryString="env-type"
   defaultValue='deployment'
   values={[
-  {label: 'Org-hosted', value:'deployment'},
-  {label: 'Self-hosted', value:'local'},
+  {label: 'Deployment environment', value:'deployment'},
+  {label: 'Local', value:'local'},
   ]}>
 <TabItem value="deployment">
 
@@ -132,12 +126,9 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
 2. After configuring your cloud service to run Docker containers, run the following Docker command to start the GX Agent: 
 
    ```bash title="Terminal input"
-   docker run -it \
-   -e GX_CLOUD_ACCESS_TOKEN= YOUR_ACCESS_TOKEN \ 
-   -e GX_CLOUD_ORGANIZATION_ID= YOUR_ORGANIZATION_ID \  
-   greatexpectations/agent:stable
+   docker run -it -e GX_CLOUD_ACCESS_TOKEN="<YOUR_ACCESS_TOKEN>" -e GX_CLOUD_ORGANIZATION_ID="<YOUR_ORGANIZATION_ID>" greatexpectations/agent:stable
     ```
-    Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously.
+    Replace `<YOUR_ACCESS_TOKEN>` and `<YOUR_ORGANIZATION_ID>` with the [access token and organization ID](#get-your-access-token-and-organization-id) values that you copied previously.
 
 3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
@@ -166,7 +157,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    --from-literal=GX_CLOUD_ORGANIZATION_ID=YOUR_ORGANIZATION_ID \
    --from-literal=GX_CLOUD_ACCESS_TOKEN=YOUR_ACCESS_TOKEN \
    ```
-    Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the values you copied previously.
+    Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the [organization ID and access token](#get-your-access-token-and-organization-id) values that you copied previously. 
 
 3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
@@ -226,7 +217,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
     ```bash title="Terminal input"
     docker run --rm --pull=always -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
     ```
-   Replace `user_access_token` and `organization_id` with the values you copied previously. 
+   Replace `<user_access_token>` and `<organization_id>` with the [access token and organization ID](#get-your-access-token-and-organization-id) values that you copied previously.
 
 3. In GX Cloud, confirm the GX Agent status is **Active Agent** and the icon is green. This indicates the GX Agent is active. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
 
@@ -253,13 +244,5 @@ If you encounter an issue deploying the GX Agent or performing a GX Cloud task, 
 
 3. Optional. Click **Hide log** to close the log details view.
 
-
-## Next steps
-
-Want to continue testing GX Cloud features and functionality?
-
-- [Create a Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset)
-
-Ready to connect GX Cloud to your deployment environment?
-
-- [Connect GX Cloud](/cloud/connect/connect_lp.md)
+## GX Agent versioning
+GX uses a date-based versioning format for its weekly GX Agent Docker image releases: `YYYYMMMDD.#` for stable releases and `YYYYMMDD.#.dev#` for pre-releases. GX uses the `stable` and `dev` Docker image tags to identify the release type. The `stable` tag indicates the image is fully tested and ready for use. The `dev` tag indicates a pre-release image.
