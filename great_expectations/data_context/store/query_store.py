@@ -17,7 +17,7 @@ if sa:
     if is_version_greater_or_equal(sa.__version__, "1.4.0"):
         url_create_fn = sqlalchemy.URL.create
     else:
-        url_create_fn = sqlalchemy.URL
+        url_create_fn = sqlalchemy.URL  # type: ignore[assignment]
 
 
 logger = logging.getLogger(__name__)

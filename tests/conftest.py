@@ -1454,7 +1454,7 @@ def evr_success():
 
 
 @pytest.fixture
-def sqlite_view_engine(test_backends) -> Engine:
+def sqlite_view_engine(test_backends) -> Engine:  # type: ignore[return]
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
         try:
@@ -1479,7 +1479,7 @@ def sqlite_view_engine(test_backends) -> Engine:
                 )
             return sqlite_engine
         except ImportError:
-            sa = None
+            sa = None  # type: ignore[assignment]
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
 

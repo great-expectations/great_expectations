@@ -36,11 +36,11 @@ def test_suite_factory_get_uses_store_get():
     set_context(context)
 
     # Act
-    result = factory.get(name=name)
+    factory.get(name=name)
 
     # Assert
     store.get.assert_called_once_with(key=key)
-    assert result == ExpectationSuite(name=name)
+    store.deserialize_suite_dict.assert_called_once_with(suite_dict)
 
 
 @pytest.mark.unit

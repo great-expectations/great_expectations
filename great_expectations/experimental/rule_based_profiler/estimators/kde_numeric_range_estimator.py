@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Callable, Dict, Optional, Union
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.experimental.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.helpers.util import (
     compute_kde_quantiles_point_estimate,
     get_false_positive_rate_from_rule_state,
@@ -63,7 +63,7 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
             parse_strings_as_datetimes=True,
             fuzzy=False,
         ):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f'Estimator "{self.__class__.__name__}" does not support DateTime/TimeStamp data types.'  # noqa: E501
             )
 

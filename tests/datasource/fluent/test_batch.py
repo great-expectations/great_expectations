@@ -26,7 +26,7 @@ def pandas_setup(csv_path: pathlib.Path) -> Tuple[AbstractDataContext, Batch]:
         / "yellow_tripdata_sample_10_trips_from_each_month.csv"
     )
     asset = source.add_csv_asset(ASSET_NAME, filepath_or_buffer=filepath)
-    batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
+    batch = asset.get_batch(asset.build_batch_request())
     return context, batch
 
 

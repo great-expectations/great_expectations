@@ -336,6 +336,23 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         default=None
     )
 
+    @override
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Expectation):
+            return False
+
+        self_dict = self.dict()
+        other_dict = other.dict()
+
+        # Simplify notes and meta equality - falsiness is equivalent
+        for attr in ("notes", "meta"):
+            self_val = self_dict.pop(attr, None) or None
+            other_val = other_dict.pop(attr, None) or None
+            if self_val != other_val:
+                return False
+
+        return self_dict == other_dict
+
     @pydantic.validator("result_format")
     def _validate_result_format(cls, result_format: ResultFormat | dict) -> ResultFormat | dict:
         if isinstance(result_format, dict) and "result_format" not in result_format:
@@ -480,7 +497,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, MetaNotes, Optional[dict]]:
+    ) -> Tuple[Optional[str], dict, MetaNotes, Optional[dict]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
@@ -1261,6 +1278,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         kwargs = self.dict(exclude_defaults=True)
         meta = kwargs.pop("meta", None)
         notes = kwargs.pop("notes", None)
+        description = kwargs.pop("description", None)
         id = kwargs.pop("id", None)
         rendered_content = kwargs.pop("rendered_content", None)
         return ExpectationConfiguration(
@@ -1268,6 +1286,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             kwargs=kwargs,
             meta=meta,
             notes=notes,
+            description=description,
             id=id,
             rendered_content=rendered_content,
         )

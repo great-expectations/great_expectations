@@ -36,7 +36,7 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
     asset = datasource.add_table_asset("yellow_tripdata_sample_2022_01")
 
     batch_request = asset.build_batch_request()
-    return asset.get_batch_list_from_batch_request(batch_request)[0]
+    return asset.get_batch(batch_request)
 
 
 @pytest.mark.unit
@@ -149,16 +149,11 @@ def test_unexpected_rows_expectation_render(
     )
     expectation.render()
     assert (
-        expectation.rendered_content[0].value.params.get("description", {}).get("value")
-        == description
-    )
-    assert (
         expectation.rendered_content[0].value.params.get("unexpected_rows_query").get("value")
         == unexpected_rows_query
     )
 
-    template = "$description" if description else ""
-    assert expectation.rendered_content[0].value.template == template
+    assert expectation.rendered_content[0].value.template == description
     assert (
         expectation.rendered_content[0].value.code_block.get("code_template_str")
         == "$unexpected_rows_query"

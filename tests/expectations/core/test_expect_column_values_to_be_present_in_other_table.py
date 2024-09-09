@@ -77,7 +77,7 @@ def test_successful_expectation_run(sqlite_datasource):
     datasource = sqlite_datasource
     asset_name = "order_table_1"
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_1")
-    batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
+    batch = asset.get_batch(asset.build_batch_request())
     res = batch.validate(
         ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="CUSTOMER_ID",
@@ -93,7 +93,7 @@ def test_failed_expectation_run(sqlite_datasource):
     datasource = sqlite_datasource
     asset_name = "order_table_2"
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")
-    batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
+    batch = asset.get_batch(asset.build_batch_request())
     res = batch.validate(
         ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="CUSTOMER_ID",
@@ -119,7 +119,7 @@ def test_configuration_invalid_column_name(sqlite_datasource):
     datasource = sqlite_datasource
     asset_name = "order_table_2"
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")
-    batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
+    batch = asset.get_batch(asset.build_batch_request())
     res = batch.validate(
         ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="I_DONT_EXIST",

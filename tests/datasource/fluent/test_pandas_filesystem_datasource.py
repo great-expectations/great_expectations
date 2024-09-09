@@ -30,6 +30,7 @@ from great_expectations.datasource.fluent.data_connector import (
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.sources import _get_field_details
+from great_expectations.exceptions.exceptions import NoAvailableBatchesError
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -429,7 +430,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         (None, "03", "yellow_tripdata_sample_2018-04.csv", 0),
     ],
 )
-def test_get_batch_list_batch_count(
+def test_get_batch_identifiers_list_count(
     year: Optional[str],
     month: Optional[str],
     path: Optional[str],
@@ -445,12 +446,12 @@ def test_get_batch_list_batch_count(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == batch_count
+    batch_identifier_list = asset.get_batch_identifiers_list(request)
+    assert len(batch_identifier_list) == batch_count
 
 
 @pytest.mark.unit
-def test_get_batch_list_from_partially_specified_batch_request(
+def test_get_batch_identifiers_list_from_partially_specified_batch_request(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     # Verify test directory has files that don't match what we will query for
@@ -474,9 +475,9 @@ def test_get_batch_list_from_partially_specified_batch_request(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
-    batches = asset.get_batch_list_from_batch_request(request)
+    batches = asset.get_batch_identifiers_list(request)
     assert (len(batches)) == 12
-    batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
+    batch_filenames = [pathlib.Path(batch["path"]).stem for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
@@ -485,9 +486,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         month: str
 
     expected_year_month = {YearMonth(year="2018", month=format(m, "02d")) for m in range(1, 13)}
-    batch_year_month = {
-        YearMonth(year=batch.metadata["year"], month=batch.metadata["month"]) for batch in batches
-    }
+    batch_year_month = {YearMonth(year=batch["year"], month=batch["month"]) for batch in batches}
     assert expected_year_month == batch_year_month
 
 
@@ -525,8 +524,8 @@ def test_pandas_slice_batch_count(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
-    batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
-    assert len(batches) == expected_batch_count
+    batch_identifiers_list = asset.get_batch_identifiers_list(batch_request=batch_request)
+    assert len(batch_identifiers_list) == expected_batch_count
 
 
 def bad_batching_regex_config(
@@ -596,7 +595,7 @@ def test_csv_asset_batch_metadata(
         )
     )
 
-    batches = pandas_filesystem_datasource.get_batch_list_from_batch_request(batch_request)
+    batch = pandas_filesystem_datasource.get_batch(batch_request)
 
     substituted_batch_metadata: BatchMetadata = copy.deepcopy(asset_specified_metadata)
     substituted_batch_metadata.update(
@@ -606,12 +605,44 @@ def test_csv_asset_batch_metadata(
         }
     )
 
-    months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+    actual_metadata = copy.deepcopy(batch.metadata)
 
-    for i, month in enumerate(months):
-        substituted_batch_metadata["month"] = month
-        actual_metadata = copy.deepcopy(batches[i].metadata)
-        # not testing path for the purposes of this test
-        actual_metadata.pop("path")
-        actual_metadata.pop("year")
-        assert actual_metadata == substituted_batch_metadata
+    actual_metadata.pop("path")
+    actual_metadata.pop("year")
+    actual_metadata.pop("month")
+
+    assert len(actual_metadata)
+    assert actual_metadata == substituted_batch_metadata
+
+
+@pytest.mark.parametrize(
+    ("sort_ascending", "expected_metadata"),
+    [
+        (True, {"year": "2020", "month": "12", "path": "yellow_tripdata_sample_2020-12.csv"}),
+        (False, {"year": "2018", "month": "01", "path": "yellow_tripdata_sample_2018-01.csv"}),
+    ],
+)
+@pytest.mark.unit
+def test_get_batch_respects_order_ascending(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+    sort_ascending: bool,
+    expected_metadata: dict,
+) -> None:
+    asset = pandas_filesystem_datasource.add_csv_asset(name="csv_asset")
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(
+        name="batch def", regex=regex, sort_ascending=sort_ascending
+    )
+    batch = batch_def.get_batch()
+    assert batch.metadata == expected_metadata
+
+
+@pytest.mark.unit
+def test_raises_if_no_matching_batches(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+) -> None:
+    asset = pandas_filesystem_datasource.add_csv_asset(name="csv_asset")
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=regex)
+    with pytest.raises(NoAvailableBatchesError):
+        batch_def.get_batch(batch_parameters={"year": "1995", "month": "01"})

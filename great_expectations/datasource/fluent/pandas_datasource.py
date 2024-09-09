@@ -32,7 +32,9 @@ from great_expectations._docs_decorators import (
 from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
+from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent import BatchParameters, BatchRequest
 from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.constants import (
@@ -119,9 +121,12 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        return [IDDict(batch_request.options)]
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
         self._validate_batch_request(batch_request)
-        batch_list: List[Batch] = []
 
         batch_spec = PandasBatchSpec(
             reader_method=self._get_reader_method(),
@@ -138,9 +143,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-        # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core.batch import LegacyBatchDefinition
-
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
@@ -153,19 +155,16 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_request=batch_request, ignore_options=("dataframe",)
         )
 
-        batch_list.append(
-            Batch(
-                datasource=self.datasource,
-                data_asset=self,
-                batch_request=batch_request,
-                data=data,
-                metadata=batch_metadata,
-                batch_markers=markers,
-                batch_spec=batch_spec,
-                batch_definition=batch_definition,
-            )
+        return Batch(
+            datasource=self.datasource,
+            data_asset=self,
+            batch_request=batch_request,
+            data=data,
+            metadata=batch_metadata,
+            batch_markers=markers,
+            batch_spec=batch_spec,
+            batch_definition=batch_definition,
         )
-        return batch_list
 
     @override
     def build_batch_request(
@@ -182,9 +181,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             partitioner: This is not currently supported and must be None for this data asset.
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """  # noqa: E501
+            A BatchRequest object that can be used to obtain a batch from an Asset by calling the
+            get_batch method.
+        """
         if options:
             raise BuildBatchRequestError(
                 message="options is not currently supported for this DataAsset "
@@ -388,9 +387,9 @@ class DataFrameAsset(_PandasDataAsset):
             partitioner: This is not currently supported and must be None for this data asset.
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """  # noqa: E501
+            A BatchRequest object that can be used to obtain a batch from an Asset by calling the
+            get_batch method.
+        """
         if batch_slice is not None:
             raise BuildBatchRequestError(
                 message="batch_slice is not currently supported for this DataAsset "
@@ -445,7 +444,11 @@ class DataFrameAsset(_PandasDataAsset):
             )
 
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        return [IDDict(batch_request.options)]
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
         self._validate_batch_request(batch_request)
 
         batch_spec = RuntimeDataBatchSpec(batch_data=batch_request.options["dataframe"])
@@ -455,9 +458,6 @@ class DataFrameAsset(_PandasDataAsset):
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-        # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core.batch import LegacyBatchDefinition
-
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
@@ -470,18 +470,16 @@ class DataFrameAsset(_PandasDataAsset):
             batch_request=batch_request, ignore_options=("dataframe",)
         )
 
-        return [
-            Batch(
-                datasource=self.datasource,
-                data_asset=self,
-                batch_request=batch_request,
-                data=data,
-                metadata=batch_metadata,
-                batch_markers=markers,
-                batch_spec=batch_spec,
-                batch_definition=batch_definition,
-            )
-        ]
+        return Batch(
+            datasource=self.datasource,
+            data_asset=self,
+            batch_request=batch_request,
+            data=data,
+            metadata=batch_metadata,
+            batch_markers=markers,
+            batch_spec=batch_spec,
+            batch_definition=batch_definition,
+        )
 
 
 class _PandasDatasource(Datasource, Generic[_DataAssetT]):
@@ -666,7 +664,7 @@ class PandasDatasource(_PandasDatasource):
         else:
             batch_request = asset.build_batch_request()
 
-        return asset.get_batch_list_from_batch_request(batch_request)[-1]
+        return asset.get_batch(batch_request)
 
     @public_api
     def add_dataframe_asset(
@@ -1427,7 +1425,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
@@ -1454,7 +1452,7 @@ class PandasDatasource(_PandasDatasource):
     @public_api
     def read_sql(
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
@@ -1484,7 +1482,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
@@ -1511,7 +1509,7 @@ class PandasDatasource(_PandasDatasource):
     @public_api
     def read_sql_query(
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
