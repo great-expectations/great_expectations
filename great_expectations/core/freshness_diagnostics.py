@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar, Type
+from typing import ClassVar, Tuple, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.exceptions import (
@@ -69,7 +69,7 @@ class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
     """
 
     parent_error_class: ClassVar[Type[GreatExpectationsError]]
-    children_error_classes: ClassVar[list[Type[GreatExpectationsError]]]
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]]
 
     def update_with_children(self, *children_diagnostics: FreshnessDiagnostics) -> None:
         for diagnostics in children_diagnostics:
@@ -93,7 +93,7 @@ class _ParentFreshnessDiagnostics(FreshnessDiagnostics):
 @dataclass
 class ValidationDefinitionFreshnessDiagnostics(_ParentFreshnessDiagnostics):
     parent_error_class: ClassVar[Type[GreatExpectationsError]] = ValidationDefinitionNotAddedError
-    children_error_classes: ClassVar[list[Type[GreatExpectationsError]]] = (
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]] = (
         ExpectationSuiteNotAddedError,
         BatchDefinitionNotAddedError,
     )
@@ -105,7 +105,7 @@ class ValidationDefinitionFreshnessDiagnostics(_ParentFreshnessDiagnostics):
 @dataclass
 class CheckpointFreshnessDiagnostics(_ParentFreshnessDiagnostics):
     parent_error_class: ClassVar[Type[GreatExpectationsError]] = CheckpointNotAddedError
-    children_error_classes: ClassVar[list[Type[GreatExpectationsError]]] = (
+    children_error_classes: ClassVar[Tuple[Type[GreatExpectationsError], ...]] = (
         ValidationDefinitionNotAddedError,
     )
     raise_for_error_class: ClassVar[Type[ResourceFreshnessAggregateError]] = (
