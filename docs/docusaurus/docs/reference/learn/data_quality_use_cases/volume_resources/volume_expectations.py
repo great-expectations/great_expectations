@@ -24,7 +24,8 @@ GX_ROOT_DIR = pathlib.Path(gx.__file__).parent.parent
 load_data_into_test_database(
     table_name="transfers",
     csv_path=str(
-        GX_ROOT_DIR / "tests/test_sets/learn_data_quality_use_cases/volume_financial_transfers.csv"
+        GX_ROOT_DIR
+        / "tests/test_sets/learn_data_quality_use_cases/volume_financial_transfers.csv"
     ),
     connection_string=CONNECTION_STRING,
 )
@@ -46,26 +47,19 @@ suite = context.suites.add(gx.ExpectationSuite(name="example missingness expecta
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToBeBetween">
-    gxe.ExpectTableRowCountToBeBetween(
-        min_value=2,
-        max_value=5
-    )
+    gxe.ExpectTableRowCountToBeBetween(min_value=2, max_value=5)
     # </snippet>
 )
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqual">
-    gxe.ExpectTableRowCountToEqual(
-        value=4
-    )
+    gxe.ExpectTableRowCountToEqual(value=4)
     # </snippet>
 )
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqualOtherTable">
-    gxe.ExpectTableRowCountToEqualOtherTable(
-        other_table_name="transactions_summary"
-    )
+    gxe.ExpectTableRowCountToEqualOtherTable(other_table_name="transactions_summary")
     # </snippet>
 )
 
@@ -79,18 +73,13 @@ suite.add_expectation(
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py monitoring_streaming_pipelines">
-    gxe.ExpectTableRowCountToBeBetween(
-        min_value=2,
-        max_value=5
-    )
+    gxe.ExpectTableRowCountToBeBetween(min_value=2, max_value=5)
     # </snippet>
 )
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py batch_processing_verification">
-    gxe.ExpectTableRowCountToEqual(
-        value=4
-    )
+    gxe.ExpectTableRowCountToEqual(value=4)
     # </snippet>
 )
 
