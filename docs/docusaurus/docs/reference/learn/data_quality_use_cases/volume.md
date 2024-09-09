@@ -80,6 +80,8 @@ Compares the row count of the current table to another table within the same dat
 
 <sup>View `ExpectTableRowCountToEqualOtherTable` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal_other_table).</sup>
 
+<br/>
+<br/>
 
 :::tip[GX tips for volume Expectations]
 - Regularly adjust your `ExpectTableRowCountToBeBetween` thresholds based on historical data and growth patterns to maintain relevance.
