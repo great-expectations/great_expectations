@@ -32,6 +32,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions import (
     ValidationDefinitionNotAddedError,
+    ValidationDefinitionNotFreshError,
 )
 from great_expectations.validator.v1_validator import Validator
 
@@ -124,6 +125,17 @@ class ValidationDefinition(BaseModel):
         return project_manager.get_validation_results_store()
 
     def is_fresh(self) -> ValidationDefinitionFreshnessDiagnostics:
+        diagnostics = self._is_added()
+        if not diagnostics.success:
+            return diagnostics
+        return self._is_fresh()
+
+    def _is_added(self) -> ValidationDefinitionFreshnessDiagnostics:
+        return ValidationDefinitionFreshnessDiagnostics(
+            errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
+        )
+
+    def _is_fresh(self) -> ValidationDefinitionFreshnessDiagnostics:
         validation_definition_diagnostics = ValidationDefinitionFreshnessDiagnostics(
             errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
         )
@@ -131,7 +143,19 @@ class ValidationDefinition(BaseModel):
         data_diagnostics = self.data.is_fresh()
         validation_definition_diagnostics.update_with_children(suite_diagnostics, data_diagnostics)
 
-        return validation_definition_diagnostics
+        if not validation_definition_diagnostics.success:
+            return validation_definition_diagnostics
+
+        store = project_manager.get_validation_definition_store()
+        key = store.get_key(name=self.name, id=self.id)
+        # TODO: Add error checking
+        validation_definition = store.get(key=key)
+
+        return ValidationDefinitionFreshnessDiagnostics(
+            errors=[]
+            if self == validation_definition
+            else [ValidationDefinitionNotFreshError(name=self.name)]
+        )
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):

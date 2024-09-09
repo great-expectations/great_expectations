@@ -42,6 +42,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions import (
     CheckpointNotAddedError,
+    CheckpointNotFreshError,
     CheckpointRunWithoutValidationDefinitionError,
 )
 from great_expectations.render.renderer.renderer import Renderer
@@ -270,13 +271,34 @@ class Checkpoint(BaseModel):
         return priority_actions + secondary_actions
 
     def is_fresh(self) -> CheckpointFreshnessDiagnostics:
+        diagnostics = self._is_added()
+        if not diagnostics.success:
+            return diagnostics
+        return self._is_fresh()
+
+    def _is_added(self) -> CheckpointFreshnessDiagnostics:
+        return CheckpointFreshnessDiagnostics(
+            errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
+        )
+
+    def _is_fresh(self) -> CheckpointFreshnessDiagnostics:
         checkpoint_diagnostics = CheckpointFreshnessDiagnostics(
             errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
         )
         validation_definition_diagnostics = [vd.is_fresh() for vd in self.validation_definitions]
         checkpoint_diagnostics.update_with_children(*validation_definition_diagnostics)
 
-        return checkpoint_diagnostics
+        if not checkpoint_diagnostics.success:
+            return checkpoint_diagnostics
+
+        store = project_manager.get_checkpoints_store()
+        key = store.get_key(name=self.name, id=self.id)
+        # TODO: Add error handling
+        checkpoint = store.get(key=key)
+
+        return CheckpointFreshnessDiagnostics(
+            errors=[] if checkpoint == self else [CheckpointNotFreshError(name=self.name)]
+        )
 
     @public_api
     def save(self) -> None:
