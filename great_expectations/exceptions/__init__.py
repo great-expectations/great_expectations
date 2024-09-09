@@ -61,7 +61,7 @@ from .exceptions import (
     UnsupportedConfigVersionError,
     ValidationError,
 )
-from .freshness import (
+from .resource_freshness import (
     BatchDefinitionNotAddedError,
     BatchDefinitionNotFreshError,
     CheckpointNotAddedError,
