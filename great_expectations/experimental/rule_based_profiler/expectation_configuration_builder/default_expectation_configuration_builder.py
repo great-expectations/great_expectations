@@ -25,6 +25,7 @@ from great_expectations.expectations.expectation_configuration import (
 from great_expectations.experimental.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
@@ -111,14 +112,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self._meta = meta
 
         if not isinstance(meta, dict):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
 (value of type "{type(meta)!s}" was encountered).
 """  # noqa: E501
             )
 
         if condition and (not isinstance(condition, str)):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""Argument "{condition}" in "{self.__class__.__name__}" must be of type "string" \
 (value of type "{type(condition)!s}" was encountered).
 """  # noqa: E501

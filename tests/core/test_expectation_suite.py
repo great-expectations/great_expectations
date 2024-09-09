@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 import pytest
 
 import great_expectations as gx
-import great_expectations.exceptions.exceptions as gx_exceptions
+import great_expectations.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import get_context
@@ -92,14 +92,6 @@ def suite_with_single_expectation(
 
 class TestInit:
     """Tests related to ExpectationSuite.__init__()"""
-
-    @pytest.mark.unit
-    def test_instantiate_with_no_context_raises(self):
-        set_context(None)
-        with pytest.raises(gx_exceptions.DataContextRequiredError):
-            ExpectationSuite(
-                name="i've made a huge mistake",
-            )
 
     @pytest.mark.unit
     def test_expectation_suite_init_defaults(
@@ -1077,11 +1069,14 @@ class TestExpectationSuiteAnalytics:
 
 
 @pytest.mark.unit
-def test_identifier_bundle_with_existing_id():
-    suite = ExpectationSuite(name="my_suite", id="fa34fbb7-124d-42ff-9760-e410ee4584a0")
+def test_identifier_bundle_with_existing_id(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    suite_id = suite.id
 
     assert suite.identifier_bundle() == _IdentifierBundle(
-        name="my_suite", id="fa34fbb7-124d-42ff-9760-e410ee4584a0"
+        name="my_suite",
+        id=suite_id,
     )
 
 
@@ -1090,23 +1085,30 @@ def test_identifier_bundle_no_id_raises_error():
     _ = gx.get_context(mode="ephemeral")
     suite = ExpectationSuite(name="my_suite", id=None)
 
-    with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedError):
+    with pytest.raises(gx_exceptions.ResourceFreshnessAggregateError) as e:
         suite.identifier_bundle()
+
+    assert len(e.value.errors) == 1
+    assert isinstance(e.value.errors[0], gx_exceptions.ExpectationSuiteNotAddedError)
 
 
 @pytest.mark.parametrize(
-    "id,is_added,num_errors",
+    "id,is_fresh,num_errors",
     [
         pytest.param(str(uuid.uuid4()), True, 0, id="added"),
         pytest.param(None, False, 1, id="not_added"),
     ],
 )
 @pytest.mark.unit
-def test_is_added(id: str | None, is_added: bool, num_errors: int):
-    suite = ExpectationSuite(name="my_suite", id=id)
-    diagnostics = suite.is_added()
+def test_is_fresh_is_added(
+    in_memory_runtime_context, id: str | None, is_fresh: bool, num_errors: int
+):
+    context = in_memory_runtime_context
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    suite.id = id  # Stores will add an ID but manually overriding for test
+    diagnostics = suite.is_fresh()
 
-    assert diagnostics.is_added is is_added
+    assert diagnostics.success is is_fresh
     assert len(diagnostics.errors) == num_errors
     assert all(
         isinstance(err, gx_exceptions.ExpectationSuiteNotAddedError) for err in diagnostics.errors
@@ -1181,3 +1183,17 @@ def test_save_on_individual_expectation_updates_rendered_content(
         4,
         5,
     ]
+
+
+@pytest.mark.unit
+def test_is_fresh_freshness(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    suite.expectations = [gxe.ExpectColumnDistinctValuesToBeInSet(column="a", value_set=[1, 2, 3])]
+
+    diagnostics = suite.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteNotFreshError)

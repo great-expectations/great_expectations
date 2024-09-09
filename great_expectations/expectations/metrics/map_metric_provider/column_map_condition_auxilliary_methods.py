@@ -263,12 +263,12 @@ def _sqlalchemy_column_map_condition_values(
 
     selectable = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
-    query = sa.select(sa.column(column_name).label("unexpected_values")).where(unexpected_condition)
+    query = sa.select(sa.column(column_name).label("unexpected_values")).where(unexpected_condition)  # type: ignore[var-annotated]
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         if hasattr(selectable, "subquery"):
             query = query.select_from(selectable.subquery())
         else:
-            query = query.select_from(selectable)
+            query = query.select_from(selectable)  # type: ignore[arg-type]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -317,13 +317,13 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    column: sa.Column = sa.column(column_name)
+    column: sa.Column = sa.column(column_name)  # type: ignore[assignment]
 
     selectable = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     query = sa.select(column, sa.func.count(column)).where(unexpected_condition).group_by(column)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        query = query.select_from(selectable)
+        query = query.select_from(selectable)  # type: ignore[arg-type]
 
     return execution_engine.execute_query(query).fetchall()
 

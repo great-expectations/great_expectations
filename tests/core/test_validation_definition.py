@@ -41,12 +41,12 @@ from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDataAsset,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
-    ValidationDefinitionRelatedResourcesNotAddedError,
+    ValidationDefinitionRelatedResourcesFreshnessError,
 )
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
@@ -392,6 +392,7 @@ class TestValidationRun:
     ):
         expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        cloud_validation_definition.suite.save()
         mock_validator.graph_validate.return_value = [
             ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
         ]
@@ -415,6 +416,7 @@ class TestValidationRun:
     ):
         expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        cloud_validation_definition.suite.save()
         mock_validator.graph_validate.return_value = [
             ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
         ]
@@ -431,7 +433,7 @@ class TestValidationRun:
         validation_definition.suite.id = None
         validation_definition.data.id = None
 
-        with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError) as e:
+        with pytest.raises(ValidationDefinitionRelatedResourcesFreshnessError) as e:
             validation_definition.run()
 
         assert [type(err) for err in e.value.errors] == [
@@ -772,7 +774,7 @@ def test_identifier_bundle_with_existing_id(validation_definition: ValidationDef
 def test_identifier_bundle_no_id_raises_error(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
-    with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError):
+    with pytest.raises(ValidationDefinitionRelatedResourcesFreshnessError):
         validation_definition.identifier_bundle()
 
 
@@ -790,7 +792,7 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
 
 
 @pytest.mark.parametrize(
-    "id,suite_id,batch_def_id,is_added,error_list",
+    "id,suite_id,batch_def_id,is_fresh,error_list",
     [
         pytest.param(
             str(uuid.uuid4()),
@@ -863,20 +865,33 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
     ],
 )
 @pytest.mark.unit
-def test_is_added(
+def test_is_fresh(
+    in_memory_runtime_context,
     id: str | None,
     suite_id: str | None,
     batch_def_id: str | None,
-    is_added: bool,
-    error_list: list[Type[ResourceNotAddedError]],
+    is_fresh: bool,
+    error_list: list[Type[ResourceFreshnessError]],
 ):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+    batch_definition.id = batch_def_id  # Fluent API will add an ID but manually overriding for test
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    suite.id = suite_id  # Store will add an ID but manually overriding for test
+
     validation_definition = ValidationDefinition(
         name="my_validation_definition",
         id=id,
-        suite=ExpectationSuite(name="my_suite", id=suite_id),
-        data=BatchDefinition(name="my_batch_def", id=batch_def_id),
+        suite=suite,
+        data=batch_definition,
     )
-    diagnostics = validation_definition.is_added()
+    diagnostics = validation_definition.is_fresh()
 
-    assert diagnostics.is_added is is_added
+    assert diagnostics.success is is_fresh
     assert [type(err) for err in diagnostics.errors] == error_list

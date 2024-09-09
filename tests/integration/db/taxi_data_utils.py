@@ -144,9 +144,9 @@ def _execute_taxi_partitioning_test_cases(
 
         # 3. Check if resulting batches are as expected
         batch_request = batch_definition.build_batch_request()
-        batch_list = asset.get_batch_list_from_batch_request(batch_request)
-        assert len(batch_list) == test_case.num_expected_batch_definitions, (
-            f"Found {len(batch_list)} batch definitions "
+        batch_identifiers_list = asset.get_batch_identifiers_list(batch_request)
+        assert len(batch_identifiers_list) == test_case.num_expected_batch_definitions, (
+            f"Found {len(batch_identifiers_list)} batch definitions "
             f"but expected {test_case.num_expected_batch_definitions}"
         )
 
@@ -160,20 +160,19 @@ def _execute_taxi_partitioning_test_cases(
         else:
             raise ValueError("Missing test_column_names or test_column_names attribute.")
 
-        actual_batch_metadata = [batch.metadata for batch in batch_list]
-        assert actual_batch_metadata == expected_batch_metadata, (
+        assert batch_identifiers_list == expected_batch_metadata, (
             f"Batch metadata lists don't match.\n\n"
-            f"batch_list:\n{batch_list}\n\n"
+            f"batch_list:\n{batch_identifiers_list}\n\n"
             f"expected_batch metadata:\n{expected_batch_metadata}"
         )
 
         # 4. Check that loaded data is as expected, using correctness
-        # of the first batch as a proxy for correctness of the whole list
+        # of arbitrary batch as a proxy for correctness of the whole list
 
-        first_batch = batch_list[0]
+        batch = asset.get_batch(batch_request)
         execution_engine = datasource.get_execution_engine()
         batch_data: SqlAlchemyBatchData = execution_engine.get_batch_data(
-            batch_spec=first_batch.batch_spec
+            batch_spec=batch.batch_spec
         )
 
         num_rows: int = execution_engine.execute_query(
