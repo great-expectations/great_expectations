@@ -34,6 +34,10 @@ from great_expectations.exceptions import (
     ValidationDefinitionNotAddedError,
     ValidationDefinitionNotFreshError,
 )
+from great_expectations.exceptions.exceptions import (
+    StoreBackendError,
+    ValidationDefinitionNotFoundError,
+)
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
@@ -148,8 +152,13 @@ class ValidationDefinition(BaseModel):
 
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
-        # TODO: Add error checking
-        validation_definition = store.get(key=key)
+
+        try:
+            validation_definition = store.get(key=key)
+        except StoreBackendError:
+            return ValidationDefinitionFreshnessDiagnostics(
+                errors=[ValidationDefinitionNotFoundError(name=self.name)]
+            )
 
         return ValidationDefinitionFreshnessDiagnostics(
             errors=[]

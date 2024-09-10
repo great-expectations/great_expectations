@@ -45,6 +45,7 @@ from great_expectations.exceptions import (
     CheckpointNotFreshError,
     CheckpointRunWithoutValidationDefinitionError,
 )
+from great_expectations.exceptions.exceptions import CheckpointNotFoundError, StoreBackendError
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -293,8 +294,11 @@ class Checkpoint(BaseModel):
 
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
-        # TODO: Add error handling
-        checkpoint = store.get(key=key)
+
+        try:
+            checkpoint = store.get(key=key)
+        except StoreBackendError:
+            return CheckpointFreshnessDiagnostics(errors=[CheckpointNotFoundError(name=self.name)])
 
         return CheckpointFreshnessDiagnostics(
             errors=[] if checkpoint == self else [CheckpointNotFreshError(name=self.name)]
