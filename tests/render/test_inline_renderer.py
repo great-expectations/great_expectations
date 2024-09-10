@@ -699,7 +699,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                type="expect_table_row_count_to_equal",
+                expectation_type="expect_table_row_count_to_equal",
                 description="Row count must be equal to "
                 "the meaning of life, the universe, and everything.",
                 kwargs={"value": 42},
