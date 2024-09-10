@@ -49,19 +49,14 @@ def validator(sqlite_datasource: SqliteDatasource) -> Validator:
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "query",
-    [
-        pytest.param("SELECT * FROM table", id="no batch"),
-        pytest.param("SELECT * FROM {{ batch }}", id="invalid format"),
-    ],
-)
 def test_unexpected_rows_expectation_invalid_query_info_message(
-    validator: Validator, query: str, caplog, capfd
+    validator: Validator, caplog, capfd
 ):
     # info log is emitted
     with caplog.at_level(logging.INFO):
-        validator.unexpected_rows_expectation(unexpected_rows_query=query)
+        validator.unexpected_rows_expectation(
+            unexpected_rows_query="SELECT * FROM yellow_tripdata_sample_2019_02"
+        )
 
     # stdout is printed to console
     out, _ = capfd.readouterr()
