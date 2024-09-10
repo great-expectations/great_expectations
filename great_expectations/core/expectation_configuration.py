@@ -1567,6 +1567,7 @@ class ExpectationConfigurationSchema(Schema):
             lambda: RenderedAtomicContentSchema, required=False, allow_none=True
         )
     )
+    description = fields.String(required=False, allow_none=True)
 
     REMOVE_KEYS_IF_NONE = [
         "ge_cloud_id",
