@@ -5,6 +5,7 @@ from string import Formatter
 from typing import TYPE_CHECKING, ClassVar, Optional, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render.renderer_configuration import (
     CodeBlock,
@@ -83,6 +84,7 @@ class UnexpectedRowsExpectation(BatchExpectation):
     args_keys = ("unexpected_rows_query",)
 
     @override
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
