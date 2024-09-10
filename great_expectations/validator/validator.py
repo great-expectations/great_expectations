@@ -449,7 +449,9 @@ class Validator:
         if self.active_batch is None:
             raise TypeError("active_batch cannot be None")
         name = name.lower()
-        if name.startswith("expect_") and get_expectation_impl(name):
+        if (
+            name.startswith("expect_") or name == "unexpected_rows_expectation"
+        ) and get_expectation_impl(name):
             return self.validate_expectation(name)
         elif (
             self._expose_dataframe_methods
