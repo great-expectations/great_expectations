@@ -138,7 +138,6 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
         kwargs: The keyword arguments to pass to the expectation class.
         meta: A dictionary of metadata to attach to the expectation.
-        description: The description of the expectation. This will be rendered instead of the default template.
         success_on_last_run: Whether the expectation succeeded on the last run.
         ge_cloud_id: The corresponding GX Cloud ID for the expectation.
         expectation_context: The context for the expectation.
@@ -1009,7 +1008,6 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_type: str,
         kwargs: dict,
         meta: Optional[dict] = None,
-        description: str | None = None,
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
@@ -1032,7 +1030,6 @@ class ExpectationConfiguration(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
-        self.description = description
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
@@ -1567,14 +1564,8 @@ class ExpectationConfigurationSchema(Schema):
             lambda: RenderedAtomicContentSchema, required=False, allow_none=True
         )
     )
-    description = fields.Str(required=False, allow_none=True)
 
-    REMOVE_KEYS_IF_NONE = [
-        "ge_cloud_id",
-        "expectation_context",
-        "rendered_content",
-        "description",
-    ]
+    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context", "rendered_content"]
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
