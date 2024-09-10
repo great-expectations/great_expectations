@@ -12,13 +12,13 @@ from typing import (
     Union,
 )
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
 )
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
@@ -150,7 +150,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             )
         )
         if len(column_types_dict_list) != 1:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""Error: {len(column_types_dict_list)} columns were found while obtaining semantic type \
     information.  Please ensure that the specified column name refers to exactly one column.
     """  # noqa: E501

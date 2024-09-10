@@ -26,16 +26,16 @@ from great_expectations.checkpoint.checkpoint import (
 )
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.constants import DATAFRAME_REPLACEMENT_STR
-from great_expectations.core.added_diagnostics import (
-    BatchDefinitionAddedDiagnostics,
-    ExpectationSuiteAddedDiagnostics,
-    ValidationDefinitionAddedDiagnostics,
-)
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
+)
+from great_expectations.core.freshness_diagnostics import (
+    BatchDefinitionFreshnessDiagnostics,
+    ExpectationSuiteFreshnessDiagnostics,
+    ValidationDefinitionFreshnessDiagnostics,
 )
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
@@ -48,13 +48,13 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     CheckpointNotAddedError,
-    CheckpointRelatedResourcesNotAddedError,
+    CheckpointRelatedResourcesFreshnessError,
     CheckpointRunWithoutValidationDefinitionError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
 )
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
@@ -186,8 +186,8 @@ class TestCheckpointSerialization:
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ), mock.patch.object(
             ValidationDefinition,
-            "is_added",
-            return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
+            "is_fresh",
+            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -207,8 +207,8 @@ class TestCheckpointSerialization:
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ), mock.patch.object(
             ValidationDefinition,
-            "is_added",
-            return_value=ValidationDefinitionAddedDiagnostics(errors=[]),
+            "is_fresh",
+            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -498,13 +498,15 @@ class TestCheckpointResult:
     def mock_suite(self, mocker: MockerFixture):
         suite = mocker.Mock(spec=ExpectationSuite)
         suite.name = self.suite_name
-        suite.is_added.return_value = ExpectationSuiteAddedDiagnostics(errors=[])
+        suite.is_fresh.return_value = ExpectationSuiteFreshnessDiagnostics(errors=[])
         return suite
 
     @pytest.fixture
     def mock_batch_def(self, mocker: MockerFixture):
         bd = mocker.Mock(spec=BatchDefinition)
-        bd._copy_and_set_values().is_added.return_value = BatchDefinitionAddedDiagnostics(errors=[])
+        bd._copy_and_set_values().is_fresh.return_value = BatchDefinitionFreshnessDiagnostics(
+            errors=[]
+        )
         return bd
 
     @pytest.fixture
@@ -575,7 +577,7 @@ class TestCheckpointResult:
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
 
-        with pytest.raises(CheckpointRelatedResourcesNotAddedError) as e:
+        with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
             checkpoint.run()
 
         assert [type(err) for err in e.value.errors] == [
@@ -921,7 +923,7 @@ class TestCheckpointResult:
 
 
 @pytest.mark.parametrize(
-    "id,validation_def_id,suite_id,batch_def_id,is_added,error_list",
+    "id,validation_def_id,suite_id,batch_def_id,is_fresh,error_list",
     [
         pytest.param(
             str(uuid.uuid4()),
@@ -1087,14 +1089,26 @@ class TestCheckpointResult:
     ],
 )
 @pytest.mark.unit
-def test_is_added(
+def test_is_fresh(
+    in_memory_runtime_context,
     id: str | None,
     validation_def_id: str | None,
     suite_id: str | None,
     batch_def_id: str | None,
-    is_added: bool,
-    error_list: list[Type[ResourceNotAddedError]],
+    is_fresh: bool,
+    error_list: list[Type[ResourceFreshnessError]],
 ):
+    context = in_memory_runtime_context
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+    batch_definition.id = batch_def_id  # Fluent API will add an ID but manually overriding for test
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    suite.id = suite_id  # Store will add an ID but manually overriding for test
+
     checkpoint = Checkpoint(
         name="my_checkpoint",
         id=id,
@@ -1102,12 +1116,12 @@ def test_is_added(
             ValidationDefinition(
                 name="my_validation_definition",
                 id=validation_def_id,
-                suite=ExpectationSuite(name="my_suite", id=suite_id),
-                data=BatchDefinition(name="my_batch_def", id=batch_def_id),
+                suite=suite,
+                data=batch_definition,
             )
         ],
     )
-    diagnostics = checkpoint.is_added()
+    diagnostics = checkpoint.is_fresh()
 
-    assert diagnostics.is_added is is_added
+    assert diagnostics.success is is_fresh
     assert [type(err) for err in diagnostics.errors] == error_list
