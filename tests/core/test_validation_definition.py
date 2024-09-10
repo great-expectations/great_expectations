@@ -48,6 +48,7 @@ from great_expectations.exceptions import (
     ValidationDefinitionNotAddedError,
     ValidationDefinitionRelatedResourcesFreshnessError,
 )
+from great_expectations.exceptions.resource_freshness import ResourceFreshnessAggregateError
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -795,65 +796,57 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
     "id,suite_id,batch_def_id,is_fresh,error_list",
     [
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
+            True,
+            True,
             True,
             [],
             id="validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
+            True,
             False,
+            True,
             [ExpectationSuiteNotAddedError],
             id="validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
+            True,
+            True,
             False,
             [BatchDefinitionNotAddedError],
             id="validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            None,
+            True,
+            False,
             False,
             [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
             id="validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
             False,
+            True,
+            True,
             [ValidationDefinitionNotAddedError],
             id="no_validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            str(uuid.uuid4()),
             False,
+            False,
+            True,
             [ExpectationSuiteNotAddedError, ValidationDefinitionNotAddedError],
             id="no_validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            None,
+            False,
+            True,
             False,
             [BatchDefinitionNotAddedError, ValidationDefinitionNotAddedError],
             id="no_validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            None,
+            False,
+            False,
             False,
             [
                 BatchDefinitionNotAddedError,
@@ -867,10 +860,9 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
 @pytest.mark.unit
 def test_is_fresh(
     in_memory_runtime_context,
-    id: str | None,
-    suite_id: str | None,
-    batch_def_id: str | None,
-    is_fresh: bool,
+    id: bool,
+    suite_id: bool,
+    batch_def_id: bool,
     error_list: list[Type[ResourceFreshnessError]],
 ):
     context = in_memory_runtime_context
@@ -880,18 +872,26 @@ def test_is_fresh(
         .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
         .add_batch_definition(name="my_batch_def")
     )
-    batch_definition.id = batch_def_id  # Fluent API will add an ID but manually overriding for test
-
     suite = context.suites.add(ExpectationSuite(name="my_suite"))
-    suite.id = suite_id  # Store will add an ID but manually overriding for test
-
-    validation_definition = ValidationDefinition(
-        name="my_validation_definition",
-        id=id,
-        suite=suite,
-        data=batch_definition,
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
     )
-    diagnostics = validation_definition.is_fresh()
 
-    assert diagnostics.success is is_fresh
-    assert [type(err) for err in diagnostics.errors] == error_list
+    # Stores/Fluent API will always assign IDs but we manually override them here
+    # for purposes of changing object state for the test
+    if not batch_def_id:
+        batch_definition.id = batch_def_id
+    if not suite_id:
+        suite.id = suite_id
+    if not id:
+        validation_definition.id = id
+
+    diagnostics = validation_definition.is_fresh()
+    try:
+        diagnostics.raise_for_error()
+    except ResourceFreshnessAggregateError as e:
+        assert [type(err) for err in e.errors] == error_list
