@@ -34,6 +34,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.freshness_diagnostics import (
     BatchDefinitionFreshnessDiagnostics,
+    CheckpointFreshnessDiagnostics,
     ExpectationSuiteFreshnessDiagnostics,
     ValidationDefinitionFreshnessDiagnostics,
 )
@@ -663,9 +664,13 @@ class TestCheckpointResult:
         )
         batch_parameters = {"my_param": "my_value"}
         expectation_parameters = {"my_other_param": "my_other_value"}
-        _ = checkpoint.run(
-            batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
-        )
+
+        with mock.patch.object(
+            Checkpoint, "is_fresh", return_value=CheckpointFreshnessDiagnostics(errors=[])
+        ):
+            _ = checkpoint.run(
+                batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
+            )
 
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             checkpoint_id=checkpoint_id,
