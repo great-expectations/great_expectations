@@ -11,11 +11,11 @@ title: Changelog
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
 ### 0.18.20
-* [FEATURE] Add `UnexpectedRowsExpectation` ([#10342](GxURL.PULL_REQUESTS/10342))
-* [BUGFIX] Remove illegible duplicate local Data Docs link from Slack renderer ([#10129](GxURL.PULL_REQUESTS/10129))
-* [MAINTENANCE] Ruff 0.5.3 + PR annotations ([#10128](GxURL.PULL_REQUESTS/10128))
-* [MAINTENANCE] Fix 0.18.x CI ([#10199](GxURL.PULL_REQUESTS/10199))
-* [MAINTENANCE] Update column identifier tests ([#8783](GxURL.PULL_REQUESTS/8783))
+* [FEATURE] Add `UnexpectedRowsExpectation` ([#10342](https://github.com/great-expectations/great_expectations/pull/10342))
+* [BUGFIX] Remove illegible duplicate local Data Docs link from Slack renderer ([#10129](https://github.com/great-expectations/great_expectations/pull/10129))
+* [MAINTENANCE] Ruff 0.5.3 + PR annotations ([#10128](https://github.com/great-expectations/great_expectations/pull/10128))
+* [MAINTENANCE] Fix 0.18.x CI ([#10199](https://github.com/great-expectations/great_expectations/pull/10199))
+* [MAINTENANCE] Update column identifier tests ([#8783](https://github.com/great-expectations/great_expectations/pull/8783))
 
 ### 0.18.19
 * [FEATURE] Snowflake test for the presence of a schema in `test_connection()` ([#10100](https://github.com/great-expectations/great_expectations/pull/10100))
