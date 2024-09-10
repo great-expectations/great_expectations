@@ -34,6 +34,10 @@ module.exports = {
       async: true,
       defer: true,
     },
+    {
+      src: 'https://fast.wistia.net/assets/external/E-v1.js',
+      async: true
+    }
   ],
 
   themeConfig: {
