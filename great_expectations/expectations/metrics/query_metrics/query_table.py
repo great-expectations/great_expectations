@@ -34,7 +34,7 @@ class QueryTable(QueryMetricProvider):
     ) -> List[dict]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
-        ) or cls.default_kwarg_values.get("query")
+        ) or metric_value_kwargs.get("unexpected_rows_query")
 
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
