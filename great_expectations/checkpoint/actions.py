@@ -129,12 +129,13 @@ class ValidationAction(BaseModel):
 
     def _get_data_docs_pages_from_prior_action(
         self, action_context: ActionContext | None
-    ) -> list[dict] | None:
+    ) -> dict[ValidationResultIdentifier, dict] | None:
         if action_context:
             data_docs_results = action_context.filter_results(class_=UpdateDataDocsAction)
             data_docs_pages = {}
             for result in data_docs_results:
                 data_docs_pages.update(result)
+            return data_docs_pages
 
         return None
 
