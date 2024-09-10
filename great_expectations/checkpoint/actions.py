@@ -131,7 +131,10 @@ class ValidationAction(BaseModel):
         self, action_context: ActionContext | None
     ) -> list[dict] | None:
         if action_context:
-            return action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_results = action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_pages = {}
+            for result in data_docs_results:
+                data_docs_pages.update(result)
 
         return None
 
@@ -285,7 +288,9 @@ class SlackNotificationAction(DataDocsAction):
     ) -> list[dict]:
         data_docs_pages = None
         if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_pages = self._get_data_docs_pages_from_prior_action(
+                action_context=action_context
+            )
 
         # Assemble complete GX Cloud URL for a specific validation result
         data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
