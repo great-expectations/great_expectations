@@ -53,6 +53,8 @@ class QueryTable(QueryMetricProvider):
             query = query.format(  # type: ignore[union-attr] # could be none
                 active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
+        elif metric_value_kwargs.get("unexpected_rows_query"):
+            query = query.format(batch=f"({selectable})")
         else:
             query = query.format(active_batch=f"({selectable})")  # type: ignore[union-attr] # could be none
 
