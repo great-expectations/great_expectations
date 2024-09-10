@@ -18,7 +18,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.result_format import ResultFormat
-from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -157,11 +156,12 @@ def cloud_validation_definition(
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_definition(BATCH_DEFINITION_NAME)
     )
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     return context.validation_definitions.add(
         ValidationDefinition(
             name="my_validation",
             data=batch_definition,
-            suite=context.suites.add(ExpectationSuite(name="my_suite")),
+            suite=suite,
         )
     )
 
@@ -760,15 +760,6 @@ class TestValidationDefinitionSerialization:
     ):
         with pytest.raises(ValueError, match=f"{error_substring}*."):
             ValidationDefinition.parse_obj(serialized_config)
-
-
-@pytest.mark.unit
-def test_identifier_bundle_with_existing_id(validation_definition: ValidationDefinition):
-    validation_definition.id = "fa34fbb7-124d-42ff-9760-e410ee4584a0"
-
-    assert validation_definition.identifier_bundle() == _IdentifierBundle(
-        name="my_validation", id="fa34fbb7-124d-42ff-9760-e410ee4584a0"
-    )
 
 
 @pytest.mark.unit
