@@ -782,6 +782,7 @@ def get_validation_definition_by_id_cb(request: PreparedRequest) -> CallbackResu
         validation_id
     )
     if validation_definition:
+        validation_definition = {"data": validation_definition}
         result = CallbackResult(
             200, headers=DEFAULT_HEADERS, body=json.dumps(validation_definition)
         )
