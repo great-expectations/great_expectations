@@ -24,8 +24,8 @@ class MicrosoftTeamsRenderer(Renderer):
 
     @override
     def render(
-        self, checkpoint_result: CheckpointResult, data_docs_pages: list[dict] | None = None
-    ):
+        self, checkpoint_result: CheckpointResult, data_docs_pages: dict | None = None
+    ) -> dict:
         checkpoint_blocks: list[list[dict[str, str]]] = []
         for result_identifier, result in checkpoint_result.run_results.items():
             validation_blocks = self._render_validation_result(
@@ -100,9 +100,7 @@ class MicrosoftTeamsRenderer(Renderer):
         check_details_text = f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
         return self._render_validation_result_element(key="Summary", value=check_details_text)
 
-    def _render_data_docs_links(
-        self, data_docs_pages: list[dict] | None
-    ) -> list[dict[str, str]] | None:
+    def _render_data_docs_links(self, data_docs_pages: dict | None) -> list[dict[str, str]] | None:
         if not data_docs_pages:
             return None
 
