@@ -129,17 +129,6 @@ class ValidationDefinition(BaseModel):
         return project_manager.get_validation_results_store()
 
     def is_fresh(self) -> ValidationDefinitionFreshnessDiagnostics:
-        diagnostics = self._is_added()
-        if not diagnostics.success:
-            return diagnostics
-        return self._is_fresh()
-
-    def _is_added(self) -> ValidationDefinitionFreshnessDiagnostics:
-        return ValidationDefinitionFreshnessDiagnostics(
-            errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
-        )
-
-    def _is_fresh(self) -> ValidationDefinitionFreshnessDiagnostics:
         validation_definition_diagnostics = ValidationDefinitionFreshnessDiagnostics(
             errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
         )

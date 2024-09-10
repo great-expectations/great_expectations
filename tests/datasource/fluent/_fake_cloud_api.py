@@ -770,6 +770,38 @@ def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
     return result
 
 
+def get_validation_definition_by_id_cb(request: PreparedRequest) -> CallbackResult:
+    if not request.url:
+        raise NotImplementedError("request.url should not be empty")
+    LOGGER.debug(f"{request.method} {request.url}")
+
+    parsed_url = urllib.parse.urlparse(request.url)
+    validation_id = parsed_url.path.split("/")[-1]
+
+    validation_definition: dict | None = _CLOUD_API_FAKE_DB["validation_definitions"].get(
+        validation_id
+    )
+    if validation_definition:
+        result = CallbackResult(
+            200, headers=DEFAULT_HEADERS, body=json.dumps(validation_definition)
+        )
+    else:
+        result = CallbackResult(
+            404,
+            headers=DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "Mock 404",
+                        "detail": f"ValidationDefinition {validation_id} not found",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
+    return result
+
+
 def post_validation_definitions_cb(request: PreparedRequest) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
@@ -928,6 +960,13 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             urllib.parse.urljoin(org_url_base_V1, "validation-definitions"),
             post_validation_definitions_cb,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            re.compile(
+                urllib.parse.urljoin(org_url_base_V1, f"validation-definitions/{UUID_REGEX}")
+            ),
+            get_validation_definition_by_id_cb,
         )
 
         yield resp_mocker

@@ -272,17 +272,6 @@ class Checkpoint(BaseModel):
         return priority_actions + secondary_actions
 
     def is_fresh(self) -> CheckpointFreshnessDiagnostics:
-        diagnostics = self._is_added()
-        if not diagnostics.success:
-            return diagnostics
-        return self._is_fresh()
-
-    def _is_added(self) -> CheckpointFreshnessDiagnostics:
-        return CheckpointFreshnessDiagnostics(
-            errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
-        )
-
-    def _is_fresh(self) -> CheckpointFreshnessDiagnostics:
         checkpoint_diagnostics = CheckpointFreshnessDiagnostics(
             errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
         )
