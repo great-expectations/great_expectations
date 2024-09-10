@@ -5,18 +5,21 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.expectations.core import UnexpectedRowsExpectation
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.datasource.fluent.interfaces import Batch
     from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
+    from great_expectations.validator.validator import Validator
 
 
 @pytest.fixture
 def taxi_db_path() -> str:
-    return file_relative_path(__file__, "../../test_sets/quickstart/yellow_tripdata.db")
+    return file_relative_path(
+        __file__,
+        "../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db",
+    )
 
 
 @pytest.fixture
@@ -25,18 +28,24 @@ def sqlite_datasource(
 ) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_sqlite_datasource"
-    return context.data_sources.add_sqlite(
+    return context.sources.add_sqlite(
         datasource_name, connection_string=f"sqlite:///{taxi_db_path}"
     )
 
 
 @pytest.fixture
-def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
+def validator(sqlite_datasource: SqliteDatasource) -> Validator:
     datasource = sqlite_datasource
-    asset = datasource.add_table_asset("yellow_tripdata_sample_2022_01")
+    context = datasource._data_context
+    asset = datasource.add_table_asset("yellow_tripdata_sample_2019_01")
 
     batch_request = asset.build_batch_request()
-    return asset.get_batch_list_from_batch_request(batch_request)[0]
+    expectation_suite_name = "test_suite"
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+    return context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
 
 
 @pytest.mark.unit
@@ -49,11 +58,11 @@ def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
     ],
 )
 def test_unexpected_rows_expectation_invalid_query_info_message(
-    query: str, caplog, capfd
+    validator: Validator, query: str, caplog, capfd
 ):
     # info log is emitted
     with caplog.at_level(logging.INFO):
-        UnexpectedRowsExpectation(unexpected_rows_query=query)
+        validator.unexpected_rows_expectation(unexpected_rows_query=query)
 
     # stdout is printed to console
     out, _ = capfd.readouterr()
@@ -105,16 +114,13 @@ def test_unexpected_rows_expectation_invalid_query_info_message(
     ],
 )
 def test_unexpected_rows_expectation_validate(
-    sqlite_batch: Batch,
+    validator: Validator,
     query: str,
     expected_success: bool,
     expected_observed_value: int,
     expected_unexpected_rows: list[dict],
 ):
-    batch = sqlite_batch
-
-    expectation = UnexpectedRowsExpectation(unexpected_rows_query=query)
-    result = batch.validate(expectation)
+    result = validator.unexpected_rows_expectation(unexpected_rows_query=query)
 
     assert result.success is expected_success
 
@@ -145,9 +151,10 @@ def test_unexpected_rows_expectation_render(
     description: str | None,
     unexpected_rows_query: str,
 ):
-    expectation = UnexpectedRowsExpectation(
+    expectation = ExpectationConfiguration(
+        expectation_type="unexpected_rows_expectation",
         description=description,
-        unexpected_rows_query=unexpected_rows_query,
+        kwargs={"unexpected_rows_query": unexpected_rows_query},
     )
     expectation.render()
     assert (
