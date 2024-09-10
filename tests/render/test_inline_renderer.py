@@ -697,6 +697,29 @@ def test_inline_renderer_expectation_validation_result_serialization(
             ],
             id="meta_notes string",
         ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal",
+                description="Row count must be equal to "
+                "the meaning of life, the universe, and everything.",
+                kwargs={"value": 42},
+            ),
+            [
+                {
+                    "value_type": "StringValueType",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
+                    "value": {
+                        "template": "Row count must be equal to "
+                        "the meaning of life, the universe, and everything.",
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "params": {
+                            "value": {"schema": {"type": "number"}, "value": 42},
+                        },
+                    },
+                }
+            ],
+            id="description",
+        ),
     ],
 )
 def test_inline_renderer_expectation_configuration_serialization(

@@ -135,6 +135,28 @@ class MetaNotes(TypedDict):
     content: List[str]
 
 
+class CodeBlockLanguage(str, Enum):
+    JSON = "json"
+    PYTHON = "python"
+    SQL = "sql"
+    YAML = "yaml"
+
+
+class CodeBlock(TypedDict):
+    """A code block of a specified language to be rendered.
+    The code_template_str uses $variable substitution of RendererConfiguration.params.
+    e.g. RendererConfiguration.params: python_code_block_1, python_code_block_2
+
+    CodeBlock(
+        code_template_str="$python_code_block_1\n\n$python_code_block_2",
+        language=CodeBlockLanguage.PYTHON,
+    )
+    """
+
+    code_template_str: str
+    language: CodeBlockLanguage
+
+
 class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererParams]):
     """
     Configuration object built for each renderer. Operations to be performed strictly on this object at the renderer
@@ -151,7 +173,8 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     meta_notes: MetaNotes = Field(
         MetaNotes(format=MetaNotesFormat.STRING, content=[]), allow_mutation=False
     )
-    template_str: str = Field("", allow_mutation=True)
+    template_str: Optional[str] = Field(None, allow_mutation=True)
+    code_block: CodeBlock = Field({}, allow_mutation=True)
     header_row: List[RendererTableValue] = Field([], allow_mutation=True)
     table: List[List[RendererTableValue]] = Field([], allow_mutation=True)
     graph: dict = Field({}, allow_mutation=True)
@@ -293,6 +316,9 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             ].expectation_config
             values["expectation_type"] = expectation_configuration.expectation_type
             values["kwargs"] = expectation_configuration.kwargs
+            # description is the template_str override
+            if expectation_configuration.description:
+                values["template_str"] = expectation_configuration.description
             raw_configuration: ExpectationConfiguration = (
                 expectation_configuration.get_raw_configuration()
             )
@@ -315,6 +341,9 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         elif "configuration" in values and values["configuration"] is not None:
             values["expectation_type"] = values["configuration"].expectation_type
             values["kwargs"] = values["configuration"].kwargs
+            # description is the template_str override
+            if values["configuration"].description:
+                values["template_str"] = values["configuration"].description
 
         return values
 
@@ -486,7 +515,13 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
     @validator("template_str")
     def _set_template_str(cls, v: str, values: dict) -> str:
-        if values.get("_row_condition"):
+        if values.get("configuration") and values["configuration"].description:
+            # description always overrides other template_strs
+            v = values["configuration"].description
+        elif values.get("result") and values["result"].expectation_config.description:
+            # description always overrides other template_strs
+            v = values["result"].expectation_config.description
+        elif values.get("_row_condition"):
             row_condition_str: str = RendererConfiguration._get_row_condition_string(
                 row_condition_str=values["_row_condition"]
             )

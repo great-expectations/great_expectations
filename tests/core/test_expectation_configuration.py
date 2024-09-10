@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -73,6 +75,19 @@ def config7():
             "column": "a",
             "value_set": [1, 2, 3, 4],
         },  # differs from others
+        meta={"notes": "This is another expectation."},
+    )
+
+
+@pytest.fixture
+def config8():
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        description="The values should be in the specified set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 2, 3, 4],
+        },
         meta={"notes": "This is another expectation."},
     )
 
@@ -197,3 +212,23 @@ def test_expectation_configuration_patch(config4, config5, config6, config7):
 
     with pytest.raises(ValueError):
         config5.patch("add", "/foo/-", 4)
+
+
+@pytest.mark.unit
+def test_expectation_configuration_to_json_dict(config1, config4, config8):
+    assert config1.to_json_dict() == {
+        "kwargs": {"column": "a", "result_format": "BASIC", "value_set": [1, 2, 3]},
+        "meta": {"notes": "This is an expectation."},
+        "expectation_type": "expect_column_values_to_be_in_set",
+    }
+    assert config4.to_json_dict() == {
+        "kwargs": {"column": "a", "result_format": "COMPLETE", "value_set": [1, 2, 3]},
+        "meta": {"notes": "This is another expectation."},
+        "expectation_type": "expect_column_values_to_be_in_set",
+    }
+    assert config8.to_json_dict() == {
+        "description": "The values should be in the specified set",
+        "kwargs": {"column": "a", "value_set": [1, 2, 3, 4]},
+        "meta": {"notes": "This is another expectation."},
+        "expectation_type": "expect_column_values_to_be_in_set",
+    }

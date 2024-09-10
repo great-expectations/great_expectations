@@ -474,7 +474,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[str, dict, MetaNotes, Optional[dict]]:
+    ) -> Tuple[Optional[str], dict, MetaNotes, Optional[dict]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
@@ -524,6 +524,7 @@ class Expectation(metaclass=MetaExpectation):
             {
                 "template": renderer_configuration.template_str,
                 "params": renderer_configuration.params.dict(),
+                "code_block": renderer_configuration.code_block or None,
                 "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
