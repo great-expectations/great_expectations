@@ -23,7 +23,9 @@ class MicrosoftTeamsRenderer(Renderer):
     MICROSOFT_TEAMS_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json"
 
     @override
-    def render(self, checkpoint_result: CheckpointResult, data_docs_pages: dict | None = None):
+    def render(
+        self, checkpoint_result: CheckpointResult, data_docs_pages: dict | None = None
+    ) -> dict:
         checkpoint_blocks: list[list[dict[str, str]]] = []
         for result_identifier, result in checkpoint_result.run_results.items():
             validation_blocks = self._render_validation_result(
