@@ -784,7 +784,7 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
 
 
 @pytest.mark.parametrize(
-    "id,suite_id,batch_def_id,error_list",
+    "has_id,has_suite_id,has_batch_def_id,error_list",
     [
         pytest.param(
             True,
@@ -851,9 +851,9 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
 @pytest.mark.unit
 def test_is_fresh(
     in_memory_runtime_context,
-    id: bool,
-    suite_id: bool,
-    batch_def_id: bool,
+    has_id: bool,
+    has_suite_id: bool,
+    has_batch_def_id: bool,
     error_list: list[Type[ResourceFreshnessError]],
 ):
     context = in_memory_runtime_context
@@ -874,11 +874,11 @@ def test_is_fresh(
 
     # Stores/Fluent API will always assign IDs but we manually override them here
     # for purposes of changing object state for the test
-    if not batch_def_id:
+    if not has_batch_def_id:
         validation_definition.data.id = None
-    if not suite_id:
+    if not has_suite_id:
         validation_definition.suite.id = None
-    if not id:
+    if not has_id:
         validation_definition.id = None
 
     diagnostics = validation_definition.is_fresh()
