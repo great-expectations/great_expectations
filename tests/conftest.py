@@ -493,7 +493,7 @@ def spark_session(test_backends) -> pyspark.SparkSession:
 
 
 @pytest.fixture
-def spark_connect_session(test_backends) -> pyspark.SparkConnectSession:
+def spark_connect_session(test_backends):
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkConnectSession:  # type: ignore[truthy-function]
