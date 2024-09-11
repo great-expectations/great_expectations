@@ -59,6 +59,10 @@ from great_expectations.exceptions import (
     ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
 )
+from great_expectations.exceptions.exceptions import (
+    CheckpointNotFoundError,
+    ValidationDefinitionNotFoundError,
+)
 from great_expectations.exceptions.resource_freshness import ResourceFreshnessAggregateError
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
@@ -1187,3 +1191,71 @@ def test_is_fresh(
         diagnostics.raise_for_error()
     except ResourceFreshnessAggregateError as e:
         assert [type(err) for err in e.errors] == error_list
+
+
+def test_is_fresh_raises_error_when_checkpoint_not_found(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    checkpoint = context.checkpoints.add(
+        Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+    )
+
+    context.checkpoints.delete(checkpoint.name)
+
+    diagnostics = checkpoint.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], CheckpointNotFoundError)
+
+
+def test_is_fresh_raises_error_when_child_deps_not_found(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    checkpoint = context.checkpoints.add(
+        Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+    )
+
+    context.validation_definitions.delete(validation_definition.name)
+
+    diagnostics = checkpoint.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], ValidationDefinitionNotFoundError)
