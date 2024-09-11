@@ -42,6 +42,7 @@ from great_expectations.exceptions import (
     ExpectationSuiteNotFreshError,
     StoreBackendError,
 )
+from great_expectations.exceptions.exceptions import InvalidKeyError
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     convert_to_json_serializable,  # noqa: TID251
@@ -272,7 +273,10 @@ class ExpectationSuite(SerializableDictDot):
         try:
             key = self._store.get_key(name=self.name, id=self.id)
             suite_dict = self._store.get(key=key)
-        except StoreBackendError:
+        except (
+            StoreBackendError,  # Generic error from stores
+            InvalidKeyError,  # Ephemeral context error
+        ):
             suite_dict = None
         if not suite_dict:
             return ExpectationSuiteFreshnessDiagnostics(
