@@ -35,6 +35,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.freshness_diagnostics import (
     BatchDefinitionFreshnessDiagnostics,
+    CheckpointFreshnessDiagnostics,
     ExpectationSuiteFreshnessDiagnostics,
     ValidationDefinitionFreshnessDiagnostics,
 )
@@ -58,6 +59,7 @@ from great_expectations.exceptions import (
     ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
 )
+from great_expectations.exceptions.resource_freshness import ResourceFreshnessAggregateError
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
 
@@ -663,9 +665,13 @@ class TestCheckpointResult:
         )
         batch_parameters = {"my_param": "my_value"}
         expectation_parameters = {"my_other_param": "my_other_value"}
-        _ = checkpoint.run(
-            batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
-        )
+
+        with mock.patch.object(
+            Checkpoint, "is_fresh", return_value=CheckpointFreshnessDiagnostics(errors=[])
+        ):
+            _ = checkpoint.run(
+                batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
+            )
 
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             checkpoint_id=checkpoint_id,
@@ -982,76 +988,68 @@ class TestCheckpointResult:
 
 
 @pytest.mark.parametrize(
-    "id,validation_def_id,suite_id,batch_def_id,is_fresh,error_list",
+    "has_id,has_validation_def_id,has_suite_id,has_batch_def_id,error_list",
     [
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
+            True,
+            True,
+            True,
             True,
             [],
             id="checkpoint_id|validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
+            True,
+            True,
+            True,
             False,
             [BatchDefinitionNotAddedError],
             id="checkpoint_id|validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
+            True,
+            True,
             False,
+            True,
             [ExpectationSuiteNotAddedError],
             id="checkpoint_id|validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
-            None,
+            True,
+            True,
+            False,
             False,
             [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
             id="checkpoint_id|validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
+            True,
             False,
+            True,
+            True,
             [ValidationDefinitionNotAddedError],
             id="checkpoint_id|no_validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
-            None,
+            True,
+            False,
+            True,
             False,
             [BatchDefinitionNotAddedError, ValidationDefinitionNotAddedError],
             id="checkpoint_id|no_validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            None,
-            str(uuid.uuid4()),
+            True,
             False,
+            False,
+            True,
             [ExpectationSuiteNotAddedError, ValidationDefinitionNotAddedError],
             id="checkpoint_id|no_validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            None,
-            None,
+            True,
+            False,
+            False,
             False,
             [
                 BatchDefinitionNotAddedError,
@@ -1061,55 +1059,49 @@ class TestCheckpointResult:
             id="checkpoint_id|no_validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
             False,
+            True,
+            True,
+            True,
             [CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
+            False,
+            True,
+            True,
             False,
             [BatchDefinitionNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
             False,
+            True,
+            False,
+            True,
             [ExpectationSuiteNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            None,
-            None,
+            False,
+            True,
+            False,
             False,
             [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
             False,
+            False,
+            True,
+            True,
             [ValidationDefinitionNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|no_validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            str(uuid.uuid4()),
-            None,
+            False,
+            False,
+            True,
             False,
             [
                 BatchDefinitionNotAddedError,
@@ -1119,11 +1111,10 @@ class TestCheckpointResult:
             id="no_checkpoint_id|no_validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            None,
-            str(uuid.uuid4()),
             False,
+            False,
+            False,
+            True,
             [
                 ExpectationSuiteNotAddedError,
                 ValidationDefinitionNotAddedError,
@@ -1132,10 +1123,9 @@ class TestCheckpointResult:
             id="no_checkpoint_id|no_validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            None,
-            None,
+            False,
+            False,
+            False,
             False,
             [
                 BatchDefinitionNotAddedError,
@@ -1150,37 +1140,50 @@ class TestCheckpointResult:
 @pytest.mark.unit
 def test_is_fresh(
     in_memory_runtime_context,
-    id: str | None,
-    validation_def_id: str | None,
-    suite_id: str | None,
-    batch_def_id: str | None,
-    is_fresh: bool,
+    has_id: bool,
+    has_validation_def_id: bool,
+    has_suite_id: bool,
+    has_batch_def_id: bool,
     error_list: list[Type[ResourceFreshnessError]],
 ):
     context = in_memory_runtime_context
+
     batch_definition = (
         context.data_sources.add_pandas(name="my_pandas_ds")
         .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
         .add_batch_definition(name="my_batch_def")
     )
-    batch_definition.id = batch_def_id  # Fluent API will add an ID but manually overriding for test
 
     suite = context.suites.add(ExpectationSuite(name="my_suite"))
-    suite.id = suite_id  # Store will add an ID but manually overriding for test
 
-    checkpoint = Checkpoint(
-        name="my_checkpoint",
-        id=id,
-        validation_definitions=[
-            ValidationDefinition(
-                name="my_validation_definition",
-                id=validation_def_id,
-                suite=suite,
-                data=batch_definition,
-            )
-        ],
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
     )
-    diagnostics = checkpoint.is_fresh()
 
-    assert diagnostics.success is is_fresh
-    assert [type(err) for err in diagnostics.errors] == error_list
+    checkpoint = context.checkpoints.add(
+        Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+    )
+
+    # Stores/Fluent API will always assign IDs but we manually override them here
+    # for purposes of changing object state for the test
+    if not has_batch_def_id:
+        checkpoint.validation_definitions[0].data.id = None
+    if not has_suite_id:
+        checkpoint.validation_definitions[0].suite.id = None
+    if not has_validation_def_id:
+        checkpoint.validation_definitions[0].id = None
+    if not has_id:
+        checkpoint.id = None
+
+    diagnostics = checkpoint.is_fresh()
+    try:
+        diagnostics.raise_for_error()
+    except ResourceFreshnessAggregateError as e:
+        assert [type(err) for err in e.errors] == error_list
