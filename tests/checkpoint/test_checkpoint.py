@@ -8,6 +8,7 @@ from unittest import mock
 
 import pandas as pd
 import pytest
+from requests import Session
 
 import great_expectations as gx
 from great_expectations import expectations as gxe
@@ -756,7 +757,10 @@ class TestCheckpointResult:
         }
         assert actual == expected
 
-    def _build_file_backed_checkpoint(self, tmp_path: pathlib.Path) -> Checkpoint:
+    def _build_file_backed_checkpoint(
+        self, tmp_path: pathlib.Path, actions: list[CheckpointAction] | None = None
+    ) -> Checkpoint:
+        actions = actions or []
         with working_directory(tmp_path):
             context = gx.get_context(mode="file")
 
@@ -793,7 +797,11 @@ class TestCheckpointResult:
             )
         )
 
-        return Checkpoint(name=self.checkpoint_name, validation_definitions=[validation_definition])
+        return Checkpoint(
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
+            actions=actions,
+        )
 
     @pytest.mark.unit
     def test_checkpoint_result_does_not_contain_dataframe(self, tmp_path: pathlib.Path):
@@ -926,6 +934,57 @@ class TestCheckpointResult:
         ]
         assert meta["checkpoint_id"] == checkpoint.id
         assert meta["validation_id"] == checkpoint.validation_definitions[0].id
+
+    @pytest.mark.filesystem
+    def test_checkpoint_run_with_data_docs_and_slack_actions_emit_page_links(
+        self, tmp_path: pathlib.Path
+    ):
+        actions = [
+            SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
+            UpdateDataDocsAction(name="docs_action"),
+        ]
+        checkpoint = self._build_file_backed_checkpoint(tmp_path=tmp_path, actions=actions)
+
+        with mock.patch.object(Session, "post") as mock_post:
+            _ = checkpoint.run()
+
+        mock_post.assert_called_once()
+        docs_block = mock_post.call_args.kwargs["json"]["blocks"][3]["text"]["text"]
+        assert "*DataDocs*" in docs_block
+        assert "local_site" in docs_block
+        assert "file:///" in docs_block
+
+    @pytest.mark.filesystem
+    def test_checkpoint_run_with_slack_action_no_page_links(self, tmp_path: pathlib.Path):
+        actions = [
+            SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
+        ]
+        checkpoint = self._build_file_backed_checkpoint(tmp_path=tmp_path, actions=actions)
+
+        with mock.patch.object(Session, "post") as mock_post:
+            _ = checkpoint.run()
+
+        mock_post.assert_called_once()
+        blocks = mock_post.call_args.kwargs["json"]["blocks"]
+        # No DataDocs blocks should be present
+        assert blocks == [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "slack_action - my_checkpoint - Failure :no_entry:",
+                },
+            },
+            {"type": "section", "text": {"type": "plain_text", "text": mock.ANY}},
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Asset*: my_asset  *Expectation Suite*: my_suite",
+                },
+            },
+            {"type": "divider"},
+        ]
 
 
 @pytest.mark.parametrize(
