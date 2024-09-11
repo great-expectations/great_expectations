@@ -400,10 +400,16 @@ class SparkDFExecutionEngine(ExecutionEngine):
         batch_id: str,
         batch_data: Union[SparkDFBatchData, pyspark.DataFrame, pyspark.ConnectDataFrame],
     ) -> None:
-        if not isinstance(batch_data, SparkDFBatchData):
+        if pyspark.DataFrame and isinstance(
+            batch_data, (pyspark.DataFrame, pyspark.ConnectDataFrame)
+        ):  # type: ignore[truthy-function]
             batch_data = SparkDFBatchData(self, batch_data)
+        elif not isinstance(batch_data, SparkDFBatchData):
+            raise GreatExpectationsError(  # noqa: TRY003
+                "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"  # noqa: E501
+            )
 
-        if self._persist and isinstance(batch_data.dataframe, pyspark.DataFrame):
+        if self._persist:
             batch_data.dataframe.persist()
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)

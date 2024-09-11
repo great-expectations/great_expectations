@@ -493,6 +493,16 @@ def spark_session(test_backends) -> pyspark.SparkSession:
 
 
 @pytest.fixture
+def spark_connect_session(test_backends) -> pyspark.SparkConnectSession:
+    from great_expectations.compatibility import pyspark
+
+    if pyspark.SparkConnectSession:  # type: ignore[truthy-function]
+        return pyspark.SparkConnectSession.builder.remote("sc://localhost:15002").getOrCreate()
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
+
+
+@pytest.fixture
 def basic_spark_df_execution_engine(spark_session):
     from great_expectations.execution_engine import SparkDFExecutionEngine
 

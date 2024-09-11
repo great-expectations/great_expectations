@@ -40,6 +40,11 @@ except (ImportError, AttributeError):
     ConnectDataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
+    from pyspark.sql.connect.session import SparkSession as SparkConnectSession
+except (ImportError, AttributeError):
+    SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
     from pyspark.sql import Column
 except (ImportError, AttributeError):
     Column = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
@@ -58,11 +63,6 @@ try:
     from pyspark.sql import SparkSession
 except (ImportError, AttributeError):
     SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-
-try:
-    from pyspark.sql.connect.session import SparkSession as SparkConnectSession
-except (ImportError, AttributeError):
-    SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
     from pyspark.sql import SQLContext
