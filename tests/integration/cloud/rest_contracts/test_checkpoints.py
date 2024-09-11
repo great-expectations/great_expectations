@@ -12,8 +12,9 @@ from tests.integration.cloud.rest_contracts.conftest import (
 )
 
 if TYPE_CHECKING:
-    from tests.integration.cloud.rest_contracts.conftest import PactBody
+    from pytest_mock import MockerFixture
 
+    from tests.integration.cloud.rest_contracts.conftest import PactBody
 
 NON_EXISTENT_CHECKPOINT_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
 
@@ -95,5 +96,7 @@ GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[PactBody] = {
 def test_checkpoint(
     contract_interaction: ContractInteraction,
     run_rest_api_pact_test: Callable[[ContractInteraction], None],
+    mocker: MockerFixture,
 ) -> None:
+    mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
     run_rest_api_pact_test(contract_interaction)

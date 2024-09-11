@@ -708,7 +708,10 @@ class TestCheckpointResult:
         )
 
         # Act
-        checkpoint.run()
+        with mock.patch.object(
+            Checkpoint, "is_fresh", return_value=CheckpointFreshnessDiagnostics(errors=[])
+        ):
+            checkpoint.run()
 
         # Assert
         submit_analytics_event.assert_called_once_with(
