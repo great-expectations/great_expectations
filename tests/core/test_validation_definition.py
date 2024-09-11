@@ -893,6 +893,7 @@ def test_is_fresh(
         assert [type(err) for err in e.errors] == error_list
 
 
+@pytest.mark.unit
 def test_is_fresh_raises_error_when_validation_definition_not_found(in_memory_runtime_context):
     context = in_memory_runtime_context
 
@@ -918,6 +919,7 @@ def test_is_fresh_raises_error_when_validation_definition_not_found(in_memory_ru
     assert isinstance(diagnostics.errors[0], ValidationDefinitionNotFoundError)
 
 
+@pytest.mark.unit
 def test_is_fresh_raises_error_when_child_deps_not_found(in_memory_runtime_context):
     context = in_memory_runtime_context
 
