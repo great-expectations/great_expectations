@@ -18,6 +18,7 @@ from pyparsing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
@@ -111,7 +112,7 @@ def validate_fully_qualified_parameter_name_delimiter(
     if not is_fully_qualified_parameter_name_delimiter_in_literal(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     ):
-        raise gx_exceptions.ProfilerExecutionError(
+        raise ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
 names must start with {FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER} (e.g., "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{fully_qualified_parameter_name}").
 """  # noqa: E501

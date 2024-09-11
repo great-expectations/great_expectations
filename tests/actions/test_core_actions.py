@@ -13,6 +13,7 @@ import requests
 from requests import Session
 
 from great_expectations.checkpoint.actions import (
+    ActionContext,
     APINotificationAction,
     EmailAction,
     MicrosoftTeamsNotificationAction,
@@ -688,6 +689,85 @@ class TestV1ActionRun:
             },
         )
 
+        assert output == {"slack_notification_result": "Slack notification succeeded."}
+
+    @pytest.mark.unit
+    def test_SlackNotificationAction_grabs_data_docs_pages(
+        self, checkpoint_result_with_assets: CheckpointResult
+    ):
+        action = SlackNotificationAction(name="my_action", slack_webhook="test", notify_on="all")
+
+        site_path = "file:///var/folders/vm/wkw13lnd5vsdh3hjmcv9tym00000gn/T/tmpctw4x7yu/validations/my_suite/__none__/20240910T175850.906745Z/foo-bar.html"
+        action_context = ActionContext()
+        action_context.update(
+            action=UpdateDataDocsAction(name="docs_action"),
+            action_result={
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(name="my_suite"),
+                    run_id=RunIdentifier(run_name="prod_20240401"),
+                    batch_identifier="my_datasource-my_first_asset",
+                ): {
+                    "local_site": site_path,
+                }
+            },
+        )
+        with mock.patch.object(Session, "post") as mock_post:
+            output = action.run(
+                checkpoint_result=checkpoint_result_with_assets, action_context=action_context
+            )
+
+        mock_post.assert_called_once_with(
+            url="test",
+            headers=None,
+            json={
+                "blocks": [
+                    {"text": {"text": mock.ANY, "type": "plain_text"}, "type": "header"},
+                    {
+                        "type": "section",
+                        "text": {"type": "plain_text", "text": "Runtime: 2024/04/01 08:51 PM"},
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Asset*: asset_1  *Expectation Suite*: suite_a  "
+                            "<www.testing?slack=true|View Results>",
+                        },
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": mock.ANY,
+                        },
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Asset*: asset_2_two_wow_whoa_vroom  "
+                            "*Expectation Suite*: suite_b",
+                        },
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": mock.ANY,
+                        },
+                    },
+                    {"type": "divider"},
+                ],
+            },
+        )
+
+        docs_block_1 = mock_post.call_args.kwargs["json"]["blocks"][3]["text"]["text"]
+        docs_block_2 = mock_post.call_args.kwargs["json"]["blocks"][5]["text"]["text"]
+
+        assert "*DataDocs*" in docs_block_1
+        assert site_path in docs_block_1
+        assert "*DataDocs*" in docs_block_2
+        assert site_path in docs_block_2
         assert output == {"slack_notification_result": "Slack notification succeeded."}
 
     @pytest.mark.unit

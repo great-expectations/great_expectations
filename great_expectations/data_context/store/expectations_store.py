@@ -341,6 +341,12 @@ class ExpectationsStore(Store):
         else:
             raise TypeError(f"Cannot deserialize value of unknown type: {type(value)}")  # noqa: TRY003
 
+    def deserialize_suite_dict(self, suite_dict: dict) -> ExpectationSuite:
+        suite = ExpectationSuite(**suite_dict)
+        if suite._include_rendered_content:
+            suite.render()
+        return suite
+
     def get_key(
         self, name: str, id: Optional[str] = None
     ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:

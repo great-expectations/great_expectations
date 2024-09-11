@@ -18,7 +18,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.result_format import ResultFormat
-from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -41,13 +40,14 @@ from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDataAsset,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
-    ValidationDefinitionRelatedResourcesNotAddedError,
+    ValidationDefinitionRelatedResourcesFreshnessError,
 )
+from great_expectations.exceptions.resource_freshness import ResourceFreshnessAggregateError
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -156,11 +156,12 @@ def cloud_validation_definition(
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_definition(BATCH_DEFINITION_NAME)
     )
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     return context.validation_definitions.add(
         ValidationDefinition(
             name="my_validation",
             data=batch_definition,
-            suite=context.suites.add(ExpectationSuite(name="my_suite")),
+            suite=suite,
         )
     )
 
@@ -392,6 +393,7 @@ class TestValidationRun:
     ):
         expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        cloud_validation_definition.suite.save()
         mock_validator.graph_validate.return_value = [
             ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
         ]
@@ -415,6 +417,7 @@ class TestValidationRun:
     ):
         expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        cloud_validation_definition.suite.save()
         mock_validator.graph_validate.return_value = [
             ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
         ]
@@ -431,7 +434,7 @@ class TestValidationRun:
         validation_definition.suite.id = None
         validation_definition.data.id = None
 
-        with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError) as e:
+        with pytest.raises(ValidationDefinitionRelatedResourcesFreshnessError) as e:
             validation_definition.run()
 
         assert [type(err) for err in e.value.errors] == [
@@ -760,19 +763,10 @@ class TestValidationDefinitionSerialization:
 
 
 @pytest.mark.unit
-def test_identifier_bundle_with_existing_id(validation_definition: ValidationDefinition):
-    validation_definition.id = "fa34fbb7-124d-42ff-9760-e410ee4584a0"
-
-    assert validation_definition.identifier_bundle() == _IdentifierBundle(
-        name="my_validation", id="fa34fbb7-124d-42ff-9760-e410ee4584a0"
-    )
-
-
-@pytest.mark.unit
 def test_identifier_bundle_no_id_raises_error(validation_definition: ValidationDefinition):
     validation_definition.id = None
 
-    with pytest.raises(ValidationDefinitionRelatedResourcesNotAddedError):
+    with pytest.raises(ValidationDefinitionRelatedResourcesFreshnessError):
         validation_definition.identifier_bundle()
 
 
@@ -790,68 +784,60 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
 
 
 @pytest.mark.parametrize(
-    "id,suite_id,batch_def_id,is_added,error_list",
+    "has_id,has_suite_id,has_batch_def_id,error_list",
     [
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
+            True,
+            True,
             True,
             [],
             id="validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
+            True,
             False,
+            True,
             [ExpectationSuiteNotAddedError],
             id="validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
+            True,
+            True,
             False,
             [BatchDefinitionNotAddedError],
             id="validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            None,
+            True,
+            False,
             False,
             [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
             id="validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
             False,
+            True,
+            True,
             [ValidationDefinitionNotAddedError],
             id="no_validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            str(uuid.uuid4()),
             False,
+            False,
+            True,
             [ExpectationSuiteNotAddedError, ValidationDefinitionNotAddedError],
             id="no_validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            None,
+            False,
+            True,
             False,
             [BatchDefinitionNotAddedError, ValidationDefinitionNotAddedError],
             id="no_validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            None,
+            False,
+            False,
             False,
             [
                 BatchDefinitionNotAddedError,
@@ -863,20 +849,40 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
     ],
 )
 @pytest.mark.unit
-def test_is_added(
-    id: str | None,
-    suite_id: str | None,
-    batch_def_id: str | None,
-    is_added: bool,
-    error_list: list[Type[ResourceNotAddedError]],
+def test_is_fresh(
+    in_memory_runtime_context,
+    has_id: bool,
+    has_suite_id: bool,
+    has_batch_def_id: bool,
+    error_list: list[Type[ResourceFreshnessError]],
 ):
-    validation_definition = ValidationDefinition(
-        name="my_validation_definition",
-        id=id,
-        suite=ExpectationSuite(name="my_suite", id=suite_id),
-        data=BatchDefinition(name="my_batch_def", id=batch_def_id),
-    )
-    diagnostics = validation_definition.is_added()
+    context = in_memory_runtime_context
 
-    assert diagnostics.is_added is is_added
-    assert [type(err) for err in diagnostics.errors] == error_list
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    # Stores/Fluent API will always assign IDs but we manually override them here
+    # for purposes of changing object state for the test
+    if not has_batch_def_id:
+        validation_definition.data.id = None
+    if not has_suite_id:
+        validation_definition.suite.id = None
+    if not has_id:
+        validation_definition.id = None
+
+    diagnostics = validation_definition.is_fresh()
+    try:
+        diagnostics.raise_for_error()
+    except ResourceFreshnessAggregateError as e:
+        assert [type(err) for err in e.errors] == error_list

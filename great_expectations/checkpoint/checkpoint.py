@@ -27,10 +27,10 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
-from great_expectations.core.added_diagnostics import CheckpointAddedDiagnostics
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
+from great_expectations.core.freshness_diagnostics import CheckpointFreshnessDiagnostics
 from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT, ResultFormatUnion
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
@@ -40,10 +40,12 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     CheckpointNotAddedError,
+    CheckpointNotFreshError,
     CheckpointRunWithoutValidationDefinitionError,
 )
+from great_expectations.exceptions.exceptions import CheckpointNotFoundError, StoreBackendError
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -165,8 +167,8 @@ class Checkpoint(BaseModel):
         if not self.validation_definitions:
             raise CheckpointRunWithoutValidationDefinitionError()
 
-        diagnostics = self.is_added()
-        if not diagnostics.is_added:
+        diagnostics = self.is_fresh()
+        if not diagnostics.success:
             # The checkpoint itself is not added but all children are - we can add it for the user
             if not diagnostics.parent_added and diagnostics.children_added:
                 self._add_to_store()
@@ -269,14 +271,27 @@ class Checkpoint(BaseModel):
 
         return priority_actions + secondary_actions
 
-    def is_added(self) -> CheckpointAddedDiagnostics:
-        checkpoint_diagnostics = CheckpointAddedDiagnostics(
+    def is_fresh(self) -> CheckpointFreshnessDiagnostics:
+        checkpoint_diagnostics = CheckpointFreshnessDiagnostics(
             errors=[] if self.id else [CheckpointNotAddedError(name=self.name)]
         )
-        validation_definition_diagnostics = [vd.is_added() for vd in self.validation_definitions]
+        validation_definition_diagnostics = [vd.is_fresh() for vd in self.validation_definitions]
         checkpoint_diagnostics.update_with_children(*validation_definition_diagnostics)
 
-        return checkpoint_diagnostics
+        if not checkpoint_diagnostics.success:
+            return checkpoint_diagnostics
+
+        store = project_manager.get_checkpoints_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        try:
+            checkpoint = store.get(key=key)
+        except StoreBackendError:
+            return CheckpointFreshnessDiagnostics(errors=[CheckpointNotFoundError(name=self.name)])
+
+        return CheckpointFreshnessDiagnostics(
+            errors=[] if checkpoint == self else [CheckpointNotFreshError(name=self.name)]
+        )
 
     @public_api
     def save(self) -> None:
