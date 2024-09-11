@@ -273,7 +273,10 @@ class ExpectationSuite(SerializableDictDot):
         try:
             key = self._store.get_key(name=self.name, id=self.id)
             suite_dict = self._store.get(key=key)
-        except (StoreBackendError, InvalidKeyError):
+        except (
+            StoreBackendError,  # Generic error from stores
+            InvalidKeyError,  # Ephemeral context error
+        ):
             suite_dict = None
         if not suite_dict:
             return ExpectationSuiteFreshnessDiagnostics(
@@ -283,7 +286,7 @@ class ExpectationSuite(SerializableDictDot):
         suite: ExpectationSuite | None
         try:
             suite = self._store.deserialize_suite_dict(suite_dict=suite_dict)
-        except (PydanticValidationError, TypeError, ValueError):
+        except PydanticValidationError:
             suite = None
         if not suite:
             return ExpectationSuiteFreshnessDiagnostics(

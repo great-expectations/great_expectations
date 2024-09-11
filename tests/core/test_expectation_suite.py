@@ -1214,21 +1214,16 @@ def test_is_fresh_fails_on_suite_retrieval(in_memory_runtime_context):
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "suite_dict",
-    [
-        pytest.param({"bad": "data"}, id="TypeError"),
-        pytest.param({"name": 123}, id="ValueError"),
-        pytest.param(
-            {"name": "my_suite", "expectations": [{"foo": "bar"}]}, id="PydanticValidationError"
-        ),
-    ],
-)
-def test_is_fresh_fails_on_suite_deserialization(in_memory_runtime_context, suite_dict: dict):
+def test_is_fresh_fails_on_suite_deserialization(in_memory_runtime_context):
     context = in_memory_runtime_context
 
     suite = context.suites.add(ExpectationSuite(name="my_suite"))
 
+    # Value has changed since initial creation and subsequent retrieval
+    suite_dict = {
+        "name": "my_suite",
+        "expectations": [{"type": "expect_column_values_to_be_between", "kwargs": {}}],
+    }
     with mock.patch.object(ExpectationsStore, "get", return_value=suite_dict):
         diagnostics = suite.is_fresh()
 
