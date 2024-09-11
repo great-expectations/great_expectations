@@ -35,7 +35,7 @@ from great_expectations.core.freshness_diagnostics import (
 )
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.data_context.data_context.context_factory import project_manager
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     ExpectationSuiteError,
     ExpectationSuiteNotAddedError,
     ExpectationSuiteNotFoundError,

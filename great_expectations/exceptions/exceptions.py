@@ -48,46 +48,12 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
-class ResourceNotAddedError(DataContextError):
-    pass
-
-
-class ResourcesNotAddedError(GreatExpectationsAggregateError):
-    pass
-
-
 class ExpectationSuiteError(DataContextError):
     pass
 
 
-class ExpectationSuiteNotAddedError(ResourceNotAddedError):
-    def __init__(self, name: str) -> None:
-        super().__init__(
-            f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
-            "Please call `context.suites.add(<SUITE_OBJECT>)`, "
-            "then try your action again."
-        )
-
-
-class ExpectationSuiteNotFreshError(ResourceNotAddedError):
-    def __init__(self, name: str) -> None:
-        super().__init__(
-            f"ExpectationSuite '{name}' has changed since it has last been saved. "
-            "Please update with `<SUITE_OBJECT>.save()`, then try your action again."
-        )
-
-
 class ValidationDefinitionError(DataContextError):
     pass
-
-
-class ValidationDefinitionNotAddedError(ResourceNotAddedError):
-    def __init__(self, name: str) -> None:
-        super().__init__(
-            f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
-            "Please call `context.validation_definitions.add(<VALIDATION_DEFINITION_OBJECT>)`, "
-            "then try your action again."
-        )
 
 
 class CheckpointError(DataContextError):
@@ -98,29 +64,12 @@ class CheckpointNotFoundError(CheckpointError):
     pass
 
 
-class CheckpointNotAddedError(ResourceNotAddedError):
-    def __init__(self, name: str) -> None:
-        super().__init__(
-            f"Checkpoint '{name}' must be added to the DataContext before it can be updated. "
-            "Please call `context.checkpoints.add(<CHECKPOINT_OBJECT>)`, "
-            "then try your action again."
-        )
-
-
 class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
     def __init__(self) -> None:
         super().__init__(
             "Checkpoint.run() requires at least one validation definition. "
             "Please add one and try your action again."
         )
-
-
-class CheckpointRelatedResourcesNotAddedError(ResourcesNotAddedError):
-    pass
-
-
-class ValidationDefinitionRelatedResourcesNotAddedError(ResourcesNotAddedError):
-    pass
 
 
 class StoreBackendError(DataContextError):
@@ -388,22 +337,6 @@ class BatchDefinitionNotFoundError(BatchDefinitionError):
     def __init__(self, name: str) -> None:
         super().__init__(
             f"BatchDefinition '{name}' not found. Please check the name and try again."
-        )
-
-
-class BatchDefinitionNotAddedError(ResourceNotAddedError):
-    def __init__(self, name: str) -> None:
-        super().__init__(
-            f"BatchDefinition '{name}' must be added to the DataContext before it can be updated. "
-            "Please update using the parent asset or data source, then try your action again."
-        )
-
-
-class BatchDefinitionNotFreshError(ResourceNotAddedError):
-    def __init__(self, name: str) -> None:
-        super().__init__(
-            f"BatchDefinition '{name}' has changed since it has last been saved. "
-            "Please update using the parent asset or data source, then try your action again."
         )
 
 
