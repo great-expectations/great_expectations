@@ -185,6 +185,79 @@ def _create_test_cases():
     return test_cases
 
 
+def test_get_batch_identifiers_list__simple(
+    spark_filesystem_monthly_batch_definition: BatchDefinition,
+) -> None:
+    batch_definition = spark_filesystem_monthly_batch_definition
+    batch_identifiers_list = batch_definition.get_batch_identifiers_list()
+
+    assert len(batch_identifiers_list) == 36
+    # just spot check the edges
+    assert batch_identifiers_list[0] == {
+        "path": "yellow_tripdata_sample_2018-01.csv",
+        "year": "2018",
+        "month": "01",
+    }
+    assert batch_identifiers_list[-1] == {
+        "path": "yellow_tripdata_sample_2020-12.csv",
+        "year": "2020",
+        "month": "12",
+    }
+
+
+def test_get_batch_identifiers_list__respects_order(
+    spark_filesystem_monthly_batch_definition_descending: BatchDefinition,
+) -> None:
+    batch_definition = spark_filesystem_monthly_batch_definition_descending
+    batch_identifiers_list = batch_definition.get_batch_identifiers_list()
+
+    assert len(batch_identifiers_list) == 36
+    # just spot check the edges
+    assert batch_identifiers_list[0] == {
+        "path": "yellow_tripdata_sample_2020-12.csv",
+        "year": "2020",
+        "month": "12",
+    }
+    assert batch_identifiers_list[-1] == {
+        "path": "yellow_tripdata_sample_2018-01.csv",
+        "year": "2018",
+        "month": "01",
+    }
+
+
+def test_get_batch_identifiers_list__respects_batch_params(
+    spark_filesystem_monthly_batch_definition: BatchDefinition,
+) -> None:
+    batch_definition = spark_filesystem_monthly_batch_definition
+    batch_identifiers_list = batch_definition.get_batch_identifiers_list(
+        batch_parameters={"year": "2020"}
+    )
+
+    assert len(batch_identifiers_list) == 12
+    # just spot check the edges
+    assert batch_identifiers_list[0] == {
+        "path": "yellow_tripdata_sample_2020-01.csv",
+        "year": "2020",
+        "month": "01",
+    }
+    assert batch_identifiers_list[-1] == {
+        "path": "yellow_tripdata_sample_2020-12.csv",
+        "year": "2020",
+        "month": "12",
+    }
+
+
+def test_get_batch_identifiers_list__no_batches(
+    spark_filesystem_monthly_batch_definition: BatchDefinition,
+) -> None:
+    batch_definition = spark_filesystem_monthly_batch_definition
+    batch_identifiers_list = batch_definition.get_batch_identifiers_list(
+        batch_parameters={"year": "1999"}
+    )
+
+    assert len(batch_identifiers_list) == 0
+
+
 @pytest.mark.parametrize(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(),
