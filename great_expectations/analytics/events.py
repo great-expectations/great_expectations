@@ -6,6 +6,7 @@ from typing import ClassVar, List
 from great_expectations.analytics.actions import (
     CHECKPOINT_CREATED,
     CHECKPOINT_DELETED,
+    CHECKPOINT_RAN,
     DATA_CONTEXT_INITIALIZED,
     DOMAIN_OBJECT_ALL_DESERIALIZE_ERROR,
     EXPECTATION_SUITE_CREATED,
@@ -184,6 +185,17 @@ class CheckpointDeletedEvent(_CheckpointEvent):
     def __init__(self, checkpoint_id: str | None = None):
         super().__init__(
             action=CHECKPOINT_DELETED,
+            checkpoint_id=checkpoint_id,
+        )
+
+
+@dataclass
+class CheckpointRanEvent(_CheckpointEvent):
+    _allowed_actions: ClassVar[List[Action]] = [CHECKPOINT_RAN]
+
+    def __init__(self, checkpoint_id: str | None = None):
+        super().__init__(
+            action=CHECKPOINT_RAN,
             checkpoint_id=checkpoint_id,
         )
 
