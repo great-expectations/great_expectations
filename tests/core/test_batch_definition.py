@@ -16,6 +16,11 @@ from great_expectations.exceptions import (
     BatchDefinitionNotFreshError,
     ResourceFreshnessAggregateError,
 )
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotFoundError,
+    DataAssetNotFoundError,
+    DatasourceNotFoundError,
+)
 
 if TYPE_CHECKING:
     from typing import List
@@ -168,3 +173,48 @@ def test_is_fresh_freshness(empty_cloud_context_fluent):
     assert diagnostics.success is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], BatchDefinitionNotFreshError)
+
+
+@pytest.mark.unit
+def test_is_fresh_fails_on_datasource_retrieval(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+    batch_definition = asset.add_batch_definition(name="my_batch_def")
+
+    context.delete_datasource("my_pandas_ds")
+
+    diagnostics = batch_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], DatasourceNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_fails_on_asset_retrieval(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+    batch_definition = asset.add_batch_definition(name="my_batch_def")
+
+    datasource.delete_asset("my_csv_asset")
+
+    diagnostics = batch_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], DataAssetNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_fails_on_batch_definition_retrieval(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+    batch_definition = asset.add_batch_definition(name="my_batch_def")
+
+    asset.delete_batch_definition("my_batch_def")
+
+    diagnostics = batch_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], BatchDefinitionNotFoundError)
