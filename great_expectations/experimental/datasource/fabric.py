@@ -27,8 +27,11 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import IDDict
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import FabricBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
@@ -37,9 +40,13 @@ from great_expectations.datasource.fluent.interfaces import (
     Sorter,
     TestConnectionError,
 )
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 
 if TYPE_CHECKING:
     from great_expectations.core.batch_spec import FabricReaderMethods
+    from great_expectations.core.partitioners import ColumnPartitioner
+    from great_expectations.datasource.fluent import BatchParameters
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
     )
@@ -75,9 +82,12 @@ class _PowerBIAsset(DataAsset):
         LOGGER.debug(f"Testing connection to {self.__class__.__name__} has not been implemented")
 
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        return [IDDict(batch_request.options)]
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
         self._validate_batch_request(batch_request)
-        batch_list: List[Batch] = []
 
         reader_options = {
             "workspace": self._datasource.workspace,
@@ -101,44 +111,66 @@ class _PowerBIAsset(DataAsset):
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-        # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core import IDDict
-        from great_expectations.core.batch import LegacyBatchDefinition
-
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
-            batch_identifiers=IDDict(batch_request.options),
+            batch_identifiers=make_batch_identifier(batch_request.options),
             batch_spec_passthrough=None,
         )
 
         batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request
+            batch_request=batch_request, ignore_options=("dataframe",)
         )
 
-        batch_list.append(
-            Batch(
-                datasource=self.datasource,
-                data_asset=self,
-                batch_request=batch_request,
-                data=data,
-                metadata=batch_metadata,
-                batch_markers=markers,
-                batch_spec=batch_spec.to_json_dict(),  # type: ignore[arg-type] # will be coerced to BatchSpec
-                batch_definition=batch_definition,
-            )
+        return Batch(
+            datasource=self.datasource,
+            data_asset=self,
+            batch_request=batch_request,
+            data=data,
+            metadata=batch_metadata,
+            batch_markers=markers,
+            batch_spec=batch_spec.to_json_dict(),  # type: ignore[arg-type] # will be coerced to BatchSpec
+            batch_definition=batch_definition,
         )
-        return batch_list
 
     @override
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters] = None,
+        batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
+    ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
+        Args:
+            options: This is not currently supported and must be {} or None for this data asset.
+            batch_slice: This is not currently supported and must be None for this data asset.
+            partitioner: This is not currently supported and must be None for this data asset.
+
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """  # noqa: E501
+            A BatchRequest object that can be used to obtain a batch from an Asset by calling the
+            get_batch method.
+        """
+        asset_type_name: str = self.__class__.__name__
+        if options:
+            raise BuildBatchRequestError(
+                message=f"options is not currently supported for {asset_type_name} "
+                "and must be None or {}."
+            )
+
+        if batch_slice is not None:
+            raise BuildBatchRequestError(
+                message=f"batch_slice is not currently supported for {asset_type_name} "
+                "and must be None."
+            )
+
+        if partitioner is not None:
+            raise BuildBatchRequestError(
+                message=f"partitioner is not currently supported for {asset_type_name} "
+                "and must be None."
+            )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,

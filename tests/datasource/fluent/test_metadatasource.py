@@ -40,6 +40,7 @@ yaml = YAMLHandler()
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.datasource_dict import DatasourceDict
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 logger = logging.getLogger(__name__)
@@ -127,6 +128,14 @@ class DummyDataAsset(DataAsset):
         partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
+
+    @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        raise NotImplementedError
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        raise NotImplementedError
 
 
 @pytest.fixture(scope="function")
@@ -307,7 +316,13 @@ class TestMisconfiguredMetaDatasource:
         ):
 
             class MissingTypeAsset(DataAsset):
-                pass
+                @override
+                def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+                    raise NotImplementedError
+
+                @override
+                def get_batch(self, batch_request: BatchRequest) -> Batch:
+                    raise NotImplementedError
 
             class BadAssetDatasource(Datasource):
                 type: str = "valid"
@@ -341,12 +356,21 @@ class TestMisconfiguredMetaDatasource:
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
-    class RedAsset(DataAsset):
+    class SampleAsset(DataAsset):
+        @override
+        def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+            raise NotImplementedError
+
+        @override
+        def get_batch(self, batch_request: BatchRequest) -> Batch:
+            raise NotImplementedError
+
+    class RedAsset(SampleAsset):
         type = "red"
 
         def test_connection(self): ...  # type: ignore[explicit-override] # FIXME
 
-    class BlueAsset(DataAsset):
+    class BlueAsset(SampleAsset):
         type = "blue"
 
         @override

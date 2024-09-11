@@ -72,19 +72,15 @@ assert my_batch_request.options == {}
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_list">
-batches = my_asset.get_batch_list_from_batch_request(my_batch_request)
+batch = my_asset.get_batch(my_batch_request)
 # </snippet>
 
-assert len(batches) == 3
-
-for batch in batches:
-    batch_spec = batch.batch_spec
-    assert batch_spec.reader_method == "read_csv"
-    assert batch_spec.reader_options == {}
-    assert batch.data.dataframe.shape == (10000, 18)
+batch_spec = batch.batch_spec
+assert batch_spec.reader_method == "read_csv"
+assert batch_spec.reader_options == {}
+assert batch.data.dataframe.shape == (10000, 18)
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py print_batch_spec">
-for batch in batches:
-    print(batch.batch_spec)
+print(batch.batch_spec)
 # </snippet>

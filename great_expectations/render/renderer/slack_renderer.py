@@ -19,11 +19,11 @@ class SlackRenderer(Renderer):
     def render(
         self,
         validation_result: ExpectationSuiteValidationResult,
-        data_docs_pages: list[dict] | None = None,
+        data_docs_pages: dict | None = None,
         notify_with: list[str] | None = None,
         validation_result_urls: list[str] | None = None,
     ) -> list[dict]:
-        data_docs_pages = data_docs_pages or []
+        data_docs_pages = data_docs_pages or {}
         notify_with = notify_with or []
         validation_result_urls = validation_result_urls or []
         blocks: list[dict] = []
@@ -169,7 +169,7 @@ class SlackRenderer(Renderer):
         return report_element
 
     def _build_report_element_block(
-        self, data_docs_pages: list[dict], notify_with: list[str]
+        self, data_docs_pages: dict, notify_with: list[str]
     ) -> dict | None:
         if not data_docs_pages:
             return None

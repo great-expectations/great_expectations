@@ -47,6 +47,7 @@ from great_expectations.experimental.rule_based_profiler.estimators.numeric_rang
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,
 )
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     VARIABLES_PREFIX,
@@ -131,7 +132,7 @@ def get_validator(  # noqa: PLR0913
     else:
         num_batches: int = len(batch_list)
         if num_batches == 0:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""{__name__}.get_validator() must utilize at least one Batch ({num_batches} are available).
 """  # noqa: E501
             )
@@ -173,7 +174,7 @@ def get_batch_ids(  # noqa: PLR0913
             parameters=parameters,
         )
 
-        batch_list = data_context.get_batch_list(batch_request=batch_request)
+        batch_list = [data_context.get_last_batch(batch_request=batch_request)]
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
 
@@ -182,7 +183,7 @@ def get_batch_ids(  # noqa: PLR0913
     if limit is not None:
         # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.  # noqa: E501
         if not (0 <= limit <= num_batch_ids):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""{__name__}.get_batch_ids() allows integer limit values between 0 and {num_batch_ids} \
 ({limit} was requested).
 """  # noqa: E501
@@ -190,7 +191,7 @@ def get_batch_ids(  # noqa: PLR0913
         batch_ids = batch_ids[-limit:]
 
     if num_batch_ids == 0:
-        raise gx_exceptions.ProfilerExecutionError(
+        raise ProfilerExecutionError(
             message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).
 """  # noqa: E501
         )
@@ -273,7 +274,7 @@ def get_parameter_value_and_validate_return_type(
 
     if expected_return_type is not None:
         if not isinstance(parameter_reference, expected_return_type):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""Argument "{parameter_reference}" must be of type "{expected_return_type!s}" \
 (value of type "{type(parameter_reference)!s}" was encountered).
 """  # noqa: E501
@@ -568,7 +569,7 @@ def get_false_positive_rate_from_rule_state(
         parameters=parameters,
     )
     if not (0.0 <= false_positive_rate <= 1.0):
-        raise gx_exceptions.ProfilerExecutionError(  # noqa: TRY003
+        raise ProfilerExecutionError(  # noqa: TRY003
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
 """  # noqa: E501
@@ -614,7 +615,7 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
         quantile_statistic_interpolation_method
         not in RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS
     ):
-        raise gx_exceptions.ProfilerExecutionError(
+        raise ProfilerExecutionError(
             message=f"""The directive "quantile_statistic_interpolation_method" can be only one of \
 {RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} ("{quantile_statistic_interpolation_method}" was detected).
 """  # noqa: E501

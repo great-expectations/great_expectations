@@ -31,8 +31,11 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pyspark import ConnectDataFrame, DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import IDDict
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchParameters, BatchRequest
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
@@ -212,9 +215,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """  # noqa: E501
+            A BatchRequest object that can be used to obtain a batch from an Asset by calling the
+            get_batch method.
+        """
         if batch_slice is not None:
             raise BuildBatchRequestError(
                 message="batch_slice is not currently supported for this DataAsset "
@@ -274,7 +277,11 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             )
 
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        return [IDDict(batch_request.options)]
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
         self._validate_batch_request(batch_request)
 
         batch_spec = RuntimeDataBatchSpec(batch_data=batch_request.options["dataframe"])
@@ -284,15 +291,11 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
-        # imports are done inline to prevent a circular dependency with core/batch.py
-        from great_expectations.core import IDDict
-        from great_expectations.core.batch import LegacyBatchDefinition
-
         batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
-            batch_identifiers=IDDict(batch_request.options),
+            batch_identifiers=make_batch_identifier(batch_request.options),
             batch_spec_passthrough=None,
         )
 
@@ -300,18 +303,16 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             batch_request=batch_request, ignore_options=("dataframe",)
         )
 
-        return [
-            Batch(
-                datasource=self.datasource,
-                data_asset=self,
-                batch_request=batch_request,
-                data=data,
-                metadata=batch_metadata,
-                batch_markers=markers,
-                batch_spec=batch_spec,
-                batch_definition=batch_definition,
-            )
-        ]
+        return Batch(
+            datasource=self.datasource,
+            data_asset=self,
+            batch_request=batch_request,
+            data=data,
+            metadata=batch_metadata,
+            batch_markers=markers,
+            batch_spec=batch_spec,
+            batch_definition=batch_definition,
+        )
 
     @public_api
     def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:

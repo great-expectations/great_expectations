@@ -154,7 +154,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         ) = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
-        column = sa.column(accessor_domain_kwargs["column"])
+        column = sa.column(accessor_domain_kwargs["column"])  # type: ignore[var-annotated]
 
         if min_value is None:
             if strict_max:
@@ -179,7 +179,7 @@ class ColumnValuesBetweenCount(MetricProvider):
                 condition = sa.and_(column >= min_value, column <= max_value)
 
         return execution_engine.execute_query(
-            sa.select(sa.func.count()).select_from(selectable).where(condition)
+            sa.select(sa.func.count()).select_from(selectable).where(condition)  # type: ignore[arg-type]
         ).scalar()
 
     @metric_value(engine=SparkDFExecutionEngine)

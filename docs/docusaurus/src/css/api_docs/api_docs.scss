@@ -34,7 +34,26 @@
       background-color: #1e1e1e;
     }
 
+    [data-theme='dark'] & {
+        p {
+          color: var(--ifm-font-color-base);
+        }
+
+        cite {
+          background-color: var(--gray-800);
+          border: none;
+          color: var(--ifm-font-color-base);
+        }
+
+        pre {
+          border: none;
+        }
+
+       .highlight pre {
+         background-color: var(--payne-gray-color);
+         border-color: transparent;
+         box-shadow: 0 3px 6px #00000029;
+         color: var(--ifm-font-color-base);
+       }
+    }
 }
-
-
-

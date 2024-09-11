@@ -98,9 +98,8 @@ for asset_name in EXPECTED_ASSET_NAMES:
     assert asset
 
     my_batch_request = asset.build_batch_request()
-    batches = asset.get_batch_list_from_batch_request(my_batch_request)
-    assert len(batches) == 1
-    assert set(batches[0].columns()) == {
+    batch = asset.get_batch(my_batch_request)
+    assert set(batch.columns()) == {
         "vendor_id",
         "pickup_datetime",
         "dropoff_datetime",

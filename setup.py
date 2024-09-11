@@ -33,7 +33,6 @@ def get_extras_require():
         "bigquery",  # https://github.com/googleapis/python-bigquery-sqlalchemy/blob/main/setup.py
         "clickhouse",  # https://github.com/xzkostyan/clickhouse-sqlalchemy/blob/master/setup.py
         "redshift",  # https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/blob/main/setup.py
-        "snowflake",  # https://github.com/snowflakedb/snowflake-sqlalchemy/blob/main/setup.cfg
         "teradata",  # https://pypi.org/project/teradatasqlalchemy   https://support.teradata.com/knowledge?id=kb_article_view&sys_kb_id=a5a869149729251ced863fe3f153af27
     )
     sqla_keys = (
@@ -46,9 +45,11 @@ def get_extras_require():
         "trino",  # https://github.com/trinodb/trino-python-client/blob/master/setup.py
         "vertica",  # https://github.com/bluelabsio/sqlalchemy-vertica-python/blob/master/setup.py
         "databricks",  # https://github.com/databricks/databricks-sql-python/blob/main/pyproject.toml
+        "snowflake",  # https://github.com/snowflakedb/snowflake-sqlalchemy/blob/main/setup.cfg
     )
     ignore_keys = (
         "sqlalchemy",
+        "sqlalchemy2",
         "test",
         "tools",
         "all-contrib-expectations",
