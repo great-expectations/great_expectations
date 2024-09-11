@@ -42,9 +42,6 @@ GX provides several Expectations specifically designed for managing data volume.
 
 :::TODO add screenshot:::
 
-![Add a volume Expectation in GX Cloud](./volume_resources/gx_cloud_volume_expectations_add.gif)
-
-
 ### Expect Table Row Count To Be Between
 
 Ensures that the number of rows in a dataset falls within a specified range.
@@ -54,7 +51,7 @@ Ensures that the number of rows in a dataset falls within a specified range.
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToBeBetween"
 ```
 
-<sup>View `ExpectTableRowCountToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between).</sup>
+<small>View `ExpectTableRowCountToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between).</small>
 
 
 ###  Expect Table Row Count To Equal
@@ -66,7 +63,7 @@ Verifies that the dataset contains exactly the specified number of records.
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqual"
 ```
 
-<sup>View `ExpectTableRowCountToEqual` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal).</sup>
+<small>View `ExpectTableRowCountToEqual` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal).</small>
 
 
 ### Expect Table Row Count To Equal Other Table
@@ -78,7 +75,7 @@ Compares the row count of the current table to another table within the same dat
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqualOtherTable"
 ```
 
-<sup>View `ExpectTableRowCountToEqualOtherTable` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal_other_table).</sup>
+<small>View `ExpectTableRowCountToEqualOtherTable` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal_other_table).</small>
 
 <br/>
 <br/>
