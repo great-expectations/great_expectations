@@ -98,6 +98,47 @@ def test_get_batch_retrieves_only_batch(mocker: pytest_mock.MockFixture):
 
 
 @pytest.mark.unit
+def test_get_batch_identifiers_list(mocker: pytest_mock.MockFixture):
+    # Arrange
+    batch_definition = BatchDefinition[None](name="test_batch_definition")
+    mock_asset = mocker.Mock(spec=DataAsset)
+    batch_definition.set_data_asset(mock_asset)
+
+    mock_batch_identifiers_list = [{"foo": "bar"}, {"baz": "qux"}]
+    mock_asset.get_batch_identifiers_list.return_value = mock_batch_identifiers_list
+
+    # Act
+    batch_identifiers_list = batch_definition.get_batch_identifiers_list()
+
+    # Assert
+    assert batch_identifiers_list == mock_batch_identifiers_list
+    mock_asset.get_batch_identifiers_list.assert_called_once_with(
+        batch_definition.build_batch_request()
+    )
+
+
+@pytest.mark.unit
+def test_get_batch_identifiers_list_with_batch_parameters(mocker: pytest_mock.MockFixture):
+    # Arrange
+    batch_definition = BatchDefinition[None](name="test_batch_definition")
+    mock_asset = mocker.Mock(spec=DataAsset)
+    batch_definition.set_data_asset(mock_asset)
+
+    mock_batch_identifiers_list = [{"foo": "bar"}, {"baz": "qux"}]
+    mock_asset.get_batch_identifiers_list.return_value = mock_batch_identifiers_list
+
+    # Act
+    batch_parameters: BatchParameters = {"path": "my_path"}
+    batch_identifiers_list = batch_definition.get_batch_identifiers_list(batch_parameters)
+
+    # Assert
+    assert batch_identifiers_list == mock_batch_identifiers_list
+    mock_asset.get_batch_identifiers_list.assert_called_once_with(
+        batch_definition.build_batch_request(batch_parameters)
+    )
+
+
+@pytest.mark.unit
 def test_identifier_bundle_success(in_memory_runtime_context):
     context = in_memory_runtime_context
     ds = context.data_sources.add_pandas("pandas_datasource")

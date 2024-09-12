@@ -12,6 +12,7 @@ from requests import Session
 
 import great_expectations as gx
 from great_expectations import expectations as gxe
+from great_expectations.analytics.events import CheckpointRanEvent
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -58,6 +59,10 @@ from great_expectations.exceptions import (
     ExpectationSuiteNotAddedError,
     ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
+)
+from great_expectations.exceptions.exceptions import (
+    CheckpointNotFoundError,
+    ValidationDefinitionNotFoundError,
 )
 from great_expectations.exceptions.resource_freshness import ResourceFreshnessAggregateError
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
@@ -589,7 +594,11 @@ class TestCheckpointResult:
         ]
 
     @pytest.mark.unit
-    def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
+    def test_checkpoint_run_no_actions(
+        self, validation_definition: ValidationDefinition, mocker: MockerFixture
+    ):
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(project=context)
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
@@ -678,6 +687,37 @@ class TestCheckpointResult:
             expectation_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
             run_id=mock.ANY,
+        )
+
+    @pytest.mark.unit
+    def test_checkpoint_run_sends_analytics(
+        self, validation_definition: ValidationDefinition, mocker: MockerFixture
+    ):
+        # Arrange
+        submit_analytics_event = mocker.patch(
+            "great_expectations.checkpoint.checkpoint.submit_analytics_event"
+        )
+
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        checkpoint_id = "e051d0a8-d492-4cde-91f3-29f353758488"
+        checkpoint = Checkpoint(
+            id=checkpoint_id,
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
+        )
+
+        # Act
+        with mock.patch.object(
+            Checkpoint, "is_fresh", return_value=CheckpointFreshnessDiagnostics(errors=[])
+        ):
+            checkpoint.run()
+
+        # Assert
+        submit_analytics_event.assert_called_once_with(
+            event=CheckpointRanEvent(
+                checkpoint_id=checkpoint_id, validation_definition_ids=[validation_definition.id]
+            )
         )
 
     @pytest.mark.unit
@@ -803,7 +843,10 @@ class TestCheckpointResult:
         )
 
     @pytest.mark.unit
-    def test_checkpoint_result_does_not_contain_dataframe(self, tmp_path: pathlib.Path):
+    def test_checkpoint_result_does_not_contain_dataframe(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         df = pd.DataFrame({"passenger_count": [1, 2, 3, 4, 5]})
 
         context = gx.get_context(mode="ephemeral")
@@ -905,7 +948,10 @@ class TestCheckpointResult:
         }
 
     @pytest.mark.filesystem
-    def test_checkpoint_run_adds_requisite_ids(self, tmp_path: pathlib.Path):
+    def test_checkpoint_run_adds_requisite_ids(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         checkpoint = self._build_file_backed_checkpoint(tmp_path)
 
         # A checkpoint that has not been persisted before running
@@ -936,7 +982,8 @@ class TestCheckpointResult:
 
     @pytest.mark.filesystem
     def test_checkpoint_run_with_data_docs_and_slack_actions_emit_page_links(
-        self, tmp_path: pathlib.Path
+        self,
+        tmp_path: pathlib.Path,
     ):
         actions = [
             SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
@@ -954,7 +1001,10 @@ class TestCheckpointResult:
         assert "file:///" in docs_block
 
     @pytest.mark.filesystem
-    def test_checkpoint_run_with_slack_action_no_page_links(self, tmp_path: pathlib.Path):
+    def test_checkpoint_run_with_slack_action_no_page_links(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         actions = [
             SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
         ]
@@ -1186,6 +1236,76 @@ def test_is_fresh(
         diagnostics.raise_for_error()
     except ResourceFreshnessAggregateError as e:
         assert [type(err) for err in e.errors] == error_list
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_error_when_checkpoint_not_found(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    checkpoint = context.checkpoints.add(
+        Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+    )
+
+    context.checkpoints.delete(checkpoint.name)
+
+    diagnostics = checkpoint.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], CheckpointNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_error_when_child_deps_not_found(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    checkpoint = context.checkpoints.add(
+        Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+    )
+
+    context.validation_definitions.delete(validation_definition.name)
+
+    diagnostics = checkpoint.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], ValidationDefinitionNotFoundError)
 
 
 @pytest.mark.unit

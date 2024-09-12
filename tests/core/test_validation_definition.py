@@ -47,6 +47,11 @@ from great_expectations.exceptions import (
     ValidationDefinitionNotAddedError,
     ValidationDefinitionRelatedResourcesFreshnessError,
 )
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotFoundError,
+    ExpectationSuiteNotFoundError,
+    ValidationDefinitionNotFoundError,
+)
 from great_expectations.exceptions.resource_freshness import ResourceFreshnessAggregateError
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
@@ -886,3 +891,55 @@ def test_is_fresh(
         diagnostics.raise_for_error()
     except ResourceFreshnessAggregateError as e:
         assert [type(err) for err in e.errors] == error_list
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_error_when_validation_definition_not_found(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    context.validation_definitions.delete(validation_definition.name)
+
+    diagnostics = validation_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], ValidationDefinitionNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_error_when_child_deps_not_found(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+    batch_definition = asset.add_batch_definition(name="my_batch_def")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    asset.delete_batch_definition(batch_definition.name)
+    context.suites.delete(suite.name)
+
+    diagnostics = validation_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 2
+    assert isinstance(diagnostics.errors[0], BatchDefinitionNotFoundError)
+    assert isinstance(diagnostics.errors[1], ExpectationSuiteNotFoundError)
