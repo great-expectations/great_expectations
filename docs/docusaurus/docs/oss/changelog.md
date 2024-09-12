@@ -23,7 +23,7 @@ Before we completely remove the functionality in a new major release, there will
 * [DOCS] Embed Wistia video in GX Core introduction ([#10366](https://github.com/great-expectations/great_expectations/pull/10366)) (thanks @JessSaavedra)
 * [DOCS] added data doc support posture ([#10373](https://github.com/great-expectations/great_expectations/pull/10373))
 * [DOCS] Adding BigQuery to GX Core support posture ([#10375](https://github.com/great-expectations/great_expectations/pull/10375))
-* [DOCS] Update Learn data quality use case articles to use <small> tags ([#10377](https://github.com/great-expectations/great_expectations/pull/10377))
+* [DOCS] Update Learn data quality use case articles to use &lt;small&gt; tags ([#10377](https://github.com/great-expectations/great_expectations/pull/10377))
 * [DOCS] Hide feedback survey on homepage ([#10378](https://github.com/great-expectations/great_expectations/pull/10378)) (thanks @deborahniesz)
 * [MAINTENANCE] SQLAlchemy 2 typing ([#10112](https://github.com/great-expectations/great_expectations/pull/10112))
 * [MAINTENANCE] Update `Expectation` equality to simplify meta and notes checks ([#10349](https://github.com/great-expectations/great_expectations/pull/10349))
