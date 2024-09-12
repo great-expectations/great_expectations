@@ -195,6 +195,10 @@ module.exports = {
               label: 'Community',
               to: 'https://greatexpectations.io/community',
             },
+            {
+              label: 'Request a demo',
+              to: 'https://greatexpectations.io/demo-gx-cloud',
+            },
           ],
           position: 'right',
         },

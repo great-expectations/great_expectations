@@ -393,6 +393,12 @@ module.exports = {
             },
           ]
         },
+        {
+          type:'link',
+          label: 'Request a demo',
+          href: 'https://www.greatexpectations.io/demo',
+          className: 'request-demo-sidebar',
+        },
       ],
   gx_apis: [
     {
