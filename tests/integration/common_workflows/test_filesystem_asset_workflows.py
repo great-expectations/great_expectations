@@ -189,7 +189,7 @@ def _create_test_cases():
     "batch_definition_fixture_name",
     [
         pytest.param("pandas_filesystem_monthly_batch_definition", marks=[pytest.mark.filesystem]),
-        pytest.param("spark_filesystem_monthly_batch_definition", marks=[pytest.mark.filesystem]),
+        pytest.param("spark_filesystem_monthly_batch_definition", marks=[pytest.mark.spark]),
     ],
 )
 def test_get_batch_identifiers_list__simple(
@@ -220,7 +220,7 @@ def test_get_batch_identifiers_list__simple(
             "pandas_filesystem_monthly_batch_definition_descending", marks=[pytest.mark.filesystem]
         ),
         pytest.param(
-            "spark_filesystem_monthly_batch_definition_descending", marks=[pytest.mark.filesystem]
+            "spark_filesystem_monthly_batch_definition_descending", marks=[pytest.mark.spark]
         ),
     ],
 )
@@ -249,7 +249,7 @@ def test_get_batch_identifiers_list__respects_order(
     "batch_definition_fixture_name",
     [
         pytest.param("pandas_filesystem_monthly_batch_definition", marks=[pytest.mark.filesystem]),
-        pytest.param("spark_filesystem_monthly_batch_definition", marks=[pytest.mark.filesystem]),
+        pytest.param("spark_filesystem_monthly_batch_definition", marks=[pytest.mark.spark]),
     ],
 )
 def test_get_batch_identifiers_list__respects_batch_params(
@@ -279,7 +279,7 @@ def test_get_batch_identifiers_list__respects_batch_params(
     "batch_definition_fixture_name",
     [
         pytest.param("pandas_filesystem_monthly_batch_definition", marks=[pytest.mark.filesystem]),
-        pytest.param("spark_filesystem_monthly_batch_definition", marks=[pytest.mark.filesystem]),
+        pytest.param("spark_filesystem_monthly_batch_definition", marks=[pytest.mark.spark]),
     ],
 )
 def test_get_batch_identifiers_list__no_batches(
