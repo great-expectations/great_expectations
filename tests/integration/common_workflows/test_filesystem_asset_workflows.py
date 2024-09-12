@@ -291,7 +291,7 @@ def test_get_batch_identifiers_list__no_batches(
         batch_parameters={"year": "1999"}
     )
 
-    assert len(batch_identifiers_list) == 0
+    assert batch_identifiers_list == []
 
 
 @pytest.mark.parametrize(
