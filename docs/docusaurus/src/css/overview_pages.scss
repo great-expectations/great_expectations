@@ -2,7 +2,7 @@
   background-color: var(--payne-gray-color);
   color: var(--ifm-footer-link-color);
   margin-bottom: 2rem;
-  padding: 2.5rem 3rem 2rem;
+  padding: 1.75rem 3rem;
   position: relative;
   width: 100%;
   z-index: 1;
@@ -17,6 +17,10 @@
     right: 0;
     top: 0;
     z-index: -1;
+  }
+
+  h4 *:last-child {
+    margin: 0;
   }
 
   @media (max-width: 996px) {
@@ -35,10 +39,6 @@
   font-weight: normal;
   line-height: var(--p-line-height);
   margin-bottom: var(--ifm-heading-margin-bottom);
-
-  p {
-    max-width: 40rem;
-  }
 }
 
 .generated-index-page {
