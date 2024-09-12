@@ -201,6 +201,13 @@ class Checkpoint(BaseModel):
         return self._serialize_validation_definitions(data=data)
 
     def _serialize_validation_definitions(self, data: dict) -> dict:
+        """
+        Manually serialize the validation_definitions field to avoid Pydantic's default
+        serialization.
+
+        We want to aggregate all errors from the validation_definitions and raise them as
+        a single error.
+        """
         data["validation_definitions"] = []
 
         diagnostics = CheckpointFreshnessDiagnostics(errors=[])
