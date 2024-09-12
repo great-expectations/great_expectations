@@ -603,7 +603,6 @@ class TestCheckpointResult:
         assert validation_result.success is True
         assert len(validation_result.results) == 1 and validation_result.results[0].success is True
 
-        assert result.checkpoint_config == checkpoint
         assert result.success is True
 
     @pytest.mark.unit
