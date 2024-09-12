@@ -152,13 +152,9 @@ class Checkpoint(BaseModel):
         NOTE: This should be removed in favor of a field/model serializer when we upgrade to
               Pydantic 2.
         """
-        if not exclude:
-            exclude = set()
-        exclude = exclude.union({"validation_definitions"})
-
         json_data = super().json(
             include=include,
-            exclude=exclude,
+            exclude=self._determine_exclude(exclude=exclude),
             by_alias=by_alias,
             skip_defaults=skip_defaults,
             exclude_unset=exclude_unset,
@@ -190,13 +186,9 @@ class Checkpoint(BaseModel):
         NOTE: This should be removed in favor of a field/model serializer when we upgrade to
               Pydantic 2.
         """
-        if not exclude:
-            exclude = set()
-        exclude = exclude.union({"validation_definitions"})
-
         data = super().dict(
             include=include,
-            exclude=exclude,
+            exclude=self._determine_exclude(exclude=exclude),
             by_alias=by_alias,
             skip_defaults=skip_defaults,
             exclude_unset=exclude_unset,
@@ -205,6 +197,19 @@ class Checkpoint(BaseModel):
         )
 
         return self._serialize_validation_definitions(data=data)
+
+    def _determine_exclude(
+        self, exclude: AbstractSet[int | str] | Mapping[int | str, Any] | None
+    ) -> AbstractSet[int | str] | Mapping[int | str, Any] | None:
+        if not exclude:
+            exclude = set()
+
+        if isinstance(exclude, set):
+            exclude = exclude.add("validation_definitions")
+        else:
+            exclude["__all__"] = "validation_definitions"
+
+        return exclude
 
     def _serialize_validation_definitions(self, data: dict) -> dict:
         """
