@@ -272,18 +272,19 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _determine_analytics_enabled(self) -> bool:
         """
-        In order to determine whether analytics should be enabled, we check two sources:
-          - The `analytics_enabled` key in the GX config file
-            - If missing, we assume True.
+        Determine if analytics are enabled using the following precedence
+          - The `analytics_enabled` key in the GX config
           - The `GX_ANALYTICS_ENABLED` environment variable
-
-        If both are True, analytics will be enabled. If either is False, analytics will be disabled.
+          - Otherwise, assume True
         """
-        config_file_enabled = self.config.analytics_enabled
-        if config_file_enabled is None:
-            config_file_enabled = True
+        config_enabled = self.config.analytics_enabled
         env_var_enabled = ENV_CONFIG.posthog_enabled
-        return config_file_enabled and env_var_enabled
+        if config_enabled is not None:
+            return config_enabled
+        elif env_var_enabled is not None:
+            return env_var_enabled
+        else:
+            return True
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -331,6 +332,17 @@ class AbstractDataContext(ConfigPeer, ABC):
             - Ephemeral : not saved, and logging message outputted
         """  # noqa: E501
         return self.variables.save()
+
+    @public_api
+    def enable_analytics(self, enable: Optional[bool]) -> None:
+        """
+        Enable or disable analytics for this DataContext.
+        With non-ephemeral contexts, this can be preserved via context.variables.save().
+
+        If set to None, the `GX_ANALYTICS_ENABLED` environment variable will be used.
+        """
+        self.config.analytics_enabled = enable
+        self._init_analytics()
 
     @public_api
     def update_project_config(
