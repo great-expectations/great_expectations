@@ -595,7 +595,6 @@ class TestCheckpointResult:
     ):
         context = mocker.Mock(spec=AbstractDataContext)
         set_context(project=context)
-        mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
@@ -620,7 +619,6 @@ class TestCheckpointResult:
     ):
         # Arrange
         action = mocker.Mock(spec=UpdateDataDocsAction, type="update_data_docs")
-        mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
         checkpoint = Checkpoint(
             name=self.checkpoint_name,
             validation_definitions=[validation_definition],
@@ -662,9 +660,8 @@ class TestCheckpointResult:
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
-        self, validation_definition: ValidationDefinition, mocker: MockerFixture
+        self, validation_definition: ValidationDefinition
     ):
-        mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
         checkpoint_id = str(uuid.uuid4())
         checkpoint = Checkpoint(
             id=checkpoint_id,
@@ -844,9 +841,9 @@ class TestCheckpointResult:
 
     @pytest.mark.unit
     def test_checkpoint_result_does_not_contain_dataframe(
-        self, tmp_path: pathlib.Path, mocker: MockerFixture
+        self,
+        tmp_path: pathlib.Path,
     ):
-        mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
         df = pd.DataFrame({"passenger_count": [1, 2, 3, 4, 5]})
 
         context = gx.get_context(mode="ephemeral")
@@ -884,8 +881,7 @@ class TestCheckpointResult:
         )
 
     @pytest.mark.filesystem
-    def test_checkpoint_run_result_shape(self, tmp_path: pathlib.Path, mocker: MockerFixture):
-        mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
+    def test_checkpoint_run_result_shape(self, tmp_path: pathlib.Path):
         checkpoint = self._build_file_backed_checkpoint(tmp_path)
 
         result = checkpoint.run()
@@ -949,8 +945,10 @@ class TestCheckpointResult:
         }
 
     @pytest.mark.filesystem
-    def test_checkpoint_run_adds_requisite_ids(self, tmp_path: pathlib.Path, mocker: MockerFixture):
-        mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
+    def test_checkpoint_run_adds_requisite_ids(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         checkpoint = self._build_file_backed_checkpoint(tmp_path)
 
         # A checkpoint that has not been persisted before running
@@ -981,9 +979,9 @@ class TestCheckpointResult:
 
     @pytest.mark.filesystem
     def test_checkpoint_run_with_data_docs_and_slack_actions_emit_page_links(
-        self, tmp_path: pathlib.Path, mocker: MockerFixture
+        self,
+        tmp_path: pathlib.Path,
     ):
-        mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
         actions = [
             SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
             UpdateDataDocsAction(name="docs_action"),
@@ -1001,9 +999,9 @@ class TestCheckpointResult:
 
     @pytest.mark.filesystem
     def test_checkpoint_run_with_slack_action_no_page_links(
-        self, tmp_path: pathlib.Path, mocker: MockerFixture
+        self,
+        tmp_path: pathlib.Path,
     ):
-        mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
         actions = [
             SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
         ]

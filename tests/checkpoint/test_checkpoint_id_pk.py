@@ -14,7 +14,6 @@ from great_expectations.data_context.data_context.context_factory import project
 from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
 
     from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context import AbstractDataContext, FileDataContext
@@ -103,11 +102,6 @@ def expect_multicolumn_sum_to_equal() -> gxe.ExpectMulticolumnSumToEqual:
     return gxe.ExpectMulticolumnSumToEqual(column_list=["a", "b", "c"], sum_total=30)
 
 
-@pytest.fixture
-def patch_checkpoint_run_analytics(mocker: MockerFixture) -> None:
-    mocker.patch("great_expectations.checkpoint.checkpoint.submit_analytics_event")
-
-
 def _build_checkpoint_and_run(
     context: AbstractDataContext,
     expectations: list[gxe.Expectation],
@@ -142,7 +136,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
     expected_unexpected_indices_output: list[dict],
     expected_sql_query_output: str,
-    patch_checkpoint_run_analytics: None,
 ):
     """
     What does this test?
@@ -178,7 +171,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
     expected_unexpected_indices_output: list[dict[str, str | int]],
     expected_sql_query_output: str,
-    patch_checkpoint_run_analytics: None,
 ):
     """
     What does this test?
@@ -217,7 +209,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_complete_output_with_query(  # noqa: E501
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_pair_values_to_be_equal: gxe.ExpectColumnPairValuesToBeEqual,
-    patch_checkpoint_run_analytics: None,
 ):
     result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
@@ -258,7 +249,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
 def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summary_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_pair_values_to_be_equal: gxe.ExpectColumnPairValuesToBeEqual,
-    patch_checkpoint_run_analytics: None,
 ):
     result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
@@ -291,7 +281,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
 def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_complete_output_with_query(  # noqa: E501
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_multicolumn_sum_to_equal: gxe.ExpectMulticolumnSumToEqual,
-    patch_checkpoint_run_analytics: None,
 ):
     """
     What does this test?
@@ -345,7 +334,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
 def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_summary_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_multicolumn_sum_to_equal: gxe.ExpectMulticolumnSumToEqual,
-    patch_checkpoint_run_analytics: None,
 ):
     result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
@@ -381,7 +369,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
     expected_unexpected_indices_output: list[dict[str, str | int]],
-    patch_checkpoint_run_analytics: None,
 ):
     """
     What does this test?
@@ -422,7 +409,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
     expect_column_values_to_not_be_in_set: gxe.ExpectColumnValuesToNotBeInSet,
     expected_unexpected_indices_output: list[dict[str, str | int]],
     expected_sql_query_output: str,
-    patch_checkpoint_run_analytics: None,
 ):
     """
     What does this test?
@@ -472,7 +458,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
     expected_unexpected_indices_output: list[dict[str, str | int]],
-    patch_checkpoint_run_analytics: None,
 ):
     """
     What does this test?
@@ -507,7 +492,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
-    patch_checkpoint_run_analytics: None,
 ):
     """
     What does this test?
@@ -544,7 +528,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
 def test_sql_complete_output_no_id_pk_fallback(
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
-    patch_checkpoint_run_analytics: None,
 ):
     result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
