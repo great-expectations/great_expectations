@@ -47,7 +47,11 @@ from great_expectations.exceptions import (
     CheckpointNotFreshError,
     CheckpointRunWithoutValidationDefinitionError,
 )
-from great_expectations.exceptions.exceptions import CheckpointNotFoundError, StoreBackendError
+from great_expectations.exceptions.exceptions import (
+    CheckpointNotFoundError,
+    InvalidKeyError,
+    StoreBackendError,
+)
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -297,7 +301,10 @@ class Checkpoint(BaseModel):
 
         try:
             checkpoint = store.get(key=key)
-        except StoreBackendError:
+        except (
+            StoreBackendError,  # Generic error from stores
+            InvalidKeyError,  # Ephemeral context error
+        ):
             return CheckpointFreshnessDiagnostics(errors=[CheckpointNotFoundError(name=self.name)])
 
         return CheckpointFreshnessDiagnostics(
