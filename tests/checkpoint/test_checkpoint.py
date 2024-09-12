@@ -1217,29 +1217,40 @@ def test_is_fresh_raises_errors_for_all_child_validation_definitions(in_memory_r
     ]
 
 
+def _build_checkpoint_with_factories(
+    context: AbstractDataContext,
+    datasource_name: str = "my_pandas_ds",
+    asset_name: str = "my_pandas_asset",
+    batch_definition_name: str = "my_bd",
+    suite_name: str = "my_suite",
+    validation_definition_name: str = "my_vd",
+    checkpoint_name: str = "my_cp",
+) -> Checkpoint:
+    datasource = context.data_sources.add_pandas(name=datasource_name)
+    asset = datasource.add_dataframe_asset(name=asset_name)
+    bd = asset.add_batch_definition_whole_dataframe(name=batch_definition_name)
+    suite = context.suites.add(ExpectationSuite(name=suite_name))
+    vd = context.validation_definitions.add(
+        ValidationDefinition(name=validation_definition_name, data=bd, suite=suite)
+    )
+    return context.checkpoints.add(Checkpoint(name=checkpoint_name, validation_definitions=[vd]))
+
+
 @pytest.mark.unit
 def test_dict_serializes_correctly(in_memory_runtime_context):
     context = in_memory_runtime_context
-
-    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
-    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
-    bd = asset.add_batch_definition_whole_dataframe(name="my_bd")
-    suite = context.suites.add(ExpectationSuite(name="my_suite"))
-    vd = context.validation_definitions.add(
-        ValidationDefinition(name="my_vd_1", data=bd, suite=suite)
-    )
-    cp = context.checkpoints.add(Checkpoint(name="my_cp", validation_definitions=[vd]))
+    cp = _build_checkpoint_with_factories(context)
 
     dict_val = cp.dict()
     assert dict_val == {
         "actions": [],
         "id": mock.ANY,
-        "name": "my_cp",
+        "name": cp.name,
         "result_format": "SUMMARY",
         "validation_definitions": [
             {
                 "id": mock.ANY,
-                "name": "my_vd_1",
+                "name": cp.validation_definitions[0].name,
             },
         ],
     }
@@ -1273,26 +1284,19 @@ def test_dict_raises_freshness_errors():
 def test_json_serializes_correctly(in_memory_runtime_context):
     context = in_memory_runtime_context
 
-    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
-    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
-    bd = asset.add_batch_definition_whole_dataframe(name="my_bd")
-    suite = context.suites.add(ExpectationSuite(name="my_suite"))
-    vd = context.validation_definitions.add(
-        ValidationDefinition(name="my_vd_1", data=bd, suite=suite)
-    )
-    cp = context.checkpoints.add(Checkpoint(name="my_cp", validation_definitions=[vd]))
+    cp = _build_checkpoint_with_factories(context)
 
     json_val = cp.json()
     dict_val = json.loads(json_val)
     assert dict_val == {
         "actions": [],
         "id": mock.ANY,
-        "name": "my_cp",
+        "name": cp.name,
         "result_format": "SUMMARY",
         "validation_definitions": [
             {
                 "id": mock.ANY,
-                "name": "my_vd_1",
+                "name": cp.validation_definitions[0].name,
             },
         ],
     }
