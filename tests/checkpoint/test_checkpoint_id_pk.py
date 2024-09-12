@@ -14,7 +14,6 @@ from great_expectations.data_context.data_context.context_factory import project
 from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
-
     from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context import AbstractDataContext, FileDataContext
 
