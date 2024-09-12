@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
@@ -80,6 +80,24 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         """
         batch_request = self.build_batch_request(batch_parameters=batch_parameters)
         return self.data_asset.get_batch(batch_request)
+
+    @public_api
+    def get_batch_identifiers_list(
+        self, batch_parameters: Optional[BatchParameters] = None
+    ) -> List[Dict]:
+        """
+        Retrieves a list of available batch identifiers.
+        These identifiers can be used to fetch specific batches via batch_options.
+
+        Args:
+            batch_parameters: Additional parameters to be used in fetching the batch identifiers
+            list.
+
+        Returns:
+            A list of batch identifiers.
+        """
+        batch_request = self.build_batch_request(batch_parameters=batch_parameters)
+        return self.data_asset.get_batch_identifiers_list(batch_request)
 
     def is_fresh(self) -> BatchDefinitionFreshnessDiagnostics:
         diagnostics = self._is_added()
