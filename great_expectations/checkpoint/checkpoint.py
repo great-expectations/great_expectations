@@ -213,7 +213,8 @@ class Checkpoint(BaseModel):
         diagnostics = CheckpointFreshnessDiagnostics(errors=[])
         for validation_definition in self.validation_definitions:
             try:
-                data["validation_definitions"].append(validation_definition.identifier_bundle())
+                identifier_bundle = validation_definition.identifier_bundle()
+                data["validation_definitions"].append(identifier_bundle.dict())
             except ResourceFreshnessAggregateError as e:
                 diagnostics.errors.extend(e.errors)
 

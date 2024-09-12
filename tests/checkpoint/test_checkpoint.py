@@ -1186,3 +1186,32 @@ def test_is_fresh(
         diagnostics.raise_for_error()
     except ResourceFreshnessAggregateError as e:
         assert [type(err) for err in e.errors] == error_list
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_errors_for_all_child_validation_definitions(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
+    bd_1 = asset.add_batch_definition_whole_dataframe(name="my_bd_1")
+    bd_2 = asset.add_batch_definition_whole_dataframe(name="my_bd_2")
+
+    suite_1 = gx.ExpectationSuite(name="my_suite_1")
+    suite_2 = gx.ExpectationSuite(name="my_suite_2")
+
+    vd_1 = gx.ValidationDefinition(name="my_vd_1", data=bd_1, suite=suite_1)
+    vd_2 = gx.ValidationDefinition(name="my_vd_2", data=bd_2, suite=suite_2)
+
+    cp = gx.Checkpoint(name="my_cp", validation_definitions=[vd_1, vd_2])
+
+    diagnostics = cp.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 5
+    assert [type(err) for err in diagnostics.errors] == [
+        ExpectationSuiteNotAddedError,
+        ValidationDefinitionNotAddedError,
+        ExpectationSuiteNotAddedError,
+        ValidationDefinitionNotAddedError,
+        CheckpointNotAddedError,
+    ]
