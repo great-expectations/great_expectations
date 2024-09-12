@@ -715,7 +715,9 @@ class TestCheckpointResult:
 
         # Assert
         submit_analytics_event.assert_called_once_with(
-            event=CheckpointRanEvent(checkpoint_id=checkpoint_id)
+            event=CheckpointRanEvent(
+                checkpoint_id=checkpoint_id, validation_definition_ids=[validation_definition.id]
+            )
         )
 
     @pytest.mark.unit

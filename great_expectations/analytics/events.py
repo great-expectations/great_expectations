@@ -193,11 +193,23 @@ class CheckpointDeletedEvent(_CheckpointEvent):
 class CheckpointRanEvent(_CheckpointEvent):
     _allowed_actions: ClassVar[List[Action]] = [CHECKPOINT_RAN]
 
-    def __init__(self, checkpoint_id: str | None = None):
+    def __init__(
+        self,
+        checkpoint_id: str | None = None,
+        validation_definition_ids: list[str | None] | None = None,
+    ):
+        self.validation_definition_ids = validation_definition_ids
         super().__init__(
             action=CHECKPOINT_RAN,
             checkpoint_id=checkpoint_id,
         )
+
+    @override
+    def _properties(self) -> dict:
+        return {
+            "validation_definition_ids": self.validation_definition_ids,
+            **super()._properties(),
+        }
 
 
 @dataclass
