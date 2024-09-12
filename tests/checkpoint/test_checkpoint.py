@@ -1197,13 +1197,13 @@ def test_is_fresh_raises_errors_for_all_child_validation_definitions(in_memory_r
     bd_1 = asset.add_batch_definition_whole_dataframe(name="my_bd_1")
     bd_2 = asset.add_batch_definition_whole_dataframe(name="my_bd_2")
 
-    suite_1 = gx.ExpectationSuite(name="my_suite_1")
-    suite_2 = gx.ExpectationSuite(name="my_suite_2")
+    suite_1 = ExpectationSuite(name="my_suite_1")
+    suite_2 = ExpectationSuite(name="my_suite_2")
 
-    vd_1 = gx.ValidationDefinition(name="my_vd_1", data=bd_1, suite=suite_1)
-    vd_2 = gx.ValidationDefinition(name="my_vd_2", data=bd_2, suite=suite_2)
+    vd_1 = ValidationDefinition(name="my_vd_1", data=bd_1, suite=suite_1)
+    vd_2 = ValidationDefinition(name="my_vd_2", data=bd_2, suite=suite_2)
 
-    cp = gx.Checkpoint(name="my_cp", validation_definitions=[vd_1, vd_2])
+    cp = Checkpoint(name="my_cp", validation_definitions=[vd_1, vd_2])
 
     diagnostics = cp.is_fresh()
     assert diagnostics.success is False
@@ -1214,4 +1214,109 @@ def test_is_fresh_raises_errors_for_all_child_validation_definitions(in_memory_r
         ExpectationSuiteNotAddedError,
         ValidationDefinitionNotAddedError,
         CheckpointNotAddedError,
+    ]
+
+
+@pytest.mark.unit
+def test_dict_serializes_correctly(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
+    bd = asset.add_batch_definition_whole_dataframe(name="my_bd")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    vd = context.validation_definitions.add(
+        ValidationDefinition(name="my_vd_1", data=bd, suite=suite)
+    )
+    cp = context.checkpoints.add(Checkpoint(name="my_cp", validation_definitions=[vd]))
+
+    dict_val = cp.dict()
+    assert dict_val == {
+        "actions": [],
+        "id": mock.ANY,
+        "name": "my_cp",
+        "result_format": "SUMMARY",
+        "validation_definitions": [
+            {
+                "id": mock.ANY,
+                "name": "my_vd_1",
+            },
+        ],
+    }
+
+    for id in (dict_val["id"], dict_val["validation_definitions"][0]["id"]):
+        try:
+            uuid.UUID(id)
+        except TypeError:
+            pytest.fail("id is not a valid UUID")
+
+
+@pytest.mark.unit
+def test_dict_raises_freshness_errors():
+    bd = BatchDefinition(name="my_bd")
+    suite = ExpectationSuite(name="my_suite")
+    vd = ValidationDefinition(name="my_vd_1", data=bd, suite=suite)
+    cp = Checkpoint(name="my_cp", validation_definitions=[vd])
+
+    with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
+        cp.dict()
+
+    assert len(e.value.errors) == 3
+    assert [type(err) for err in e.value.errors] == [
+        BatchDefinitionNotAddedError,
+        ExpectationSuiteNotAddedError,
+        ValidationDefinitionNotAddedError,
+    ]
+
+
+@pytest.mark.unit
+def test_json_serializes_correctly(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
+    bd = asset.add_batch_definition_whole_dataframe(name="my_bd")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    vd = context.validation_definitions.add(
+        ValidationDefinition(name="my_vd_1", data=bd, suite=suite)
+    )
+    cp = context.checkpoints.add(Checkpoint(name="my_cp", validation_definitions=[vd]))
+
+    json_val = cp.json()
+    dict_val = json.loads(json_val)
+    assert dict_val == {
+        "actions": [],
+        "id": mock.ANY,
+        "name": "my_cp",
+        "result_format": "SUMMARY",
+        "validation_definitions": [
+            {
+                "id": mock.ANY,
+                "name": "my_vd_1",
+            },
+        ],
+    }
+
+    for id in (dict_val["id"], dict_val["validation_definitions"][0]["id"]):
+        try:
+            uuid.UUID(id)
+        except TypeError:
+            pytest.fail("id is not a valid UUID")
+
+
+@pytest.mark.unit
+def test_json_raises_freshness_errors():
+    bd = BatchDefinition(name="my_bd")
+    suite = ExpectationSuite(name="my_suite")
+    vd = ValidationDefinition(name="my_vd_1", data=bd, suite=suite)
+    cp = Checkpoint(name="my_cp", validation_definitions=[vd])
+
+    with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
+        cp.json()
+
+    assert len(e.value.errors) == 3
+    assert [type(err) for err in e.value.errors] == [
+        BatchDefinitionNotAddedError,
+        ExpectationSuiteNotAddedError,
+        ValidationDefinitionNotAddedError,
     ]
