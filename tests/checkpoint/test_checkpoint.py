@@ -12,6 +12,7 @@ from requests import Session
 
 import great_expectations as gx
 from great_expectations import expectations as gxe
+from great_expectations.analytics.events import CheckpointRanEvent
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -593,7 +594,11 @@ class TestCheckpointResult:
         ]
 
     @pytest.mark.unit
-    def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
+    def test_checkpoint_run_no_actions(
+        self, validation_definition: ValidationDefinition, mocker: MockerFixture
+    ):
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(project=context)
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
@@ -683,6 +688,37 @@ class TestCheckpointResult:
             expectation_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
             run_id=mock.ANY,
+        )
+
+    @pytest.mark.unit
+    def test_checkpoint_run_sends_analytics(
+        self, validation_definition: ValidationDefinition, mocker: MockerFixture
+    ):
+        # Arrange
+        submit_analytics_event = mocker.patch(
+            "great_expectations.checkpoint.checkpoint.submit_analytics_event"
+        )
+
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        checkpoint_id = "e051d0a8-d492-4cde-91f3-29f353758488"
+        checkpoint = Checkpoint(
+            id=checkpoint_id,
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
+        )
+
+        # Act
+        with mock.patch.object(
+            Checkpoint, "is_fresh", return_value=CheckpointFreshnessDiagnostics(errors=[])
+        ):
+            checkpoint.run()
+
+        # Assert
+        submit_analytics_event.assert_called_once_with(
+            event=CheckpointRanEvent(
+                checkpoint_id=checkpoint_id, validation_definition_ids=[validation_definition.id]
+            )
         )
 
     @pytest.mark.unit
@@ -808,7 +844,10 @@ class TestCheckpointResult:
         )
 
     @pytest.mark.unit
-    def test_checkpoint_result_does_not_contain_dataframe(self, tmp_path: pathlib.Path):
+    def test_checkpoint_result_does_not_contain_dataframe(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         df = pd.DataFrame({"passenger_count": [1, 2, 3, 4, 5]})
 
         context = gx.get_context(mode="ephemeral")
@@ -910,7 +949,10 @@ class TestCheckpointResult:
         }
 
     @pytest.mark.filesystem
-    def test_checkpoint_run_adds_requisite_ids(self, tmp_path: pathlib.Path):
+    def test_checkpoint_run_adds_requisite_ids(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         checkpoint = self._build_file_backed_checkpoint(tmp_path)
 
         # A checkpoint that has not been persisted before running
@@ -941,7 +983,8 @@ class TestCheckpointResult:
 
     @pytest.mark.filesystem
     def test_checkpoint_run_with_data_docs_and_slack_actions_emit_page_links(
-        self, tmp_path: pathlib.Path
+        self,
+        tmp_path: pathlib.Path,
     ):
         actions = [
             SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
@@ -959,7 +1002,10 @@ class TestCheckpointResult:
         assert "file:///" in docs_block
 
     @pytest.mark.filesystem
-    def test_checkpoint_run_with_slack_action_no_page_links(self, tmp_path: pathlib.Path):
+    def test_checkpoint_run_with_slack_action_no_page_links(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         actions = [
             SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
         ]
