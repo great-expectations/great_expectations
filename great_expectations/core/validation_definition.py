@@ -35,6 +35,7 @@ from great_expectations.exceptions import (
     ValidationDefinitionNotFreshError,
 )
 from great_expectations.exceptions.exceptions import (
+    InvalidKeyError,
     StoreBackendError,
     ValidationDefinitionNotFoundError,
 )
@@ -144,7 +145,10 @@ class ValidationDefinition(BaseModel):
 
         try:
             validation_definition = store.get(key=key)
-        except StoreBackendError:
+        except (
+            StoreBackendError,  # Generic error from stores
+            InvalidKeyError,  # Ephemeral context error
+        ):
             return ValidationDefinitionFreshnessDiagnostics(
                 errors=[ValidationDefinitionNotFoundError(name=self.name)]
             )
