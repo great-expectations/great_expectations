@@ -14,6 +14,30 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.0.3
+* [FEATURE] Replace get_batch_list_from_batch_request with get_batch and get_batch_identifiers_list ([#10295](https://github.com/great-expectations/great_expectations/pull/10295))
+* [FEATURE] Add Checkpoint.run analytics ([#10382](https://github.com/great-expectations/great_expectations/pull/10382))
+* [FEATURE] BatchDefinition.get_batch_identifiers_list ([#10383](https://github.com/great-expectations/great_expectations/pull/10383))
+* [BUGFIX] Patch issue with data docs page retrieval in checkpoint actions ([#10374](https://github.com/great-expectations/great_expectations/pull/10374))
+* [DOCS] Update changelog attributions for 1.0 releases ([#10348](https://github.com/great-expectations/great_expectations/pull/10348))
+* [DOCS] Embed Wistia video in GX Core introduction ([#10366](https://github.com/great-expectations/great_expectations/pull/10366)) (thanks @JessSaavedra)
+* [DOCS] added data doc support posture ([#10373](https://github.com/great-expectations/great_expectations/pull/10373))
+* [DOCS] Adding BigQuery to GX Core support posture ([#10375](https://github.com/great-expectations/great_expectations/pull/10375))
+* [DOCS] Update Learn data quality use case articles to use <small> tags ([#10377](https://github.com/great-expectations/great_expectations/pull/10377))
+* [DOCS] Hide feedback survey on homepage ([#10378](https://github.com/great-expectations/great_expectations/pull/10378)) (thanks @deborahniesz)
+* [MAINTENANCE] SQLAlchemy 2 typing ([#10112](https://github.com/great-expectations/great_expectations/pull/10112))
+* [MAINTENANCE] Update `Expectation` equality to simplify meta and notes checks ([#10349](https://github.com/great-expectations/great_expectations/pull/10349))
+* [MAINTENANCE] Add `description` field to `ExpectationConfigurationSchema` and render always `description` over `template_str` ([#10347](https://github.com/great-expectations/great_expectations/pull/10347))
+* [MAINTENANCE] Clean up GX error types ([#10356](https://github.com/great-expectations/great_expectations/pull/10356))
+* [MAINTENANCE] Check that `BatchDefinitions` and `ExpectationSuites` are up-to-date before saving ([#10277](https://github.com/great-expectations/great_expectations/pull/10277))
+* [MAINTENANCE] Clean up test fixtures ([#10358](https://github.com/great-expectations/great_expectations/pull/10358))
+* [MAINTENANCE] Move "freshness"-related exceptions to separate file ([#10359](https://github.com/great-expectations/great_expectations/pull/10359))
+* [MAINTENANCE] Guard against dictionary `KeyError`s ([#10353](https://github.com/great-expectations/great_expectations/pull/10353))
+* [MAINTENANCE] Add "freshness" checks for ValidationDefinitions and Checkpoints ([#10365](https://github.com/great-expectations/great_expectations/pull/10365))
+* [MAINTENANCE] Additional tests for `BatchDefinition` and `ExpectationSuite` freshness ([#10380](https://github.com/great-expectations/great_expectations/pull/10380))
+* [MAINTENANCE] Delete misc functions from `test_utils` ([#10357](https://github.com/great-expectations/great_expectations/pull/10357))
+* [MAINTENANCE] Additional tests for `ValidationDefinition` and `Checkpoint` freshness ([#10381](https://github.com/great-expectations/great_expectations/pull/10381))
+
 ### 1.0.2
 * [FEATURE] Allow setting result format when calling batch.validate ([#10281](https://github.com/great-expectations/great_expectations/pull/10281))
 * [BUGFIX] FabricPowerBIDatasource 1.0 - TypeError: _PowerBIAsset.build_batch_request() got an unexpected keyword argument 'options' ([#10318](https://github.com/great-expectations/great_expectations/pull/10318))
