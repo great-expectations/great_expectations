@@ -86,7 +86,31 @@ Compares the row count of the current table to another table within the same dat
 - Implement `ExpectTableRowCountToEqualOtherTable` to ensure data integrity across your data pipeline stages.
 :::
 
-## Examples and scenarios
+## Examples
+
+### Validating daily transaction volume
+
+Here's an example GX Core workflow that validates the sample data provided, batched on transfer date day, using ExpectTableRowCountToBeBetween to check that the volume is in an expected range for a given date:
+
+:::TODO fix me:::
+
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py ExpectTableRowCountToEqualOtherTable"
+```
+
+In this example:
+
+1. We create a DataFrame from the sample data and convert the `transfer_date` column to datetime.
+2. We create a Data Context, add a Pandas Data Source, and define a DataFrame Asset.
+3. We define a function `transfer_date_day` to extract the transfer date day from a batch specification.
+4. We add a Batch Definition with a partition key based on `transfer_date`.
+5. We create an Expectation Suite and add an Expectation using `ExpectTableRowCountToBeBetween` to check that the row count is between 1 and 5 for each partition.
+6. We group the DataFrame by `transfer_date` to create partitions.
+7. For each partition, we create a Batch using the Batch Definition and the partition DataFrame, and validate the Batch against the Expectation Suite.
+8. We print the validation result for each partition.
+
+This example demonstrates how to validate data batched on a specific column (transfer_date day) and check the row count for each partition using GX Core.
+
+## Scenarios
 
 ### Data reconciliation across systems
 
