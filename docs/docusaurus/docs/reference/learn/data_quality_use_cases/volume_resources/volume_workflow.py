@@ -11,13 +11,10 @@ pytest --postgresql --docs-tests -k "data_quality_use_case_missingness_expectati
 
 # This section loads sample data to use for CI testing of the script.
 import pathlib
+from datetime import datetime
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from tests.test_utils import load_data_into_test_database
-
-from datetime import datetime
-
 from tests.test_utils import load_data_into_test_database
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
@@ -46,8 +43,8 @@ data_asset = data_source.add_table_asset(name="data asset", table_name="transfer
 
 
 def transfer_date_day(batch_spec):
-    transfer_date = datetime.strptime(batch_spec['transfer_date'], '%Y-%m-%d')
-    return transfer_date.strftime('%Y-%m-%d')
+    transfer_date = datetime.strptime(batch_spec["transfer_date"], "%Y-%m-%d")
+    return transfer_date.strftime("%Y-%m-%d")
 
 
 # Add a Batch Definition with a partition key
@@ -65,12 +62,12 @@ expectation_suite.add_expectation(
     gxe.ExpectTableRowCountToBeBetween(
         min_value=1,
         max_value=5,
-        batch_definition_parameters={"transfer_date": transfer_date_day}
+        batch_definition_parameters={"transfer_date": transfer_date_day},
     )
 )
 
 # Get partitions based on transfer_date
-partitions = df.groupby(df['transfer_date'].dt.date)
+partitions = df.groupby(df["transfer_date"].dt.date)
 
 # Validate each partition
 for transfer_date, partition_df in partitions:
@@ -78,8 +75,8 @@ for transfer_date, partition_df in partitions:
 
     # Create a Batch for the partition
     batch = batch_definition.get_batch(
-        batch_parameters={"transfer_date": transfer_date.strftime('%Y-%m-%d')},
-        dataframe=partition_df
+        batch_parameters={"transfer_date": transfer_date.strftime("%Y-%m-%d")},
+        dataframe=partition_df,
     )
 
     # Validate the Batch
