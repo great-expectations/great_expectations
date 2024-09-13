@@ -23,7 +23,7 @@ To create custom SQL query Expectations, you'll need to use the GX API. See [Cus
 The following table lists the available GX Cloud Expectations.
 
 | Data Quality Issue | Expectation                                               | Description                                                                                                                            |
-| ------------------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------|-----------------------------------------------------------| -------------------------------------------------------------------------------------------------------------------------------------- |
 | Cardinality        | `expect_column_values_to_be_unique`                       | Expect each column value to be unique.                                                                                                 |
 | Cardinality        | `expect_compound_columns_to_be_unique`                    | Expect the compound columns to be unique.                                                                                              |
 | Cardinality        | `expect_select_column_values_to_be_unique_within_record`  | Expect the values for each record to be unique across the columns listed. Note that records can be duplicated.                         |
@@ -68,6 +68,7 @@ The following table lists the available GX Cloud Expectations.
 | Volume             | `expect_table_row_count_to_be_between`                    | Expect the number of rows to be between two values.                                                                                    |
 | Volume             | `expect_table_row_count_to_equal`                         | Expect the number of rows to equal a value.                                                                                            |
 | Volume             | `expect_table_row_count_to_equal_other_table`             | Expect the number of rows to equal the number in another table within the same database.                                               |
+|                    | `unexpected_rows_expectation`                             | "This Expectation will fail validation if the query returns one or more rows. The WHERE clause defines the fail criteria.".            |
 
 ## Add an Expectation
 
