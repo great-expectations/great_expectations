@@ -234,9 +234,9 @@ class Checkpoint(BaseModel):
 
     @validator("validation_definitions", pre=True)
     def _validate_validation_definitions(
-        cls, validation_definitions: list[ValidationDefinition] | list[dict]
+        cls, validation_definitions: list[ValidationDefinition] | list[Dict[str, Any]]
     ) -> list[ValidationDefinition]:
-        if validation_definitions and isinstance(validation_definitions[0], dict):
+        if validation_definitions and isinstance(validation_definitions[0], Dict):
             validation_definition_store = project_manager.get_validation_definition_store()
             identifier_bundles = [
                 _IdentifierBundle(**v)  # type: ignore[arg-type] # All validation configs are dicts if the first one is
