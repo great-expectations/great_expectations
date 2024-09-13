@@ -131,7 +131,7 @@ Compares the row count of the current table to another table within the same dat
 
 While volume management is a critical component of data quality, it's just one facet of a comprehensive data engineering strategy. To build on the foundations laid in this guide, consider the following steps:
 
-1. Integrate volume-focused Expectations into your CI/CD pipelines, enabling automated checks at key points in your data flow. Follow our step-by-step guide on [integrating GX with Github Actions](https://greatexpectations.io/blog/github-actions) to streamline your deployment process.
+1. Integrate volume-focused Expectations into your CI/CD pipelines, enabling automated checks at key points in your data flow.
 
 2. Explore the [Expectation Gallery](https://greatexpectations.io/expectations/) to identify Expectations that complement your volume management strategy and address other dimensions of data quality. Experiment with combining different Expectations to create a robust validation framework tailored to your specific data quality challenges.
 
