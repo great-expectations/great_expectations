@@ -9,15 +9,6 @@
   font-size: var(--p-md-font-size);
 }
 
-.request-a-demo {
-  margin-top: 24px;
-}
-
-.request-a-demo a {
-  font-weight: bold;
-  color: #ff6310;;
-}
-
 .menu__link {
   border-left: 4px solid transparent;
   line-height: var(--p-line-height);
@@ -108,6 +99,16 @@ li.menu__list-item {
       top: calc(50% + 2px);
     }
   }
+}
+
+//Request a demo CTA
+.request-demo-sidebar {
+  margin-top: 24px;
+}
+
+.request-demo-sidebar a {
+  font-weight: bold;
+  color: #ff6310;;
 }
 
 [data-theme='dark'] nav.menu {
