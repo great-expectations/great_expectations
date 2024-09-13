@@ -22,7 +22,7 @@
       "include_in_gallery": false,
       "exact_match_out" : false,
       "in":{
-        "unexpected_rows_query": "SELECT * FROM {batch} WHERE c1 > 8"
+        "unexpected_rows_query": "SELECT * FROM {batch} WHERE c1 > 7"
       },
       "out":{
         "success":true,
@@ -34,7 +34,7 @@
       "include_in_gallery": false,
       "exact_match_out" : false,
       "in":{
-        "unexpected_rows_query": "SELECT * FROM {batch} WHERE c1 > 7"
+        "unexpected_rows_query": "SELECT * FROM {batch} WHERE c1 > 6"
       },
       "out":{
         "success":false,
