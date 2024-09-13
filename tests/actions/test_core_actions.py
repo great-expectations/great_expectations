@@ -810,6 +810,14 @@ class TestV1ActionRun:
         assert "Successfully posted results" in result["result"]
 
     @pytest.mark.unit
+    def test_UpdateDataDocsAction_equality(self):
+        """I kow, this one seems silly. But this was a bug for other actions."""
+        a = UpdateDataDocsAction(name="my_action")
+        b = UpdateDataDocsAction(name="my_action")
+
+        assert a == b
+
+    @pytest.mark.unit
     def test_UpdateDataDocsAction_run(
         self, mocker: MockerFixture, checkpoint_result: CheckpointResult
     ):
