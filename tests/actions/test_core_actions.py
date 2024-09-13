@@ -380,6 +380,23 @@ class TestV1ActionRun:
             ],
         )
 
+    def test_EmailAction_equality(self):
+        """I know, this one seems silly. But this was a bug."""
+        a = EmailAction(
+            name="my_action",
+            smtp_address="test",
+            smtp_port="587",
+            receiver_emails="test@gmail.com",
+        )
+        b = EmailAction(
+            name="my_action",
+            smtp_address="test",
+            smtp_port="587",
+            receiver_emails="test@gmail.com",
+        )
+
+        assert a == b
+
     @pytest.mark.unit
     @pytest.mark.parametrize(
         "emails, expected_email_list",
@@ -610,6 +627,14 @@ class TestV1ActionRun:
         }
 
         mock_pypd_event.assert_not_called()
+
+    @pytest.mark.unit
+    def test_SlackNotificationAction_equality(self):
+        """I kow, this one seems silly. But this was a bug."""
+        a = SlackNotificationAction(name="my_action", slack_webhook="test", notify_on="all")
+        b = SlackNotificationAction(name="my_action", slack_webhook="test", notify_on="all")
+
+        assert a == b
 
     @pytest.mark.unit
     def test_SlackNotificationAction_run(self, checkpoint_result: CheckpointResult):
