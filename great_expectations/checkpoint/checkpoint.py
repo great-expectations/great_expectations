@@ -205,7 +205,7 @@ class Checkpoint(BaseModel):
             exclude = set()
 
         if isinstance(exclude, set):
-            exclude = exclude.add("validation_definitions")
+            exclude.add("validation_definitions")
         else:
             exclude["__all__"] = "validation_definitions"
 
