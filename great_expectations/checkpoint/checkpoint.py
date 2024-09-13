@@ -211,7 +211,7 @@ class Checkpoint(BaseModel):
 
         return exclude
 
-    def _serialize_validation_definitions(self, data: dict) -> dict:
+    def _serialize_validation_definitions(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Manually serialize the validation_definitions field to avoid Pydantic's default
         serialization.
