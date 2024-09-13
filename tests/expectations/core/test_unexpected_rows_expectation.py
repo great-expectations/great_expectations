@@ -39,16 +39,6 @@ def postgres_batch(in_memory_runtime_context: AbstractDataContext) -> Batch:
     return asset.add_batch_definition_whole_table().get_batch()
 
 
-@pytest.fixture(
-    params=[
-        pytest.param("sqlite_batch", marks=[pytest.mark.sqlite]),
-        pytest.param("postgres_batch", marks=[pytest.mark.postgresql]),
-    ]
-)
-def batch(request):
-    return request.getfixturevalue(request.param)
-
-
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "query",
@@ -68,7 +58,6 @@ def test_unexpected_rows_expectation_invalid_query_info_message(query: str, capl
     assert "{batch}" in out
 
 
-@pytest.mark.sqlite
 @pytest.mark.postgresql
 @pytest.mark.parametrize(
     "query, expected_success, expected_observed_value, expected_unexpected_rows",
@@ -118,10 +107,10 @@ def test_unexpected_rows_expectation_validate(
     expected_success: bool,
     expected_observed_value: int,
     expected_unexpected_rows: list[dict],
-    batch: Batch,
+    postgres_batch: Batch,
 ):
     expectation = UnexpectedRowsExpectation(unexpected_rows_query=query)
-    result = batch.validate(expectation)
+    result = postgres_batch.validate(expectation)
 
     assert result.success is expected_success
 
