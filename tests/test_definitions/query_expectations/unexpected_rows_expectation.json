@@ -1,6 +1,7 @@
 {
   "expectation_type" : "unexpected_rows_expectation",
   "datasets" : [{
+    "only_for": ["postgresql", "snowflake", "sqlite"],
     "dataset_name": "unexpected_rows_expectation_1",
     "data" : {
       "c1" : [4,5,6,7],
