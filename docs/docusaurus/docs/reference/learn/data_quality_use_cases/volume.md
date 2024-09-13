@@ -135,12 +135,7 @@ While volume management is a critical component of data quality, it's just one f
 
 2. Explore the [Expectation Gallery](https://greatexpectations.io/expectations/) to identify Expectations that complement your volume management strategy and address other dimensions of data quality. Experiment with combining different Expectations to create a robust validation framework tailored to your specific data quality challenges.
 
-3. Develop a multifaceted approach that combines volume checks with other [crucial data quality aspects](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md), such as data integrity, schema evolution, and distribution analysis. For instance, consider coupling volume checks with schema validation:
-
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py combined_checks"
-```
-
-This combination allows you to monitor for unexpected data growth while simultaneously ensuring structural consistency, providing a more robust validation framework.
+3. Develop a multifaceted approach that combines volume checks with other [crucial data quality aspects](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md), such as data integrity, schema evolution, and distribution analysis.
 
 4. Implement a systematic review process for your Expectations suite, ensuring it evolves alongside your data architecture and business requirements. Schedule regular meetings with stakeholders to discuss data quality objectives, review Expectation performance, and identify areas for improvement.
 
