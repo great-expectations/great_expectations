@@ -982,7 +982,8 @@ class TestCheckpointResult:
 
     @pytest.mark.filesystem
     def test_checkpoint_run_with_data_docs_and_slack_actions_emit_page_links(
-        self, tmp_path: pathlib.Path
+        self,
+        tmp_path: pathlib.Path,
     ):
         actions = [
             SlackNotificationAction(name="slack_action", slack_webhook="webhook"),

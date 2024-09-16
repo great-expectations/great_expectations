@@ -129,7 +129,7 @@ class ValidationAction(BaseModel):
 
     def _get_data_docs_pages_from_prior_action(
         self, action_context: ActionContext | None
-    ) -> dict[ValidationResultIdentifier, dict] | None:
+    ) -> dict[ValidationResultIdentifier, dict[str, str]] | None:
         if action_context:
             data_docs_results = action_context.filter_results(class_=UpdateDataDocsAction)
             data_docs_pages = {}
@@ -689,7 +689,7 @@ class UpdateDataDocsAction(DataDocsAction):
     def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
-        action_results: dict[ValidationResultIdentifier, dict] = {}
+        action_results: dict[ValidationResultIdentifier, dict[str, str]] = {}
         for result_identifier, result in checkpoint_result.run_results.items():
             suite_name = result.suite_name
 

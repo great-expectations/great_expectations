@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from great_expectations.compatibility.typing_extensions import override
 
@@ -24,7 +24,7 @@ class SlackRenderer(Renderer):
     def render(
         self,
         validation_result: ExpectationSuiteValidationResult,
-        data_docs_pages: dict[ValidationResultIdentifier, dict] | None = None,
+        data_docs_pages: dict[ValidationResultIdentifier, dict[str, str]] | None = None,
         notify_with: list[str] | None = None,
         validation_result_urls: list[str] | None = None,
     ) -> list[dict]:
@@ -39,11 +39,12 @@ class SlackRenderer(Renderer):
         )
         blocks.append(description_block)
 
-        report_element_block = self._build_report_element_block(
-            data_docs_pages=data_docs_pages, notify_with=notify_with
-        )
-        if report_element_block:
-            blocks.append(report_element_block)
+        for data_docs_page in data_docs_pages.values():
+            report_element_block = self._build_report_element_block(
+                data_docs_page=data_docs_page, notify_with=notify_with
+            )
+            if report_element_block:
+                blocks.append(report_element_block)
 
         return blocks
 
@@ -140,7 +141,7 @@ class SlackRenderer(Renderer):
             ],
         }
 
-    def _get_report_element(self, docs_link):
+    def _get_report_element(self, docs_link: str) -> dict[str, Any] | None:
         report_element = None
         if docs_link:
             try:
@@ -174,15 +175,15 @@ class SlackRenderer(Renderer):
         return report_element
 
     def _build_report_element_block(
-        self, data_docs_pages: dict[ValidationResultIdentifier, dict], notify_with: list[str]
+        self, data_docs_page: dict[str, str], notify_with: list[str]
     ) -> dict | None:
-        if not data_docs_pages:
+        if not data_docs_page:
             return None
 
         if notify_with:
             for docs_link_key in notify_with:
-                if docs_link_key in data_docs_pages:
-                    docs_link = data_docs_pages[docs_link_key]
+                if docs_link_key in data_docs_page:
+                    docs_link = data_docs_page[docs_link_key]
                     report_element = self._get_report_element(docs_link)
                 else:
                     logger.critical(
@@ -202,10 +203,10 @@ class SlackRenderer(Renderer):
                 if report_element:
                     return report_element
         else:
-            for docs_link_key in data_docs_pages:
+            for docs_link_key in data_docs_page:
                 if docs_link_key == "class":
                     continue
-                docs_link = data_docs_pages[docs_link_key]
+                docs_link = data_docs_page[docs_link_key]
                 report_element = self._get_report_element(docs_link)
                 return report_element
 

@@ -26,7 +26,7 @@ class MicrosoftTeamsRenderer(Renderer):
     def render(
         self,
         checkpoint_result: CheckpointResult,
-        data_docs_pages: dict[ValidationResultIdentifier, dict] | None = None,
+        data_docs_pages: dict[ValidationResultIdentifier, dict[str, str]] | None = None,
     ) -> dict:
         checkpoint_blocks: list[list[dict[str, str]]] = []
         for result_identifier, result in checkpoint_result.run_results.items():
@@ -103,7 +103,7 @@ class MicrosoftTeamsRenderer(Renderer):
         return self._render_validation_result_element(key="Summary", value=check_details_text)
 
     def _render_data_docs_links(
-        self, data_docs_pages: dict[ValidationResultIdentifier, dict] | None
+        self, data_docs_pages: dict[ValidationResultIdentifier, dict[str, str]] | None
     ) -> list[dict[str, str]] | None:
         if not data_docs_pages:
             return None
