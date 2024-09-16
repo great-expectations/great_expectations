@@ -6,7 +6,7 @@ cd assets/docker/postgresql
 docker compose up
 
 2. Run the following command from the repo root dir in a second terminal:
-pytest --postgresql --docs-tests -k "data_quality_use_case_missingness_expectations" tests/integration/test_script_runner.py
+pytest --postgresql --docs-tests -k "data_quality_use_case_volume_expectations" tests/integration/test_script_runner.py
 """
 
 # This section loads sample data to use for CI testing of the script.
@@ -40,7 +40,7 @@ data_asset = datasource.add_table_asset(name="data asset", table_name="transfers
 batch_definition = data_asset.add_batch_definition_whole_table("batch definition")
 batch = batch_definition.get_batch()
 
-suite = context.suites.add(gx.ExpectationSuite(name="example missingness expectations"))
+suite = context.suites.add(gx.ExpectationSuite(name="example volume expectations"))
 
 #############################
 # Start Expectation snippets.
@@ -82,24 +82,5 @@ suite.add_expectation(
     gxe.ExpectTableRowCountToEqual(value=4)
     # </snippet>
 )
-
-# TODO fix this
-# suite.add_expectation(
-#     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py combined_checks">
-#     gxe.ExpectTableRowCountToBeBetween(
-#         min_value=2,
-#         max_value=5
-#     ),
-#
-#     gxe.ExpectTableColumnsToMatchOrderedList(
-#         column_list=[
-#             "sender_account_number",
-#             "recipient_account_number",
-#             "transfer_amount",
-#             "transfer_date",
-#         ]
-#     )
-#     # </snippet>
-# )
 
 results = batch.validate(suite)

@@ -6,80 +6,53 @@ cd assets/docker/postgresql
 docker compose up
 
 2. Run the following command from the repo root dir in a second terminal:
-pytest --postgresql --docs-tests -k "data_quality_use_case_missingness_expectations" tests/integration/test_script_runner.py
+pytest --postgresql --docs-tests -k "data_quality_use_case_volume_workflow" tests/integration/test_script_runner.py
 """
 
-# This section loads sample data to use for CI testing of the script.
-import pathlib
-from datetime import datetime
-
+# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code">
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from tests.test_utils import load_data_into_test_database
+import pandas as pd
 
-CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
-
-GX_ROOT_DIR = pathlib.Path(gx.__file__).parent.parent
-
-# Add test data to database for testing.
-load_data_into_test_database(
-    table_name="transfers",
-    csv_path=str(
-        GX_ROOT_DIR
-        / "tests/test_sets/learn_data_quality_use_cases/volume_financial_transfers.csv"
-    ),
-    connection_string=CONNECTION_STRING,
-)
-
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code">
-
+# Create Data Context.
 context = gx.get_context()
+
+# Connect to sample data, create Data Source and Data Asset.
+CONNECTION_STRING = "postgresql+psycopg2://try_gx:try_gx@postgres.workshops.greatexpectations.io/gx_learn_data_quality"
+
 data_source = context.data_sources.add_postgres(
     "postgres database", connection_string=CONNECTION_STRING
 )
-data_asset = data_source.add_table_asset(name="data asset", table_name="transfers")
+data_asset = data_source.add_table_asset(name="financial transfers table", table_name="volume_financial_transfers")
 
-# Define a function to extract the transfer date day
-
-
-def transfer_date_day(batch_spec):
-    transfer_date = datetime.strptime(batch_spec["transfer_date"], "%Y-%m-%d")
-    return transfer_date.strftime("%Y-%m-%d")
-
-
-# Add a Batch Definition with a partition key
-batch_definition = data_asset.add_batch_definition(
-    name="daily_batch",
+# Add a Batch Definition with partitioning by day.
+batch_definition = data_asset.add_batch_definition_daily(
+    name="daily transfers",
+    column="transfer_ts"
 )
 
-# Create an Expectation Suite
-expectation_suite = context.suites.add(
-    gx.core.expectation_suite.ExpectationSuite(name="transactions_suite")
-)
+# Create an Expectation testing that each batch (day) contains between 1 and 5 rows.
+volume_expectation = gxe.ExpectTableRowCountToBeBetween(min_value=1, max_value=5)
 
-# Add an Expectation for row count to be between 1 and 5 for each partition
-expectation_suite.add_expectation(
-    gxe.ExpectTableRowCountToBeBetween(
-        min_value=1,
-        max_value=5,
-        batch_definition_parameters={"transfer_date": transfer_date_day},
-    )
-)
+# Validate data volume for each day in date range and capture result.
+START_DATE = "2024-05-01"
+END_DATE = "2024-05-07"
 
-# Get partitions based on transfer_date
-partitions = df.groupby(df["transfer_date"].dt.date)
+validation_results_by_day = []
 
-# Validate each partition
-for transfer_date, partition_df in partitions:
-    print(f"Validating partition for transfer_date: {transfer_date}")
-
-    # Create a Batch for the partition
-    batch = batch_definition.get_batch(
-        batch_parameters={"transfer_date": transfer_date.strftime("%Y-%m-%d")},
-        dataframe=partition_df,
+for date in list(pd.date_range(start=START_DATE, end=END_DATE).to_pydatetime()):
+    daily_batch = batch_definition.get_batch(
+        batch_parameters={"year": date.year, "month": date.month, "day": date.day}
     )
 
-    # Validate the Batch
-    validation_result = batch.validate(expectation_suite)
-    print(validation_result.success)
+    result = daily_batch.validate(volume_expectation)
+    validation_results_by_day.append(
+        {
+            "date" : date,
+            "expectation passed": result["success"],
+            "observed rows":  result["result"]["observed_value"],
+        }
+    )
+
+pd.DataFrame(validation_results_by_day)
 # </snippet>

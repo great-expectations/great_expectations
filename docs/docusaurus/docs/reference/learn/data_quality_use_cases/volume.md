@@ -2,19 +2,21 @@
 sidebar_label: 'Volume'
 title: 'Manage data volume with GX'
 ---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 Data volume, a critical aspect of data quality, refers to the quantity of records or data points within a dataset. Managing data volume effectively is crucial for maintaining data integrity, ensuring system performance, and deriving accurate insights. Unexpected changes in data volume can signal issues in data collection, processing, or storage, potentially leading to skewed analyses or system failures. Volume management is intrinsically linked to other aspects of data quality, such as data completeness and consistency, forming a crucial part of a comprehensive data quality strategy.
 
 Great Expectations (GX) offers a powerful set of tools for monitoring and validating data volume through its volume-focused Expectations. By integrating these Expectations into your data pipelines, you can establish robust checks that ensure your datasets maintain the expected volume, catch anomalies early, and prevent downstream issues in your data workflows.
 
-This guide will walk you through leveraging GX to effectively manage and validate data volume, helping you maintain high-quality, reliable datasets for your analytics and decision-making processes.
+This guide will walk you through leveraging GX to effectively manage and validate data volume, helping you maintain high-quality, reliable datasets.
 
-## Understanding the impact of data volume on quality
+## The impact of data volume on data quality
 
 Data volume plays a significant role in the overall quality and reliability of your datasets. Some key considerations include:
 
 1. **Consistency**: Unexpected changes in data volume can indicate issues in data collection, processing, or integration, potentially leading to inconsistent or incomplete datasets.
-2. **Performance**: Excessively large datasets can strain system resources, leading to slower query times, increased latency, and potential system failures.
+2. **Performance**: Unexpectedly large datasets can strain system resources, leading to slower query times, increased latency, and potential system failures.
 3. **Accuracy**: Anomalies in data volume, such as sudden spikes or drops, can skew analytical results and lead to inaccurate insights if not properly addressed.
 4. **Compliance**: Certain regulations, such as data retention policies, may require strict control over data volume to ensure compliance and avoid legal repercussions.
 
@@ -26,15 +28,15 @@ This article assumes basic familiarity with GX components and workflows. If you'
 
 ## Data preview
 
-The examples in this guide use a sample transaction dataset, available as a [CSV file on GitHub](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/volume_financial_transfers.csv).
+The examples in this article use a sample financial transaction dataset that is provided in from a public Postgres database table. The sample data is also available in [CSV format](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/volume_financial_transfers.csv).
 
 
-| type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_date       |
+| transfer_type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_ts       |
 |----------|------------------------|--------------------|-----------------|---------------------|
 | domestic | 244084670977           | Jaxson Duke        | 9143.40         | 2024-05-01 01:12    |
 | domestic | 954005011218           | Nelson O’Connell   | 3285.21         | 2024-05-01 05:08    |
 
-This dataset represents daily financial transactions. In a real-world scenario, you'd expect a certain number of transactions each day.
+This dataset represents daily financial transactions. In a real-world scenario, you'd expect a certain volume of transactions to occur each day.
 
 ## Key volume Expectations
 
@@ -46,7 +48,7 @@ GX provides several Expectations specifically designed for managing data volume.
 
 Ensures that the number of rows in a dataset falls within a specified range.
 
-**Use Case**: Validate that daily transaction volumes are within expected bounds, alerting to unusual spikes or drops in activity.
+**Use Case**: Validate that transaction volumes are within expected bounds, alerting to unusual spikes or drops in activity.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToBeBetween"
 ```
@@ -86,58 +88,76 @@ Compares the row count of the current table to another table within the same dat
 - Implement `ExpectTableRowCountToEqualOtherTable` to ensure data integrity across your data pipeline stages.
 :::
 
-## Examples
+## Examples and scenarios
 
-### Validating daily transaction volume
+GX Cloud provides a visual interface to create and run schema validation workflows. The GX Cloud workflow to validate data volume is intuitive and straightforward: create a Data Asset, define Expectations (optionally batching data), run a Validation, and review Validation Results.
 
-Here's an example GX Core workflow that validates the sample data provided, batched on transfer date day, using ExpectTableRowCountToBeBetween to check that the volume is in an expected range for a given date:
+:::TODO add screenshot:::
 
-:::TODO fix me:::
+GX Core can be used to complement and extend the capabilities of GX Cloud to programmatically implement custom validation workflows. The example and scenarios provided in this section feature use cases that can be achieved using either GX Cloud, GX Core, or a combination of both products.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py ExpectTableRowCountToEqualOtherTable"
+### Validate daily transaction volume
+
+**Context**: In SQL tables, data is often timestamped on row creation. Tables can hold data created over long ranges of time, however, organizations generally want to validate volume for a specific time period: over a year, over a month, over a day.
+
+**Goal**: Using GX Core or GX Cloud, validate daily data volume by batching a single Data Asset (a Postgres table) on a time-based column and using `ExpectTableRowCountToBeBetween`.
+
+<Tabs 
+   defaultValue="gx_core"
+   values={[
+      {value: 'gx_core', label: 'GX Core'},
+      {value: 'gx_cloud', label: 'GX Cloud'}
+   ]}
+>
+
+<TabItem value="gx_core" label="GX Core">
+
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code"
 ```
 
-In this example:
+**Result**:
+| date | expectation passed | observed rows |
+| :--- | :--- | :--- |
+| 2024-05-01 | True | 4 |
+| 2024-05-02 | True | 5 |
+| 2024-05-03 | True | 5 |
+| 2024-05-04 | True | 6 |
+| 2024-05-05 | True | 5 |
+| 2024-05-06 | True | 6 |
+| 2024-05-07 | True | 5 |
 
-1. We create a DataFrame from the sample data and convert the `transfer_date` column to datetime.
-2. We create a Data Context, add a Pandas Data Source, and define a DataFrame Asset.
-3. We define a function `transfer_date_day` to extract the transfer date day from a batch specification.
-4. We add a Batch Definition with a partition key based on `transfer_date`.
-5. We create an Expectation Suite and add an Expectation using `ExpectTableRowCountToBeBetween` to check that the row count is between 1 and 5 for each partition.
-6. We group the DataFrame by `transfer_date` to create partitions.
-7. For each partition, we create a Batch using the Batch Definition and the partition DataFrame, and validate the Batch against the Expectation Suite.
-8. We print the validation result for each partition.
+</TabItem>
 
-This example demonstrates how to validate data batched on a specific column (transfer_date day) and check the row count for each partition using GX Core.
+<TabItem value="gx_cloud" label="GX Cloud">
 
-## Scenarios
+::: TODO
+
+Add GX Cloud steps
+
+:::
+
+</TabItem>
+</Tabs>
+
 
 ### Data reconciliation across systems
 
 **Context**: In many organizations, data is often stored and processed across multiple systems, such as source systems, data warehouses, and reporting databases. Ensuring data consistency across these systems is crucial for accurate reporting and decision-making. For example, in a banking environment, data might be stored in core banking platforms, data warehouses, and reporting databases, and ensuring consistency across these systems is essential for regulatory compliance and accurate financial reporting.
 
-**GX solution**: Implement checks to ensure data volume consistency between source and target systems in a data reconciliation process.
-
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py reconciliation_across_systems"
-```
+**GX solution**: Implement checks using `ExpectTableRowCountToEqualOtherTable` to ensure data volume consistency between source and target systems in a data reconciliation process.
 
 ### Monitoring data volume in real-time streaming pipelines
 
 **Context**: Many organizations process large volumes of data in real-time for various purposes, such as fraud detection, system monitoring, or real-time analytics. Monitoring data volume in real-time streaming pipelines is essential to ensure that the volume remains within expected bounds and to detect any anomalies promptly. For instance, banks often process large volumes of data in real-time for fraud detection or market monitoring, and detecting volume anomalies quickly is crucial for mitigating risks.
 
-**GX solution**: Implement checks to monitor data volume in real-time streaming pipelines and alert when anomalies are detected.
-
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py monitoring_streaming_pipelines"
-```
+**GX solution**: Implement checks using `ExpectTableRowCountToBeBetween` to monitor data volume in real-time streaming pipelines and alert when anomalies are detected.
 
 ### Batch processing verification
 
-**Context**: In batch processing systems, it's important to verify that each batch contains the expected number of records to ensure complete processing. This is applicable across various industries, such as retail, where sales transactions might be processed in batches, or in healthcare, where patient records might be updated through batch processes. Ensuring that each batch contains the expected number of records is crucial for maintaining data integrity and avoiding data loss.
+**Context**: In batch processing systems, it is important to verify that each batch contains the expected number of records to ensure complete processing. This is applicable across various industries, such as retail, where sales transactions might be processed in batches, or in healthcare, where patient records might be updated through batch processes. Ensuring that each batch contains the expected number of records is crucial for maintaining data integrity and avoiding data loss.
 
-**GX solution**: Validate that each processed batch contains exactly the expected number of records.
+**GX solution**: Validate data using `ExpectTableRowCountToEqual` to ensure that each processed batch contains exactly the expected number of records.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py batch_processing_verification"
-```
 
 ## Avoid common volume validation pitfalls
 
