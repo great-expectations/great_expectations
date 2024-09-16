@@ -275,7 +275,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
     @override
     def get_batch(self, batch_request: BatchRequest) -> Batch:
-        self._validate_batch_request(batch_request)
+        #self._validate_batch_request(batch_request)
 
         batch_spec = RuntimeDataBatchSpec(batch_data=batch_request.options["dataframe"])
         execution_engine: SparkDFExecutionEngine = self.datasource.get_execution_engine()
