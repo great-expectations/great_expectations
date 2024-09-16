@@ -25,6 +25,7 @@ from great_expectations.core.expectation_suite import (
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.data_context.context_factory import set_context
+from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.expectation_configuration import (
@@ -1197,3 +1198,35 @@ def test_is_fresh_freshness(in_memory_runtime_context):
     assert diagnostics.success is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteNotFreshError)
+
+
+@pytest.mark.unit
+def test_is_fresh_fails_on_suite_retrieval(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+    context.suites.delete(suite.name)
+
+    diagnostics = suite.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_fails_on_suite_deserialization(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    # Value has changed since initial creation and subsequent retrieval
+    suite_dict = {
+        "name": "my_suite",
+        "expectations": [{"type": "expect_column_values_to_be_between", "kwargs": {}}],
+    }
+    with mock.patch.object(ExpectationsStore, "get", return_value=suite_dict):
+        diagnostics = suite.is_fresh()
+
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteError)
