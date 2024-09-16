@@ -862,3 +862,19 @@ def test_set_oss_id_with_existing_config(
         "oss_id",
     ]
     assert oss_id == uuid.UUID(config["analytics"]["oss_id"])
+
+
+@pytest.mark.unit
+def test_context_instantiation_sets_data_context_id():
+    context = gx.get_context(mode="ephemeral")
+    assert context.data_context_id
+
+
+@pytest.mark.unit
+def test_context_instantiation_grabs_existing_data_context_id(tmp_path: pathlib.Path):
+    project_root_dir = tmp_path / "my_project_root_dir"
+    context = gx.get_context(mode="file", project_root_dir=project_root_dir)
+    data_context_id = context.data_context_id
+    context = gx.get_context(mode="file", project_root_dir=project_root_dir)
+
+    assert context.data_context_id == data_context_id
