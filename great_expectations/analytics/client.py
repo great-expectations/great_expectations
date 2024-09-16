@@ -72,4 +72,6 @@ def _in_gx_ci() -> bool:
         os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
         # Azure Pipelines
         or os.getenv("System.TeamProject") == "great_expectations"
+        # Pytest
+        or bool(os.getenv("PYTEST_CURRENT_TEST"))
     )
