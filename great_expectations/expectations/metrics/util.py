@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import re
 from collections import UserDict
+from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -80,8 +81,11 @@ except ImportError:
 
 
 def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
-    column, regex, dialect, positive=True
-):
+    column: Any,  # TODO: add column type
+    regex: str,
+    dialect: ModuleType,
+    positive: bool = True,
+) -> sa.SQLColumnExpression | None:
     try:
         # postgres
         if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
