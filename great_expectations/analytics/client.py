@@ -67,11 +67,18 @@ def init(  # noqa: PLR0913
 
 
 def _in_gx_ci() -> bool:
+    """
+    To prevent polluting analytics data with CI runs, we disable analytics tracking when running in
+    certain environments (GitHub Actions and Azure Pipelines).
+
+    We also disable analytics tracking when running tests with Pytest to prevent issues during local
+    development.
+    """
     return (
-        # GitHub Actions
+        # GitHub Actions: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables
         os.getenv("GITHUB_REPOSITORY") == "great-expectations/great_expectations"
-        # Azure Pipelines
+        # Azure Pipelines: https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#system-variables-devops-services
         or os.getenv("System.TeamProject") == "great_expectations"
-        # Pytest
+        # Pytest: https://docs.pytest.org/en/7.1.x/example/simple.html#pytest-current-test-environment-variable
         or bool(os.getenv("PYTEST_CURRENT_TEST"))
     )
