@@ -696,7 +696,7 @@ class TestTableIdentifiers:
             batch_definition = asset.add_batch_definition_whole_table("whole table!")
 
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
-        suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))
+        suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name"))
 
         validation_definition = context.validation_definitions.add(
             ValidationDefinition(name="validation_definition", suite=suite, data=batch_definition)
@@ -859,11 +859,7 @@ class TestColumnExpectations:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                    "mostly": 1,
-                },
+                type=expectation_type, kwargs={"column": column_name}
             )
         )
         suite.save()
@@ -967,11 +963,7 @@ class TestColumnExpectations:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                    "mostly": 1,
-                },
+                type=expectation_type, kwargs={"column": column_name}
             )
         )
         suite.save()
@@ -1101,10 +1093,7 @@ class TestColumnExpectations:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                },
+                type=expectation_type, kwargs={"column": column_name}
             )
         )
         suite.save()
