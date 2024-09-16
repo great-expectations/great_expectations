@@ -149,10 +149,23 @@ module.exports = {
         {
           type: 'category',
           label: 'GX Cloud overview',
-          link: { type: 'doc', id: 'cloud/overview/overview_lp' },
+          link: { type: 'doc', id: 'cloud/overview/gx_cloud_overview' },
           items: [
-            'cloud/overview/gx_cloud_components',
-            'cloud/overview/gx_cloud_workflow',
+            {
+              type: 'link',
+              label: 'GX Cloud components',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-components',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud terminology',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-terminology',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud workflow',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-workflow',
+            },
           ]
         },
         {
