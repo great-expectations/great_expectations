@@ -856,25 +856,23 @@ class TestColumnExpectations:
         )
         print(f"asset:\n{asset!r}\n")
 
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
-        suite.add_expectation(
+        suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
+        suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                expectation_type=expectation_type,
+                type=expectation_type,
                 kwargs={
                     "column": column_name,
                     "mostly": 1,
                 },
             )
         )
-        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+        suite.save()
 
         checkpoint_config = {
             "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
-                    "expectation_suite_name": suite.expectation_suite_name,
+                    "expectation_suite_name": suite.name,
                     "batch_request": {
                         "datasource_name": datasource.name,
                         "data_asset_name": asset.name,
@@ -970,25 +968,23 @@ class TestColumnExpectations:
         )
         print(f"asset:\n{asset!r}\n")
 
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
-        suite.add_expectation(
+        suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
+        suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                expectation_type=expectation_type,
+                type=expectation_type,
                 kwargs={
                     "column": column_name,
                     "mostly": 1,
                 },
             )
         )
-        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+        suite.save()
 
         checkpoint_config = {
             "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
-                    "expectation_suite_name": suite.expectation_suite_name,
+                    "expectation_suite_name": suite.name,
                     "batch_request": {
                         "datasource_name": datasource.name,
                         "data_asset_name": asset.name,
