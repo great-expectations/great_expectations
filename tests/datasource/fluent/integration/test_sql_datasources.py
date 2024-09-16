@@ -152,6 +152,51 @@ QUOTED_MIXED_CASE: Final[Literal["quotedMixed"]] = "quotedMixed"
 QUOTED_W_DOTS: Final[Literal["quoted.w.dots"]] = "quoted.w.dots"
 
 
+def get_random_identifier_name() -> str:
+    guid = uuid.uuid4()
+    return f"i{guid.hex}"
+
+
+RAND_SCHEMA: Final[str] = f"{PYTHON_VERSION}_{get_random_identifier_name()}"
+
+
+def _get_exception_details(
+    result: CheckpointResult,
+    prettyprint: bool = False,
+) -> list[
+    dict[
+        Literal["exception_message", "exception_traceback", "raised_exception"],
+        str,
+    ]
+]:
+    """Extract a list of exception_info dicts from a CheckpointResult."""
+    first_run_result = next(iter(result.run_results.values()))
+    validation_results = first_run_result.results
+    if prettyprint:
+        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
+
+    exc_details = [
+        r["exception_info"]
+        for r in validation_results
+        if r["exception_info"].get("raised_exception")
+    ]
+    if exc_details and prettyprint:
+        print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
+        for i, exc_info in enumerate(exc_details, start=1):
+            print(
+                f"  {i}: {exc_info['exception_message']}"
+                f"\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
+            )
+    return exc_details
+
+
+@pytest.fixture
+def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
+    """Capture SQLAlchemy engine logs and display them if the test fails."""
+    caplog.set_level(logging.INFO, logger="sqlalchemy.engine")
+    return caplog
+
+
 class Row(TypedDict):
     id: int
     name: str
@@ -162,13 +207,6 @@ class Row(TypedDict):
     unquoted_upper_col: str
     unquoted_lower_col: str
 
-
-def get_random_identifier_name() -> str:
-    guid = uuid.uuid4()
-    return f"i{guid.hex}"
-
-
-RAND_SCHEMA: Final[str] = f"{PYTHON_VERSION}_{get_random_identifier_name()}"
 
 ColNameParams: TypeAlias = Literal[
     # DDL: unquoted_lower_col ------
@@ -401,43 +439,6 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
             if schema:
                 conn.execute(TextClause(f"DROP SCHEMA IF EXISTS {schema}"))
             transaction.commit()
-
-
-def _get_exception_details(
-    result: CheckpointResult,
-    prettyprint: bool = False,
-) -> list[
-    dict[
-        Literal["exception_message", "exception_traceback", "raised_exception"],
-        str,
-    ]
-]:
-    """Extract a list of exception_info dicts from a CheckpointResult."""
-    first_run_result = next(iter(result.run_results.values()))
-    validation_results = first_run_result.results
-    if prettyprint:
-        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
-
-    exc_details = [
-        r["exception_info"]
-        for r in validation_results
-        if r["exception_info"].get("raised_exception")
-    ]
-    if exc_details and prettyprint:
-        print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
-        for i, exc_info in enumerate(exc_details, start=1):
-            print(
-                f"  {i}: {exc_info['exception_message']}"
-                f"\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
-            )
-    return exc_details
-
-
-@pytest.fixture
-def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
-    """Capture SQLAlchemy engine logs and display them if the test fails."""
-    caplog.set_level(logging.INFO, logger="sqlalchemy.engine")
-    return caplog
 
 
 @pytest.fixture
