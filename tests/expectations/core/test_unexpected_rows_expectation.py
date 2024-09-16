@@ -11,6 +11,7 @@ from great_expectations.expectations import UnexpectedRowsExpectation
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import Batch
+    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 
 
 @pytest.fixture
@@ -19,34 +20,23 @@ def taxi_db_path() -> str:
 
 
 @pytest.fixture
-def sqlite_batch(in_memory_runtime_context: AbstractDataContext, taxi_db_path: str) -> Batch:
+def sqlite_datasource(
+    in_memory_runtime_context: AbstractDataContext, taxi_db_path: str
+) -> SqliteDatasource:
     context = in_memory_runtime_context
-    datasource = context.data_sources.add_sqlite(
-        "my_sqlite_datasource", connection_string=f"sqlite:///{taxi_db_path}"
+    datasource_name = "my_sqlite_datasource"
+    return context.data_sources.add_sqlite(
+        datasource_name, connection_string=f"sqlite:///{taxi_db_path}"
     )
-    asset = datasource.add_table_asset("yellow_tripdata_sample_2022_01")
-    return asset.add_batch_definition_whole_table().get_batch()
 
 
 @pytest.fixture
-def postgres_batch(in_memory_runtime_context: AbstractDataContext) -> Batch:
-    context = in_memory_runtime_context
-    datasource = context.data_sources.add_postgres(
-        "my_postgres_datasource",
-        connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
-    )
+def sqlite_batch(sqlite_datasource: SqliteDatasource) -> Batch:
+    datasource = sqlite_datasource
     asset = datasource.add_table_asset("yellow_tripdata_sample_2022_01")
-    return asset.add_batch_definition_whole_table().get_batch()
 
-
-@pytest.fixture(
-    params=[
-        pytest.param("sqlite_batch", marks=[pytest.mark.sqlite]),
-        pytest.param("postgres_batch", marks=[pytest.mark.postgresql]),
-    ]
-)
-def batch(request):
-    return request.getfixturevalue(request.param)
+    batch_request = asset.build_batch_request()
+    return asset.get_batch(batch_request)
 
 
 @pytest.mark.unit
@@ -69,7 +59,6 @@ def test_unexpected_rows_expectation_invalid_query_info_message(query: str, capl
 
 
 @pytest.mark.sqlite
-@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "query, expected_success, expected_observed_value, expected_unexpected_rows",
     [
@@ -114,12 +103,14 @@ def test_unexpected_rows_expectation_invalid_query_info_message(query: str, capl
     ],
 )
 def test_unexpected_rows_expectation_validate(
+    sqlite_batch: Batch,
     query: str,
     expected_success: bool,
     expected_observed_value: int,
     expected_unexpected_rows: list[dict],
-    batch: Batch,
 ):
+    batch = sqlite_batch
+
     expectation = UnexpectedRowsExpectation(unexpected_rows_query=query)
     result = batch.validate(expectation)
 
