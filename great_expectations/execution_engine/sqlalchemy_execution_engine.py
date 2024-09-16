@@ -1317,7 +1317,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-        with self.get_connection() as connection:  # type: ignore[var-annotated]
+        with self.get_connection() as connection:
             result = connection.execute(query)
 
         return result
@@ -1336,7 +1336,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """  # noqa: E501
-        with self.get_connection() as connection:  # type: ignore[var-annotated]
+        with self.get_connection() as connection:
             if (
                 is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
                 and not connection.closed

@@ -742,7 +742,7 @@ def _raw_query_check_column_exists(
     gx_execution_engine: SqlAlchemyExecutionEngine,
 ) -> bool:
     """Use a simple 'SELECT {column_name_param} from {qualified_table_name};' query to check if the column exists.'"""  # noqa: E501
-    with gx_execution_engine.get_connection() as connection:  # type: ignore[var-annotated]
+    with gx_execution_engine.get_connection() as connection:
         query = f"""SELECT {column_name_param} FROM {qualified_table_name} LIMIT 1;"""
         print(f"query:\n  {query}")
         # an exception will be raised if the column does not exist
