@@ -10,9 +10,10 @@ pytest --postgresql --docs-tests -k "data_quality_use_case_volume_workflow" test
 """
 
 # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code">
+import pandas as pd
+
 import great_expectations as gx
 import great_expectations.expectations as gxe
-import pandas as pd
 
 # Create Data Context.
 context = gx.get_context()
@@ -23,12 +24,13 @@ CONNECTION_STRING = "postgresql+psycopg2://try_gx:try_gx@postgres.workshops.grea
 data_source = context.data_sources.add_postgres(
     "postgres database", connection_string=CONNECTION_STRING
 )
-data_asset = data_source.add_table_asset(name="financial transfers table", table_name="volume_financial_transfers")
+data_asset = data_source.add_table_asset(
+    name="financial transfers table", table_name="volume_financial_transfers"
+)
 
 # Add a Batch Definition with partitioning by day.
 batch_definition = data_asset.add_batch_definition_daily(
-    name="daily transfers",
-    column="transfer_ts"
+    name="daily transfers", column="transfer_ts"
 )
 
 # Create an Expectation testing that each batch (day) contains between 1 and 5 rows.
@@ -48,9 +50,9 @@ for date in list(pd.date_range(start=START_DATE, end=END_DATE).to_pydatetime()):
     result = daily_batch.validate(volume_expectation)
     validation_results_by_day.append(
         {
-            "date" : date,
+            "date": date,
             "expectation passed": result["success"],
-            "observed rows":  result["result"]["observed_value"],
+            "observed rows": result["result"]["observed_value"],
         }
     )
 
