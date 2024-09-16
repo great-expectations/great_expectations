@@ -378,6 +378,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="clickhouse_sqlalchemy.drivers.base"
             )
+        # TODO: add DatabricksSQL dialect module
         else:
             self.dialect_module = None
 
