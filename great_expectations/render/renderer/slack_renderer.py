@@ -13,13 +13,16 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
+    from great_expectations.data_context.types.resource_identifiers import (
+        ValidationResultIdentifier,
+    )
 
 
 class SlackRenderer(Renderer):
     def render(
         self,
         validation_result: ExpectationSuiteValidationResult,
-        data_docs_pages: dict | None = None,
+        data_docs_pages: dict[ValidationResultIdentifier, dict] | None = None,
         notify_with: list[str] | None = None,
         validation_result_urls: list[str] | None = None,
     ) -> list[dict]:
@@ -169,7 +172,7 @@ class SlackRenderer(Renderer):
         return report_element
 
     def _build_report_element_block(
-        self, data_docs_pages: dict, notify_with: list[str]
+        self, data_docs_pages: dict[ValidationResultIdentifier, dict], notify_with: list[str]
     ) -> dict | None:
         if not data_docs_pages:
             return None
