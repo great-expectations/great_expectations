@@ -1060,7 +1060,7 @@ class TestColumnExpectations:
         """
         param_id = request.node.callspec.id
         datasource = all_sql_datasources
-        dialect = datasource.get_engine().dialect.name
+        dialect = GXSqlDialect(datasource.get_engine().dialect.name)
 
         original_column_name = column_name
         if column_name.startswith('"') and column_name.endswith('"'):
