@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Callable, TypeVar
 from typing_extensions import ParamSpec
 
 from great_expectations._docs_decorators import public_api
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -36,6 +37,10 @@ def renderer(renderer_type: str, **kwargs) -> Callable[[Callable[P, T]], Callabl
 @public_api
 class Renderer:
     """A convenience class to provide an explicit mechanism to instantiate any Renderer."""
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        return type(self) is type(other)
 
     def serialize(self) -> dict:
         # Necessary to enable proper serialization within an Action (and additionally, within a Checkpoint)  # noqa: E501

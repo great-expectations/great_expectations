@@ -4,8 +4,6 @@ import logging
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from great_expectations.compatibility.typing_extensions import override
-
 logger = logging.getLogger(__name__)
 
 from great_expectations.render.renderer.renderer import Renderer
@@ -211,7 +209,3 @@ class SlackRenderer(Renderer):
                 return report_element
 
         return None
-
-    @override
-    def __eq__(self, value: object) -> bool:
-        return isinstance(value, SlackRenderer)
