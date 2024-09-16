@@ -26,12 +26,15 @@ This article assumes basic familiarity with GX components and workflows. If you'
 
 The examples in this guide use a sample dataset of customer transactions, available as a [CSV file on GitHub](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/distribution_purchases.csv).
 
-| transaction_id | customer_id | purchase_amount | purchase_date     | product_category |
-|----------------|-------------|-----------------|-------------------|------------------|
-| 1001           | 501         | 250.00          | 2024-01-15        | Electronics      |
-| 1002           | 502         | 40.00           | 2024-01-15        | Books            |
+| transaction_id | customer_id | purchase_amount | purchase_date     | product_category | product_rating | return_date       |
+|----------------|-------------|-----------------|-------------------|------------------|----------------|-------------------|
+| 1001           | 501         | 250.00          | 2024-01-15        | Electronics      | 4.5            | 2024-01-30        |
+| 1002           | 502         | 40.00           | 2024-01-15        | Books            | 4.2            | null              |
+| 1003           | 503         | 1200.00         | 2024-01-16        | Electronics      | 4.8            | null              |
+| 1004           | 504         | 80.00           | 2024-01-16        | Clothing         | 3.9            | 2024-02-01        |
+| 1005           | 505         | 3500.00         | 2024-01-17        | Electronics      | 4.6            | 2024-02-10        |
 
-In this dataset, `purchase_amount` represents the amount spent by customers in various product categories. Analyzing the distribution of `purchase_amount` and other numerical columns can reveal insights into customer behavior and detect anomalies.
+In this dataset, `purchase_amount` represents the amount spent by customers in various `product_category`. Analyzing the distribution of `purchase_amount` and other numerical columns can reveal insights into customer behavior and detect anomalies.
 
 ## Key distribution Expectations
 
@@ -41,14 +44,13 @@ GX offers several Expectations specifically designed for managing data distribut
 
 Ensures that all values in a column fall between a specified minimum and maximum value.
 
-**Use Case**: Essential for bounding financial values within valid ranges, such as ensuring prices or account balances are non-negative and within reasonable limits.
+**Use Case**: Essential for bounding numerical values within valid ranges, such as ensuring product ratings or purchase amounts are within reasonable limits.
 
 ```python
 validator.expect_column_values_to_be_between(
-    column="purchase_amount",
-    min_value=0,
-    max_value=10000,
-    mostly=0.95
+    column="product_rating",
+    min_value=1,
+    max_value=5,
 )
 ```
 
@@ -58,12 +60,12 @@ validator.expect_column_values_to_be_between(
 
 Validates that values in one column are greater than corresponding values in another column.
 
-**Use Case**: Crucial for maintaining valid relationships between financial entities, like verifying that credit amounts do not exceed account balances.
+**Use Case**: Crucial for maintaining valid relationships between data entities, like verifying that return dates are later than purchase dates.
 
 ```python
 validator.expect_column_pair_values_A_to_be_greater_than_B(
-    column_A="account_balance",
-    column_B="credit_amount",
+    column_A="return_date",
+    column_B="purchase_date",
 )
 ```
 
@@ -73,11 +75,11 @@ validator.expect_column_pair_values_A_to_be_greater_than_B(
 
 Checks that the Z-scores (number of standard deviations from mean) of all values are below a threshold.
 
-**Use Case**: Powerful for identifying individual outliers and anomalous data points that could represent errors or fraud in financial data.
+**Use Case**: Powerful for identifying individual outliers and anomalous data points that could represent data entry issues or unusual transactions.
 
 ```python
 validator.expect_column_value_z_scores_to_be_less_than(
-    column="transaction_amount",
+    column="purchase_amount",
     threshold=3,
 )
 ```
@@ -88,17 +90,16 @@ validator.expect_column_value_z_scores_to_be_less_than(
 
 Ensures that specified quantiles of a column fall within provided ranges.
 
-**Use Case**: Robustly monitors key statistics of the overall distribution, which is essential in finance for tracking metrics like the median transaction size over time.
+**Use Case**: Robustly monitors key statistics of the overall distribution, which is valuable for tracking metrics like median purchase amount or 90th percentile product ratings.
 
 ```python
 validator.expect_column_quantile_values_to_be_between(
-    column="daily_revenue",
+    column="purchase_amount",
     quantile_ranges={
-        "quantiles": [0.25, 0.5, 0.75],
+        "quantiles": [0.5, 0.9],
         "value_ranges": [
-            [5000, 6000],
-            [9000, 10000],
-            [14000, 15000]
+            [50, 200],
+            [500, 2000]
         ]
     }
 )
@@ -110,13 +111,13 @@ validator.expect_column_quantile_values_to_be_between(
 
 Validates that the standard deviation of a column is within a specified range.
 
-**Use Case**: Watches for unusual changes in variance that could signal issues in financial processes or risk models.
+**Use Case**: Watches for unusual changes in variance that could signal issues in data collection or processing pipelines.
 
 ```python
 validator.expect_column_stdev_to_be_between(
-    column="stock_returns",
-    min_value=0.01,
-    max_value=0.05
+    column="purchase_amount",
+    min_value=500,
+    max_value=2000
 )
 ```
 
@@ -130,6 +131,20 @@ validator.expect_column_stdev_to_be_between(
 - Regularly update your reference distributions (e.g., in `ExpectColumnKlDivergenceToBeLessThan`) to reflect the most recent data patterns.
 - Combine multiple distribution Expectations to create a comprehensive validation suite that covers central tendency, dispersion, and shape of your data distribution.
 :::
+
+## Additional distribution Expectations
+
+In addition to the key distribution Expectations discussed above, GX offers a range of other Expectations that can be useful for validating and monitoring data distributions. Some examples include:
+
+- `ExpectColumnMedianToBeBetween`: Checks if the median value of a column is within a specified range. The median is the middle value when the data is sorted in ascending or descending order. This Expectation is useful for ensuring that the central tendency of the data falls within acceptable limits.
+
+- `ExpectColumnSumToBeBetween`: Verifies that the sum of all values in a column is between a specified minimum and maximum value. This Expectation helps you check if the total of your data is within expected boundaries, which can be helpful for catching data anomalies or ensuring consistency.
+
+- `ExpectColumnKLDivergenceToBeLessThan`: Compares the distribution of a specified column to a reference distribution using the Kullback-Leibler (KL) divergence metric. KL divergence measures the difference between two probability distributions. This Expectation checks if the KL divergence is below a specified threshold, allowing you to assess the similarity between the actual and expected data distributions.
+
+These additional Expectations provide more advanced techniques for comparing and validating data distributions, allowing you to create even more comprehensive and tailored validation suites.
+
+To learn more about these and other available Expectations, be sure to explore the [Expectation Gallery](https://greatexpectations.io/expectations). The gallery provides a complete list of Expectations, along with code examples and use cases to help you effectively apply them to your specific data quality challenges.
 
 ## Examples
 
