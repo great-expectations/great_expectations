@@ -380,6 +380,7 @@ class TestV1ActionRun:
             ],
         )
 
+    @pytest.mark.unit
     def test_EmailAction_equality(self):
         """I know, this one seems silly. But this was a bug."""
         a = EmailAction(
