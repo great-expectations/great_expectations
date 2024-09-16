@@ -121,6 +121,147 @@ def list_s3_bucket_contents(bucket: str, prefix: str) -> Set[str]:
 
 @pytest.mark.aws_deps
 @mock_s3
+def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConfig_if_no_configured_expectations_store(  # noqa: E501
+    monkeypatch, aws_credentials
+):
+    """
+    What does this test and why?
+
+    A DataContext should have an id. This ID should come from either:
+    1. configured expectations store store_backend_id
+    2. great_expectations.yml
+    3. new generated id from DataContextConfig
+    This test verifies that DataContext._construct_data_context_id
+    uses the data_context_id from DataContextConfig when there is no configured expectations store
+    when instantiating the DataContext,
+    and also that this data_context_id is used to configure the expectations_store.store_backend_id
+    """
+    bucket = "leakybucket"
+    expectations_store_prefix = "expectations_store_prefix"
+    validation_results_store_prefix = "validation_results_store_prefix"
+    data_docs_store_prefix = "data_docs_store_prefix"
+    manually_created_uuid = uuid.UUID("00000000-0000-0000-0000-000000000eee")
+
+    # Create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    # Create a DataContext (note NO existing expectations store already set up)
+    in_code_data_context_project_config = build_in_code_data_context_project_config(
+        bucket="leakybucket",
+        expectations_store_prefix=expectations_store_prefix,
+        validation_results_store_prefix=validation_results_store_prefix,
+        data_docs_store_prefix=data_docs_store_prefix,
+    )
+    # Manually set the data_context_id in the project_config
+    in_code_data_context_project_config.data_context_id = manually_created_uuid
+    in_code_data_context = get_context(project_config=in_code_data_context_project_config)
+
+    # Make sure the manually set data_context_id is propagated to all the appropriate places
+    assert (
+        manually_created_uuid
+        == in_code_data_context.data_context_id
+        == in_code_data_context.stores[
+            in_code_data_context.expectations_store_name
+        ].store_backend_id
+    )
+
+
+@pytest.mark.big
+@mock_s3
+def test_suppress_store_backend_id_is_true_for_inactive_stores():
+    """
+    What does this test and why?
+
+    Trying to read / set the store_backend_id for inactive stores should not be attempted during DataContext initialization. This test ensures that the _suppress_store_backend_id parameter is set to True for inactive stores.
+
+    """  # noqa: E501
+
+    bucket = "leakybucket"
+    expectations_store_prefix = "expectations_store_prefix"
+    validation_results_store_prefix = "validation_results_store_prefix"
+    data_docs_store_prefix = "data_docs_store_prefix"
+
+    # Create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    # Create a DataContext
+    # Add inactive stores
+    inactive_bucket = "inactive_leakybucket"
+    stores = {
+        "expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": bucket,
+                "prefix": expectations_store_prefix,
+            },
+        },
+        "validation_results_S3_store": {
+            "class_name": "ValidationResultsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": bucket,
+                "prefix": validation_results_store_prefix,
+            },
+        },
+        "inactive_expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": inactive_bucket,
+                "prefix": expectations_store_prefix,
+            },
+        },
+        "inactive_validation_results_S3_store": {
+            "class_name": "ValidationResultsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": inactive_bucket,
+                "prefix": validation_results_store_prefix,
+            },
+        },
+    }
+    in_code_data_context_project_config = build_in_code_data_context_project_config(
+        bucket="leakybucket",
+        expectations_store_prefix=expectations_store_prefix,
+        validation_results_store_prefix=validation_results_store_prefix,
+        data_docs_store_prefix=data_docs_store_prefix,
+        stores=stores,
+    )
+    in_code_data_context = get_context(project_config=in_code_data_context_project_config)
+
+    # Check here that suppress_store_backend_id == True for inactive stores
+    # and False for active stores
+    assert (
+        in_code_data_context.stores.get(
+            "inactive_expectations_S3_store"
+        ).store_backend._suppress_store_backend_id
+        is True
+    )
+    assert (
+        in_code_data_context.stores.get(
+            "inactive_validation_results_S3_store"
+        ).store_backend._suppress_store_backend_id
+        is True
+    )
+    assert (
+        in_code_data_context.stores.get(
+            "expectations_S3_store"
+        ).store_backend._suppress_store_backend_id
+        is False
+    )
+    assert (
+        in_code_data_context.stores.get(
+            "validation_results_S3_store"
+        ).store_backend._suppress_store_backend_id
+        is False
+    )
+
+
+@pytest.mark.aws_deps
+@mock_s3
 def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
     """
     What does this test do and why?
