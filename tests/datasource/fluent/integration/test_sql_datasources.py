@@ -381,13 +381,14 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
         LOGGER.info(
             f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"  # noqa: E501
         )
+        dialect = GXSqlDialect(sa_engine.dialect.name)
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
 
         with gx_engine.get_connection() as conn:
-            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=sa_engine.dialect.name)
-            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=sa_engine.dialect.name)
-            quoted_w_dots: str = quote_str(QUOTED_W_DOTS, dialect=sa_engine.dialect.name)
-            quoted_mixed_case: str = quote_str(QUOTED_MIXED_CASE, dialect=sa_engine.dialect.name)
+            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=dialect)
+            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=dialect)
+            quoted_w_dots: str = quote_str(QUOTED_W_DOTS, dialect=dialect)
+            quoted_mixed_case: str = quote_str(QUOTED_MIXED_CASE, dialect=dialect)
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))

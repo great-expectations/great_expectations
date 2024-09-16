@@ -1278,8 +1278,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return self._inspector  # type: ignore[return-value]
 
-    @contextmanager  # type: ignore[arg-type]
-    def get_connection(self) -> sqlalchemy.Connection:  # type: ignore[misc]
+    @contextmanager
+    def get_connection(self) -> sqlalchemy.Connection:
         """Get a connection for executing queries.
 
         Some databases sqlite/mssql temp tables only persist within a connection,
