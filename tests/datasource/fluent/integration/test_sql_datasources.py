@@ -10,6 +10,7 @@ import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    Any,
     Final,
     Generator,
     Literal,
@@ -57,6 +58,12 @@ from great_expectations.execution_engine.sqlalchemy_dialect import (
     DIALECT_IDENTIFIER_QUOTE_STRINGS,
     GXSqlDialect,
     quote_str,
+)
+from great_expectations.expectations import (
+    Expectation,
+    ExpectColumnToExist,
+    ExpectColumnValuesToMatchRegex,
+    ExpectColumnValuesToNotBeNull,
 )
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 
@@ -719,7 +726,7 @@ def _fails_expectation(param_id: str) -> bool:
     This does not mean that it SHOULD fail, but that it currently does.
     """
     column_name: ColNameParamId
-    dialect, column_name, _ = param_id.split("-")  # type: ignore[assignment]
+    dialect, column_name, *_ = param_id.split("-")  # type: ignore[assignment]
     dialects_need_fixes: list[DatabaseType] = FAILS_EXPECTATION.get(column_name, [])
     return dialect in dialects_need_fixes
 
@@ -764,16 +771,24 @@ def _raw_query_check_column_exists(
         return True
 
 
+MAPPING: Mapping[type[Expectation], object] = {  # TODO: do something with this
+    ExpectColumnValuesToMatchRegex: {},
+    ExpectColumnToExist: {},
+    ExpectColumnValuesToNotBeNull: {},
+}
+
+
 _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
-    param("expect_column_to_exist"),
-    param("expect_column_values_to_not_be_null"),
+    param("expect_column_to_exist", {}),
+    param("expect_column_values_to_not_be_null", {}),
+    param("expect_column_values_to_match_regex", {}),
 )
 
 
 @pytest.mark.filterwarnings(
     "once::DeprecationWarning"
 )  # snowflake `add_table_asset` raises warning on passing a schema
-@pytest.mark.parametrize("expectation_type", _EXPECTATION_TYPES)
+@pytest.mark.parametrize("expectation_type, extra_exp_kwargs", _EXPECTATION_TYPES)
 class TestColumnExpectations:
     @pytest.mark.parametrize(
         "column_name",
@@ -806,6 +821,7 @@ class TestColumnExpectations:
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
         request: pytest.FixtureRequest,
     ):
         """
@@ -908,6 +924,7 @@ class TestColumnExpectations:
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
         request: pytest.FixtureRequest,
     ):
         """
@@ -1028,6 +1045,7 @@ class TestColumnExpectations:
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
         request: pytest.FixtureRequest,
     ):
         """
