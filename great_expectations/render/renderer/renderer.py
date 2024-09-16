@@ -40,6 +40,7 @@ class Renderer:
 
     @override
     def __eq__(self, other: object) -> bool:
+        # Renderers do not have any state, so they are equal if they are the same class
         return type(self) is type(other)
 
     def serialize(self) -> dict:
