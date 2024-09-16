@@ -868,20 +868,16 @@ class TestColumnExpectations:
         )
         suite.save()
 
-        checkpoint_config = {
-            "name": f"{datasource.name}-{asset.name}",
-            "validations": [
-                {
-                    "expectation_suite_name": suite.name,
-                    "batch_request": {
-                        "datasource_name": datasource.name,
-                        "data_asset_name": asset.name,
-                    },
-                }
-            ],
-        }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
-            **checkpoint_config,
+        batch_definition = asset.add_batch_definition_whole_table("my_batch_def")
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="my_validation_def", suite=suite, data=batch_definition)
+        )
+
+        checkpoint = context.checkpoints.add(
+            checkpoint=Checkpoint(
+                name=f"{datasource.name}-{asset.name}_checkpoint",
+                validation_definitions=[validation_definition],
+            )
         )
         result = checkpoint.run()
 
@@ -923,7 +919,7 @@ class TestColumnExpectations:
         """
         param_id = request.node.callspec.id
         datasource = all_sql_datasources
-        dialect = datasource.get_engine().dialect.name
+        dialect = GXSqlDialect(datasource.get_engine().dialect.name)
 
         if column_name[0] not in ("'", '"', "`"):
             pytest.skip(f"see test_unquoted_params for {column_name!r}")
@@ -980,20 +976,16 @@ class TestColumnExpectations:
         )
         suite.save()
 
-        checkpoint_config = {
-            "name": f"{datasource.name}-{asset.name}",
-            "validations": [
-                {
-                    "expectation_suite_name": suite.name,
-                    "batch_request": {
-                        "datasource_name": datasource.name,
-                        "data_asset_name": asset.name,
-                    },
-                }
-            ],
-        }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
-            **checkpoint_config,
+        batch_definition = asset.add_batch_definition_whole_table("my_batch_def")
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="my_validation_def", suite=suite, data=batch_definition)
+        )
+
+        checkpoint = context.checkpoints.add(
+            checkpoint=Checkpoint(
+                name=f"{datasource.name}-{asset.name}_checkpoint",
+                validation_definitions=[validation_definition],
+            )
         )
         result = checkpoint.run()
 
@@ -1124,7 +1116,8 @@ class TestColumnExpectations:
 
         checkpoint = context.checkpoints.add(
             checkpoint=Checkpoint(
-                name="my_checkpoint", validation_definitions=[validation_definition]
+                name=f"{datasource.name}-{asset.name}_checkpoint",
+                validation_definitions=[validation_definition],
             )
         )
         result = checkpoint.run()
