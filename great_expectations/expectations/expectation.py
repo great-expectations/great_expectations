@@ -75,6 +75,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.expectations.sql_tokens_and_types import (
     valid_sql_tokens_and_types,
 )
+from great_expectations.expectations.window import Window  # noqa: TCH001
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -109,7 +110,6 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import (
         ExecutionEngine,
     )
-    from great_expectations.expectations.window import Window
     from great_expectations.render.renderer_configuration import MetaNotes
     from great_expectations.validator.validator import ValidationDependencies, Validator
 
