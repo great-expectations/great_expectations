@@ -80,3 +80,7 @@ class EmailRenderer(Renderer):
         else:
             logger.warning("No docs link found. Skipping data docs link in the email message.")
         return report_element
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, EmailRenderer)
