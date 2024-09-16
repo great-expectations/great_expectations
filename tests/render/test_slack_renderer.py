@@ -4,11 +4,12 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultMeta,
 )
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.render.renderer import SlackRenderer
 
 
 @pytest.mark.unit
-def test_SlackRenderer_render():
+def test_SlackRenderer_render(mocker):
     validation_result = ExpectationSuiteValidationResult(
         success=True,
         meta=ExpectationSuiteValidationResultMeta(
@@ -38,7 +39,8 @@ def test_SlackRenderer_render():
         results=[],
         suite_name="my_suite",
     )
-    data_docs_pages = {"local_site": "file:///localsite/index.html"}
+    key = mocker.MagicMock(spec=ValidationResultIdentifier)
+    data_docs_pages = {key: {"local_site": "file:///localsite/index.html"}}
     notify_with = ["local_site"]
 
     slack_renderer = SlackRenderer()
