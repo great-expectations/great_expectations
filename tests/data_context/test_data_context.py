@@ -867,7 +867,7 @@ def test_set_oss_id_with_existing_config(
 @pytest.mark.unit
 def test_context_instantiation_sets_data_context_id():
     context = gx.get_context(mode="ephemeral")
-    assert context.data_context_id
+    assert context.data_context_id is not None
 
 
 @pytest.mark.unit
@@ -877,4 +877,5 @@ def test_context_instantiation_grabs_existing_data_context_id(tmp_path: pathlib.
     data_context_id = context.data_context_id
     context = gx.get_context(mode="file", project_root_dir=project_root_dir)
 
+    assert data_context_id is not None
     assert context.data_context_id == data_context_id
