@@ -109,6 +109,7 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import (
         ExecutionEngine,
     )
+    from great_expectations.expectations.window import Window
     from great_expectations.render.renderer_configuration import MetaNotes
     from great_expectations.validator.validator import ValidationDependencies, Validator
 
@@ -330,6 +331,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
+    # TODO: Ensure is optional
+    windows: Optional[List[Window]] = None
     examples: ClassVar[List[dict]] = []
 
     _save_callback: Union[Callable[[Expectation], Expectation], None] = pydantic.PrivateAttr(
