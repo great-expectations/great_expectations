@@ -770,6 +770,9 @@ _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
 )
 
 
+@pytest.mark.filterwarnings(
+    "once::DeprecationWarning"
+)  # snowflake `add_table_asset` raises warning on passing a schema
 @pytest.mark.parametrize("expectation_type", _EXPECTATION_TYPES)
 class TestColumnExpectations:
     @pytest.mark.parametrize(
