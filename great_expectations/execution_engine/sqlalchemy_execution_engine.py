@@ -1318,7 +1318,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
         with self.get_connection() as connection:
-            result = connection.execute(query)
+            result = connection.execute(query)  # type: ignore[call-overload] # FIXME:Selectable overly broad
 
         return result
 
@@ -1341,10 +1341,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
                 and not connection.closed
             ):
-                result = connection.execute(query)
+                result = connection.execute(query)  # type: ignore[call-overload] # FIXME:Selectable overly broad
                 connection.commit()
             else:
                 with connection.begin():
-                    result = connection.execute(query)
+                    result = connection.execute(query)  # type: ignore[call-overload] # FIXME:Selectable overly broad
 
         return result
