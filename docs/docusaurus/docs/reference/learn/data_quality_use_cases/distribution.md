@@ -259,22 +259,15 @@ validator.expect_column_quantile_values_to_be_between(
 
 ## Avoid common distribution analysis pitfalls
 
+- **Assuming Static Distributions**: Data distributions often evolve over time due to seasonality, trends, or changes in data collection. It's crucial to regularly update reference distributions and Expectations to reflect the current state of the data.
 
-- **Ignoring Small Changes**: Minor shifts in distribution can accumulate over time, leading to significant deviations. Regularly monitor and analyze even small changes.
+- **Overlooking Data Quality Issues**: Data entry errors, missing values, or outliers can significantly distort the distribution. Ensuring comprehensive data quality checks, including handling missing data and outliers, is essential for accurate distribution analysis.
 
-- **Assuming Static Distributions**: Data distributions can evolve due to seasonality, trends, or changes in data collection. Update your reference distributions and Expectations to reflect current data.
+- **Not Accounting for Multimodal Distributions**: Some datasets may have multiple peaks, requiring appropriate methods and Expectations that can handle multimodal distributions. Ignoring multimodality can lead to inaccurate interpretations of the data.
 
-- **Overlooking Data Quality Issues**: Data entry errors, missing values, or outliers can distort the distribution. Ensure comprehensive data quality checks, including handling of missing data and outliers.
+- **Neglecting Time-based Changes**: Distributions may change over time due to seasonality or long-term trends. Implementing time-based analysis alongside point-in-time checks is crucial for understanding and adapting to evolving data distributions.
 
-- **Not Accounting for Multimodal Distributions**: Some data may have multiple peaks. Use appropriate methods and Expectations that can handle multimodal distributions.
-
-- **Failure to Collaborate with Domain Experts**: Involving subject matter experts can help in setting realistic thresholds and interpreting distribution changes accurately.
-
-- **Assuming Normal Distribution**: Not all data follows a normal distribution. Use appropriate Expectations and techniques for non-normal distributions when necessary.
-- **Ignoring Multimodality**: Some datasets may have multiple peaks. Be cautious when using simple summary statistics and consider using more advanced distribution analysis techniques.
-- **Overlooking Outliers**: Extreme values can significantly impact distribution metrics. Use robust statistics and consider separate Expectations for handling outliers.
-- **Neglecting Time-based Changes**: Distributions may change over time due to seasonality or long-term trends. Implement time-based analysis alongside point-in-time checks.
-- **Misinterpreting Correlation**: Distribution similarities don't always imply correlation. Use additional statistical tests to validate relationships between variables.
+- **Insufficient Sample Size**: Small sample sizes may not accurately represent the true distribution of the data. It's important to ensure that the sample size is large enough to capture the underlying distribution and avoid drawing incorrect conclusions based on limited data.
 
 ## Next steps: Enhancing distribution management
 
