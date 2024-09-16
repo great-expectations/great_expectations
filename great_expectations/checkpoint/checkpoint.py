@@ -4,9 +4,12 @@ import datetime as dt
 import json
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     Any,
+    Callable,
     Dict,
     List,
+    Mapping,
     Optional,
     TypedDict,
     Union,
@@ -29,6 +32,7 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -52,6 +56,7 @@ from great_expectations.exceptions.exceptions import (
     InvalidKeyError,
     StoreBackendError,
 )
+from great_expectations.exceptions.resource_freshness import ResourceFreshnessAggregateError
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
@@ -126,11 +131,112 @@ class Checkpoint(BaseModel):
             Renderer: lambda r: r.serialize(),
         }
 
+    @override
+    def json(  # noqa: PLR0913
+        self,
+        *,
+        include: AbstractSet[int | str] | Mapping[int | str, Any] | None = None,
+        exclude: AbstractSet[int | str] | Mapping[int | str, Any] | None = None,
+        by_alias: bool = False,
+        skip_defaults: bool | None = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Callable[[Any], Any] | None = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs: Any,
+    ) -> str:
+        """
+        Override the default json method to enable proper diagnostics around validation_definitions.
+
+        NOTE: This should be removed in favor of a field/model serializer when we upgrade to
+              Pydantic 2.
+        """
+        json_data = super().json(
+            include=include,
+            exclude=self._determine_exclude(exclude=exclude),
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+        )
+
+        data = json.loads(json_data)  # Parse back to dict to add validation_definitions
+        data_with_validation_definitions = self._serialize_validation_definitions(data)
+        return json.dumps(data_with_validation_definitions, **dumps_kwargs)
+
+    @override
+    def dict(  # noqa: PLR0913
+        self,
+        *,
+        include: AbstractSet[int | str] | Mapping[int | str, Any] | None = None,
+        exclude: AbstractSet[int | str] | Mapping[int | str, Any] | None = None,
+        by_alias: bool = False,
+        skip_defaults: bool | None = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+    ) -> Dict[str, Any]:
+        """
+        Override the default dict method to enable proper diagnostics around validation_definitions.
+
+        NOTE: This should be removed in favor of a field/model serializer when we upgrade to
+              Pydantic 2.
+        """
+        data = super().dict(
+            include=include,
+            exclude=self._determine_exclude(exclude=exclude),
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+        )
+
+        return self._serialize_validation_definitions(data=data)
+
+    def _determine_exclude(
+        self, exclude: AbstractSet[int | str] | Mapping[int | str, Any] | None
+    ) -> AbstractSet[int | str] | Mapping[int | str, Any] | None:
+        if not exclude:
+            exclude = set()
+
+        if isinstance(exclude, set):
+            exclude.add("validation_definitions")
+        else:
+            exclude["__all__"] = "validation_definitions"  # type: ignore[index] # FIXME
+
+        return exclude
+
+    def _serialize_validation_definitions(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Manually serialize the validation_definitions field to avoid Pydantic's default
+        serialization.
+
+        We want to aggregate all errors from the validation_definitions and raise them as
+        a single error.
+        """
+        data["validation_definitions"] = []
+
+        diagnostics = CheckpointFreshnessDiagnostics(errors=[])
+        for validation_definition in self.validation_definitions:
+            try:
+                identifier_bundle = validation_definition.identifier_bundle()
+                data["validation_definitions"].append(identifier_bundle.dict())
+            except ResourceFreshnessAggregateError as e:
+                diagnostics.errors.extend(e.errors)
+
+        diagnostics.raise_for_error()
+        return data
+
     @validator("validation_definitions", pre=True)
     def _validate_validation_definitions(
-        cls, validation_definitions: list[ValidationDefinition] | list[dict]
+        cls, validation_definitions: list[ValidationDefinition] | list[Dict[str, Any]]
     ) -> list[ValidationDefinition]:
-        if validation_definitions and isinstance(validation_definitions[0], dict):
+        if validation_definitions and isinstance(validation_definitions[0], Dict):
             validation_definition_store = project_manager.get_validation_definition_store()
             identifier_bundles = [
                 _IdentifierBundle(**v)  # type: ignore[arg-type] # All validation configs are dicts if the first one is
