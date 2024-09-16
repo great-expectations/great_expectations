@@ -59,7 +59,7 @@ from great_expectations.core.factory import (
     ValidationDefinitionFactory,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store import Store
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -228,17 +228,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._datasource_store = self._init_datasource_store()
         self._init_datasources()
 
-        # Init data_context_id
-        self._data_context_id = self._construct_data_context_id()
-
-        # Override the project_config data_context_id if an expectations_store was already set up
-        self.config.data_context_id = self._data_context_id
-
         self._suite_parameter_dependencies: dict = {}
 
         self._init_data_source_manager()
 
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
+
+        # Analytics
+        self._data_context_id = self._construct_data_context_id()
+        self.config.data_context_id = self._data_context_id
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
 
@@ -2030,16 +2028,10 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource._rebuild_asset_data_connectors()
 
     def _construct_data_context_id(self) -> uuid.UUID | None:
-        # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self.stores[self.expectations_store_name]
-        if isinstance(expectations_store.store_backend, TupleStoreBackend):
-            # suppress_warnings since a warning will already have been issued during the store creation  # noqa: E501
-            # if there was an invalid store config
-            return expectations_store.store_backend_id_warnings_suppressed
-
-        # Otherwise choose the id stored in the project_config
-        else:
-            return self.variables.data_context_id
+        if not self.variables.data_context_id:
+            self.variables.data_context_id = uuid.uuid4()
+            self.variables.save()
+        return self.variables.data_context_id
 
     def get_validation_result(  # noqa: C901
         self,
