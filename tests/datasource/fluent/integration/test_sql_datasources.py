@@ -59,13 +59,6 @@ from great_expectations.execution_engine.sqlalchemy_dialect import (
     GXSqlDialect,
     quote_str,
 )
-from great_expectations.expectations import (
-    Expectation,
-    ExpectColumnToExist,
-    ExpectColumnValuesToMatchLikePattern,
-    ExpectColumnValuesToMatchRegex,
-    ExpectColumnValuesToNotBeNull,
-)
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 
 if TYPE_CHECKING:
@@ -770,8 +763,6 @@ def _raw_query_check_column_exists(
             print(f"\n{column_name_param} does not exist! - {sql_err.__class__.__name__}\n")
             return False
         return True
-
-
 
 
 _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
