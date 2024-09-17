@@ -36,25 +36,42 @@ class QueryTable(QueryMetricProvider):
     ) -> List[dict]:
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
-        selectable: Union[sa.sql.Selectable, str]
-        selectable, _, _ = execution_engine.get_compute_domain(
+        batch_selectable: Union[sa.sql.Selectable, str]
+        batch_selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
-        if isinstance(selectable, sa.Table):
-            query = query.format(batch=selectable)
+        if isinstance(batch_selectable, sa.Table):
+            query = query.format(batch=batch_selectable)
+        elif isinstance(batch_selectable, get_sqlalchemy_subquery_type()):
+            # Specifying a runtime query string returns the active batch as a Subquery or Alias type
+            # There is no object-based way to apply the subquery alias to columns in the SELECT and
+            # WHERE clauses. Instead, we extract the subquery parameters from the batch selectable
+            # and inject them into the SQL string.
+            batch_table = batch_selectable.selectable.element.get_final_froms()[0].name
+            unfiltered_query = query.format(batch=batch_table)
+            batch_filter = str(batch_selectable.selectable.element.whereclause)
+            if "WHERE" in query.upper():
+                # Add a new WHERE condition
+                query = unfiltered_query.replace("WHERE", f"WHERE {batch_filter} AND")
+            elif "GROUP BY" in query.upper():
+                # If there is no existing WHERE clause, but there is a GROUP BY clause
+                # add the WHERE clause before the GROUP BY clause
+                query = unfiltered_query.replace("GROUP BY", f"WHERE {batch_filter} GROUP BY")
+            elif "ORDER BY" in query.upper():
+                # If there is no existing WHERE clause, but there is an ORDER BY clause
+                # add the WHERE clause before the ORDER BY clause
+                query = unfiltered_query.replace("ORDER BY", f"WHERE {batch_filter} ORDER BY")
+            else:
+                query += f"WHERE {batch_filter}"
         elif isinstance(
-            selectable, get_sqlalchemy_subquery_type()
-        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery or Alias; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break  # noqa: E501
-            query = query.format(batch=f"({selectable})")
-        elif isinstance(
-            selectable, sa.sql.Select
+            batch_selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query  # noqa: E501
             query = query.format(
-                batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',  # noqa: E501
+                batch=f'({batch_selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',  # noqa: E501
             )
         else:
-            query = query.format(batch=f"({selectable})")
+            query = query.format(batch=f"({batch_selectable})")
 
         result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()  # type: ignore[assignment,arg-type]
         return [element._asdict() for element in result]
