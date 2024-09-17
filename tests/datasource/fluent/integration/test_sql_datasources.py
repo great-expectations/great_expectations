@@ -62,6 +62,7 @@ from great_expectations.execution_engine.sqlalchemy_dialect import (
 from great_expectations.expectations import (
     Expectation,
     ExpectColumnToExist,
+    ExpectColumnValuesToMatchLikePattern,
     ExpectColumnValuesToMatchRegex,
     ExpectColumnValuesToNotBeNull,
 )
@@ -775,6 +776,7 @@ MAPPING: Mapping[type[Expectation], object] = {  # TODO: do something with this
     ExpectColumnValuesToMatchRegex: {},
     ExpectColumnToExist: {},
     ExpectColumnValuesToNotBeNull: {},
+    ExpectColumnValuesToMatchLikePattern: {},
 }
 
 
@@ -785,6 +787,11 @@ _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
         "expect_column_values_to_match_regex",
         {"regex": r".*"},
         id="expect_column_values_to_match_regex",
+    ),
+    param(
+        "expect_column_values_to_match_like_pattern",
+        {"like_pattern": r"%"},
+        id="expect_column_values_to_match_like_pattern",
     ),
 )
 
