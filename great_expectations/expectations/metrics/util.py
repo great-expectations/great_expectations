@@ -87,9 +87,9 @@ except ImportError:
     teradatatypes = None
 
 
-def _databricks_dialect_available(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
+def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
     """
-    Check if the Databricks dialect is available.
+    Check if the Databricks dialect is being provided.
 
     Note:A Dialect class will be ignored and treated as if it is not available.
     """
@@ -125,15 +125,12 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     except AttributeError:
         pass
 
-    try:
-        # databricks sql
-        if _databricks_dialect_available(dialect):
-            if positive:
-                return sa.func.regexp_like(column, sqlalchemy.literal(regex))
-            else:
-                return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
-    except AttributeError:
-        pass
+    # databricks sql
+    if _is_databricks_dialect(dialect):
+        if positive:
+            return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+        else:
+            return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
 
     # redshift
     # noinspection PyUnresolvedReferences
@@ -909,7 +906,7 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915
         ):
             dialect_supported = True
 
-    if _databricks_dialect_available(dialect):
+    if _is_databricks_dialect(dialect):
         dialect_supported = True
 
     try:
