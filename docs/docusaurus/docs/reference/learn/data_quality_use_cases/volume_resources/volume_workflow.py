@@ -9,11 +9,13 @@ docker compose up
 pytest --postgresql --docs-tests -k "data_quality_use_case_volume_workflow" tests/integration/test_script_runner.py
 """
 
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code">
-import pandas as pd
+# ruff: noqa: I001
+# Adding noqa rule so that GX and Pandas imports don't get reordered by linter.
 
+# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code">
 import great_expectations as gx
 import great_expectations.expectations as gxe
+import pandas as pd
 
 # Create Data Context.
 context = gx.get_context()
