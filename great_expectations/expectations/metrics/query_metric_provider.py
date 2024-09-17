@@ -99,6 +99,6 @@ class QueryMetricProvider(MetricProvider):
             # add the WHERE clause before the ORDER BY clause
             query = unfiltered_query.replace("ORDER BY", f"WHERE {batch_filter} ORDER BY")
         else:
-            query += f"WHERE {batch_filter}"
+            query = unfiltered_query + f" WHERE {batch_filter}"
 
         return query

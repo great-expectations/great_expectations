@@ -340,8 +340,22 @@ def test__query_metric_provider__registration(mock_registry):
     "input_query,expected_query",
     [
         (
+            "SELECT * FROM {batch}",
+            "SELECT * FROM iris WHERE datetime_column = '01/12/2024'",
+        ),
+        (
             "SELECT * FROM {batch} WHERE passenger_count > 7",
             "SELECT * FROM iris WHERE datetime_column = '01/12/2024' AND passenger_count > 7",
+        ),
+        (
+            "SELECT * FROM {batch} WHERE passenger_count > 7 ORDER BY iris.'PetalLengthCm' DESC",
+            "SELECT * FROM iris WHERE datetime_column = '01/12/2024' "
+            "AND passenger_count > 7 ORDER BY iris.'PetalLengthCm' DESC",
+        ),
+        (
+            "SELECT * FROM {batch} WHERE passenger_count > 7 GROUP BY iris.'Species' DESC",
+            "SELECT * FROM iris WHERE datetime_column = '01/12/2024' "
+            "AND passenger_count > 7 GROUP BY iris.'Species' DESC",
         ),
     ],
 )
