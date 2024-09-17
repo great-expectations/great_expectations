@@ -14,6 +14,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class MissingElementError(TypeError):
+    def __init__(self):
+        super().__init__(
+            "The batch_subquery selectable does not contain an"
+            "element from which query parameters can be extracted."
+        )
+
+
 class QueryMetricProvider(MetricProvider):
     """Base class for all Query Metrics, which define metrics to construct SQL queries.
 
@@ -55,7 +63,7 @@ class QueryMetricProvider(MetricProvider):
 
     @classmethod
     def _get_query_string_with_substituted_batch_parameters(
-        cls, query: str, batch_selectable: sa.sql.Subquery | sa.sql.Alias
+        cls, query: str, batch_subquery: sa.sql.Subquery | sa.sql.Alias
     ) -> str:
         """Specifying a runtime query string returns the active batch as a Subquery or Alias type
         There is no object-based way to apply the subquery alias to columns in the SELECT and
@@ -63,9 +71,13 @@ class QueryMetricProvider(MetricProvider):
         and inject them into the SQL string.
         """
 
-        batch_table = batch_selectable.selectable.element.get_final_froms()[0].name
+        try:
+            batch_table = batch_subquery.selectable.element.get_final_froms()[0].name
+            batch_filter = str(batch_subquery.selectable.element.whereclause)
+        except AttributeError as e:
+            raise MissingElementError() from e
+
         unfiltered_query = query.format(batch=batch_table)
-        batch_filter = str(batch_selectable.selectable.element.whereclause)
 
         if "WHERE" in query.upper():
             # Add a new WHERE condition

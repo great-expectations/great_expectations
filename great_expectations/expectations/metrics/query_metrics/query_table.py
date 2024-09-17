@@ -47,7 +47,7 @@ class QueryTable(QueryMetricProvider):
             if execution_engine.dialect_name in cls.dialect_columns_require_subquery_aliases:
                 query = cls._get_query_string_with_substituted_batch_parameters(
                     query=query,
-                    batch_selectable=batch_selectable,
+                    batch_subquery=batch_selectable,
                 )
             else:
                 query = query.format(
