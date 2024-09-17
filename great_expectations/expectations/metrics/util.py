@@ -90,12 +90,12 @@ except ImportError:
 def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     column: sa.Column,
     regex: str,
-    dialect: ModuleType,
+    dialect: ModuleType | Type[sa.Dialect] | sa.Dialect,
     positive: bool = True,
 ) -> sa.SQLColumnExpression | None:
     try:
         # postgres
-        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):  # type: ignore[union-attr]
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
@@ -121,7 +121,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     # noinspection PyUnresolvedReferences
     try:
         if hasattr(dialect, "RedshiftDialect") or (
-            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)  # type: ignore[union-attr]
         ):
             if positive:
                 return sqlalchemy.BinaryExpression(
@@ -138,7 +138,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # MySQL
-        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):  # type: ignore[union-attr]
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
@@ -155,7 +155,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # Snowflake
         if issubclass(
-            dialect.dialect,
+            dialect.dialect,  # type: ignore[union-attr]
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
             if positive:
@@ -237,7 +237,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # Teradata
-        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
+        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):  # type: ignore[union-attr]
             if positive:
                 return (
                     sa.func.REGEXP_SIMILAR(
@@ -258,7 +258,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # sqlite
         # regex_match for sqlite introduced in sqlalchemy v1.4
-        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(
+        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(  # type: ignore[union-attr]
             sa.__version__
         ) >= version.parse("1.4"):
             if positive:
