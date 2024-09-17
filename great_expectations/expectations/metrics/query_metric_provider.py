@@ -1,14 +1,9 @@
 import logging
-from typing import TYPE_CHECKING, ClassVar, Set, Union
+from typing import ClassVar, Set, Union
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.metrics.metric_provider import MetricProvider
-
-if TYPE_CHECKING:
-    from great_expectations.compatibility.sqlalchemy import (
-        sqlalchemy as sa,
-    )
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +45,11 @@ class QueryMetricProvider(MetricProvider):
 
     @classmethod
     def _get_query_string_with_substituted_batch_parameters(
-        cls, query: str, batch_subquery: Union[sa.sql.Subquery, sa.sql.Alias]
+        cls,
+        query: str,
+        batch_subquery: Union[
+            "sa.sql.Subquery", "sa.sql.Alias"  # noqa: F821  # fixed in 1.0
+        ],
     ) -> str:
         """Specifying a runtime query string returns the active batch as a Subquery or Alias type
         There is no object-based way to apply the subquery alias to columns in the SELECT and
