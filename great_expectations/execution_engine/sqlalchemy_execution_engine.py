@@ -378,7 +378,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="clickhouse_sqlalchemy.drivers.base"
             )
-        # TODO: add DatabricksSQL dialect module
+        elif self.dialect_name == GXSqlDialect.DATABRICKS:
+            self.dialect_module = import_library_module("databricks.sqlalchemy.base")
         else:
             self.dialect_module = None
 
