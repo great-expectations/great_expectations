@@ -76,8 +76,8 @@ class QueryMetricProvider(MetricProvider):
         """
 
         try:
-            batch_table = batch_subquery.selectable.element.get_final_froms()[0].name
-            batch_filter = str(batch_subquery.selectable.element.whereclause)
+            batch_table = batch_subquery.selectable.element.get_final_froms()[0].name  # type: ignore[attr-defined]  # possible AttributeError handled
+            batch_filter = str(batch_subquery.selectable.element.whereclause)  # type: ignore[attr-defined]  # possible AttributeError handled
         except AttributeError as e:
             raise MissingElementError() from e
 
