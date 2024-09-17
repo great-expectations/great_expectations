@@ -10,6 +10,7 @@ import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    Any,
     Final,
     Generator,
     Literal,
@@ -767,7 +768,7 @@ def _fails_expectation(param_id: str) -> bool:
     This does not mean that it SHOULD fail, but that it currently does.
     """
     column_name: ColNameParamId
-    dialect, column_name, _ = param_id.split("-")  # type: ignore[assignment]
+    dialect, column_name, *_ = param_id.split("-")  # type: ignore[assignment]
     dialects_need_fixes: list[DatabaseType] = FAILS_EXPECTATION.get(column_name, [])
     return dialect in dialects_need_fixes
 
@@ -817,12 +818,26 @@ def _raw_query_check_column_exists(
 
 
 _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
-    param("expect_column_to_exist"),
-    param("expect_column_values_to_not_be_null"),
+    param("expect_column_to_exist", {"mostly": 1}, id="expect_column_to_exist"),
+    param(
+        "expect_column_values_to_not_be_null",
+        {"mostly": 1},
+        id="expect_column_values_to_not_be_null",
+    ),
+    param(
+        "expect_column_values_to_match_regex",
+        {"regex": r".*"},
+        id="expect_column_values_to_match_regex",
+    ),
+    param(
+        "expect_column_values_to_match_like_pattern",
+        {"like_pattern": r"%"},
+        id="expect_column_values_to_match_like_pattern",
+    ),
 )
 
 
-@pytest.mark.parametrize("expectation_type", _EXPECTATION_TYPES)
+@pytest.mark.parametrize("expectation_type, extra_exp_kwargs", _EXPECTATION_TYPES)
 class TestColumnExpectations:
     @pytest.mark.parametrize(
         "column_name",
@@ -855,6 +870,7 @@ class TestColumnExpectations:
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
         request: pytest.FixtureRequest,
     ):
         """
@@ -913,10 +929,7 @@ class TestColumnExpectations:
         suite.add_expectation(
             expectation_configuration=ExpectationConfiguration(
                 expectation_type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                    "mostly": 1,
-                },
+                kwargs={"column": column_name, **extra_exp_kwargs},
             )
         )
         suite = context.add_or_update_expectation_suite(expectation_suite=suite)
@@ -966,6 +979,7 @@ class TestColumnExpectations:
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
         request: pytest.FixtureRequest,
     ):
         """
@@ -1026,10 +1040,7 @@ class TestColumnExpectations:
         suite.add_expectation(
             expectation_configuration=ExpectationConfiguration(
                 expectation_type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                    "mostly": 1,
-                },
+                kwargs={"column": column_name, **extra_exp_kwargs},
             )
         )
         suite = context.add_or_update_expectation_suite(expectation_suite=suite)
@@ -1095,6 +1106,7 @@ class TestColumnExpectations:
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
         request: pytest.FixtureRequest,
     ):
         """
@@ -1167,10 +1179,7 @@ class TestColumnExpectations:
         suite.add_expectation(
             expectation_configuration=ExpectationConfiguration(
                 expectation_type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                    "mostly": 1,
-                },
+                kwargs={"column": column_name, **extra_exp_kwargs},
             )
         )
         suite = context.add_or_update_expectation_suite(expectation_suite=suite)
