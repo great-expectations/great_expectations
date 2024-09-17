@@ -861,7 +861,7 @@ def parse_value_set(value_set: Iterable) -> list:
     return parsed_value_set
 
 
-def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
+def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915
     column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
 ) -> sa.BinaryExpression | None:
     dialect_supported: bool = False
@@ -887,6 +887,12 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
             ),
         ):
             dialect_supported = True
+
+    try:
+        if hasattr(dialect, "DatabricksDialect"):
+            dialect_supported = True
+    except Exception:
+        pass
 
     try:
         if hasattr(dialect, "RedshiftDialect"):
