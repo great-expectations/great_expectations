@@ -69,6 +69,10 @@ class QueryMetricProvider(MetricProvider):
         There is no object-based way to apply the subquery alias to columns in the SELECT and
         WHERE clauses. Instead, we extract the subquery parameters from the batch selectable
         and inject them into the SQL string.
+
+        Raises:
+            MissingElementError if the batch_subquery.selectable does not have an element
+            for which to extract query parameters.
         """
 
         try:

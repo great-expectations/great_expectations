@@ -12,6 +12,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
+    MissingElementError,
     QueryMetricProvider,
 )
 from great_expectations.util import get_sqlalchemy_subquery_type
@@ -45,20 +46,25 @@ class QueryTable(QueryMetricProvider):
             query = query.format(batch=batch_selectable)
         elif isinstance(batch_selectable, get_sqlalchemy_subquery_type()):
             if execution_engine.dialect_name in cls.dialect_columns_require_subquery_aliases:
-                query = cls._get_query_string_with_substituted_batch_parameters(
-                    query=query,
-                    batch_subquery=batch_selectable,
-                )
+                try:
+                    query = cls._get_query_string_with_substituted_batch_parameters(
+                        query=query,
+                        batch_subquery=batch_selectable,
+                    )
+                except MissingElementError:
+                    # if we are unable to extract the subquery parameters,
+                    # we fall back to the default behavior for all dialects
+                    batch = batch_selectable.compile(compile_kwargs={"literal_binds": True})
+                    query = query.format(batch=f"({batch})")
             else:
-                query = query.format(
-                    batch=f'({batch_selectable.compile(compile_kwargs={"literal_binds": True})})'
-                )
+                batch = batch_selectable.compile(compile_kwargs={"literal_binds": True})
+                query = query.format(batch=f"({batch})")
         elif isinstance(
             batch_selectable, sa.sql.Select
-        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query  # noqa: E501
-            query = query.format(
-                batch=f'({batch_selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',  # noqa: E501
-            )
+        ):  # Specifying a row_condition returns the active batch as a Select object
+            # requiring compilation & aliasing when formatting the parameterized query
+            batch = batch_selectable.compile(compile_kwargs={"literal_binds": True})
+            query = query.format(batch=f"({batch}) AS subselect")
         else:
             query = query.format(batch=f"({batch_selectable})")
 
