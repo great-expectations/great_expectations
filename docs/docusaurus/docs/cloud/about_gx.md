@@ -80,6 +80,20 @@ For example, you might opt to run and interact with the GX Core Python library l
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX Core to fit your unique requirements.
 
+## Credential management 
+
+To connect to your database in GX Cloud, there are two methods for managing credentials:
+
+1: Direct Input
+You can input credentials directly into GX Cloud. These credentials are securely encrypted at rest and in transit, stored in our database, and accessible to the GX Agent and any API user.
+
+2: Environment Variable Substitution
+For enhanced security, you can use environment variables to substitute sensitive information like passwords. In the GX Cloud UI, reference the environment variable by entering it as ${MY_DATABASE_PASSWORD} (or another variable name). You would then inject this variable into your GX Agent container using the same method as for your organization ID and access token.
+
+With this method, your password is never saved or sent to GX Cloud. To access the database through the API, just set the environment variable in your setup. It works smoothly with any Docker-based service, whether you’re using Kubernetes, ECS, ACI, or GCE.
+
+Environment variable substitution is not supported in fully hosted deployments.
+
 ## GX Cloud workflow
 
 The GX Cloud workflow is a sequence of tasks you complete to perform Data Validations. 
