@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class MissingElementError(TypeError):
     def __init__(self):
         super().__init__(
-            "The batch_subquery selectable does not contain an"
+            "The batch_subquery selectable does not contain an "
             "element from which query parameters can be extracted."
         )
 
@@ -76,9 +76,13 @@ class QueryMetricProvider(MetricProvider):
         """
 
         try:
-            batch_table = batch_subquery.selectable.element.get_final_froms()[0].name  # type: ignore[attr-defined]  # possible AttributeError handled
+            froms = batch_subquery.selectable.element.get_final_froms()  # type: ignore[attr-defined]  # possible AttributeError handled
+            try:
+                batch_table = froms[0].name
+            except AttributeError:
+                batch_table = str(froms[0])
             batch_filter = str(batch_subquery.selectable.element.whereclause)  # type: ignore[attr-defined]  # possible AttributeError handled
-        except AttributeError as e:
+        except (AttributeError, IndexError) as e:
             raise MissingElementError() from e
 
         unfiltered_query = query.format(batch=batch_table)
