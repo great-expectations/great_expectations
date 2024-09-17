@@ -63,13 +63,13 @@ df = pd.DataFrame(validation_results_by_day)
 
 # Check output matches what is in the docs.
 expected_values = [
-    [ "2024-05-01", True, 4 ],
-    [ "2024-05-02", True, 5 ],
-    [ "2024-05-03", True, 5 ],
-    [ "2024-05-04", False, 6 ],
-    [ "2024-05-05", True, 5 ],
-    [ "2024-05-06", False, 6 ],
-    [ "2024-05-07", True, 5 ]
+    ["2024-05-01", True, 4],
+    ["2024-05-02", True, 5],
+    ["2024-05-03", True, 5],
+    ["2024-05-04", False, 6],
+    ["2024-05-05", True, 5],
+    ["2024-05-06", False, 6],
+    ["2024-05-07", True, 5],
 ]
 
 for idx, row in enumerate(expected_values):
