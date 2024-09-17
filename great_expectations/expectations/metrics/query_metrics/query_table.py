@@ -50,7 +50,9 @@ class QueryTable(QueryMetricProvider):
                     batch_selectable=batch_selectable,
                 )
             else:
-                query = query.format(batch=f"({batch_selectable})")
+                query = query.format(
+                    batch=f'({batch_selectable.compile(compile_kwargs={"literal_binds": True})})'
+                )
         elif isinstance(
             batch_selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query  # noqa: E501
