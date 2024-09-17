@@ -54,6 +54,15 @@
                 "type": "object"
             }
         },
+        "windows": {
+            "title": "Windows",
+            "description": "Definition(s) for evaluation of time-series windows",
+            "default": [],
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Window"
+            }
+        },
         "batch_id": {
             "title": "Batch Id",
             "type": "string"
@@ -214,6 +223,51 @@
                 "SUMMARY"
             ],
             "type": "string"
+        },
+        "PercentOffset": {
+            "title": "PercentOffset",
+            "type": "object",
+            "properties": {
+                "positive": {
+                    "title": "Positive",
+                    "type": "number"
+                },
+                "negative": {
+                    "title": "Negative",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "positive",
+                "negative"
+            ]
+        },
+        "Window": {
+            "title": "Window",
+            "type": "object",
+            "properties": {
+                "constraint_fn": {
+                    "title": "Constraint Fn",
+                    "type": "string"
+                },
+                "parameter_name": {
+                    "title": "Parameter Name",
+                    "type": "string"
+                },
+                "range": {
+                    "title": "Range",
+                    "type": "integer"
+                },
+                "percent_offset": {
+                    "$ref": "#/definitions/PercentOffset"
+                }
+            },
+            "required": [
+                "constraint_fn",
+                "parameter_name",
+                "range",
+                "percent_offset"
+            ]
         }
     }
 }
