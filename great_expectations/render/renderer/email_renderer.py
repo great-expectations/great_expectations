@@ -102,6 +102,6 @@ class EmailRenderer(Renderer):
 
     def _build_report_element_block(self, validation_result_urls: list[str]) -> str | None:
         for url in validation_result_urls:
-            url = pathlib.Path(urllib.parse.unquote(url)).as_posix()
-            report_element = self._get_report_element(url)
+            fixed_url = pathlib.Path(urllib.parse.unquote(url)).as_posix()
+            report_element = self._get_report_element(fixed_url)
             return report_element

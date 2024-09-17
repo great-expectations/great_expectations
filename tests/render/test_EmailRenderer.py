@@ -71,11 +71,14 @@ def test_EmailRenderer_render(v1_checkpoint_result):
         <p><strong>Batch Validation Status</strong>: Success ✅</p>
         <p><strong>Expectation Suite Name</strong>: my_suite</p>
         <p><strong>Data Asset Name</strong>: taxi_data_1.csv</p>
-        <p><strong>Run ID</strong>: {'run_name': '20220727-114327-my-run-name-template', 'run_time': '2022-07-27T11:43:27.625252+00:00'}</p>
+        <p><strong>Run ID</strong>: {'run_name': '20220727-114327-my-run-name-template',
+                                    'run_time': '2022-07-27T11:43:27.625252+00:00'}</p>
         <p><strong>Batch ID</strong>: None</p>
-        <p><strong>Summary</strong>: <strong>3</strong> of <strong>3</strong> expectations were met</p>"""
+        <p><strong>Summary</strong>: <strong>3</strong> of <strong>3</strong>
+                                     expectations were met</p>"""
     )
     assert data_docs_block == str(
-        '<p><strong>DataDocs</strong> can be found here: <a href="file:/localsite/index.html">file:/localsite/index.html</a>.</br>'
+        """<p><strong>DataDocs</strong> can be found here: <a href="file:/localsite/index.html">
+                                    file:/localsite/index.html</a>.</br>"""
         "(Please copy and paste link into a browser to view)</p>",
     )
