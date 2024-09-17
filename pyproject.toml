@@ -208,6 +208,7 @@ module = [
     "boto3.*",
     "botocore.*",
     "clickhouse_sqlalchemy.*",
+    "databricks.*",
     "google.*",
     "great_expectations.compatibility.pydantic.*",
     "ipywidgets.*",
