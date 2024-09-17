@@ -486,6 +486,7 @@ class Validator:
             expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
 
             meta: Optional[dict] = expectation_kwargs.pop("meta", None)
+            description: Optional[str] = expectation_kwargs.pop("description", None)
 
             basic_default_expectation_args: dict = {
                 k: v
@@ -529,6 +530,7 @@ class Validator:
                     expectation_type=name,
                     expectation_kwargs=expectation_kwargs,
                     meta=meta,
+                    description=description,
                     expectation_impl=expectation_impl,
                     runtime_configuration=basic_runtime_configuration,
                 )
@@ -601,11 +603,12 @@ class Validator:
 
         return inst_expectation
 
-    def _build_expectation_configuration(
+    def _build_expectation_configuration(  # noqa: PLR0913  # method not applicable in v1
         self,
         expectation_type: str,
         expectation_kwargs: dict,
         meta: Optional[dict],
+        description: Optional[str],
         expectation_impl: type[Expectation],
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
@@ -691,6 +694,7 @@ class Validator:
             expectation_type=expectation_type,
             kwargs=expectation_kwargs,
             meta=meta,
+            description=description,
         )
 
         return configuration

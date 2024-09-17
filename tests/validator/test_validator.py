@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import sqlite3
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
 from unittest.mock import patch
@@ -1722,3 +1723,49 @@ def test_validator_with_exception_info_in_result():
                 evr.exception_info[str(metric_id)].exception_message
                 == exception_message
             )
+
+
+@pytest.mark.unit
+def test_rendered_content_description():
+    conn = sqlite3.connect("gx-sqlite.db")
+
+    df = pd.DataFrame(
+        {
+            "row_id": (1, 2, 3, 4, 5, 6, 7),
+            "total_count": (100, 200, 300, 400, 500, 600, 700),
+            "color": ("red", "blue", "red", "blue", "red", "blue", "red"),
+        }
+    )
+    df.to_sql("color_counts", conn, if_exists="replace")
+
+    context = get_context()
+    asset = context.sources.add_sqlite(
+        name="sqlite-ds", connection_string="sqlite:///gx-sqlite.db"
+    ).add_table_asset(
+        name="Color Counts",
+        table_name="color_counts",
+    )
+    batch_request = asset.build_batch_request()
+    expectation_suite_name = "test_description"
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    description = "This is my description!"
+    expectation_validation_result = validator.unexpected_rows_expectation(
+        description=description,
+        unexpected_rows_query="SELECT * FROM {batch} WHERE color = 'red' AND total_count >= 600",
+    )
+    assert expectation_validation_result.expectation_config.description == description
+    expectation_validation_result.expectation_config.render()
+    assert (
+        expectation_validation_result.expectation_config.rendered_content[
+            0
+        ].value.template
+        == description
+    )
