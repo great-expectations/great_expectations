@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -10,6 +12,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
+    MissingElementError,
     QueryMetricProvider,
 )
 from great_expectations.util import get_sqlalchemy_subquery_type
@@ -32,9 +35,9 @@ class QueryTable(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or metric_value_kwargs.get("unexpected_rows_query")
+        query: str = metric_value_kwargs.get("query") or metric_value_kwargs.get(
+            "unexpected_rows_query", ""
+        )
 
         batch_ref = (
             "batch"
@@ -42,27 +45,41 @@ class QueryTable(QueryMetricProvider):
             else "active_batch"
         )
 
-        selectable: Union[sa.sql.Selectable, str]
-        selectable, _, _ = execution_engine.get_compute_domain(
+        batch_selectable: sa.sql.Selectable
+        batch_selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
-        if isinstance(selectable, sa.Table):
-            query = query.format(**{batch_ref: selectable})  # type: ignore[union-attr] # could be none
+        if isinstance(batch_selectable, sa.Table):
+            query = query.format(**{batch_ref: batch_selectable})
+        elif isinstance(batch_selectable, get_sqlalchemy_subquery_type()):
+            if (
+                execution_engine.dialect_name
+                in cls.dialect_columns_require_subquery_aliases
+            ):
+                try:
+                    query = cls._get_query_string_with_substituted_batch_parameters(
+                        query=query,
+                        batch_subquery=batch_selectable,
+                    )
+                except MissingElementError:
+                    # if we are unable to extract the subquery parameters,
+                    # we fall back to the default behavior for all dialects
+                    batch = batch_selectable.compile(
+                        compile_kwargs={"literal_binds": True}
+                    )
+                    query = query.format(**{batch_ref: f"({batch})"})
+            else:
+                batch = batch_selectable.compile(compile_kwargs={"literal_binds": True})
+                query = query.format(**{batch_ref: f"({batch})"})
         elif isinstance(
-            selectable, get_sqlalchemy_subquery_type()
-        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery or Alias; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(**{batch_ref: f"({selectable})"})  # type: ignore[union-attr] # could be none
-        elif isinstance(
-            selectable, sa.sql.Select
-        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
-            query = query.format(  # type: ignore[union-attr] # could be none
-                **{
-                    batch_ref: f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect'
-                },
-            )
+            batch_selectable, sa.sql.Select
+        ):  # Specifying a row_condition returns the active batch as a Select object
+            # requiring compilation & aliasing when formatting the parameterized query
+            batch = batch_selectable.compile(compile_kwargs={"literal_binds": True})
+            query = query.format(**{batch_ref: f"({batch}) AS subselect"})
         else:
-            query = query.format(**{batch_ref: f"({selectable})"})  # type: ignore[union-attr] # could be none
+            query = query.format(**{batch_ref: f"({batch_selectable})"})
 
         result: List[sqlalchemy.Row] = execution_engine.execute_query(
             sa.text(query)
