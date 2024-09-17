@@ -102,9 +102,9 @@ Run the following GX Core workflow.
 | 2024-05-01 | True | 4 |
 | 2024-05-02 | True | 5 |
 | 2024-05-03 | True | 5 |
-| 2024-05-04 | True | 6 |
+| 2024-05-04 | False | 6 |
 | 2024-05-05 | True | 5 |
-| 2024-05-06 | True | 6 |
+| 2024-05-06 | False | 6 |
 | 2024-05-07 | True | 5 |
 
 </TabItem>
