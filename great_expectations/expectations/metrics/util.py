@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Iterable,
     List,
     Mapping,
     Optional,
@@ -275,7 +276,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     return None
 
 
-def _get_dialect_type_module(dialect=None):
+def _get_dialect_type_module(dialect: ModuleType | None = None) -> ModuleType:
     if dialect is None:
         logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
@@ -855,14 +856,14 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
     return None if verify_only else normalized_batch_columns_mappings
 
 
-def parse_value_set(value_set):
+def parse_value_set(value_set: Iterable) -> list:
     parsed_value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
     return parsed_value_set
 
 
 def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
     column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
-):
+) -> sa.BinaryExpression | None:
     dialect_supported: bool = False
 
     try:
