@@ -772,12 +772,6 @@ def _raw_query_check_column_exists(
         return True
 
 
-MAPPING: Mapping[type[Expectation], object] = {  # TODO: do something with this
-    ExpectColumnValuesToMatchRegex: {},
-    ExpectColumnToExist: {},
-    ExpectColumnValuesToNotBeNull: {},
-    ExpectColumnValuesToMatchLikePattern: {},
-}
 
 
 _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
