@@ -78,7 +78,7 @@ class TableHead(TableMetricProvider):
         selectable = sa.select("*").select_from(selectable).limit(limit).selectable  # type: ignore[assignment,arg-type]
 
         try:
-            with execution_engine.get_connection() as con:  # type: ignore[var-annotated]
+            with execution_engine.get_connection() as con:
                 df = pandas_read_sql(
                     sql=selectable,
                     con=con,
