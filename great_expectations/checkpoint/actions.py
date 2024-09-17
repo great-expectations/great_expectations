@@ -533,7 +533,7 @@ class OpsgenieAlertAction(ValidationAction):
 
 
 @public_api
-class EmailAction(ValidationAction):
+class EmailAction(DataDocsAction):
     """Sends an email to a given list of email addresses.
 
     ```yaml
@@ -633,7 +633,26 @@ class EmailAction(ValidationAction):
         if not _should_notify(success=success, notify_on=self.notify_on):
             return {"email_result": ""}
 
-        title, html = self.renderer.render(checkpoint_result=checkpoint_result)
+        checkpoint_result_text_blocks: list[str] = []
+        for (
+            validation_result_suite_identifier,
+            validation_result_suite,
+        ) in checkpoint_result.run_results.items():
+            validation_text_blocks = self._render_validation_result(
+                result_identifier=validation_result_suite_identifier,
+                result=validation_result_suite,
+                action_context=action_context,
+            )
+            checkpoint_result_text_blocks.extend(validation_text_blocks)
+
+        title, html = self.renderer.concatenate_blocks(
+            action_name=self.name,
+            text_blocks=checkpoint_result_text_blocks,
+            success=success,
+            checkpoint_name=checkpoint_result.checkpoint_config.name,
+            run_id=checkpoint_result.run_id,
+        )
+
         receiver_emails_list = list(map(lambda x: x.strip(), self.receiver_emails.split(",")))
 
         # this will actually send the email
@@ -652,6 +671,34 @@ class EmailAction(ValidationAction):
 
         # sending payload back as dictionary
         return {"email_result": email_result}
+
+    def _render_validation_result(
+        self,
+        result_identifier: ValidationResultIdentifier,
+        result: ExpectationSuiteValidationResult,
+        action_context: ActionContext | None = None,
+    ) -> list[dict]:
+        data_docs_pages = None
+        if action_context:
+            data_docs_pages = self._get_data_docs_pages_from_prior_action(
+                action_context=action_context
+            )
+
+        data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
+            resource_identifier=result_identifier
+        )
+
+        validation_result_urls: list[str] = [
+            data_docs_url["site_url"]
+            for data_docs_url in data_docs_urls
+            if data_docs_url["site_url"]
+        ]
+
+        return self.renderer.render(
+            validation_result=result,
+            data_docs_pages=data_docs_pages,
+            validation_result_urls=validation_result_urls,
+        )
 
 
 @public_api
