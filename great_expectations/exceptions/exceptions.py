@@ -56,12 +56,20 @@ class ValidationDefinitionError(DataContextError):
     pass
 
 
+class ValidationDefinitionNotFoundError(ValidationDefinitionError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ValidationDefinition '{name}' not found. Please check the name and try again."
+        )
+
+
 class CheckpointError(DataContextError):
     pass
 
 
 class CheckpointNotFoundError(CheckpointError):
-    pass
+    def __init__(self, name: str) -> None:
+        super().__init__(f"Checkpoint '{name}' not found. Please check the name and try again.")
 
 
 class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
