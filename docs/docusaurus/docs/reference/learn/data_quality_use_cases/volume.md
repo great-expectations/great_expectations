@@ -11,25 +11,13 @@ Great Expectations (GX) offers a powerful set of tools for monitoring and valida
 
 This guide will walk you through leveraging GX to effectively manage and validate data volume, helping you maintain high-quality, reliable datasets.
 
-## The impact of data volume on data quality
-
-Data volume plays a significant role in the overall quality and reliability of your datasets. Some key considerations include:
-
-1. **Consistency**: Unexpected changes in data volume can indicate issues in data collection, processing, or integration, potentially leading to inconsistent or incomplete datasets.
-2. **Performance**: Unexpectedly large datasets can strain system resources, leading to slower query times, increased latency, and potential system failures.
-3. **Accuracy**: Anomalies in data volume, such as sudden spikes or drops, can skew analytical results and lead to inaccurate insights if not properly addressed.
-4. **Compliance**: Certain regulations, such as data retention policies, may require strict control over data volume to ensure compliance and avoid legal repercussions.
-
-By proactively managing and validating data volume, you can mitigate these risks and maintain a high-quality, reliable data ecosystem.
-
 ## Prerequisite knowledge
 
-This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Overview](https://docs.greatexpectations.io/docs/guides/overview) to familiarize yourself with key concepts and setup procedures.
+This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Overview](/core/introduction/gx_overview.md) to familiarize yourself with key concepts and setup procedures.
 
 ## Data preview
 
-The examples in this article use a sample financial transaction dataset that is provided in from a public Postgres database table. The sample data is also available in [CSV format](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/volume_financial_transfers.csv).
-
+The examples in this article use a sample financial transaction dataset that is provided from a public Postgres database table. The sample data is also available in [CSV format](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/volume_financial_transfers.csv).
 
 | transfer_type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_ts       |
 |----------|------------------------|--------------------|-----------------|---------------------|
@@ -88,21 +76,13 @@ Compares the row count of the current table to another table within the same dat
 - Implement `ExpectTableRowCountToEqualOtherTable` to ensure data integrity across your data pipeline stages.
 :::
 
-## Examples and scenarios
+## Example: Validate daily transaction volume
 
-GX Cloud provides a visual interface to create and run schema validation workflows. The GX Cloud workflow to validate data volume is intuitive and straightforward: create a Data Asset, define Expectations (optionally batching data), run a Validation, and review Validation Results.
+**Context**: In SQL tables, data is often timestamped on row creation. Tables can hold historical data created over long ranges of time, however, organizations generally want to validate volume for a specific time period: over a year, over a month, over a day. When data arrives on a regular cadence, it is also useful to be able to monitor volume over the most recent window of time.
 
-:::TODO add screenshot:::
+**Goal**: Using the `ExpectTableRowCountToBeBetween` Expectation and either GX Core or GX Cloud, validate daily data volume by batching a single Data Asset (a Postgres table) on a time-based column, `transfer_ts`.
 
-GX Core can be used to complement and extend the capabilities of GX Cloud to programmatically implement custom validation workflows. The example and scenarios provided in this section feature use cases that can be achieved using either GX Cloud, GX Core, or a combination of both products.
-
-### Validate daily transaction volume
-
-**Context**: In SQL tables, data is often timestamped on row creation. Tables can hold data created over long ranges of time, however, organizations generally want to validate volume for a specific time period: over a year, over a month, over a day.
-
-**Goal**: Using GX Core or GX Cloud, validate daily data volume by batching a single Data Asset (a Postgres table) on a time-based column and using `ExpectTableRowCountToBeBetween`.
-
-<Tabs 
+<Tabs
    defaultValue="gx_core"
    values={[
       {value: 'gx_core', label: 'GX Core'},
@@ -111,6 +91,7 @@ GX Core can be used to complement and extend the capabilities of GX Cloud to pro
 >
 
 <TabItem value="gx_core" label="GX Core">
+Run the following GX Core workflow.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code"
 ```
@@ -130,15 +111,33 @@ GX Core can be used to complement and extend the capabilities of GX Cloud to pro
 
 <TabItem value="gx_cloud" label="GX Cloud">
 
-::: TODO
+Use the GX Cloud UI to walk through the following steps.
 
-Add GX Cloud steps
+1. Create a Postgres Data Asset for the `volume_financial_transfers` table, using the connection string:
+   ```
+   postgresql+psycopg2://try_gx:try_gx@postgres.workshops.greatexpectations.io/gx_learn_data_quality
+   ```
 
-:::
+2. Profile the Data Asset.
+3. Add an **Expect table row count to be between** Expectation to the freshly created Data Asset.
+4. Populate the Expectation:
+   * Define a **Daily** batch interval for the Expectation, using `transfer_ts` as the **Batch column**.
+   * Provide a **Min Value** of `1` and a **Max Value** of `5`.
+5. Save the Expectation.
+6. Click the **Validate** button and define which batch to validate.
+   * **Latest Batch** validates data for the most recent batch found in the Data Asset.
+   * **Custom Batch** validates data for the batch provided.
+7. Click **Validate**.
+8. Review Validation Results.
 
 </TabItem>
 </Tabs>
 
+**GX solution**: GX enables volume validation for yearly, monthly, or daily ranges of data. Data validation can be defined and run using either GX Core or GX Cloud.
+
+## Scenarios
+
+The scenarios in this section outline common real-world use cases for data volume validation, and how GX can be applied to identify and monitor volume issues.
 
 ### Data reconciliation across systems
 
@@ -171,22 +170,8 @@ Add GX Cloud steps
 
 - **Neglecting Context**: Remember that volume changes might be legitimate due to business events or system changes. Incorporate contextual information when possible. GX can be integrated with external systems to factor in known events or changes when validating volume expectations.
 
-## Next steps: Advancing volume management
+## The path forward
 
-While volume management is a critical component of data quality, it's just one facet of a comprehensive data engineering strategy. To build on the foundations laid in this guide, consider the following steps:
+Proactive management and validation of data volume is a key part of ensuring the quality and reliability of your data. Implementing the strategies explored in this article will help you to enhance your data's integrity and trustworthiness.
 
-1. Integrate volume-focused Expectations into your CI/CD pipelines, enabling automated checks at key points in your data flow.
-
-2. Explore the [Expectation Gallery](https://greatexpectations.io/expectations/) to identify Expectations that complement your volume management strategy and address other dimensions of data quality. Experiment with combining different Expectations to create a robust validation framework tailored to your specific data quality challenges.
-
-3. Develop a multifaceted approach that combines volume checks with other [crucial data quality aspects](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md), such as data integrity, schema evolution, and distribution analysis.
-
-4. Implement a systematic review process for your Expectations suite, ensuring it evolves alongside your data architecture and business requirements. Schedule regular meetings with stakeholders to discuss data quality objectives, review Expectation performance, and identify areas for improvement.
-
-5. Foster collaboration between data engineers, data analysts, and other stakeholders in developing and refining your data quality strategy. Encourage open communication and knowledge sharing to ensure that your data quality initiatives align with the needs of the broader organization. Consider sharing validation results from GX, which is designed to be useful as stand-alone data documentation, with other stakeholders outside of your team.
-
-:::TODO GX link for #5?:::
-
-As you continue to iterate on your data quality strategy, leverage the full spectrum of GX capabilities to create a robust, scalable, and trustworthy data ecosystem. Explore our broader [data quality series](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md) to gain insights into how other critical aspects of data quality can be seamlessly integrated into your engineering workflows.
-
-By following these actionable steps and embracing a collaborative, multifaceted approach to data quality, you'll be well-equipped to tackle the ever-evolving challenges of modern data engineering. Together, let's build a future where high-quality, reliable data drives innovation and success across industries.
+Volume management is a critical component of data quality, however, it is one facet of a comprehensive data quality strategy. As you continue to iterate on your data quality strategy, leverage the full spectrum of GX capabilities to create a robust, scalable, and trustworthy data ecosystem. Explore our broader [data quality series](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md) to gain insights into how other critical aspects of data quality can be seamlessly integrated into your workflows.

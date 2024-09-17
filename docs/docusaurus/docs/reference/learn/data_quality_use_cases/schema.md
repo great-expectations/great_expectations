@@ -6,7 +6,7 @@ title: 'Validate data schema with GX'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-**Data schema** refers to the structural blueprint of a dataset, encompassing elements such as column
+Data schema refers to the structural blueprint of a dataset, encompassing elements such as column
 names, data types, and the overall organization of information. When working with data, ensuring
 that it adheres to its predefined schema is a critical aspect of data quality management. This
 process, known as schema validation, is among the top priority use cases for data quality platforms.
@@ -17,7 +17,7 @@ established rules, such as verifying column names, data types, and the presence 
 Schema changes, whether planned or unexpected, can significantly impact data integrity and the
 performance of data-dependent systems.
 
-Great Expectations (GX) provides a powerful suite of schema-focused **Expectations** that allow you
+Great Expectations (GX) provides a powerful suite of schema-focused Expectations that allow you
 to define and enforce the structural integrity of your datasets. These tools enable you to establish
 robust schema validation within your data pipelines, helping to catch and address schema-related
 issues before they propagate through your data ecosystem. This guide will walk you through
