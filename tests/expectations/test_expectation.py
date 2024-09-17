@@ -237,7 +237,7 @@ def test_expectation_configuration_window():
                 constraint_fn="a",
                 parameter_name="b",
                 range=5,
-                percent_offset=PercentOffset(positive=0.2, negative=0.2),
+                offset=PercentOffset(positive=0.2, negative=0.2),
             )
         ],
     )
@@ -250,7 +250,7 @@ def test_expectation_configuration_window():
                     "constraint_fn": "a",
                     "parameter_name": "b",
                     "range": 5,
-                    "percent_offset": {"positive": 0.2, "negative": 0.2},
+                    "offset": {"positive": 0.2, "negative": 0.2},
                 }
             ],
             "column": "foo",

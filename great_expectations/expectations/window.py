@@ -10,4 +10,4 @@ class Window(pydantic.BaseModel):
     constraint_fn: str
     parameter_name: str
     range: int
-    percent_offset: PercentOffset
+    offset: PercentOffset
