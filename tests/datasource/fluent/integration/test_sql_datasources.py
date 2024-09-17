@@ -781,7 +781,7 @@ MAPPING: Mapping[type[Expectation], object] = {  # TODO: do something with this
 _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
     param("expect_column_to_exist", {}),
     param("expect_column_values_to_not_be_null", {}),
-    param("expect_column_values_to_match_regex", {}),
+    param("expect_column_values_to_match_regex", {"regex": r".*"}),
 )
 
 
@@ -878,7 +878,7 @@ class TestColumnExpectations:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type, kwargs={"column": column_name}
+                type=expectation_type, kwargs={"column": column_name, **extra_exp_kwargs}
             )
         )
         suite.save()
@@ -983,7 +983,7 @@ class TestColumnExpectations:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type, kwargs={"column": column_name}
+                type=expectation_type, kwargs={"column": column_name, **extra_exp_kwargs}
             )
         )
         suite.save()
@@ -1114,7 +1114,7 @@ class TestColumnExpectations:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type, kwargs={"column": column_name}
+                type=expectation_type, kwargs={"column": column_name, **extra_exp_kwargs}
             )
         )
         suite.save()
