@@ -63,6 +63,7 @@ from great_expectations.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
     COLUMN_LIST_DESCRIPTION,
     MOSTLY_DESCRIPTION,
+    WINDOWS_DESCRIPTION,
 )
 from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
     Mostly,
@@ -331,8 +332,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
-    # TODO: Ensure is optional
-    windows: Optional[List[Window]] = None
+    windows: Optional[List[Window]] = pydantic.Field(default=[], description=WINDOWS_DESCRIPTION)
     examples: ClassVar[List[dict]] = []
 
     _save_callback: Union[Callable[[Expectation], Expectation], None] = pydantic.PrivateAttr(
