@@ -90,8 +90,6 @@ except ImportError:
 def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
     """
     Check if the Databricks dialect is being provided.
-
-    Note:A Dialect class will be ignored and treated as if it is not available.
     """
     if not sqla_databricks:
         return False
@@ -99,6 +97,8 @@ def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) 
         if isinstance(dialect, sqla_databricks.DatabricksDialect):
             return True
         if hasattr(dialect, "DatabricksDialect"):
+            return True
+        if issubclass(dialect, sqla_databricks.DatabricksDialect):  # type: ignore[arg-type]
             return True
     except Exception:
         pass
