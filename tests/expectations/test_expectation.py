@@ -18,7 +18,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.expectations.window import PercentOffset, Window
+from great_expectations.expectations.window import Offset, Window
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 LOGGER = logging.getLogger(__name__)
@@ -237,7 +237,7 @@ def test_expectation_configuration_window():
                 constraint_fn="a",
                 parameter_name="b",
                 range=5,
-                offset=PercentOffset(positive=0.2, negative=0.2),
+                offset=Offset(positive=0.2, negative=0.2),
             )
         ],
     )
