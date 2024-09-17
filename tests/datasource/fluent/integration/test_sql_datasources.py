@@ -779,9 +779,13 @@ MAPPING: Mapping[type[Expectation], object] = {  # TODO: do something with this
 
 
 _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
-    param("expect_column_to_exist", {}),
-    param("expect_column_values_to_not_be_null", {}),
-    param("expect_column_values_to_match_regex", {"regex": r".*"}),
+    param("expect_column_to_exist", {}, id="expect_column_to_exist"),
+    param("expect_column_values_to_not_be_null", {}, id="expect_column_values_to_not_be_null"),
+    param(
+        "expect_column_values_to_match_regex",
+        {"regex": r".*"},
+        id="expect_column_values_to_match_regex",
+    ),
 )
 
 
