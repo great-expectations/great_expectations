@@ -30,7 +30,7 @@ This dataset represents daily financial transactions. In a real-world scenario, 
 
 GX provides several Expectations specifically designed for managing data volume. These can be added to an Expectation Suite via the GX Cloud UI or using the GX Core Python library.
 
-:::TODO add screenshot:::
+![Add a volume Expectation in GX Cloud](./volume_resources/gx_cloud_volume_expectations_add.gif)
 
 ### Expect Table Row Count To Be Between
 
