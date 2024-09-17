@@ -1141,7 +1141,7 @@ class TestConnectionPersistence:
         temporary table wouldn't be accessible.
         """  # noqa: E501
         execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
-        with execution_engine.get_connection() as con:  # type: ignore[var-annotated]
+        with execution_engine.get_connection() as con:
             add_dataframe_to_db(df=pd_dataframe, name="test", con=con, index=False)
 
         assert (
@@ -1173,7 +1173,7 @@ class TestConnectionPersistence:
         from the pool). The same connection should be accessible from the execution engine after each query.
         """  # noqa: E501
         execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
-        with execution_engine.get_connection() as con:  # type: ignore[var-annotated]
+        with execution_engine.get_connection() as con:
             add_dataframe_to_db(df=pd_dataframe, name="test", con=con, index=False)
             connection = con
         assert (
@@ -1183,17 +1183,17 @@ class TestConnectionPersistence:
         create_temp_table = "CREATE TEMPORARY TABLE temp_table AS SELECT * FROM test;"
         execution_engine.execute_query_in_transaction(sa.text(create_temp_table))
 
-        with execution_engine.get_connection() as test_con:  # type: ignore[var-annotated]
+        with execution_engine.get_connection() as test_con:
             assert connection == test_con
 
         select_temp_table = "SELECT * FROM temp_table;"
 
         execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
-        with execution_engine.get_connection() as test_con:  # type: ignore[var-annotated]
+        with execution_engine.get_connection() as test_con:
             assert connection == test_con
 
         execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
-        with execution_engine.get_connection() as test_con:  # type: ignore[var-annotated]
+        with execution_engine.get_connection() as test_con:
             assert connection == test_con
 
     def test_get_connection_doesnt_close_on_exit_sqlite(self, sa):
