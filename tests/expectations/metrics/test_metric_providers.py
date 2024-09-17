@@ -5,6 +5,9 @@ from typing import Any, Dict, List
 
 import pytest
 
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -348,3 +351,45 @@ def test__query_metric_provider__registration(mock_registry):
         == prev_registered_metric_key_count + 1
     )
     assert "query.custom_metric" in mock_registry._registered_metrics.keys()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "input_query,expected_query",
+    [
+        (
+            "SELECT * FROM {batch}",
+            "SELECT * FROM iris WHERE datetime_column = '01/12/2024'",
+        ),
+        (
+            "SELECT * FROM {batch} WHERE passenger_count > 7",
+            "SELECT * FROM iris WHERE datetime_column = '01/12/2024' AND passenger_count > 7",
+        ),
+        (
+            "SELECT * FROM {batch} WHERE passenger_count > 7 ORDER BY iris.'PetalLengthCm' DESC",
+            "SELECT * FROM iris WHERE datetime_column = '01/12/2024' "
+            "AND passenger_count > 7 ORDER BY iris.'PetalLengthCm' DESC",
+        ),
+        (
+            "SELECT * FROM {batch} WHERE passenger_count > 7 GROUP BY iris.'Species' DESC",
+            "SELECT * FROM iris WHERE datetime_column = '01/12/2024' "
+            "AND passenger_count > 7 GROUP BY iris.'Species' DESC",
+        ),
+    ],
+)
+def test__get_query_string_with_substituted_batch_parameters(
+    input_query: str, expected_query: str
+):
+    batch_subquery = (
+        sa.select("*")
+        .select_from(sa.text("iris"))
+        .where(sa.text("datetime_column = '01/12/2024'"))
+        .subquery()
+    )
+    actual_query = (
+        QueryMetricProvider._get_query_string_with_substituted_batch_parameters(
+            query=input_query,
+            batch_subquery=batch_subquery,
+        )
+    )
+    assert actual_query == expected_query
