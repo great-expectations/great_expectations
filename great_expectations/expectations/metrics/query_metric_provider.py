@@ -88,15 +88,10 @@ class QueryMetricProvider(MetricProvider):
         unfiltered_query = query.format(batch=batch_table)
 
         if "WHERE" in query.upper():
-            # Add a new WHERE condition
             query = unfiltered_query.replace("WHERE", f"WHERE {batch_filter} AND")
         elif "GROUP BY" in query.upper():
-            # If there is no existing WHERE clause, but there is a GROUP BY clause
-            # add the WHERE clause before the GROUP BY clause
             query = unfiltered_query.replace("GROUP BY", f"WHERE {batch_filter} GROUP BY")
         elif "ORDER BY" in query.upper():
-            # If there is no existing WHERE clause, but there is an ORDER BY clause
-            # add the WHERE clause before the ORDER BY clause
             query = unfiltered_query.replace("ORDER BY", f"WHERE {batch_filter} ORDER BY")
         else:
             query = unfiltered_query + f" WHERE {batch_filter}"
