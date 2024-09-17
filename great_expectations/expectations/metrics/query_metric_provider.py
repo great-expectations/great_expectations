@@ -1,5 +1,5 @@
 import logging
-from typing import ClassVar
+from typing import ClassVar, Union
 
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -48,7 +48,7 @@ class QueryMetricProvider(MetricProvider):
 
     @classmethod
     def _get_query_string_with_substituted_batch_parameters(
-        cls, query: str, batch_subquery: sa.sql.Subquery | sa.sql.Alias
+        cls, query: str, batch_subquery: Union[sa.sql.Subquery, sa.sql.Alias]
     ) -> str:
         """Specifying a runtime query string returns the active batch as a Subquery or Alias type
         There is no object-based way to apply the subquery alias to columns in the SELECT and
