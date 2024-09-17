@@ -1,5 +1,5 @@
 import logging
-from typing import ClassVar, Union
+from typing import ClassVar, Set, Union
 
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -42,7 +42,7 @@ class QueryMetricProvider(MetricProvider):
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
-    dialect_columns_require_subquery_aliases: ClassVar[set[GXSqlDialect]] = {
+    dialect_columns_require_subquery_aliases: ClassVar[Set[GXSqlDialect]] = {
         GXSqlDialect.POSTGRESQL
     }
 
@@ -61,12 +61,12 @@ class QueryMetricProvider(MetricProvider):
         """
 
         try:
-            froms = batch_subquery.selectable.element.get_final_froms()  # type: ignore[attr-defined]  # possible AttributeError handled
+            froms = batch_subquery.selectable.element.get_final_froms()
             try:
                 batch_table = froms[0].name
             except AttributeError:
                 batch_table = str(froms[0])
-            batch_filter = str(batch_subquery.selectable.element.whereclause)  # type: ignore[attr-defined]  # possible AttributeError handled
+            batch_filter = str(batch_subquery.selectable.element.whereclause)
         except (AttributeError, IndexError) as e:
             raise MissingElementError() from e
 
