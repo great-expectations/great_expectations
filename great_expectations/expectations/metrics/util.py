@@ -64,6 +64,11 @@ try:
 except ImportError:
     clickhouse_sqlalchemy = None
 
+try:
+    import databricks.sqlalchemy as sqla_databricks
+except ImportError:
+    sqla_databricks = None  # type: ignore[assignment]
+
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
 from great_expectations.compatibility import bigquery as sqla_bigquery
@@ -97,6 +102,16 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
                 )
+    except AttributeError:
+        pass
+
+    try:
+        # databricks sql
+        if sqla_databricks and isinstance(dialect, sqla_databricks.DatabricksDialect):
+            if positive:
+                return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+            else:
+                return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
     except AttributeError:
         pass
 
