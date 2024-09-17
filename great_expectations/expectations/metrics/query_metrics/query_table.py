@@ -35,9 +35,9 @@ class QueryTable(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query: Optional[str] = metric_value_kwargs.get(
-            "query"
-        ) or metric_value_kwargs.get("unexpected_rows_query")
+        query: str = metric_value_kwargs.get("query") or metric_value_kwargs.get(
+            "unexpected_rows_query", ""
+        )
 
         batch_ref = (
             "batch"
