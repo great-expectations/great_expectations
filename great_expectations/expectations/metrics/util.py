@@ -86,7 +86,7 @@ except ImportError:
 
 
 def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
-    column: Any,  # TODO: add column type
+    column: sa.Column,
     regex: str,
     dialect: ModuleType,
     positive: bool = True,
@@ -861,7 +861,7 @@ def parse_value_set(value_set):
 
 
 def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
-    column, dialect, like_pattern, positive=True
+    column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
 ):
     dialect_supported: bool = False
 
