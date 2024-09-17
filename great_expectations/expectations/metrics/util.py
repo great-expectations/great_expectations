@@ -279,9 +279,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
         # regex_match for sqlite introduced in sqlalchemy v1.4
         if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(
             sa.__version__
-        ) >= version.parse(
-            "1.4"
-        ):
+        ) >= version.parse("1.4"):
             if positive:
                 return column.regexp_match(sqlalchemy.literal(regex))
             else:
