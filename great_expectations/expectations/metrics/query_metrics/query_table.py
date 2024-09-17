@@ -36,7 +36,7 @@ class QueryTable(QueryMetricProvider):
     ) -> List[dict]:
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
-        batch_selectable: sa.sql.Selectable | str
+        batch_selectable: sa.sql.Selectable
         batch_selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
