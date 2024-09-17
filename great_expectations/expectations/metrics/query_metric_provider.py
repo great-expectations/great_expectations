@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 import logging
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.metrics.metric_provider import MetricProvider
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility.sqlalchemy import (
+        sqlalchemy as sa,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +38,10 @@ class QueryMetricProvider(MetricProvider):
 
     query_param_name: ClassVar[str] = "query"
 
+    dialect_columns_require_subquery_aliases: ClassVar[set[GXSqlDialect]] = {
+        GXSqlDialect.POSTGRESQL
+    }
+
     @classmethod
     def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
         query_param = cls.query_param_name
@@ -40,5 +50,33 @@ class QueryMetricProvider(MetricProvider):
         )
         if not query:
             raise ValueError(f"Must provide `{query_param}` to `{cls.__name__}` metric.")  # noqa: TRY003
+
+        return query
+
+    @classmethod
+    def _get_query_string_with_substituted_batch_parameters(
+        cls, query: str, batch_selectable: sa.sql.Selectable | str
+    ):
+        # Specifying a runtime query string returns the active batch as a Subquery or Alias type
+        # There is no object-based way to apply the subquery alias to columns in the SELECT and
+        # WHERE clauses. Instead, we extract the subquery parameters from the batch selectable
+        # and inject them into the SQL string.
+        batch_table = batch_selectable.selectable.element.get_final_froms()[0].name
+        unfiltered_query = query.format(batch=batch_table)
+        batch_filter = str(batch_selectable.selectable.element.whereclause)
+
+        if "WHERE" in query.upper():
+            # Add a new WHERE condition
+            query = unfiltered_query.replace("WHERE", f"WHERE {batch_filter} AND")
+        elif "GROUP BY" in query.upper():
+            # If there is no existing WHERE clause, but there is a GROUP BY clause
+            # add the WHERE clause before the GROUP BY clause
+            query = unfiltered_query.replace("GROUP BY", f"WHERE {batch_filter} GROUP BY")
+        elif "ORDER BY" in query.upper():
+            # If there is no existing WHERE clause, but there is an ORDER BY clause
+            # add the WHERE clause before the ORDER BY clause
+            query = unfiltered_query.replace("ORDER BY", f"WHERE {batch_filter} ORDER BY")
+        else:
+            query += f"WHERE {batch_filter}"
 
         return query
