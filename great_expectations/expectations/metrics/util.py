@@ -87,6 +87,24 @@ except ImportError:
     teradatatypes = None
 
 
+def _databricks_dialect_available(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
+    """
+    Check if the Databricks dialect is available.
+
+    Note:A Dialect class will be ignored and treated as if it is not available.
+    """
+    if not sqla_databricks:
+        return False
+    try:
+        if isinstance(dialect, sqla_databricks.DatabricksDialect):
+            return True
+        if hasattr(dialect, "DatabricksDialect"):
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     column: sa.Column,
     regex: str,
@@ -109,7 +127,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # databricks sql
-        if sqla_databricks and isinstance(dialect, sqla_databricks.DatabricksDialect):
+        if _databricks_dialect_available(dialect):
             if positive:
                 return sa.func.regexp_like(column, sqlalchemy.literal(regex))
             else:
@@ -891,12 +909,8 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915
         ):
             dialect_supported = True
 
-    try:
-        # databricks sql
-        if sqla_databricks and isinstance(dialect, sqla_databricks.DatabricksDialect):
-            dialect_supported = True
-    except Exception:
-        pass
+    if _databricks_dialect_available(dialect):
+        dialect_supported = True
 
     try:
         if hasattr(dialect, "RedshiftDialect"):
