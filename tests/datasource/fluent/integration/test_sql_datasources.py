@@ -818,10 +818,10 @@ def _raw_query_check_column_exists(
 
 
 _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
-    param("expect_column_to_exist", {}, id="expect_column_to_exist"),
+    param("expect_column_to_exist", {"mostly": 1}, id="expect_column_to_exist"),
     param(
         "expect_column_values_to_not_be_null",
-        {},
+        {"mostly": 1},
         id="expect_column_values_to_not_be_null",
     ),
     param(
@@ -928,7 +928,7 @@ class TestColumnExpectations:
         )
         suite.add_expectation(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type,
+                expectation_type=expectation_type,
                 kwargs={"column": column_name, **extra_exp_kwargs},
             )
         )
@@ -1039,7 +1039,7 @@ class TestColumnExpectations:
         )
         suite.add_expectation(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type,
+                expectation_type=expectation_type,
                 kwargs={"column": column_name, **extra_exp_kwargs},
             )
         )
@@ -1178,7 +1178,7 @@ class TestColumnExpectations:
         )
         suite.add_expectation(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type,
+                expectation_type=expectation_type,
                 kwargs={"column": column_name, **extra_exp_kwargs},
             )
         )
