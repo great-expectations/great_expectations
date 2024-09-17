@@ -205,7 +205,7 @@
                     "title": "Range",
                     "type": "integer"
                 },
-                "percent_offset": {
+                "offset": {
                     "$ref": "#/definitions/PercentOffset"
                 }
             },
@@ -213,7 +213,7 @@
                 "constraint_fn",
                 "parameter_name",
                 "range",
-                "percent_offset"
+                "offset"
             ]
         }
     }
