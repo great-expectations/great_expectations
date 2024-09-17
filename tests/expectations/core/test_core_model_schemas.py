@@ -22,8 +22,8 @@ def test_all_core_model_schemas_are_serializable():
         model.schema_json()
 
 
-@pytest.mark.unit
 @pytest.mark.slow  # 4.2s
+@pytest.mark.unit
 def test_schemas_updated():
     all_models = {
         cls_name: expectation
