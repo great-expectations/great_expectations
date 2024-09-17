@@ -1,12 +1,14 @@
 import logging
-from typing import ClassVar, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Set, Union
 
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.metrics.metric_provider import MetricProvider
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility.sqlalchemy import (
+        sqlalchemy as sa,
+    )
 
 logger = logging.getLogger(__name__)
 
