@@ -56,11 +56,13 @@ class QueryMetricProvider(MetricProvider):
     @classmethod
     def _get_query_string_with_substituted_batch_parameters(
         cls, query: str, batch_selectable: sa.sql.Subquery | sa.sql.Alias
-    ):
-        # Specifying a runtime query string returns the active batch as a Subquery or Alias type
-        # There is no object-based way to apply the subquery alias to columns in the SELECT and
-        # WHERE clauses. Instead, we extract the subquery parameters from the batch selectable
-        # and inject them into the SQL string.
+    ) -> str:
+        """Specifying a runtime query string returns the active batch as a Subquery or Alias type
+        There is no object-based way to apply the subquery alias to columns in the SELECT and
+        WHERE clauses. Instead, we extract the subquery parameters from the batch selectable
+        and inject them into the SQL string.
+        """
+
         batch_table = batch_selectable.selectable.element.get_final_froms()[0].name
         unfiltered_query = query.format(batch=batch_table)
         batch_filter = str(batch_selectable.selectable.element.whereclause)
