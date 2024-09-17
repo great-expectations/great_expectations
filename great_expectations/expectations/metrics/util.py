@@ -892,7 +892,8 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915
             dialect_supported = True
 
     try:
-        if hasattr(dialect, "DatabricksDialect"):
+        # databricks sql
+        if sqla_databricks and isinstance(dialect, sqla_databricks.DatabricksDialect):
             dialect_supported = True
     except Exception:
         pass
