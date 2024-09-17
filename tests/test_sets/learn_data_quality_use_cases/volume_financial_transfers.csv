@@ -1,4 +1,4 @@
-type,sender_account_number,recipient_fullname,transfer_amount,transfer_date
+transfer_type,sender_account_number,recipient_fullname,transfer_amount,transfer_ts
 domestic,244084670977,Jaxson Duke,9143.40,2024-05-01 01:12
 domestic,954005011218,Nelson O'Connell,3285.21,2024-05-01 05:08
 domestic,842374923847,Johanna McKee,5783.18,2024-04-12 15:35

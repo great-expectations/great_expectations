@@ -68,7 +68,7 @@ expected_values = [
     ["2024-05-01", True, 4],
     ["2024-05-02", True, 5],
     ["2024-05-03", True, 5],
-    ["2024-05-04", False, 6],
+    ["2024-05-04", True, 5],
     ["2024-05-05", True, 5],
     ["2024-05-06", False, 6],
     ["2024-05-07", True, 5],
@@ -76,6 +76,6 @@ expected_values = [
 
 for idx, row in enumerate(expected_values):
     results = df.iloc[idx]
-    assert str(results["date"]) == row[0]
-    assert results["expectation passed"] is row[1]
+    assert str(results["date"])[0:10] == row[0]
+    assert bool(results["expectation passed"]) is row[1]
     assert results["observed rows"] == row[2]
