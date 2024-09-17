@@ -14,6 +14,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     overload,
 )
 
@@ -276,7 +277,9 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     return None
 
 
-def _get_dialect_type_module(dialect: ModuleType | None = None) -> ModuleType:
+def _get_dialect_type_module(
+    dialect: ModuleType | Type[sa.Dialect] | sa.Dialect | None = None,
+) -> ModuleType | Type[sa.Dialect] | sa.Dialect:
     if dialect is None:
         logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
@@ -294,7 +297,7 @@ def _get_dialect_type_module(dialect: ModuleType | None = None) -> ModuleType:
         if (
             isinstance(
                 dialect,
-                sqla_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,  # type: ignore[attr-defined]
             )
             and bigquery_types_tuple is not None
         ):
@@ -306,7 +309,7 @@ def _get_dialect_type_module(dialect: ModuleType | None = None) -> ModuleType:
     try:
         if (
             issubclass(
-                dialect,
+                dialect,  # type: ignore[arg-type]
                 teradatasqlalchemy.dialect.TeradataDialect,
             )
             and teradatatypes is not None
