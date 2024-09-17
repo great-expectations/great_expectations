@@ -48,7 +48,7 @@ class QueryMetricProvider(MetricProvider):
         cls,
         query: str,
         batch_subquery: Union[
-            "sa.sql.Subquery", "sa.sql.Alias"  # noqa: F821  # fixed in 1.0
+            "sa.sql.Subquery", "sa.sql.Alias"  # type: ignore[name-defined]  # noqa: F821  # fixed in 1.0
         ],
     ) -> str:
         """Specifying a runtime query string returns the active batch as a Subquery or Alias type
