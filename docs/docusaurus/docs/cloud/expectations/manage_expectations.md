@@ -69,6 +69,10 @@ The following table lists the available GX Cloud Expectations.
 | Volume             | `expect_table_row_count_to_equal`                         | Expect the number of rows to equal a value.                                                                                            |
 | Volume             | `expect_table_row_count_to_equal_other_table`             | Expect the number of rows to equal the number in another table within the same database.                                               |
 
+### Custom SQL Expectations
+
+
+
 ## Add an Expectation
 
 1. In GX Cloud, click **Data Assets**.
