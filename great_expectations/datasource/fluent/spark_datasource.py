@@ -13,7 +13,6 @@ from typing import (
     Literal,
     Optional,
     Type,
-    TypeGuard,
     TypeVar,
     Union,
 )
@@ -49,7 +48,7 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.exceptions.exceptions import BuildBatchRequestError
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing_extensions import TypeAlias, TypeGuard
 
     from great_expectations.compatibility.pyspark import SparkSession
     from great_expectations.core.batch_definition import BatchDefinition
@@ -235,7 +234,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
         if not self.is_spark_data_frame(options["dataframe"]):
             raise BuildBatchRequestError(
-                message="Can not build batch request for dataframe asset " "without a dataframe."
+                message="Cannot build batch request without a Spark DataFrame."
             )
 
         return BatchRequest(
