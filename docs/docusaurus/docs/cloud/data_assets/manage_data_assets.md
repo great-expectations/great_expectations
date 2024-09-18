@@ -321,9 +321,7 @@ To connect to your database in GX Cloud, there are two methods for managing cred
 
 This process is similar across any Docker-based service, including Kubernetes, ECS, ACI, and GCE. Each platform will have its own method for setting environment variables.
 
-The password is not stored or transmitted to GX Cloud. To access the database via API, ensure that the environment variable is set in your environment.
-
-With this method, your password is never saved or sent to GX Cloud. To access the database through the API, just set the environment variable in your setup. It works smoothly with any Docker-based service, whether you’re using Kubernetes, ECS, ACI, or GCE.
+With this method, your password is not stored or transmitted to GX Cloud. To access the database through the API, just set the environment variable in your setup. 
 
 **Environment variable substitution is not supported in fully hosted deployments.**
 
