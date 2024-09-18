@@ -27,7 +27,7 @@ from great_expectations.compatibility.pydantic import (
     StrictInt,
     StrictStr,
 )
-from great_expectations.compatibility.pyspark import DataFrame, pyspark
+from great_expectations.compatibility.pyspark import ConnectDataFrame, DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
@@ -231,7 +231,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         if not (options is not None and "dataframe" in options and len(options) == 1):
             raise BuildBatchRequestError(message="options must contain exactly 1 key, 'dataframe'.")
 
-        if not isinstance(options["dataframe"], DataFrame):
+        if not isinstance(options["dataframe"], (DataFrame, ConnectDataFrame)):
             raise BuildBatchRequestError(
                 message="Can not build batch request for dataframe asset " "without a dataframe."
             )
@@ -255,7 +255,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             and batch_request.options
             and len(batch_request.options) == 1
             and "dataframe" in batch_request.options
-            and isinstance(batch_request.options["dataframe"], DataFrame)
+            and isinstance(batch_request.options["dataframe"], (DataFrame, ConnectDataFrame))
         ):
             expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
