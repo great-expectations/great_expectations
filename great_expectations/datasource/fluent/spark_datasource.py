@@ -5,6 +5,7 @@ import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    Any,
     ClassVar,
     Dict,
     Generic,
@@ -12,6 +13,7 @@ from typing import (
     Literal,
     Optional,
     Type,
+    TypeGuard,
     TypeVar,
     Union,
 )
@@ -231,7 +233,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         if not (options is not None and "dataframe" in options and len(options) == 1):
             raise BuildBatchRequestError(message="options must contain exactly 1 key, 'dataframe'.")
 
-        if not isinstance(options["dataframe"], (DataFrame, ConnectDataFrame)):
+        if not self.is_spark_data_frame(options["dataframe"]):
             raise BuildBatchRequestError(
                 message="Can not build batch request for dataframe asset " "without a dataframe."
             )
@@ -255,7 +257,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             and batch_request.options
             and len(batch_request.options) == 1
             and "dataframe" in batch_request.options
-            and isinstance(batch_request.options["dataframe"], (DataFrame, ConnectDataFrame))
+            and self.is_spark_data_frame(batch_request.options["dataframe"])
         ):
             expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
@@ -313,6 +315,13 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             name=name,
             partitioner=None,
         )
+
+    @staticmethod
+    def is_spark_data_frame(df: Any) -> TypeGuard[Union[DataFrame, ConnectDataFrame]]:
+        """Check that a given object is a Spark DataFrame.
+        This could either be a regular Spark DataFrame or a Spark Connect DataFrame.
+        """
+        return isinstance(df, (DataFrame, ConnectDataFrame))
 
 
 @public_api
