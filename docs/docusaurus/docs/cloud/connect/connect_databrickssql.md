@@ -13,7 +13,7 @@ import Tabs from '@theme/Tabs';
 
 - You have a Databricks SQL catalog, schema, and table.
 
-- To improve data security, GX recommends creating a separate Databricks SQL user for your GX Cloud connection.
+- To improve data security, GX recommends creating a separate Databricks SQL [service principal](https://docs.databricks.com/en/admin/users-groups/service-principals.html#manage-service-principals-in-your-account) for your GX Cloud connection.
 
 
 ## Connect to a Databricks SQL Data Asset
