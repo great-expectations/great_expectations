@@ -4,3 +4,10 @@ services:
     ports:
       - "9090:8080"
       - "7077:7077"
+
+  spark-connect:
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}bitnami/spark:3.5.2
+    ports:
+      - "15002:15002"
+    # See https://spark.apache.org/docs/latest/spark-connect-overview.html#download-and-start-spark-server-with-spark-connect
+    command: ./sbin/start-connect-server.sh --packages org.apache.spark:spark-connect_2.12:3.5.2
