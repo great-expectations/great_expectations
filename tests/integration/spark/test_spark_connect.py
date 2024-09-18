@@ -42,6 +42,7 @@ def spark_validation_definition(
     )
 
 
+@pytest.mark.spark
 def test_spark_connect(
     spark_connect_session: SparkConnectSession,
     spark_validation_definition: ValidationDefinition,
