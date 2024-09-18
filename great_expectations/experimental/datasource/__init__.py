@@ -1,4 +1,4 @@
-from great_expectations.experimental.datasource.fabric import (
+from great_expectations.datasource.fluent.fabric import (
     FabricPowerBIDatasource,
     PowerBIDax,
     PowerBIMeasure,
