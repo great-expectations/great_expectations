@@ -198,6 +198,11 @@ def pytest_addoption(parser):
         help="If set, execute tests against the spark test suite",
     )
     parser.addoption(
+        "--spark_connect",
+        action="store_true",
+        help="If set, execute tests against the spark-connect test suite",
+    )
+    parser.addoption(
         "--no-sqlalchemy",
         action="store_true",
         help="If set, suppress all tests using sqlalchemy",
