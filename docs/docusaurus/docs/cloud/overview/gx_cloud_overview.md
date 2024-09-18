@@ -2,13 +2,15 @@
 title: 'GX Cloud overview'
 id: gx_cloud_overview
 description: Explore GX Cloud components, workflows, and architecture.
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 GX Cloud is a fully managed SaaS platform that simplifies data quality management and monitoring. With GX Cloud, you and your organization can work collaboratively to define and maintain shared understanding of your data.
 
 ## GX Cloud components
 
-GX Cloud components are entities that represent your data, your data validation criteria, and the results of data validation. GX Cloud data validation workflows are created using GX Cloud components.
+GX Cloud components are entities that represent your data, your data validation criteria, and the results of data validation.
 
 |  |  |
 | :--: | :--- |
@@ -20,9 +22,13 @@ GX Cloud components are entities that represent your data, your data validation 
 
 ## GX Cloud workflow
 
+GX Cloud data validation workflows are created using GX Cloud components.
+
+### Standard data validation workflow
+
 A GX Cloud data validation workflow can be implemented using a short, clear set of steps:
 
-![Basic GX Cloud workflow](./overview_images/gx_cloud_workflow.png)
+![Standard GX Cloud workflow](./overview_images/gx_cloud_workflow.png)
 
 1. Connect to your data.
 2. Create a Data Asset.
@@ -30,6 +36,8 @@ A GX Cloud data validation workflow can be implemented using a short, clear set 
 4. Validate your data.
 5. Review and share your Validation Results with your organization.
 
+
+### Additional workflow features
 There are a variety of GX Cloud features that support additional enhancements to your GX Cloud data validation workflow.
 
 ![GX Cloud workflow enhanced with product features](./overview_images/gx_cloud_workflow_enhanced.png)
@@ -41,6 +49,8 @@ There are a variety of GX Cloud features that support additional enhancements to
 * **Schedule Validations.** GX Cloud enables you to schedule validations, so that you can test and assess your data on a regular cadence and monitor data quality over time. See [Manage schedules](/cloud/schedules/manage_schedules.md) for more detail.
 
 * **Alerting.** GX Cloud provides the ability send alerts when validations fail, enabling your organization to remain proactively aware of the health of your Data Assets. See [Manage alerts](/cloud/schedules/manage_schedules.md) for more detail.
+
+
 
 
 ## GX Cloud architecture
