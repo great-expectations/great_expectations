@@ -12,7 +12,7 @@ from great_expectations.exceptions.exceptions import BuildBatchRequestError
 logger = logging.getLogger(__name__)
 
 
-pytestmark = pytest.mark.spark
+pytestmark = pytest.mark.spark_connect
 
 DATAFRAME_VALUES = [1, 2, 3]
 

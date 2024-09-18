@@ -130,6 +130,7 @@ REQUIRED_MARKERS: Final[set[str]] = {
     "pyarrow",
     "snowflake",
     "spark",
+    "spark_connect",
     "sqlite",
     "trino",
     "unit",
