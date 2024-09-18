@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import pytest
 from pyspark.sql import Row
@@ -7,6 +8,7 @@ import great_expectations as gx
 from great_expectations.compatibility.pyspark import ConnectDataFrame, SparkConnectSession
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +55,17 @@ def test_spark_connect(
     results = spark_validation_definition.run(batch_parameters={"dataframe": df})
 
     assert results.success
+
+
+@pytest.mark.parametrize("not_a_dataframe", [None, 1, "string", 1.0, True])
+def test_error_messages_if_we_get_an_invalid_dataframe(
+    not_a_dataframe: Any,
+    spark_validation_definition: ValidationDefinition,
+):
+    with pytest.raises(
+        BuildBatchRequestError, match="Cannot build batch request without a Spark DataFrame."
+    ):
+        spark_validation_definition.run(batch_parameters={"dataframe": not_a_dataframe})
 
 
 @pytest.mark.xfail(
