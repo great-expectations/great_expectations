@@ -8,12 +8,6 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 <!-- [//]: # (TODO: To learn more about Expectations, see Expectation.) -->
 
-:::info Custom SQL Query Expectations
-
-To create custom SQL query Expectations, you'll need to use the GX API. See [Customize Expectations](/core/customize_expectations/customize_expectations.md).
-
-:::
-
 ## Prerequisites
 
 - You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
@@ -71,7 +65,11 @@ The following table lists the available GX Cloud Expectations.
 
 ### Custom SQL Expectations
 
+:::info Custom SQL Query Expectations
 
+To create custom SQL query Expectations, you'll need to use the GX API. See [Customize Expectations](/core/customize_expectations/customize_expectations.md).
+
+:::
 
 ## Add an Expectation
 
