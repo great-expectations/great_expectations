@@ -1,11 +1,10 @@
 ---
 title: 'GX Cloud overview'
 id: gx_cloud_overview
-description: Explore GX Cloud components and workflows.
+description: Explore GX Cloud components, workflows, and architecture.
 ---
 
 GX Cloud is a fully managed SaaS platform that simplifies data quality management and monitoring. With GX Cloud, you and your organization can work collaboratively to define and maintain shared understanding of your data.
-
 
 ## GX Cloud components
 

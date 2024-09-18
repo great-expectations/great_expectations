@@ -60,7 +60,7 @@ module.exports = {
         },
         secondary: {
           label: 'GX Cloud overview',
-          href: 'https://docs.greatexpectations.io/docs/cloud',
+          href: '/docs/cloud/overview/gx_cloud_overview',
         },
       },
     },
@@ -152,7 +152,7 @@ module.exports = {
         },
         {
           label: 'GX Cloud',
-          to: 'docs/cloud',
+          to: 'docs/cloud/overview/gx_cloud_overview',
           position: 'right',
           className: 'non-versioned-section',
         },
