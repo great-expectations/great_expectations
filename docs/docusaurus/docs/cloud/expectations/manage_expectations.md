@@ -65,9 +65,13 @@ The following table lists the available GX Cloud Expectations.
 
 ### Custom SQL Expectations
 
-:::info Custom SQL Query Expectations
+GX Cloud also offers the ability to write a custom Expectation using SQL. It is designed to fail validation if the provided SQL query returns one or more rows.
 
-To create custom SQL query Expectations, you'll need to use the GX API. See [Customize Expectations](/core/customize_expectations/customize_expectations.md).
+The provided query should be written in the dialect of the Data Source in which a given Data Asset lives.
+
+:::info Optional {batch} named query
+
+The optional {batch} named query references the Batch of data under test. When the Expectation is evaluated, the {batch} named query will be replaced with the Batch of data that is validated.
 
 :::
 
