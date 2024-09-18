@@ -69,9 +69,9 @@ GX Cloud also offers the ability to write a custom Expectation using SQL. It is 
 
 The provided query should be written in the dialect of the Data Source in which a given Data Asset lives.
 
-:::info Optional `\\{batch\\}` named query
+:::info Optional `{batch}` named query
 
-The optional `\\{batch}` named query references the Batch of data under test. When the Expectation is evaluated, the `\\{batch}` named query will be replaced with the Batch of data that is validated.
+The optional `{batch}` named query references the Batch of data under test. When the Expectation is evaluated, the `{batch}` named query will be replaced with the Batch of data that is validated.
 
 :::
 
