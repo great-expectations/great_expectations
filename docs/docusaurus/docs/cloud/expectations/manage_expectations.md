@@ -68,7 +68,6 @@ The following table lists the available GX Cloud Expectations.
 | Volume             | `expect_table_row_count_to_be_between`                    | Expect the number of rows to be between two values.                                                                                    |
 | Volume             | `expect_table_row_count_to_equal`                         | Expect the number of rows to equal a value.                                                                                            |
 | Volume             | `expect_table_row_count_to_equal_other_table`             | Expect the number of rows to equal the number in another table within the same database.                                               |
-|                    | `unexpected_rows_expectation`                             | This Expectation will fail validation if the query returns one or more rows. The WHERE clause defines the fail criteria.               |
 
 ## Add an Expectation
 
