@@ -158,13 +158,13 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'GX Cloud terminology',
-              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-terminology',
+              label: 'GX Cloud workflow',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-workflow',
             },
             {
               type: 'link',
-              label: 'GX Cloud workflow',
-              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-workflow',
+              label: 'GX Cloud architecture',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-architecture',
             },
           ]
         },
