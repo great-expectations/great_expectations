@@ -496,11 +496,14 @@ def spark_session(test_backends) -> pyspark.SparkSession:
 def spark_connect_session(test_backends):
     from great_expectations.compatibility import pyspark
 
-    spark_connect_session = pyspark.SparkSession.builder.remote(
-        "sc://localhost:15002"
-    ).getOrCreate()
-    assert isinstance(spark_connect_session, pyspark.SparkConnectSession)
-    return spark_connect_session
+    if pyspark.SparkConnectSession:  # type: ignore[truthy-function]
+        spark_connect_session = pyspark.SparkSession.builder.remote(
+            "sc://localhost:15002"
+        ).getOrCreate()
+        assert isinstance(spark_connect_session, pyspark.SparkConnectSession)
+        return spark_connect_session
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
