@@ -172,8 +172,8 @@
             ],
             "type": "string"
         },
-        "PercentOffset": {
-            "title": "PercentOffset",
+        "Offset": {
+            "title": "Offset",
             "type": "object",
             "properties": {
                 "positive": {
@@ -207,7 +207,7 @@
                     "type": "integer"
                 },
                 "offset": {
-                    "$ref": "#/definitions/PercentOffset"
+                    "$ref": "#/definitions/Offset"
                 }
             },
             "required": [
