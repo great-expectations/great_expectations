@@ -307,12 +307,13 @@ You can only edit the settings of Data Assets created in GX Cloud.
 
 To connect to your database in GX Cloud, there are two methods for managing credentials:
 
-1: **Direct Input**: You can input credentials directly into GX Cloud. These credentials are securely encrypted at rest and in transit, stored in our database, and accessible to the GX Agent and any API user.
+1. **Direct input**: You can input credentials directly into GX Cloud. These credentials are securely encrypted at rest and in transit, stored in our database, and accessible to the GX Agent and any API user.
 
-2: **Environment Variable Substitution**: To enhance security, you can use environment variables to manage sensitive connection parameters or strings. For example, instead of directly including your database password in configuration settings, you can use a variable reference like `${MY_DATABASE_PASSWORD}`:
-- **Configure the Environment Variable**: Enter the name of your environment variable, enclosed in `${}`, into the UI configuration form. For instance, you might use ${MY_DATABASE_PASSWORD}.
+2. **Environment variable substitution**: To enhance security, you can use environment variables to manage sensitive connection parameters or strings. For example, instead of directly including your database password in configuration settings, you can use a variable reference like `${MY_DATABASE_PASSWORD}`:
 
-- **Inject the Variable into Your Agent Container**: When setting up your Docker container, include the environment variable in the command. For example:
+    - **Configure the environment variable**: Enter the name of your environment variable, enclosed in `${}`, into the UI configuration form. For instance, you might use `${MY_DATABASE_PASSWORD}`.
+
+    - **Inject the variable into your agent container**: When setting up your Docker container, include the environment variable in the command. For example:
    
    ```bash title="Terminal input"
    docker run -it -e MY_DATABASE_PASSWORD=<YOUR_DATABASE_PASSWORD> -e GX_CLOUD_ACCESS_TOKEN=<YOUR_ACCESS_TOKEN> -e GX_CLOUD_ORGANIZATION_ID=<YOUR_ORGANIZATION_ID> greatexpectations/agent:stable
@@ -320,8 +321,7 @@ To connect to your database in GX Cloud, there are two methods for managing cred
 
 This process is similar across any Docker-based service, including Kubernetes, ECS, ACI, and GCE. Each platform will have its own method for setting environment variables.
 
-- **Secure Your Credentials**: The password is not stored or transmitted to GX Cloud. To access the database via API, ensure that the environment variable is set in your environment.
-
+The password is not stored or transmitted to GX Cloud. To access the database via API, ensure that the environment variable is set in your environment.
 
 With this method, your password is never saved or sent to GX Cloud. To access the database through the API, just set the environment variable in your setup. It works smoothly with any Docker-based service, whether you’re using Kubernetes, ECS, ACI, or GCE.
 
