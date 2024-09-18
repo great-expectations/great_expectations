@@ -11,10 +11,15 @@ from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import FileNamePartitionerYearly
 from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     BatchDefinitionNotFreshError,
-    ResourcesNotAddedError,
+    ResourceFreshnessAggregateError,
+)
+from great_expectations.exceptions.exceptions import (
+    BatchDefinitionNotFoundError,
+    DataAssetNotFoundError,
+    DatasourceNotFoundError,
 )
 
 if TYPE_CHECKING:
@@ -93,6 +98,47 @@ def test_get_batch_retrieves_only_batch(mocker: pytest_mock.MockFixture):
 
 
 @pytest.mark.unit
+def test_get_batch_identifiers_list(mocker: pytest_mock.MockFixture):
+    # Arrange
+    batch_definition = BatchDefinition[None](name="test_batch_definition")
+    mock_asset = mocker.Mock(spec=DataAsset)
+    batch_definition.set_data_asset(mock_asset)
+
+    mock_batch_identifiers_list = [{"foo": "bar"}, {"baz": "qux"}]
+    mock_asset.get_batch_identifiers_list.return_value = mock_batch_identifiers_list
+
+    # Act
+    batch_identifiers_list = batch_definition.get_batch_identifiers_list()
+
+    # Assert
+    assert batch_identifiers_list == mock_batch_identifiers_list
+    mock_asset.get_batch_identifiers_list.assert_called_once_with(
+        batch_definition.build_batch_request()
+    )
+
+
+@pytest.mark.unit
+def test_get_batch_identifiers_list_with_batch_parameters(mocker: pytest_mock.MockFixture):
+    # Arrange
+    batch_definition = BatchDefinition[None](name="test_batch_definition")
+    mock_asset = mocker.Mock(spec=DataAsset)
+    batch_definition.set_data_asset(mock_asset)
+
+    mock_batch_identifiers_list = [{"foo": "bar"}, {"baz": "qux"}]
+    mock_asset.get_batch_identifiers_list.return_value = mock_batch_identifiers_list
+
+    # Act
+    batch_parameters: BatchParameters = {"path": "my_path"}
+    batch_identifiers_list = batch_definition.get_batch_identifiers_list(batch_parameters)
+
+    # Assert
+    assert batch_identifiers_list == mock_batch_identifiers_list
+    mock_asset.get_batch_identifiers_list.assert_called_once_with(
+        batch_definition.build_batch_request(batch_parameters)
+    )
+
+
+@pytest.mark.unit
 def test_identifier_bundle_success(in_memory_runtime_context):
     context = in_memory_runtime_context
     ds = context.data_sources.add_pandas("pandas_datasource")
@@ -117,7 +163,7 @@ def test_identifier_bundle_no_id_raises_error(in_memory_runtime_context):
 
     batch_definition.id = None
 
-    with pytest.raises(ResourcesNotAddedError) as e:
+    with pytest.raises(ResourceFreshnessAggregateError) as e:
         batch_definition.identifier_bundle()
 
     assert len(e.value.errors) == 1
@@ -168,3 +214,48 @@ def test_is_fresh_freshness(empty_cloud_context_fluent):
     assert diagnostics.success is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], BatchDefinitionNotFreshError)
+
+
+@pytest.mark.unit
+def test_is_fresh_fails_on_datasource_retrieval(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+    batch_definition = asset.add_batch_definition(name="my_batch_def")
+
+    context.delete_datasource("my_pandas_ds")
+
+    diagnostics = batch_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], DatasourceNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_fails_on_asset_retrieval(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+    batch_definition = asset.add_batch_definition(name="my_batch_def")
+
+    datasource.delete_asset("my_csv_asset")
+
+    diagnostics = batch_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], DataAssetNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_fails_on_batch_definition_retrieval(in_memory_runtime_context):
+    context = in_memory_runtime_context
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+    batch_definition = asset.add_batch_definition(name="my_batch_def")
+
+    asset.delete_batch_definition("my_batch_def")
+
+    diagnostics = batch_definition.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], BatchDefinitionNotFoundError)

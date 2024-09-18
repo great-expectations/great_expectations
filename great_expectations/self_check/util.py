@@ -894,7 +894,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
     batch_data = SqlAlchemyBatchData(execution_engine=execution_engine, table_name=table_name)
-    with execution_engine.get_connection() as connection:  # type: ignore[var-annotated]
+    with execution_engine.get_connection() as connection:
         _debug("Calling df.to_sql")
         _start = time.time()
         add_dataframe_to_db(

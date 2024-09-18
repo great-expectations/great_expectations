@@ -10,6 +10,7 @@ import random
 import re
 import string
 import traceback
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import (
@@ -309,7 +310,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # Even though we use a single connection pool for dialects that need a single persisted connection  # noqa: E501
         # (e.g. for accessing temporary tables), if we don't keep a reference
         # then we get errors like sqlite3.ProgrammingError: Cannot operate on a closed database.
-        self._connection = None
+        self._connection: sqlalchemy.Connection | None = None
 
         # Use a single instance of SQLAlchemy engine to avoid creating multiple engine instances
         # for the same SQLAlchemy engine. This allows us to take advantage of SQLAlchemy's
@@ -377,6 +378,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="clickhouse_sqlalchemy.drivers.base"
             )
+        elif self.dialect_name == GXSqlDialect.DATABRICKS:
+            self.dialect_module = import_library_module("databricks.sqlalchemy")
         else:
             self.dialect_module = None
 
@@ -1278,8 +1281,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return self._inspector  # type: ignore[return-value]
 
-    @contextmanager  # type: ignore[arg-type]
-    def get_connection(self) -> sqlalchemy.Connection:  # type: ignore[misc]
+    @contextmanager
+    def get_connection(self) -> Generator[sqlalchemy.Connection, None, None]:
         """Get a connection for executing queries.
 
         Some databases sqlite/mssql temp tables only persist within a connection,
@@ -1294,7 +1297,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
             try:
                 if not self._connection:
-                    self._connection = self.engine.connect()  # type: ignore[assignment]
+                    self._connection = self.engine.connect()
                 yield self._connection
             finally:
                 # Temp tables only persist within a connection for some dialects,
@@ -1316,8 +1319,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-        with self.get_connection() as connection:  # type: ignore[var-annotated]
-            result = connection.execute(query)
+        with self.get_connection() as connection:
+            result = connection.execute(query)  # type: ignore[call-overload] # FIXME:Selectable overly broad
 
         return result
 
@@ -1335,15 +1338,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """  # noqa: E501
-        with self.get_connection() as connection:  # type: ignore[var-annotated]
+        with self.get_connection() as connection:
             if (
                 is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
                 and not connection.closed
             ):
-                result = connection.execute(query)
+                result = connection.execute(query)  # type: ignore[call-overload] # FIXME:Selectable overly broad
                 connection.commit()
             else:
                 with connection.begin():
-                    result = connection.execute(query)
+                    result = connection.execute(query)  # type: ignore[call-overload] # FIXME:Selectable overly broad
 
         return result

@@ -34,6 +34,10 @@ module.exports = {
       async: true,
       defer: true,
     },
+    {
+      src: 'https://fast.wistia.net/assets/external/E-v1.js',
+      async: true
+    }
   ],
 
   themeConfig: {
@@ -191,6 +195,10 @@ module.exports = {
               label: 'Community',
               to: 'https://greatexpectations.io/community',
             },
+            {
+              label: 'Request a demo',
+              to: 'https://greatexpectations.io/demo-gx-cloud',
+            },
           ],
           position: 'right',
         },
@@ -290,7 +298,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '1.0.2',
+              label: '1.0.4',
             },
             ['0.18']: {
               label: '0.18.17',

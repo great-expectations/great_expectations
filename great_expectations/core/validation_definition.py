@@ -30,8 +30,14 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     ValidationDefinitionNotAddedError,
+    ValidationDefinitionNotFreshError,
+)
+from great_expectations.exceptions.exceptions import (
+    InvalidKeyError,
+    StoreBackendError,
+    ValidationDefinitionNotFoundError,
 )
 from great_expectations.validator.v1_validator import Validator
 
@@ -131,7 +137,27 @@ class ValidationDefinition(BaseModel):
         data_diagnostics = self.data.is_fresh()
         validation_definition_diagnostics.update_with_children(suite_diagnostics, data_diagnostics)
 
-        return validation_definition_diagnostics
+        if not validation_definition_diagnostics.success:
+            return validation_definition_diagnostics
+
+        store = project_manager.get_validation_definition_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        try:
+            validation_definition = store.get(key=key)
+        except (
+            StoreBackendError,  # Generic error from stores
+            InvalidKeyError,  # Ephemeral context error
+        ):
+            return ValidationDefinitionFreshnessDiagnostics(
+                errors=[ValidationDefinitionNotFoundError(name=self.name)]
+            )
+
+        return ValidationDefinitionFreshnessDiagnostics(
+            errors=[]
+            if self == validation_definition
+            else [ValidationDefinitionNotFreshError(name=self.name)]
+        )
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):

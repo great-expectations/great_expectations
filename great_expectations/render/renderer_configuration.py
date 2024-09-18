@@ -509,10 +509,10 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
     @validator("template_str")
     def _set_template_str(cls, v: str, values: dict) -> str:
-        if values["configuration"] and values["configuration"].description:
+        if values.get("configuration") and values["configuration"].description:
             # description always overrides other template_strs
             v = values["configuration"].description
-        elif values["result"] and values["result"].expectation_config.description:
+        elif values.get("result") and values["result"].expectation_config.description:
             # description always overrides other template_strs
             v = values["result"].expectation_config.description
         elif values.get("_row_condition"):

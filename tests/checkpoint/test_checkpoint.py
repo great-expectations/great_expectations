@@ -8,9 +8,11 @@ from unittest import mock
 
 import pandas as pd
 import pytest
+from requests import Session
 
 import great_expectations as gx
 from great_expectations import expectations as gxe
+from great_expectations.analytics.events import CheckpointRanEvent
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -34,6 +36,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.freshness_diagnostics import (
     BatchDefinitionFreshnessDiagnostics,
+    CheckpointFreshnessDiagnostics,
     ExpectationSuiteFreshnessDiagnostics,
     ValidationDefinitionFreshnessDiagnostics,
 )
@@ -48,15 +51,20 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     BatchDefinitionNotAddedError,
     CheckpointNotAddedError,
-    CheckpointRelatedResourcesNotAddedError,
+    CheckpointRelatedResourcesFreshnessError,
     CheckpointRunWithoutValidationDefinitionError,
     ExpectationSuiteNotAddedError,
-    ResourceNotAddedError,
+    ResourceFreshnessError,
     ValidationDefinitionNotAddedError,
 )
+from great_expectations.exceptions.exceptions import (
+    CheckpointNotFoundError,
+    ValidationDefinitionNotFoundError,
+)
+from great_expectations.exceptions.resource_freshness import ResourceFreshnessAggregateError
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
 
@@ -577,7 +585,7 @@ class TestCheckpointResult:
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
 
-        with pytest.raises(CheckpointRelatedResourcesNotAddedError) as e:
+        with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
             checkpoint.run()
 
         assert [type(err) for err in e.value.errors] == [
@@ -586,7 +594,11 @@ class TestCheckpointResult:
         ]
 
     @pytest.mark.unit
-    def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
+    def test_checkpoint_run_no_actions(
+        self, validation_definition: ValidationDefinition, mocker: MockerFixture
+    ):
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(project=context)
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
@@ -600,7 +612,6 @@ class TestCheckpointResult:
         assert validation_result.success is True
         assert len(validation_result.results) == 1 and validation_result.results[0].success is True
 
-        assert result.checkpoint_config == checkpoint
         assert result.success is True
 
     @pytest.mark.unit
@@ -662,9 +673,13 @@ class TestCheckpointResult:
         )
         batch_parameters = {"my_param": "my_value"}
         expectation_parameters = {"my_other_param": "my_other_value"}
-        _ = checkpoint.run(
-            batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
-        )
+
+        with mock.patch.object(
+            Checkpoint, "is_fresh", return_value=CheckpointFreshnessDiagnostics(errors=[])
+        ):
+            _ = checkpoint.run(
+                batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
+            )
 
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             checkpoint_id=checkpoint_id,
@@ -672,6 +687,37 @@ class TestCheckpointResult:
             expectation_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
             run_id=mock.ANY,
+        )
+
+    @pytest.mark.unit
+    def test_checkpoint_run_sends_analytics(
+        self, validation_definition: ValidationDefinition, mocker: MockerFixture
+    ):
+        # Arrange
+        submit_analytics_event = mocker.patch(
+            "great_expectations.checkpoint.checkpoint.submit_analytics_event"
+        )
+
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        checkpoint_id = "e051d0a8-d492-4cde-91f3-29f353758488"
+        checkpoint = Checkpoint(
+            id=checkpoint_id,
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
+        )
+
+        # Act
+        with mock.patch.object(
+            Checkpoint, "is_fresh", return_value=CheckpointFreshnessDiagnostics(errors=[])
+        ):
+            checkpoint.run()
+
+        # Assert
+        submit_analytics_event.assert_called_once_with(
+            event=CheckpointRanEvent(
+                checkpoint_id=checkpoint_id, validation_definition_ids=[validation_definition.id]
+            )
         )
 
     @pytest.mark.unit
@@ -750,7 +796,10 @@ class TestCheckpointResult:
         }
         assert actual == expected
 
-    def _build_file_backed_checkpoint(self, tmp_path: pathlib.Path) -> Checkpoint:
+    def _build_file_backed_checkpoint(
+        self, tmp_path: pathlib.Path, actions: list[CheckpointAction] | None = None
+    ) -> Checkpoint:
+        actions = actions or []
         with working_directory(tmp_path):
             context = gx.get_context(mode="file")
 
@@ -787,10 +836,17 @@ class TestCheckpointResult:
             )
         )
 
-        return Checkpoint(name=self.checkpoint_name, validation_definitions=[validation_definition])
+        return Checkpoint(
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
+            actions=actions,
+        )
 
     @pytest.mark.unit
-    def test_checkpoint_result_does_not_contain_dataframe(self, tmp_path: pathlib.Path):
+    def test_checkpoint_result_does_not_contain_dataframe(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         df = pd.DataFrame({"passenger_count": [1, 2, 3, 4, 5]})
 
         context = gx.get_context(mode="ephemeral")
@@ -892,7 +948,10 @@ class TestCheckpointResult:
         }
 
     @pytest.mark.filesystem
-    def test_checkpoint_run_adds_requisite_ids(self, tmp_path: pathlib.Path):
+    def test_checkpoint_run_adds_requisite_ids(
+        self,
+        tmp_path: pathlib.Path,
+    ):
         checkpoint = self._build_file_backed_checkpoint(tmp_path)
 
         # A checkpoint that has not been persisted before running
@@ -921,78 +980,125 @@ class TestCheckpointResult:
         assert meta["checkpoint_id"] == checkpoint.id
         assert meta["validation_id"] == checkpoint.validation_definitions[0].id
 
+    @pytest.mark.filesystem
+    def test_checkpoint_run_with_data_docs_and_slack_actions_emit_page_links(
+        self,
+        tmp_path: pathlib.Path,
+    ):
+        actions = [
+            SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
+            UpdateDataDocsAction(name="docs_action"),
+        ]
+        checkpoint = self._build_file_backed_checkpoint(tmp_path=tmp_path, actions=actions)
+
+        with mock.patch.object(Session, "post") as mock_post:
+            _ = checkpoint.run()
+
+        mock_post.assert_called_once()
+        docs_block = mock_post.call_args.kwargs["json"]["blocks"][3]["text"]["text"]
+        assert "*DataDocs*" in docs_block
+        assert "local_site" in docs_block
+        assert "file:///" in docs_block
+
+    @pytest.mark.filesystem
+    def test_checkpoint_run_with_slack_action_no_page_links(
+        self,
+        tmp_path: pathlib.Path,
+    ):
+        actions = [
+            SlackNotificationAction(name="slack_action", slack_webhook="webhook"),
+        ]
+        checkpoint = self._build_file_backed_checkpoint(tmp_path=tmp_path, actions=actions)
+
+        with mock.patch.object(Session, "post") as mock_post:
+            _ = checkpoint.run()
+
+        mock_post.assert_called_once()
+        blocks = mock_post.call_args.kwargs["json"]["blocks"]
+        # No DataDocs blocks should be present
+        assert blocks == [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "slack_action - my_checkpoint - Failure :no_entry:",
+                },
+            },
+            {"type": "section", "text": {"type": "plain_text", "text": mock.ANY}},
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Asset*: my_asset  *Expectation Suite*: my_suite",
+                },
+            },
+            {"type": "divider"},
+        ]
+
 
 @pytest.mark.parametrize(
-    "id,validation_def_id,suite_id,batch_def_id,is_fresh,error_list",
+    "has_id,has_validation_def_id,has_suite_id,has_batch_def_id,error_list",
     [
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
+            True,
+            True,
+            True,
             True,
             [],
             id="checkpoint_id|validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
+            True,
+            True,
+            True,
             False,
             [BatchDefinitionNotAddedError],
             id="checkpoint_id|validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
+            True,
+            True,
             False,
+            True,
             [ExpectationSuiteNotAddedError],
             id="checkpoint_id|validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
-            None,
+            True,
+            True,
+            False,
             False,
             [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError],
             id="checkpoint_id|validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
+            True,
             False,
+            True,
+            True,
             [ValidationDefinitionNotAddedError],
             id="checkpoint_id|no_validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
-            None,
+            True,
+            False,
+            True,
             False,
             [BatchDefinitionNotAddedError, ValidationDefinitionNotAddedError],
             id="checkpoint_id|no_validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            None,
-            str(uuid.uuid4()),
+            True,
             False,
+            False,
+            True,
             [ExpectationSuiteNotAddedError, ValidationDefinitionNotAddedError],
             id="checkpoint_id|no_validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            str(uuid.uuid4()),
-            None,
-            None,
-            None,
+            True,
+            False,
+            False,
             False,
             [
                 BatchDefinitionNotAddedError,
@@ -1002,55 +1108,49 @@ class TestCheckpointResult:
             id="checkpoint_id|no_validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
             False,
+            True,
+            True,
+            True,
             [CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
-            None,
+            False,
+            True,
+            True,
             False,
             [BatchDefinitionNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            None,
-            str(uuid.uuid4()),
             False,
+            True,
+            False,
+            True,
             [ExpectationSuiteNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            str(uuid.uuid4()),
-            None,
-            None,
+            False,
+            True,
+            False,
             False,
             [BatchDefinitionNotAddedError, ExpectationSuiteNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|validation_id|no_suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            str(uuid.uuid4()),
-            str(uuid.uuid4()),
             False,
+            False,
+            True,
+            True,
             [ValidationDefinitionNotAddedError, CheckpointNotAddedError],
             id="no_checkpoint_id|no_validation_id|suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            str(uuid.uuid4()),
-            None,
+            False,
+            False,
+            True,
             False,
             [
                 BatchDefinitionNotAddedError,
@@ -1060,11 +1160,10 @@ class TestCheckpointResult:
             id="no_checkpoint_id|no_validation_id|suite_id|no_batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            None,
-            str(uuid.uuid4()),
             False,
+            False,
+            False,
+            True,
             [
                 ExpectationSuiteNotAddedError,
                 ValidationDefinitionNotAddedError,
@@ -1073,10 +1172,9 @@ class TestCheckpointResult:
             id="no_checkpoint_id|no_validation_id|no_suite_id|batch_def_id",
         ),
         pytest.param(
-            None,
-            None,
-            None,
-            None,
+            False,
+            False,
+            False,
             False,
             [
                 BatchDefinitionNotAddedError,
@@ -1091,37 +1189,262 @@ class TestCheckpointResult:
 @pytest.mark.unit
 def test_is_fresh(
     in_memory_runtime_context,
-    id: str | None,
-    validation_def_id: str | None,
-    suite_id: str | None,
-    batch_def_id: str | None,
-    is_fresh: bool,
-    error_list: list[Type[ResourceNotAddedError]],
+    has_id: bool,
+    has_validation_def_id: bool,
+    has_suite_id: bool,
+    has_batch_def_id: bool,
+    error_list: list[Type[ResourceFreshnessError]],
 ):
     context = in_memory_runtime_context
+
     batch_definition = (
         context.data_sources.add_pandas(name="my_pandas_ds")
         .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
         .add_batch_definition(name="my_batch_def")
     )
-    batch_definition.id = batch_def_id  # Fluent API will add an ID but manually overriding for test
 
     suite = context.suites.add(ExpectationSuite(name="my_suite"))
-    suite.id = suite_id  # Store will add an ID but manually overriding for test
 
-    checkpoint = Checkpoint(
-        name="my_checkpoint",
-        id=id,
-        validation_definitions=[
-            ValidationDefinition(
-                name="my_validation_definition",
-                id=validation_def_id,
-                suite=suite,
-                data=batch_definition,
-            )
-        ],
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
     )
-    diagnostics = checkpoint.is_fresh()
 
-    assert diagnostics.success is is_fresh
-    assert [type(err) for err in diagnostics.errors] == error_list
+    checkpoint = context.checkpoints.add(
+        Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+    )
+
+    # Stores/Fluent API will always assign IDs but we manually override them here
+    # for purposes of changing object state for the test
+    if not has_batch_def_id:
+        checkpoint.validation_definitions[0].data.id = None
+    if not has_suite_id:
+        checkpoint.validation_definitions[0].suite.id = None
+    if not has_validation_def_id:
+        checkpoint.validation_definitions[0].id = None
+    if not has_id:
+        checkpoint.id = None
+
+    diagnostics = checkpoint.is_fresh()
+    try:
+        diagnostics.raise_for_error()
+    except ResourceFreshnessAggregateError as e:
+        assert [type(err) for err in e.errors] == error_list
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_error_when_checkpoint_not_found(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    checkpoint = context.checkpoints.add(
+        Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+    )
+
+    context.checkpoints.delete(checkpoint.name)
+
+    diagnostics = checkpoint.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], CheckpointNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_error_when_child_deps_not_found(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch_definition = (
+        context.data_sources.add_pandas(name="my_pandas_ds")
+        .add_csv_asset(name="my_csv_asset", filepath_or_buffer="data.csv")
+        .add_batch_definition(name="my_batch_def")
+    )
+
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
+
+    validation_definition = context.validation_definitions.add(
+        ValidationDefinition(
+            name="my_validation_definition",
+            suite=suite,
+            data=batch_definition,
+        )
+    )
+
+    checkpoint = context.checkpoints.add(
+        Checkpoint(
+            name="my_checkpoint",
+            validation_definitions=[validation_definition],
+        )
+    )
+
+    context.validation_definitions.delete(validation_definition.name)
+
+    diagnostics = checkpoint.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 1
+    assert isinstance(diagnostics.errors[0], ValidationDefinitionNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_errors_for_all_child_validation_definitions(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
+    bd_1 = asset.add_batch_definition_whole_dataframe(name="my_bd_1")
+    bd_2 = asset.add_batch_definition_whole_dataframe(name="my_bd_2")
+
+    suite_1 = ExpectationSuite(name="my_suite_1")
+    suite_2 = ExpectationSuite(name="my_suite_2")
+
+    vd_1 = ValidationDefinition(name="my_vd_1", data=bd_1, suite=suite_1)
+    vd_2 = ValidationDefinition(name="my_vd_2", data=bd_2, suite=suite_2)
+
+    cp = Checkpoint(name="my_cp", validation_definitions=[vd_1, vd_2])
+
+    diagnostics = cp.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 5
+    assert [type(err) for err in diagnostics.errors] == [
+        ExpectationSuiteNotAddedError,
+        ValidationDefinitionNotAddedError,
+        ExpectationSuiteNotAddedError,
+        ValidationDefinitionNotAddedError,
+        CheckpointNotAddedError,
+    ]
+
+
+class TestCheckpointPydanticSerializationMethods:
+    """
+    Test overridden Pydantic serialization methods for Checkpoint
+    (dict and json)
+    """
+
+    datasource_name: str = "my_pandas_ds"
+    asset_name: str = "my_pandas_asset"
+    batch_definition_name: str = "my_bd"
+    suite_name: str = "my_suite"
+    validation_definition_name: str = "my_vd"
+    checkpoint_name: str = "my_cp"
+
+    def _build_checkpoint_with_factories(
+        self,
+        context: AbstractDataContext,
+    ) -> Checkpoint:
+        datasource = context.data_sources.add_pandas(name=self.datasource_name)
+        asset = datasource.add_dataframe_asset(name=self.asset_name)
+        bd = asset.add_batch_definition_whole_dataframe(name=self.batch_definition_name)
+        suite = context.suites.add(ExpectationSuite(name=self.suite_name))
+        vd = context.validation_definitions.add(
+            ValidationDefinition(name=self.validation_definition_name, data=bd, suite=suite)
+        )
+        return context.checkpoints.add(
+            Checkpoint(name=self.checkpoint_name, validation_definitions=[vd])
+        )
+
+    def _build_checkpoint_without_factories(self) -> Checkpoint:
+        bd = BatchDefinition(name=self.batch_definition_name)
+        suite = ExpectationSuite(name=self.suite_name)
+        vd = ValidationDefinition(name=self.validation_definition_name, data=bd, suite=suite)
+        return Checkpoint(name=self.checkpoint_name, validation_definitions=[vd])
+
+    @pytest.mark.unit
+    def test_dict_serializes_correctly(self, in_memory_runtime_context):
+        context = in_memory_runtime_context
+        cp = self._build_checkpoint_with_factories(context)
+
+        dict_val = cp.dict()
+        assert dict_val == {
+            "actions": [],
+            "id": mock.ANY,
+            "name": self.checkpoint_name,
+            "result_format": "SUMMARY",
+            "validation_definitions": [
+                {
+                    "id": mock.ANY,
+                    "name": self.validation_definition_name,
+                },
+            ],
+        }
+
+        for id in (dict_val["id"], dict_val["validation_definitions"][0]["id"]):
+            try:
+                uuid.UUID(id)
+            except TypeError:
+                pytest.fail("id is not a valid UUID")
+
+    @pytest.mark.unit
+    def test_dict_raises_freshness_errors(self):
+        cp = self._build_checkpoint_without_factories()
+        with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
+            cp.dict()
+
+        assert len(e.value.errors) == 3
+        assert [type(err) for err in e.value.errors] == [
+            BatchDefinitionNotAddedError,
+            ExpectationSuiteNotAddedError,
+            ValidationDefinitionNotAddedError,
+        ]
+
+    @pytest.mark.unit
+    def test_json_serializes_correctly(self, in_memory_runtime_context):
+        context = in_memory_runtime_context
+
+        cp = self._build_checkpoint_with_factories(context)
+
+        json_val = cp.json()
+        dict_val = json.loads(json_val)
+        assert dict_val == {
+            "actions": [],
+            "id": mock.ANY,
+            "name": self.checkpoint_name,
+            "result_format": "SUMMARY",
+            "validation_definitions": [
+                {
+                    "id": mock.ANY,
+                    "name": self.validation_definition_name,
+                },
+            ],
+        }
+
+        for id in (dict_val["id"], dict_val["validation_definitions"][0]["id"]):
+            try:
+                uuid.UUID(id)
+            except TypeError:
+                pytest.fail("id is not a valid UUID")
+
+    @pytest.mark.unit
+    def test_json_raises_freshness_errors(self):
+        cp = self._build_checkpoint_without_factories()
+        with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
+            cp.json()
+
+        assert len(e.value.errors) == 3
+        assert [type(err) for err in e.value.errors] == [
+            BatchDefinitionNotAddedError,
+            ExpectationSuiteNotAddedError,
+            ValidationDefinitionNotAddedError,
+        ]

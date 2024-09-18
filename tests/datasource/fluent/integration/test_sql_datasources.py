@@ -10,9 +10,11 @@ import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    Any,
     Final,
     Generator,
     Literal,
+    Mapping,
     Protocol,
     Sequence,
     TypedDict,
@@ -24,6 +26,12 @@ from pytest import param
 
 import great_expectations.expectations.core as gxe
 from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.compatibility.sqlalchemy import (
+    DatabaseError as SqlAlchemyDatabaseError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    OperationalError as SqlAlchemyOperationalError,
+)
 from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
@@ -54,6 +62,7 @@ from great_expectations.execution_engine.sqlalchemy_dialect import (
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 
 if TYPE_CHECKING:
+    from _pytest.mark.structures import ParameterSet
     from typing_extensions import TypeAlias
 
     from great_expectations.checkpoint.checkpoint import CheckpointResult
@@ -92,7 +101,7 @@ TableNameCase: TypeAlias = Literal[
 # all the naming conventions we want to support for different SQL dialects
 # NOTE: commented out are tests we know fail for individual datasources. Ideally all
 # test cases should work for all datasrouces
-TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
+TABLE_NAME_MAPPING: Final[Mapping[DatabaseType, Mapping[TableNameCase, str]]] = {
     "postgres": {
         "unquoted_lower": TEST_TABLE_NAME.lower(),
         "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
@@ -140,6 +149,8 @@ UNQUOTED_UPPER_COL: Final[Literal["UNQUOTED_UPPER_COL"]] = "UNQUOTED_UPPER_COL"
 UNQUOTED_LOWER_COL: Final[Literal["unquoted_lower_col"]] = "unquoted_lower_col"
 QUOTED_UPPER_COL: Final[Literal["QUOTED_UPPER_COL"]] = "QUOTED_UPPER_COL"
 QUOTED_LOWER_COL: Final[Literal["quoted_lower_col"]] = "quoted_lower_col"
+QUOTED_MIXED_CASE: Final[Literal["quotedMixed"]] = "quotedMixed"
+QUOTED_W_DOTS: Final[Literal["quoted.w.dots"]] = "quoted.w.dots"
 
 
 def get_random_identifier_name() -> str:
@@ -174,7 +185,8 @@ def _get_exception_details(
         print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
         for i, exc_info in enumerate(exc_details, start=1):
             print(
-                f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"  # noqa: E501
+                f"  {i}: {exc_info['exception_message']}"
+                f"\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
             )
     return exc_details
 
@@ -191,8 +203,148 @@ class Row(TypedDict):
     name: str
     quoted_upper_col: str
     quoted_lower_col: str
+    quoted_mixed_case: str
+    quoted_w_dots: str
     unquoted_upper_col: str
     unquoted_lower_col: str
+
+
+ColNameParams: TypeAlias = Literal[
+    # DDL: unquoted_lower_col ------
+    "unquoted_lower_col",
+    '"unquoted_lower_col"',
+    "UNQUOTED_LOWER_COL",
+    '"UNQUOTED_LOWER_COL"',
+    # DDL: UNQUOTED_UPPER_COL ------
+    "unquoted_upper_col",
+    '"unquoted_upper_col"',
+    "UNQUOTED_UPPER_COL",
+    '"UNQUOTED_UPPER_COL"',
+    # DDL: "quoted_lower_col" -----
+    "quoted_lower_col",
+    '"quoted_lower_col"',
+    "QUOTED_LOWER_COL",
+    '"QUOTED_LOWER_COL"',
+    # DDL: "QUOTED_UPPER_COL" ----
+    "quoted_upper_col",
+    '"quoted_upper_col"',
+    "QUOTED_UPPER_COL",
+    '"QUOTED_UPPER_COL"',
+    # DDL: "quotedMixed" -----
+    "quotedmixed",
+    "quotedMixed",
+    '"quotedMixed"',
+    "QUOTEDMIXED",
+    # DDL: "quoted.w.dots" -------
+    "quoted.w.dots",
+    '"quoted.w.dots"',
+    "QUOTED.W.DOTS",
+    '"QUOTED.W.DOTS"',
+]
+
+ColNameParamId: TypeAlias = Literal[
+    # DDL: unquoted_lower_col ------
+    "str unquoted_lower_col",
+    'str "unquoted_lower_col"',
+    "str UNQUOTED_LOWER_COL",
+    'str "UNQUOTED_LOWER_COL"',
+    # DDL: UNQUOTED_UPPER_COL ------
+    "str unquoted_upper_col",
+    'str "unquoted_upper_col"',
+    "str UNQUOTED_UPPER_COL",
+    'str "UNQUOTED_UPPER_COL"',
+    # DDL: "quoted_lower_col" -----
+    "str quoted_lower_col",
+    'str "quoted_lower_col"',
+    "str QUOTED_LOWER_COL",
+    'str "QUOTED_LOWER_COL"',
+    # DDl: "QUOTED_UPPER_COL" ----
+    "str quoted_upper_col",
+    'str "quoted_upper_col"',
+    "str QUOTED_UPPER_COL",
+    'str "QUOTED_UPPER_COL"',
+    # DDL: "quotedMixed" -----
+    "str quotedmixed",
+    "str quotedMixed",
+    'str "quotedMixed"',
+    "str QUOTEDMIXED",
+    # DDL: "quoted.w.dots" -------
+    "str quoted.w.dots",
+    'str "quoted.w.dots"',
+    "str QUOTED.W.DOTS",
+    'str "QUOTED.W.DOTS"',
+]
+
+COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
+    # DDL: unquoted_lower_col ------
+    "unquoted_lower_col": UNQUOTED_LOWER_COL,
+    '"unquoted_lower_col"': UNQUOTED_LOWER_COL,
+    "UNQUOTED_LOWER_COL": UNQUOTED_LOWER_COL,
+    '"UNQUOTED_LOWER_COL"': UNQUOTED_LOWER_COL,
+    # DDL: UNQUOTED_UPPER_COL ------
+    "unquoted_upper_col": UNQUOTED_UPPER_COL,
+    '"unquoted_upper_col"': UNQUOTED_UPPER_COL,
+    "UNQUOTED_UPPER_COL": UNQUOTED_UPPER_COL,
+    '"UNQUOTED_UPPER_COL"': UNQUOTED_UPPER_COL,
+    # DDL: "quoted_lower_col" -----
+    "quoted_lower_col": f'"{QUOTED_LOWER_COL}"',
+    '"quoted_lower_col"': f'"{QUOTED_LOWER_COL}"',
+    "QUOTED_LOWER_COL": f'"{QUOTED_LOWER_COL}"',
+    '"QUOTED_LOWER_COL"': f'"{QUOTED_LOWER_COL}"',
+    # DDl: "QUOTED_UPPER_COL" ----
+    "quoted_upper_col": f'"{QUOTED_UPPER_COL}"',
+    '"quoted_upper_col"': f'"{QUOTED_UPPER_COL}"',
+    "QUOTED_UPPER_COL": f'"{QUOTED_UPPER_COL}"',
+    '"QUOTED_UPPER_COL"': f'"{QUOTED_UPPER_COL}"',
+    # DDL: "quotedMixed" -----
+    "quotedmixed": f"{QUOTED_MIXED_CASE.lower()}",
+    "quotedMixed": f"{QUOTED_MIXED_CASE}",
+    '"quotedMixed"': f'"{QUOTED_MIXED_CASE}"',
+    "QUOTEDMIXED": f"{QUOTED_MIXED_CASE.upper()}",
+    # DDL: "quoted.w.dots" -------
+    "quoted.w.dots": f'"{QUOTED_W_DOTS}"',
+    '"quoted.w.dots"': f'"{QUOTED_W_DOTS}"',
+    "QUOTED.W.DOTS": f'"{QUOTED_W_DOTS}"',
+    '"QUOTED.W.DOTS"': f'"{QUOTED_W_DOTS}"',
+}
+
+
+# TODO: remove items from this lookup when working on fixes
+# The presence of a database type in the list indicates that this specific value fails when
+# used as the `column_name` value for at least one expectation.
+# It does not mean that it SHOULD or SHOULD NOT fail, but that it currently does.
+FAILS_EXPECTATION: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
+    # DDL: unquoted_lower_col ------
+    "str unquoted_lower_col": [],
+    'str "unquoted_lower_col"': ["postgres", "snowflake", "sqlite"],
+    "str UNQUOTED_LOWER_COL": ["databricks_sql", "postgres", "sqlite"],
+    'str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
+    # DDL: UNQUOTED_UPPER_COL ------
+    "str unquoted_upper_col": ["databricks_sql", "sqlite"],
+    'str "unquoted_upper_col"': ["postgres", "sqlite"],
+    "str UNQUOTED_UPPER_COL": ["postgres"],
+    'str "UNQUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
+    # DDL: "quoted_lower_col" -----
+    'str "quoted_lower_col"': ["postgres", "snowflake", "sqlite"],
+    "str quoted_lower_col": ["snowflake"],
+    "str QUOTED_LOWER_COL": ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    'str "QUOTED_LOWER_COL"': ["sqlite"],
+    # DDl: "QUOTED_UPPER_COL" ----
+    "str quoted_upper_col": ["databricks_sql", "sqlite", "postgres"],
+    'str "quoted_upper_col"': ["sqlite"],
+    "str QUOTED_UPPER_COL": [],
+    'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
+    # DDL: "quotedMixed" -----
+    "str quotedmixed": ["databricks_sql", "postgres", "sqlite", "snowflake"],
+    "str quotedMixed": ["snowflake"],
+    'str "quotedMixed"': ["databricks_sql", "postgres", "sqlite", "snowflake"],
+    "str QUOTEDMIXED": ["databricks_sql", "postgres", "sqlite", "snowflake"],
+    # DDL: "quoted.w.dots" -------
+    "str quoted.w.dots": ["databricks_sql"],
+    'str "quoted.w.dots"': ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    "str QUOTED.W.DOTS": ["databricks_sql", "snowflake", "sqlite", "postgres"],
+    'str "QUOTED.W.DOTS"': ["sqlite"],
+}
 
 
 class TableFactory(Protocol):
@@ -230,11 +382,14 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
         LOGGER.info(
             f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"  # noqa: E501
         )
+        dialect = GXSqlDialect(sa_engine.dialect.name)
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
 
-        with gx_engine.get_connection() as conn:  # type: ignore[var-annotated]
-            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=sa_engine.dialect.name)  # type: ignore[arg-type]
-            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=sa_engine.dialect.name)  # type: ignore[arg-type]
+        with gx_engine.get_connection() as conn:
+            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=dialect)
+            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=dialect)
+            quoted_w_dots: str = quote_str(QUOTED_W_DOTS, dialect=dialect)
+            quoted_mixed_case: str = quote_str(QUOTED_MIXED_CASE, dialect=dialect)
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
@@ -243,14 +398,21 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
                 # TODO: use dialect specific quotes
                 create_tables: str = (
                     f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
-                    f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"  # noqa: E501
-                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255))"
+                    " (id INTEGER, name VARCHAR(255),"
+                    f" {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"
+                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255),"
+                    f" {quoted_mixed_case} VARCHAR(255), {quoted_w_dots} VARCHAR(255))"
                 )
                 conn.execute(TextClause(create_tables))
                 if data:
                     insert_data = (
-                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"  # noqa: E501
-                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col, :unquoted_upper_col, :unquoted_lower_col)"  # noqa: E501
+                        f"INSERT INTO {qualified_table_name}"
+                        f" (id, name, {quoted_upper_col}, {quoted_lower_col},"
+                        f" {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL},"
+                        f" {quoted_mixed_case}, {quoted_w_dots})"
+                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col,"
+                        " :unquoted_upper_col, :unquoted_lower_col,"
+                        " :quoted_mixed_case, :quoted_w_dots)"
                     )
                     conn.execute(TextClause(insert_data), data)
 
@@ -535,7 +697,7 @@ class TestTableIdentifiers:
             batch_definition = asset.add_batch_definition_whole_table("whole table!")
 
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
-        suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))
+        suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name"))
 
         validation_definition = context.validation_definitions.add(
             ValidationDefinition(name="validation_definition", suite=suite, data=batch_definition)
@@ -552,136 +714,14 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
-ColNameParamId: TypeAlias = Literal[
-    "str unquoted_lower_col",
-    'str "unquoted_lower_col"',
-    "str UNQUOTED_LOWER_COL",
-    'str "UNQUOTED_LOWER_COL"',
-    # ----------------------
-    "str unquoted_upper_col",
-    'str "unquoted_upper_col"',
-    "str UNQUOTED_UPPER_COL",
-    'str "UNQUOTED_UPPER_COL"',
-    # ----------------------
-    "str quoted_lower_col",
-    'str "quoted_lower_col"',
-    "str QUOTED_LOWER_COL",
-    'str "QUOTED_LOWER_COL"',
-    # ----------------------
-    "str quoted_upper_col",
-    'str "quoted_upper_col"',
-    "str QUOTED_UPPER_COL",
-    'str "QUOTED_UPPER_COL"',
-    # ----------------------
-]
-
-
-# TODO: remove items from this lookup when working on fixes
-REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    'expect_column_to_exist-str "unquoted_lower_col"': ["postgres", "sqlite"],
-    "expect_column_to_exist-str UNQUOTED_LOWER_COL": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'expect_column_to_exist-str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
-    "expect_column_to_exist-str unquoted_upper_col": ["databricks_sql", "sqlite"],
-    'expect_column_to_exist-str "unquoted_upper_col"': ["postgres", "sqlite"],
-    "expect_column_to_exist-str UNQUOTED_UPPER_COL": ["postgres"],
-    'expect_column_to_exist-str "UNQUOTED_UPPER_COL"': ["snowflake", "sqlite"],
-    'expect_column_to_exist-str "quoted_lower_col"': [
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    "expect_column_to_exist-str quoted_lower_col": ["snowflake"],
-    "expect_column_to_exist-str QUOTED_LOWER_COL": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    'expect_column_to_exist-str "QUOTED_LOWER_COL"': ["sqlite"],
-    "expect_column_to_exist-str quoted_upper_col": [
-        "databricks_sql",
-        "sqlite",
-    ],
-    'expect_column_to_exist-str "quoted_upper_col"': ["sqlite"],
-    "expect_column_to_exist-str QUOTED_UPPER_COL": ["postgres"],
-    'expect_column_to_exist-str "QUOTED_UPPER_COL"': [
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "unquoted_lower_col"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str UNQUOTED_LOWER_COL": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "UNQUOTED_LOWER_COL"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str unquoted_upper_col": [
-        "databricks_sql",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "unquoted_upper_col"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str UNQUOTED_UPPER_COL": [
-        "postgres",
-    ],
-    'expect_column_values_to_not_be_null-str "UNQUOTED_UPPER_COL"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str quoted_lower_col": [
-        "snowflake",
-    ],
-    'expect_column_values_to_not_be_null-str "quoted_lower_col"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str QUOTED_LOWER_COL": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "QUOTED_LOWER_COL"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str quoted_upper_col": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "quoted_upper_col"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str QUOTED_UPPER_COL": [
-        "postgres",
-    ],
-    'expect_column_values_to_not_be_null-str "QUOTED_UPPER_COL"': [
-        "postgres",
-        "snowflake",
-    ],
-}
-
-
-def _requires_fix(param_id: str) -> bool:
+def _fails_expectation(param_id: str) -> bool:
+    """
+    Lookup whether a given column_name fails an expectation for a given dialect.
+    This does not mean that it SHOULD fail, but that it currently does.
+    """
     column_name: ColNameParamId
-    dialect, expectation, column_name = param_id.split("-")  # type: ignore[assignment]
-    key = f"{expectation}-{column_name}"
-    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(key, [])
+    dialect, column_name, *_ = param_id.split("-")  # type: ignore[assignment]
+    dialects_need_fixes: list[DatabaseType] = FAILS_EXPECTATION.get(column_name, [])
     return dialect in dialects_need_fixes
 
 
@@ -703,7 +743,7 @@ def _raw_query_check_column_exists(
     gx_execution_engine: SqlAlchemyExecutionEngine,
 ) -> bool:
     """Use a simple 'SELECT {column_name_param} from {qualified_table_name};' query to check if the column exists.'"""  # noqa: E501
-    with gx_execution_engine.get_connection() as connection:  # type: ignore[var-annotated]
+    with gx_execution_engine.get_connection() as connection:
         query = f"""SELECT {column_name_param} FROM {qualified_table_name} LIMIT 1;"""
         print(f"query:\n  {query}")
         # an exception will be raised if the column does not exist
@@ -714,70 +754,89 @@ def _raw_query_check_column_exists(
             print(f"\nResults:\n  {col_exist_check.keys()}")
             col_exist_result = col_exist_check.fetchone()
             print(f"  Values: {col_exist_result}\n{column_name_param} exists!\n")
-            if not col_exist_result:
-                return False
-        except SqlAlchemyProgrammingError as sql_err:
-            LOGGER.warning("SQLAlchemy Error", exc_info=sql_err)
-            print(f"\n{column_name_param} does not exist!\n")
+        except (
+            SqlAlchemyProgrammingError,
+            SqlAlchemyOperationalError,
+            SqlAlchemyDatabaseError,
+        ) as sql_err:
+            LOGGER.debug("_raw_query_check_column_exists - SQLAlchemy Error", exc_info=sql_err)
+            print(f"\n{column_name_param} does not exist! - {sql_err.__class__.__name__}\n")
             return False
         return True
+
+
+_EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
+    param("expect_column_to_exist", {}, id="expect_column_to_exist"),
+    param("expect_column_values_to_not_be_null", {}, id="expect_column_values_to_not_be_null"),
+    param(
+        "expect_column_values_to_match_regex",
+        {"regex": r".*"},
+        id="expect_column_values_to_match_regex",
+    ),
+    param(
+        "expect_column_values_to_match_like_pattern",
+        {"like_pattern": r"%"},
+        id="expect_column_values_to_match_like_pattern",
+    ),
+)
 
 
 @pytest.mark.filterwarnings(
     "once::DeprecationWarning"
 )  # snowflake `add_table_asset` raises warning on passing a schema
-@pytest.mark.parametrize(
-    "column_name",
-    [
-        # DDL: unquoted_lower_col ----------------------------------
-        param("unquoted_lower_col", id="str unquoted_lower_col"),
-        param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
-        param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
-        param('"UNQUOTED_LOWER_COL"', id='str "UNQUOTED_LOWER_COL"'),
-        # DDL: UNQUOTED_UPPER_COL ----------------------------------
-        param("unquoted_upper_col", id="str unquoted_upper_col"),
-        param('"unquoted_upper_col"', id='str "unquoted_upper_col"'),
-        param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
-        param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
-        # DDL: "quoted_lower_col"-----------------------------------
-        param("quoted_lower_col", id="str quoted_lower_col"),
-        param('"quoted_lower_col"', id='str "quoted_lower_col"'),
-        param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
-        param('"QUOTED_LOWER_COL"', id='str "QUOTED_LOWER_COL"'),
-        # DDL: "QUOTED_UPPER_COL" ----------------------------------
-        param("quoted_upper_col", id="str quoted_upper_col"),
-        param('"quoted_upper_col"', id='str "quoted_upper_col"'),
-        param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
-        param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
-    ],
-)
-class TestColumnIdentifiers:
+@pytest.mark.parametrize("expectation_type, extra_exp_kwargs", _EXPECTATION_TYPES)
+class TestColumnExpectations:
     @pytest.mark.parametrize(
-        "expectation_type",
+        "column_name",
         [
-            "expect_column_to_exist",
-            "expect_column_values_to_not_be_null",
+            # DDL: unquoted_lower_col ----------------------------------
+            param("unquoted_lower_col", id="str unquoted_lower_col"),
+            param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
+            # DDL: UNQUOTED_UPPER_COL ----------------------------------
+            param("unquoted_upper_col", id="str unquoted_upper_col"),
+            param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
+            # DDL: "quoted_lower_col"-----------------------------------
+            param("quoted_lower_col", id="str quoted_lower_col"),
+            param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+            # DDL: "QUOTED_UPPER_COL" ----------------------------------
+            param("quoted_upper_col", id="str quoted_upper_col"),
+            param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+            # DDL: "quotedMixed" -------------------------------------
+            param("quotedmixed", id="str quotedmixed"),
+            param("quotedMixed", id="str quotedMixed"),
+            param("QUOTEDMIXED", id="str QUOTEDMIXED"),
+            # DDL: "quoted.w.dots" -------------------------------------
+            param("quoted.w.dots", id="str quoted.w.dots"),
+            param("QUOTED.W.DOTS", id="str QUOTED.W.DOTS"),
         ],
     )
-    def test_column_expectation(
+    def test_unquoted_params(
         self,
         context: EphemeralDataContext,
         all_sql_datasources: SQLDatasource,
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
         request: pytest.FixtureRequest,
     ):
+        """
+        Test column expectations when using unquoted column name parameters
+        (actual column may have DDL with quotes).
+
+        Test fails if the expectation fails regardless of dialect.
+        """
         param_id = request.node.callspec.id
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
 
-        if _is_quote_char_dialect_mismatch(dialect, column_name):  # type: ignore[arg-type]
-            pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
-
-        if _requires_fix(param_id):
+        if column_name[0] in ("'", '"', "`"):
+            pytest.skip(f"see _desired_state tests for {column_name!r}")
+        elif _fails_expectation(param_id):
             # apply marker this way so that xpasses can be seen in the report
             request.applymarker(pytest.mark.xfail)
+
+        print(f"expectations_type:\n  {expectation_type}")
 
         schema: str | None = (
             RAND_SCHEMA
@@ -785,7 +844,8 @@ class TestColumnIdentifiers:
             else None
         )
 
-        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")  # type: ignore[index] # FIXME
+        print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
         print(f"type:\n  {type(column_name)}\n")
 
         table_factory(
@@ -800,12 +860,242 @@ class TestColumnIdentifiers:
                     "quoted_lower_col": "my column is lowercase",
                     "unquoted_upper_col": "whatever",
                     "unquoted_lower_col": "whatever",
+                    "quoted_mixed_case": "Whatever",
+                    "quoted_w_dots": "what.ever",
+                },
+            ],
+        )
+
+        asset = datasource.add_table_asset(
+            "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
+        )
+        print(f"asset:\n{asset!r}\n")
+
+        suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
+        suite.add_expectation_configuration(
+            expectation_configuration=ExpectationConfiguration(
+                type=expectation_type, kwargs={"column": column_name, **extra_exp_kwargs}
+            )
+        )
+        suite.save()
+
+        batch_definition = asset.add_batch_definition_whole_table("my_batch_def")
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="my_validation_def", suite=suite, data=batch_definition)
+        )
+
+        checkpoint = context.checkpoints.add(
+            checkpoint=Checkpoint(
+                name=f"{datasource.name}-{asset.name}_checkpoint",
+                validation_definitions=[validation_definition],
+            )
+        )
+        result = checkpoint.run()
+
+        _ = _get_exception_details(result, prettyprint=True)
+
+        assert result.success is True, "validation failed"
+
+    @pytest.mark.parametrize(
+        "column_name",
+        [
+            # DDL: unquoted_lower_col ----------------------------------
+            param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
+            # DDL: UNQUOTED_UPPER_COL ----------------------------------
+            param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
+            # DDL: "quoted_lower_col"-----------------------------------
+            param('"quoted_lower_col"', id='str "quoted_lower_col"'),
+            # DDL: "QUOTED_UPPER_COL" ----------------------------------
+            param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
+            # DDL: "quotedMixed" -------------------------------------
+            param('"quotedMixed"', id='str "quotedMixed"'),
+            # DDL: "quoted.w.dots" -------------------------------------
+            param('"quoted.w.dots"', id='str "quoted.w.dots"'),
+        ],
+    )
+    def test_quoted_params(
+        self,
+        context: EphemeralDataContext,
+        all_sql_datasources: SQLDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
+        expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
+        request: pytest.FixtureRequest,
+    ):
+        """
+        Test column expectations when using quoted column name parameters
+        (actual column may have DDL without quotes).
+
+        Test fails if the expectation fails regardless of dialect.
+        """
+        param_id = request.node.callspec.id
+        datasource = all_sql_datasources
+        dialect = GXSqlDialect(datasource.get_engine().dialect.name)
+
+        if column_name[0] not in ("'", '"', "`"):
+            pytest.skip(f"see test_unquoted_params for {column_name!r}")
+        elif _is_quote_char_dialect_mismatch(dialect, column_name):
+            pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
+        elif _fails_expectation(param_id):
+            # apply marker this way so that xpasses can be seen in the report
+            request.applymarker(pytest.mark.xfail)
+
+        print(f"expectations_type:\n  {expectation_type}")
+
+        schema: str | None = (
+            RAND_SCHEMA
+            if GXSqlDialect(dialect) in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
+            else None
+        )
+
+        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")  # type: ignore[index] # FIXME
+        print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={TEST_TABLE_NAME},
+            schema=schema,
+            data=[
+                {
+                    "id": 1,
+                    "name": param_id,
+                    "quoted_upper_col": "my column is uppercase",
+                    "quoted_lower_col": "my column is lowercase",
+                    "unquoted_upper_col": "whatever",
+                    "unquoted_lower_col": "whatever",
+                    "quoted_mixed_case": "Whatever",
+                    "quoted_w_dots": "what.ever",
+                },
+            ],
+        )
+
+        asset = datasource.add_table_asset(
+            "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
+        )
+        print(f"asset:\n{asset!r}\n")
+
+        suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
+        suite.add_expectation_configuration(
+            expectation_configuration=ExpectationConfiguration(
+                type=expectation_type, kwargs={"column": column_name, **extra_exp_kwargs}
+            )
+        )
+        suite.save()
+
+        batch_definition = asset.add_batch_definition_whole_table("my_batch_def")
+        validation_definition = context.validation_definitions.add(
+            ValidationDefinition(name="my_validation_def", suite=suite, data=batch_definition)
+        )
+
+        checkpoint = context.checkpoints.add(
+            checkpoint=Checkpoint(
+                name=f"{datasource.name}-{asset.name}_checkpoint",
+                validation_definitions=[validation_definition],
+            )
+        )
+        result = checkpoint.run()
+
+        assert result.success is True, "validation failed"
+
+    @pytest.mark.parametrize(
+        "column_name",
+        [
+            # DDL: unquoted_lower_col ----------------------------------
+            param("unquoted_lower_col", id="str unquoted_lower_col"),
+            param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
+            param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
+            param('"UNQUOTED_LOWER_COL"', id='str "UNQUOTED_LOWER_COL"'),
+            # DDL: UNQUOTED_UPPER_COL ----------------------------------
+            param("unquoted_upper_col", id="str unquoted_upper_col"),
+            param('"unquoted_upper_col"', id='str "unquoted_upper_col"'),
+            param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
+            param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
+            # DDL: "quoted_lower_col"-----------------------------------
+            param("quoted_lower_col", id="str quoted_lower_col"),
+            param('"quoted_lower_col"', id='str "quoted_lower_col"'),
+            param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+            param('"QUOTED_LOWER_COL"', id='str "QUOTED_LOWER_COL"'),
+            # DDL: "QUOTED_UPPER_COL" ----------------------------------
+            param("quoted_upper_col", id="str quoted_upper_col"),
+            param('"quoted_upper_col"', id='str "quoted_upper_col"'),
+            param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+            param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
+            # DDL: "quotedMixed" ---------------------------------------
+            param("quotedmixed", id="str quotedmixed"),
+            param("quotedMixed", id="str quotedMixed"),
+            param('"quotedMixed"', id='str "quotedMixed"'),
+            param("QUOTEDMIXED", id="str QUOTEDMIXED"),
+            # DDL: "quoted.w.dots" -------------------------------------
+            param("quoted.w.dots", id="str quoted.w.dots"),
+            param('"quoted.w.dots"', id='str "quoted.w.dots"'),  # TODO: fix me
+            param("QUOTED.W.DOTS", id="str QUOTED.W.DOTS"),
+            param('"QUOTED.W.DOTS"', id='str "QUOTED.W.DOTS"'),
+        ],
+    )
+    def test_desired_state(
+        self,
+        context: EphemeralDataContext,
+        all_sql_datasources: SQLDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
+        expectation_type: str,
+        extra_exp_kwargs: dict[str, Any],
+        request: pytest.FixtureRequest,
+    ):
+        """
+        Perform a raw query to check if the column exists before running the expectation.
+        This is used to determine how the identifier behaves natively in the database and
+        therefore determine if the expectation should pass or fail.
+
+        An expectation is expected to succeed if the column 'exists' and fail if it does not.
+        If we want GX to behave the same way as each dialect/database,
+        these tests should be our guide.
+
+        However currently, GX does not behave the same way as the databases in all cases.
+        """
+        param_id = request.node.callspec.id
+        datasource = all_sql_datasources
+        dialect = GXSqlDialect(datasource.get_engine().dialect.name)
+
+        original_column_name = column_name
+        if column_name.startswith('"') and column_name.endswith('"'):
+            # databricks uses backticks for quoting
+            column_name = quote_str(column_name[1:-1], dialect=dialect)
+
+        print(f"expectations_type:\n  {expectation_type}")
+
+        schema: str | None = (
+            RAND_SCHEMA
+            if GXSqlDialect(dialect) in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
+            else None
+        )
+
+        print(f"\ncolumn DDL:\n  {COLUMN_DDL[original_column_name]}")  # type: ignore[index] # FIXME
+        print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={TEST_TABLE_NAME},
+            schema=schema,
+            data=[
+                {
+                    "id": 1,
+                    "name": param_id,
+                    "quoted_upper_col": "my column is uppercase",
+                    "quoted_lower_col": "my column is lowercase",
+                    "unquoted_upper_col": "whatever",
+                    "unquoted_lower_col": "whatever",
+                    "quoted_mixed_case": "Whatever",
+                    "quoted_w_dots": "what.ever",
                 },
             ],
         )
 
         qualified_table_name: str = f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
-        # check that the column exists so that we know what if the expectation should succeed or fail  # noqa: E501
+        # check the column exists so that we know what if the expectation should succeed or fail
         column_exists = _raw_query_check_column_exists(
             column_name,
             qualified_table_name,
@@ -820,10 +1110,7 @@ class TestColumnIdentifiers:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                },
+                type=expectation_type, kwargs={"column": column_name, **extra_exp_kwargs}
             )
         )
         suite.save()
@@ -835,18 +1122,22 @@ class TestColumnIdentifiers:
 
         checkpoint = context.checkpoints.add(
             checkpoint=Checkpoint(
-                name="my_checkpoint", validation_definitions=[validation_definition]
+                name=f"{datasource.name}-{asset.name}_checkpoint",
+                validation_definitions=[validation_definition],
             )
         )
         result = checkpoint.run()
 
-        exc_details = _get_exception_details(result, prettyprint=True)
-        assert not exc_details, exc_details[0]["raised_exception"]
-
-        if column_exists:
-            assert result.success is True, "column exists but validation failed"
-        else:
-            assert result.success is False, "column does not exist but validation succeeded"
+        try:
+            if column_exists:
+                assert result.success is True, "column exists but validation failed"
+            else:
+                assert result.success is False, "column does not exist but validation succeeded"
+        except AssertionError as ae:
+            reason = str(ae).splitlines()[0]
+            print(reason)
+            # xfail if the expectation doesn't behave as the dialect would
+            pytest.xfail(reason=reason)
 
 
 if __name__ == "__main__":

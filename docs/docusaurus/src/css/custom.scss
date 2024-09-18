@@ -295,6 +295,15 @@ table.borderless tr:nth-child(2n) {
   line-height: var(--p-line-height)
 }
 
+.request-a-demo {
+  margin-top: 24px;
+}
+
+.request-a-demo a {
+  font-weight: bold;
+  color: #ff6310;;
+}
+
 /* overrides to keep margin consistent in edge cases when there are lists inside list subitems */
 li ul,
 li ol {

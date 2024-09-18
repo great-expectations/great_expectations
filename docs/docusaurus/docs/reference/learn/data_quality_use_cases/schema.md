@@ -62,8 +62,8 @@ compared to the previous Expectation, suitable for scenarios needing strict type
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeOfType"
 ```
 
-<sup>View `ExpectColumnValuesToBeOfType` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type).</sup>
+<small>View `ExpectColumnValuesToBeOfType` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type).</small>
 
 
 #### Expect Column Values To Be In Type List
@@ -76,8 +76,8 @@ not be strictly enforced, aiding smooth data migration and validation.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnValuesToBeInTypeList"
 ```
 
-<sup>View `ExpectColumnValuesToBeInTypeList` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list).</sup>
+<small>View `ExpectColumnValuesToBeInTypeList` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list).</small>
 
 <br/>
 <br/>
@@ -103,7 +103,7 @@ essential fields are present before proceeding with downstream processing.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectColumnToExist"
 ```
 
-<sup>View `ExpectColumnToExist` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_to_exist).</sup>
+<small>View `ExpectColumnToExist` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_to_exist).</small>
 
 
 #### Expect Table Column Count To Equal
@@ -116,8 +116,8 @@ fixed schema structure, providing a strong safeguard against unexpected changes.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToEqual"
 ```
 
-<sup>View `ExpectTableColumnCountToEqual` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal).</sup>
+<small>View `ExpectTableColumnCountToEqual` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal).</small>
 
 
 #### Expect Table Columns To Match Ordered List
@@ -131,8 +131,8 @@ columns are computed during serialization.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchOrderedList"
 ```
 
-<sup>View `ExpectTableColumnsToMatchOrderedList` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list).</sup>
+<small>View `ExpectTableColumnsToMatchOrderedList` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list).</small>
 
 
 #### Expect Table Columns To Match Set
@@ -145,8 +145,8 @@ flexibility where column presence is more critical than their sequence.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnsToMatchSet"
 ```
 
-<sup>View `ExpectTableColumnsToMatchSet` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set).</sup>
+<small>View `ExpectTableColumnsToMatchSet` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set).</small>
 
 
 #### Expect Table Column Count To Be Between
@@ -159,8 +159,8 @@ datasets that can expand or contract within a known boundary.
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_expectations.py ExpectTableColumnCountToBeBetween"
 ```
 
-<sup>View `ExpectTableColumnCountToBeBetween` in the [Expectation
-Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between).</sup>
+<small>View `ExpectTableColumnCountToBeBetween` in the [Expectation
+Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between).</small>
 
 <br/>
 <br/>
