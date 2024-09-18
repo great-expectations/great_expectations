@@ -320,7 +320,8 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         """Check that a given object is a Spark DataFrame.
         This could either be a regular Spark DataFrame or a Spark Connect DataFrame.
         """
-        return isinstance(df, (DataFrame, ConnectDataFrame))
+        data_frame_types = [DataFrame, ConnectDataFrame]
+        return any((cls and isinstance(df, cls)) for cls in data_frame_types)
 
 
 @public_api
