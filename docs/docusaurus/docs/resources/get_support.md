@@ -36,7 +36,7 @@ The following are some recommendations for resolving issues on your own. Resolvi
 
 Search the docs you're using currently for an answer to your issue or question.
 
-If you're new to GX Cloud, review the [GX Cloud overview](/cloud/overview/overview_lp.md).
+If you're new to GX Cloud, review the [GX Cloud overview](/cloud/overview/gx_cloud_overview.md).
 
 If you're new to GX Core, see the [Introduction to GX Core](/core/introduction/introduction.mdx).
 

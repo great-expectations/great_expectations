@@ -21,7 +21,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
 ### Get started
 
 <LinkCardGrid>
-  <LinkCard topIcon label="GX Cloud overview" description="Learn more about GX Cloud features and functionality." to="/cloud/overview/overview_lp" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="GX Cloud overview" description="Learn more about GX Cloud features and functionality." to="/cloud/overview/gx_cloud_overview.md" icon="/img/small_gx_logo.png" />
 
   <LinkCard topIcon label="Deploy GX Cloud" description="Learn how to deploy GX Cloud in your environment." to="/cloud/deploy/deploy_lp" icon="/img/small_gx_logo.png" />
 
