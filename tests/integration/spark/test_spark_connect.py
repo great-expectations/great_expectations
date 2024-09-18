@@ -70,13 +70,18 @@ def test_error_messages_if_we_get_an_invalid_dataframe(
 
 @pytest.mark.xfail(
     reason="If we use the factory method on SparkConnectSession to create the session, we fail",
-    strict=True,
+    strict=False,
 )
-def test_spark_connect_with_bad_import(
+def test_spark_connect_with_bad_factory_method(
     spark_validation_definition: ValidationDefinition,
 ):
-    """The purpose of this test is to document the issues with using SparkConnectSession's
-    factory method to create the session
+    """The purpose of this test is to document an issue with using SparkConnectSession's
+    factory method to create the session.
+
+    Unfortunately, because spark sessions are persisted across tests, we can't run this
+    with other spark tests, and therefore can't even put `strict=True`.
+
+    Running this test in isolation will fail, but running it in the suite will pass. :(
     """
     spark_connect_session = SparkConnectSession.builder.remote("sc://localhost:15002").getOrCreate()
     assert isinstance(spark_connect_session, SparkConnectSession)
