@@ -1284,7 +1284,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         description = kwargs.pop("description", None)
         id = kwargs.pop("id", None)
         rendered_content = kwargs.pop("rendered_content", None)
-        # We might need the windows key here
         return ExpectationConfiguration(
             type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
