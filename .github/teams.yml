@@ -40,6 +40,8 @@ core:
   - "@tyler-hoffman" # Tyler Hoffman
   - "@wookasz" # Łukasz Lempart
   - "@annabar" # Anna Barr
+  - "@annabarr" # Anna Barr
+  - "@allisongx" # Allison Hirata
 
 bot:
   - "@dependabot"
