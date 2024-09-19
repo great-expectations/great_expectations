@@ -305,7 +305,7 @@ You can only edit the settings of Data Assets created in GX Cloud.
 
 ## Data Source credential management
 
-To connect to your database in GX Cloud, there are two methods for managing credentials:
+To connect to your Data Source in GX Cloud, there are two methods for managing credentials:
 
 1. **Direct input**: You can input credentials directly into GX Cloud. These credentials are securely encrypted at rest and in transit, stored in our database, and accessible to the GX Agent and any API user.
 
