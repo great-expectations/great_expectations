@@ -332,7 +332,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
-    windows: Optional[List[Window]] = pydantic.Field(default=[], description=WINDOWS_DESCRIPTION)
+    windows: Optional[List[Window]] = pydantic.Field(default=None, description=WINDOWS_DESCRIPTION)
     examples: ClassVar[List[dict]] = []
 
     _save_callback: Union[Callable[[Expectation], Expectation], None] = pydantic.PrivateAttr(
