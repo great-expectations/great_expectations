@@ -309,7 +309,7 @@ To connect to your Data Source in GX Cloud, there are two methods for managing c
 
 1. **Direct input**: You can input credentials directly into GX Cloud. These credentials are securely encrypted at rest and in transit, stored in our database, and accessible to the GX Agent and any API user.
 
-2. **Environment variable substitution**: To enhance security, you can use environment variables to manage sensitive connection parameters or strings. For example, instead of directly including your database password in configuration settings, you can use a variable reference like `${MY_DATABASE_PASSWORD}`:
+2. **Environment variable substitution**: To enhance security, you can use environment variables to manage sensitive connection parameters or strings. For example, instead of directly including your database password in configuration settings, you can use a variable reference like `${MY_DATABASE_PASSWORD}`. When using environment variable substitution, your password is not stored or transmitted to GX Cloud.
 
     - **Configure the environment variable**: Enter the name of your environment variable, enclosed in `${}`, into the Data Source setup form. For instance, you might use `${MY_DATABASE_PASSWORD}`.
 
