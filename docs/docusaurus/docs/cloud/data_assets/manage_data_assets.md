@@ -313,7 +313,7 @@ To connect to your Data Source in GX Cloud, there are two methods for managing c
 
     - **Configure the environment variable**: Enter the name of your environment variable, enclosed in `${}`, into the Data Source setup form. For instance, you might use `${MY_DATABASE_PASSWORD}`.
 
-    - **Inject the variable into your agent container**: When setting up your Docker container, include the environment variable in the command. For example:
+    - **Inject the variable into your GX Agent container or environment**: When running the GX Agent Docker container, include the environment variable in the command. For example:
    
    ```bash title="Terminal input"
    docker run -it -e MY_DATABASE_PASSWORD=<YOUR_DATABASE_PASSWORD> -e GX_CLOUD_ACCESS_TOKEN=<YOUR_ACCESS_TOKEN> -e GX_CLOUD_ORGANIZATION_ID=<YOUR_ORGANIZATION_ID> greatexpectations/agent:stable
