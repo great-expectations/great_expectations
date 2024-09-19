@@ -63,7 +63,7 @@ The following table lists the available GX Cloud Expectations.
 | Volume             | `expect_table_row_count_to_equal`                         | Expect the number of rows to equal a value.                                                                                            |
 | Volume             | `expect_table_row_count_to_equal_other_table`             | Expect the number of rows to equal the number in another table within the same database.                                               |
 
-### Custom SQL Expectations
+## Custom SQL Expectations
 
 GX Cloud also offers the ability to write a custom Expectation using SQL. It is designed to fail validation if the provided SQL query returns one or more rows.
 
