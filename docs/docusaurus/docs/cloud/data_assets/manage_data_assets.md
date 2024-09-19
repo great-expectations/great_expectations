@@ -311,7 +311,7 @@ To connect to your Data Source in GX Cloud, there are two methods for managing c
 
 2. **Environment variable substitution**: To enhance security, you can use environment variables to manage sensitive connection parameters or strings. For example, instead of directly including your database password in configuration settings, you can use a variable reference like `${MY_DATABASE_PASSWORD}`:
 
-    - **Configure the environment variable**: Enter the name of your environment variable, enclosed in `${}`, into the UI configuration form. For instance, you might use `${MY_DATABASE_PASSWORD}`.
+    - **Configure the environment variable**: Enter the name of your environment variable, enclosed in `${}`, into the Data Source setup form. For instance, you might use `${MY_DATABASE_PASSWORD}`.
 
     - **Inject the variable into your agent container**: When setting up your Docker container, include the environment variable in the command. For example:
    
