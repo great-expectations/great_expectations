@@ -298,7 +298,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '1.0.4',
+              label: '1.0.5',
             },
             ['0.18']: {
               label: '0.18.21',
@@ -325,6 +325,12 @@ module.exports = {
           // Optional fields.
           anonymizeIP: true, // Should IPs be anonymized?
         },
+        sitemap: {
+          ignorePatterns: [
+            '**/0.18/oss/templates/**',
+            '**/0.18/oss/team_templates/**'
+          ],
+        }
       },
     ],
   ],

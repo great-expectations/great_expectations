@@ -14,6 +14,17 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.0.5
+* [BUGFIX] Using `{batch}` keyword in `UnexpectedRowsQuery` ([#10392](https://github.com/great-expectations/great_expectations/pull/10392))
+* [BUGFIX] Fix Databricks SQL Regex and Like based Expectations ([#10406](https://github.com/great-expectations/great_expectations/pull/10406))
+* [BUGFIX] Support Spark connect dataframes ([#10420](https://github.com/great-expectations/great_expectations/pull/10420))
+* [BUGFIX] Handle DatabricksSQL attribute error and update dependency ([#10424](https://github.com/great-expectations/great_expectations/pull/10424))
+* [DOCS] Add Connect to Databricks SQL page in GX Cloud ([#10394](https://github.com/great-expectations/great_expectations/pull/10394)) (thanks @allisongx)
+* [DOCS] Changelog updates `0.18.18` -> `0.18.21` ([#10422](https://github.com/great-expectations/great_expectations/pull/10422))
+* [DOCS] Add Connect to Databricks SQL to GX Cloud docs TOC ([#10423](https://github.com/great-expectations/great_expectations/pull/10423))
+* [MAINTENANCE] Fix `SQLAlchemyExectionEngine.get_connection()` typing + update column identifier tests ([#10399](https://github.com/great-expectations/great_expectations/pull/10399))
+* [MAINTENANCE] Move FabricPowerBIDatasource out of experimental dir ([#10419](https://github.com/great-expectations/great_expectations/pull/10419))
+
 ### 1.0.4
 * [BUGFIX] Fix action equality ([#10393](https://github.com/great-expectations/great_expectations/pull/10393))
 * [BUGFIX] Patch additional issues with data docs page retrieval in checkpoint actions ([#10400](https://github.com/great-expectations/great_expectations/pull/10400))

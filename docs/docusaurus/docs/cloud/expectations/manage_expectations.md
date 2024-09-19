@@ -8,12 +8,6 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 <!-- [//]: # (TODO: To learn more about Expectations, see Expectation.) -->
 
-:::info Custom SQL Query Expectations
-
-To create custom SQL query Expectations, you'll need to use the GX API. See [Customize Expectations](/core/customize_expectations/customize_expectations.md).
-
-:::
-
 ## Prerequisites
 
 - You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
@@ -23,7 +17,7 @@ To create custom SQL query Expectations, you'll need to use the GX API. See [Cus
 The following table lists the available GX Cloud Expectations.
 
 | Data Quality Issue | Expectation                                               | Description                                                                                                                            |
-| ------------------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------|-----------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
 | Cardinality        | `expect_column_values_to_be_unique`                       | Expect each column value to be unique.                                                                                                 |
 | Cardinality        | `expect_compound_columns_to_be_unique`                    | Expect the compound columns to be unique.                                                                                              |
 | Cardinality        | `expect_select_column_values_to_be_unique_within_record`  | Expect the values for each record to be unique across the columns listed. Note that records can be duplicated.                         |
@@ -68,6 +62,18 @@ The following table lists the available GX Cloud Expectations.
 | Volume             | `expect_table_row_count_to_be_between`                    | Expect the number of rows to be between two values.                                                                                    |
 | Volume             | `expect_table_row_count_to_equal`                         | Expect the number of rows to equal a value.                                                                                            |
 | Volume             | `expect_table_row_count_to_equal_other_table`             | Expect the number of rows to equal the number in another table within the same database.                                               |
+
+## Custom SQL Expectations
+
+GX Cloud also offers the ability to write a custom Expectation using SQL. It is designed to fail validation if the provided SQL query returns one or more rows.
+
+The provided query should be written in the dialect of the Data Source in which a given Data Asset lives.
+
+:::info Optional `{batch}` named query
+
+The optional `{batch}` named query references the Batch of data under test. When the Expectation is evaluated, the `{batch}` named query will be replaced with the Batch of data that is validated.
+
+:::
 
 ## Add an Expectation
 
