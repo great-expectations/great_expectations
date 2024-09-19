@@ -301,7 +301,7 @@ module.exports = {
               label: '1.0.4',
             },
             ['0.18']: {
-              label: '0.18.17',
+              label: '0.18.21',
             },
           },
           admonitions: {
