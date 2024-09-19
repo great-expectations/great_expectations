@@ -190,6 +190,7 @@ module.exports = {
           items: [
             'cloud/connect/connect_postgresql',
             'cloud/connect/connect_snowflake',
+            'cloud/connect/connect_databrickssql',
             'cloud/connect/connect_airflow',
             'cloud/connect/connect_python',
           ]
