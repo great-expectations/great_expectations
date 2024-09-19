@@ -34,7 +34,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
+    ExpectationSuiteValidationResult,
 )
 from great_expectations.core.freshness_diagnostics import CheckpointFreshnessDiagnostics
 from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT, ResultFormatUnion

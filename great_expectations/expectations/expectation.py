@@ -65,7 +65,7 @@ from great_expectations.expectations.model_field_descriptions import (
     MOSTLY_DESCRIPTION,
     WINDOWS_DESCRIPTION,
 )
-from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
+from great_expectations.expectations.model_field_types import (  # types needed for pydantic deser
     Mostly,
 )
 from great_expectations.expectations.registry import (
