@@ -67,20 +67,13 @@ def test_error_messages_if_we_get_an_invalid_dataframe(
         spark_validation_definition.run(batch_parameters={"dataframe": not_a_dataframe})
 
 
-@pytest.mark.xfail(
-    reason="If we use the factory method on SparkConnectSession to create the session, we fail",
-    strict=False,
-)
-def test_spark_connect_with_bad_factory_method(
+def test_spark_connect_with_spark_connect_session_factory_method(
     spark_validation_definition: ValidationDefinition,
 ):
-    """The purpose of this test is to document an issue with using SparkConnectSession's
-    factory method to create the session.
+    """This test demonstrates that SparkConnectionSession can be used to create a session.
 
-    Unfortunately, because spark sessions are persisted across tests, we can't run this
-    with other spark tests, and therefore can't even put `strict=True`.
-
-    Running this test in isolation will fail, but running it in the suite will pass. :(
+    This test is being added because in some scenarios, this appeared to fail, but it was
+    the result of other active spark sessions.
     """
     spark_connect_session = SparkConnectSession.builder.remote("sc://localhost:15002").getOrCreate()
     assert isinstance(spark_connect_session, SparkConnectSession)
