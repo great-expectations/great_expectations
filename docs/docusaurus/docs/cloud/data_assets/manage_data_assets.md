@@ -319,7 +319,7 @@ To connect to your Data Source in GX Cloud, there are two methods for managing c
    docker run -it -e MY_DATABASE_PASSWORD=<YOUR_DATABASE_PASSWORD> -e GX_CLOUD_ACCESS_TOKEN=<YOUR_ACCESS_TOKEN> -e GX_CLOUD_ORGANIZATION_ID=<YOUR_ORGANIZATION_ID> greatexpectations/agent:stable
     ```
 
-This process is similar across any Docker-based service, including Kubernetes, ECS, ACI, and GCE. Each platform will have its own method for setting environment variables.
+When running the GX Agent in other Docker-based service, including Kubernetes, ECS, ACI, and GCE, use the service's instructions to set and provide environment variables to the running container.
 
 With this method, your password is not stored or transmitted to GX Cloud. To access the database through the API, just set the environment variable in your setup. 
 
