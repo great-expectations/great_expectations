@@ -190,6 +190,7 @@ module.exports = {
           items: [
             'cloud/connect/connect_postgresql',
             'cloud/connect/connect_snowflake',
+            'cloud/connect/connect_databrickssql',
             'cloud/connect/connect_airflow',
             'cloud/connect/connect_python',
           ]
@@ -250,6 +251,11 @@ module.exports = {
               type: 'link',
               label: 'Available Expectations',
               href: '/docs/cloud/expectations/manage_expectations#available-expectations',
+            },
+            {
+              type: 'link',
+              label: 'Custom SQL Expectations',
+              href: '/docs/cloud/expectations/manage_expectations#custom-sql-expectations',
             },
             {
               type: 'link',
