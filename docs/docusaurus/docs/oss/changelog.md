@@ -14,6 +14,13 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.0.4
+* [BUGFIX] Fix action equality ([#10393](https://github.com/great-expectations/great_expectations/pull/10393))
+* [BUGFIX] Patch additional issues with data docs page retrieval in checkpoint actions ([#10400](https://github.com/great-expectations/great_expectations/pull/10400))
+* [DOCS] Add CTAs to request a demo ([#10389](https://github.com/great-expectations/great_expectations/pull/10389))
+* [MAINTENANCE] Ensure that all nested validation definition diagnostics are emitted from a parent checkpoint ([#10386](https://github.com/great-expectations/great_expectations/pull/10386))
+* [MAINTENANCE] Fix `SQLAlchemyExectionEngine.get_connection()` typing + update column identifier tests ([#10399](https://github.com/great-expectations/great_expectations/pull/10399))
+
 ### 1.0.3
 * [FEATURE] Replace get_batch_list_from_batch_request with get_batch and get_batch_identifiers_list ([#10295](https://github.com/great-expectations/great_expectations/pull/10295))
 * [FEATURE] Add Checkpoint.run analytics ([#10382](https://github.com/great-expectations/great_expectations/pull/10382))

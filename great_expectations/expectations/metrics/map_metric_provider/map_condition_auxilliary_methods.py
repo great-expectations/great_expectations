@@ -308,7 +308,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     try:
         if execution_engine.dialect_name == GXSqlDialect.MSSQL:
-            with execution_engine.get_connection() as connection:  # type: ignore[var-annotated]
+            with execution_engine.get_connection() as connection:
                 if not connection.closed:
                     temp_table_obj = _generate_temp_table(
                         connection=connection,
