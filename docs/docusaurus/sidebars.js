@@ -254,6 +254,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Custom SQL Expectations',
+              href: '/docs/cloud/expectations/manage_expectations#custom-sql-expectations',
+            },
+            {
+              type: 'link',
               label: 'Add an Expectation',
               href: '/docs/cloud/expectations/manage_expectations#add-an-expectation',
             },
