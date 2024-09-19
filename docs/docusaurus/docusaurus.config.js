@@ -325,6 +325,12 @@ module.exports = {
           // Optional fields.
           anonymizeIP: true, // Should IPs be anonymized?
         },
+        sitemap: {
+          ignorePatterns: [
+            '**/0.18/oss/templates/**',
+            '**/0.18/oss/team_templates/**'
+          ],
+        }
       },
     ],
   ],
