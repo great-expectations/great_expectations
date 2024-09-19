@@ -56,7 +56,7 @@
         },
         "windows": {
             "title": "Windows",
-            "description": "Definition(s) for evaluation of time-series windows",
+            "description": "Definition(s) for evaluation of temporal windows",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Window"
