@@ -179,6 +179,7 @@
         },
         "Offset": {
             "title": "Offset",
+            "description": "A threshold in which a metric will be considered passable",
             "type": "object",
             "properties": {
                 "positive": {
@@ -197,6 +198,7 @@
         },
         "Window": {
             "title": "Window",
+            "description": "A definition for a temporal window across <`range`> number of previous invocations",
             "type": "object",
             "properties": {
                 "constraint_fn": {
