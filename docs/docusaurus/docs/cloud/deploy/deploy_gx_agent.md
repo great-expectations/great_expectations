@@ -20,7 +20,7 @@ The GX Agent, and agent-enabled deployments, are not available by default in GX 
 
 The GX Agent serves as an intermediary between GX Cloud and your organization's data stores. GX Cloud does not connect directly to your data in an agent-enabled deployment, and all data access occurs within the GX Agent. GX Cloud sends jobs to the GX Agent, the GX Agent executes these jobs against your data, and then sends the job results to GX Cloud.
 
-A [local deployment](?env-type=local#deploy-the-gx-agent) of the GX Agent will allow you to test GX Cloud setup or processes from a single machine before moving to a shared production deployment. Alternatively, you can run the GX Agent in your [deployment environment](?env-type=deployment#deploy-the-gx-agent) and leverage GX Cloud while connecting to Data Sources using your organization's environment and infrastructure, for enhanced control and security.
+A local deployment of the GX Agent will allow you to test GX Cloud setup or processes from a single machine before moving to a shared production deployment. Alternatively, you can run the GX Agent in your deployment environment and leverage GX Cloud while connecting to Data Sources using your organization's environment and infrastructure, for enhanced control and security.
 
 
 ## Prerequisites
