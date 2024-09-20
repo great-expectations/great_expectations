@@ -495,6 +495,22 @@ class SnowflakeDatasource(SQLDatasource):
             "role", [None]
         )[0]
 
+    def _database_name_exists(self, database_name: str) -> bool:
+        engine: sa.Engine = self.get_engine()
+        try:
+            with engine.connect() as connection:
+                query_str = sa.text(f"SHOW TERSE DATABASES LIKE '{database_name}';")
+                # row_columns = ("created_on", "name", "kind", "database_name", "schema_name")
+                db_name_set = {row[1] for row in connection.execute(query_str).all()}
+                if _is_bracketed_by_quotes(database_name):
+                    return database_name[1:-1] in db_name_set
+                return database_name.upper() in db_name_set
+        except Exception as e:
+            raise TestConnectionError(
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{e!s}"
+            ) from e
+
     @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SnowflakeDatasource.
