@@ -63,8 +63,9 @@ from great_expectations.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
     COLUMN_LIST_DESCRIPTION,
     MOSTLY_DESCRIPTION,
+    WINDOWS_DESCRIPTION,
 )
-from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
+from great_expectations.expectations.model_field_types import (
     Mostly,
 )
 from great_expectations.expectations.registry import (
@@ -75,6 +76,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.expectations.sql_tokens_and_types import (
     valid_sql_tokens_and_types,
 )
+from great_expectations.expectations.window import Window
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -330,6 +332,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
+    windows: Optional[List[Window]] = pydantic.Field(default=None, description=WINDOWS_DESCRIPTION)
     examples: ClassVar[List[dict]] = []
 
     _save_callback: Union[Callable[[Expectation], Expectation], None] = pydantic.PrivateAttr(
