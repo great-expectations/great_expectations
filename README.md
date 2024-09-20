@@ -31,7 +31,7 @@ For data sources and other integrations that GX supports, see [GX integration su
 
 ## Get started
 
-GX recommends deploying GX Core within a virtual environment. For more information about getting started with GX Core, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/tutorials/quickstart).
+GX recommends deploying GX Core within a virtual environment. For more information about getting started with GX Core, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/core/introduction/try_gx).
 
 1. Run the following command in an empty base directory inside a Python virtual environment to install GX Core:
 
