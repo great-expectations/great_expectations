@@ -189,7 +189,8 @@
             "required": [
                 "positive",
                 "negative"
-            ]
+            ],
+            "additionalProperties": false
         },
         "Window": {
             "title": "Window",
@@ -217,7 +218,8 @@
                 "parameter_name",
                 "range",
                 "offset"
-            ]
+            ],
+            "additionalProperties": false
         }
     }
 }
