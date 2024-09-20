@@ -77,7 +77,12 @@ class QueryTable(QueryMetricProvider):
         result: Union[Sequence[sa.Row[Any]], Any] = execution_engine.execute_query(
             sa.select(sa.text(query))
         ).fetchmany(MAX_IN_MEMORY_RECORDS_ALLOWED)
-        return [element._asdict() for element in result]
+
+        if isinstance(result, (list, tuple)):
+            query_table_records = [element._asdict() for element in result]
+        else:
+            query_table_records = [result]
+        return query_table_records
         # </snippet>
 
     @metric_value(engine=SparkDFExecutionEngine)
