@@ -4,9 +4,8 @@ import itertools
 import logging
 from typing import Any, Dict, List
 
-import pytest
-
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.exceptions import InvalidExpectationConfigurationError
 from great_expectations_v1.expectations.expectation import (

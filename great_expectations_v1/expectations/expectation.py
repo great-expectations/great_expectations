@@ -29,9 +29,9 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
+from great_expectations import __version__ as ge_version
 from typing_extensions import ParamSpec, dataclass_transform
 
-from great_expectations import __version__ as ge_version
 from great_expectations_v1._docs_decorators import public_api
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.compatibility.pydantic import Field, ModelMetaclass, StrictStr
@@ -1221,13 +1221,13 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         pass  # no-op
 
     # Renamed from validate due to collision with Pydantic method of the same name
-    def validate_(
+    def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
         suite_parameters: Optional[dict] = None,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,  # To update
     ) -> ExpectationValidationResult:
         """Validates the expectation against the provided data.
 
@@ -2593,7 +2593,8 @@ class UnexpectedRowsExpectation:
     ):
         # deprecated-v1.0.2
         warnings.warn(
-            "Importing UnexpectedRowsExpectation from great_expectations_v1.expectations.expectation "
+            "Importing UnexpectedRowsExpectation from "
+            "great_expectations_v1.expectations.expectation "
             "is deprecated. Please import UnexpectedRowsExpectation from "
             "great_expectations_v1.expectations instead.",
             category=DeprecationWarning,
