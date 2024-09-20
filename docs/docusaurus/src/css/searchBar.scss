@@ -1,22 +1,7 @@
+@import "sass_variables.scss";
+
 div .custom-search-bar {
   padding: var(--ifm-navbar-item-padding-vertical) 0;
-
-}
-
-.custom-search-bar .DocSearch-Button {
-  background: none;
-
-  &-Placeholder {
-    display: none;
-  }
-
-  &-Container svg path {
-    stroke-width: 3;
-  }
-
-  &-Keys {
-    display: none;
-  }
 }
 
 [data-theme='dark'] .custom-search-bar .DocSearch-Button:hover {
@@ -25,4 +10,22 @@ div .custom-search-bar {
 
 [data-theme='dark'] .DocSearch-Form {
   background: none;
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .custom-search-bar .DocSearch-Button {
+    background: none;
+
+    &-Placeholder {
+      display: none;
+    }
+
+    &-Container svg path {
+      stroke-width: 3;
+    }
+
+    &-Keys {
+      display: none;
+    }
+  }
 }
