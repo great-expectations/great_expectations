@@ -24,7 +24,7 @@ import GXCard from '@site/src/components/GXCard';
 ## What do you want to do today?
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Get started with GX Cloud" description="Our fully-managed SaaS solution that simplifies deployment, scaling, and collaboration." to="/cloud/" icon="/img/gx_cloud_storage.svg" />
+  <LinkCard topIcon label="Get started with GX Cloud" description="Our fully-managed SaaS solution that simplifies deployment, scaling, and collaboration." to="/cloud/overview/gx_cloud_overview" icon="/img/gx_cloud_storage.svg" />
 
   <LinkCard topIcon label="Get started with GX Core" description="Get started with the Great Expectations Python library." to="/core/introduction/" icon="/img/oss_icon.svg" />
 

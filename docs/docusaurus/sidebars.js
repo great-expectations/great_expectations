@@ -153,8 +153,8 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'GX Cloud components',
-              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-components',
+              label: 'GX Cloud concepts',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-concepts',
             },
             {
               type: 'link',
