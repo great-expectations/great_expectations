@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Final,
     Iterable,
     List,
     Mapping,
@@ -85,6 +86,9 @@ try:
 except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
+
+
+MAX_IN_MEMORY_RECORDS_ALLOWED: Final[int] = 200
 
 
 def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:

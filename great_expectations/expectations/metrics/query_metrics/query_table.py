@@ -15,6 +15,7 @@ from great_expectations.expectations.metrics.query_metric_provider import (
     MissingElementError,
     QueryMetricProvider,
 )
+from great_expectations.expectations.metrics.util import MAX_IN_MEMORY_RECORDS_ALLOWED
 from great_expectations.util import get_sqlalchemy_subquery_type
 
 if TYPE_CHECKING:
@@ -68,7 +69,9 @@ class QueryTable(QueryMetricProvider):
         else:
             query = query.format(batch=f"({batch_selectable})")
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()  # type: ignore[assignment,arg-type]
+        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchmany(
+            MAX_IN_MEMORY_RECORDS_ALLOWED
+        )
         return [element._asdict() for element in result]
         # </snippet>
 
