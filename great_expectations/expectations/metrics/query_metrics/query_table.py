@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Union
 
+from typing_extensions import Annotated, TypeAlias
+
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -22,6 +24,9 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
 
 
+QueryTableRecords: TypeAlias = Annotated[List[dict], MAX_IN_MEMORY_RECORDS_ALLOWED]
+
+
 class QueryTable(QueryMetricProvider):
     metric_name = "query.table"
     value_keys = ("query",)
@@ -35,7 +40,7 @@ class QueryTable(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[dict]:
+    ) -> QueryTableRecords:
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         batch_selectable: sa.sql.Selectable
@@ -83,7 +88,7 @@ class QueryTable(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[dict]:
+    ) -> QueryTableRecords:
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
@@ -95,6 +100,6 @@ class QueryTable(QueryMetricProvider):
         query = query.format(batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
-        result: List[pyspark.Row] = engine.sql(query).collect()
+        result: List[pyspark.Row] = engine.sql(query).collect(MAX_IN_MEMORY_RECORDS_ALLOWED)
 
         return [element.asDict() for element in result]
