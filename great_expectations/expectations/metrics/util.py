@@ -6,7 +6,6 @@ from collections import UserDict
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
-    Annotated,
     Any,
     Dict,
     Final,
@@ -17,13 +16,13 @@ from typing import (
     Sequence,
     Tuple,
     Type,
-    TypeAlias,
     overload,
 )
 
 import numpy as np
 from dateutil.parser import parse
 from packaging import version
+from typing_extensions import Annotated, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws, sqlalchemy, trino
@@ -92,7 +91,7 @@ except ImportError:
 
 MAX_IN_MEMORY_RECORDS_ALLOWED: Final[int] = 200
 
-UnexpectedIndexList: TypeAlias = Annotated[list[dict[str, Any]], MAX_IN_MEMORY_RECORDS_ALLOWED]
+UnexpectedIndexList: TypeAlias = Annotated[List[Dict[str, Any]], MAX_IN_MEMORY_RECORDS_ALLOWED]
 
 
 def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
@@ -1320,7 +1319,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     exclude_unexpected_values: bool = False,
 ) -> UnexpectedIndexList:
     """
-    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    Builds unexpected_index_list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there is a single named index.
     Args:
         domain_records_df: reference to Pandas dataframe
