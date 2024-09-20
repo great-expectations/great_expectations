@@ -100,6 +100,6 @@ class QueryTable(QueryMetricProvider):
         query = query.format(batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
-        result: List[pyspark.Row] = engine.sql(query).collect(MAX_IN_MEMORY_RECORDS_ALLOWED)
+        result: List[pyspark.Row] = engine.sql(query).limit(MAX_IN_MEMORY_RECORDS_ALLOWED).collect()
 
         return [element.asDict() for element in result]
