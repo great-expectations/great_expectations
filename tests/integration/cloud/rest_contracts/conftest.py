@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Union
 
 import pact
 import pytest
-from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
+from typing_extensions import Annotated, TypeAlias
 
 from great_expectations import project_manager
 from great_expectations.compatibility import pydantic

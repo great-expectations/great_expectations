@@ -1,4 +1,4 @@
-[build-system]
+ubuild-system]
 requires = ["setuptools", "wheel"]
 # uncomment to enable pep517 after versioneer problem is fixed.
 # https://github.com/python-versioneer/python-versioneer/issues/193
@@ -396,6 +396,7 @@ runtime-evaluated-base-classes = [
     "great_expectations_v1.datasource.fluent.fluent_base_model.FluentBaseModel",
     "great_expectations_v1.datasource.fluent.interfaces.Datasource",
     "great_expectations_v1.datasource.fluent.sql_datasource.SQLDatasource",
+    "great_expectations_v1.compatibility.pydantic.BaseModel",
 ]
 runtime-evaluated-decorators = ["pydantic.dataclasses.dataclass"]
 

@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 GX_ROOT_DIR: Final = pathlib.Path(__file__).parent
-GX_PACKAGE_DIR: Final = GX_ROOT_DIR / "great_expectations"
+GX_PACKAGE_DIR: Final = GX_ROOT_DIR / "great_expectations_v1"
 REQS_DIR: Final = GX_ROOT_DIR / "reqs"
 
 _CHECK_HELP_DESC = (
@@ -504,7 +504,7 @@ def type_schema(  # noqa: C901,PLR0912 - too complex
     Generate json schema for each Datasource & DataAsset with `--sync`.
     """
     import pandas
-    from great_expectations.expectations import core
+    from great_expectations_v1.expectations import core
 
     from great_expectations_v1.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
