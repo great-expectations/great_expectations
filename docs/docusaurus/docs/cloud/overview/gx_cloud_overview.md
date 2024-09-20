@@ -63,6 +63,6 @@ GX Cloud architecture comprises a frontend web UI, storage for entity configurat
 
 * **GX Cloud data storage**. Stores the configurations for your organization's Data Sources, Data Assets, Expectations, and Validations alongside your organization's Validation Result histories and Data Asset descriptive metrics.
 
-* **GX Cloud backend application**. Contains the necessary logic and compute to connect to data and run queries. The specifics of how the GX Cloud backend connects to your data is described in [GX Cloud deployment pattern](/cloud/deploy/deployment_patterns.md).
+* **GX Cloud backend application**. Contains the necessary logic and compute to connect to data and run queries. The specifics of how the GX Cloud backend connects to your data is described in [Deployment patterns](/cloud/deploy/deployment_patterns.md).
 
 * **GX Core Python client**. Enables you to interact programmatically with the GX Cloud backend application. The [GX Core Python client](/core/introduction/introduction.mdx) can complement and extend your web UI-created workflows.
