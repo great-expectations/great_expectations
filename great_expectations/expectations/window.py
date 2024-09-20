@@ -9,6 +9,9 @@ class Offset(pydantic.BaseModel):
     positive: float
     negative: float
 
+    class Config:
+        extra = pydantic.Extra.forbid
+
 
 class Window(pydantic.BaseModel):
     """
@@ -19,3 +22,6 @@ class Window(pydantic.BaseModel):
     parameter_name: str
     range: int
     offset: Offset
+
+    class Config:
+        extra = pydantic.Extra.forbid
