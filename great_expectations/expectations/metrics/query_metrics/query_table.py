@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Union
 
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -19,7 +19,7 @@ from great_expectations.expectations.metrics.util import MAX_IN_MEMORY_RECORDS_A
 from great_expectations.util import get_sqlalchemy_subquery_type
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility import pyspark, sqlalchemy
+    from great_expectations.compatibility import pyspark
 
 
 class QueryTable(QueryMetricProvider):
@@ -69,9 +69,9 @@ class QueryTable(QueryMetricProvider):
         else:
             query = query.format(batch=f"({batch_selectable})")
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchmany(
-            MAX_IN_MEMORY_RECORDS_ALLOWED
-        )
+        result: Union[Sequence[sa.Row[Any]], Any] = execution_engine.execute_query(
+            sa.select(sa.text(query))
+        ).fetchmany(MAX_IN_MEMORY_RECORDS_ALLOWED)
         return [element._asdict() for element in result]
         # </snippet>
 
