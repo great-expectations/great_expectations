@@ -1,4 +1,5 @@
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import Extra
 
 
 class Offset(pydantic.BaseModel):
@@ -10,7 +11,7 @@ class Offset(pydantic.BaseModel):
     negative: float
 
     class Config:
-        extra = pydantic.Extra.forbid
+        extra = Extra.forbid
 
 
 class Window(pydantic.BaseModel):
@@ -24,4 +25,4 @@ class Window(pydantic.BaseModel):
     offset: Offset
 
     class Config:
-        extra = pydantic.Extra.forbid
+        extra = Extra.forbid
