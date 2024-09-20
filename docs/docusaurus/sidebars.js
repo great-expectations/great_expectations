@@ -146,41 +146,35 @@ module.exports = {
     }
   ],
   gx_cloud: [
-    {type: 'doc', id: 'cloud/why_gx_cloud'},
         {
           type: 'category',
-          label: 'GX Cloud deployment patterns and architecture',
-          link: { type: 'doc', id: 'cloud/about_gx' },
+          label: 'GX Cloud overview',
+          link: { type: 'doc', id: 'cloud/overview/gx_cloud_overview' },
           items: [
             {
               type: 'link',
-              label: 'GX Cloud architecture',
-              href: '/docs/cloud/about_gx#gx-cloud-architecture',
-            },
-            {
-              type: 'link',
-              label: 'GX Cloud deployment options',
-              href: '/docs/cloud/about_gx#gx-cloud-deployment-options',
+              label: 'GX Cloud concepts',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-concepts',
             },
             {
               type: 'link',
               label: 'GX Cloud workflow',
-              href: '/docs/cloud/about_gx#gx-cloud-workflow',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-workflow',
             },
             {
               type: 'link',
-              label: 'Roles and responsibilities',
-              href: '/docs/cloud/about_gx#roles-and-responsibilities',
+              label: 'GX Cloud architecture',
+              href: '/docs/cloud/overview/gx_cloud_overview#gx-cloud-architecture',
             },
-            {
-              type: 'link',
-              label: 'Supported browsers',
-              href: '/docs/cloud/about_gx#supported-browsers',
-            },
-            { 
-              type: 'doc', 
-              id: 'cloud/deploy_gx_agent' 
-            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Deploy GX Cloud',
+          link: { type: 'doc', id: 'cloud/deploy/deploy_lp' },
+          items: [
+            'cloud/deploy/deployment_patterns',
+            'cloud/deploy/deploy_gx_agent',
           ]
         },
         {
@@ -367,6 +361,11 @@ module.exports = {
           label: 'Manage users and access tokens',
           link: { type: 'doc', id: 'cloud/users/manage_users' },
           items: [
+            {
+              type: 'link',
+              label: 'Roles and responsibilities',
+              href: '/docs/cloud/users/manage_users#roles-and-responsibilities',
+            },
             {
               type: 'link',
               label: 'Invite a user',
