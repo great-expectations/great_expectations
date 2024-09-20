@@ -3,15 +3,18 @@ from __future__ import annotations
 import logging
 import re
 from collections import UserDict
+from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Iterable,
     List,
     Mapping,
     Optional,
     Sequence,
     Tuple,
+    Type,
     overload,
 )
 
@@ -63,6 +66,11 @@ try:
 except ImportError:
     clickhouse_sqlalchemy = None
 
+try:
+    import databricks.sqlalchemy as sqla_databricks
+except (ImportError, AttributeError):
+    sqla_databricks = None  # type: ignore[assignment]
+
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
 from great_expectations.compatibility import bigquery as sqla_bigquery
@@ -79,12 +87,33 @@ except ImportError:
     teradatatypes = None
 
 
+def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
+    """
+    Check if the Databricks dialect is being provided.
+    """
+    if not sqla_databricks:
+        return False
+    try:
+        if isinstance(dialect, sqla_databricks.DatabricksDialect):
+            return True
+        if hasattr(dialect, "DatabricksDialect"):
+            return True
+        if issubclass(dialect, sqla_databricks.DatabricksDialect):  # type: ignore[arg-type]
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
-    column, regex, dialect, positive=True
-):
+    column: sa.Column,
+    regex: str,
+    dialect: ModuleType | Type[sa.Dialect] | sa.Dialect,
+    positive: bool = True,
+) -> sa.SQLColumnExpression | None:
     try:
         # postgres
-        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):  # type: ignore[union-attr]
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
@@ -96,11 +125,18 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     except AttributeError:
         pass
 
+    # databricks sql
+    if _is_databricks_dialect(dialect):
+        if positive:
+            return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+        else:
+            return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
+
     # redshift
     # noinspection PyUnresolvedReferences
     try:
         if hasattr(dialect, "RedshiftDialect") or (
-            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)  # type: ignore[union-attr]
         ):
             if positive:
                 return sqlalchemy.BinaryExpression(
@@ -117,7 +153,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # MySQL
-        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):  # type: ignore[union-attr]
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
@@ -134,7 +170,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # Snowflake
         if issubclass(
-            dialect.dialect,
+            dialect.dialect,  # type: ignore[union-attr]
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
             if positive:
@@ -216,7 +252,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # Teradata
-        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
+        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):  # type: ignore[union-attr]
             if positive:
                 return (
                     sa.func.REGEXP_SIMILAR(
@@ -237,7 +273,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # sqlite
         # regex_match for sqlite introduced in sqlalchemy v1.4
-        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(
+        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(  # type: ignore[union-attr]
             sa.__version__
         ) >= version.parse("1.4"):
             if positive:
@@ -256,7 +292,9 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     return None
 
 
-def _get_dialect_type_module(dialect=None):
+def _get_dialect_type_module(
+    dialect: ModuleType | Type[sa.Dialect] | sa.Dialect | None = None,
+) -> ModuleType | Type[sa.Dialect] | sa.Dialect:
     if dialect is None:
         logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
@@ -274,7 +312,7 @@ def _get_dialect_type_module(dialect=None):
         if (
             isinstance(
                 dialect,
-                sqla_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,  # type: ignore[attr-defined]
             )
             and bigquery_types_tuple is not None
         ):
@@ -286,7 +324,7 @@ def _get_dialect_type_module(dialect=None):
     try:
         if (
             issubclass(
-                dialect,
+                dialect,  # type: ignore[arg-type]
                 teradatasqlalchemy.dialect.TeradataDialect,
             )
             and teradatatypes is not None
@@ -836,14 +874,14 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
     return None if verify_only else normalized_batch_columns_mappings
 
 
-def parse_value_set(value_set):
+def parse_value_set(value_set: Iterable) -> list:
     parsed_value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
     return parsed_value_set
 
 
-def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
-    column, dialect, like_pattern, positive=True
-):
+def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915
+    column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
+) -> sa.BinaryExpression | None:
     dialect_supported: bool = False
 
     try:
@@ -867,6 +905,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
             ),
         ):
             dialect_supported = True
+
+    if _is_databricks_dialect(dialect):
+        dialect_supported = True
 
     try:
         if hasattr(dialect, "RedshiftDialect"):

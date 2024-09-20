@@ -10,6 +10,31 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.21
+* [BUGFIX] Using `{batch}` keyword in `UnexpectedRowsQuery` (#10392) ([#10411](https://github.com/great-expectations/great_expectations/pull/10411))
+* [BUGFIX] 0.18.x Ignore unsupported INTERVAL type as part of CDM ([#10414](https://github.com/great-expectations/great_expectations/pull/10414))
+* [BUGFIX] 0.18.x Databricks SQL Pattern Expectation Fix ([#10415](https://github.com/great-expectations/great_expectations/pull/10415))
+* [MAINTENANCE] Pass `description` from `Validator` to `ExpectationConfiguration` ([#10388](https://github.com/great-expectations/great_expectations/pull/10388))
+
+### 0.18.20
+* [FEATURE] Add `UnexpectedRowsExpectation` ([#10342](https://github.com/great-expectations/great_expectations/pull/10342))
+* [BUGFIX] Remove illegible duplicate local Data Docs link from Slack renderer ([#10129](https://github.com/great-expectations/great_expectations/pull/10129))
+* [MAINTENANCE] Ruff 0.5.3 + PR annotations ([#10128](https://github.com/great-expectations/great_expectations/pull/10128))
+* [MAINTENANCE] Fix 0.18.x CI ([#10199](https://github.com/great-expectations/great_expectations/pull/10199))
+* [MAINTENANCE] Update column identifier tests ([#8783](https://github.com/great-expectations/great_expectations/pull/8783))
+
+### 0.18.19
+* [FEATURE] Snowflake test for the presence of a schema in `test_connection()` ([#10100](https://github.com/great-expectations/great_expectations/pull/10100))
+* [BUGFIX] Z-score renderer when `double_sided` ([#10085](https://github.com/great-expectations/great_expectations/pull/10085))
+* [BUGFIX] SQLDatasource - lowercase unquoted `schema_names` for SQLAlchemy case-sensitivity compatibility ([#10107](https://github.com/great-expectations/great_expectations/pull/10107))
+* [MAINTENANCE] Export `great_expectations.compatibility` types ([#10089](https://github.com/great-expectations/great_expectations/pull/10089))
+* [MAINTENANCE] 0.18.x - mypy - `possibly-undefined` ([#10091](https://github.com/great-expectations/great_expectations/pull/10091))
+* [MAINTENANCE] loosen ruamel pin ([#10081](https://github.com/great-expectations/great_expectations/pull/10081))
+
+### 0.18.18
+* [FEATURE] Add atomic renderer for `ExpectMulticolumnSumToEqual` (#10076) ([#10077](https://github.com/great-expectations/great_expectations/pull/10077))
+* [FEATURE] Snowflake - narrow Account Identifier regex ([#10069](https://github.com/great-expectations/great_expectations/pull/10069))
+* [FEATURE] Add missing atomic renderers to Expectations (#10079) ([#10080](https://github.com/great-expectations/great_expectations/pull/10080))
 
 ### 0.18.17
 * [FEATURE] Snowflake - Better Account Identifier related TestConnectionErrors ([#10043](https://github.com/great-expectations/great_expectations/pull/10043))
