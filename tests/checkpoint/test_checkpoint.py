@@ -1448,3 +1448,7 @@ class TestCheckpointPydanticSerializationMethods:
             ExpectationSuiteNotAddedError,
             ValidationDefinitionNotAddedError,
         ]
+
+
+def test_nothing():
+    assert True
