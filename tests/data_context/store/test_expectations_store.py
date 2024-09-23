@@ -6,6 +6,7 @@ import pytest
 
 import great_expectations.expectations as gxe
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -494,7 +495,8 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
     # Assert
     updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))
     updated_suite = ExpectationSuite(**updated_suite_dict)
-    updated_suite.render()
+    if isinstance(context, CloudDataContext):
+        updated_suite.render()
     assert suite == updated_suite
     assert len(updated_suite.expectations) == 1
 
