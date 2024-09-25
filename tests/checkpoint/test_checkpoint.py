@@ -1478,16 +1478,14 @@ def test_checkpoint_expectation_parameters(
             data=bd,
         )
     )
-    empty_data_context.checkpoints.add(
+    checkpoint = empty_data_context.checkpoints.add(
         Checkpoint(
             name=name,
             validation_definitions=[vd],
         )
     )
 
-    cp = empty_data_context.checkpoints.get(name)
-
-    results = cp.run(
+    results = checkpoint.run(
         expectation_parameters={"values": [1, 2]},
         batch_parameters={"dataframe": pd.DataFrame({col: [1, 2]})},
     )
