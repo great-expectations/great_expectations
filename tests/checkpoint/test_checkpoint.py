@@ -1450,6 +1450,7 @@ class TestCheckpointPydanticSerializationMethods:
         ]
 
 
+@pytest.mark.unit
 def test_checkpoint_expectation_parameters(
     empty_data_context: AbstractDataContext,
 ) -> None:
