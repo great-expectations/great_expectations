@@ -330,7 +330,19 @@ class AbstractDataContext(ConfigPeer, ABC):
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """  # noqa: E501
+        self._synchronize_config()
         return self.variables.save()
+
+    def _synchronize_config(self) -> None:
+        """Syncrhonize config with the current context.
+
+        This is a workaround until we rework the persistence layer.
+        Datasources can currently fall out of sync between the context
+        and its config (which is used at least in __str__ and __repr__ for contexts).
+
+        TODO: Remove this method and ensure there is one single source of truth
+        """
+        self.config.fluent_datasources = self.fluent_datasources
 
     @public_api
     def update_project_config(
