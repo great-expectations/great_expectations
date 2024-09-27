@@ -27,6 +27,7 @@ from typing import (
 
 from marshmallow import ValidationError
 
+import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
     new_argument,
@@ -1574,17 +1575,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         site_name: Optional[str] = None,
         only_if_exists: bool = True,
     ) -> None:
-        data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
+        data_docs_urls = self.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
             only_if_exists=only_if_exists,
         )
-        urls_to_open: List[str] = [site["site_url"] for site in data_docs_urls]
+        nullable_urls = [site["site_url"] for site in data_docs_urls]
+        urls_to_open = [url for url in nullable_urls if url is not None]
+
+        if not urls_to_open:
+            raise gx.exceptions.NoDataDocsError
 
         for url in urls_to_open:
-            if url is not None:
-                logger.debug(f"Opening Data Docs found here: {url}")
-                self._open_url_in_browser(url)
+            logger.debug(f"Opening Data Docs found here: {url}")
+            self._open_url_in_browser(url)
 
     @staticmethod
     def _open_url_in_browser(url: str) -> None:
@@ -1599,7 +1603,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         site_name: Optional[str] = None,
         only_if_exists: bool = True,
         site_names: Optional[List[str]] = None,
-    ) -> List[Dict[str, str]]:
+    ) -> List[Dict[str, Optional[str]]]:
         """
         Get URLs for a resource for all data docs sites.
 
