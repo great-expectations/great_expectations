@@ -286,7 +286,7 @@ class DatabaseStoreBackend(StoreBackend):
         raise NotImplementedError
 
     @override
-    def get_url_for_key(self, key) -> str:
+    def get_url_for_key(self, key, protocol=None) -> str:
         url = self._convert_engine_and_key_to_url(key)
         return url
 
