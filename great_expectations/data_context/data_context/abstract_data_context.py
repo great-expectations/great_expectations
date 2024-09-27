@@ -1650,7 +1650,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
             return [{"site_name": site_name, "site_url": url}]
 
-        site_urls = []
+        site_urls: List[Dict[str, Optional[str]]] = []
         for _site_name, site_config in sites.items():
             site_builder = self._load_site_builder_from_site_config(site_config)
             url = site_builder.get_resource_url(
