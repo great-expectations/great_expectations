@@ -47,7 +47,7 @@ Ensures that all values in a column fall between a specified minimum and maximum
 **Use Case**: Essential for bounding numerical values within valid ranges, such as ensuring product ratings or purchase amounts are within reasonable limits.
 
 ```python
-validator.expect_column_values_to_be_between(
+gxe.expect_column_values_to_be_between(
     column="product_rating",
     min_value=1,
     max_value=5,
@@ -63,7 +63,7 @@ Validates that values in one column are greater than corresponding values in ano
 **Use Case**: Crucial for maintaining valid relationships between data entities, like verifying that return dates are later than purchase dates.
 
 ```python
-validator.expect_column_pair_values_A_to_be_greater_than_B(
+gxe.expect_column_pair_values_A_to_be_greater_than_B(
     column_A="return_date",
     column_B="purchase_date",
 )
@@ -78,7 +78,7 @@ Checks that the Z-scores (number of standard deviations from mean) of all values
 **Use Case**: Powerful for identifying individual outliers and anomalous data points that could represent data entry issues or unusual transactions.
 
 ```python
-validator.expect_column_value_z_scores_to_be_less_than(
+gxe.expect_column_value_z_scores_to_be_less_than(
     column="purchase_amount",
     threshold=3,
 )
@@ -93,7 +93,7 @@ Ensures that specified quantiles of a column fall within provided ranges.
 **Use Case**: Robustly monitors key statistics of the overall distribution, which is valuable for tracking metrics like median purchase amount or 90th percentile product ratings.
 
 ```python
-validator.expect_column_quantile_values_to_be_between(
+gxe.expect_column_quantile_values_to_be_between(
     column="purchase_amount",
     quantile_ranges={
         "quantiles": [0.5, 0.9],
@@ -114,7 +114,7 @@ Validates that the standard deviation of a column is within a specified range.
 **Use Case**: Watches for unusual changes in variance that could signal issues in data collection or processing pipelines.
 
 ```python
-validator.expect_column_stdev_to_be_between(
+gxe.expect_column_stdev_to_be_between(
     column="purchase_amount",
     min_value=500,
     max_value=2000
@@ -154,38 +154,47 @@ Here's an example GX Core workflow that validates the age distribution in the sa
 
 ```python
 import great_expectations as gx
+import great_expectations.expectations as gxe
 import pandas as pd
 
-# Load the sample data
-df = pd.read_csv("distribution_customer_data.csv")
-
-# Create a Data Context and add a Pandas Data Source
+# Create Data Context.
 context = gx.get_context()
-datasource = context.sources.add_pandas(name="my_pandas_datasource")
 
-# Create a DataFrame Asset
-asset = datasource.add_dataframe_asset(name="customer_data", dataframe=df)
+# Connect to sample data, create Data Source and Data Asset.
+CONNECTION_STRING = "postgresql+psycopg2://try_gx:try_gx@postgres.workshops.greatexpectations.io/gx_learn_data_quality"
+
+data_source = context.data_sources.add_postgres(
+    "postgres database", connection_string=CONNECTION_STRING
+)
+data_asset = data_source.add_table_asset(
+    name="financial transfers table", table_name="distribution_purchases"
+)
 
 # Create an Expectation Suite
-suite = context.add_expectation_suite(expectation_suite_name="customer_age_distribution_suite")
+suite = context.add_expectation_suite(expectation_suite_name="purchase_amount_distribution_suite")
 
 # Add distribution Expectations
-suite.expect_column_kl_divergence_to_be_less_than(
-    column="age",
-    partition_object={"bins": [0, 20, 40, 60, 80, 100], "weights": [0.05, 0.25, 0.4, 0.25, 0.05]},
+purchase_amount_distribution_expectation = gxe.ExpectColumnKlDivergenceToBeLessThan(
+    column="purchase_amount",
+    partition_object={"bins": [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000], "weights": [0.3, 0.2, 0.15, 0.1, 0.1, 0.05, 0.05, 0.05]},
     threshold=0.1
 )
-suite.expect_column_mean_to_be_between(column="age", min_value=30, max_value=50)
-suite.expect_column_median_to_be_between(column="age", min_value=35, max_value=45)
 
-# Create a Validator and run the suite
+purchase_amount_mean_expectation = gxe.ExpectColumnMeanToBeBetween(column="purchase_amount", min_value=500, max_value=2000)
+purchase_amount_median_expectation = gxe.ExpectColumnMedianToBeBetween(column="purchase_amount", min_value=250, max_value=1500)
+
+suite.add_expectation(purchase_amount_distribution_expectation)
+suite.add_expectation(purchase_amount_mean_expectation)
+suite.add_expectation(purchase_amount_median_expectation)
+
+# Validate the data asset and capture the result
 validator = context.get_validator(
-    batch_request=asset.build_batch_request(),
+    batch_request=data_asset.build_batch_request(),
     expectation_suite=suite
 )
 results = validator.validate()
 
-# Print the results
+# Print the validation results
 print(results)
 ```
 
