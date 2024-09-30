@@ -59,6 +59,7 @@ from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -235,10 +236,14 @@ class SlackNotificationAction(DataDocsAction):
 
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        config_provider = project_manager.get_config_provider()
         for credential in ("slack_webhook", "slack_token", "slack_channel"):
             if isinstance(values[credential], ConfigStr):
                 values[credential] = cls._substitute_slack_credential(
-                    slack_credential=values[credential]
+                    slack_credential=values[credential],
+                    config_provider=config_provider,
                 )
 
         try:
@@ -252,10 +257,9 @@ class SlackNotificationAction(DataDocsAction):
         return values
 
     @classmethod
-    def _substitute_slack_webhook(cls, slack_credential: ConfigStr) -> str:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
-        config_provider = project_manager.get_config_provider()
+    def _substitute_slack_credential(
+        cls, slack_credential: ConfigStr, config_provider: _ConfigurationProvider
+    ) -> str:
         return slack_credential.get_config_value(config_provider=config_provider)
 
     @override
