@@ -417,6 +417,7 @@ def test_expectation_equality_with_meta(meta_a: dict | None, meta_b: dict | None
     assert (expectation_a == expectation_b) is expected
 
 
+@pytest.mark.unit
 def test_expectation_equality_ignores_rendered_content():
     column = "whatever"
     min_value = 0
