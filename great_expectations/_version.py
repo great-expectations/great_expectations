@@ -68,7 +68,7 @@ def register_vcs_handler(vcs, method):  # decorator
     return decorate
 
 
-def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=None):  # noqa: C901 - too complex
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=None):
     """Call the given command(s)."""
     assert isinstance(commands, list)
 
@@ -97,8 +97,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
             print(f"unable to find command, tried {commands}")
         return None, None
     stdout = p.communicate()[0].strip()
-    if sys.version_info[0] >= 3:
-        stdout = stdout.decode()
+    stdout = stdout.decode()
     if p.returncode != 0:
         if verbose:
             print(f"unable to run {dispcmd} (error)")
