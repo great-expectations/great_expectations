@@ -13,7 +13,7 @@ from great_expectations_v1.checkpoint.actions import (
 )
 from great_expectations_v1.compatibility.pydantic import BaseModel, Field, root_validator, validator
 from great_expectations_v1.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
+    ExpectationSuiteValidationResult,
 )
 from great_expectations_v1.core.result_format import ResultFormat
 from great_expectations_v1.core.run_identifier import RunIdentifier

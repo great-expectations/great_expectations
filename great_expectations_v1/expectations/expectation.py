@@ -63,8 +63,9 @@ from great_expectations_v1.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
     COLUMN_LIST_DESCRIPTION,
     MOSTLY_DESCRIPTION,
+    WINDOWS_DESCRIPTION,
 )
-from great_expectations_v1.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
+from great_expectations_v1.expectations.model_field_types import (
     Mostly,
 )
 from great_expectations_v1.expectations.registry import (
@@ -75,6 +76,7 @@ from great_expectations_v1.expectations.registry import (
 from great_expectations_v1.expectations.sql_tokens_and_types import (
     valid_sql_tokens_and_types,
 )
+from great_expectations_v1.expectations.window import Window
 from great_expectations_v1.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -256,7 +258,7 @@ class MetaExpectation(ModelMetaclass):
 class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     """Base class for all Expectations.
 
-    For a list of all available expectation types, see the `Expectation Gallery <https://greatexpectations.io/expectations/>`_.
+    For a list of all available expectation types, see the `Expectation Gallery <https://great_expectations.io/expectations/>`_.
 
     Expectation classes *must* have the following attributes set:
         1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
@@ -330,11 +332,29 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
+    windows: Optional[List[Window]] = pydantic.Field(default=None, description=WINDOWS_DESCRIPTION)
     examples: ClassVar[List[dict]] = []
 
     _save_callback: Union[Callable[[Expectation], Expectation], None] = pydantic.PrivateAttr(
         default=None
     )
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Expectation):
+            return False
+
+        self_dict = self.dict()
+        other_dict = other.dict()
+
+        # Simplify notes and meta equality - falsiness is equivalent
+        for attr in ("notes", "meta"):
+            self_val = self_dict.pop(attr, None) or None
+            other_val = other_dict.pop(attr, None) or None
+            if self_val != other_val:
+                return False
+
+        return self_dict == other_dict
 
     @pydantic.validator("result_format")
     def _validate_result_format(cls, result_format: ResultFormat | dict) -> ResultFormat | dict:
@@ -358,6 +378,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             raise RuntimeError(  # noqa: TRY003
                 "Expectation must be added to ExpectationSuite before it can be saved."
             )
+        if self._include_rendered_content:
+            self.render()
+
         updated_self = self._save_callback(self)
         self.id = updated_self.id
 
@@ -373,6 +396,16 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
             register_renderer(object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj)
+
+    def render(self) -> None:
+        """
+        Renders content using the atomic prescriptive renderer for each expectation configuration associated with
+           this ExpectationSuite to ExpectationConfiguration.rendered_content.
+        """  # noqa: E501
+        from great_expectations_v1.render.renderer.inline_renderer import InlineRenderer
+
+        inline_renderer = InlineRenderer(render_object=self.configuration)
+        self.rendered_content = inline_renderer.get_rendered_content()
 
     @abstractmethod
     def _validate(
@@ -739,7 +772,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             )
 
             if result.expectation_config is not None:
-                expectation_type = result.expectation_config.expectation_type
+                expectation_type = result.expectation_config.type
             else:
                 expectation_type = None
 
@@ -1188,14 +1221,13 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         pass  # no-op
 
     # Renamed from validate due to collision with Pydantic method of the same name
-    @public_api
     def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
         suite_parameters: Optional[dict] = None,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,  # To update
     ) -> ExpectationValidationResult:
         """Validates the expectation against the provided data.
 
@@ -1253,7 +1285,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         id = kwargs.pop("id", None)
         rendered_content = kwargs.pop("rendered_content", None)
         return ExpectationConfiguration(
-            expectation_type=camel_to_snake(self.__class__.__name__),
+            type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
             meta=meta,
             notes=notes,
@@ -1261,6 +1293,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             id=id,
             rendered_content=rendered_content,
         )
+
+    @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations_v1.data_context.data_context.context_factory import project_manager
+
+        return project_manager.is_using_cloud()
 
     def __copy__(self):
         return self.copy(update={"id": None}, deep=True)
@@ -2555,12 +2593,13 @@ class UnexpectedRowsExpectation:
     ):
         # deprecated-v1.0.2
         warnings.warn(
-            "Importing UnexpectedRowsExpectation from great_expectations.expectations.expectation "
+            "Importing UnexpectedRowsExpectation from "
+            "great_expectations_v1.expectations.expectation "
             "is deprecated. Please import UnexpectedRowsExpectation from "
-            "great_expectations.expectations instead.",
+            "great_expectations_v1.expectations instead.",
             category=DeprecationWarning,
         )
-        from great_expectations.expectations import (
+        from great_expectations_v1.expectations import (
             UnexpectedRowsExpectation as CoreUnexpectedRowsExpectation,
         )
 
@@ -2682,7 +2721,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 partial_unexpected_counts = [
                     {"value": key, "count": value}
                     for key, value in sorted(
-                        Counter(immutable_unexpected_list).most_common(
+                        Counter(immutable_unexpected_list).most_common(  # type: ignore[possibly-undefined] # FIXME
                             result_format["partial_unexpected_count"]
                         ),
                         key=lambda x: (-x[1], x[0]),

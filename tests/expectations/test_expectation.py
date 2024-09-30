@@ -4,21 +4,21 @@ import itertools
 import logging
 from typing import Any, Dict, List
 
+import great_expectations_v1.expectations as gxe
 import pytest
-
-import great_expectations.expectations as gxe
-from great_expectations.compatibility import pydantic
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations.expectation import (
+from great_expectations_v1.compatibility import pydantic
+from great_expectations_v1.exceptions import InvalidExpectationConfigurationError
+from great_expectations_v1.expectations.expectation import (
     ColumnMapExpectation,
     ColumnPairMapExpectation,
     MulticolumnMapExpectation,
     _validate_dependencies_against_available_metrics,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations_v1.expectations.window import Offset, Window
+from great_expectations_v1.validator.metric_configuration import MetricConfiguration
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ def fake_expectation_config(
     Helper method to generate of ExpectationConfiguration objects for tests.
     """
     return ExpectationConfiguration(
-        expectation_type=expectation_type,
+        type=expectation_type,
         kwargs=config_kwargs,
     )
 
@@ -216,7 +216,60 @@ def test_expectation_configuration_property():
     expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     assert expectation.configuration == ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
+        type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "foo",
+            "min_value": 0,
+            "max_value": 10,
+        },
+    )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_window():
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="foo",
+        min_value=0,
+        max_value=10,
+        windows=[
+            Window(
+                constraint_fn="a",
+                parameter_name="b",
+                range=5,
+                offset=Offset(positive=0.2, negative=0.2),
+            )
+        ],
+    )
+
+    assert expectation.configuration == ExpectationConfiguration(
+        type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "foo",
+            "min_value": 0,
+            "max_value": 10,
+            "windows": [
+                {
+                    "constraint_fn": "a",
+                    "parameter_name": "b",
+                    "range": 5,
+                    "offset": {"positive": 0.2, "negative": 0.2},
+                }
+            ],
+        },
+    )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_window_empty():
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="foo",
+        min_value=0,
+        max_value=10,
+        windows=None,
+    )
+
+    assert expectation.configuration == ExpectationConfiguration(
+        type="expect_column_max_to_be_between",
         kwargs={
             "column": "foo",
             "min_value": 0,
@@ -234,7 +287,7 @@ def test_expectation_configuration_property_recognizes_state_changes():
     expectation.max_value = 15
 
     assert expectation.configuration == ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
+        type="expect_column_max_to_be_between",
         kwargs={
             "column": "bar",
             "min_value": 5,
@@ -298,3 +351,66 @@ class TestSuiteParameterOptions:
             max_value={"$PARAMETER": self.SUITE_PARAMETER_VALUE},
         )
         assert expectation.suite_parameter_options == (self.SUITE_PARAMETER_VALUE,)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "column_a,column_b,expected",
+    [
+        pytest.param("foo", "foo", True, id="equivalent_columns"),
+        pytest.param("foo", "bar", False, id="different_columns"),
+    ],
+)
+def test_expectation_equality(column_a: str, column_b: str, expected: bool):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(column=column_a, min_value=0, max_value=10)
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(column=column_b, min_value=0, max_value=10)
+
+    assert (expectation_a == expectation_b) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "notes_a,notes_b,expected",
+    [
+        pytest.param(None, None, True, id="both_none"),
+        pytest.param([], None, True, id="both_falsy"),
+        pytest.param("my_notes", None, False, id="missing_notes"),
+        pytest.param("my_notes", "my_other_notes", False, id="different_notes"),
+        pytest.param("my_notes", "my_notes", True, id="equivalent_notes"),
+    ],
+)
+def test_expectation_equality_with_notes(
+    notes_a: str | list[str] | None, notes_b: str | list[str] | None, expected: bool
+):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, notes=notes_a
+    )
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, notes=notes_b
+    )
+
+    assert (expectation_a == expectation_b) is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "meta_a,meta_b,expected",
+    [
+        pytest.param(None, None, True, id="both_none"),
+        pytest.param({}, None, True, id="both_falsy"),
+        pytest.param({"author": "Bob Dylan"}, None, False, id="missing_meta"),
+        pytest.param(
+            {"author": "Bob Dylan"}, {"author": "John Lennon"}, False, id="different_meta"
+        ),
+        pytest.param({"author": "Bob Dylan"}, {"author": "Bob Dylan"}, True, id="equivalent_meta"),
+    ],
+)
+def test_expectation_equality_with_meta(meta_a: dict | None, meta_b: dict | None, expected: bool):
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, meta=meta_a
+    )
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", min_value=0, max_value=10, meta=meta_b
+    )
+
+    assert (expectation_a == expectation_b) is expected
