@@ -78,93 +78,19 @@ def _pandas_column_map_condition_values(
     if filter_column_isnull:
         df = df[df[column_name].notnull()]
 
-    domain_values = df[column_name][:MAX_RESULT_RECORDS]
-
-    domain_values = domain_values[
-        boolean_mapped_unexpected_values == True  # noqa: E712
-    ]
-
-    result_format = metric_value_kwargs["result_format"]
-
-    if result_format["result_format"] == "COMPLETE":
-        return list(domain_values)
-
-    return list(domain_values[: result_format["partial_unexpected_count"]])
-
-
-# TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>  # noqa: E501
-def _pandas_column_map_series_and_domain_values(
-    cls,
-    execution_engine: PandasExecutionEngine,
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
-    **kwargs,
-):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
-    (
-        boolean_mapped_unexpected_values,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = metrics["unexpected_condition"]
-    (
-        map_series,
-        compute_domain_kwargs_2,
-        accessor_domain_kwargs_2,
-    ) = metrics["metric_partial_fn"]
-    assert (
-        compute_domain_kwargs == compute_domain_kwargs_2
-    ), "map_series and condition must have the same compute domain"
-    assert (
-        accessor_domain_kwargs == accessor_domain_kwargs_2
-    ), "map_series and condition must have the same accessor kwargs"
-
-    if "column" not in accessor_domain_kwargs:
-        raise ValueError(  # noqa: TRY003
-            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
-(_pandas_column_map_series_and_domain_values).
-"""  # noqa: E501
-        )
-
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
-    ###
-    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
-    # currently handle filter_column_isnull differently than other map_fn / map_condition
-    # cases.
-    ###
-    filter_column_isnull = kwargs.get(
-        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    )
-    if filter_column_isnull:
-        df = df[df[column_name].notnull()]
-
     domain_values = df[column_name]
 
     domain_values = domain_values[
         boolean_mapped_unexpected_values == True  # noqa: E712
     ]
-    map_series = map_series[boolean_mapped_unexpected_values == True]  # noqa: E712
 
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return (
-            list(domain_values),
-            list(map_series),
-        )
+        return list(domain_values[:MAX_RESULT_RECORDS])
 
-    return (
-        list(domain_values[: result_format["partial_unexpected_count"]]),
-        list(map_series[: result_format["partial_unexpected_count"]]),
-    )
+    limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+    return list(domain_values[:limit])
 
 
 def _pandas_column_map_condition_value_counts(
