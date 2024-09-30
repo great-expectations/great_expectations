@@ -27,6 +27,7 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
     _is_sqlalchemy_metric_selectable,
 )
 from great_expectations.expectations.metrics.util import (
+    MAX_RESULT_RECORDS,
     compute_unexpected_pandas_indices,
     get_dbms_compatible_metric_domain_kwargs,
     get_sqlalchemy_source_table_and_schema,
@@ -241,9 +242,10 @@ def _pandas_map_condition_rows(
     df = df[boolean_mapped_unexpected_values]
 
     if result_format["result_format"] == "COMPLETE":
-        return df
+        return df[:MAX_RESULT_RECORDS]
 
-    return df.iloc[: result_format["partial_unexpected_count"]]
+    limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+    return df.iloc[:limit]
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
@@ -392,9 +394,10 @@ def _sqlalchemy_map_condition_rows(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
-        query = query.limit(result_format["partial_unexpected_count"])
+        limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+        query = query.limit(limit)
     try:
-        return execution_engine.execute_query(query).fetchall()
+        return execution_engine.execute_query(query).fetchmany(MAX_RESULT_RECORDS)
     except sqlalchemy.OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {oe!s}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(message=exception_message)
@@ -648,9 +651,10 @@ def _spark_map_condition_rows(
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return filtered.collect()
+        return filtered.limit(MAX_RESULT_RECORDS).collect()
 
-    return filtered.limit(result_format["partial_unexpected_count"]).collect()
+    limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+    return filtered.limit(limit).collect()
 
 
 def _spark_map_condition_index(  # noqa: C901 - too complex
