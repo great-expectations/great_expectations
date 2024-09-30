@@ -953,3 +953,21 @@ class TestV1ActionRun:
             validation_identifier_a: {},
             validation_identifier_b: {},
         }
+
+
+@pytest.mark.unit
+def test_SlackNotificationAction_variable_substitution_webhook(mock_context):
+    SlackNotificationAction(name="my_action", slack_webhook="${SLACK_WEBHOOK}")
+
+    mock_context.config_provider.substitute_config.assert_called_once_with("${SLACK_WEBHOOK}")
+
+
+@pytest.mark.unit
+def test_SlackNotificationAction_variable_substitution_token_and_channel(mock_context):
+    SlackNotificationAction(
+        name="my_action", slack_token="${SLACK_TOKEN}", slack_channel="${SLACK_CHANNEL}"
+    )
+
+    assert mock_context.config_provider.substitute_config.call_count == 2
+    mock_context.config_provider.substitute_config.assert_any_call("${SLACK_CHANNEL}")
+    mock_context.config_provider.substitute_config.assert_any_call("${SLACK_TOKEN}")
