@@ -562,7 +562,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return_obj._data_context = self
         if save_changes:
             self._save_project_config()
-
             self.config.fluent_datasources[return_obj.name] = return_obj
 
         return return_obj
@@ -595,7 +594,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._save_project_config()
 
         assert isinstance(updated_datasource, FluentDatasource)
-        self.config.fluent_datasources[updated_datasource.name] = updated_datasource
+        self.config.fluent_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
     def _delete_fluent_datasource(self, name: str, _call_store: bool = True) -> None:
@@ -612,6 +611,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             # Raise key error instead?
             logger.info(f"No Datasource '{name}' to delete")
         self.data_sources.all().pop(name, None)
+        del self.config.fluent_datasources[name]
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -1016,8 +1016,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._delete_fluent_datasource(name)
 
         self._save_project_config()
-
-        del self.config.fluent_datasources[name]
 
     def get_validator(  # noqa: PLR0913
         self,
