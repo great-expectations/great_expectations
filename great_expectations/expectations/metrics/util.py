@@ -89,7 +89,7 @@ except ImportError:
     teradatatypes = None
 
 
-MAX_RESULT_RECORDS: Final[int] = 3
+MAX_RESULT_RECORDS: Final[int] = 1
 
 UnexpectedIndexList: TypeAlias = List[Dict[str, Any]]
 
