@@ -7,6 +7,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     Union,
 )
 
@@ -203,7 +204,7 @@ def _pandas_map_condition_rows(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> pd.DataFrame:
     """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
@@ -370,7 +371,7 @@ def _sqlalchemy_map_condition_rows(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> Union[Sequence[sa.Row[Any]], Any]:
     """
     Returns all rows of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -631,7 +632,7 @@ def _spark_map_condition_rows(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[dict]:
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]

@@ -43,7 +43,7 @@ def _pandas_column_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[dict]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
@@ -165,7 +165,7 @@ def _sqlalchemy_column_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Tuple],
     **kwargs,
-):
+) -> list[dict]:
     """
     Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
     expected Expectation condition for ColumnMapExpectation Expectations.
@@ -265,7 +265,7 @@ def _spark_column_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[dict]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"

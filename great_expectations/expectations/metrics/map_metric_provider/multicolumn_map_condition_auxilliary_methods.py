@@ -41,7 +41,7 @@ def _pandas_multicolumn_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[dict]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
@@ -125,7 +125,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[dict]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
@@ -214,7 +214,7 @@ def _spark_multicolumn_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[dict]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         unexpected_condition,
@@ -259,15 +259,12 @@ def _spark_multicolumn_map_condition_values(
             domain_values.select(column_selector)
             .limit(MAX_RESULT_RECORDS)
             .toPandas()
-            .to_dict("records")  # type: ignore[assignment]
+            .to_dict("records")
         )
     else:
         limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
         domain_values = (
-            domain_values.select(column_selector)  # type: ignore[assignment]
-            .limit(limit)
-            .toPandas()
-            .to_dict("records")
+            domain_values.select(column_selector).limit(limit).toPandas().to_dict("records")
         )
 
     return domain_values
