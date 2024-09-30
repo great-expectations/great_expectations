@@ -322,7 +322,7 @@ class SiteBuilder:
             index_links_dict,
         )
 
-    def get_resource_url(self, resource_identifier=None, only_if_exists=True):
+    def get_resource_url(self, resource_identifier=None, only_if_exists=True) -> Optional[str]:
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).

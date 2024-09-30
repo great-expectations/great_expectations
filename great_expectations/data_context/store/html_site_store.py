@@ -6,6 +6,7 @@ import pathlib
 import re
 import tempfile
 from mimetypes import guess_type
+from typing import Optional
 from zipfile import ZipFile, is_zipfile
 
 from great_expectations.core.data_context_key import DataContextKey
@@ -266,7 +267,7 @@ class HtmlSiteStore:
             content_type="text/html; charset=utf-8",
         )
 
-    def get_url_for_resource(self, resource_identifier=None, only_if_exists=True):
+    def get_url_for_resource(self, resource_identifier=None, only_if_exists=True) -> Optional[str]:
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
