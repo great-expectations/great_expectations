@@ -59,8 +59,8 @@ module.exports = {
           href: 'https://greatexpectations.io/cloud',
         },
         secondary: {
-          label: 'Why GX Cloud?',
-          href: 'https://docs.greatexpectations.io/docs/cloud/why_gx_cloud',
+          label: 'GX Cloud overview',
+          href: '/docs/cloud/overview/gx_cloud_overview',
         },
       },
     },
@@ -152,7 +152,7 @@ module.exports = {
         },
         {
           label: 'GX Cloud',
-          to: 'docs/cloud',
+          to: 'docs/cloud/overview/gx_cloud_overview',
           position: 'right',
           className: 'non-versioned-section',
         },
@@ -298,10 +298,10 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '1.0.4',
+              label: '1.0.5',
             },
             ['0.18']: {
-              label: '0.18.17',
+              label: '0.18.21',
             },
           },
           admonitions: {
@@ -325,6 +325,12 @@ module.exports = {
           // Optional fields.
           anonymizeIP: true, // Should IPs be anonymized?
         },
+        sitemap: {
+          ignorePatterns: [
+            '**/0.18/oss/templates/**',
+            '**/0.18/oss/team_templates/**'
+          ],
+        }
       },
     ],
   ],

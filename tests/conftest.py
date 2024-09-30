@@ -21,6 +21,7 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.analytics.config import ENV_CONFIG
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -95,7 +96,6 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
-    from great_expectations.compatibility import pyspark
     from great_expectations.compatibility.sqlalchemy import Engine
 
 yaml = YAMLHandler()
@@ -130,6 +130,7 @@ REQUIRED_MARKERS: Final[set[str]] = {
     "pyarrow",
     "snowflake",
     "spark",
+    "spark_connect",
     "sqlite",
     "trino",
     "unit",
@@ -195,6 +196,11 @@ def pytest_addoption(parser):
         "--spark",
         action="store_true",
         help="If set, execute tests against the spark test suite",
+    )
+    parser.addoption(
+        "--spark_connect",
+        action="store_true",
+        help="If set, execute tests against the spark-connect test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -488,6 +494,20 @@ def spark_session(test_backends) -> pyspark.SparkSession:
 
     if pyspark.SparkSession:  # type: ignore[truthy-function]
         return SparkDFExecutionEngine.get_or_create_spark_session()
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
+
+
+@pytest.fixture
+def spark_connect_session(test_backends):
+    from great_expectations.compatibility import pyspark
+
+    if pyspark.SparkConnectSession:  # type: ignore[truthy-function]
+        spark_connect_session = pyspark.SparkSession.builder.remote(
+            "sc://localhost:15002"
+        ).getOrCreate()
+        assert isinstance(spark_connect_session, pyspark.SparkConnectSession)
+        return spark_connect_session
 
     raise ValueError("spark tests are requested, but pyspark is not installed")
 
