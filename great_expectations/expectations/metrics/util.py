@@ -91,7 +91,7 @@ except ImportError:
 
 MAX_RESULT_RECORDS: Final[int] = 200
 
-UnexpectedIndexList: TypeAlias = list[dict[str, Any]]
+UnexpectedIndexList: TypeAlias = List[Dict[str, Any]]
 
 
 def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
