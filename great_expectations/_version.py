@@ -343,12 +343,12 @@ def render_pep440(pieces):
         rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
             rendered += plus_or_dot(pieces)
-            rendered += "%d.g%s" % (pieces["distance"], pieces["short"])
+            rendered += "%d.g%s" % (pieces["distance"], pieces["short"])  # noqa: UP031
             if pieces["dirty"]:
                 rendered += ".dirty"
     else:
         # exception #1
-        rendered = "0+untagged.%d.g%s" % (pieces["distance"], pieces["short"])
+        rendered = "0+untagged.%d.g%s" % (pieces["distance"], pieces["short"])  # noqa: UP031
         if pieces["dirty"]:
             rendered += ".dirty"
     return rendered
@@ -363,10 +363,10 @@ def render_pep440_pre(pieces):
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"]:
-            rendered += ".post.dev%d" % pieces["distance"]
+            rendered += ".post.dev%d" % pieces["distance"]  # noqa: UP031
     else:
         # exception #1
-        rendered = "0.post.dev%d" % pieces["distance"]
+        rendered = "0.post.dev%d" % pieces["distance"]  # noqa: UP031
     return rendered
 
 
@@ -383,14 +383,14 @@ def render_pep440_post(pieces):
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
-            rendered += ".post%d" % pieces["distance"]
+            rendered += ".post%d" % pieces["distance"]  # noqa: UP031
             if pieces["dirty"]:
                 rendered += ".dev0"
             rendered += plus_or_dot(pieces)
             rendered += f"g{pieces['short']}"
     else:
         # exception #1
-        rendered = "0.post%d" % pieces["distance"]
+        rendered = "0.post%d" % pieces["distance"]  # noqa: UP031
         if pieces["dirty"]:
             rendered += ".dev0"
         rendered += f"+g{pieces['short']}"
@@ -408,12 +408,12 @@ def render_pep440_old(pieces):
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
-            rendered += ".post%d" % pieces["distance"]
+            rendered += ".post%d" % pieces["distance"]  # noqa: UP031
             if pieces["dirty"]:
                 rendered += ".dev0"
     else:
         # exception #1
-        rendered = "0.post%d" % pieces["distance"]
+        rendered = "0.post%d" % pieces["distance"]  # noqa: UP031
         if pieces["dirty"]:
             rendered += ".dev0"
     return rendered
@@ -430,7 +430,7 @@ def render_git_describe(pieces):
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
         if pieces["distance"]:
-            rendered += "-%d-g%s" % (pieces["distance"], pieces["short"])
+            rendered += "-%d-g%s" % (pieces["distance"], pieces["short"])  # noqa: UP031
     else:
         # exception #1
         rendered = pieces["short"]
@@ -450,7 +450,7 @@ def render_git_describe_long(pieces):
     """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
-        rendered += "-%d-g%s" % (pieces["distance"], pieces["short"])
+        rendered += "-%d-g%s" % (pieces["distance"], pieces["short"])  # noqa: UP031
     else:
         # exception #1
         rendered = pieces["short"]
