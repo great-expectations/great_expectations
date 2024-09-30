@@ -46,6 +46,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.renderer import (
     EmailRenderer,
@@ -213,9 +214,9 @@ class SlackNotificationAction(DataDocsAction):
 
     type: Literal["slack"] = "slack"
 
-    slack_webhook: Optional[str] = None
-    slack_token: Optional[str] = None
-    slack_channel: Optional[str] = None
+    slack_webhook: Optional[Union[ConfigStr, str]] = None
+    slack_token: Optional[Union[ConfigStr, str]] = None
+    slack_channel: Optional[Union[ConfigStr, str]] = None
     notify_on: Literal["all", "failure", "success"] = "all"
     notify_with: Optional[List[str]] = None
     show_failed_expectations: bool = False
@@ -234,19 +235,28 @@ class SlackNotificationAction(DataDocsAction):
 
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
-        slack_token = values["slack_token"]
-        slack_channel = values["slack_channel"]
-        slack_webhook = values["slack_webhook"]
+        for credential in ("slack_webhook", "slack_token", "slack_channel"):
+            if isinstance(values[credential], ConfigStr):
+                values[credential] = cls._substitute_slack_credential(
+                    slack_credential=values[credential]
+                )
 
         try:
-            if slack_webhook:
-                assert not slack_token and not slack_channel
+            if values["slack_webhook"]:
+                assert not values["slack_token"] and not values["slack_channel"]
             else:
-                assert slack_token and slack_channel
+                assert values["slack_token"] and values["slack_channel"]
         except AssertionError:
             raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")  # noqa: TRY003
 
         return values
+
+    @classmethod
+    def _substitute_slack_webhook(cls, slack_credential: ConfigStr) -> str:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        config_provider = project_manager.get_config_provider()
+        return slack_credential.get_config_value(config_provider=config_provider)
 
     @override
     def run(
