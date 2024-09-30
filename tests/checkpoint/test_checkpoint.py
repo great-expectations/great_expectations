@@ -1495,3 +1495,46 @@ def test_loaded_checkpoint_can_run(
 
     results = cp.run({"dataframe": pd.DataFrame({col: [1, 1]})})
     assert results.success
+
+
+@pytest.mark.unit
+def test_checkpoint_expectation_parameters(
+    empty_data_context: AbstractDataContext,
+) -> None:
+    col = "col"
+    name = "checkpoint_testing"
+    bd = (
+        empty_data_context.data_sources.add_pandas(name)
+        .add_dataframe_asset(name)
+        .add_batch_definition_whole_dataframe(name)
+    )
+    suite = empty_data_context.suites.add(
+        ExpectationSuite(
+            name="test_suite",
+            expectations=[
+                gxe.ExpectColumnValuesToBeInSet(
+                    column=col,
+                    value_set={"$PARAMETER": "values"},
+                )
+            ],
+        )
+    )
+    vd = empty_data_context.validation_definitions.add(
+        ValidationDefinition(
+            name=name,
+            suite=suite,
+            data=bd,
+        )
+    )
+    checkpoint = empty_data_context.checkpoints.add(
+        Checkpoint(
+            name=name,
+            validation_definitions=[vd],
+        )
+    )
+
+    results = checkpoint.run(
+        expectation_parameters={"values": [1, 2]},
+        batch_parameters={"dataframe": pd.DataFrame({col: [1, 2]})},
+    )
+    assert results.success

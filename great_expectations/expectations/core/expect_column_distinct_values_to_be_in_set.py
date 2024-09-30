@@ -385,8 +385,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             return None
         else:
             chart_pixel_width = (len(values) / 60.0) * 500
-            if chart_pixel_width < 250:  # noqa: PLR2004
-                chart_pixel_width = 250
+            chart_pixel_width = max(chart_pixel_width, 250)
             chart_container_col_width = round((len(values) / 60.0) * 6)
             if chart_container_col_width < 4:  # noqa: PLR2004
                 chart_container_col_width = 4

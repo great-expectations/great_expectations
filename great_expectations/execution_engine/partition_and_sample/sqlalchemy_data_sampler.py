@@ -69,7 +69,7 @@ class SqlAlchemyDataSampler(DataSampler):
                     compile_kwargs={"literal_binds": True},
                 )
             )
-            query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
+            query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]  # noqa: UP031
             return query
         elif dialect_name == GXSqlDialect.MSSQL:
             # Note that this code path exists because the limit parameter is not getting rendered
