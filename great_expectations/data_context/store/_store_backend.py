@@ -185,7 +185,7 @@ class StoreBackend(metaclass=ABCMeta):
         # https://docs.python.org/3/library/urllib.parse.html#url-quoting
         return urllib.parse.quote(path)
 
-    def get_url_for_key(self, key, protocol=None) -> None:
+    def get_url_for_key(self, key, protocol=None) -> str:
         raise StoreError(
             "Store backend of type {:s} does not have an implementation of get_url_for_key".format(  # noqa: UP032
                 type(self).__name__
