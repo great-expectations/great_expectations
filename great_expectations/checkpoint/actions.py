@@ -334,7 +334,7 @@ class SlackNotificationAction(DataDocsAction):
             payload=payload,
             slack_webhook=str(self.slack_webhook) if self.slack_webhook else None,
             slack_token=str(self.slack_token) if self.slack_token else None,
-            slack_channel=self(self.slack_channel) if self.slack_channel else None,
+            slack_channel=str(self.slack_channel) if self.slack_channel else None,
         )
         return {"slack_notification_result": slack_notif_result}
 
