@@ -1,7 +1,11 @@
 @import "sass_variables.scss";
 
 div .custom-search-bar {
-  padding: var(--ifm-navbar-item-padding-vertical) 0;
+  padding: var(--ifm-navbar-item-padding-vertical) 0.5rem;
+
+  .DocSearch-Button {
+    width: 170px;
+  }
 }
 
 [data-theme='dark'] .custom-search-bar .DocSearch-Button:hover {
@@ -13,19 +17,25 @@ div .custom-search-bar {
 }
 
 @media (max-width: $mobile-breakpoint) {
-  .custom-search-bar .DocSearch-Button {
-    background: none;
+  div .custom-search-bar {
+    padding: 0.25rem 0;
 
-    &-Placeholder {
-      display: none;
-    }
+    .DocSearch-Button {
+      padding: 0 0.5rem;
+      width: auto;
+      background: none;
 
-    &-Container svg path {
-      stroke-width: 3;
-    }
+      &-Placeholder {
+        display: none;
+      }
 
-    &-Keys {
-      display: none;
+      &-Container svg path {
+        stroke-width: 3;
+      }
+
+      &-Keys {
+        display: none;
+      }
     }
   }
 }
