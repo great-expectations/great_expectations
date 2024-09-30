@@ -15,6 +15,7 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
     _is_sqlalchemy_metric_selectable,
 )
 from great_expectations.expectations.metrics.util import (
+    MAX_RESULT_RECORDS,
     get_dbms_compatible_metric_domain_kwargs,
 )
 from great_expectations.util import (
@@ -78,9 +79,10 @@ def _pandas_multicolumn_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return domain_values.to_dict("records")
+        return domain_values[:MAX_RESULT_RECORDS].to_dict("records")
 
-    return domain_values[: result_format["partial_unexpected_count"]].to_dict("records")
+    limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+    return domain_values[:limit].to_dict("records")
 
 
 def _pandas_multicolumn_map_condition_filtered_row_count(
@@ -160,9 +162,12 @@ def _sqlalchemy_multicolumn_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
-        query = query.limit(result_format["partial_unexpected_count"])
+        limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+        query = query.limit(limit)
 
-    return [val._asdict() for val in execution_engine.execute_query(query).fetchall()]
+    return [
+        val._asdict() for val in execution_engine.execute_query(query).fetchmany(MAX_RESULT_RECORDS)
+    ]
 
 
 def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
@@ -251,12 +256,16 @@ def _spark_multicolumn_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
         domain_values = (
-            domain_values.select(column_selector).toPandas().to_dict("records")  # type: ignore[assignment]
+            domain_values.select(column_selector)
+            .limit(MAX_RESULT_RECORDS)
+            .toPandas()
+            .to_dict("records")  # type: ignore[assignment]
         )
     else:
+        limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
         domain_values = (
             domain_values.select(column_selector)  # type: ignore[assignment]
-            .limit(result_format["partial_unexpected_count"])
+            .limit(limit)
             .toPandas()
             .to_dict("records")
         )
