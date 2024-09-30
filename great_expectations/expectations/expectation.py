@@ -347,7 +347,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         # rendered_content is derived from the rest of the expectation, and can/should
         # be excluded from equality checks
         exclude: set[str] = {"rendered"}
-       
+
         self_dict = self.dict(exclude=exclude)
         other_dict = other.dict(exclude=exclude)
 
