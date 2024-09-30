@@ -415,3 +415,25 @@ def test_expectation_equality_with_meta(meta_a: dict | None, meta_b: dict | None
     )
 
     assert (expectation_a == expectation_b) is expected
+
+
+def test_expectation_equality_ignores_rendered_content():
+    column = "whatever"
+    min_value = 0
+    max_value = 10
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column=column,
+        min_value=min_value,
+        max_value=max_value,
+    )
+    expectation_a.render()
+    assert expectation_a.rendered_content
+
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column=column,
+        min_value=min_value,
+        max_value=max_value,
+    )
+    expectation_b.rendered_content = None
+
+    assert expectation_a == expectation_b
