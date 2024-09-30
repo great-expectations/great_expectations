@@ -1,21 +1,10 @@
+@import "sass_variables.scss";
+
 div .custom-search-bar {
-  padding: var(--ifm-navbar-item-padding-vertical) 0;
+  padding: var(--ifm-navbar-item-padding-vertical) 0.5rem;
 
-}
-
-.custom-search-bar .DocSearch-Button {
-  background: none;
-
-  &-Placeholder {
-    display: none;
-  }
-
-  &-Container svg path {
-    stroke-width: 3;
-  }
-
-  &-Keys {
-    display: none;
+  .DocSearch-Button {
+    width: 170px;
   }
 }
 
@@ -25,4 +14,28 @@ div .custom-search-bar {
 
 [data-theme='dark'] .DocSearch-Form {
   background: none;
+}
+
+@media (max-width: $mobile-breakpoint) {
+  div .custom-search-bar {
+    padding: 0.25rem 0;
+
+    .DocSearch-Button {
+      padding: 0 0.5rem;
+      width: auto;
+      background: none;
+
+      &-Placeholder {
+        display: none;
+      }
+
+      &-Container svg path {
+        stroke-width: 3;
+      }
+
+      &-Keys {
+        display: none;
+      }
+    }
+  }
 }

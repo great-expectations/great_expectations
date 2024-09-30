@@ -18,6 +18,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+from great_expectations.expectations.window import Offset, Window
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 LOGGER = logging.getLogger(__name__)
@@ -214,6 +215,59 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
 @pytest.mark.unit
 def test_expectation_configuration_property():
     expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
+
+    assert expectation.configuration == ExpectationConfiguration(
+        type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "foo",
+            "min_value": 0,
+            "max_value": 10,
+        },
+    )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_window():
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="foo",
+        min_value=0,
+        max_value=10,
+        windows=[
+            Window(
+                constraint_fn="a",
+                parameter_name="b",
+                range=5,
+                offset=Offset(positive=0.2, negative=0.2),
+            )
+        ],
+    )
+
+    assert expectation.configuration == ExpectationConfiguration(
+        type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "foo",
+            "min_value": 0,
+            "max_value": 10,
+            "windows": [
+                {
+                    "constraint_fn": "a",
+                    "parameter_name": "b",
+                    "range": 5,
+                    "offset": {"positive": 0.2, "negative": 0.2},
+                }
+            ],
+        },
+    )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_window_empty():
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="foo",
+        min_value=0,
+        max_value=10,
+        windows=None,
+    )
 
     assert expectation.configuration == ExpectationConfiguration(
         type="expect_column_max_to_be_between",

@@ -8,6 +8,7 @@ from typing import (
     Callable,
     Literal,
     Mapping,
+    Optional,
     Type,
     overload,
 )
@@ -134,7 +135,7 @@ class ProjectManager:
         site_name: str | None = None,
         only_if_exists: bool = True,
         site_names: list[str] | None = None,
-    ) -> list[dict[str, str]]:
+    ) -> list[dict[str, Optional[str]]]:
         return self._project.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
