@@ -78,9 +78,12 @@ def test_event_identifiers(analytics_config):
 def test_ephemeral_context_init(monkeypatch):
     monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", True)  # Enable usage stats
 
-    with mock.patch(
-        "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
-    ) as mock_init, mock.patch("posthog.capture") as mock_submit:
+    with (
+        mock.patch(
+            "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
+        ) as mock_init,
+        mock.patch("posthog.capture") as mock_submit,
+    ):
         _ = gx.get_context(mode="ephemeral")
 
     mock_init.assert_called_once_with(
@@ -107,9 +110,12 @@ def test_ephemeral_context_init(monkeypatch):
 def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
     monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", True)  # Enable usage stats
 
-    with mock.patch(
-        "great_expectations.data_context.data_context.cloud_data_context.init_analytics"
-    ) as mock_init, mock.patch("posthog.capture") as mock_submit:
+    with (
+        mock.patch(
+            "great_expectations.data_context.data_context.cloud_data_context.init_analytics"
+        ) as mock_init,
+        mock.patch("posthog.capture") as mock_submit,
+    ):
         _ = gx.get_context(
             cloud_access_token=cloud_details.access_token,
             cloud_organization_id=cloud_details.org_id,
