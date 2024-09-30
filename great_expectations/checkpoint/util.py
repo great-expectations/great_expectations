@@ -6,23 +6,19 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import TYPE_CHECKING
 
 import requests
 
 from great_expectations.compatibility import aws
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.config_str import ConfigStr
 
 logger = logging.getLogger(__name__)
 
 
 def send_slack_notification(
     payload: dict,
-    slack_webhook: str | ConfigStr | None = None,
-    slack_channel: str | ConfigStr | None = None,
-    slack_token: str | ConfigStr | None = None,
+    slack_webhook: str | None = None,
+    slack_channel: str | None = None,
+    slack_token: str | None = None,
 ) -> str | None:
     session = requests.Session()
     url = slack_webhook

@@ -332,9 +332,9 @@ class SlackNotificationAction(DataDocsAction):
         # this will actually send the POST request to the Slack webapp server
         slack_notif_result = send_slack_notification(
             payload=payload,
-            slack_webhook=self.slack_webhook,
-            slack_token=self.slack_token,
-            slack_channel=self.slack_channel,
+            slack_webhook=str(self.slack_webhook) if self.slack_webhook else None,
+            slack_token=str(self.slack_token) if self.slack_token else None,
+            slack_channel=self(self.slack_channel) if self.slack_channel else None,
         )
         return {"slack_notification_result": slack_notif_result}
 
