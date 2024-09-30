@@ -22,7 +22,6 @@ from typing import (
 import numpy as np
 from dateutil.parser import parse
 from packaging import version
-from typing_extensions import Annotated, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws, sqlalchemy, trino
@@ -80,6 +79,7 @@ from great_expectations.compatibility.bigquery import bigquery_types_tuple
 
 if TYPE_CHECKING:
     import pandas as pd
+    from typing_extensions import TypeAlias
 
 try:
     import teradatasqlalchemy.dialect
@@ -89,9 +89,9 @@ except ImportError:
     teradatatypes = None
 
 
-MAX_IN_MEMORY_RECORDS_ALLOWED: Final[int] = 200
+MAX_RESULT_RECORDS: Final[int] = 200
 
-UnexpectedIndexList: TypeAlias = Annotated[List[Dict[str, Any]], MAX_IN_MEMORY_RECORDS_ALLOWED]
+UnexpectedIndexList: TypeAlias = list[dict[str, Any]]
 
 
 def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:

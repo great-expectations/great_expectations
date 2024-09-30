@@ -11,6 +11,7 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.expectations.metrics.util import (
+    MAX_RESULT_RECORDS,
     get_dbms_compatible_metric_domain_kwargs,
 )
 
@@ -77,7 +78,7 @@ def _pandas_column_map_condition_values(
     if filter_column_isnull:
         df = df[df[column_name].notnull()]
 
-    domain_values = df[column_name]
+    domain_values = df[column_name][:MAX_RESULT_RECORDS]
 
     domain_values = domain_values[
         boolean_mapped_unexpected_values == True  # noqa: E712
@@ -284,7 +285,10 @@ def _sqlalchemy_column_map_condition_values(
         )
         query = query.limit(10000)  # BigQuery upper bound on query parameters
 
-    return [val.unexpected_values for val in execution_engine.execute_query(query).fetchall()]
+    return [
+        val.unexpected_values
+        for val in execution_engine.execute_query(query).fetchmany(MAX_RESULT_RECORDS)
+    ]
 
 
 def _sqlalchemy_column_map_condition_value_counts(
@@ -365,19 +369,15 @@ def _spark_column_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
 
+    # note that without an explicit column alias,
+    # spark will use only the final portion
+    # of a nested column as the column name
     if result_format["result_format"] == "COMPLETE":
-        rows = filtered.select(
-            F.col(column_name).alias(column_name)
-        ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name  # noqa: E501
+        query = filtered.select(F.col(column_name).alias(column_name)).limit(MAX_RESULT_RECORDS)
     else:
-        rows = (
-            filtered.select(
-                F.col(column_name).alias(column_name)
-            )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name  # noqa: E501
-            .limit(result_format["partial_unexpected_count"])
-            .collect()
-        )
-    return [row[column_name] for row in rows]
+        limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+        query = filtered.select(F.col(column_name).alias(column_name)).limit(limit)
+    return [row[column_name] for row in query.collect()]
 
 
 def _spark_column_map_condition_value_counts(

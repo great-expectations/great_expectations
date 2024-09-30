@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Union
 
-from typing_extensions import Annotated, TypeAlias
-
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -17,14 +15,11 @@ from great_expectations.expectations.metrics.query_metric_provider import (
     MissingElementError,
     QueryMetricProvider,
 )
-from great_expectations.expectations.metrics.util import MAX_IN_MEMORY_RECORDS_ALLOWED
+from great_expectations.expectations.metrics.util import MAX_RESULT_RECORDS
 from great_expectations.util import get_sqlalchemy_subquery_type
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
-
-
-QueryTableRecords: TypeAlias = Annotated[List[dict], MAX_IN_MEMORY_RECORDS_ALLOWED]
 
 
 class QueryTable(QueryMetricProvider):
@@ -40,7 +35,7 @@ class QueryTable(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> QueryTableRecords:
+    ) -> list[dict]:
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         batch_selectable: sa.sql.Selectable
@@ -76,7 +71,7 @@ class QueryTable(QueryMetricProvider):
 
         result: Union[Sequence[sa.Row[Any]], Any] = execution_engine.execute_query(
             sa.select(sa.text(query))
-        ).fetchmany(MAX_IN_MEMORY_RECORDS_ALLOWED)
+        ).fetchmany(MAX_RESULT_RECORDS)
 
         if isinstance(result, (list, tuple)):
             query_table_records = [element._asdict() for element in result]
@@ -93,7 +88,7 @@ class QueryTable(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> QueryTableRecords:
+    ) -> list[dict]:
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
@@ -105,6 +100,6 @@ class QueryTable(QueryMetricProvider):
         query = query.format(batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
-        result: List[pyspark.Row] = engine.sql(query).limit(MAX_IN_MEMORY_RECORDS_ALLOWED).collect()
+        result: List[pyspark.Row] = engine.sql(query).limit(MAX_RESULT_RECORDS).collect()
 
         return [element.asDict() for element in result]
