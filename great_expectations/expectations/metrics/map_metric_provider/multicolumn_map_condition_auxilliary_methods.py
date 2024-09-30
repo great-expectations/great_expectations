@@ -23,7 +23,7 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility import sqlalchemy
+    from great_expectations.compatibility import pyspark, sqlalchemy
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -214,7 +214,7 @@ def _spark_multicolumn_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> list[dict]:
+) -> pyspark.DataFrame:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         unexpected_condition,
