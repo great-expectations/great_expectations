@@ -557,6 +557,21 @@ learn_data_quality_use_cases = [
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
+    # Volume.
+    IntegrationTestFixture(
+        name="data_quality_use_case_volume_expectations",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py",
+        data_dir="tests/test_sets/learn_data_quality_use_cases/",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+    IntegrationTestFixture(
+        name="data_quality_use_case_volume_workflow",
+        user_flow_script="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py",
+        data_dir="tests/test_sets/learn_data_quality_use_cases/",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
 ]
 
 # Extend the docs_tests list with the above sublists (only the docs_tests list is imported
