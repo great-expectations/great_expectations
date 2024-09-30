@@ -23,7 +23,7 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility import pyspark, sqlalchemy
+    from great_expectations.compatibility import sqlalchemy
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -214,7 +214,7 @@ def _spark_multicolumn_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> pyspark.DataFrame:
+) -> list[dict]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         unexpected_condition,
@@ -251,21 +251,14 @@ def _spark_multicolumn_map_condition_values(
 
     column_selector = [F.col(column_name).alias(column_name) for column_name in column_list]
 
-    domain_values = filtered.select(column_selector)
-
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
         domain_values = (
-            domain_values.select(column_selector)
-            .limit(MAX_RESULT_RECORDS)
-            .toPandas()
-            .to_dict("records")
+            filtered.select(column_selector).limit(MAX_RESULT_RECORDS).toPandas().to_dict("records")
         )
     else:
         limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
-        domain_values = (
-            domain_values.select(column_selector).limit(limit).toPandas().to_dict("records")
-        )
+        domain_values = filtered.select(column_selector).limit(limit).toPandas().to_dict("records")
 
     return domain_values
 
