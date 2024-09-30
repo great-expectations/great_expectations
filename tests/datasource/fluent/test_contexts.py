@@ -79,7 +79,7 @@ def test_add_fluent_datasource_are_persisted(
         urllib.parse.urljoin(
             GX_CLOUD_MOCK_BASE_URL, f"api/v1/organizations/{FAKE_ORG_ID}/datasources"
         ),
-        2,
+        3,
     )
 
 
@@ -203,7 +203,7 @@ def test_context_update_datasource(
     )
     cloud_api_fake.assert_call_count(
         datasources_url,
-        2,
+        4,
     )
     cloud_api_fake.assert_call_count(
         f"{datasources_url}/{datasource.id}?name={datasource.name}",
@@ -361,7 +361,7 @@ def test_cloud_context_delete_datasource(
 
     cloud_api_fake.assert_call_count(
         datasources_url,
-        3,
+        5,
     )
     cloud_api_fake.assert_call_count(
         f"{datasources_url}/{datasource.id}",

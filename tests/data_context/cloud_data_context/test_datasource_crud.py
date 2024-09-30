@@ -42,7 +42,7 @@ def test_cloud_context_add_datasource_with_fds(
     fds = PandasDatasource(name=name)
     _ = context.add_datasource(datasource=fds)
 
-    assert cloud_api_fake.assert_call_count(url=post_url, count=2)
+    assert cloud_api_fake.assert_call_count(url=post_url, count=3)
 
 
 @pytest.mark.e2e
