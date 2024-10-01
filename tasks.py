@@ -638,6 +638,7 @@ def type_schema(  # noqa: C901 - too complex
         core.ExpectColumnValuesToNotMatchLikePatternList,
         core.ExpectColumnValuesToNotMatchRegex,
         core.ExpectColumnValuesToNotMatchRegexList,
+        core.UnexpectedRowsExpectation,
     ]
     for x in supported_expectations:
         schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
@@ -931,6 +932,14 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         requirement_files=("reqs/requirements-dev-spark.txt",),
         services=("spark",),
         extra_pytest_args=("--spark",),
+    ),
+    "spark_connect": TestDependencies(
+        requirement_files=(
+            "reqs/requirements-dev-spark.txt",
+            "reqs/requirements-dev-spark-connect.txt",
+        ),
+        services=("spark",),
+        extra_pytest_args=("--spark_connect",),
     ),
     "trino": TestDependencies(
         ("reqs/requirements-dev-trino.txt",),

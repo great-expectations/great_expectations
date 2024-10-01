@@ -39,6 +39,7 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -119,8 +120,6 @@ class ValidationAction(BaseModel):
 
     @property
     def _using_cloud_context(self) -> bool:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.is_using_cloud()
 
     def run(
@@ -130,9 +129,13 @@ class ValidationAction(BaseModel):
 
     def _get_data_docs_pages_from_prior_action(
         self, action_context: ActionContext | None
-    ) -> list[dict] | None:
+    ) -> dict[ValidationResultIdentifier, dict[str, str]] | None:
         if action_context:
-            return action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_results = action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_pages = {}
+            for result in data_docs_results:
+                data_docs_pages.update(result)
+            return data_docs_pages
 
         return None
 
@@ -153,8 +156,6 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifiers: list | None = None,
     ) -> dict:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.build_data_docs(
             site_names=site_names, resource_identifiers=resource_identifiers
         )
@@ -164,8 +165,6 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifier: Any | None = None,
     ):
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.get_docs_sites_urls(
             site_names=site_names, resource_identifier=resource_identifier
         )
@@ -290,7 +289,9 @@ class SlackNotificationAction(DataDocsAction):
     ) -> list[dict]:
         data_docs_pages = None
         if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_pages = self._get_data_docs_pages_from_prior_action(
+                action_context=action_context
+            )
 
         # Assemble complete GX Cloud URL for a specific validation result
         data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
@@ -688,7 +689,7 @@ class UpdateDataDocsAction(DataDocsAction):
     def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
-        action_results: dict[ValidationResultIdentifier, dict] = {}
+        action_results: dict[ValidationResultIdentifier, dict[str, str]] = {}
         for result_identifier, result in checkpoint_result.run_results.items():
             suite_name = result.suite_name
 

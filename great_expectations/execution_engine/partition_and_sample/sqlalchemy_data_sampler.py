@@ -46,9 +46,9 @@ class SqlAlchemyDataSampler(DataSampler):
         # Partition clause should be permissive of all values if not supplied.
         if where_clause is None:
             if execution_engine.dialect_name == GXSqlDialect.SQLITE:
-                where_clause = sa.text("1 = 1")
+                where_clause = sa.text("1 = 1")  # type: ignore[assignment]
             else:
-                where_clause = sa.true()
+                where_clause = sa.true()  # type: ignore[assignment]
 
         table_name: str = batch_spec["table_name"]
 
@@ -61,7 +61,7 @@ class SqlAlchemyDataSampler(DataSampler):
             raw_query: sqlalchemy.Selectable = (
                 sa.select("*")
                 .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
-                .where(where_clause)
+                .where(where_clause)  # type: ignore[arg-type]
             )
             query: str = str(
                 raw_query.compile(
@@ -69,7 +69,7 @@ class SqlAlchemyDataSampler(DataSampler):
                     compile_kwargs={"literal_binds": True},
                 )
             )
-            query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
+            query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]  # noqa: UP031
             return query
         elif dialect_name == GXSqlDialect.MSSQL:
             # Note that this code path exists because the limit parameter is not getting rendered
@@ -77,7 +77,7 @@ class SqlAlchemyDataSampler(DataSampler):
             selectable_query: sqlalchemy.Selectable = (
                 sa.select("*")
                 .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
-                .where(where_clause)
+                .where(where_clause)  # type: ignore[arg-type]
                 .limit(batch_spec["sampling_kwargs"]["n"])
             )
             string_of_query: str = str(
@@ -93,9 +93,9 @@ class SqlAlchemyDataSampler(DataSampler):
             return string_of_query
         else:
             return (
-                sa.select("*")
+                sa.select("*")  # type: ignore[return-value]
                 .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
-                .where(where_clause)
+                .where(where_clause)  # type: ignore[arg-type]
                 .limit(batch_spec["sampling_kwargs"]["n"])
             )
 
@@ -154,16 +154,16 @@ class SqlAlchemyDataSampler(DataSampler):
                 "the 'sampling_kwargs' configuration."
             ) from e
 
-        num_rows: int = execution_engine.execute_query(
+        num_rows: int = execution_engine.execute_query(  # type: ignore[assignment]
             sa.select(sa.func.count())
             .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
-            .where(where_clause)
+            .where(where_clause)  # type: ignore[arg-type]
         ).scalar()
         sample_size: int = round(p * num_rows)
         return (
             sa.select("*")
             .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
-            .where(where_clause)
+            .where(where_clause)  # type: ignore[arg-type]
             .order_by(sa.func.random())
             .limit(sample_size)
         )
@@ -191,7 +191,7 @@ class SqlAlchemyDataSampler(DataSampler):
         mod: int = self.get_sampling_kwargs_value_or_default(batch_spec, "mod")
         value: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
 
-        return sa.column(column_name) % mod == value
+        return sa.column(column_name) % mod == value  # type: ignore[return-value]
 
     def sample_using_a_list(
         self,
@@ -213,7 +213,7 @@ class SqlAlchemyDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_key_exists("value_list", batch_spec)
         column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
         value_list: list = self.get_sampling_kwargs_value_or_default(batch_spec, "value_list")
-        return sa.column(column_name).in_(value_list)
+        return sa.column(column_name).in_(value_list)  # type: ignore[return-value]
 
     def sample_using_md5(
         self,
@@ -242,6 +242,6 @@ class SqlAlchemyDataSampler(DataSampler):
         )
 
         return (
-            sa.func.right(sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits)
+            sa.func.right(sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits)  # type: ignore[return-value]
             == hash_value
         )

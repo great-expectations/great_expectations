@@ -3,15 +3,18 @@ from __future__ import annotations
 import logging
 import re
 from collections import UserDict
+from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Iterable,
     List,
     Mapping,
     Optional,
     Sequence,
     Tuple,
+    Type,
     overload,
 )
 
@@ -41,7 +44,7 @@ try:
     import psycopg2  # noqa: F401
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: TID251
 except (ImportError, KeyError):
-    sqlalchemy_psycopg2 = None
+    sqlalchemy_psycopg2 = None  # type: ignore[assignment]
 
 try:
     import snowflake
@@ -63,6 +66,11 @@ try:
 except ImportError:
     clickhouse_sqlalchemy = None
 
+try:
+    import databricks.sqlalchemy as sqla_databricks
+except (ImportError, AttributeError):
+    sqla_databricks = None  # type: ignore[assignment]
+
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
 from great_expectations.compatibility import bigquery as sqla_bigquery
@@ -79,12 +87,33 @@ except ImportError:
     teradatatypes = None
 
 
+def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
+    """
+    Check if the Databricks dialect is being provided.
+    """
+    if not sqla_databricks:
+        return False
+    try:
+        if isinstance(dialect, sqla_databricks.DatabricksDialect):
+            return True
+        if hasattr(dialect, "DatabricksDialect"):
+            return True
+        if issubclass(dialect, sqla_databricks.DatabricksDialect):  # type: ignore[arg-type]
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
-    column, regex, dialect, positive=True
-):
+    column: sa.Column,
+    regex: str,
+    dialect: ModuleType | Type[sa.Dialect] | sa.Dialect,
+    positive: bool = True,
+) -> sa.SQLColumnExpression | None:
     try:
         # postgres
-        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):  # type: ignore[union-attr]
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
@@ -96,11 +125,18 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     except AttributeError:
         pass
 
+    # databricks sql
+    if _is_databricks_dialect(dialect):
+        if positive:
+            return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+        else:
+            return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
+
     # redshift
     # noinspection PyUnresolvedReferences
     try:
         if hasattr(dialect, "RedshiftDialect") or (
-            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)  # type: ignore[union-attr]
         ):
             if positive:
                 return sqlalchemy.BinaryExpression(
@@ -117,7 +153,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # MySQL
-        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):  # type: ignore[union-attr]
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
@@ -134,7 +170,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # Snowflake
         if issubclass(
-            dialect.dialect,
+            dialect.dialect,  # type: ignore[union-attr]
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
             if positive:
@@ -216,7 +252,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # Teradata
-        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
+        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):  # type: ignore[union-attr]
             if positive:
                 return (
                     sa.func.REGEXP_SIMILAR(
@@ -237,7 +273,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # sqlite
         # regex_match for sqlite introduced in sqlalchemy v1.4
-        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(
+        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(  # type: ignore[union-attr]
             sa.__version__
         ) >= version.parse("1.4"):
             if positive:
@@ -256,7 +292,9 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     return None
 
 
-def _get_dialect_type_module(dialect=None):
+def _get_dialect_type_module(
+    dialect: ModuleType | Type[sa.Dialect] | sa.Dialect | None = None,
+) -> ModuleType | Type[sa.Dialect] | sa.Dialect:
     if dialect is None:
         logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
@@ -274,7 +312,7 @@ def _get_dialect_type_module(dialect=None):
         if (
             isinstance(
                 dialect,
-                sqla_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,  # type: ignore[attr-defined]
             )
             and bigquery_types_tuple is not None
         ):
@@ -286,7 +324,7 @@ def _get_dialect_type_module(dialect=None):
     try:
         if (
             issubclass(
-                dialect,
+                dialect,  # type: ignore[arg-type]
                 teradatasqlalchemy.dialect.TeradataDialect,
             )
             and teradatatypes is not None
@@ -335,7 +373,7 @@ class CaseInsensitiveString(str):
         else:
             return False
 
-    def __hash__(self):
+    def __hash__(self):  # type: ignore[explicit-override] # FIXME
         return hash(self._lower)
 
     @override
@@ -373,7 +411,7 @@ def get_sqlalchemy_column_metadata(
         inspector = execution_engine.get_inspector()
         try:
             # if a custom query was passed
-            if sqlalchemy.TextClause and isinstance(table_selectable, sqlalchemy.TextClause):
+            if sqlalchemy.TextClause and isinstance(table_selectable, sqlalchemy.TextClause):  # type: ignore[truthy-function]
                 if hasattr(table_selectable, "selected_columns"):
                     # New in version 1.4.
                     columns = table_selectable.selected_columns.columns
@@ -386,7 +424,7 @@ def get_sqlalchemy_column_metadata(
                 table_name = str(table_selectable)
                 if execution_engine.dialect_name == GXSqlDialect.SNOWFLAKE:
                     table_name = table_name.lower()
-                columns = inspector.get_columns(
+                columns = inspector.get_columns(  # type: ignore[assignment]
                     table_name=table_name,
                     schema=schema_name,
                 )
@@ -447,7 +485,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
         if dialect.name.lower() == "mssql":
             # Get column names and types from the database
             # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
-            tables_table_clause: sqlalchemy.TableClause = sa.table(
+            tables_table_clause: sqlalchemy.TableClause = sa.table(  # type: ignore[assignment]
                 "tables",
                 sa.column("object_id"),
                 sa.column("schema_id"),
@@ -455,7 +493,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 schema="sys",
             ).alias("sys_tables_table_clause")
             tables_table_query: sqlalchemy.Select = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     tables_table_clause.columns.object_id.label("object_id"),
                     sa.func.schema_name(tables_table_clause.columns.schema_id).label("schema_name"),
                     tables_table_clause.columns.name.label("table_name"),
@@ -463,7 +501,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 .select_from(tables_table_clause)
                 .alias("sys_tables_table_subquery")
             )
-            columns_table_clause: sqlalchemy.TableClause = sa.table(
+            columns_table_clause: sqlalchemy.TableClause = sa.table(  # type: ignore[assignment]
                 "columns",
                 sa.column("object_id"),
                 sa.column("user_type_id"),
@@ -474,7 +512,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 schema="sys",
             ).alias("sys_columns_table_clause")
             columns_table_query: sqlalchemy.Select = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     columns_table_clause.columns.object_id.label("object_id"),
                     columns_table_clause.columns.user_type_id.label("user_type_id"),
                     columns_table_clause.columns.column_id.label("column_id"),
@@ -485,24 +523,24 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 .select_from(columns_table_clause)
                 .alias("sys_columns_table_subquery")
             )
-            types_table_clause: sqlalchemy.TableClause = sa.table(
+            types_table_clause: sqlalchemy.TableClause = sa.table(  # type: ignore[assignment]
                 "types",
                 sa.column("user_type_id"),
                 sa.column("name"),
                 schema="sys",
             ).alias("sys_types_table_clause")
             types_table_query: sqlalchemy.Select = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     types_table_clause.columns.user_type_id.label("user_type_id"),
                     types_table_clause.columns.name.label("column_data_type"),
                 )
                 .select_from(types_table_clause)
                 .alias("sys_types_table_subquery")
             )
-            inner_join_conditions: sqlalchemy.BinaryExpression = sa.and_(
+            inner_join_conditions: sqlalchemy.BinaryExpression = sa.and_(  # type: ignore[assignment]
                 *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
             )
-            outer_join_conditions: sqlalchemy.BinaryExpression = sa.and_(
+            outer_join_conditions: sqlalchemy.BinaryExpression = sa.and_(  # type: ignore[assignment]
                 *(
                     columns_table_query.columns.user_type_id
                     == types_table_query.columns.user_type_id,
@@ -519,7 +557,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                     columns_table_query.c.column_precision,
                 )
                 .select_from(
-                    tables_table_query.join(
+                    tables_table_query.join(  # type: ignore[call-arg,arg-type]
                         right=columns_table_query,
                         onclause=inner_join_conditions,
                         isouter=False,
@@ -529,14 +567,14 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                         isouter=True,
                     )
                 )
-                .where(tables_table_query.c.table_name == selectable.name)
+                .where(tables_table_query.c.table_name == selectable.name)  # type: ignore[attr-defined]
                 .order_by(
                     tables_table_query.c.schema_name.asc(),
                     tables_table_query.c.table_name.asc(),
                     columns_table_query.c.column_id.asc(),
                 )
             )
-            col_info_tuples_list: List[tuple] = connection.execute(col_info_query).fetchall()
+            col_info_tuples_list: List[tuple] = connection.execute(col_info_query).fetchall()  # type: ignore[assignment]
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
                 {
@@ -548,7 +586,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
             ]
         elif dialect.name.lower() == "trino":
             try:
-                table_name = selectable.name
+                table_name = selectable.name  # type: ignore[attr-defined]
             except AttributeError:
                 table_name = selectable
                 if str(table_name).lower().startswith("select"):
@@ -564,7 +602,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 schema="information_schema",
             )
             tables_table_query = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     sa.column("table_schema").label("schema_name"),
                     sa.column("table_name").label("table_name"),
                 )
@@ -577,7 +615,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 schema="information_schema",
             )
             columns_table_query = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     sa.column("column_name").label("column_name"),
                     sa.column("table_name").label("table_name"),
                     sa.column("table_schema").label("schema_name"),
@@ -593,14 +631,14 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
                 )
             )
             col_info_query = (
-                sa.select(
+                sa.select(  # type: ignore[assignment]
                     tables_table_query.c.schema_name,
                     tables_table_query.c.table_name,
                     columns_table_query.c.column_name,
                     columns_table_query.c.column_data_type,
                 )
                 .select_from(
-                    tables_table_query.join(
+                    tables_table_query.join(  # type: ignore[call-arg,arg-type]
                         right=columns_table_query, onclause=conditions, isouter=False
                     )
                 )
@@ -622,9 +660,9 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
 
             # in sqlalchemy > 2.0.0 this is a Subquery, which we need to convert into a Selectable
             if not col_info_query.supports_execution:
-                col_info_query = sa.select(col_info_query)
+                col_info_query = sa.select(col_info_query)  # type: ignore[call-overload]
 
-            col_info_tuples_list = connection.execute(col_info_query).fetchall()
+            col_info_tuples_list = connection.execute(col_info_query).fetchall()  # type: ignore[assignment]
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
                 {
@@ -635,21 +673,21 @@ def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
             ]
         else:
             # if a custom query was passed
-            if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
+            if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):  # type: ignore[truthy-function]
                 query: sqlalchemy.TextClause = selectable
-            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
+            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):  # type: ignore[truthy-function]
                 query = sa.select(sa.text("*")).select_from(selectable).limit(1)
             else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
-                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
+                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)  # type: ignore[assignment,arg-type]
                 else:
-                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
+                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)  # type: ignore[assignment,arg-type]
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
-            col_names: List[str] = result_object._metadata.keys
+            col_names: List[str] = result_object._metadata.keys  # type: ignore[assignment]
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
 
@@ -836,14 +874,14 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
     return None if verify_only else normalized_batch_columns_mappings
 
 
-def parse_value_set(value_set):
+def parse_value_set(value_set: Iterable) -> list:
     parsed_value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
     return parsed_value_set
 
 
-def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
-    column, dialect, like_pattern, positive=True
-):
+def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915
+    column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
+) -> sa.BinaryExpression | None:
     dialect_supported: bool = False
 
     try:
@@ -867,6 +905,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
             ),
         ):
             dialect_supported = True
+
+    if _is_databricks_dialect(dialect):
+        dialect_supported = True
 
     try:
         if hasattr(dialect, "RedshiftDialect"):
@@ -1151,7 +1192,7 @@ def sql_statement_with_post_compile_to_string(
         String representation of select_statement
 
     """  # noqa: E501
-    sqlalchemy_connection: sa.engine.base.Connection = engine.engine
+    sqlalchemy_connection: sa.engine.base.Connection = engine.engine  # type: ignore[assignment]
     compiled = select_statement.compile(
         sqlalchemy_connection,
         compile_kwargs={"render_postcompile": True},
@@ -1160,7 +1201,7 @@ def sql_statement_with_post_compile_to_string(
     dialect_name: str = engine.dialect_name
 
     if dialect_name in ["sqlite", "trino", "mssql"]:
-        params = (repr(compiled.params[name]) for name in compiled.positiontup)
+        params = (repr(compiled.params[name]) for name in compiled.positiontup)  # type: ignore[union-attr]
         query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
 
     else:

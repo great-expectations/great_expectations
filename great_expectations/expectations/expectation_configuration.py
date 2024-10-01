@@ -100,9 +100,11 @@ class ExpectationConfiguration(SerializableDictDot):
     """Defines the parameters and name of a specific Expectation.
 
     Args:
-        expectation_type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
+        type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
         kwargs: The keyword arguments to pass to the expectation class.
         meta: A dictionary of metadata to attach to the expectation.
+        notes: Notes about this expectation.
+        description: The description of the expectation. This will be rendered instead of the default template.
         success_on_last_run: Whether the expectation succeeded on the last run.
         id: The corresponding GX Cloud ID for the expectation.
         expectation_context: The context for the expectation.
@@ -125,6 +127,7 @@ class ExpectationConfiguration(SerializableDictDot):
         kwargs: dict,
         meta: Optional[dict] = None,
         notes: str | list[str] | None = None,
+        description: str | None = None,
         success_on_last_run: Optional[bool] = None,
         id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
@@ -146,6 +149,7 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.notes = notes
+        self.description = description
         self.success_on_last_run = success_on_last_run
         self._id = id
         self._expectation_context = expectation_context
@@ -384,7 +388,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
         return False
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         """ExpectationConfiguration equality does include meta, but ignores instance identity."""
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
@@ -401,13 +405,14 @@ class ExpectationConfiguration(SerializableDictDot):
             )
         )
 
-    def __ne__(self, other):
+    def __ne__(self, other):  # type: ignore[explicit-override] # FIXME
         # By using the == operator, the returned NotImplemented is handled correctly.
         return not self == other
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         return json.dumps(self.to_json_dict())
 
+    @override
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
@@ -437,13 +442,21 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def to_domain_obj(self) -> Expectation:
         expectation_impl = self._get_expectation_impl()
-        return expectation_impl(
-            id=self.id,
-            meta=self.meta,
-            notes=self.notes,
-            rendered_content=self.rendered_content,
-            **self.kwargs,
-        )
+        kwargs: dict[Any, Any] = {
+            "id": self.id,
+            "meta": self.meta,
+            "notes": self.notes,
+            "rendered_content": self.rendered_content,
+        }
+        # it's possible description could be subclassed as a class variable,
+        # because we have documented it that way in the past.
+        # if that is the case, passing a self.description of any type would raise an error
+        # we can't check for the presence of expectation_impl.description
+        # because _get_expectation_impl() only returns registered expectations
+        if self.description:
+            kwargs.update({"description": self.description})
+        kwargs.update(self.kwargs)
+        return expectation_impl(**kwargs)
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this expectation."""
@@ -501,12 +514,14 @@ class ExpectationConfigurationSchema(Schema):
             allow_none=True,
         )
     )
+    description = fields.Str(required=False, allow_none=True)
 
     REMOVE_KEYS_IF_NONE = [
         "id",
         "expectation_context",
         "rendered_content",
         "notes",
+        "description",
     ]
 
     @pre_dump

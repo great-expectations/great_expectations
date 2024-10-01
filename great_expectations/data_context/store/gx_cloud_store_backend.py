@@ -419,7 +419,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ) from e
 
     @override
-    def get_url_for_key(  # type: ignore[override]
+    def get_url_for_key(
         self,
         key: Tuple[GXCloudRESTResource, str | None, str | None],
         protocol: Optional[Any] = None,
@@ -433,7 +433,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
         return url
 
-    def remove_key(self, key):
+    def remove_key(self, key):  # type: ignore[explicit-override] # FIXME
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
@@ -525,7 +525,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return self.set(key=key, value=value, **kwargs)
 
-    def _add_or_update(self, key, value, **kwargs):
+    def _add_or_update(self, key, value, **kwargs):  # type: ignore[explicit-override] # FIXME
         try:
             response_data = self._get(key)["data"]
         except StoreBackendError as e:

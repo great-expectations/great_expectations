@@ -34,6 +34,10 @@ module.exports = {
       async: true,
       defer: true,
     },
+    {
+      src: 'https://fast.wistia.net/assets/external/E-v1.js',
+      async: true
+    }
   ],
 
   themeConfig: {
@@ -55,8 +59,8 @@ module.exports = {
           href: 'https://greatexpectations.io/cloud',
         },
         secondary: {
-          label: 'Why GX Cloud?',
-          href: 'https://docs.greatexpectations.io/docs/cloud/why_gx_cloud',
+          label: 'GX Cloud overview',
+          href: '/docs/cloud/overview/gx_cloud_overview',
         },
       },
     },
@@ -90,7 +94,7 @@ module.exports = {
       ]
     },
     colorMode: {
-      disableSwitch: true,
+      disableSwitch: false,
     },
     zoomSelector: '.markdown :not(em) > img',
     // announcementBar: {
@@ -107,6 +111,7 @@ module.exports = {
       logo: {
         alt: 'Great Expectations',
         src: 'img/GXDocs.svg',
+        srcDark: 'img/GXDocs-dark.svg',
         href: 'https://greatexpectations.io',
       },
       items: [
@@ -128,6 +133,11 @@ module.exports = {
           className: 'custom-search-bar',
         },
         {
+          type: 'custom-colorModeToggle',
+          position: 'left',
+          className: 'color-mode-toggle',
+        },
+        {
           type: 'custom-githubNavbarItem',
           position: 'left',
           owner: 'great-expectations',
@@ -142,7 +152,7 @@ module.exports = {
         },
         {
           label: 'GX Cloud',
-          to: 'docs/cloud',
+          to: 'docs/cloud/overview/gx_cloud_overview',
           position: 'right',
           className: 'non-versioned-section',
         },
@@ -184,6 +194,10 @@ module.exports = {
             {
               label: 'Community',
               to: 'https://greatexpectations.io/community',
+            },
+            {
+              label: 'Request a demo',
+              to: 'https://greatexpectations.io/demo-gx-cloud',
             },
           ],
           position: 'right',
@@ -284,10 +298,10 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '1.0.0',
+              label: '1.0.5',
             },
             ['0.18']: {
-              label: '0.18.17',
+              label: '0.18.21',
             },
           },
           admonitions: {
@@ -311,6 +325,12 @@ module.exports = {
           // Optional fields.
           anonymizeIP: true, // Should IPs be anonymized?
         },
+        sitemap: {
+          ignorePatterns: [
+            '**/0.18/oss/templates/**',
+            '**/0.18/oss/team_templates/**'
+          ],
+        }
       },
     ],
   ],

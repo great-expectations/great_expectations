@@ -28,14 +28,21 @@ from great_expectations.analytics.events import (
     ExpectationSuiteExpectationDeletedEvent,
     ExpectationSuiteExpectationUpdatedEvent,
 )
+from great_expectations.compatibility.pydantic import ValidationError as PydanticValidationError
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.added_diagnostics import (
-    ExpectationSuiteAddedDiagnostics,
+from great_expectations.core.freshness_diagnostics import (
+    ExpectationSuiteFreshnessDiagnostics,
 )
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.exceptions.exceptions import (
+from great_expectations.data_context.data_context.context_factory import project_manager
+from great_expectations.exceptions import (
+    ExpectationSuiteError,
     ExpectationSuiteNotAddedError,
+    ExpectationSuiteNotFoundError,
+    ExpectationSuiteNotFreshError,
+    StoreBackendError,
 )
+from great_expectations.exceptions.exceptions import InvalidKeyError
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     convert_to_json_serializable,  # noqa: TID251
@@ -44,6 +51,7 @@ from great_expectations.util import (
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
+    from great_expectations.data_context.store.expectations_store import ExpectationsStore
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
@@ -104,14 +112,12 @@ class ExpectationSuite(SerializableDictDot):
         self.meta = meta
         self.notes = notes
 
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
-        self._store = project_manager.get_expectations_store()
+    @property
+    def _store(self) -> ExpectationsStore:
+        return project_manager.get_expectations_store()
 
     @property
     def _include_rendered_content(self) -> bool:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.is_using_cloud()
 
     @property
@@ -251,9 +257,44 @@ class ExpectationSuite(SerializableDictDot):
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
-    def is_added(self) -> ExpectationSuiteAddedDiagnostics:
-        return ExpectationSuiteAddedDiagnostics(
+    def is_fresh(self) -> ExpectationSuiteFreshnessDiagnostics:
+        diagnostics = self._is_added()
+        if not diagnostics.success:
+            return diagnostics
+        return self._is_fresh()
+
+    def _is_added(self) -> ExpectationSuiteFreshnessDiagnostics:
+        return ExpectationSuiteFreshnessDiagnostics(
             errors=[] if self.id else [ExpectationSuiteNotAddedError(name=self.name)]
+        )
+
+    def _is_fresh(self) -> ExpectationSuiteFreshnessDiagnostics:
+        suite_dict: dict | None
+        try:
+            key = self._store.get_key(name=self.name, id=self.id)
+            suite_dict = self._store.get(key=key)
+        except (
+            StoreBackendError,  # Generic error from stores
+            InvalidKeyError,  # Ephemeral context error
+        ):
+            suite_dict = None
+        if not suite_dict:
+            return ExpectationSuiteFreshnessDiagnostics(
+                errors=[ExpectationSuiteNotFoundError(name=self.name)]
+            )
+
+        suite: ExpectationSuite | None
+        try:
+            suite = self._store.deserialize_suite_dict(suite_dict=suite_dict)
+        except PydanticValidationError:
+            suite = None
+        if not suite:
+            return ExpectationSuiteFreshnessDiagnostics(
+                errors=[ExpectationSuiteError(f"Could not deserialize suite '{self.name}'")]
+            )
+
+        return ExpectationSuiteFreshnessDiagnostics(
+            errors=[] if self == suite else [ExpectationSuiteNotFreshError(name=self.name)]
         )
 
     def _has_been_saved(self) -> bool:
@@ -282,7 +323,7 @@ class ExpectationSuite(SerializableDictDot):
             "Please use ExpectationSuite.expectations instead."
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         """ExpectationSuite equality ignores instance identity, relying only on properties."""
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
@@ -296,13 +337,14 @@ class ExpectationSuite(SerializableDictDot):
             )
         )
 
-    def __ne__(self, other):
+    def __ne__(self, other):  # type: ignore[explicit-override] # FIXME
         # By using the == operator, the returned NotImplemented is handled correctly.
         return not self == other
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @override
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
@@ -601,7 +643,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        diagnostics = self.is_added()
+        diagnostics = self.is_fresh()
         diagnostics.raise_for_error()
 
         return _IdentifierBundle(name=self.name, id=self.id)

@@ -24,7 +24,7 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 ## Self-hosted deployment
 
-To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. A self-hosted deployment is recommended when you want to test GX Cloud features and functionality and it differs from the recommended [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern), in which the GX Agent runs in your organization's deployment environment.
+To try GX Cloud, you use a [self-hosted deployment](/cloud/deploy/deployment_patterns.md) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. A self-hosted deployment is recommended when you want to test GX Cloud features and functionality and it differs from the recommended [org-hosted deployment](/cloud/deploy/deployment_patterns.md), in which the GX Agent runs in your organization's deployment environment.
 
 ## Get your user access token and copy your organization ID
 
@@ -48,7 +48,7 @@ You'll need your user access token and organization ID to set your environment v
 
 ## Set the environment variables and deploy the GX Agent
 
-Environment variables securely store your GX Cloud access credentials. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
+Environment variables securely store your GX Cloud access credentials. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [GX Cloud deployment patterns](/cloud/deploy/deployment_patterns.md).
 
 1. Start the Docker Engine.
 

@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 import numpy as np
 import scipy
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.experimental.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
@@ -126,7 +126,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         """  # noqa: E501
 
         if domain.domain_type == MetricDomainTypes.COLUMN and "." in domain.domain_kwargs["column"]:
-            raise gx_exceptions.ProfilerExecutionError(  # noqa: TRY003
+            raise ProfilerExecutionError(  # noqa: TRY003
                 "Column names cannot contain '.' when computing parameters for unexpected count statistics."  # noqa: E501
             )
 
@@ -198,7 +198,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             mode
             not in UnexpectedCountStatisticsMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS  # noqa: E501
         ):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""The directive "mode" can only be one of \
 {UnexpectedCountStatisticsMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS}, or must be omitted (or set to None); however, "{mode}" was detected.
 """  # noqa: E501

@@ -10,6 +10,7 @@ import great_expectations.expectations as gxe
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.interfaces import Batch, Datasource
+from great_expectations.expectations.expectation import Expectation
 
 DATASOURCE_NAME = "my_pandas"
 ASSET_NAME = "my_csv"
@@ -25,7 +26,7 @@ def pandas_setup(csv_path: pathlib.Path) -> Tuple[AbstractDataContext, Batch]:
         / "yellow_tripdata_sample_10_trips_from_each_month.csv"
     )
     asset = source.add_csv_asset(ASSET_NAME, filepath_or_buffer=filepath)
-    batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
+    batch = asset.get_batch(asset.build_batch_request())
     return context, batch
 
 
@@ -112,54 +113,91 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
     assert result.success is True
 
 
-@pytest.mark.filesystem
-def test_batch_validate_change_expectation_result_format(
-    pandas_setup: Tuple[AbstractDataContext, Batch],
-):
-    _, batch = pandas_setup
+class TestBatchValidateExpectation:
+    @pytest.fixture
+    def expectation(self) -> Expectation:
+        return gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)
 
-    # "SUMMARY"" is the default result format
-    assert batch.result_format == "SUMMARY"
-    expectation = gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)
-    summary_result = batch.validate(expectation)
-    # Summary result succeeds and .result has non-empty summary
-    assert summary_result.success is True
-    assert len(summary_result.result) > 0
-    batch.result_format = "BOOLEAN_ONLY"
-    boolean_result = batch.validate(expectation)
-    # Boolean result succeeds but .result is empty
-    assert boolean_result.success is True
-    assert len(boolean_result.result) == 0
+    @pytest.mark.filesystem
+    def test_boolean_validation_result(
+        self,
+        pandas_setup: Tuple[AbstractDataContext, Batch],
+        expectation: Expectation,
+    ):
+        _, batch = pandas_setup
+        result = batch.validate(expectation, result_format="BOOLEAN_ONLY")
+
+        assert result.success is True
+        assert len(result.result) == 0
+
+    @pytest.mark.filesystem
+    def test_summary_validation_result(
+        self,
+        pandas_setup: Tuple[AbstractDataContext, Batch],
+        expectation: Expectation,
+    ):
+        _, batch = pandas_setup
+        summary_result = batch.validate(expectation, result_format="SUMMARY")
+
+        assert summary_result.success is True
+        assert len(summary_result.result) > 0
+
+    @pytest.mark.filesystem
+    def test_complete_validation_result(
+        self,
+        pandas_setup: Tuple[AbstractDataContext, Batch],
+        expectation: Expectation,
+    ):
+        _, batch = pandas_setup
+        result = batch.validate(expectation, result_format="COMPLETE")
+
+        assert result.success is True
+        assert "unexpected_index_list" in result.result
 
 
-@pytest.mark.filesystem
-def test_batch_validate_change_expectation_suite_result_format(
-    pandas_setup: Tuple[AbstractDataContext, Batch],
-):
-    context, batch = pandas_setup
-
-    # "SUMMARY"" is the default result format
-    assert batch.result_format == "SUMMARY"
-    # Make Expectation Suite
-    suite = context.suites.add(ExpectationSuite(name="my_suite"))
-    suite.add_expectation(
-        gxe.ExpectColumnValuesToNotBeNull(
-            column="vendor_id",
-            mostly=0.95,
+class TestBatchValidateExpectationSuite:
+    @pytest.fixture
+    def suite(self) -> ExpectationSuite:
+        return gx.ExpectationSuite(
+            name="my-suite",
+            expectations=[gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)],
         )
-    )
-    # Validate
-    summary_result = batch.validate(suite)
-    # Summary result succeeds and .results[0].result has non-empty summary
-    assert summary_result.success is True
-    assert len(summary_result.results) == 1
-    assert len(summary_result.results[0].result) > 0
-    batch.result_format = "BOOLEAN_ONLY"
-    boolean_result = batch.validate(suite)
-    # Boolean result succeeds but .results[0].result is empty
-    assert boolean_result.success is True
-    assert len(boolean_result.results) == 1
-    assert len(boolean_result.results[0].result) == 0
+
+    @pytest.mark.filesystem
+    def test_boolean_validation_result(
+        self,
+        pandas_setup: Tuple[AbstractDataContext, Batch],
+        suite: ExpectationSuite,
+    ):
+        _, batch = pandas_setup
+        result = batch.validate(suite, result_format="BOOLEAN_ONLY")
+
+        assert result.success is True
+        assert len(result.results[0].result) == 0
+
+    @pytest.mark.filesystem
+    def test_summary_validation_result(
+        self,
+        pandas_setup: Tuple[AbstractDataContext, Batch],
+        suite: ExpectationSuite,
+    ):
+        _, batch = pandas_setup
+        summary_result = batch.validate(suite, result_format="SUMMARY")
+
+        assert summary_result.success is True
+        assert len(summary_result.results[0].result) > 0
+
+    @pytest.mark.filesystem
+    def test_complete_validation_result(
+        self,
+        pandas_setup: Tuple[AbstractDataContext, Batch],
+        suite: ExpectationSuite,
+    ):
+        _, batch = pandas_setup
+        result = batch.validate(suite, result_format="COMPLETE")
+
+        assert result.success is True
+        assert "unexpected_index_list" in result.results[0].result
 
 
 @pytest.mark.filesystem

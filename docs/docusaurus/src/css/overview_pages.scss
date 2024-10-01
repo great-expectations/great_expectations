@@ -1,5 +1,5 @@
 @mixin overview-card-container {
-  background-color: #404041;
+  background-color: var(--payne-gray-color);
   color: var(--ifm-footer-link-color);
   margin-bottom: 2rem;
   padding: 2.5rem 3rem 2rem;
@@ -35,7 +35,10 @@
   font-weight: normal;
   line-height: var(--p-line-height);
   margin-bottom: var(--ifm-heading-margin-bottom);
-  max-width: 40rem;
+
+  p {
+    max-width: 40rem;
+  }
 }
 
 .generated-index-page {

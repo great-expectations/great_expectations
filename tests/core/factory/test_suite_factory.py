@@ -6,7 +6,6 @@ from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 from pytest_mock import MockerFixture
-from typing_extensions import override
 
 from great_expectations.alias_types import JSONValues
 from great_expectations.analytics.events import (
@@ -37,11 +36,11 @@ def test_suite_factory_get_uses_store_get():
     set_context(context)
 
     # Act
-    result = factory.get(name=name)
+    factory.get(name=name)
 
     # Assert
     store.get.assert_called_once_with(key=key)
-    assert result == ExpectationSuite(name=name)
+    store.deserialize_suite_dict.assert_called_once_with(suite_dict)
 
 
 @pytest.mark.unit
@@ -248,8 +247,7 @@ def test_suite_factory_all_with_bad_marshmallow_config(
             # This type intentionally mismatches. We want a bad config.
             self.configuration: dict = {}
 
-        @override
-        def to_json_dict(self) -> Dict[str, JSONValues]:
+        def to_json_dict(self) -> Dict[str, JSONValues]:  # type: ignore[explicit-override] # FIXME
             return {"id": self.id}
 
     # Arrange

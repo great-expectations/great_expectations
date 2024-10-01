@@ -12,6 +12,7 @@ from great_expectations.compatibility.pydantic import ValidationError as Pydanti
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.factory.factory import Factory
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
@@ -24,8 +25,6 @@ class SuiteFactory(Factory[ExpectationSuite]):
 
     @property
     def _include_rendered_content(self) -> bool:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.is_using_cloud()
 
     @public_api
@@ -51,6 +50,9 @@ class SuiteFactory(Factory[ExpectationSuite]):
                 expectation_suite_id=suite.id,
             )
         )
+
+        if suite._include_rendered_content:
+            suite.render()
 
         return suite
 
@@ -97,7 +99,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         if not self._store.has_key(key=key):
             raise DataContextError(f"ExpectationSuite with name {name} was not found.")  # noqa: TRY003
         suite_dict = self._store.get(key=key)
-        return self._deserialize(suite_dict)
+        return self._store.deserialize_suite_dict(suite_dict)
 
     @public_api
     @override
@@ -114,7 +116,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         bad_dicts: list[Any] = []
         for suite_dict in dicts:
             try:
-                deserializable_suites.append(self._deserialize(suite_dict))
+                deserializable_suites.append(self._store.deserialize_suite_dict(suite_dict))
             except PydanticValidationError as e:
                 bad_dicts.append(suite_dict)
                 self._store.submit_all_deserialization_event(e)
@@ -122,10 +124,3 @@ class SuiteFactory(Factory[ExpectationSuite]):
                 self._store.submit_all_deserialization_event(e)
                 raise
         return deserializable_suites
-
-    def _deserialize(self, suite_dict: dict) -> ExpectationSuite:
-        # TODO: Move this logic to the store
-        suite = ExpectationSuite(**suite_dict)
-        if self._include_rendered_content:
-            suite.render()
-        return suite

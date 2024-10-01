@@ -20,19 +20,21 @@ The following are the levels of support provided by GX:
 
 The following table defines the GX Cloud, GX Core, and Community Supported integrations.
 
-| Integration Type      | GX Cloud                   | GX Core                                                                       | Community                         |
-| --------------------- | -------------------------- | ----------------------------------------------------------------------------- | --------------------------------- |
-| Data Sources¹         | Snowflake<br/> PostgreSQL² | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>Spark<br/>Pandas | Redshift<br/>MSSQL<br/>MySQL<br/> |
-| Configuration Stores³ | In-app                     | File system                                                                   | None                              |
-| Actions               | Slack                      | Slack <br/>Email                                                              | None                              |
-| Credential Store      | Environment variables      | Environment variables <br/> YAML⁴                                             | None                              |
-| Orchestrator          | Airflow ⁵                  | Airflow ⁵                                                                     | None                              |
+| Integration Type                 | GX Cloud                              | GX Core                                                                                    | Community            |
+| -------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------- |
+| Data Sources<sup>1</sup>         | Snowflake<br/> PostgreSQL<sup>2</sup> | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>BigQuery<br/>Spark<br/>Pandas | MSSQL<br/>MySQL<br/> |
+| Configuration Stores<sup>3</sup> | In-app                                | File system                                                                                | None                 |
+| Data Doc Stores                  | In-app                                | File system                                                                                | None                 |
+| Actions                          | Slack                                 | Slack <br/>Email                                                                           | None                 |
+| Credential Stores                | Environment variables                 | Environment variables <br/> YAML<sup>4</sup>                                               | None                 |
+| Orchestrator                     | Airflow <sup>5</sup> <sup>6</sup>     | Airflow <sup>5</sup> <sup>6</sup>                                                          | None                 |
 
-¹ We've also seen GX work with the following data sources in the past but we can't guarentee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
-² Support for BigQuery in GX Cloud will be available in a future release.<br/>
-³ This includes configuration storage for Expectations, Checkpoints, Validation Definitions, and Validation Result<br/>
-⁴ config_variables.yml<br/>
-⁵ Although only Airflow is supported, GX Cloud and GX Core should work with any orchestrator that executes Python code.<br/>
+<sup>1</sup> We've also seen GX work with the following data sources in the past but we can't guarantee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
+<sup>2</sup> Support for BigQuery in GX Cloud will be available in a future release.<br/>
+<sup>3</sup> This includes configuration storage for Expectations, Checkpoints, Validation Definitions, and Validation Result<br/>
+<sup>4</sup> config_variables.yml<br/>
+<sup>5</sup> Although only Airflow is supported, GX Cloud and GX Core should work with any orchestrator that executes Python code.<br/>
+<sup>6</sup> Airflow version 2.9.0+ required<br/>
 
 ### GX components
 
@@ -47,11 +49,11 @@ The following table defines the GX components supported by GX Cloud and GX Core.
 
 The following table defines the operating systems supported by GX Cloud and GX Core.
 
-| GX Cloud    | GX Core   | Community |
-| ----------- | --------- | --------- |
-| Mac/Linux ¹ | Mac/Linux | Mac/Linux |
+| GX Cloud               | GX Core   | Community |
+| ---------------------- | --------- | --------- |
+| Mac/Linux <sup>1</sup> | Mac/Linux | Mac/Linux |
 
-¹ GX does not currently support Windows. However, we've seen users successfuly deploying GX on Windows.
+<sup>1</sup> GX does not currently support Windows. However, we've seen users successfully deploying GX on Windows.
 
 ### Python versions
 
@@ -68,3 +70,15 @@ The following table defines the GX versions supported by GX Cloud and GX Core.
 | GX Cloud | GX Core | Community |
 | -------- | ------- | --------- |
 | ≥1.0     | ≥1.0    | ≥1.0      |
+
+### Web browsers
+
+The following web browsers are supported by GX Cloud.
+
+- [Google Chrome](https://www.google.com/chrome/) — the latest version is fully supported
+
+- [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/) — the latest version is fully supported
+
+- [Apple Safari](https://www.apple.com/safari/) — the latest version is fully supported
+
+- [Microsoft Edge](https://www.microsoft.com/en-us/edge?ep=82&form=MA13KI&es=24) — the latest version is fully supported

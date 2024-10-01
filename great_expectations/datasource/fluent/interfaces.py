@@ -6,6 +6,7 @@ import functools
 import logging
 import uuid
 import warnings
+from abc import ABC, abstractmethod
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -42,7 +43,7 @@ from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_definition import BatchDefinition, PartitionerT
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
 )
@@ -66,6 +67,8 @@ from great_expectations.datasource.fluent.data_connector import (
 if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
+
+    from great_expectations.core.result_format import ResultFormatUnion
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -96,6 +99,8 @@ if TYPE_CHECKING:
     from great_expectations.validator.v1_validator import (
         Validator as V1Validator,
     )
+
+_T = TypeVar("_T")
 
 
 class PartitionerSortingProtocol(Protocol):
@@ -281,7 +286,7 @@ _ExecutionEngineT = TypeVar("_ExecutionEngineT")
 DatasourceT = TypeVar("DatasourceT", bound="Datasource")
 
 
-class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
+class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -340,15 +345,18 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
             partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
+            A BatchRequest object that can be used to obtain a batch from an asset by calling the
+            get_batch method.
         """  # noqa: E501
         raise NotImplementedError(
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
-        raise NotImplementedError
+    @abstractmethod
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]: ...
+
+    @abstractmethod
+    def get_batch(self, batch_request: BatchRequest) -> Batch: ...
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
@@ -509,52 +517,85 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
 
     def sort_batches(
         self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
-    ) -> None:
+    ) -> List[Batch]:
         """Sorts batch_list in place in the order configured in this DataAsset.
         Args:
             batch_list: The list of batches to sort in place.
             partitioner: Configuration used to determine sort.
         """
+
+        def get_value(key: str) -> Callable[[Batch], Any]:
+            return lambda bd: bd.metadata[key]
+
+        return self._sort_batch_data_list(batch_list, partitioner, get_value)
+
+    def sort_legacy_batch_definitions(
+        self,
+        legacy_batch_definition_list: List[LegacyBatchDefinition],
+        partitioner: PartitionerSortingProtocol,
+    ) -> List[LegacyBatchDefinition]:
+        """Sorts batch_definition_list in the order configured by the partitioner."""
+
+        def get_value(key: str) -> Callable[[LegacyBatchDefinition], Any]:
+            return lambda bd: bd.batch_identifiers[key]
+
+        return self._sort_batch_data_list(legacy_batch_definition_list, partitioner, get_value)
+
+    def sort_batch_identifiers_list(
+        self, batch_identfiers_list: List[dict], partitioner: PartitionerSortingProtocol
+    ) -> List[dict]:
+        """Sorts batch_identfiers_list in the order configured by the partitioner."""
+
+        def get_value(key: str) -> Callable[[dict], Any]:
+            return lambda d: d[key]
+
+        return self._sort_batch_data_list(batch_identfiers_list, partitioner, get_value)
+
+    def _sort_batch_data_list(
+        self,
+        batch_data_list: List[_T],
+        partitioner: PartitionerSortingProtocol,
+        get_value: Callable[[str], Any],
+    ) -> List[_T]:
+        """Sorts batch_data_list in the order configured by the partitioner."""
         reverse = not partitioner.sort_ascending
         for key in reversed(partitioner.param_names):
             try:
-                batch_list.sort(
-                    key=functools.cmp_to_key(_sort_batches_with_none_metadata_values(key)),
+                batch_data_list = sorted(
+                    batch_data_list,
+                    key=functools.cmp_to_key(
+                        _sort_batch_identifiers_with_none_metadata_values(get_value(key))
+                    ),
                     reverse=reverse,
                 )
             except KeyError as e:
                 raise KeyError(  # noqa: TRY003
-                    f"Trying to sort {self.name} table asset batches on key {key} "
+                    f"Trying to sort {self.name}'s batches on key {key}, "
                     "which isn't available on all batches."
                 ) from e
+        return batch_data_list
 
 
-def _sort_batches_with_none_metadata_values(
-    key: str,
-) -> Callable[[Batch, Batch], int]:
-    def _compare_function(a: Batch, b: Batch) -> int:
-        if a.metadata[key] is not None and b.metadata[key] is not None:
-            if a.metadata[key] < b.metadata[key]:
+def _sort_batch_identifiers_with_none_metadata_values(
+    get_val: Callable[[_T], Any],
+) -> Callable[[_T, _T], int]:
+    def _compare_function(a: _T, b: _T) -> int:
+        a_val = get_val(a)
+        b_val = get_val(b)
+
+        if a_val is not None and b_val is not None:
+            if a_val < b_val:
                 return -1
-
-            if a.metadata[key] > b.metadata[key]:
+            elif a_val > b_val:
                 return 1
-
+            else:
+                return 0
+        elif a_val is None and b_val is None:
             return 0
-
-        if a.metadata[key] is None and b.metadata[key] is None:
-            return 0
-
-        if a.metadata[key] is None:  # b.metadata[key] is not None
+        elif a_val is None:  # b.metadata_val is not None
             return -1
-
-        if a.metadata[key] is not None:  # b.metadata[key] is None
+        else:  # b[key] is None
             return 1
-
-        # This line should never be reached; hence, "ValueError" with corresponding error message is raised.  # noqa: E501
-        raise ValueError(  # noqa: TRY003
-            f'Unexpected Batch metadata key combination, "{a.metadata[key]}" and "{b.metadata[key]}", was encountered.'  # noqa: E501
-        )
 
     return _compare_function
 
@@ -710,18 +751,22 @@ class Datasource(
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
         return self._execution_engine
 
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
-        """A list of batches that correspond to the BatchRequest.
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        """A Batch that corresponds to the BatchRequest.
 
         Args:
             batch_request: A batch request for this asset. Usually obtained by calling
                 build_batch_request on the asset.
 
         Returns:
-            A list of batches that match the options specified in the batch request.
+            A Batch that matches the options specified in the batch request.
         """
         data_asset = self.get_asset(batch_request.data_asset_name)
-        return data_asset.get_batch_list_from_batch_request(batch_request)
+        return data_asset.get_batch(batch_request)
+
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        data_asset = self.get_asset(batch_request.data_asset_name)
+        return data_asset.get_batch_identifiers_list(batch_request)
 
     def get_assets_as_dict(self) -> MutableMapping[str, _DataAssetT]:
         """Returns available DataAsset objects as dictionary, with corresponding name as key.
@@ -1071,37 +1116,36 @@ class Batch:
         )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
 
-    @property
-    def result_format(self) -> str | dict | ResultFormat:
-        # We always `return a ResultFormat`. However to prevent having to do #ignore[assignment] we return  # noqa: E501
-        # `str | ResultFormat`. When the getter/setter have different types mypy gets confused on lines like:  # noqa: E501
-        # batch.result_format = "SUMMARY"
-        # See:
-        # https://github.com/python/mypy/issues/3004
-        return self._validator.result_format
-
-    @result_format.setter
-    def result_format(self, result_format: str | ResultFormat):
-        # We allow a str result_format because this is an interactive workflow
-        self._validator.result_format = ResultFormat(result_format)
+    @overload
+    def validate(
+        self,
+        expect: Expectation,
+        *,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+    ) -> ExpectationValidationResult: ...
 
     @overload
-    def validate(self, expect: Expectation) -> ExpectationValidationResult: ...
-
-    @overload
-    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult: ...
+    def validate(
+        self,
+        expect: ExpectationSuite,
+        *,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+    ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
     def validate(
-        self, expect: Expectation | ExpectationSuite
+        self,
+        expect: Expectation | ExpectationSuite,
+        *,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
         from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
 
         if isinstance(expect, Expectation):
-            return self._validate_expectation(expect)
+            return self._validate_expectation(expect, result_format=result_format)
         elif isinstance(expect, ExpectationSuite):
-            return self._validate_expectation_suite(expect)
+            return self._validate_expectation_suite(expect, result_format=result_format)
         else:
             # If we are type checking, we should never fall through to this case. However, exploratory  # noqa: E501
             # workflows are not being type checked.
@@ -1109,16 +1153,25 @@ class Batch:
                 f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"  # noqa: E501
             )
 
-    def _validate_expectation(self, expect: Expectation) -> ExpectationValidationResult:
-        return self._validator.validate_expectation(expect)
+    def _validate_expectation(
+        self,
+        expect: Expectation,
+        result_format: ResultFormatUnion,
+    ) -> ExpectationValidationResult:
+        return self._create_validator(
+            result_format=result_format,
+        ).validate_expectation(expect)
 
     def _validate_expectation_suite(
-        self, expect: ExpectationSuite
+        self,
+        expect: ExpectationSuite,
+        result_format: ResultFormatUnion,
     ) -> ExpectationSuiteValidationResult:
-        return self._validator.validate_expectation_suite(expect)
+        return self._create_validator(
+            result_format=result_format,
+        ).validate_expectation_suite(expect)
 
-    @functools.cached_property
-    def _validator(self) -> V1Validator:
+    def _create_validator(self, *, result_format: ResultFormatUnion) -> V1Validator:
         from great_expectations.validator.v1_validator import Validator as V1Validator
 
         context = self.datasource.data_context
@@ -1137,4 +1190,5 @@ class Batch:
         return V1Validator(
             batch_definition=batch_definition,
             batch_parameters=self.batch_request.options,
+            result_format=result_format,
         )

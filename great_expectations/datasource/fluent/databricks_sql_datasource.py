@@ -143,7 +143,7 @@ class DatabricksTableAsset(SqlTableAsset):
 
         from great_expectations.compatibility import sqlalchemy
 
-        if sqlalchemy.quoted_name:
+        if sqlalchemy.quoted_name:  # type: ignore[truthy-function]
             if isinstance(table_name, sqlalchemy.quoted_name):
                 return table_name
 
@@ -180,7 +180,7 @@ class DatabricksSQLDatasource(SQLDatasource):
 
     Args:
         name: The name of this DatabricksSQL datasource.
-        connection_string: The SQLAlchemy connection string used to connect to the postgres database.
+        connection_string: The SQLAlchemy connection string used to connect to the Databricks SQL database.
             For example: "databricks://token:<token>@<host>:<port>?http_path=<http_path>&catalog=<catalog>&schema=<schema>""
         assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values
             are TableAsset or QueryAsset objects.

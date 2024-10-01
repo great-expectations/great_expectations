@@ -122,7 +122,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     This expectation works on both categorical and continuous partitions. See notes below for details.
 
     ExpectColumnKlDivergenceToBeLessThan is a \
-    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
+    Column Aggregate Expectation.
 
     Column Aggregate Expectations are one of the most common types of Expectation.
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
@@ -902,7 +902,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         return return_obj
 
     @classmethod
-    def _get_kl_divergence_chart(  # noqa: PLR0912,C901 - 13
+    def _get_kl_divergence_chart(  # noqa: C901 - 13
         cls, partition_object, header=None
     ):
         weights = partition_object["weights"]
@@ -913,8 +913,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
             )
         else:
             chart_pixel_width = (len(weights) / 60.0) * 500
-            if chart_pixel_width < 250:  # noqa: PLR2004
-                chart_pixel_width = 250
+            chart_pixel_width = max(chart_pixel_width, 250)
             chart_container_col_width = round((len(weights) / 60.0) * 6)
             if chart_container_col_width < 4:  # noqa: PLR2004
                 chart_container_col_width = 4
@@ -1008,12 +1007,11 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         return expected_distribution
 
     @classmethod
-    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:  # noqa: C901 - too complex
+    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
         weights = partition_object.get("weights", [])
 
         chart_pixel_width = (len(weights) / 60.0) * 500
-        if chart_pixel_width < 250:  # noqa: PLR2004
-            chart_pixel_width = 250
+        chart_pixel_width = max(chart_pixel_width, 250)
         chart_container_col_width = round((len(weights) / 60.0) * 6)
         if chart_container_col_width < 4:  # noqa: PLR2004
             chart_container_col_width = 4

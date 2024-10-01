@@ -49,7 +49,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectTableColumnsToMatchOrderedList is a \
-    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
+    Batch Expectation.
 
     BatchExpectations are one of the most common types of Expectation.
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.

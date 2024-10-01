@@ -162,13 +162,13 @@ def _sqlalchemy_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    query = sa.select(
+    query = sa.select(  # type: ignore[var-annotated]
         sa.column(column_A_name).label("unexpected_values_A"),
         sa.column(column_B_name).label("unexpected_values_B"),
     ).where(boolean_mapped_unexpected_values)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        selectable = get_sqlalchemy_selectable(selectable)
-        query = query.select_from(selectable)
+        selectable = get_sqlalchemy_selectable(selectable)  # type: ignore[arg-type]
+        query = query.select_from(selectable)  # type: ignore[arg-type]
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -205,7 +205,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     return execution_engine.execute_query(
-        sa.select(sa.func.count()).select_from(selectable)
+        sa.select(sa.func.count()).select_from(selectable)  # type: ignore[arg-type]
     ).scalar()
 
 

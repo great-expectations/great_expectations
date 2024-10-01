@@ -17,7 +17,7 @@ if sa:
     if is_version_greater_or_equal(sa.__version__, "1.4.0"):
         url_create_fn = sqlalchemy.URL.create
     else:
-        url_create_fn = sqlalchemy.URL
+        url_create_fn = sqlalchemy.URL  # type: ignore[assignment]
 
 
 logger = logging.getLogger(__name__)
@@ -93,10 +93,10 @@ class SqlAlchemyQueryStore(Store):
             return StringKey(key)
         return key
 
-    def get(self, key):
+    def get(self, key):  # type: ignore[explicit-override] # FIXME
         return super().get(self._convert_key(key))
 
-    def set(self, key, value):
+    def set(self, key, value):  # type: ignore[explicit-override] # FIXME
         return super().set(self._convert_key(key), value)
 
     def get_query_result(self, key, query_parameters=None):

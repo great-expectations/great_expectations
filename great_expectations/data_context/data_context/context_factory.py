@@ -8,6 +8,7 @@ from typing import (
     Callable,
     Literal,
     Mapping,
+    Optional,
     Type,
     overload,
 )
@@ -134,7 +135,7 @@ class ProjectManager:
         site_name: str | None = None,
         only_if_exists: bool = True,
         site_names: list[str] | None = None,
-    ) -> list[dict[str, str]]:
+    ) -> list[dict[str, Optional[str]]]:
         return self._project.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
@@ -376,7 +377,7 @@ project_manager = ProjectManager()
 
 
 @overload
-def get_context(  # type: ignore[overload-overlap]
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: None = ...,
@@ -390,7 +391,7 @@ def get_context(  # type: ignore[overload-overlap]
 
 
 @overload
-def get_context(  # type: ignore[overload-overlap]
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr = ...,  # If context_root_dir is provided, project_root_dir shouldn't be  # noqa: E501
     project_root_dir: None = ...,
@@ -403,7 +404,7 @@ def get_context(  # type: ignore[overload-overlap]
 
 
 @overload
-def get_context(  # type: ignore[overload-overlap]
+def get_context(
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: PathStr = ...,  # If project_root_dir is provided, context_root_dir shouldn't be  # noqa: E501

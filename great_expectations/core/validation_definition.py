@@ -8,18 +8,18 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Extra,
-    PrivateAttr,
     ValidationError,
     validator,
 )
-from great_expectations.core.added_diagnostics import (
-    ValidationDefinitionAddedDiagnostics,
-)
+from great_expectations.constants import DATAFRAME_REPLACEMENT_STR
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
 )
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.freshness_diagnostics import (
+    ValidationDefinitionFreshnessDiagnostics,
+)
+from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -30,8 +30,14 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions.exceptions import (
+from great_expectations.exceptions import (
     ValidationDefinitionNotAddedError,
+    ValidationDefinitionNotFreshError,
+)
+from great_expectations.exceptions.exceptions import (
+    InvalidKeyError,
+    StoreBackendError,
+    ValidationDefinitionNotFoundError,
 )
 from great_expectations.validator.v1_validator import Validator
 
@@ -39,15 +45,15 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
+    from great_expectations.core.result_format import ResultFormatUnion
     from great_expectations.data_context.store.validation_results_store import (
         ValidationResultsStore,
     )
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
-DATAFRAME_INDICATOR = "<DATAFRAME>"
 
-
+@public_api
 class ValidationDefinition(BaseModel):
     """
     Responsible for running a suite against data and returning a validation result.
@@ -104,19 +110,14 @@ class ValidationDefinition(BaseModel):
     data: BatchDefinition
     suite: ExpectationSuite
     id: Union[str, None] = None
-    _validation_results_store: ValidationResultsStore = PrivateAttr()
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-
-        # TODO: Migrate this to model_post_init when we get to pydantic 2
-        self._validation_results_store = project_manager.get_validation_results_store()
 
     @property
+    @public_api
     def batch_definition(self) -> BatchDefinition:
         return self.data
 
     @property
+    @public_api
     def asset(self) -> DataAsset:
         return self.data.data_asset
 
@@ -124,15 +125,39 @@ class ValidationDefinition(BaseModel):
     def data_source(self) -> Datasource:
         return self.asset.datasource
 
-    def is_added(self) -> ValidationDefinitionAddedDiagnostics:
-        validation_definition_diagnostics = ValidationDefinitionAddedDiagnostics(
+    @property
+    def _validation_results_store(self) -> ValidationResultsStore:
+        return project_manager.get_validation_results_store()
+
+    def is_fresh(self) -> ValidationDefinitionFreshnessDiagnostics:
+        validation_definition_diagnostics = ValidationDefinitionFreshnessDiagnostics(
             errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
         )
-        suite_diagnostics = self.suite.is_added()
-        data_diagnostics = self.data.is_added()
+        suite_diagnostics = self.suite.is_fresh()
+        data_diagnostics = self.data.is_fresh()
         validation_definition_diagnostics.update_with_children(suite_diagnostics, data_diagnostics)
 
-        return validation_definition_diagnostics
+        if not validation_definition_diagnostics.success:
+            return validation_definition_diagnostics
+
+        store = project_manager.get_validation_definition_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        try:
+            validation_definition = store.get(key=key)
+        except (
+            StoreBackendError,  # Generic error from stores
+            InvalidKeyError,  # Ephemeral context error
+        ):
+            return ValidationDefinitionFreshnessDiagnostics(
+                errors=[ValidationDefinitionNotFoundError(name=self.name)]
+            )
+
+        return ValidationDefinitionFreshnessDiagnostics(
+            errors=[]
+            if self == validation_definition
+            else [ValidationDefinitionNotFreshError(name=self.name)]
+        )
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -175,7 +200,10 @@ class ValidationDefinition(BaseModel):
         except gx_exceptions.InvalidKeyError as e:
             raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e  # noqa: TRY003
 
-        return ExpectationSuite(**config)
+        suite = ExpectationSuite(**config)
+        if suite._include_rendered_content:
+            suite.render()
+        return suite
 
     @classmethod
     def _decode_data(cls, data_dict: dict) -> BatchDefinition:
@@ -218,11 +246,34 @@ class ValidationDefinition(BaseModel):
         checkpoint_id: Optional[str] = None,
         batch_parameters: Optional[BatchParameters] = None,
         expectation_parameters: Optional[dict[str, Any]] = None,
-        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
+        result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
-        diagnostics = self.is_added()
-        if not diagnostics.is_added:
+        """
+        Runs a validation using the configured data and suite.
+
+        Args:
+            batch_parameters: The dictionary of parameters necessary for selecting the
+              correct batch to run the validation on. The keys are strings that are determined
+              by the BatchDefinition used to instantiate this ValidationDefinition. For example:
+
+              - whole table -> None
+              - yearly -> year
+              - monthly -> year, month
+              - daily -> year, month, day
+
+            expectation_parameters: A dictionary of parameters values for any expectations using
+              parameterized values (the $PARAMETER syntax). The keys are the parameter names
+              and the values are the values to be used for this validation run.
+            result_format: A parameter controlling how much diagnostic information the result
+              contains.
+            checkpoint_id: This is used by the checkpoints code when it runs a validation
+              definition. Otherwise, it should be None.
+            run_id: An identifier for this run. Typically, this should be set to None and it will
+              be generated by this call.
+        """
+        diagnostics = self.is_fresh()
+        if not diagnostics.success:
             # The validation definition itself is not added but all children are - we can add it for the user # noqa: E501
             if not diagnostics.parent_added and diagnostics.children_added:
                 self._add_to_store()
@@ -246,7 +297,7 @@ class ValidationDefinition(BaseModel):
         if batch_parameters:
             batch_parameters_copy = {k: v for k, v in batch_parameters.items()}
             if "dataframe" in batch_parameters_copy:
-                batch_parameters_copy["dataframe"] = DATAFRAME_INDICATOR
+                batch_parameters_copy["dataframe"] = DATAFRAME_REPLACEMENT_STR
             results.meta["batch_parameters"] = batch_parameters_copy
         else:
             results.meta["batch_parameters"] = None
@@ -304,15 +355,13 @@ class ValidationDefinition(BaseModel):
 
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
-        diagnostics = self.is_added()
+        diagnostics = self.is_fresh()
         diagnostics.raise_for_error()
 
         return _IdentifierBundle(name=self.name, id=self.id)
 
     @public_api
     def save(self) -> None:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
 
@@ -323,9 +372,6 @@ class ValidationDefinition(BaseModel):
 
         We need to persist a validation_definition before it can be run. If user calls runs but
         hasn't persisted it we add it for them."""
-
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         store = project_manager.get_validation_definition_store()
         key = store.get_key(name=self.name, id=self.id)
 
