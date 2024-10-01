@@ -48,7 +48,7 @@ class _Mostly(Number):
             field_schema["multipleOf"] = 0.01
 
 
-Mostly = Annotated[_Mostly, float]
+Mostly = Annotated[float, _Mostly]
 
 
 class _ValueSet(Iterable):
