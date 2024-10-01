@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 from typing import Any, Dict, List
+from unittest import mock
 
 import pytest
 
@@ -41,6 +42,22 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+class Dialect:
+    def __init__(self, dialect: str):
+        self.name = dialect
+
+
+class MockSaEngine:
+    def __init__(self, dialect: Dialect):
+        self.dialect = dialect
+
+
+class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
+    def __init__(self, create_temp_table: bool = True, *args, **kwargs):
+        self.engine = MockSaEngine(dialect=Dialect("sqlite"))  # type: ignore[assignment]
+        self._create_temp_table = create_temp_table
 
 
 @pytest.fixture
@@ -401,3 +418,38 @@ def test__get_parameters_dict_from_query_parameters(
 ):
     actual_dict = QueryMetricProvider._get_parameters_dict_from_query_parameters(query_parameters)
     assert actual_dict == expected_dict
+
+
+@pytest.mark.unit
+@mock.patch.object(sa, "text")
+@pytest.mark.parametrize(
+    "batch_selectable,expected_query",
+    [
+        (
+            sa.table("my_table"),
+            "SELECT my_column FROM (my_table) WHERE passenger_count > 7",
+        ),
+        (
+            sa.select("*").select_from(sa.text("my_table")).subquery(),
+            "SELECT my_column FROM (SELECT * \nFROM my_table) WHERE passenger_count > 7",
+        ),
+        (
+            sa.select("*").select_from(sa.text("my_table")),
+            "SELECT my_column FROM (SELECT * \nFROM my_table) AS subselect "
+            "WHERE passenger_count > 7",
+        ),
+    ],
+)
+def test__get_sqlalchemy_records_from_query_and_batch_selectable(
+    mock_sqlalchemy_text, batch_selectable: sa.Selectable, expected_query: str
+):
+    execution_engine = MockSqlAlchemyExecutionEngine()
+    mock_sqlalchemy_text.return_value = "*"
+    with mock.patch.object(execution_engine, "execute_query"):
+        QueryMetricProvider._get_sqlalchemy_records_from_query_and_batch_selectable(
+            query="SELECT {column} FROM {batch} WHERE passenger_count > 7",
+            batch_selectable=batch_selectable,
+            execution_engine=execution_engine,
+            query_parameters=QueryParameters(column="my_column"),
+        )
+    mock_sqlalchemy_text.assert_called_with(expected_query)
