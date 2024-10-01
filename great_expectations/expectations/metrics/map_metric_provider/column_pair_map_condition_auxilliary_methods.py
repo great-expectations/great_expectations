@@ -106,7 +106,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> int:
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
@@ -191,7 +191,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> int:
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
@@ -278,7 +278,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> int:
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 

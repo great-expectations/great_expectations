@@ -60,7 +60,7 @@ def _pandas_map_condition_unexpected_count(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> int:
     """Returns unexpected count for MapExpectations"""
     return np.count_nonzero(metrics["unexpected_condition"][0])
 
@@ -256,7 +256,7 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> tuple[Any, Any, Any]:
     """Returns unexpected count for MapExpectations"""
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
@@ -281,7 +281,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> float | int:
     """Returns unexpected count for MapExpectations. This is a *value* metric, which is useful for
     when the unexpected_condition is a window function.
     """
@@ -586,7 +586,7 @@ def _spark_map_condition_unexpected_count_aggregate_fn(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> tuple[Any, Any, Any]:
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]
@@ -604,7 +604,7 @@ def _spark_map_condition_unexpected_count_value(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> int:
     # fn_domain_kwargs maybe updated to reflect null filtering
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"

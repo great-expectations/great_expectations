@@ -5,6 +5,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Sequence,
     Tuple,
     Union,
 )
@@ -30,6 +31,8 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
 )
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.compatibility import pyspark, sqlalchemy
 
 
@@ -100,7 +103,7 @@ def _pandas_column_map_condition_value_counts(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> pd.Series[int]:
     """Returns respective value counts for distinct column values"""
     (
         boolean_mapped_unexpected_values,
@@ -224,7 +227,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> Union[Sequence[sa.Row[Any]], Any]:
     """
     Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -313,7 +316,7 @@ def _spark_column_map_condition_value_counts(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> int:
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]
