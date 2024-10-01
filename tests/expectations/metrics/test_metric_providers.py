@@ -34,6 +34,7 @@ from great_expectations.expectations.metrics.metric_provider import (
 )
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
+    QueryParameters,
 )
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
@@ -371,3 +372,32 @@ def test__get_query_string_with_substituted_batch_parameters(input_query: str, e
         batch_subquery=batch_subquery,
     )
     assert actual_query == expected_query
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query_parameters,expected_dict",
+    [
+        (
+            None,
+            {},
+        ),
+        (
+            QueryParameters(),
+            {},
+        ),
+        (
+            QueryParameters(column="my_column"),
+            {"column": "my_column"},
+        ),
+        (
+            QueryParameters(column_A="my_column_A", column_B="my_column_B"),
+            {"column_A": "my_column_A", "column_B": "my_column_B"},
+        ),
+    ],
+)
+def test__get_parameters_dict_from_query_parameters(
+    query_parameters: QueryParameters, expected_dict: dict
+):
+    actual_dict = QueryMetricProvider._get_parameters_dict_from_query_parameters(query_parameters)
+    assert actual_dict == expected_dict
