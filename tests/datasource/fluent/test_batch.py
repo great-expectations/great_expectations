@@ -37,7 +37,7 @@ def test_batch_validate_expectation(pandas_setup: Tuple[AbstractDataContext, Bat
     # Make Expectation
     expectation = gxe.ExpectColumnValuesToNotBeNull(
         column="vendor_id",
-        mostly=0.95,  # type: ignore[assignment] # TODO: Fix in CORE-412
+        mostly=0.95,  # type: ignore[arg-type] # TODO: Fix in CORE-412
     )
     # Validate
     result = batch.validate(expectation)
@@ -56,7 +56,7 @@ def test_batch_validate_expectation_suite(
     suite.add_expectation(
         gxe.ExpectColumnValuesToNotBeNull(
             column="vendor_id",
-            mostly=0.95,  # type: ignore[assignment] # TODO: Fix in CORE-412
+            mostly=0.95,  # type: ignore[arg-type] # TODO: Fix in CORE-412
         )
     )
     # Validate
