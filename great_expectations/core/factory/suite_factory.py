@@ -51,6 +51,9 @@ class SuiteFactory(Factory[ExpectationSuite]):
             )
         )
 
+        if suite._include_rendered_content:
+            suite.render()
+
         return suite
 
     @public_api
