@@ -316,7 +316,7 @@ def _spark_column_map_condition_value_counts(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> int:
+) -> list[pyspark.Row]:
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]

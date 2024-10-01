@@ -32,7 +32,6 @@ class QueryParameters(TypedDict):
     column_A: NotRequired[str]
     column_B: NotRequired[str]
     columns: NotRequired[list[str]]
-    template_dict: NotRequired[dict]
 
 
 class QueryMetricProvider(MetricProvider):
