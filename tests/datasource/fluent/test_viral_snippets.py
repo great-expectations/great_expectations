@@ -15,13 +15,12 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.partitioners import ColumnPartitionerMonthly
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
+from great_expectations.datasource.fluent import SqliteDatasource
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
-
-    from great_expectations.datasource.fluent import SqliteDatasource
 
 
 YAML = YAMLHandler()
