@@ -1826,7 +1826,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     """  # noqa: E501
 
     column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
-    mostly: Mostly = 1.0
+    mostly: Mostly = 1.0  # type: ignore[assignment] # FIXME
 
     catch_exceptions: bool = True
 
@@ -2092,7 +2092,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
 
     column_A: StrictStr = Field(min_length=1, description=COLUMN_A_DESCRIPTION)
     column_B: StrictStr = Field(min_length=1, description=COLUMN_B_DESCRIPTION)
-    mostly: Mostly = 1.0
+    mostly: Mostly = 1.0  # type: ignore[assignment] # FIXME
 
     catch_exceptions: bool = True
 
