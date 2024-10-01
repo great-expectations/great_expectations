@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
 from functools import reduce
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional
 
 import sqlalchemy as sa
 
@@ -13,9 +12,7 @@ from great_expectations.core import (
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,
-)
+from great_expectations.core.types import Comparable
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -137,8 +134,8 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         [expect_column_pair_values_to_be_equal](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal)
     """
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
+    min_value: Optional[Comparable] = None
+    max_value: Optional[Comparable] = None
 
     map_metric = "multicolumn_values_to_be_equal"
 
