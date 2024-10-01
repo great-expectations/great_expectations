@@ -9,7 +9,6 @@ import pytest
         pytest.param("empty_cloud_context_fluent", marks=[pytest.mark.cloud]),
     ],
 )
-@pytest.mark.unit
 def test_fluent_datasources_show_when_printed(
     context_fixture_name: str,
     request,
@@ -46,7 +45,6 @@ def test_fluent_datasources_show_when_printed(
         pytest.param("empty_cloud_context_fluent", marks=[pytest.mark.cloud]),
     ],
 )
-@pytest.mark.unit
 def test_deleted_fluent_datasources_do_not_show_when_printed(
     context_fixture_name: str,
     request,
