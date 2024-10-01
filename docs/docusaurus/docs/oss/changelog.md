@@ -14,6 +14,21 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.0.6
+* [FEATURE] Add expectation windows for dynamic parameters ([#10402](https://github.com/great-expectations/great_expectations/pull/10402))
+* [FEATURE] Descriptive error if open_data_docs called with no data docs ([#10439](https://github.com/great-expectations/great_expectations/pull/10439))
+* [BUGFIX] Ensure suite.render() is called when loading suites ([#10434](https://github.com/great-expectations/great_expectations/pull/10434))
+* [DOCS] Update docs for `UnexpectedRowsExpectation` ([#10391](https://github.com/great-expectations/great_expectations/pull/10391))
+* [DOCS] Exclude templates files from algolia search ([#10401](https://github.com/great-expectations/great_expectations/pull/10401)) (thanks @JessSaavedra)
+* [DOCS] DSB-1116: Reorganize and update GX Cloud deployment and architecture patterns into GX Cloud overview ([#10345](https://github.com/great-expectations/great_expectations/pull/10345))
+* [DOCS] Fix typo in overview docs ([#10429](https://github.com/great-expectations/great_expectations/pull/10429))
+* [DOCS] Go back to old search bar design ([#10409](https://github.com/great-expectations/great_expectations/pull/10409)) (thanks @JessSaavedra)
+* [DOCS] Fix styles for search bar ([#10436](https://github.com/great-expectations/great_expectations/pull/10436)) (thanks @deborahniesz)
+* [DOCS] Data quality tech doc on Volume ([#10362](https://github.com/great-expectations/great_expectations/pull/10362)) (thanks @Quantisan)
+* [MAINTENANCE] ruff `0.5.3` -> `0.6.8` ([#10442](https://github.com/great-expectations/great_expectations/pull/10442))
+* [MAINTENANCE] Add test showing expectation parameters being passed to… ([#10435](https://github.com/great-expectations/great_expectations/pull/10435))
+* [MAINTENANCE] Update expectation equality checks to ignore rendered content ([#10444](https://github.com/great-expectations/great_expectations/pull/10444))
+
 ### 1.0.5
 * [BUGFIX] Using `{batch}` keyword in `UnexpectedRowsQuery` ([#10392](https://github.com/great-expectations/great_expectations/pull/10392))
 * [BUGFIX] Fix Databricks SQL Regex and Like based Expectations ([#10406](https://github.com/great-expectations/great_expectations/pull/10406))
