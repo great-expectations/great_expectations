@@ -48,7 +48,7 @@ class _Mostly(Number):
             field_schema["multipleOf"] = 0.01
 
 
-Mostly = Annotated[float, _Mostly]
+Mostly = Annotated[_Mostly, float]
 
 
 class _ValueSet(Iterable):
@@ -110,4 +110,4 @@ class _ValueSet(Iterable):
             ]
 
 
-ValueSet = Annotated[Union[list, set], _ValueSet]
+ValueSet = Annotated[_ValueSet, Union[list, set]]
