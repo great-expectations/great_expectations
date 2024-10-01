@@ -398,6 +398,7 @@ runtime-evaluated-base-classes = [
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
     "great_expectations.datasource.fluent.interfaces.Datasource",
     "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",
+    "great_expectations.compatibility.pydantic.BaseModel",
 ]
 runtime-evaluated-decorators = ["pydantic.dataclasses.dataclass"]
 
@@ -678,6 +679,7 @@ markers = [
     "sqlite: mark test requiring sqlite",
     "slow: mark tests taking longer than 1 second.",
     "spark: mark a test as Spark-dependent.",
+    "spark_connect: mark a test as Spark Connect-dependent.",
     "trino: mark a test as trino-dependent.",
     "unit: mark a test as a unit test.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",

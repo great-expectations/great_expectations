@@ -11,11 +11,11 @@ from packaging.version import Version
 
 import great_expectations.core.batch_spec
 from great_expectations.datasource.fluent import BatchRequest
-from great_expectations.exceptions.exceptions import BuildBatchRequestError
-from great_expectations.experimental.datasource.fabric import (
+from great_expectations.datasource.fluent.fabric import (
     FabricPowerBIDatasource,
     _PowerBIAsset,
 )
+from great_expectations.exceptions.exceptions import BuildBatchRequestError
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext

@@ -933,6 +933,14 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         services=("spark",),
         extra_pytest_args=("--spark",),
     ),
+    "spark_connect": TestDependencies(
+        requirement_files=(
+            "reqs/requirements-dev-spark.txt",
+            "reqs/requirements-dev-spark-connect.txt",
+        ),
+        services=("spark",),
+        extra_pytest_args=("--spark_connect",),
+    ),
     "trino": TestDependencies(
         ("reqs/requirements-dev-trino.txt",),
         services=("trino",),

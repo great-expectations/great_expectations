@@ -3,6 +3,8 @@ title: Introduction to GX Core
 description: Learn about GX Core components and workflows and try out the GX Core Python library.
 hide_feedback_survey: true
 hide_title: true
+pagination_next: null
+pagination_prev: null
 ---
 import GxData from '../_core_components/_data.jsx'
 
