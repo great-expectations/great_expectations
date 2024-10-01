@@ -344,8 +344,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if not isinstance(other, Expectation):
             return False
 
-        self_dict = self.dict()
-        other_dict = other.dict()
+        # rendered_content is derived from the rest of the expectation, and can/should
+        # be excluded from equality checks
+        exclude: set[str] = {"rendered_content"}
+
+        self_dict = self.dict(exclude=exclude)
+        other_dict = other.dict(exclude=exclude)
 
         # Simplify notes and meta equality - falsiness is equivalent
         for attr in ("notes", "meta"):
