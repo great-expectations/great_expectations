@@ -290,7 +290,7 @@ def test_graph_validate_with_runtime_config(
             },
             expectation_config=gxe.ExpectColumnValueZScoresToBeLessThan(
                 column="b",
-                mostly=1.0,  # type: ignore[arg-type] # FIXME
+                mostly=1.0,
                 threshold=2.0,
                 double_sided=True,
             ).configuration,
