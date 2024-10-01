@@ -515,7 +515,7 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
         "content_blocks"
     ][1]
     content_block["graph"]["$schema"] = re.sub(
-        r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
+        r"v\d*\.\d*\.\d*", "v5.8.0", content_block["graph"]["$schema"]
     )
     assert rendered_validation_results == ValidationResultsPageRenderer_render_with_run_info_at_end
 
@@ -534,7 +534,7 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
         "content_blocks"
     ][1]
     content_block["graph"]["$schema"] = re.sub(
-        r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
+        r"v\d*\.\d*\.\d*", "v5.8.0", content_block["graph"]["$schema"]
     )
     assert (
         rendered_validation_results == ValidationResultsPageRenderer_render_with_run_info_at_start

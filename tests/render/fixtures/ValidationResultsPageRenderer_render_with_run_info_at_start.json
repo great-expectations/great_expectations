@@ -3074,7 +3074,7 @@
                       },
                       "height": 400,
                       "width": 250,
-                      "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+                      "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
                       "datasets": {
                         "data-239befdaa7503a2ed2cd7283306bb6f7": [
                           {
