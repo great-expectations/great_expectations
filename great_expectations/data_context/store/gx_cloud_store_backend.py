@@ -467,7 +467,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ) from e
 
     @override
-    def get_url_for_key(  # type: ignore[override]
+    def get_url_for_key(
         self,
         key: Tuple[GXCloudRESTResource, str | None, str | None],
         protocol: Optional[Any] = None,

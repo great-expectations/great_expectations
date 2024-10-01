@@ -46,6 +46,7 @@ from .exceptions import (
     MetricResolutionError,
     MissingConfigVariableError,
     MissingDataContextError,
+    NoDataDocsError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
     RenderingError,

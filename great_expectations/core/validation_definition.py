@@ -200,7 +200,10 @@ class ValidationDefinition(BaseModel):
         except gx_exceptions.InvalidKeyError as e:
             raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e  # noqa: TRY003
 
-        return ExpectationSuite(**config)
+        suite = ExpectationSuite(**config)
+        if suite._include_rendered_content:
+            suite.render()
+        return suite
 
     @classmethod
     def _decode_data(cls, data_dict: dict) -> BatchDefinition:
