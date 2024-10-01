@@ -165,7 +165,7 @@ class QueryMetricProvider(MetricProvider):
             query = query.format(batch=f"({batch_selectable})", **parameters)
 
         result: Union[Sequence[sa.Row[Any]], Any] = execution_engine.execute_query(
-            sa.select(sa.text(query))
+            sa.text(query)
         ).fetchmany(MAX_RESULT_RECORDS)
 
         if isinstance(result, Sequence):
