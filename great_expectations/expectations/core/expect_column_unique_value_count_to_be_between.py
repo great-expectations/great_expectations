@@ -24,7 +24,6 @@ from great_expectations.render.renderer_configuration import (
 )
 from great_expectations.render.util import (
     handle_strict_min_max,
-    num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
@@ -255,7 +254,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
             )
 
     @classmethod
-    def _prescriptive_template(  # noqa: C901, PLR0912
+    def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -263,7 +262,6 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
             ("column", RendererValueType.STRING),
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
-            ("mostly", RendererValueType.NUMBER),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
         )
@@ -286,23 +284,12 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
-                if not params.min_value:
-                    template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."  # noqa: E501
-                elif not params.max_value:
-                    template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."  # noqa: E501
-                else:
-                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."  # noqa: E501
-            else:  # noqa: PLR5501
-                if not params.min_value:
-                    template_str = f"must have {at_most_str} $max_value unique values."
-                elif not params.max_value:
-                    template_str = f"must have {at_least_str} $min_value unique values."
-                else:
-                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."  # noqa: E501
+            if not params.min_value:
+                template_str = f"must have {at_most_str} $max_value unique values."
+            elif not params.max_value:
+                template_str = f"must have {at_least_str} $min_value unique values."
+            else:
+                template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."  # noqa: E501
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -314,7 +301,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
-    def _prescriptive_renderer(  # noqa: C901 - too complex
+    def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
@@ -330,7 +317,6 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                 "column",
                 "min_value",
                 "max_value",
-                "mostly",
                 "row_condition",
                 "condition_parser",
                 "strict_min",
@@ -343,22 +329,12 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
         else:  # noqa: PLR5501
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
-                if params["min_value"] is None:
-                    template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."  # noqa: E501
-                elif params["max_value"] is None:
-                    template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."  # noqa: E501
-                else:
-                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."  # noqa: E501
-            else:  # noqa: PLR5501
-                if params["min_value"] is None:
-                    template_str = f"must have {at_most_str} $max_value unique values."
-                elif params["max_value"] is None:
-                    template_str = f"must have {at_least_str} $min_value unique values."
-                else:
-                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."  # noqa: E501
+            if params["min_value"] is None:
+                template_str = f"must have {at_most_str} $max_value unique values."
+            elif params["max_value"] is None:
+                template_str = f"must have {at_least_str} $min_value unique values."
+            else:
+                template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."  # noqa: E501
 
         if include_column_name:
             template_str = f"$column {template_str}"
