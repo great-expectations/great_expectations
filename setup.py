@@ -18,6 +18,8 @@ def get_python_requires() -> str:
     """
     if os.getenv("GX_PYTHON_EXPERIMENTAL"):
         return ">=3.9"
+    elif os.getenv("ALGOLIA_API_KEY"):  # TODO: don't use algolia as a proxy
+        return ">=3.8"
     return SUPPORTED_PYTHON
 
 
