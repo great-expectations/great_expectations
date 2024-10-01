@@ -618,7 +618,6 @@ class CloudDataContext(SerializableDataContext):
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        self._synchronize_config()
         logger.debug(
             "CloudDataContext._save_project_config() was called. Base class impl was override to be no-op to retain "  # noqa: E501
             "legacy behavior."

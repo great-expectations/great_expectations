@@ -149,7 +149,6 @@ class FileDataContext(SerializableDataContext):
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        self._synchronize_config()
         config_filepath = pathlib.Path(self.root_directory, self.GX_YML)
 
         logger.debug(
