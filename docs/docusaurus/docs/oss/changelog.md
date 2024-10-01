@@ -15,7 +15,7 @@ When we deprecate our public APIs, we will
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
 ### 1.0.6
-* [FEATURE] Add expectation windows for dynamic parameters ([#10402](https://github.com/great-expectations/great_expectations/pull/10402))
+* [FEATURE] Add windows attribute to support experimental gx-cloud feature ([#10402](https://github.com/great-expectations/great_expectations/pull/10402))
 * [FEATURE] Descriptive error if open_data_docs called with no data docs ([#10439](https://github.com/great-expectations/great_expectations/pull/10439))
 * [BUGFIX] Ensure suite.render() is called when loading suites ([#10434](https://github.com/great-expectations/great_expectations/pull/10434))
 * [DOCS] Update docs for `UnexpectedRowsExpectation` ([#10391](https://github.com/great-expectations/great_expectations/pull/10391))
