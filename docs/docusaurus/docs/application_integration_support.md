@@ -61,7 +61,7 @@ The following table defines the Python versions supported by GX Cloud and GX Cor
 
 | GX Cloud    | GX Core     | Community   |
 | ----------- | ----------- | ----------- |
-| 3.8 to 3.11 | 3.8 to 3.11 | 3.8 to 3.11 |
+| 3.9 to 3.11 | 3.9 to 3.11 | 3.9 to 3.11 |
 
 ### GX versions
 

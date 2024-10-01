@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 import altair as alt
@@ -10,9 +9,7 @@ import pandas as pd
 from scipy import stats
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
-)
+from great_expectations.core.types import Comparable  # noqa: TCH001
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
@@ -331,12 +328,8 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         default=0, ge=0, le=1, description=TAIL_WEIGHT_HOLDOUT_DESCRIPTION
     )
     bucketize_data: bool = pydantic.Field(True, description=BUCKETIZE_DATA_DESCRIPTION)
-    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        None, description=MIN_VALUE_DESCRIPTION
-    )
-    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        None, description=MAX_VALUE_DESCRIPTION
-    )
+    min_value: Optional[Comparable] = pydantic.Field(None, description=MIN_VALUE_DESCRIPTION)
+    max_value: Optional[Comparable] = pydantic.Field(None, description=MAX_VALUE_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
@@ -902,7 +895,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         return return_obj
 
     @classmethod
-    def _get_kl_divergence_chart(  # noqa: PLR0912,C901 - 13
+    def _get_kl_divergence_chart(  # noqa: C901 - 13
         cls, partition_object, header=None
     ):
         weights = partition_object["weights"]
@@ -913,8 +906,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
             )
         else:
             chart_pixel_width = (len(weights) / 60.0) * 500
-            if chart_pixel_width < 250:  # noqa: PLR2004
-                chart_pixel_width = 250
+            chart_pixel_width = max(chart_pixel_width, 250)
             chart_container_col_width = round((len(weights) / 60.0) * 6)
             if chart_container_col_width < 4:  # noqa: PLR2004
                 chart_container_col_width = 4
@@ -1008,12 +1000,11 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         return expected_distribution
 
     @classmethod
-    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:  # noqa: C901 - too complex
+    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
         weights = partition_object.get("weights", [])
 
         chart_pixel_width = (len(weights) / 60.0) * 500
-        if chart_pixel_width < 250:  # noqa: PLR2004
-            chart_pixel_width = 250
+        chart_pixel_width = max(chart_pixel_width, 250)
         chart_container_col_width = round((len(weights) / 60.0) * 6)
         if chart_container_col_width < 4:  # noqa: PLR2004
             chart_container_col_width = 4

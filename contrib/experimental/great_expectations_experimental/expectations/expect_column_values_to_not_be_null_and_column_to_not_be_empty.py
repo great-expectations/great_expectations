@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 
@@ -11,9 +10,7 @@ from great_expectations.core import (
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,
-)
+from great_expectations.core.types import Comparable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -84,8 +81,8 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         [expect_column_values_not_to_be_null](https://greatexpectations.io/expectations/expect_column_values_not_to_be_null)
     """
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
+    min_value: Optional[Comparable] = None
+    max_value: Optional[Comparable] = None
 
     library_metadata = {
         "maturity": "experimental",

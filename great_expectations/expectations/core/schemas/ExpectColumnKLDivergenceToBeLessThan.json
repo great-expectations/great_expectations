@@ -124,6 +124,10 @@
                 },
                 {
                     "type": "string",
+                    "format": "date"
+                },
+                {
+                    "type": "string",
                     "format": "date-time"
                 }
             ]
@@ -137,6 +141,10 @@
                 },
                 {
                     "type": "object"
+                },
+                {
+                    "type": "string",
+                    "format": "date"
                 },
                 {
                     "type": "string",
