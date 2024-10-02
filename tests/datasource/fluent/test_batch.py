@@ -66,6 +66,20 @@ def test_batch_validate_expectation_suite(
 
 
 @pytest.mark.filesystem
+def test_batch_validate_expectation_with_expectation_params(
+    pandas_setup: Tuple[AbstractDataContext, Batch],
+):
+    pass
+
+
+@pytest.mark.filesystem
+def test_batch_validate_expectation_suite_with_expectation_params(
+    pandas_setup: Tuple[AbstractDataContext, Batch],
+):
+    pass
+
+
+@pytest.mark.filesystem
 def test_batch_validate_with_updated_expectation(
     pandas_setup: Tuple[AbstractDataContext, Batch],
 ):

@@ -1179,7 +1179,7 @@ class Batch:
         return self._create_validator(
             result_format=result_format,
         ).validate_expectation_suite(
-            expectation=expect, expectation_parameters=expectation_parameters
+            expectation_suite=expect, expectation_parameters=expectation_parameters
         )
 
     def _create_validator(self, *, result_format: ResultFormatUnion) -> V1Validator:
