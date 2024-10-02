@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List
 
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -13,11 +10,12 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
+    QueryParameters,
 )
-from great_expectations.util import get_sqlalchemy_subquery_type
+from great_expectations.expectations.metrics.util import MAX_RESULT_RECORDS
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility import pyspark, sqlalchemy
+    from great_expectations.compatibility import pyspark
 
 
 class QueryMultipleColumns(QueryMetricProvider):
@@ -35,50 +33,20 @@ class QueryMultipleColumns(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[dict]:
-        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
-
-        if not isinstance(query, str):
-            raise TypeError("Query must be supplied as a string")  # noqa: TRY003
-
-        selectable: Union[sa.sql.Selectable, str]
-        selectable, _, _ = execution_engine.get_compute_domain(
+    ) -> list[dict]:
+        batch_selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
         columns = metric_value_kwargs.get("columns")
-
         if not isinstance(columns, list):
             raise TypeError("Columns must be supplied as a list")  # noqa: TRY003
-
-        if isinstance(selectable, sa.Table):
-            query = query.format(
-                **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-                batch=selectable,
-            )
-        elif isinstance(
-            selectable, get_sqlalchemy_subquery_type()
-        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break  # noqa: E501
-            query = query.format(
-                **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-                batch=f"({selectable})",
-            )
-        elif isinstance(
-            selectable, sa.sql.Select
-        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query  # noqa: E501
-            query = query.format(
-                **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-                batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',  # noqa: E501
-            )
-        else:
-            query = query.format(
-                **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-                batch=f"({selectable})",
-            )
-
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()  # type: ignore[assignment,arg-type]
-
-        return [element._asdict() for element in result]
+        return cls._get_sqlalchemy_records_from_query_and_batch_selectable(
+            query=query,
+            batch_selectable=batch_selectable,
+            execution_engine=execution_engine,
+            query_parameters=QueryParameters(columns=columns),
+        )
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -88,7 +56,7 @@ class QueryMultipleColumns(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[dict]:
+    ) -> list[dict]:
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         if not isinstance(query, str):
@@ -111,6 +79,6 @@ class QueryMultipleColumns(QueryMetricProvider):
         )
 
         engine: pyspark.SparkSession = execution_engine.spark
-        result: List[pyspark.Row] = engine.sql(query).collect()
+        result: List[pyspark.Row] = engine.sql(query).limit(MAX_RESULT_RECORDS).collect()
 
         return [element.asDict() for element in result]
