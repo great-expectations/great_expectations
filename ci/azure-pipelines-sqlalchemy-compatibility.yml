@@ -137,6 +137,7 @@ stages:
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "numpy$(comparison)2.0.0" >> constraints-dev-temp.txt
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
 
               pip install --constraint constraints-dev-temp.txt ".[test, postgresql]" pytest-azurepipelines
@@ -194,6 +195,7 @@ stages:
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "numpy$(comparison)2.0.0" >> constraints-dev-temp.txt
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
 
               pip install --constraint constraints-dev-temp.txt ".[test, mssql]" pytest-azurepipelines
