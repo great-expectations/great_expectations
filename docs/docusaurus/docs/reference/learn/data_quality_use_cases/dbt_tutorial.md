@@ -9,6 +9,8 @@ import TabItem from '@theme/TabItem';
 
 This tutorial will enable you to schedule and run data pipelines locally using PostgreSQL as the database, dbt for transforming data, Great Expectations for data quality and Airflow for workflow orchestration - all running inside of containers via Docker Compose. This tutorial assumes you have basic knowledge of Python, SQL, Docker, and how to use a CLI. We will have step-by-step instructions along with explanations for those who want a deeper understanding of what we are doing and why.
 
+![dbt Tutorial Overview](./dbt_tutorial/overview.png)
+
 Before we get started, let’s take a look at a high-level overview of how these tools will work together. First, notice that we are using Docker Compose, which allows us to run each of the tools/services below in separate Docker containers that can depend on and interact with each other. Containerizing our services is a best practice as it allows us to customize the environment for each service and replicate it on any other machine.
 
 As mentioned above, we have PostgreSQL to store our data, dbt to transform it, Great Expectations to run data quality tests, and Airflow to orchestrate that whole process. All of these tools are popular open-source tools that you are likely to find in the real world, but we encourage you to focus on the concepts rather than the specifics of these tools.
@@ -115,11 +117,17 @@ docker compose up -d --build
 
 When you run this for the first time, it may take several minutes to download and install the required libraries. You will also notice that one of the services `airflow-init` exits after running, but that is expected because it’s only used to initialize the airflow service. Once everything is complete, your Docker Desktop Containers screen will look like this:
 
+![Running Docker Services](./dbt_tutorial/docker-services.png)
+
 ## Connect to the Database
 One of the services we are running with Docker is pgAdmin, which will let you interact with the PostgreSQL database. We will be using pgAdmin in this tutorial, but feel free to use a SQL editor of your choice instead. 
 
 ### Log into pgAdmin
-You can open pgAdmin by either clicking on the port for the pgAdmin service in Docker Desktop or by going to [http://localhost:15433](http://localhost:15433) in your browser. Log in using the credentials specified in docker compose for pgAdmin:
+You can open pgAdmin by either clicking on the port for the pgAdmin service in Docker Desktop or by going to [http://localhost:15433](http://localhost:15433) in your browser. 
+
+![Log into pgAdmin](./dbt_tutorial/pgadmin_open.png)
+
+Log in using the credentials specified in docker compose for pgAdmin:
 
 - Username: example@email.com
 - Password: postgres
@@ -132,7 +140,11 @@ You can open pgAdmin by either clicking on the port for the pgAdmin service in D
     - Username and password: postgres (defined in Docker compose under database service)
 - Save the connection
 
+![Create a PostgreSQL server](./dbt_tutorial/create_psql_server.png)
+
 You will now be able to see your empty database when you look under the public schema > tables:
+
+![Empty PostgreSQL tables](./dbt_tutorial/empty_psql_tables.png)
 
 ## Populate the Database 
 The dbt project that we included from GitHub has some initial datasets in the form of [seed files](https://docs.getdbt.com/docs/build/seeds). We will import these seed files into our database as tables and then use these tables as the data source for the rest of our dbt models.
@@ -151,7 +163,11 @@ cp jaffle-data/*.csv
 dbt seed
 ```
 
+![dbt seed](./dbt_tutorial/dbt_seed.png)
+
 In pgAdmin you can now see the newly created tables in the new schema.
+
+![Raw tables created](./dbt_tutorial/raw_tables.png)
 
 Run the rest of the dbt models by running the command below in the dbt service command line:
 ```bash
@@ -159,6 +175,8 @@ dbt run
 ```
 
 Again, we can see the models successfully created as tables and views but in our public schema:
+
+![Seeded tables](./dbt_tutorial/seeded_tables.png)
 
 ## Use Great Expectations to create Data Quality Tests
 Now that we have some data to test in our database, let’s set up GX so we can create some data quality tests and run them against the data.
@@ -173,7 +191,14 @@ docker exec great-expectations jupyter notebook --allow-root --no-browser --ip=0
 
 Once it’s up and running you will see a similar message to the one below and be able to copy or click on the url starting with 127.0.0.1. The token at the end of the URL is unique and required to access the Jupyter Notebook server:
 
+![Open Jupyter Notebook](./dbt_tutorial/open_jupyter_notebook_server.png)
+
+![Emptyer Jupyter Notebook Server](./dbt_tutorial/empty_jupyter_notebook_server.png)
+
 Create a new notebook. In the top left corner choose File > New > Notebook. Then select the Python 3 Kernel if prompted.
+
+![Create new Notebook](./dbt_tutorial/create_jupyter_notebook.png)
+![Select Kernel](./dbt_tutorial/select_kernel.png)
 
 ### Create the GX Configuration
 Copy the following code into the notebook. We recommend breaking up each part into different cells to see the outputs when you run each section. The overview of what we are doing here is creating a Data Context, which stores your GX configuration, creating a Data Source (connecting to PostgreSQL), creating a Data Asset (defining one of the tables to test on - the `customers` table in PostgreSQL), creating Expectations for the data (`ExpectColumnValuesToNotBeNull` and `ExpectColumnValuesToBeBetween`), and finally running Validations.
@@ -235,7 +260,11 @@ You’ve now run these data quality tests manually by executing the Notebook, wh
 
 Open the data docs site here: [http://127.0.0.1:8888/edit/gx/uncommitted/data_docs/local_site/index.html](http://127.0.0.1:8888/edit/gx/uncommitted/data_docs/local_site/index.html)
 
+![Open Data Docs](./dbt_tutorial/open_data_docs.png)
+
 Now you can view your Validation results.
+
+![View Validation Results](./dbt_tutorial/view_validation_results.png)
 
 You can see that the two Expectations that we have created are passing. Whenever Expectations fail, the status column will be updated to indicate a failure, along with the Observed Value column to include any values that have fallen outside of the expected range.
 
@@ -247,7 +276,9 @@ Open [http://localhost:8080](http://localhost:8080) in your browser. You can use
 username=airflow
 password=airflow
 
-And you will see an empty dags dashboard:
+And you will see an empty DAGs dashboard:
+
+![Empty DAGs dashboard](./dbt_tutorial/empty_dags.png)
 
 ### Create a DAG and add a connection
 Create a new Airflow dag using the command in the root of your project directory:
@@ -301,14 +332,21 @@ You can see that in this DAG file, we use the same commands that we executed man
 
 It might take a few minutes for the new pipeline to show up in Airflow, but you will also see an error saying our dbt connection isn’t defined, so let’s create it now. We will also need to add the credentials for our PostgreSQL database for the Great Expectations step. If you do not see the error, refresh the Airflow dashboard page in your browser.
 
+![Airflow DAG Import Errors](./dbt_tutorial/airflow_dag_import_errors.png)
+
 Add dbt-ssh credentials:
 - In Airflow click on Admin > Connections
+
+![Airflow Connections menu](./dbt_tutorial/airflow_connections_menu.png)
+
 - Click on the + to add a new record
     - Fill out the connection using the following:
     - Connection id: dbt-ssh
     - Connection Type: SSH
     - Host: dbt
     - Username: root
+
+![Airflow connection config](./dbt_tutorial/airflow_connections_config.png)
 
 Add Postgres credentials:
 - Still inside Admin > Connections click + to add a new record
@@ -321,19 +359,31 @@ Add Postgres credentials:
     - Password: postgres
     - Port: 5432
 
+![Airflow PostgreSQL connection details](./dbt_tutorial/airflow_postgres_connection.png)
+
 Your connections page will now look like this:
 
+![Airflow connections list](./dbt_tutorial/airflow_connections_list.png)
+
 You will now see `customers_dag` listed on the DAGs page:
+
+![Customers DAG created](./dbt_tutorial/customers_dag_listed.png)
 
 ### Run the DAG
 
 Run the DAG by clicking on the play button under Actions and then choosing Trigger DAG.
 
+![Trigger DAG](./dbt_tutorial/trigger_dag.png)
+
 > Note: If you see an error saying “Task exited with return code Negsignal.SIGKILL” then it usually means that Airflow doesn’t have enough resources to run. Airflow recommends 4GB memory. Make sure your Docker resources are set appropriately (Docker Desktop > settings > Resources.)
 
 You can click on the dag name to watch it as it runs and wait for it to complete:
 
+![View DAG run](./dbt_tutorial/customers_dag_run.png)
+
 Refresing the Data Docs page will show the new results from the DAG run:
+
+![Refreshed Data Docs](./dbt_tutorial/refreshed_data_docs.png)
 
 ## Conclusion
 Congratulations on completing this tutorial using PostgreSQL, dbt, GX and Airflow! By now, you should have an understanding of how to schedule and run data pipelines using some great open source tools. We strongly encourage you to explore what else you can do within GX. For example, you can try connecting to your own Data Sources, or create other Expectations by referring to our [Expectations Gallery](https://greatexpectations.io/expectations/). 
