@@ -20,8 +20,7 @@ from great_expectations.experimental.metric_repository.metrics import (
 
 @pytest.mark.cloud  # NOTE: needs orjson dependency
 class TestCloudDataStoreMetricRun:
-
-    metric_runs_url : str = "https://app.greatexpectations.fake.io/api/v1/organizations/12345678-1234-5678-1234-567812345678/metric-runs"
+    metric_runs_url: str = "https://app.greatexpectations.fake.io/api/v1/organizations/12345678-1234-5678-1234-567812345678/metric-runs"
 
     def test_add_metric_run_non_generic_metric_type(
         self,
