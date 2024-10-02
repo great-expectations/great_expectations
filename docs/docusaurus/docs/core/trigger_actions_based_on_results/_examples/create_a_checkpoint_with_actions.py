@@ -41,6 +41,15 @@ def set_up_context_for_example(context):
 
 
 # EXAMPLE SCRIPT STARTS HERE:
+
+# Dummy values to appease config substitution
+import os
+
+os.environ["validation_notification_slack_webhook"] = (
+    "https://hooks.slack.com/services/..."
+)
+os.environ["validation_notification_slack_channel"] = "my_slack_channel"
+
 # <snippet name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/create_a_checkpoint_with_actions.py - full code example">
 import great_expectations as gx
 
