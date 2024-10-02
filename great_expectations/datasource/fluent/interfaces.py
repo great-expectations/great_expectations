@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias, TypeGuard
 
     from great_expectations.core.result_format import ResultFormatUnion
+    from great_expectations.core.suite_parameters import SuiteParameterDict
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -1122,7 +1123,7 @@ class Batch:
         expect: Expectation,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationValidationResult: ...
 
     @overload
@@ -1131,7 +1132,7 @@ class Batch:
         expect: ExpectationSuite,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
@@ -1140,7 +1141,7 @@ class Batch:
         expect: Expectation | ExpectationSuite,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
         from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
@@ -1164,7 +1165,7 @@ class Batch:
         self,
         expect: Expectation,
         result_format: ResultFormatUnion,
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationValidationResult:
         return self._create_validator(
             result_format=result_format,
@@ -1174,7 +1175,7 @@ class Batch:
         self,
         expect: ExpectationSuite,
         result_format: ResultFormatUnion,
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationSuiteValidationResult:
         return self._create_validator(
             result_format=result_format,
