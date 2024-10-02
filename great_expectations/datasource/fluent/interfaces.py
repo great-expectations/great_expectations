@@ -1122,6 +1122,7 @@ class Batch:
         expect: Expectation,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+        expectation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationValidationResult: ...
 
     @overload
@@ -1130,6 +1131,7 @@ class Batch:
         expect: ExpectationSuite,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+        expectation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
@@ -1138,14 +1140,19 @@ class Batch:
         expect: Expectation | ExpectationSuite,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+        expectation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
         from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
 
         if isinstance(expect, Expectation):
-            return self._validate_expectation(expect, result_format=result_format)
+            return self._validate_expectation(
+                expect, result_format=result_format, expectation_parameters=expectation_parameters
+            )
         elif isinstance(expect, ExpectationSuite):
-            return self._validate_expectation_suite(expect, result_format=result_format)
+            return self._validate_expectation_suite(
+                expect, result_format=result_format, expectation_parameters=expectation_parameters
+            )
         else:
             # If we are type checking, we should never fall through to this case. However, exploratory  # noqa: E501
             # workflows are not being type checked.
@@ -1157,19 +1164,23 @@ class Batch:
         self,
         expect: Expectation,
         result_format: ResultFormatUnion,
+        expectation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationValidationResult:
         return self._create_validator(
             result_format=result_format,
-        ).validate_expectation(expect)
+        ).validate_expectation(expectation=expect, expectation_parameters=expectation_parameters)
 
     def _validate_expectation_suite(
         self,
         expect: ExpectationSuite,
         result_format: ResultFormatUnion,
+        expectation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationSuiteValidationResult:
         return self._create_validator(
             result_format=result_format,
-        ).validate_expectation_suite(expect)
+        ).validate_expectation_suite(
+            expectation=expect, expectation_parameters=expectation_parameters
+        )
 
     def _create_validator(self, *, result_format: ResultFormatUnion) -> V1Validator:
         from great_expectations.validator.v1_validator import Validator as V1Validator

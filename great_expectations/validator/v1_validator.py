@@ -52,7 +52,10 @@ class Validator:
         expectation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationValidationResult:
         """Run a single expectation against the batch definition"""
-        results = self._validate_expectation_configs([expectation.configuration])
+        results = self._validate_expectation_configs(
+            expectation_configs=[expectation.configuration],
+            expectation_parameters=expectation_parameters,
+        )
 
         assert len(results) == 1
         return results[0]
@@ -64,8 +67,8 @@ class Validator:
     ) -> ExpectationSuiteValidationResult:
         """Run an expectation suite against the batch definition"""
         results = self._validate_expectation_configs(
-            expectation_suite.expectation_configurations,
-            expectation_parameters,
+            expectation_configs=expectation_suite.expectation_configurations,
+            expectation_parameters=expectation_parameters,
         )
         statistics = calc_validation_statistics(results)
 
