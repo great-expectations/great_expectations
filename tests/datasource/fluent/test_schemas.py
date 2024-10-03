@@ -25,7 +25,7 @@ PYTHON_VERSION: Version = Version(f"{sys.version_info.major}.{sys.version_info.m
 
 
 def min_supported_python() -> Version:
-    return Version("3.8")
+    return Version("3.9")
 
 
 def _models_and_schema_dirs() -> (
