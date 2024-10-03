@@ -11,7 +11,7 @@ env:
 
 on:
   merge_group:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
@@ -38,27 +38,62 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-actor-permissions:
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check User Permission
+        id: check-user-permission
+        uses: actions-cool/check-user-permission@v2
+        with:
+          require: write
+          username: ${{ github.triggering_actor }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify on Lack of Permission
+        if: steps.check-user-permission.outputs.require-result == 'false'
+        id: slack
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "MESSAGE": "${{github.actor}} opened a PR from a fork. Please carefully review the code and retry failed jobs.",
+              "GHA_LINK": "${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PERMISSION_CHECK_WEBHOOK_URL }}
+
+      - name: Add comment to add helpful context for contributors
+        if: steps.check-user-permission.outputs.require-result == 'false'
+        uses: thollander/actions-comment-pull-request@v2.5.0
+        with:
+          comment_tag: execution
+          message: |
+            Thanks for the PR @${{github.actor}} :wave:
+
+            Our GitHub actions pipelines require a user with write permissions to retry the failed jobs. We've sent a message to a maintainer to review your PR. Please be patient and we'll get back to you as soon as possible.
+
+      - name: Fail if No Write Permission
+        if: steps.check-user-permission.outputs.require-result == 'false'
+        run: exit 1
+
   ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == true
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
-  ci-is-on-main-repo:
-    runs-on: ubuntu-latest
-    # job only runs on main repo where we have access to credentials, or as part of the release
-    if: |
-      github.event.pull_request.head.repo.full_name == github.repository ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/')) ||
-      github.event_name == 'merge_group'
-    steps:
-      - run: echo "This CI step only runs on the main repo, where we have access to credentials."
-
   static-analysis:
+    needs: [check-actor-permissions]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -80,7 +115,7 @@ jobs:
         run: invoke marker-coverage
 
   docs-snippets:
-    needs: [unit-tests, doc-checks, ci-is-on-main-repo]
+    needs: [unit-tests, doc-checks, check-actor-permissions]
     # run on non-draft PRs with docs changes
     if: |
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
@@ -127,14 +162,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.8"
+
       - name: Run docs_snippet_checker
         run: |
           yarn install
           python ci/checks/validate_docs_snippets.py
+
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v2
         with:
@@ -165,6 +205,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
@@ -196,6 +237,7 @@ jobs:
           flags: ${{ matrix.doc-step }}
 
   unit-tests:
+    needs: [check-actor-permissions]
     env:
       GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
     strategy:
@@ -208,6 +250,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -241,7 +285,7 @@ jobs:
           flags: ${{ matrix.python-version }}
 
   doc-checks:
-    needs: [static-analysis]
+    needs: [static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     permissions:
       id-token: write
@@ -250,6 +294,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -257,21 +304,28 @@ jobs:
           cache: "pip"
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
 
       - name: check_repo_root_size
         run: sh ./ci/checks/check_repo_root_size.sh
+
       - name: Docstring linter
         run: invoke docstrings
+
       - name: line_number_snippet_checker
         run: python ci/checks/check_no_line_number_snippets.py
+
       - name: name_tag_snippet_checker
         run: python ci/checks/check_only_name_tag_snippets.py
+
       - name: integration_test_gets_run_checker
         run: python ci/checks/check_integration_test_gets_run.py
+
       - name: name_tag_snippet_referenced_checker
         run: python ci/checks/check_name_tag_snippets_referenced.py
+
       # Disabling public_api_report during V1 development; should be re-enabled upon completion of public API audit
       # - name: public_api_report
       #   run: invoke public-api
@@ -279,7 +333,7 @@ jobs:
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs -sp static --skip-external
 
   docs-build:
-    needs: [doc-checks]
+    needs: [doc-checks, check-actor-permissions]
     # run on non-draft PRs
     if: |
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
@@ -289,14 +343,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
+
       - name: Build docs
         env:
           NODE_OPTIONS: --max_old_space_size=4096
@@ -304,10 +363,14 @@ jobs:
         run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   docs-tests:
+    needs: [check-actor-permissions]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Run tests
         env:
           NODE_OPTIONS: --max_old_space_size=4096
@@ -315,7 +378,7 @@ jobs:
         run: cd docs/docusaurus && yarn install && yarn test
 
   cloud-tests:
-    needs: [unit-tests, static-analysis, ci-is-on-main-repo]
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     permissions:
       id-token: write
@@ -340,6 +403,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -395,7 +460,7 @@ jobs:
           flags: cloud
 
   marker-tests:
-    needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     env:
       GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
@@ -456,6 +521,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -501,135 +568,170 @@ jobs:
           flags: "${{ matrix.python-version }} ${{ matrix.markers }}"
 
   py38-min-versions:
-    needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
+
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py39-min-versions:
-    needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.9"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
+
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py310-min-versions:
-    needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
+
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py311-min-versions:
-    needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py311-min-install.txt -r reqs/requirements-dev-test.txt
+
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py312-min-versions:
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     env:
       GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
-    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py312-min-install.txt -r reqs/requirements-dev-test.txt
+
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   pydantic-v1:
-    needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
+
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/pydantic-v1-install.txt -r reqs/requirements-dev-test.txt
+
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   airflow-min-versions:
-    needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis, check-actor-permissions]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
           cache-dependency-path: requirements.txt
+
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/airflow-min-install.txt
+
       - name: Run the test
         # ensure the great_expectations can be imported and a context created
         run: sh ci/checks/check_min_airflow_dependency_compatibility.sh
 
   import_gx:
-    needs: [static-analysis]
+    needs: [static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
@@ -641,21 +743,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: requirements.txt
+
       - name: Install Great Expectations with core deps only
         run: pip install .
+
       - name: Import Great Expectations
         run: python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
 
   build-n-publish:
     needs:
       [
-        ci-is-on-main-repo,
+        check-actor-permissions,
         doc-checks,
         static-analysis,
         docs-snippets,
@@ -680,22 +787,30 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@master
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python 3.8
         uses: actions/setup-python@v5
         with:
           python-version: "3.8"
+
       - name: Update pip
         run: python -m pip install --upgrade pip
+
       - name: Install Twine and Wheel, and prepare packaging
         run: |
           pip install twine wheel
           git config --global user.email "team@greatexpectations.io"
           git config --global user.name "Great Expectations"
+
       - name: Build distribution
         run: |
           python setup.py sdist
           python setup.py bdist_wheel
+
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -704,7 +819,7 @@ jobs:
   notify_on_failure:
     needs:
       [
-        ci-is-on-main-repo,
+        check-actor-permissions,
         doc-checks,
         static-analysis,
         docs-snippets,
