@@ -31,4 +31,6 @@ established rules." to="/reference/learn/data_quality_use_cases/schema" icon="/i
 
   <LinkCard topIcon label="Volume" description="Validate that record quantity falls within expected bounds." to="/reference/learn/data_quality_use_cases/volume" icon="/img/actions_icon.svg"/>
 
+  <LinkCard topIcon label="Using GX with dbt" description="Learn how to use GX with dbt" to="/reference/learn/data_quality_use_cases/dbt_tutorial" icon="/img/actions_icon.svg"/>
+
 </LinkCardGrid>
