@@ -15,7 +15,6 @@ When we deprecate our public APIs, we will
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
 ### 1.1.0
-* [FEATURE] Improve context.data_sources autocomplete ([#10447](https://github.com/great-expectations/great_expectations/pull/10447))
 * [FEATURE] Update `Batch.validate()` API to accept expectation parameters ([#10456](https://github.com/great-expectations/great_expectations/pull/10456))
 * [BUGFIX] README.md updated link ([#10446](https://github.com/great-expectations/great_expectations/pull/10446))
 * [BUGFIX] Ensure that fluent_datasources show up in context ([#10438](https://github.com/great-expectations/great_expectations/pull/10438))
@@ -23,6 +22,7 @@ Before we completely remove the functionality in a new major release, there will
 * [DOCS] Bump python version to 3.9 in docs ([#10453](https://github.com/great-expectations/great_expectations/pull/10453))
 * [DOCS] add example of environment variable substitution ([#10417](https://github.com/great-expectations/great_expectations/pull/10417)) (thanks @adeola-ak)
 * [DOCS] Add `Databricks (SQL)` to Cloud supported list ([#10452](https://github.com/great-expectations/great_expectations/pull/10452))
+* [MAINTENANCE] Improve context.data_sources autocomplete ([#10447](https://github.com/great-expectations/great_expectations/pull/10447))
 * [MAINTENANCE] Use `Comparable` type alias for Expectation min/max value ([#10448](https://github.com/great-expectations/great_expectations/pull/10448))
 * [MAINTENANCE] Remove `mostly` from `ExpectColumnUniqueValueCountToBeBetween` ([#10450](https://github.com/great-expectations/great_expectations/pull/10450))
 * [MAINTENANCE] Limit Result Format and `QueryMetricProvider` total unexpected records ([#10432](https://github.com/great-expectations/great_expectations/pull/10432))
