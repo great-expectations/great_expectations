@@ -137,8 +137,10 @@ stages:
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
-              echo "numpy<1.25" >> constraints-dev-temp.txt
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+
+              # Constrain numpy to prevent running into a number of DeprecationWarnings
+              echo "numpy<1.25" >> constraints-dev-temp.txt
 
               pip install --constraint constraints-dev-temp.txt ".[test, postgresql]" pytest-azurepipelines
             displayName: "Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)"
@@ -195,8 +197,10 @@ stages:
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
-              echo "numpy$(comparison)2.0.0" >> constraints-dev-temp.txt
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+
+              # Constrain numpy to prevent running into a number of DeprecationWarnings
+              echo "numpy<1.25" >> constraints-dev-temp.txt
 
               pip install --constraint constraints-dev-temp.txt ".[test, mssql]" pytest-azurepipelines
             displayName: "Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)"
