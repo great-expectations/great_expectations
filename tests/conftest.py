@@ -1805,16 +1805,20 @@ def empty_data_context_in_cloud_mode(
     def mocked_get_cloud_config(*args, **kwargs) -> GXCloudConfig:
         return ge_cloud_config
 
-    with mock.patch(
-        "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
-    ), mock.patch(
-        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
-        autospec=True,
-        side_effect=mocked_config,
-    ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.get_cloud_config",
-        autospec=True,
-        side_effect=mocked_get_cloud_config,
+    with (
+        mock.patch(
+            "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
+        ),
+        mock.patch(
+            "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
+            autospec=True,
+            side_effect=mocked_config,
+        ),
+        mock.patch(
+            "great_expectations.data_context.data_context.CloudDataContext.get_cloud_config",
+            autospec=True,
+            side_effect=mocked_get_cloud_config,
+        ),
     ):
         context = CloudDataContext(context_root_dir=project_path)
 

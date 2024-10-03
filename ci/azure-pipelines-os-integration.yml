@@ -129,7 +129,7 @@ stages:
           mysql: mysql
 
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         steps:
           - task: UsePythonVersion@0
@@ -170,7 +170,7 @@ stages:
           mssql: mssql
 
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         steps:
           - task: UsePythonVersion@0
@@ -201,7 +201,7 @@ stages:
           postgres: postgres
 
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         steps:
           - task: UsePythonVersion@0
@@ -229,7 +229,7 @@ stages:
           trino: trino
 
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         steps:
           - task: UsePythonVersion@0
