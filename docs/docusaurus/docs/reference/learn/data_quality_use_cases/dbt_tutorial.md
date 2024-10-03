@@ -40,15 +40,17 @@ mkdir ssh-keys
 
 After completing the steps above, your folder structure should look like this:
 
+```
 dbt-tutorial
 └── tutorial-dbt-gx-airflow/
     ├── airflow/
-    │   └── .env
+        └── .env
     ├── data/
     ├── great-expectations/
     ├── pgadmin-data/
     ├── ssh-keys/
     ├── airflow.Dockerfile
+```
 
 Let's take a moment to explain some of the contents of the configuration we have just cloned.
 
@@ -90,21 +92,23 @@ ssh-keygen -t rsa -b 4096 -f ./ssh-keys/id_rsa -N ""
 ```
 Double check that at this point, your project structure looks like this:
 
+```
 dbt-tutorial/
 └── tutorial-dbt-gx-airflow/
     ├── airflow/
-    │   └── .env
+        └── .env
     ├── data/
     ├── dbt/
-    │   └── …
+        └── …
     ├── great expectations/
     ├── pgadmin-data/
     ├── ssh-keys/
-    │   └── …
+        └── …
     ├── airflow.Dockerfile
     ├── dbt.Dockerfile
     ├── docker-compose.yaml
     └── gx.Dockerfile
+```
 
 ## Start the Docker Services
 We are now ready to start up our services and start working with them. In the next few steps we will also show you how to connect to each service and work with it. Make sure you have Docker Desktop open and running before running the docker commands.
