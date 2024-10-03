@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
@@ -46,6 +46,7 @@ if TYPE_CHECKING:
         ExpectationSuiteValidationResult,
     )
     from great_expectations.core.result_format import ResultFormatUnion
+    from great_expectations.core.suite_parameters import SuiteParameterDict
     from great_expectations.data_context.store.validation_results_store import (
         ValidationResultsStore,
     )
@@ -245,7 +246,7 @@ class ValidationDefinition(BaseModel):
         *,
         checkpoint_id: Optional[str] = None,
         batch_parameters: Optional[BatchParameters] = None,
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:

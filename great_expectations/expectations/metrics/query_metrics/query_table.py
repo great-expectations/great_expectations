@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List
 
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -12,20 +9,18 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
-    MissingElementError,
     QueryMetricProvider,
 )
-from great_expectations.util import get_sqlalchemy_subquery_type
+from great_expectations.expectations.metrics.util import MAX_RESULT_RECORDS
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility import pyspark, sqlalchemy
+    from great_expectations.compatibility import pyspark
 
 
 class QueryTable(QueryMetricProvider):
     metric_name = "query.table"
     value_keys = ("query",)
 
-    # <snippet>
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
@@ -34,43 +29,16 @@ class QueryTable(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[dict]:
-        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
-
-        batch_selectable: sa.sql.Selectable
+    ) -> list[dict]:
         batch_selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-
-        if isinstance(batch_selectable, sa.Table):
-            query = query.format(batch=batch_selectable)
-        elif isinstance(batch_selectable, get_sqlalchemy_subquery_type()):
-            if execution_engine.dialect_name in cls.dialect_columns_require_subquery_aliases:
-                try:
-                    query = cls._get_query_string_with_substituted_batch_parameters(
-                        query=query,
-                        batch_subquery=batch_selectable,
-                    )
-                except MissingElementError:
-                    # if we are unable to extract the subquery parameters,
-                    # we fall back to the default behavior for all dialects
-                    batch = batch_selectable.compile(compile_kwargs={"literal_binds": True})
-                    query = query.format(batch=f"({batch})")
-            else:
-                batch = batch_selectable.compile(compile_kwargs={"literal_binds": True})
-                query = query.format(batch=f"({batch})")
-        elif isinstance(
-            batch_selectable, sa.sql.Select
-        ):  # Specifying a row_condition returns the active batch as a Select object
-            # requiring compilation & aliasing when formatting the parameterized query
-            batch = batch_selectable.compile(compile_kwargs={"literal_binds": True})
-            query = query.format(batch=f"({batch}) AS subselect")
-        else:
-            query = query.format(batch=f"({batch_selectable})")
-
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()  # type: ignore[assignment,arg-type]
-        return [element._asdict() for element in result]
-        # </snippet>
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
+        return cls._get_sqlalchemy_records_from_query_and_batch_selectable(
+            query=query,
+            batch_selectable=batch_selectable,
+            execution_engine=execution_engine,
+        )
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -80,7 +48,7 @@ class QueryTable(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[dict]:
+    ) -> list[dict]:
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
@@ -92,6 +60,6 @@ class QueryTable(QueryMetricProvider):
         query = query.format(batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
-        result: List[pyspark.Row] = engine.sql(query).collect()
+        result: List[pyspark.Row] = engine.sql(query).limit(MAX_RESULT_RECORDS).collect()
 
         return [element.asDict() for element in result]
