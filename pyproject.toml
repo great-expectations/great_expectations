@@ -576,6 +576,7 @@ filterwarnings = [
     'ignore: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
     # Example Actual Warning: DeprecationWarning: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.
     'ignore: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
+    'ignore: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.:DeprecationWarning`',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
