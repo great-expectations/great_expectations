@@ -182,6 +182,11 @@ Again, we can see the models successfully created as tables and views but in our
 
 ![Seeded tables](./dbt_tutorial/seeded_tables.png)
 
+Exit the dbt Docker container's terminal by running:
+```bash
+exit
+```
+
 ## Use Great Expectations to create Data Quality Tests
 Now that we have some data to test in our database, let’s set up GX so we can create some data quality tests and run them against the data.
 
