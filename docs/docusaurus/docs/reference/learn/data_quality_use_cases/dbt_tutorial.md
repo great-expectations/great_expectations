@@ -163,7 +163,7 @@ Once inside the dbt container, run the `dbt deps` command to install dependencie
 
 ```bash
 dpt deps
-cp jaffle-data/*.csv
+cp jaffle-data/*.csv seeds
 dbt seed
 ```
 
