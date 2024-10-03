@@ -1,5 +1,5 @@
 ---
-sidebar_label: 'dbt Tutorial'
+sidebar_label: 'Using GX with dbt'
 title: 'Using GX with dbt'
 ---
 import Tabs from '@theme/Tabs';
