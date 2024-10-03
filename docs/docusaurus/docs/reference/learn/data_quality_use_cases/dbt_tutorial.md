@@ -31,7 +31,7 @@ Bash shell or Z shell (Zsh)
 Open a terminal window and navigate to a project folder where you’d like to create this tutorial. We have created a template that you will clone via github repo. Clone the repo and create the rest of the folder structure by running the steps below.
 
 ```bash
-git clone git@github.com:greatexpectationslabs/dbt-tutorial.git
+git clone https://github.com/greatexpectationslabs/dbt-tutorial.git
 cd dbt-tutorial/tutorial-dbt-gx-airflow
 mkdir data
 mkdir great-expectations
