@@ -40,6 +40,7 @@ core:
   - "@tyler-hoffman" # Tyler Hoffman
   - "@wookasz" # Łukasz Lempart
   - "@annabarr" # Anna Barr
+  - "@alena-hutchinson" # Alena Hutchinson
 
 bot:
   - "@dependabot"
