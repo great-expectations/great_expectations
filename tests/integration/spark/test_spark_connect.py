@@ -32,7 +32,8 @@ def spark_validation_definition(
             name="spark-connect-suite",
             expectations=[
                 gx.expectations.ExpectColumnValuesToBeInSet(
-                    column="column", value_set=DATAFRAME_VALUES
+                    column="column",
+                    value_set=DATAFRAME_VALUES,  # type: ignore[arg-type] # TODO: Fix in CORE-412
                 ),
             ],
         )

@@ -37,7 +37,7 @@ def test_batch_validate_expectation(pandas_setup: Tuple[AbstractDataContext, Bat
     # Make Expectation
     expectation = gxe.ExpectColumnValuesToNotBeNull(
         column="vendor_id",
-        mostly=0.95,
+        mostly=0.95,  # type: ignore[arg-type] # TODO: Fix in CORE-412
     )
     # Validate
     result = batch.validate(expectation)
@@ -56,7 +56,7 @@ def test_batch_validate_expectation_suite(
     suite.add_expectation(
         gxe.ExpectColumnValuesToNotBeNull(
             column="vendor_id",
-            mostly=0.95,
+            mostly=0.95,  # type: ignore[arg-type] # TODO: Fix in CORE-412
         )
     )
     # Validate
@@ -129,7 +129,7 @@ def test_batch_validate_with_updated_expectation(
     # Asserts on result
     assert result.success is False
     # Update expectation and validate
-    expectation.mostly = 0.95
+    expectation.mostly = 0.95  # type: ignore[assignment] # TODO: Fix in CORE-412
     result = batch.validate(expectation)
     assert result.success is True
 
@@ -152,7 +152,7 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
 
     expectation = suite.expectations[0]
     assert isinstance(expectation, gxe.ExpectColumnValuesToNotBeNull)
-    expectation.mostly = 0.95
+    expectation.mostly = 0.95  # type: ignore[assignment] # TODO: Fix in CORE-412
 
     expectation.save()
     assert isinstance(suite.expectations[0], gxe.ExpectColumnValuesToNotBeNull)
@@ -165,7 +165,7 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
 class TestBatchValidateExpectation:
     @pytest.fixture
     def expectation(self) -> Expectation:
-        return gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)
+        return gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)  # type: ignore[arg-type] # TODO: Fix in CORE-412
 
     @pytest.mark.filesystem
     def test_boolean_validation_result(
@@ -209,7 +209,7 @@ class TestBatchValidateExpectationSuite:
     def suite(self) -> ExpectationSuite:
         return gx.ExpectationSuite(
             name="my-suite",
-            expectations=[gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)],
+            expectations=[gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)],  # type: ignore[arg-type] # TODO: Fix in CORE-412
         )
 
     @pytest.mark.filesystem
@@ -260,7 +260,7 @@ def test_batch_validate_expectation_does_not_persist_a_batch_definition(
 
     expectation = gxe.ExpectColumnValuesToNotBeNull(
         column="vendor_id",
-        mostly=0.95,
+        mostly=0.95,  # type: ignore[arg-type] # TODO: Fix in CORE-412
     )
     result = batch.validate(expectation)
 
@@ -282,7 +282,7 @@ def test_batch_validate_expectation_suite_does_not_persist_a_batch_definition(
         expectations=[
             gxe.ExpectColumnValuesToNotBeNull(
                 column="vendor_id",
-                mostly=0.95,
+                mostly=0.95,  # type: ignore[arg-type] # TODO: Fix in CORE-412
             )
         ],
     )

@@ -188,14 +188,17 @@ class TestCheckpointSerialization:
             data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
-        with mock.patch.object(
-            ValidationDefinition,
-            "json",
-            return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(
-            ValidationDefinition,
-            "is_fresh",
-            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+        with (
+            mock.patch.object(
+                ValidationDefinition,
+                "json",
+                return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
+            ),
+            mock.patch.object(
+                ValidationDefinition,
+                "is_fresh",
+                return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+            ),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -209,14 +212,17 @@ class TestCheckpointSerialization:
             data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
-        with mock.patch.object(
-            ValidationDefinition,
-            "json",
-            return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(
-            ValidationDefinition,
-            "is_fresh",
-            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+        with (
+            mock.patch.object(
+                ValidationDefinition,
+                "json",
+                return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
+            ),
+            mock.patch.object(
+                ValidationDefinition,
+                "is_fresh",
+                return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+            ),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 

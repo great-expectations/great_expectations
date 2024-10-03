@@ -439,23 +439,27 @@ def test_progress_bar_config(
     execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    with mock.patch(
-        "great_expectations.validator.validation_graph.ValidationGraph._parse",
-        return_value=(
-            {},
-            {},
+    with (
+        mock.patch(
+            "great_expectations.validator.validation_graph.ValidationGraph._parse",
+            return_value=(
+                {},
+                {},
+            ),
         ),
-    ), mock.patch(
-        "great_expectations.validator.validation_graph.ValidationGraph.edges",
-        new_callable=mock.PropertyMock,
-        return_value=[
-            MetricEdge(left=metric_configuration),
-            MetricEdge(left=metric_configuration),
-            MetricEdge(left=metric_configuration),
-        ],
-    ), mock.patch(
-        "great_expectations.validator.validation_graph.tqdm",
-    ) as mock_tqdm:
+        mock.patch(
+            "great_expectations.validator.validation_graph.ValidationGraph.edges",
+            new_callable=mock.PropertyMock,
+            return_value=[
+                MetricEdge(left=metric_configuration),
+                MetricEdge(left=metric_configuration),
+                MetricEdge(left=metric_configuration),
+            ],
+        ),
+        mock.patch(
+            "great_expectations.validator.validation_graph.tqdm",
+        ) as mock_tqdm,
+    ):
         call_args = {
             "runtime_configuration": None,
         }
