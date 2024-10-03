@@ -1,12 +1,7 @@
 # To add an additional team, simply add a top-level key with a list of users.
 # NOTE - this should be kept in sync with the GX org's teams
 
-dx:
-  - "@Shinnnyshinshin" # Will Shin
-  - "@anthonyburdi" # Anthony Burdi
-
 devrel:
-  - "@Rachel-Reverie" # Rachel Reverie
   - "@kyleaton" # Kyle Eaton
   - "@rachhouse" # Rachel House
   - "@r34ctor" # Nevin Tan
@@ -14,7 +9,6 @@ devrel:
 core:
   - "@DrewHoo" # Drew Hoover
   - "@Erin-GX" # Erin Kapp
-  - "@JennyTee" # Jenny Terlinden
   - "@Kilo59" # Gabriel Gore
   - "@NathanFarmer" # Nathan Farmer
   - "@Shinnnyshinshin" # Will Shin
