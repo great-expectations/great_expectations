@@ -497,7 +497,7 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
 
     # Reload the asset and see that we can re-add the df to the batch definition
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
-    dataframe_asset = context.get_datasource(name="fluent_pandas_datasource").get_asset(
+    dataframe_asset = context.data_sources.get(name="fluent_pandas_datasource").get_asset(
         name="my_df_asset"
     )
     reloaded_batch_def = dataframe_asset.get_batch_definition(name="bd")
@@ -548,7 +548,7 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     retrieved_bd = (
-        context.get_datasource(name="fluent_spark_datasource")
+        context.data_sources.get(name="fluent_spark_datasource")
         .get_asset(name="my_df_asset")
         .get_batch_definition(name="bd")
     )

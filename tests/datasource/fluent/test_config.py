@@ -917,7 +917,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     context.data_sources.add_sqlite("my_new_one", connection_string="sqlite://")
 
     # add a new asset to an existing data
-    sqlite_ds_w_subs: SqliteDatasource = context.get_datasource(  # type: ignore[assignment]
+    sqlite_ds_w_subs: SqliteDatasource = context.data_sources.get(  # type: ignore[assignment]
         "my_sqlite_ds_w_subs"
     )
     sqlite_ds_w_subs.add_table_asset("new_asset", table_name="yellow_tripdata_sample_2019_01")

@@ -108,7 +108,7 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
     titanic_data_context,
 ):
     with pytest.raises(ValueError):
-        _ = titanic_data_context.get_datasource("fakey_mc_fake")
+        _ = titanic_data_context.data_sources.get("fakey_mc_fake")
 
 
 @pytest.mark.unit

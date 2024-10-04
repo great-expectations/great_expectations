@@ -61,7 +61,7 @@ def test_serialize_fluent_config(
 
 @pytest.mark.filesystem
 def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
-    datasource = seeded_file_context.get_datasource("sqlite_taxi")
+    datasource = seeded_file_context.data_sources.get("sqlite_taxi")
     assert isinstance(datasource, Datasource)
     partitioner = ColumnPartitionerMonthly(column_name="pickup_datetime")
     batch_request = datasource.get_asset("my_asset").build_batch_request(
