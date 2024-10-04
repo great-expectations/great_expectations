@@ -7,7 +7,7 @@ import TabItem from '@theme/TabItem';
 
 ## Overview
 
-This tutorial will enable you to schedule and run data pipelines locally using PostgreSQL as the database, dbt for transforming data, Great Expectations for data quality and Airflow for workflow orchestration - all running inside of containers via Docker Compose. This tutorial assumes you have basic knowledge of Python, SQL, Docker, and how to use a CLI. We will have step-by-step instructions along with explanations for those who want a deeper understanding of what we are doing and why.
+This tutorial will enable you to schedule and run data pipelines locally using PostgreSQL as the database, dbt for transforming data, Great Expectations for data quality and Airflow for workflow orchestration - all running inside of containers via Docker Compose. This tutorial assumes you have basic knowledge of Python, SQL, Docker, and how to use a CLI. The tutorial will have step-by-step instructions along with explanations for those who want a deeper understanding of what you are doing and why.
 
 ![dbt Tutorial Overview](./dbt_tutorial/overview.png)
 
@@ -84,7 +84,7 @@ This tutorial does not include a full explanation of the Docker Compose file. Ho
 - Airflow is a collection of 4 different services: an initialization service (this happens when you first run the service), a web server, a scheduler, and a PostgreSQL backend that stores metadata about this pipeline.
 - For each service, the Docker image is defined to use, environment variables to pass into the container, and which services are dependent on each other. For example, the airflow-postgres service needs to be running before the webserver and scheduler services can start.
 - Line 159 defines a default network for all services in this pipeline. This section also defines the services' names as the host name in credentials, instead of using an IP address.
-- Line 165 demonstrates how to securely pass ssh keys using Docker secrets to the containers in the pipeline. We recommend using this pattern as a best practice.
+- Line 165 demonstrates how to securely pass ssh keys using Docker secrets to the containers in the pipeline. This pattern is recommended as a best practice.
 
 ## 2. Generate SSH Keys
 You will need to generate a key pair that you will use in our Docker services to securely authenticate with each other. You can read more about how SSH keys work [here](https://www.foxpass.com/blog/learn-ssh-keys-in-minutes/).
@@ -168,7 +168,7 @@ docker exec -it dbt bash -l
 ```
 
 :::note
-Here you are using the `docker exec` command to open an interactive terminal inside the container using bash as the shell. The -l flag is important here because it tells the shell to be a login shell which automatically sources the .bashrc file we put into the container which exports the dbt environment variables. See the dbt.Dockerfile for more info.
+Here you are using the `docker exec` command to open an interactive terminal inside the container using bash as the shell. The -l flag is important here because it tells the shell to be a login shell, which automatically sources the .bashrc file in the container, which in turn exports the dbt environment variables. See the dbt.Dockerfile for more info.
 :::
 
 Next, run the `dbt deps` command to install dependencies. Then, copy the seed data into the seeds folder by running `cp jaffle-data/*.csv` and run the `dbt seed` command to import the data into the PostgreSQL database. By default, it will import the data into a new schema called `jaffle_shop_raw`. This step might take a few minutes to complete.
@@ -243,7 +243,7 @@ pg_datasource = context.data_sources.add_postgres(name="pg_datasource", connecti
 asset = pg_datasource.add_table_asset(name="customer_data", table_name="customers")
 bd = asset.add_batch_definition_whole_table("BD")
 ```
-An Expectation Suite is a group of Expectations that describe how data should be tested. A Validation Definition links an Expectation Suite to the data it describes via the Batch Definition we created in the previous step. You can then add Expectations to the Expectation Suite. In this example, you create an Expectation to check that the `customer_id` column values are never null. Separately, you create another Expectation to check that the values of the `lifetime_spend` column are between 0 and 100000. Browse the [Expectations Gallery](https://greatexpectations.io/expectations/) to explore all available Expectations you can use to gain insight into your data.
+An Expectation Suite is a group of Expectations that describe how data should be tested. A Validation Definition links an Expectation Suite to the data it describes via the Batch Definition you created in the previous step. You can then add Expectations to the Expectation Suite. In this example, you create an Expectation to check that the `customer_id` column values are never null. Separately, you create another Expectation to check that the values of the `lifetime_spend` column are between 0 and 100000. Browse the [Expectations Gallery](https://greatexpectations.io/expectations/) to explore all available Expectations you can use to gain insight into your data.
 
 ```python
 ## Create Expectations
@@ -284,10 +284,10 @@ View the Validation results by navigating to the URL here:[http://127.0.0.1:8888
 You can see that the two Expectations you have created are passing. View failed Expectations in the status column. The Observed Value column displays any values that have fallen outside of the expected range.
 
 ## 7. Build a data pipeline and automate it with Airflow
-The final portion of this tutorial automates the process above with a pipeline or dag in the workflow orchestration tool Airflow. You will create a simple pipeline using the common write-audit-publish pattern.
+The final portion of this tutorial automates the process above with a pipeline or DAG in the workflow orchestration tool Airflow. You will create a simple pipeline using the common write-audit-publish pattern.
 
 ### Log into Airflow
-Open [http://localhost:8080](http://localhost:8080) in your browser. You can use the username and password we created earlier in our configuration step.
+Open [http://localhost:8080](http://localhost:8080) in your browser. You can use the username and password created earlier in the configuration step.
 username=airflow
 password=airflow
 
@@ -296,13 +296,13 @@ And you will see an empty DAGs dashboard:
 ![Empty DAGs dashboard](./dbt_tutorial/empty_dags.png)
 
 ### Create a DAG and add a connection
-Create a new Airflow dag using the command in the root of your project directory:
+Create a new Airflow DAG using the command in the root of your project directory:
 
 ```bash
 touch airflow/dags/customers_dag.py
 ```
 
-Copy the contents below into your new dag file:
+Copy the contents below into your new DAG file:
 
 ```python
 from datetime import datetime
@@ -343,7 +343,7 @@ with DAG(
 
 write_data >> gx_run_audit >> dbt_publish_model
 ```
-This dag file contains the process above, however executing the GX Checkpoint is as simple as loading the previously created Data Context and running the stored Checkpoint.
+This DAG file contains the process above, however executing the GX Checkpoint is as simple as loading the previously created Data Context and running the stored Checkpoint.
 
 After a few minutes, the new pipleline will appear in Airflow. Next, you will receive the following error:
 
@@ -403,7 +403,7 @@ Run the DAG by navigating to **Actions** and clicking the **play** button. Then 
 If you see an error saying “Task exited with return code Negsignal.SIGKILL” then it usually means that Airflow doesn’t have enough resources to run. Airflow recommends 4GB memory. Make sure your Docker resources are set appropriately (Docker Desktop > settings > Resources.)
 :::
 
-You can click on the dag name to watch it as it runs and wait for it to complete:
+You can click on the DAG name to watch it as it runs and wait for it to complete:
 
 ![View DAG run](./dbt_tutorial/customers_dag_run.png)
 
