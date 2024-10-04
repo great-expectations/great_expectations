@@ -468,8 +468,9 @@ def test_view_validation_result(
     }
     checkpoint_result = mocker.Mock(spec=CheckpointResult, run_results=run_results)
 
-    with mock.patch("webbrowser.open") as mock_open, mock.patch(
-        "great_expectations.data_context.store.StoreBackend.has_key", return_value=True
+    with (
+        mock.patch("webbrowser.open") as mock_open,
+        mock.patch("great_expectations.data_context.store.StoreBackend.has_key", return_value=True),
     ):
         context.view_validation_result(checkpoint_result)
 

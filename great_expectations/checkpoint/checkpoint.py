@@ -60,6 +60,7 @@ from great_expectations.exceptions.resource_freshness import ResourceFreshnessAg
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
+    from great_expectations.core.suite_parameters import SuiteParameterDict
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
@@ -273,7 +274,7 @@ class Checkpoint(BaseModel):
     def run(
         self,
         batch_parameters: Dict[str, Any] | None = None,
-        expectation_parameters: Dict[str, Any] | None = None,
+        expectation_parameters: SuiteParameterDict | None = None,
         run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
         if not self.validation_definitions:
@@ -312,7 +313,7 @@ class Checkpoint(BaseModel):
     def _run_validation_definitions(
         self,
         batch_parameters: Dict[str, Any] | None,
-        expectation_parameters: Dict[str, Any] | None,
+        expectation_parameters: SuiteParameterDict | None,
         result_format: ResultFormatUnion,
         run_id: RunIdentifier,
     ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:

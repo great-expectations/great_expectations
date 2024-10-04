@@ -5,7 +5,7 @@ variables:
   contrib_major: 0
   contrib_minor: 1
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
-  python.version: "3.8"
+  python.version: "3.9"
 
 name: $(Date:yyyyMMdd)$(Rev:rrr)
 
