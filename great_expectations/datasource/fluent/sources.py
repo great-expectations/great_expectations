@@ -367,7 +367,7 @@ class DataSourceManager:
     ) -> None:
         try:
             current_datasource = self._data_context.data_sources.get(name)
-        except ValueError as e:
+        except KeyError as e:
             if raise_if_none:
                 raise ValueError(f"There is no datasource {name} in the data context.") from e  # noqa: TRY003
             current_datasource = None

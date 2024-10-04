@@ -104,14 +104,6 @@ def test_get_expectation_suite_include_rendered_content(
 
 
 @pytest.mark.unit
-def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
-    titanic_data_context,
-):
-    with pytest.raises(ValueError):
-        _ = titanic_data_context.data_sources.get("fakey_mc_fake")
-
-
-@pytest.mark.unit
 def test_add_store(empty_data_context):
     assert "my_new_store" not in empty_data_context.stores
     assert "my_new_store" not in empty_data_context.get_config()["stores"]

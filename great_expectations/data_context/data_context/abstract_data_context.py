@@ -1506,7 +1506,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     datasource = self.data_sources.get(datasource_name)
                     fluent_data_asset_names[datasource_name] = sorted(datasource.get_asset_names())
 
-                except ValueError:
+                except KeyError:
                     # handle the edge case of a non-existent datasource
                     fluent_data_asset_names[datasource_name] = {}
 
