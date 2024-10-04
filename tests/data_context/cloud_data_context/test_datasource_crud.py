@@ -58,5 +58,5 @@ def test_cloud_context_datasource_crud_e2e() -> None:
     context.delete_datasource(datasource_name)
 
     # Make another call to the backend to confirm deletion
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         context.data_sources.get(datasource_name)
