@@ -272,9 +272,8 @@ jobs:
         run: python ci/checks/check_integration_test_gets_run.py
       - name: name_tag_snippet_referenced_checker
         run: python ci/checks/check_name_tag_snippets_referenced.py
-      # Disabling public_api_report during V1 development; should be re-enabled upon completion of public API audit
-      # - name: public_api_report
-      #   run: invoke public-api
+      - name: public_api_report
+        run: invoke public-api
       - name: link_checker
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs -sp static --skip-external
 
