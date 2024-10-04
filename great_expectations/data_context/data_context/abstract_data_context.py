@@ -851,7 +851,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ValueError: The input `datasource_name` is None.
         """
-        return self.data_sources.get(name)
+        try:
+            return self.data_sources.get(name)
+        except KeyError as e:
+            raise ValueError(str(e)) from e
 
     def add_store(self, name: str, config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.

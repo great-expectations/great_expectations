@@ -14,6 +14,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -101,6 +102,26 @@ def test_get_expectation_suite_include_rendered_content(
                 rendered_content_block,
                 RenderedAtomicContent,
             )
+
+
+@pytest.mark.unit
+def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
+    titanic_data_context: AbstractDataContext,
+):
+    # this is deprecated
+    with pytest.raises(ValueError):
+        _ = titanic_data_context.get_datasource("fakey_mc_fake")
+
+
+@pytest.mark.unit
+def test_data_context_get_datasource(
+    titanic_data_context: AbstractDataContext,
+):
+    # this is deprecated
+    name = "my datasource"
+    ds = titanic_data_context.data_sources.add_pandas(name)
+    fetched_ds = titanic_data_context.get_datasource(name)
+    assert fetched_ds == ds
 
 
 @pytest.mark.unit
