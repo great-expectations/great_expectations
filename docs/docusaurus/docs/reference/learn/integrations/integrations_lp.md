@@ -20,6 +20,6 @@ Great Expectations can be easily integrated into a variety of data pipelines.
 
 <LinkCardGrid>
 
-  <LinkCard topIcon label="Using GX with dbt" description="Learn how to use GX with dbt" to="/reference/learn/data_quality_use_cases/dbt_tutorial" icon="/img/actions_icon.svg"/>
+  <LinkCard topIcon label="Using GX with dbt" description="Learn how to use GX with dbt" to="/reference/learn/integrations/dbt_tutorial" icon="/img/actions_icon.svg"/>
 
 </LinkCardGrid>
