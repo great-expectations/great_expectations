@@ -850,6 +850,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ValueError: The input `datasource_name` is None.
         """
+        # deprecated-v0.13.12
         warnings.warn(
             "context.get_datasource is deprecated as of v1.2.0. "
             "Please use context.data_sources.get instead",
