@@ -4,7 +4,7 @@ Over time this list should be driven to 0 by either adding the @public_api decor
 adding an exclude directive to docs/sphinx_api_docs_source/public_api_excludes.py
 """
 
-ITEMS_IGNORED_FROM_PUBLIC_API: list[str] = [
+ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/_docs_decorators.py Name: add",
     "File: great_expectations/checkpoint/actions.py Name: _run",
     "File: great_expectations/checkpoint/actions.py Name: run",
