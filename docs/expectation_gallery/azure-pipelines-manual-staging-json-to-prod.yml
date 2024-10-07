@@ -18,7 +18,7 @@ stages:
         condition: eq(variables.isManual, true)
         timeoutInMinutes: 15
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         steps:
           - task: UsePythonVersion@0
