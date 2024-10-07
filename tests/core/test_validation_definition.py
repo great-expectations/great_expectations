@@ -31,6 +31,7 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
     EphemeralDataContext,
 )
 from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
@@ -411,6 +412,35 @@ class TestValidationRun:
         value = kwargs["value"]
         assert isinstance(key, GXCloudIdentifier)
         assert value.success is True
+
+    @mock.patch.object(
+        ValidationResultsStore,
+        "set",
+        return_value=GXCloudResourceRef(
+            resource_type="validation_result",
+            id="59b72ca5-4636-44be-a367-46b54ae51fe1",
+            url="https://api.greatexpectations.io/api/v1/organizations/11111111-ba69-4295-8fe1-61eef96f12b4/validation-results",
+            response_json={"data": {"result_url": "my_result_url"}},
+        ),
+    )
+    @pytest.mark.unit
+    def test_cloud_validation_def_adds_id_and_url_to_result(
+        self,
+        mock_validation_results_store_set: MagicMock,
+        mock_validator: MagicMock,
+        cloud_validation_definition: ValidationDefinition,
+    ):
+        expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
+        cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        cloud_validation_definition.suite.save()
+        mock_validator.graph_validate.return_value = [
+            ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
+        ]
+
+        result = cloud_validation_definition.run()
+
+        assert result.id == "59b72ca5-4636-44be-a367-46b54ae51fe1"
+        assert result.result_url == "my_result_url"
 
     @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
