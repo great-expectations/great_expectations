@@ -4,12 +4,9 @@ import uuid
 import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
-import numpy as np
 import pandas as pd
-import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
@@ -41,57 +38,6 @@ logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
-
-
-# Taken from the following stackoverflow:
-# https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
-# noinspection PyPep8Naming
-def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
-    """
-    Assert that two complex structures have almost equal contents.
-
-    Compares lists, dicts and tuples recursively. Checks numeric values
-    using pyteset.approx and checks all other values with an assertion equality statement
-    Accepts additional positional and keyword arguments and pass those
-    intact to pytest.approx() (that's how you specify comparison
-    precision).
-
-    """
-    is_root = "__trace" not in kwargs
-    trace = kwargs.pop("__trace", "ROOT")
-    try:
-        # if isinstance(expected, (int, float, long, complex)):
-        if isinstance(expected, (int, float, complex)):
-            assert expected == pytest.approx(actual, *args, **kwargs)
-        elif isinstance(expected, (list, tuple, np.ndarray)):
-            assert len(expected) == len(actual)
-            for index in range(len(expected)):
-                v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(
-                    v1,
-                    v2,
-                    __trace=repr(index),
-                    *args,  # noqa: B026 # expected
-                    **kwargs,
-                )
-        elif isinstance(expected, dict):
-            assert set(expected) == set(actual)
-            for key in expected:
-                assertDeepAlmostEqual(
-                    expected[key],
-                    actual[key],
-                    __trace=repr(key),
-                    *args,  # noqa: B026 # expected
-                    **kwargs,
-                )
-        else:
-            assert expected == actual
-    except AssertionError as exc:
-        exc.__dict__.setdefault("traces", []).append(trace)
-        if is_root:
-            trace = " -> ".join(reversed(exc.traces))
-            exc = AssertionError(f"{exc!s}\nTRACE: {trace}")
-        raise exc  # noqa: TRY201
 
 
 def safe_remove(path):
@@ -198,20 +144,6 @@ def build_tuple_filesystem_store_backend(
         config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
-    )
-
-
-def build_checkpoint_store_using_filesystem(
-    store_name: str,
-    base_directory: str,
-    overwrite_existing: bool = False,
-) -> CheckpointStore:
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
-    return build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend_obj,
-        overwrite_existing=overwrite_existing,
     )
 
 
@@ -860,24 +792,6 @@ def introspect_db(  # noqa: C901, PLR0912
     return tables
 
 
-@contextmanager
-def set_directory(path: str) -> Generator:
-    """Sets the cwd within the context
-
-    Args:
-        path: The string representation of the desired path to cd into
-
-    Yields:
-        None
-    """
-    origin = Path().absolute()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(origin)
-
-
 def check_athena_table_count(
     connection_string: str, db_name: str, expected_table_count: int
 ) -> bool:
@@ -1038,50 +952,6 @@ def add_datasource(
         return context.data_sources.add_postgres(name=name, connection_string=connection_string)
     else:
         return context.data_sources.add_sql(name=name, connection_string=connection_string)
-
-
-def find_strings_in_nested_obj(  # noqa: C901 - 14
-    obj: Any, target_strings: List[str]
-) -> bool:
-    """Recursively traverse a nested structure to find all strings in an input string.
-
-    Args:
-        obj (Any): The object to traverse (generally a dict to start with)
-        target_strings (List[str]): The collection of strings to find.
-
-    Returns:
-        True if ALL target strings are found. Otherwise, will return False.
-    """
-
-    strings: Set[str] = set(target_strings)
-
-    def _find_string(data: Any) -> bool:  # noqa: C901
-        if isinstance(data, list):
-            for val in data:
-                if _find_string(val):
-                    return True
-        elif isinstance(data, dict):
-            for key, val in data.items():
-                if _find_string(key) or _find_string(val):
-                    return True
-        elif isinstance(data, str):
-            string_to_remove: Optional[str] = None
-            for string in strings:
-                if string in data:
-                    string_to_remove = string
-                    break
-            if string_to_remove:
-                strings.remove(string_to_remove)
-                if not strings:
-                    return True
-
-        return False
-
-    success: bool = _find_string(obj)
-    if not success:
-        logger.info(f"Could not find the following target strings: {strings}")
-
-    return success
 
 
 @contextmanager

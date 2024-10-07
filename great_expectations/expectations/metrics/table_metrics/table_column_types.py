@@ -92,12 +92,12 @@ def _get_sqlalchemy_column_metadata(
 ):
     table_selectable: str | sqlalchemy.TextClause
 
-    if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
+    if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):  # type: ignore[truthy-function]
         table_selectable = batch_data.source_table_name or batch_data.selectable.name
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     # if custom query was passed in
-    elif sqlalchemy.TextClause and isinstance(batch_data.selectable, sqlalchemy.TextClause):
+    elif sqlalchemy.TextClause and isinstance(batch_data.selectable, sqlalchemy.TextClause):  # type: ignore[truthy-function]
         table_selectable = batch_data.selectable
         schema_name = None
     else:
@@ -106,7 +106,7 @@ def _get_sqlalchemy_column_metadata(
 
     return get_sqlalchemy_column_metadata(
         execution_engine=execution_engine,
-        table_selectable=table_selectable,
+        table_selectable=table_selectable,  # type: ignore[arg-type]
         schema_name=schema_name,
     )
 

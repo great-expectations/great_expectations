@@ -1,0 +1,17 @@
+@import '../../../css/sass_variables';
+
+.colorModeToggle {
+  padding: var(--ifm-navbar-item-padding-vertical) 0.5rem var(--ifm-navbar-item-padding-vertical) 0.25rem;
+
+  button:hover {
+    box-shadow: inset 0 0 0 2px var(--docsearch-primary-color)
+  }
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .colorModeToggle {
+    position: absolute;
+    right: calc(var(--ifm-navbar-padding-horizontal) + 4.5rem);
+    padding-right: 0;
+  }
+}

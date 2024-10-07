@@ -247,7 +247,7 @@ request = asset.build_batch_request({"year": "2021"})
 
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_list">
-batches = asset.get_batch_list_from_batch_request(request)
+batch = asset.get_batch(request)
 # </snippet>
 
 config = context.fluent_datasources["s3_datasource"].yaml()

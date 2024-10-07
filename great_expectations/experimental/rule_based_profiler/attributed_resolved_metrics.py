@@ -34,7 +34,7 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:  # no
                 properties=(
                     pd.DataFrame,
                     pd.Series,
-                    sqlalchemy.Row if sqlalchemy.Row else None,
+                    sqlalchemy.Row if sqlalchemy.Row else None,  # type: ignore[truthy-function]
                     pyspark.Row if pyspark.Row else None,  # type: ignore[truthy-function]
                     set,
                 )

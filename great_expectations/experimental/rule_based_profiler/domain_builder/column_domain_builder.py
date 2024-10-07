@@ -12,12 +12,12 @@ from typing import (
     cast,
 )
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.experimental.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
@@ -263,7 +263,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
         for column_name in filtered_column_names:
             if column_name not in column_names:
-                raise gx_exceptions.ProfilerExecutionError(
+                raise ProfilerExecutionError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 

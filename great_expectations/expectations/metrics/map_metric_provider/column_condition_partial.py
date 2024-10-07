@@ -179,7 +179,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 if dialect is None:
                     # Trino
                     if hasattr(sqlalchemy_engine, "dialect"):
-                        dialect = sqlalchemy_engine.dialect
+                        dialect = sqlalchemy_engine.dialect  # type: ignore[assignment]
 
                 expected_condition = metric_fn(
                     cls,

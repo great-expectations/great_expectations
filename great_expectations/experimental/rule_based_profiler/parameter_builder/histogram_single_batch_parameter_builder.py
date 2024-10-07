@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
 import numpy as np
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.experimental.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     _is_iterable_of_numeric_dtypes,
@@ -140,12 +140,12 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         ]
 
         if domain.domain_type == MetricDomainTypes.COLUMN and "." in domain.domain_kwargs["column"]:
-            raise gx_exceptions.ProfilerExecutionError(  # noqa: TRY003
+            raise ProfilerExecutionError(  # noqa: TRY003
                 "Column names cannot contain '.' when computing the histogram metric."
             )
 
         if bins is None:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} into bins encountered empty or non-existent \
 elements.
@@ -153,7 +153,7 @@ elements.
             )
 
         if not _is_iterable_of_numeric_dtypes(bins):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield bins of supported data type.
 """  # noqa: E501

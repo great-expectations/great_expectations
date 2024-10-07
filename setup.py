@@ -8,7 +8,7 @@ from setuptools import find_packages, setup
 
 import versioneer
 
-SUPPORTED_PYTHON = ">=3.8,<3.12"
+SUPPORTED_PYTHON = ">=3.9,<3.12"
 
 
 def get_python_requires() -> str:
@@ -17,6 +17,9 @@ def get_python_requires() -> str:
     return a version with no upper-bound.
     """
     if os.getenv("GX_PYTHON_EXPERIMENTAL"):
+        return ">=3.9"
+    elif os.getenv("NETLIFY"):
+        # Netlify only supports Python 3.8 (EOL 2024-10-31) and 2.7 (EOl 2020-01-01).
         return ">=3.8"
     return SUPPORTED_PYTHON
 
@@ -33,7 +36,6 @@ def get_extras_require():
         "bigquery",  # https://github.com/googleapis/python-bigquery-sqlalchemy/blob/main/setup.py
         "clickhouse",  # https://github.com/xzkostyan/clickhouse-sqlalchemy/blob/master/setup.py
         "redshift",  # https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/blob/main/setup.py
-        "snowflake",  # https://github.com/snowflakedb/snowflake-sqlalchemy/blob/main/setup.cfg
         "teradata",  # https://pypi.org/project/teradatasqlalchemy   https://support.teradata.com/knowledge?id=kb_article_view&sys_kb_id=a5a869149729251ced863fe3f153af27
     )
     sqla_keys = (
@@ -46,9 +48,11 @@ def get_extras_require():
         "trino",  # https://github.com/trinodb/trino-python-client/blob/master/setup.py
         "vertica",  # https://github.com/bluelabsio/sqlalchemy-vertica-python/blob/master/setup.py
         "databricks",  # https://github.com/databricks/databricks-sql-python/blob/main/pyproject.toml
+        "snowflake",  # https://github.com/snowflakedb/snowflake-sqlalchemy/blob/main/setup.cfg
     )
     ignore_keys = (
         "sqlalchemy",
+        "sqlalchemy2",
         "test",
         "tools",
         "all-contrib-expectations",
@@ -121,7 +125,7 @@ config = {
     "include_package_data": True,
     "python_requires": get_python_requires(),
     "classifiers": [
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Other Audience",
@@ -130,7 +134,6 @@ config = {
         "Topic :: Software Development :: Testing",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",

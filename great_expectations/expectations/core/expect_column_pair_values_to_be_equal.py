@@ -53,7 +53,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectColumnPairValuesToBeEqual is a \
-    [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
+    Column Pair Map Expectation.
 
     Column Pair Map Expectations are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns.
     Based on the result, they then calculate the percentage of rows that gave a positive answer.

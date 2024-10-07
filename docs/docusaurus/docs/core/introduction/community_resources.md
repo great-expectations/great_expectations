@@ -41,7 +41,7 @@ If you're interested in helping out, review the [GitHub issues list](https://git
 
 ## Connect with our community
 
-Join the GX [public Slack channel](https://greatexpectations.io/slack) to connect with other GX users and see how they're using GX. Before you post for the first time, review the [Slack Guidelines](https://discourse.greatexpectations.io/t/slack-guidelines/1195).
+Join the [GX Discourse forum](https://discourse.greatexpectations.io/) to connect with other GX users and see how they're using GX. Before you post for the first time, review the [Discourse guidelines](https://discourse.greatexpectations.io/t/discourse-guidelines/1230).
 
 ## GX Cloud
 

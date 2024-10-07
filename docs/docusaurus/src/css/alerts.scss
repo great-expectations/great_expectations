@@ -9,13 +9,21 @@
   --ifm-color-success-dark: #B6C647;
 
   --ifm-color-warning-contrast-background: #FEFBF3;
-  --ifm-color-warning-dark: #F5CE4A;
+  --ifm-color-warning-dark: #F3C62D;
 
   --ifm-color-danger-contrast-background: #FEF6F9;
   --ifm-color-danger-dark: #E54F54;
 
   --color-cta-contrast-background: transparent;
   --color-cta-secondary-dark: var(--ifm-color-primary);
+}
+
+:root[data-theme='dark'] {
+  --ifm-color-info-contrast-background: var(--card-background-dark-theme);
+  --ifm-color-success-contrast-background: var(--card-background-dark-theme);
+  --ifm-color-warning-contrast-background: var(--card-background-dark-theme);
+  --ifm-color-danger-contrast-background: var(--card-background-dark-theme);
+  --ifm-color-cta-contrast-background: var(--card-background-dark-theme);
 }
 
 .alert {

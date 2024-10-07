@@ -30,3 +30,7 @@ div[role="tabpanel"]{
     }
   }
 }
+
+[data-theme='dark'] .tabs-container .tabs {
+  border-bottom: 2px solid var(--light-gray-dark-theme);
+}

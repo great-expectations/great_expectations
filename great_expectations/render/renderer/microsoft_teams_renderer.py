@@ -24,8 +24,10 @@ class MicrosoftTeamsRenderer(Renderer):
 
     @override
     def render(
-        self, checkpoint_result: CheckpointResult, data_docs_pages: list[dict] | None = None
-    ):
+        self,
+        checkpoint_result: CheckpointResult,
+        data_docs_pages: dict[ValidationResultIdentifier, dict[str, str]] | None = None,
+    ) -> dict:
         checkpoint_blocks: list[list[dict[str, str]]] = []
         for result_identifier, result in checkpoint_result.run_results.items():
             validation_blocks = self._render_validation_result(
@@ -101,17 +103,16 @@ class MicrosoftTeamsRenderer(Renderer):
         return self._render_validation_result_element(key="Summary", value=check_details_text)
 
     def _render_data_docs_links(
-        self, data_docs_pages: list[dict] | None
+        self, data_docs_pages: dict[ValidationResultIdentifier, dict[str, str]] | None
     ) -> list[dict[str, str]] | None:
         if not data_docs_pages:
             return None
 
         elements: list[dict[str, str]] = []
-        for data_docs_page in data_docs_pages:
-            for docs_link_key in data_docs_page:
+        for data_docs_page in data_docs_pages.values():
+            for docs_link_key, docs_link in data_docs_page.items():
                 if docs_link_key == "class":
                     continue
-                docs_link = data_docs_pages[docs_link_key]
                 report_element = self._get_report_element(docs_link)
                 elements.append(report_element)
 

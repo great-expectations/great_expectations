@@ -6,6 +6,7 @@ from uuid import UUID
 
 from great_expectations import __version__ as gx_version
 from great_expectations.analytics.config import get_config
+from great_expectations.compatibility.typing_extensions import override
 
 
 @dataclass(frozen=True)
@@ -18,6 +19,7 @@ class Action:
 
     name: str
 
+    @override
     def __repr__(self):
         return self.name
 

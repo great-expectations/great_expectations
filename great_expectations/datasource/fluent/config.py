@@ -76,7 +76,7 @@ _MISSING_FLUENT_DATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 _MISSING: Final = object()
 
 JSON_ENCODERS: dict[Type, Callable] = {}
-if TextClause:
+if TextClause:  # type: ignore[truthy-function]
     JSON_ENCODERS[TextClause] = lambda v: str(v)
 
 T = TypeVar("T")

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterable, List, Optional, Union
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
 )
 from great_expectations.experimental.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
@@ -141,14 +141,14 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         if not (profile_report_column_names and table_column_names):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"Error: List of available table columns in {self.__class__.__name__} must not be empty."
             )
 
         if not is_candidate_subset_of_target(
             candidate=profile_report_column_names, target=table_column_names
         ):
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"Error: Some of profiled columns in {self.__class__.__name__} are not found in Batch table."
             )
 

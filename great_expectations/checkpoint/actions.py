@@ -39,12 +39,14 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.renderer import (
     EmailRenderer,
@@ -57,6 +59,7 @@ from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -119,8 +122,6 @@ class ValidationAction(BaseModel):
 
     @property
     def _using_cloud_context(self) -> bool:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.is_using_cloud()
 
     def run(
@@ -130,9 +131,13 @@ class ValidationAction(BaseModel):
 
     def _get_data_docs_pages_from_prior_action(
         self, action_context: ActionContext | None
-    ) -> list[dict] | None:
+    ) -> dict[ValidationResultIdentifier, dict[str, str]] | None:
         if action_context:
-            return action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_results = action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_pages = {}
+            for result in data_docs_results:
+                data_docs_pages.update(result)
+            return data_docs_pages
 
         return None
 
@@ -153,8 +158,6 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifiers: list | None = None,
     ) -> dict:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.build_data_docs(
             site_names=site_names, resource_identifiers=resource_identifiers
         )
@@ -164,8 +167,6 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifier: Any | None = None,
     ):
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
         return project_manager.get_docs_sites_urls(
             site_names=site_names, resource_identifier=resource_identifier
         )
@@ -214,9 +215,9 @@ class SlackNotificationAction(DataDocsAction):
 
     type: Literal["slack"] = "slack"
 
-    slack_webhook: Optional[str] = None
-    slack_token: Optional[str] = None
-    slack_channel: Optional[str] = None
+    slack_webhook: Optional[Union[ConfigStr, str]] = None
+    slack_token: Optional[Union[ConfigStr, str]] = None
+    slack_channel: Optional[Union[ConfigStr, str]] = None
     notify_on: Literal["all", "failure", "success"] = "all"
     notify_with: Optional[List[str]] = None
     show_failed_expectations: bool = False
@@ -235,10 +236,9 @@ class SlackNotificationAction(DataDocsAction):
 
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
+        slack_webhook = values["slack_webhook"]
         slack_token = values["slack_token"]
         slack_channel = values["slack_channel"]
-        slack_webhook = values["slack_webhook"]
-
         try:
             if slack_webhook:
                 assert not slack_token and not slack_channel
@@ -290,7 +290,9 @@ class SlackNotificationAction(DataDocsAction):
     ) -> list[dict]:
         data_docs_pages = None
         if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+            data_docs_pages = self._get_data_docs_pages_from_prior_action(
+                action_context=action_context
+            )
 
         # Assemble complete GX Cloud URL for a specific validation result
         data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
@@ -314,14 +316,35 @@ class SlackNotificationAction(DataDocsAction):
         )
 
     def _send_slack_notification(self, payload: dict) -> dict:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        config_provider = project_manager.get_config_provider()
+        substituted_slack_webhook = self._substitute_slack_credential(
+            slack_credential=self.slack_webhook, config_provider=config_provider
+        )
+        substituted_slack_token = self._substitute_slack_credential(
+            slack_credential=self.slack_token, config_provider=config_provider
+        )
+        substituted_slack_channel = self._substitute_slack_credential(
+            slack_credential=self.slack_channel, config_provider=config_provider
+        )
+
         # this will actually send the POST request to the Slack webapp server
         slack_notif_result = send_slack_notification(
             payload=payload,
-            slack_webhook=self.slack_webhook,
-            slack_token=self.slack_token,
-            slack_channel=self.slack_channel,
+            slack_webhook=substituted_slack_webhook,
+            slack_token=substituted_slack_token,
+            slack_channel=substituted_slack_channel,
         )
         return {"slack_notification_result": slack_notif_result}
+
+    @staticmethod
+    def _substitute_slack_credential(
+        slack_credential: ConfigStr | str | None, config_provider: _ConfigurationProvider
+    ) -> str | None:
+        if not isinstance(slack_credential, ConfigStr):
+            return slack_credential
+        return slack_credential.get_config_value(config_provider=config_provider)
 
 
 @public_api
@@ -688,7 +711,7 @@ class UpdateDataDocsAction(DataDocsAction):
     def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
-        action_results: dict[ValidationResultIdentifier, dict] = {}
+        action_results: dict[ValidationResultIdentifier, dict[str, str]] = {}
         for result_identifier, result in checkpoint_result.run_results.items():
             suite_name = result.suite_name
 

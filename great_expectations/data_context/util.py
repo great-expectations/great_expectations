@@ -19,7 +19,7 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 try:
     import sqlalchemy as sa  # noqa: TID251
 except ImportError:
-    sa = None
+    sa = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 

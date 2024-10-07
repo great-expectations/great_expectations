@@ -1,6 +1,7 @@
 import pytest
 
 from great_expectations.checkpoint.checkpoint import CheckpointResult
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.render.renderer import MicrosoftTeamsRenderer
 
 
@@ -41,3 +42,19 @@ def test_MicrosoftTeamsRenderer_render(v1_checkpoint_result: CheckpointResult):
         second_validation_result_text_blocks[5]["text"]
         == "**Summary:** *1* of *1* expectations were met"
     )
+
+
+@pytest.mark.unit
+def test_MicrosoftTeamsRender_render_with_data_docs_pages(
+    v1_checkpoint_result: CheckpointResult, mocker
+):
+    renderer = MicrosoftTeamsRenderer()
+    local_path = "http://local_site"
+    data_docs_pages = {
+        mocker.MagicMock(spec=ValidationResultIdentifier): {"local_site": local_path}
+    }
+    rendered_output = renderer.render(
+        checkpoint_result=v1_checkpoint_result, data_docs_pages=data_docs_pages
+    )
+
+    assert rendered_output["attachments"][0]["content"]["actions"][0]["url"] == local_path

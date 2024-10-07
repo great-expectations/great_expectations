@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.types import Comparable  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     render_suite_parameter_string,
 )
@@ -29,9 +29,6 @@ try:
 except ImportError:
     pass
 
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
-)
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 
@@ -76,7 +73,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectColumnMaxToBeBetween is a \
-    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations)
+    Column Aggregate Expectation
 
     Column Aggregate Expectations are one of the most common types of Expectation.
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
@@ -86,7 +83,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         column (str): \
             {COLUMN_DESCRIPTION}
         min_value (comparable type or None): \
-            {MAX_VALUE_DESCRIPTION}
+            {MIN_VALUE_DESCRIPTION}
         max_value (comparable type or None): \
             {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
@@ -189,10 +186,10 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+    min_value: Optional[Comparable] = pydantic.Field(
         default=None, description=MIN_VALUE_DESCRIPTION
     )
-    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+    max_value: Optional[Comparable] = pydantic.Field(
         default=None, description=MAX_VALUE_DESCRIPTION
     )
     strict_min: bool = pydantic.Field(default=False, description=STRICT_MAX_DESCRIPTION)

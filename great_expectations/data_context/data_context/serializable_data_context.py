@@ -65,10 +65,10 @@ class SerializableDataContext(AbstractDataContext):
         self._context_root_directory = context_root_dir
         super().__init__(runtime_environment=runtime_environment)
 
-    def _init_datasource_store(self):
+    def _init_datasource_store(self):  # type: ignore[explicit-override] # FIXME
         raise NotImplementedError  # Required by parent ABC but this class is never instantiated
 
-    def _init_variables(self):
+    def _init_variables(self):  # type: ignore[explicit-override] # FIXME
         raise NotImplementedError  # Required by parent ABC but this class is never instantiated
 
     @property

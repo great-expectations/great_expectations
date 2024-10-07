@@ -15,7 +15,6 @@ import pathlib
 import psycopg2
 
 import great_expectations as gx
-import great_expectations.expectations as gxe
 from tests.test_utils import load_data_into_test_database
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
@@ -42,10 +41,11 @@ def add_column_to_transfers_table() -> None:
     connection.close()
 
 
-# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full sample code">
+# <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/schema_resources/schema_validation_over_time.py full example code">
 import pandas as pd
 
 import great_expectations as gx
+import great_expectations.expectations as gxe
 
 # Create Data Context.
 context = gx.get_context()
@@ -59,9 +59,7 @@ datasource = context.data_sources.add_postgres(
 data_asset = datasource.add_table_asset(name="data asset", table_name="transfers")
 
 # Create Expectation Suite and add Expectations.
-suite = context.suites.add(
-    gx.core.expectation_suite.ExpectationSuite(name="schema expectations")
-)
+suite = context.suites.add(gx.ExpectationSuite(name="schema expectations"))
 
 suite.add_expectation(
     gxe.ExpectTableColumnsToMatchSet(
@@ -82,7 +80,7 @@ batch = batch_definition.get_batch()
 
 # Validate Batch.
 validation_definition = context.validation_definitions.add(
-    gx.core.validation_definition.ValidationDefinition(
+    gx.ValidationDefinition(
         name="validation definition",
         data=batch_definition,
         suite=suite,
@@ -91,9 +89,7 @@ validation_definition = context.validation_definitions.add(
 
 # Define Checkpoint, run it, and capture result.
 checkpoint = context.checkpoints.add(
-    gx.checkpoint.checkpoint.Checkpoint(
-        name="checkpoint", validation_definitions=[validation_definition]
-    )
+    gx.Checkpoint(name="checkpoint", validation_definitions=[validation_definition])
 )
 
 checkpoint_result_1 = checkpoint.run()

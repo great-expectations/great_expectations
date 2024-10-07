@@ -55,7 +55,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column_name = accessor_domain_kwargs["column"]
-        column = sa.column(column_name)
+        column = sa.column(column_name)  # type: ignore[var-annotated]
         """SqlAlchemy Median Implementation"""
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
@@ -67,7 +67,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             .where(column != None)  # noqa: E711
             .offset(max(nonnull_count // 2 - 1, 0))
             .limit(2)
-            .select_from(selectable)
+            .select_from(selectable)  # type: ignore[arg-type]
         )
 
         column_values = list(element_values.fetchall())

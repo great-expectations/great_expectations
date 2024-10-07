@@ -104,9 +104,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         options={"name": "alex", "timestamp": "20200819", "price": "1300"},
         partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
+    batch = asset.get_batch(request)
     assert batch.batch_request.datasource_name == spark_dbfs_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
     assert batch.batch_request.options == (
@@ -127,5 +125,4 @@ def test_get_batch_list_from_fully_specified_batch_request(
     request = asset.build_batch_request(
         options={"name": "alex"}, partitioner=FileNamePartitionerPath(regex=batching_regex)
     )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 2
+    assert len(asset.get_batch_identifiers_list(request)) == 2

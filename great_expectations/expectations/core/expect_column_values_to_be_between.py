@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import root_validator
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.suite_parameters import (  # noqa: TCH001
-    SuiteParameterDict,
-)
+from great_expectations.core.types import Comparable  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
@@ -64,7 +61,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectColumnValuesToBeBetween is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations)
+    Column Map Expectation
 
     Column Map Expectations are one of the most common types of Expectation.
     They are evaluated for a single column and ask a yes/no question for every row in that column.
@@ -193,10 +190,10 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+    min_value: Optional[Comparable] = pydantic.Field(
         default=None, description=MIN_VALUE_DESCRIPTION
     )
-    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+    max_value: Optional[Comparable] = pydantic.Field(
         default=None, description=MAX_VALUE_DESCRIPTION
     )
     strict_min: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)

@@ -56,14 +56,14 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
    ```python title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/run_a_validation_definition.py - review Validation Results"
    ```
    
-   When you print the returned Validation Result object you will recieve a yaml representation of the results.  By default this will include a `"results"` list that includes each Expectation in your Validation Definition's Expectation Suite, whether the Expectation was successfully met or failed to pass, and some sumarized information explaining the why the Expectation succeeded or failed.
+   When you print the returned Validation Result object you will recieve a json representation of the results.  By default this will include a `"results"` list that includes each Expectation in your Validation Definition's Expectation Suite, whether the Expectation was successfully met or failed to pass, and some sumarized information explaining the why the Expectation succeeded or failed.
 
    :::tip
 
    GX Cloud users can view the Validation Results in the GX Cloud UI by following the url provided with:
 
    ```python title="Python"
-   print(validation_results.results_url)
+   print(validation_results.result_url)
    ```
 
    :::

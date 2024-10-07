@@ -3,13 +3,15 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
     batch_request_contains_batch_data,
     get_batch_request_as_dict,
+)
+from great_expectations.experimental.rule_based_profiler.exceptions import (
+    ProfilerConfigurationError,
 )
 from great_expectations.types import SerializableDictDot, safe_deep_copy
 from great_expectations.util import (
@@ -102,7 +104,7 @@ class Builder(SerializableDictDot):
             )
         )
         if num_supplied_batch_specification_args > 1:
-            raise gx_exceptions.ProfilerConfigurationError(  # noqa: TRY003
+            raise ProfilerConfigurationError(  # noqa: TRY003
                 f'Please pass at most one of "batch_list" and "batch_request" arguments (you passed {num_supplied_batch_specification_args} arguments).'  # noqa: E501
             )
 

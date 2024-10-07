@@ -1,1 +1,0 @@
-- [How to install Great Expectations for use with local filesystem data](/guides/setup/installation/install_gx.md)

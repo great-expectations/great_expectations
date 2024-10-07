@@ -50,12 +50,12 @@ from great_expectations.core import (
     ExpectationSuiteSchema,
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
-    IDDict,
 )
 from great_expectations.core.batch import Batch, LegacyBatchDefinition
 from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
+from great_expectations.datasource.fluent.batch_identifier_util import make_batch_identifier
 from great_expectations.exceptions.exceptions import (
     ExecutionEngineError,
     InvalidExpectationConfigurationError,
@@ -151,8 +151,8 @@ try:
         "NUMERIC": postgresqltypes.NUMERIC,
     }
 except (ImportError, KeyError):
-    postgresqltypes = None
-    pgDialect = None
+    postgresqltypes = None  # type: ignore[assignment]
+    pgDialect = None  # type: ignore[assignment]
     POSTGRESQL_TYPES = {}
 
 try:
@@ -176,8 +176,8 @@ try:
         "TINYINT": mysqltypes.TINYINT,
     }
 except (ImportError, KeyError):
-    mysqltypes = None
-    mysqlDialect = None
+    mysqltypes = None  # type: ignore[assignment]
+    mysqlDialect = None  # type: ignore[assignment]
     MYSQL_TYPES = {}
 
 try:
@@ -189,9 +189,9 @@ try:
     from sqlalchemy.dialects.mssql import dialect as mssqlDialect  # noqa: TID251
 
     try:
-        mssqltypes.INT  # noqa: B018 # reassigning if attr not found
+        mssqltypes.INT  # type: ignore[attr-defined] # noqa: B018 # reassigning if attr not found
     except AttributeError:
-        mssqltypes.INT = mssqltypes.INTEGER
+        mssqltypes.INT = mssqltypes.INTEGER  # type: ignore[attr-defined]
 
     # noinspection PyUnresolvedReferences
     MSSQL_TYPES = {
@@ -206,7 +206,7 @@ try:
         "DECIMAL": mssqltypes.DECIMAL,
         "FLOAT": mssqltypes.FLOAT,
         "IMAGE": mssqltypes.IMAGE,
-        "INT": mssqltypes.INT,
+        "INT": mssqltypes.INT,  # type: ignore[attr-defined]
         "INTEGER": mssqltypes.INTEGER,
         "MONEY": mssqltypes.MONEY,
         "NCHAR": mssqltypes.NCHAR,
@@ -227,8 +227,8 @@ try:
         "VARCHAR": mssqltypes.VARCHAR,
     }
 except (ImportError, KeyError):
-    mssqltypes = None
-    mssqlDialect = None
+    mssqltypes = None  # type: ignore[assignment]
+    mssqlDialect = None  # type: ignore[assignment]
     MSSQL_TYPES = {}
 
 
@@ -536,7 +536,7 @@ def _get_test_validator_with_data_pandas(  # noqa: C901
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
+        batch_identifiers=make_batch_identifier({}),
         batch_spec_passthrough=None,
     )
 
@@ -681,7 +681,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
+        batch_identifiers=make_batch_identifier({}),
         batch_spec_passthrough=None,
     )
     return build_spark_validator_with_data(
@@ -740,13 +740,13 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
     try:
         dialect_classes["postgresql"] = postgresqltypes.dialect
-        dialect_types["postgresql"] = POSTGRESQL_TYPES
+        dialect_types["postgresql"] = POSTGRESQL_TYPES  # type: ignore[assignment]
     except AttributeError:
         pass
 
     try:
         dialect_classes["mysql"] = mysqltypes.dialect
-        dialect_types["mysql"] = MYSQL_TYPES
+        dialect_types["mysql"] = MYSQL_TYPES  # type: ignore[assignment]
     except AttributeError:
         pass
 
@@ -841,7 +841,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if (
         schemas
         and sa_engine_name in schemas
-        and isinstance(engine.dialect, dialect_classes[sa_engine_name])
+        and isinstance(engine.dialect, dialect_classes[sa_engine_name])  # type: ignore[union-attr]
     ):
         schema = schemas[sa_engine_name]
         if pk_column:
@@ -918,7 +918,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
             datasource_name="my_test_datasource",
             data_connector_name="my_sql_data_connector",
             data_asset_name="my_asset",
-            batch_identifiers=IDDict(),
+            batch_identifiers=make_batch_identifier({}),
         )
 
     batch = Batch(data=batch_data, batch_definition=batch_definition)  # type: ignore[arg-type] # got SqlAlchemyBatchData

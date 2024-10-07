@@ -7,3 +7,4 @@ IGNORE_ROW_IF_DESCRIPTION = (
     "If specified, sets the condition on which a given row is to be ignored."
 )
 VALUE_SET_DESCRIPTION = "A set of objects used for comparison."
+WINDOWS_DESCRIPTION = "Definition(s) for evaluation of temporal windows"

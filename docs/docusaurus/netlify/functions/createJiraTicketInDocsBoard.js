@@ -3,6 +3,7 @@ const DOCUMENTATION_BOARD_ID = 10019;
 const STORY_ISSUETYPE_ID = 10011;
 const JIRA_ISSUE_ENDPOINT_URL = "https://greatexpectations.atlassian.net/rest/api/2/issue"
 const TO_DO_STATE_ID = 291;
+const DOCS_BASE_URL = "https://docs.greatexpectations.io";
 
 const truncateDescription = (description) => {
     return description.length > TITLE_MAX_CHARACTERS ? description.substring(0, TITLE_MAX_CHARACTERS) + "..." : description;
@@ -10,9 +11,9 @@ const truncateDescription = (description) => {
 
 const formatOptionalValue = (value) => value || '-';
 
-const fullDescription = (description, name, email, selectedValue) => {
+const fullDescription = (description, name, email, selectedValue, pathname) => {
     const formattedSelectedValue = selectedValue.replaceAll("-"," ");
-    return `*Name:* ${formatOptionalValue(name)}\n*Email:* ${formatOptionalValue(email)}\n*Selected feedback type:* ${formattedSelectedValue}\n\n*Description:* ${description}`;
+    return `*Name:* ${formatOptionalValue(name)}\n*Email:* ${formatOptionalValue(email)}\n*Selected feedback type:* ${formattedSelectedValue}\n*URL:* ${DOCS_BASE_URL}${pathname}\n\n*Description:* ${description}`;
 }
 
 const httpPostRequest = async (url, body) => {
@@ -27,7 +28,7 @@ const httpPostRequest = async (url, body) => {
 }
 
 exports.handler = async (req, context) => {
-    const { description, name, email, selectedValue } = JSON.parse(req.body);
+    const { description, name, email, selectedValue, pathname } = JSON.parse(req.body);
     try {
         const response = await httpPostRequest(JIRA_ISSUE_ENDPOINT_URL, {
             "fields": {
@@ -35,7 +36,7 @@ exports.handler = async (req, context) => {
                     "id": DOCUMENTATION_BOARD_ID
                 },
                 "summary": truncateDescription(description),
-                "description": fullDescription(description, name, email, selectedValue),
+                "description": fullDescription(description, name, email, selectedValue, pathname),
                 "issuetype": {
                     "id": STORY_ISSUETYPE_ID
                 },

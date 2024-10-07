@@ -100,3 +100,22 @@ li.menu__list-item {
     }
   }
 }
+
+//Request a demo CTA
+.request-demo-sidebar {
+  margin-top: 24px !important;
+}
+
+.request-demo-sidebar a {
+  font-weight: bold;
+  color: #ff6310;;
+}
+
+.request-demo-sidebar svg {
+  opacity: 0;
+}
+
+[data-theme='dark'] nav.menu {
+  background-color: var(--ifm-background-color);
+  border-right: 1px solid var(--light-gray-dark-theme);
+}

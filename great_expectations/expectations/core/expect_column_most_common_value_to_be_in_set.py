@@ -63,7 +63,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectColumnMostCommonValueToBeInSet is a \
-    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
+    Column Aggregate Expectation.
 
     Column Aggregate Expectations are one of the most common types of Expectation.
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
@@ -170,7 +170,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Optional[Union[SuiteParameterDict, ValueSet]] = pydantic.Field(
+    value_set: Union[Optional[ValueSet], SuiteParameterDict] = pydantic.Field(
         description=VALUE_SET_DESCRIPTION,
     )
     ties_okay: Union[bool, None] = pydantic.Field(

@@ -411,7 +411,7 @@ def test_sort_batches__ascending(
         metadata_none_none,
     ]
 
-    empty_data_asset.sort_batches(batches, partitioner)
+    batches = empty_data_asset.sort_batches(batches, partitioner)
 
     assert batches == [
         metadata_none_none,
@@ -446,7 +446,7 @@ def test_sort_batches__descending(
         metadata_none_none,
     ]
 
-    empty_data_asset.sort_batches(batches, partitioner)
+    batches = empty_data_asset.sort_batches(batches, partitioner)
 
     assert batches == [
         metadata_2_2,
@@ -466,7 +466,7 @@ def test_sort_batches__requires_keys(empty_data_asset, mocker):
     wheres_my_b = mocker.MagicMock(spec=Batch, metadata={"a": 1})
     i_have_a_b = mocker.MagicMock(spec=Batch, metadata={"a": 1, "b": 2})
 
-    expected_error = "Trying to sort my data asset for batch configs table asset batches on key b"
+    expected_error = "Trying to sort my data asset for batch configs's batches on key b"
 
     with pytest.raises(KeyError, match=expected_error):
         empty_data_asset.sort_batches([wheres_my_b, i_have_a_b], partitioner)

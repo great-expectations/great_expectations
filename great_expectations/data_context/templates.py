@@ -14,7 +14,7 @@ class YAMLToString(YAML):
     Get yaml dump as a string: https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
     """
 
-    def dump(self, data, stream=None, **kw):
+    def dump(self, data, stream=None, **kw):  # type: ignore[explicit-override] # FIXME
         inefficient = False
         if not stream:
             inefficient = True

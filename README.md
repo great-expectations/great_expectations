@@ -24,14 +24,14 @@ Learn more about how data teams are using GX Core in our featured [case studies]
 
 ## Integration support policy
 
-GX Core supports Python `3.8` through `3.11`.
+GX Core supports Python `3.9` through `3.11`.
 Experimental support for Python `3.12` and later can be enabled by setting a `GX_PYTHON_EXPERIMENTAL` environment variable when installing `great_expectations`.
 
 For data sources and other integrations that GX supports, see [GX integration support policy](https://docs.greatexpectations.io/docs/application_integration_support) for additional information.
 
 ## Get started
 
-GX recommends deploying GX Core within a virtual environment. For more information about getting started with GX Core, see [Get started with Great Expectations](https://docs.greatexpectations.io/docs/oss/tutorials/quickstart).
+GX recommends deploying GX Core within a virtual environment. For more information about getting started with GX Core, see [Introduction to GX Core](https://docs.greatexpectations.io/docs/core/introduction/).
 
 1. Run the following command in an empty base directory inside a Python virtual environment to install GX Core:
 
@@ -55,11 +55,15 @@ They are listed in the order in which GX is prioritizing the support issues:
 3. Questions posted to the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82)
 
 ## Contribute
-We deeply value the contributions of our community. We're now accepting PRs for bug fixes. To ensure the long-term quality of the GX Core codebase, we're not yet ready to accept feature contributions to the parts of the codebase that don't have clear APIs for extensions. We're actively working to increase the surface area for contributions. Thank you being a crucial part of GX's data quality platform!
+We deeply value the contributions of our community. We're now accepting PRs for bug fixes.
+
+To ensure the long-term quality of the GX Core codebase, we're not yet ready to accept feature contributions to the parts of the codebase that don't have clear APIs for extensions. We're actively working to increase the surface area for contributions. Thank you being a crucial part of GX's data quality platform!
 
 ### Levels of contribution readiness
 🟢 Ready. Have a clear and public API for extensions.
+
 🟡 Partially ready. Case-by-case.
+
 🔴 Not ready. Will accept contributions that fix existing bugs or workflows.
 
 | GX Component         | Readiness          | Notes |

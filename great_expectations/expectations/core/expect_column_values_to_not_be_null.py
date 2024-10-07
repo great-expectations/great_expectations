@@ -67,7 +67,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     np.NaN in pandas. Empty strings don't count as null unless they have been coerced to a null type.
 
     ExpectColumnValuesToNotBeNull is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+    Column Map Expectation.
 
     Column Map Expectations are one of the most common types of Expectation.
     They are evaluated for a single column and ask a yes/no question for every row in that column.

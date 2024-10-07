@@ -809,4 +809,4 @@ class SnowflakeDatasource(SQLDatasource):
 
         engine_kwargs["url"] = url
 
-        return sa.create_engine(**engine_kwargs)
+        return sa.create_engine(**engine_kwargs)  # type: ignore[misc]

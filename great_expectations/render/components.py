@@ -17,6 +17,7 @@ from great_expectations.types import DictDot
 if TYPE_CHECKING:
     from great_expectations.compatibility.pydantic import fields as pydantic_fields
     from great_expectations.render.renderer_configuration import (
+        CodeBlock,
         MetaNotes,
         RendererTableValue,
     )
@@ -42,6 +43,7 @@ class AtomicPrescriptiveRendererType(str, Enum):
     FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
     SUMMARY = ".".join([AtomicRendererType.PRESCRIPTIVE, "summary"])
 
+    @override
     def __str__(self):
         return self.value
 
@@ -52,6 +54,7 @@ class AtomicDiagnosticRendererType(str, Enum):
     FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
     OBSERVED_VALUE = ".".join([AtomicRendererType.DIAGNOSTIC, "observed_value"])
 
+    @override
     def __str__(self):
         return self.value
 
@@ -132,7 +135,7 @@ class RenderedContent:
         """
         return {}
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
@@ -497,13 +500,14 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         d["string_template"] = self.string_template
         return d
 
+    @override
     def __str__(self):
         string = pTemplate(self.string_template["template"]).safe_substitute(
             self.string_template["params"]
         )
         return string
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # type: ignore[explicit-override] # FIXME
         return str(self) == str(other)
 
 
@@ -765,6 +769,7 @@ class RenderedAtomicValue(DictDot):
         header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
+        code_block: Optional[CodeBlock] = None,
         header_row: Optional[List[RendererTableValue]] = None,
         table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
@@ -776,6 +781,7 @@ class RenderedAtomicValue(DictDot):
         # StringValueType
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
+        self.code_block: Optional[CodeBlock] = code_block
 
         # TableType
         self.header_row: Optional[List[RendererTableValue]] = header_row
@@ -847,6 +853,7 @@ class RenderedAtomicValueSchema(Schema):
     # for StringValueType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
+    code_block = fields.Dict(required=False, allow_none=True)
 
     # for TableType
     header_row = fields.List(fields.Dict, required=False, allow_none=True)
@@ -870,6 +877,7 @@ class RenderedAtomicValueSchema(Schema):
         "table",
         "graph",
         "meta_notes",
+        "code_block",
     )
 
     @staticmethod

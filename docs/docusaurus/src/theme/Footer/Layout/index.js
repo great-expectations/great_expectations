@@ -1,5 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
+import styles from './styles.module.css';
+
 export default function FooterLayout({style, links, logo, copyright}) {
   return (
     <footer
@@ -76,7 +78,7 @@ export default function FooterLayout({style, links, logo, copyright}) {
           >
             <div>{copyright}</div>
             <div>
-              <a href="https://greatexpectations.io/privacy-policy">Privacy Policy</a>
+              <a className={styles.privacyPolicy} href="https://greatexpectations.io/privacy-policy">Privacy Policy</a>
             </div>
           </div>
       </div>

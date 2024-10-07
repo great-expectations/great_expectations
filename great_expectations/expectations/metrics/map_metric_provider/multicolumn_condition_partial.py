@@ -175,7 +175,7 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
-                column_selector = [sa.column(column_name) for column_name in column_list]
+                column_selector = [sa.column(column_name) for column_name in column_list]  # type: ignore[var-annotated]
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
                     cls,

@@ -1,0 +1,45 @@
+{
+  "expectation_type" : "unexpected_rows_expectation",
+  "datasets" : [{
+    "only_for": ["postgresql", "snowflake", "sqlite"],
+    "dataset_name": "unexpected_rows_expectation_1",
+    "data" : {
+      "c1" : [4,5,6,7],
+      "c2" : ["a","b","c","d"],
+      "c3" : [null,null,null,null],
+      "c4" : [4.0, 3.0, 3.5, 1.2]
+    },
+    "schemas": {
+      "spark": {
+        "c1": "IntegerType",
+        "c2": "StringType",
+        "c3": "StringType",
+        "c4": "FloatType"
+      }
+    },
+    "tests": [{
+      "title": "basic_positive_test",
+      "include_in_gallery": false,
+      "exact_match_out" : false,
+      "in":{
+        "unexpected_rows_query": "SELECT * FROM {batch} WHERE c1 > 7"
+      },
+      "out":{
+        "success":true,
+        "observed_value": "0 unexpected rows"
+      }
+    },
+    {
+      "title": "basic_negative_test",
+      "include_in_gallery": false,
+      "exact_match_out" : false,
+      "in":{
+        "unexpected_rows_query": "SELECT * FROM {batch} WHERE c1 > 6"
+      },
+      "out":{
+        "success":false,
+        "observed_value": "1 unexpected row"
+      }
+    }]
+  }]
+}

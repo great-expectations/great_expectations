@@ -20,6 +20,16 @@ class GreatExpectationsError(Exception):
         super().__init__(message)
 
 
+class GreatExpectationsAggregateError(ValueError):
+    def __init__(self, errors: list[GreatExpectationsError]) -> None:
+        self._errors = errors
+        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
+
+    @property
+    def errors(self) -> list[GreatExpectationsError]:
+        return self._errors
+
+
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
     def __init__(self, message, validation_error=None) -> None:
         self.message = message
@@ -38,43 +48,26 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
-class ResourceNotAddedError(DataContextError):
-    pass
-
-
-class ResourcesNotAddedError(ValueError):
-    def __init__(self, errors: list[ResourceNotAddedError]) -> None:
-        self._errors = errors
-        super().__init__("\n\t" + "\n\t".join(str(e) for e in errors))
-
-    @property
-    def errors(self) -> list[ResourceNotAddedError]:
-        return self._errors
-
-
 class ExpectationSuiteError(DataContextError):
     pass
-
-
-class ExpectationSuiteNotAddedError(ResourceNotAddedError):
-    def __init__(self, name: str) -> None:
-        super().__init__(
-            f"ExpectationSuite '{name}' must be added to the DataContext before it can be updated. "
-            "Please call `context.suites.add(<SUITE_OBJECT>)`, "
-            "then try your action again."
-        )
 
 
 class ValidationDefinitionError(DataContextError):
     pass
 
 
-class ValidationDefinitionNotAddedError(ResourceNotAddedError):
+class NoDataDocsError(DataContextError):
+    def __init__(self) -> None:
+        super().__init__(
+            "No Data Docs found. Please check that you have run a checkpoint, "
+            "and that the checkpoint has a UpdateDataDocsAction in its actions."
+        )
+
+
+class ValidationDefinitionNotFoundError(ValidationDefinitionError):
     def __init__(self, name: str) -> None:
         super().__init__(
-            f"ValidationDefinition '{name}' must be added to the DataContext before it can be updated. "  # noqa: E501
-            "Please call `context.validation_definitions.add(<VALIDATION_DEFINITION_OBJECT>)`, "
-            "then try your action again."
+            f"ValidationDefinition '{name}' not found. Please check the name and try again."
         )
 
 
@@ -83,16 +76,8 @@ class CheckpointError(DataContextError):
 
 
 class CheckpointNotFoundError(CheckpointError):
-    pass
-
-
-class CheckpointNotAddedError(ResourceNotAddedError):
     def __init__(self, name: str) -> None:
-        super().__init__(
-            f"Checkpoint '{name}' must be added to the DataContext before it can be updated. "
-            "Please call `context.checkpoints.add(<CHECKPOINT_OBJECT>)`, "
-            "then try your action again."
-        )
+        super().__init__(f"Checkpoint '{name}' not found. Please check the name and try again.")
 
 
 class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
@@ -101,14 +86,6 @@ class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
             "Checkpoint.run() requires at least one validation definition. "
             "Please add one and try your action again."
         )
-
-
-class CheckpointRelatedResourcesNotAddedError(ResourcesNotAddedError):
-    pass
-
-
-class ValidationDefinitionRelatedResourcesNotAddedError(ResourcesNotAddedError):
-    pass
 
 
 class StoreBackendError(DataContextError):
@@ -130,19 +107,11 @@ class StoreBackendTransientError(StoreBackendError):
     pass
 
 
-class ParserError(GreatExpectationsError):
-    pass
-
-
 class InvalidConfigurationYamlError(DataContextError):
     pass
 
 
 class InvalidTopLevelConfigKeyError(GreatExpectationsError):
-    pass
-
-
-class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
@@ -170,14 +139,6 @@ class InvalidDataContextConfigError(InvalidBaseYamlConfigError):
     pass
 
 
-class InvalidCheckpointConfigError(InvalidBaseYamlConfigError):
-    pass
-
-
-class InvalidBatchKwargsError(GreatExpectationsError):
-    pass
-
-
 class InvalidBatchSpecError(GreatExpectationsError):
     pass
 
@@ -189,6 +150,11 @@ class InvalidBatchRequestError(GreatExpectationsError):
 class BuildBatchRequestError(GreatExpectationsError):
     def __init__(self, message: str):
         super().__init__(f"Bad input to build_batch_request: {message}")
+
+
+class NoAvailableBatchesError(GreatExpectationsError):
+    def __init__(self) -> None:
+        super().__init__("No available batches found.")
 
 
 class InvalidBatchIdError(GreatExpectationsError):
@@ -220,42 +186,6 @@ class SuiteParameterError(GreatExpectationsError):
     pass
 
 
-class ProfilerError(GreatExpectationsError):
-    pass
-
-
-class ProfilerConfigurationError(ProfilerError):
-    """A configuration error for a "RuleBasedProfiler" class."""
-
-    pass
-
-
-class ProfilerExecutionError(ProfilerError):
-    """A runtime error for a "RuleBasedProfiler" class."""
-
-    pass
-
-
-class ProfilerNotFoundError(ProfilerError):
-    pass
-
-
-class DataAssistantError(ProfilerError):
-    pass
-
-
-class DataAssistantExecutionError(DataAssistantError):
-    """A runtime error for a "DataAssistant" class."""
-
-    pass
-
-
-class DataAssistantResultExecutionError(DataAssistantError):
-    """A runtime error for a "DataAssistantResult" class."""
-
-    pass
-
-
 class InvalidConfigError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message
@@ -268,13 +198,6 @@ class MissingConfigVariableError(InvalidConfigError):
             missing_config_variable = []
         self.message = message
         self.missing_config_variable = missing_config_variable
-        super().__init__(self.message)
-
-
-class AmbiguousDataAssetNameError(DataContextError):
-    def __init__(self, message, candidates=None) -> None:
-        self.message = message
-        self.candidates = candidates
         super().__init__(self.message)
 
 
@@ -291,10 +214,6 @@ class InvalidExpectationConfigurationError(GreatExpectationsError):
 
 
 class ExpectationNotFoundError(GreatExpectationsError):
-    pass
-
-
-class InvalidValidationResultError(GreatExpectationsError):
     pass
 
 
@@ -418,17 +337,10 @@ properly defined inside its intended module and declared correctly by the callin
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
-    def __init__(self, data_asset_name) -> None:
-        self.data_asset_name = data_asset_name
-        self.message = f"No expectation suite found for data_asset_name {data_asset_name}"
-        super().__init__(self.message)
-
-
-class BatchKwargsError(DataContextError):
-    def __init__(self, message, batch_kwargs=None) -> None:
-        self.message = message
-        self.batch_kwargs = batch_kwargs
-        super().__init__(self.message)
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            f"ExpectationSuite '{name}' not found. Please check the name and try again."
+        )
 
 
 class BatchDefinitionError(DataContextError):
@@ -437,11 +349,10 @@ class BatchDefinitionError(DataContextError):
         super().__init__(self.message)
 
 
-class BatchDefinitionNotAddedError(ResourceNotAddedError):
+class BatchDefinitionNotFoundError(BatchDefinitionError):
     def __init__(self, name: str) -> None:
         super().__init__(
-            f"BatchDefinition '{name}' must be added to the DataContext before it can be updated. "
-            "Please update using the parent asset or data source, then try your action again."
+            f"BatchDefinition '{name}' not found. Please check the name and try again."
         )
 
 
@@ -469,19 +380,13 @@ class DatasourceNotFoundError(DataContextError):
     pass
 
 
-class DataAssetInitializationError(GreatExpectationsError):
-    def __init__(self, message: str) -> None:
-        self.message = f"Cannot initialize data asset: {message}"
-        super().__init__(self.message)
-
-
-class InvalidConfigValueTypeError(DataContextError):
+class DataAssetNotFoundError(DataContextError):
     pass
 
 
-class DataConnectorError(DataContextError):
-    def __init__(self, message) -> None:
-        self.message = message
+class DataAssetInitializationError(GreatExpectationsError):
+    def __init__(self, message: str) -> None:
+        self.message = f"Cannot initialize data asset: {message}"
         super().__init__(self.message)
 
 
@@ -553,9 +458,6 @@ class GXCloudConfigurationError(GreatExpectationsError):
     """  # noqa: E501
 
 
+# Only used in tests
 class DatabaseConnectionError(GreatExpectationsError):
     """Error connecting to a database including during an integration test."""
-
-
-class MigrationError(GreatExpectationsError):
-    """Error when using the migration tool."""

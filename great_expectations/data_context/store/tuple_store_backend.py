@@ -293,7 +293,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def _get(self, key):
+    def _get(self, key):  # type: ignore[explicit-override] # FIXME
         filepath: str = os.path.join(  # noqa: PTH118
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
@@ -312,7 +312,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         keys = [key for key in self.list_keys() if key != StoreBackend.STORE_BACKEND_ID_KEY]
         return [self._get(key) for key in keys]
 
-    def _set(self, key, value, **kwargs):
+    def _set(self, key, value, **kwargs):  # type: ignore[explicit-override] # FIXME
         if not isinstance(key, tuple):
             key = key.to_tuple()
         filepath = os.path.join(  # noqa: PTH118
@@ -328,7 +328,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 outfile.write(value)
         return filepath
 
-    def _move(self, source_key, dest_key, **kwargs):
+    def _move(self, source_key, dest_key, **kwargs):  # type: ignore[explicit-override] # FIXME
         source_path = os.path.join(  # noqa: PTH118
             self.full_base_directory, self._convert_key_to_filepath(source_key)
         )
@@ -392,7 +392,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         except (NotADirectoryError, FileNotFoundError):
             pass
 
-    def remove_key(self, key):
+    def remove_key(self, key):  # type: ignore[explicit-override] # FIXME
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
@@ -407,7 +407,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             return True
         return False
 
-    def get_url_for_key(self, key, protocol=None):
+    @override
+    def get_url_for_key(self, key, protocol=None) -> str:
         path = self._convert_key_to_filepath(key)
         escaped_path = self._url_path_escape_special_characters(path=path)
         full_path = os.path.join(self.full_base_directory, escaped_path)  # noqa: PTH118
@@ -428,7 +429,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         public_url = self.base_public_path + path
         return public_url
 
-    def _has_key(self, key):
+    def _has_key(self, key):  # type: ignore[explicit-override] # FIXME
         return os.path.isfile(  # noqa: PTH113
             os.path.join(  # noqa: PTH118
                 self.full_base_directory, self._convert_key_to_filepath(key)
@@ -538,7 +539,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 s3_object_key = self._convert_key_to_filepath(key)
         return s3_object_key
 
-    def _get(self, key):
+    def _get(self, key):  # type: ignore[explicit-override] # FIXME
         client = self._create_client()
         s3_object_key = self._build_s3_object_key(key)
         return self._get_by_s3_object_key(client, s3_object_key)
@@ -570,7 +571,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             .decode(s3_response_object.get("ContentEncoding", "utf-8"))
         )
 
-    def _set(
+    def _set(  # type: ignore[explicit-override] # FIXME
         self,
         key,
         value,
@@ -647,7 +648,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 key_list.append(key)
         return key_list
 
-    def get_url_for_key(self, key, protocol=None):
+    @override
+    def get_url_for_key(self, key, protocol=None) -> str:
         location = None
         if self.boto3_options.get("endpoint_url"):
             location = self.boto3_options.get("endpoint_url")
@@ -684,7 +686,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             public_url = self.base_public_path + s3_key
         return public_url
 
-    def remove_key(self, key):
+    def remove_key(self, key):  # type: ignore[explicit-override] # FIXME
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
@@ -699,7 +701,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             return False
 
-    def _has_key(self, key):
+    def _has_key(self, key):  # type: ignore[explicit-override] # FIXME
         all_keys = self.list_keys()
         return key in all_keys
 
@@ -825,7 +827,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_key = self._convert_key_to_filepath(key)
         return gcs_object_key
 
-    def _get(self, key):
+    def _get(self, key):  # type: ignore[explicit-override] # FIXME
         from great_expectations.compatibility import google
 
         gcs = google.storage.Client(project=self.project)
@@ -854,7 +856,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
 
-    def _set(
+    def _set(  # type: ignore[explicit-override] # FIXME
         self,
         key,
         value,
@@ -920,7 +922,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 key_list.append(key)
         return key_list
 
-    def get_url_for_key(self, key, protocol=None):
+    @override
+    def get_url_for_key(self, key, protocol=None) -> str:
         path = self._convert_key_to_filepath(key)
 
         if self._public_urls:
@@ -957,7 +960,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 path_url = "/".join((self.bucket, path))
         return path_url
 
-    def remove_key(self, key):
+    def remove_key(self, key):  # type: ignore[explicit-override] # FIXME
         from great_expectations.compatibility import google
 
         gcs = google.storage.Client(project=self.project)
@@ -968,7 +971,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             return False
         return True
 
-    def _has_key(self, key):
+    def _has_key(self, key):  # type: ignore[explicit-override] # FIXME
         all_keys = self.list_keys()
         return key in all_keys
 
@@ -1063,7 +1066,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
         return blob_service_client.get_container_client(self.container)
 
-    def _get(self, key):
+    def _get(self, key):  # type: ignore[explicit-override] # FIXME
         az_blob_key = os.path.join(  # noqa: PTH118
             self.prefix, self._convert_key_to_filepath(key)
         )
@@ -1074,7 +1077,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         keys = self.list_keys()
         return [self._get(key) for key in keys]
 
-    def _set(self, key, value, content_encoding="utf-8", **kwargs):
+    def _set(self, key, value, content_encoding="utf-8", **kwargs):  # type: ignore[explicit-override] # FIXME
         from great_expectations.compatibility.azure import ContentSettings
 
         az_blob_key = os.path.join(  # noqa: PTH118
@@ -1123,7 +1126,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             key_list.append(key)
         return key_list
 
-    def get_url_for_key(self, key, protocol=None):
+    @override
+    def get_url_for_key(self, key, protocol=None) -> str:
         az_blob_key = self._convert_key_to_filepath(key)
         az_blob_path = os.path.join(  # noqa: PTH118
             self.container, self.prefix, az_blob_key
@@ -1131,7 +1135,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
         return f"https://{self._container_client.account_name}.blob.core.windows.net/{az_blob_path}"
 
-    def _has_key(self, key):
+    def _has_key(self, key):  # type: ignore[explicit-override] # FIXME
         all_keys = self.list_keys()
         return key in all_keys
 
@@ -1160,7 +1164,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             )
         source_blob.delete_blob()
 
-    def remove_key(self, key):
+    def remove_key(self, key):  # type: ignore[explicit-override] # FIXME
         if not isinstance(key, tuple):
             key = key.to_tuple()
 

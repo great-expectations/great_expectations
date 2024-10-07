@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Tuple
+from typing import Dict, Tuple
 
 import pytest
 
@@ -22,10 +22,6 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from tests.expectations.test_util import get_table_columns_metric
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import Batch
-
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +49,7 @@ def run_checkpoint_and_data_doc(
     validator.expect_column_median_to_be_between(column="passenger_count", min_value=1, max_value=4)
 
     suite = validator.expectation_suite
+    suite.save()
     batch_def = asset.add_batch_definition(name="my_batch_definition")
 
     # Configure and run a checkpoint
@@ -122,20 +119,15 @@ def run_checkpoint_and_data_doc(
     assert "ge-failed-icon" not in data_doc_index
 
 
-def run_batch_head(  # noqa: C901, PLR0915
+def run_batch_head(  # noqa: C901
     datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     fetch_all: bool | str,
     n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
 ) -> None:
     _, datasource, _, batch_request = datasource_test_data
-    batch_list: list[Batch] = datasource.get_batch_list_from_batch_request(
-        batch_request=batch_request
-    )
-    assert len(batch_list) > 0
+    batch = datasource.get_batch(batch_request=batch_request)
 
-    # arbitrarily select the first batch for testing
-    batch: Batch = batch_list[0]
     if success:
         assert n_rows is None or isinstance(n_rows, int)
         assert isinstance(fetch_all, bool)

@@ -48,7 +48,7 @@ class DocstringError:
     raw_error: str
     line_number: int
 
-    def __str__(self):
+    def __str__(self):  # type: ignore[explicit-override] # FIXME
         return self.raw_error
 
 

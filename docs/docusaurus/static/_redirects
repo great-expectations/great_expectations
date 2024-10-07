@@ -416,6 +416,7 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/tutorials/getting_started/how_to_use_great_expectations_with_sql /docs/oss/get_started/get_started_with_gx_and_sql
 
 /docs /docs/home
+/ /docs/home
 
 /docs/terms/*   /docs/reference/learn/terms/:splat
 /docs/conceptual_guides/*   /docs/reference/learn/conceptual_guides/:splat

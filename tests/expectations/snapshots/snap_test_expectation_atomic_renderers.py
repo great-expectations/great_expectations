@@ -548,11 +548,9 @@ snapshots["test_atomic_prescriptive_summary_expect_column_unique_value_count_to_
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 20},
             "min_value": {"schema": {"type": "number"}, "value": 10},
-            "mostly": {"schema": {"type": "number"}, "value": 0.8},
-            "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column must have greater than or equal to $min_value and less than or equal to $max_value unique values, at least $mostly_pct % of the time.",  # noqa: E501
+        "template": "$column must have greater than or equal to $min_value and less than or equal to $max_value unique values.",  # noqa: E501
     },
     "value_type": "StringValueType",
 }

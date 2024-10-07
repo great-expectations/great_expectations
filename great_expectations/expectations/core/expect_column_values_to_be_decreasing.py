@@ -37,7 +37,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     is strictly decreasing--equal values are treated as failures.
 
     ExpectColumnValuesToBeDecreasing is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations)
+    Column Map Expectation
 
     Args:
         column (str): \

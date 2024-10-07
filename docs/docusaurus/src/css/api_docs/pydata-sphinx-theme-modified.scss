@@ -8826,6 +8826,7 @@ a.text-dark:focus, a.text-dark:hover {
 }
 
 @media print {
+ [data-theme="light"] {
   *, :after, :before {
     box-shadow: none !important;
     text-shadow: none !important
@@ -8883,6 +8884,7 @@ a.text-dark:focus, a.text-dark:hover {
     border-color: #dee2e6;
     color: inherit
   }
+ }
 }
 
 // Changed to * to apply to all elements since this file is imported under a selector
@@ -10288,27 +10290,49 @@ nav.page-toc ul > li {
 }
 
 div.deprecated, div.versionadded, div.versionchanged {
-  background-color: var(--pst-color-on-background);
-  border-left: .2rem solid;
-  border-color: var(--pst-color-info);
+  border: 1px solid;
   border-radius: .25rem;
-  box-shadow: 0 .2rem .5rem var(--pst-color-shadow), 0 0 .0625rem var(--pst-color-shadow) !important;
+  box-shadow: none;
   margin: 1.5625em auto;
   overflow: hidden;
   padding: 0 .6rem;
   page-break-inside: avoid;
   position: relative;
   transition: color .25s, background-color .25s, border-color .25s;
-  vertical-align: middle
+  vertical-align: middle;
+
+  p {
+    margin: 0.5rem 0
+  }
+
+  p:before {
+    background-color: transparent;
+  }
+
+  cite {
+    [data-theme='dark'] & {
+      color: var(--ifm-font-color-base);
+    }
+  }
+
+  .deprecated:before,
+  .added:before,
+  .versionchanged:before{
+    background-color: var(--ifm-font-color-base);
+    content: '';
+    display: inline-block;
+    mask-size: cover;
+    height: 1em;
+    width: 1em;
+  }
+
+  [data-theme='dark'] & {
+    background-color: var(--card-background-dark-theme);
+  }
 }
 
-div.deprecated > p, div.versionadded > p, div.versionchanged > p {
-  margin-bottom: .6rem;
-  margin-top: .6rem
-}
 
 div.deprecated > p:before, div.versionadded > p:before, div.versionchanged > p:before {
-  background-color: var(--pst-color-info);
   content: "";
   height: 100%;
   left: 0;
@@ -10320,11 +10344,18 @@ div.deprecated > p:before, div.versionadded > p:before, div.versionchanged > p:b
 }
 
 div.versionadded {
-  border-color: var(--pst-color-success)
-}
+  background-color: var(--ifm-color-success-contrast-background);
+  border: 1px solid var(--ifm-color-success-dark);
+  border-left-width: 6px;
 
-div.versionadded p:before {
-  background-color: var(--pst-color-success)
+  cite {
+    background-color: var(--ifm-color-success-contrast-background);
+    border-color: var(--ifm-color-success-dark);
+  }
+
+  .added:before {
+    mask: url("/static/img/admonition-info-icon.svg");
+  }
 }
 
 div.versionchanged {
@@ -10336,11 +10367,18 @@ div.versionchanged p:before {
 }
 
 div.deprecated {
-  border-color: var(--pst-color-danger)
-}
+  background-color: var(--ifm-color-danger-contrast-background);
+  border: 1px solid var(--ifm-color-danger-dark);
+  border-left-width: 6px;
 
-div.deprecated p:before {
-  background-color: var(--pst-color-danger)
+  .deprecated:before {
+    mask: url("/static/img/admonition-info-icon.svg");
+  }
+
+  cite {
+    background-color: var(--ifm-color-danger-contrast-background);
+    border-color: var(--ifm-color-danger-dark);
+  }
 }
 
 span.versionmodified {
@@ -10359,7 +10397,7 @@ span.versionmodified:before {
 span.versionmodified.added:before {
   color: var(--pst-color-success);
   // Note: Color is currently hardcoded into the svg below:
-  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px' viewBox='0 0 512 512'%3E%3C!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --%3E%3Cpath fill='%2328a745' d='M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zm32 224c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z'/%3E%3C/svg%3E");
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px' viewBox='0 0 512 512'%3E%3C!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --%3E%3Cpath fill='%23a3b32f' d='M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zm32 224c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z'/%3E%3C/svg%3E");
 }
 
 span.versionmodified.changed:before {
@@ -10370,7 +10408,7 @@ span.versionmodified.changed:before {
 span.versionmodified.deprecated:before {
   color: var(--pst-color-danger);
   // Note: Color is currently hardcoded into the svg below:
-  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px' viewBox='0 0 512 512'%3E%3C!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --%3E%3Cpath fill='%23dc3545' d='M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zm32 224c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z'/%3E%3C/svg%3E");
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px' viewBox='0 0 512 512'%3E%3C!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --%3E%3Cpath fill='%23d74148' d='M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zm32 224c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z'/%3E%3C/svg%3E");
 }
 
 .sidebar-indices-items {
@@ -10775,11 +10813,16 @@ div.literal-block-wrapper div[class*=highlight-] pre {
   box-shadow: none
 }
 
-code.literal {
+code .literal {
   background-color: var(--pst-color-surface);
   border: 1px solid var(--pst-color-on-surface);
   border-radius: .25rem;
-  padding: .1rem .25rem
+  padding: .1rem .25rem;
+}
+
+[data-theme='dark'] code .literal {
+  background-color: var(--nero-black-color);
+  border: 1px solid var(--gray-900);
 }
 
 figure a.headerlink {

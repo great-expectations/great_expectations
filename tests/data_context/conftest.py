@@ -349,7 +349,7 @@ class MockResponse:
         if self.status_code >= 400:
             raise requests.exceptions.HTTPError(f"Mock {self.status_code} HTTPError", response=self)
 
-    def __repr__(self):
+    def __repr__(self):  # type: ignore[explicit-override] # FIXME
         return f"<Response [{self.status_code}]>"
 
 

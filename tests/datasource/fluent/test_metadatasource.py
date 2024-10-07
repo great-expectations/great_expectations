@@ -40,6 +40,7 @@ yaml = YAMLHandler()
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.datasource_dict import DatasourceDict
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 logger = logging.getLogger(__name__)
@@ -128,6 +129,14 @@ class DummyDataAsset(DataAsset):
     ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
+    @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+        raise NotImplementedError
+
+    @override
+    def get_batch(self, batch_request: BatchRequest) -> Batch:
+        raise NotImplementedError
+
 
 @pytest.fixture(scope="function")
 def context_sources_cleanup() -> Generator[DataSourceManager, None, None]:
@@ -157,7 +166,7 @@ def empty_sources(context_sources_cleanup) -> Generator[DataSourceManager, None,
 
 
 class DummyExecutionEngine(ExecutionEngine):
-    def get_batch_data_and_markers(self, batch_spec):
+    def get_batch_data_and_markers(self, batch_spec):  # type: ignore[explicit-override] # FIXME
         raise NotImplementedError
 
 
@@ -307,7 +316,13 @@ class TestMisconfiguredMetaDatasource:
         ):
 
             class MissingTypeAsset(DataAsset):
-                pass
+                @override
+                def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+                    raise NotImplementedError
+
+                @override
+                def get_batch(self, batch_request: BatchRequest) -> Batch:
+                    raise NotImplementedError
 
             class BadAssetDatasource(Datasource):
                 type: str = "valid"
@@ -341,12 +356,21 @@ class TestMisconfiguredMetaDatasource:
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
-    class RedAsset(DataAsset):
+    class SampleAsset(DataAsset):
+        @override
+        def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]:
+            raise NotImplementedError
+
+        @override
+        def get_batch(self, batch_request: BatchRequest) -> Batch:
+            raise NotImplementedError
+
+    class RedAsset(SampleAsset):
         type = "red"
 
-        def test_connection(self): ...
+        def test_connection(self): ...  # type: ignore[explicit-override] # FIXME
 
-    class BlueAsset(DataAsset):
+    class BlueAsset(SampleAsset):
         type = "blue"
 
         @override
@@ -361,7 +385,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         def execution_engine_type(self) -> Type[ExecutionEngine]:
             return DummyExecutionEngine
 
-        def test_connection(self): ...
+        def test_connection(self): ...  # type: ignore[explicit-override] # FIXME
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)  # type: ignore[call-arg] # ?

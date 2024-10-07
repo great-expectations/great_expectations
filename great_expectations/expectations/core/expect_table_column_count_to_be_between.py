@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
-)
+from great_expectations.core.types import Comparable  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_suite_parameter_string,
@@ -54,7 +51,7 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectTableColumnCountToBeBetween is a \
-    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
+    Batch Expectation.
 
     BatchExpectations are one of the most common types of Expectation.
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
@@ -152,12 +149,8 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        description=MIN_VALUE_DESCRIPTION
-    )
-    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        description=MAX_VALUE_DESCRIPTION
-    )
+    min_value: Optional[Comparable] = pydantic.Field(description=MIN_VALUE_DESCRIPTION)
+    max_value: Optional[Comparable] = pydantic.Field(description=MAX_VALUE_DESCRIPTION)
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",

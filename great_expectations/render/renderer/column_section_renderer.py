@@ -91,7 +91,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
 
     # Note: Seems awkward to pass section_name and column_type into this renderer.
     # Can't we figure that out internally?
-    def render(self, evrs, section_name=None, column_type=None):
+    def render(self, evrs, section_name=None, column_type=None):  # type: ignore[explicit-override] # FIXME
         if section_name is None:
             column = self._get_column_name(evrs)
         else:
@@ -434,7 +434,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         )
         return [], new_block
 
-    def render(self, validation_results, suite_parameters=None):
+    def render(self, validation_results, suite_parameters=None):  # type: ignore[explicit-override] # FIXME
         column = self._get_column_name(validation_results)
         content_blocks = []
         remaining_evrs, content_block = self._render_header(validation_results)
@@ -489,7 +489,7 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
 
         return [], new_block
 
-    def render(self, expectations):
+    def render(self, expectations):  # type: ignore[explicit-override] # FIXME
         column = self._get_column_name(expectations)
 
         content_blocks = []

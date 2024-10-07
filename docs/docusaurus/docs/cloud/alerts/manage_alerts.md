@@ -4,60 +4,21 @@ title: 'Manage alerts'
 description: Create and manage alerts in GX Cloud.
 ---
 
-Add alerts to your GX Cloud workflows to receive Slack notifications when a Checkpoint is successful, it fails, or when it succeeds or fails.
+Stay informed about the health of the Data Assets that you care about by enabling alerts in GX Cloud. 
 
-## Add a Slack alert
+## Email alert default settings
+
+By default, alerts are enabled for every Data Asset you create and disabled for all other Data Assets. You can change these settings at any time.
+
+Every time a Data Asset fails a validation run, GX Cloud sends an email to all users who have enabled alerts for that Data Asset.
+
+Email alerts are configured on a per-user basis; your email alert settings do not affect the email alerts of other users in your organization.
+
+## Update an email alert
 
 1. In GX Cloud, click **Data Assets**.
-
-2. In the **Data Assets** list, click the Data Asset name.
-
+2. Click a Data Asset in the **Data Assets** list.
 3. Click the **Expectations** tab and then **Alerts**.
+4. Click the **toggle switch** to enable or disable email alerts for the Data Asset.
 
-4. Click **Add Alert**.
-
-5. Optional. Select a Checkpoint in the **Checkpoint** list.
-
-6. Complete the following fields:
-
-    - **Alert name:** Enter a meaningful name for the alert.
-
-    - **Webhook:** Enter the Slack incoming webhook URL. For more information about Slack incoming webhooks, see [Sending messages using incoming webhooks](https://api.slack.com/messaging/webhooks).
-
-    - **Alert type:** Select the type of alert to send to Slack. **Show all** sends a notification when the Checkpoint succeeds or fails, **Failures only** sends a notification when the Checkpoint fails, and **Success only** sends a notification when the Checkpoint succeeds. 
-
-7. Click **Save**.
-
-8. Optional. Click **Add Alert** to add an additional Slack alert.
-
-9. Click **Done**.
-
-## Edit a Slack alert
-
-1. In GX Cloud, click **Data Assets**.
-
-2. In the **Data Assets** list, click the Data Asset name.
-
-3. Click **Alerts**.
-
-4. Click **Edit** for the alert you want to edit.
-
-5. Edit the following fields:
-
-    - **Webhook:** Enter the Slack incoming webhook URL. For more information about Slack incoming webhooks, see [Sending messages using incoming webhooks](https://api.slack.com/messaging/webhooks).
-
-    - **Alert type:** Select the type of alert to send to Slack. **Show all** sends a notification when the Checkpoint succeeds or fails, **Failures only** sends a notification when the Checkpoint fails, and **Success only** sends a notification when the Checkpoint succeeds. 
-
-6. Click **Save**.
-
-## Delete a Slack alert
-
-1. In GX Cloud, click **Data Assets**.
-
-2. In the **Data Assets** list, click the Data Asset name.
-
-3. Click the **Expectations** tab and then click **Alerts**.
-
-4. Click **Delete** for the alert you want to delete.
-
-5. Click **OK**.
+If you disabled an alert, you will stop receiving emails for the Data Asset immediately. If you enabled an alert, you will begin receiving the emails as soon as the Data Asset’s next full validation run is complete.

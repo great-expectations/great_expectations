@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
-)
+from great_expectations.core.types import Comparable  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
@@ -59,7 +56,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectColumnSumToBeBetween is a \
-    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
+    Column Aggregate Expectation.
 
     Column Aggregate Expectations are one of the most common types of Expectation.
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
@@ -166,12 +163,8 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        None, description=MIN_VALUE_DESCRIPTION
-    )
-    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        None, description=MAX_VALUE_DESCRIPTION
-    )
+    min_value: Optional[Comparable] = pydantic.Field(None, description=MIN_VALUE_DESCRIPTION)
+    max_value: Optional[Comparable] = pydantic.Field(None, description=MAX_VALUE_DESCRIPTION)
     strict_min: bool = pydantic.Field(False, description=STRICT_MIN_DESCRIPTION)
     strict_max: bool = pydantic.Field(False, description=STRICT_MAX_DESCRIPTION)
 

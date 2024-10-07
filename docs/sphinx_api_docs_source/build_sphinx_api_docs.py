@@ -208,7 +208,7 @@ class SphinxInvokeDocsBuilder:
         Returns:
             Content suitable for use in a docusaurus mdx file.
         """
-        from bs4 import (  # noqa: I001
+        from bs4 import (
             BeautifulSoup,
         )  # Importing here since it is not a library requirement
 

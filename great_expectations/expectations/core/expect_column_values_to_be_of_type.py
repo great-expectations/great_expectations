@@ -98,7 +98,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     ExpectColumnValuesToBeOfType is a \
-    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
+    Column Map Expectation \
     for typed-column backends, and also for Pandas Datasources where the column dtype and provided \
     type_ are unambiguous constraints (any dtype except 'object' or dtype of 'object' with \
     type_ specified as 'object').

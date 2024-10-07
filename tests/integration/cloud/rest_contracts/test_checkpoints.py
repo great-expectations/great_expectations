@@ -14,7 +14,6 @@ from tests.integration.cloud.rest_contracts.conftest import (
 if TYPE_CHECKING:
     from tests.integration.cloud.rest_contracts.conftest import PactBody
 
-
 NON_EXISTENT_CHECKPOINT_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
 
 EXISTING_CHECKPOINT_ID: Final[str] = "4d734009-2c50-4222-bd71-9660f5b05fff"

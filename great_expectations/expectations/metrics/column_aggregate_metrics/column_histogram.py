@@ -119,12 +119,12 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                 .where(
                     sa.column(column) != None,  # noqa: E711
                 )
-                .select_from(selectable)
+                .select_from(selectable)  # type: ignore[arg-type]
             )
 
             # Run the data through convert_to_json_serializable to ensure we do not have Decimal types  # noqa: E501
             return convert_to_json_serializable(
-                list(execution_engine.execute_query(query).fetchone())
+                list(execution_engine.execute_query(query).fetchone())  # type: ignore[arg-type]
             )
 
         idx = 0
@@ -201,11 +201,11 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             .where(
                 sa.column(column) != None,  # noqa: E711
             )
-            .select_from(selectable)
+            .select_from(selectable)  # type: ignore[arg-type]
         )
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
-        return convert_to_json_serializable(list(execution_engine.execute_query(query).fetchone()))
+        return convert_to_json_serializable(list(execution_engine.execute_query(query).fetchone()))  # type: ignore[arg-type]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(  # noqa: C901

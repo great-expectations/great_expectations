@@ -70,7 +70,9 @@ class _PandasDataAsset(DataAsset):
     def test_connection(self) -> None: ...
     def batch_parameters_template(self) -> BatchParameters: ...
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
+    def get_batch(self, batch_request: BatchRequest) -> Batch: ...
+    @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> list[dict]: ...
     @override
     def build_batch_request(
         self,
@@ -129,7 +131,9 @@ class DataFrameAsset(_PandasDataAsset):
         partitioner: Optional[ColumnPartitioner] = ...,
     ) -> BatchRequest: ...
     @override
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
+    def get_batch(self, batch_request: BatchRequest) -> Batch: ...
+    @override
+    def get_batch_identifiers_list(self, batch_request: BatchRequest) -> List[dict]: ...
 
 _PandasDataAssetT = TypeVar("_PandasDataAssetT", bound=_PandasDataAsset)
 
@@ -434,7 +438,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(  # noqa: PLR0913
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -448,7 +452,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(  # noqa: PLR0913
         self,
         name: str,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -814,7 +818,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Batch: ...
     def read_sql(  # noqa: PLR0913
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         asset_name: Optional[str] = ...,
@@ -828,7 +832,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Batch: ...
     def read_sql_query(  # noqa: PLR0913
         self,
-        sql: sa.select | sa.text | str,
+        sql: sa.select | sa.text | str,  # type: ignore[valid-type]
         con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         asset_name: Optional[str] = ...,

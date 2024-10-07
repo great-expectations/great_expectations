@@ -43,9 +43,8 @@ assert my_batch_request.datasource_name == "my_pandas_datasource"
 assert my_batch_request.data_asset_name == "taxi_dataframe"
 assert my_batch_request.options == {}
 
-batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
-assert len(batches) == 1
-assert set(batches[0].columns()) == {
+batch = data_asset.get_batch(my_batch_request)
+assert set(batch.columns()) == {
     "VendorID",
     "tpep_pickup_datetime",
     "tpep_dropoff_datetime",

@@ -8,7 +8,7 @@ import GxData from '../_core_components/_data.jsx'
 import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
 import PrereqGxInstalled from '../_core_components/prerequisites/_gx_installation.md';
 import PrereqPreconfiguredDataContext from '../_core_components/prerequisites/_preconfigured_data_context.md';
-import PrereqPreconfiguredDataSourceAndAsset from '../_core_components/prerequisites/_data_source_and_asset_connected_to_data.md';
+import PrereqPreconfiguredDataSourceAndAssetAndBatchDefinition from '../_core_components/prerequisites/_data_source_asset_and_batch_definition.md';
 import PrereqPreconfiguredExpectationSuiteAndExpectations from '../_core_components/prerequisites/_expectation_suite_with_expectations.md';
 
 import StepRequestADataContext from '../_core_components/common_steps/_request_a_data_context.md';
@@ -21,7 +21,7 @@ A Validation Definition is a fixed reference that links a Batch of data to an Ex
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.
 - <PrereqPreconfiguredDataContext/>. In this guide the variable `context` is assumed to contain your Data Context.
-- <PrereqPreconfiguredDataSourceAndAsset/>.
+- <PrereqPreconfiguredDataSourceAndAssetAndBatchDefinition/>.
 - <PrereqPreconfiguredExpectationSuiteAndExpectations/>.
 
 ### Procedure

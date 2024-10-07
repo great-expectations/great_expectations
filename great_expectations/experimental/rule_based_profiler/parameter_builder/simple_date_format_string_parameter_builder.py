@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -14,6 +13,7 @@ from great_expectations.experimental.rule_based_profiler.attributed_resolved_met
 from great_expectations.experimental.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
@@ -204,7 +204,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # This should never happen.
         if len(metric_computation_result.attributed_resolved_metrics) != 1:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'  # noqa: E501
             )
 
@@ -217,7 +217,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_values = attributed_resolved_metrics.conditioned_metric_values
 
         if metric_values is None:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"Result of metric computations for {self.__class__.__name__} is empty."
             )
 

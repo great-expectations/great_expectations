@@ -18,7 +18,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 try:
     import sqlalchemy as sa  # noqa: TID251
 except ImportError:
-    sa = None
+    sa = None  # type: ignore[assignment]
 
 
 class ColumnValuesInSet(ColumnMapMetricProvider):

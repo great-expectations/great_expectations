@@ -1,0 +1,8 @@
+# NOTES:
+# Spark connect's requirements are here: https://github.com/apache/spark/blob/ed3a9b1aa92957015592b399167a960b68b73beb/dev/requirements.txt#L60
+# grpcio and grpcio-status should be bumped up to match that, but that conflicts with our constraints.txt file.
+# TODO: Fix in V1-532
+
+googleapis-common-protos>=1.56.4
+grpcio>=1.48.1
+grpcio-status>=1.48.1

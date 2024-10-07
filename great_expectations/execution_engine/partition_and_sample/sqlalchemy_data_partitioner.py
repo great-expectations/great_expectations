@@ -167,7 +167,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             column_batch_identifiers, date_parts
         )
 
-        query: Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList] = sa.and_(
+        query: Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList] = sa.and_(  # type: ignore[assignment]
             *[
                 sa.extract(date_part.value, sa.column(column_name))
                 == date_parts_dict[date_part.value]
@@ -284,7 +284,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
     ) -> bool:
         """Partition on the joint values in the named columns"""
 
-        return sa.and_(
+        return sa.and_(  # type: ignore[return-value]
             *(
                 sa.column(column_name) == column_value
                 for column_name, column_value in batch_identifiers.items()
@@ -477,7 +477,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         concat_date_parts: sqlalchemy.Cast | sqlalchemy.ColumnOperators
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
-            concat_clause = sa.func.distinct(
+            concat_clause = sa.func.distinct(  # type: ignore[assignment]
                 sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
                     date_parts[0].value
                 )
@@ -503,7 +503,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         )
                     )
 
-                concat_clause = sa.func.distinct(concat_date_parts).label("concat_distinct_values")
+                concat_clause = sa.func.distinct(concat_date_parts).label("concat_distinct_values")  # type: ignore[assignment]
             else:
                 concat_date_parts = sa.func.concat(
                     "",
@@ -522,9 +522,9 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         ),
                     )
 
-                concat_clause = sa.func.distinct(concat_date_parts).label("concat_distinct_values")
+                concat_clause = sa.func.distinct(concat_date_parts).label("concat_distinct_values")  # type: ignore[assignment]
 
-        partitioned_query: sqlalchemy.Selectable = sa.select(
+        partitioned_query: sqlalchemy.Selectable = sa.select(  # type: ignore[call-overload]
             concat_clause,
             *[
                 sa.cast(sa.func.extract(date_part.value, sa.column(column_name)), sa.Integer).label(
@@ -722,7 +722,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         """Partition using the values in the named column"""
         return (
             sa.select(sa.func.distinct(sa.column(column_name)))
-            .select_from(selectable)
+            .select_from(selectable)  # type: ignore[arg-type]
             .order_by(sa.column(column_name).asc())
         )
 
@@ -741,7 +741,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         sa.column(column_name),
                     )
                 )
-            ).select_from(selectable)
+            ).select_from(selectable)  # type: ignore[arg-type]
 
         raise NotImplementedError(
             f'Partitioner method "partition_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'  # noqa: E501
@@ -762,7 +762,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         sa.Integer,
                     )
                 )
-            ).select_from(selectable)
+            ).select_from(selectable)  # type: ignore[arg-type]
 
         if self._dialect == GXSqlDialect.MYSQL:
             return sa.select(
@@ -775,7 +775,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         sa.Integer,
                     )
                 )
-            ).select_from(selectable)
+            ).select_from(selectable)  # type: ignore[arg-type]
 
         if self._dialect == GXSqlDialect.MSSQL:
             return sa.select(
@@ -789,7 +789,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         sa.Integer,
                     )
                 )
-            ).select_from(selectable)
+            ).select_from(selectable)  # type: ignore[arg-type]
 
         if self._dialect == GXSqlDialect.AWSATHENA:
             return sa.select(
@@ -799,7 +799,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         sa.Integer,
                     )
                 )
-            ).select_from(selectable)
+            ).select_from(selectable)  # type: ignore[arg-type]
 
         return sa.select(
             sa.func.distinct(
@@ -808,7 +808,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                     sa.Integer,
                 )
             )
-        ).select_from(selectable)
+        ).select_from(selectable)  # type: ignore[arg-type]
 
     def get_partition_query_for_data_for_batch_identifiers_for_partition_on_mod_integer(
         self,
@@ -823,11 +823,11 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         ]:
             return sa.select(
                 sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) % mod)
-            ).select_from(selectable)
+            ).select_from(selectable)  # type: ignore[arg-type]
 
         return sa.select(
             sa.func.distinct(sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod))
-        ).select_from(selectable)
+        ).select_from(selectable)  # type: ignore[arg-type]
 
     @staticmethod
     def get_partition_query_for_data_for_batch_identifiers_for_partition_on_multi_column_values(
@@ -838,7 +838,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         return (
             sa.select(*[sa.column(column_name) for column_name in column_names])
             .distinct()
-            .select_from(selectable)
+            .select_from(selectable)  # type: ignore[arg-type]
         )
 
     def get_partition_query_for_data_for_batch_identifiers_for_partition_on_hashed_column(
@@ -853,7 +853,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                 sa.func.distinct(
                     sa.func.md5(sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits)
                 )
-            ).select_from(selectable)
+            ).select_from(selectable)  # type: ignore[arg-type]
 
         raise NotImplementedError(
             f'Partitioner method "partition_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'  # noqa: E501

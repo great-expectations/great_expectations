@@ -357,7 +357,7 @@ def _to_pydantic_fields(
                 FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
                 type_ = Any
             else:
-                type_ = _get_annotation_type(param)
+                type_ = _get_annotation_type(param)  # type: ignore[assignment]
                 if type_ is UNSUPPORTED_TYPE or type_ == "None":
                     logger.debug(f"`{param_name}` has no supported types. Field skipped")
                     FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)

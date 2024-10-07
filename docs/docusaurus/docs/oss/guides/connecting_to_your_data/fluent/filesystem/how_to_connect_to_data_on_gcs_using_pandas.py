@@ -45,9 +45,8 @@ my_batch_definition = data_asset.add_batch_definition_monthly(
 my_batch_request = my_batch_definition.build_batch_request(
     {"year": "2019", "month": "03"}
 )
-batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
-assert len(batches) == 1
-assert set(batches[0].columns()) == {
+batch = data_asset.get_batch(my_batch_request)
+assert set(batch.columns()) == {
     "vendor_id",
     "pickup_datetime",
     "dropoff_datetime",

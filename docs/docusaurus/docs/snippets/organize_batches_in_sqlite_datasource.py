@@ -43,9 +43,8 @@ partitioner = ColumnPartitionerMonthly(column_name="pickup_datetime")
 # </snippet>
 
 my_batch_request = my_table_asset.build_batch_request(partitioner=partitioner)
-batches = my_table_asset.get_batch_list_from_batch_request(my_batch_request)
+batch = my_table_asset.get_batch(my_batch_request)
 
-assert len(batches) == 12
 
 assert my_table_asset.get_batch_parameters_keys(partitioner=partitioner) == (
     "year",
@@ -55,17 +54,14 @@ assert my_table_asset.get_batch_parameters_keys(partitioner=partitioner) == (
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_batch_list">
 my_batch_request = my_table_asset.build_batch_request(partitioner=partitioner)
-batches = my_table_asset.get_batch_list_from_batch_request(my_batch_request)
+batch = my_table_asset.get_batch(my_batch_request)
 # </snippet>
 
 assert my_batch_request.datasource_name == "my_datasource"
 assert my_batch_request.data_asset_name == "my_table_asset"
 assert my_batch_request.options == {}
 
-assert len(batches) == 12
-
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py print_batch_spec">
-for batch in batches:
-    print(batch.batch_spec)
+print(batch.batch_spec)
 # </snippet>

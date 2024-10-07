@@ -3,6 +3,7 @@
   "datasets" : [{
     "dataset_name": "expect_column_values_to_be_in_set_1",
     "data" : {
+      "w" : ["AK", "HI", "PR"],
       "x" : [1,2,4],
       "y" : [1.1,2.2,5.5],
       "z" : ["hello", "jello", "mello"]
@@ -117,6 +118,17 @@
           "success": false,
           "unexpected_index_list": [{"y": 1.1, "pk_index": 0}, {"y": 2.2, "pk_index": 1}, {"y": 5.5, "pk_index": 2}],
           "unexpected_list": [1.1, 2.2, 5.5]
+        }
+      },
+      {
+        "title": "positive_test_two_character_set",
+        "exact_match_out": false,
+        "in": {
+          "column": "w",
+          "value_set": ["HI", "PR", "AK"]
+        },
+        "out": {
+          "success": true
         }
       },
     {

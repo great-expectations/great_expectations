@@ -61,7 +61,7 @@ Environment variables securely store your GX Cloud access credentials.
     ```
 
     :::note
-   After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [GX Core guides](/core/introduction/introduction.md).
+   After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [GX Core guides](/core/introduction/introduction.mdx).
     :::
 
 2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
@@ -70,10 +70,13 @@ Environment variables securely store your GX Cloud access credentials.
 
 - Run the following Python code to create a Data Context object:
 
-    ```python title="Python" name="tutorials/quickstart/quickstart.py get_context"
+    ```python title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - get cloud context"
     ```
   
-    The Data Context will detect the previously set environment variables and connect to your GX Cloud account.
+    The Data Context will detect the previously set environment variables and connect to your GX Cloud account.  You can verify that you have a GX Cloud Data Context with:
+
+    ```python title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - verify context type"
+    ```
 
 ## Connect to a Data Asset
 
@@ -83,6 +86,16 @@ Environment variables securely store your GX Cloud access credentials.
     ```
 
     The code example uses the default Data Source for Pandas to access the `.csv` data from the file at the specified URL path.
+
+    Alternatively, if you have already configured your data in GX Cloud you can use it instead.  To see your available Data Sources, run:
+
+    ```title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - list data sources"
+    ```
+  
+    Using the printed information you can get the name of one of your existing Data Sources, one of its Data Assets, and the name of a Batch Definition on the Data Asset.  Then, you can retrieve a Batch of data by updating the values for `data_source_name`, `data_asset_name`, and `batch_definition_name` in the following code and executing it:
+
+    ```python title="Python" name="docs/docusaurus/docs/cloud/connect/connect_python.py - retrieve a data asset"
+    ```
 
 ## Create Expectations
 

@@ -17,10 +17,6 @@
     flex-wrap: wrap;
   }
   
-  html[data-theme="dark"] .gxCard {
-    background-color: var(--orange-700);
-  }
-  
   .button {
     display: inline-block;
     position: relative;
@@ -53,6 +49,10 @@
     color: var(--blue-600);
     border-color: var(--blue-600);
     background: none;
+  }
+
+  html[data-theme="dark"] .gxCard {
+    background-color: var(--dark-orange-dark-theme);
   }
   
   html[data-theme="dark"] .button__outline {

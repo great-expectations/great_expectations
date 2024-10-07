@@ -99,7 +99,7 @@ def sqlachemy_execution_engine_mock_cls(
             # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in  # noqa: E501
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
-            self.engine = MockSaEngine(dialect=Dialect(dialect))
+            self.engine = MockSaEngine(dialect=Dialect(dialect))  # type: ignore[assignment]
             self._create_temp_table = create_temp_table
 
         @override
@@ -109,7 +109,7 @@ def sqlachemy_execution_engine_mock_cls(
             validate_batch_spec(batch_spec)
             return BatchData(self), BatchMarkers(ge_load_time=None)
 
-        def execute_partitioned_query(self, partitioned_query):
+        def execute_partitioned_query(self, partitioned_query):  # type: ignore[explicit-override] # FIXME
             class Row:
                 def __init__(self, attributes):
                     for k, v in attributes.items():

@@ -78,11 +78,12 @@ def test_datasource_store_get_by_name(
             200,
         )
 
-    with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_response
-    ) as mock_get, mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.has_key", autospec=True
-    ) as mock_has_key:
+    with (
+        mock.patch("requests.Session.get", autospec=True, side_effect=mocked_response) as mock_get,
+        mock.patch(
+            "great_expectations.data_context.store.DatasourceStore.has_key", autospec=True
+        ) as mock_has_key,
+    ):
         # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.  # noqa: E501
         mock_has_key.return_value = True
 

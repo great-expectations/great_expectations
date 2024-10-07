@@ -98,3 +98,4 @@ from .expect_table_row_count_to_equal import ExpectTableRowCountToEqual
 from .expect_table_row_count_to_equal_other_table import (
     ExpectTableRowCountToEqualOtherTable,
 )
+from .unexpected_rows_expectation import UnexpectedRowsExpectation

@@ -71,8 +71,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.8
-            displayName: "Use Python 3.8"
+              versionSpec: 3.9
+            displayName: "Use Python 3.9"
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -92,8 +92,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "3.8"
-            displayName: "Use Python 3.8"
+              versionSpec: "3.9"
+            displayName: "Use Python 3.9"
 
           - script: |
               pip install .
@@ -128,8 +128,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "3.8"
-            displayName: "Use Python 3.8"
+              versionSpec: "3.9"
+            displayName: "Use Python 3.9"
 
           - bash: python -m pip install --upgrade pip
             displayName: "Update pip"
@@ -138,6 +138,9 @@ stages:
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+
+              # Constrain numpy to prevent running into a number of DeprecationWarnings
+              echo "numpy<1.25" >> constraints-dev-temp.txt
 
               pip install --constraint constraints-dev-temp.txt ".[test, postgresql]" pytest-azurepipelines
             displayName: "Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)"
@@ -182,8 +185,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "3.8"
-            displayName: "Use Python 3.8"
+              versionSpec: "3.9"
+            displayName: "Use Python 3.9"
 
           - bash: python -m pip install --upgrade pip
             displayName: "Update pip"
@@ -195,6 +198,9 @@ stages:
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+
+              # Constrain numpy to prevent running into a number of DeprecationWarnings
+              echo "numpy<1.25" >> constraints-dev-temp.txt
 
               pip install --constraint constraints-dev-temp.txt ".[test, mssql]" pytest-azurepipelines
             displayName: "Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)"

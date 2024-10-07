@@ -13,11 +13,11 @@ from typing import (
     Union,
 )
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.experimental.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.experimental.rule_based_profiler.exceptions import ProfilerExecutionError
 from great_expectations.experimental.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,
     CardinalityChecker,
@@ -308,7 +308,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         if validator is None:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise ProfilerExecutionError(
                 message=f"Error: Failed to obtain Validator {self.__class__.__name__}"
                 " (Validator is required for cardinality checks)."
             )

@@ -1,0 +1,6 @@
+type,sender_account_number,recipient_fullname,transfer_amount,transfer_date,errors
+domestic,244084670977,Jaxson Duke,9143.40,2024-05-01 01:12,NULL
+domestic,954005011218,Nelson O’Connell,3285.21,2024-05-01 05:08,NULL
+domestic,842374923847,Johanna McKee,5783.18,2024-04-12 15:35,NULL
+domestic,673894027340,Albert Rakes,8493.14,2024-04-21 09:50,NULL
+NULL,123456789012,Jane Smith,5000.00,NULL,NULL
