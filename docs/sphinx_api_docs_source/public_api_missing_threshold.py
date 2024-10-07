@@ -4,7 +4,7 @@ Over time this list should be driven to 0 by either adding the @public_api decor
 adding an exclude directive to docs/sphinx_api_docs_source/public_api_excludes.py
 """
 
-ITEMS_IGNORED_FROM_PUBLIC_API = [
+ITEMS_IGNORED_FROM_PUBLIC_API: list[str] = [
     # "File: great_expectations/checkpoint/actions.py Name: _run",
     # "File: great_expectations/compatibility/not_imported.py Name: is_version_greater_or_equal",
     # "File: great_expectations/compatibility/typing_extensions.py Name: override",
