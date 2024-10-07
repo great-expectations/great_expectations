@@ -179,3 +179,111 @@ The suites above were created with the following API calls. This example demonst
         </td>
     </tr>
 </table>
+
+### Data Sources and Data Assets
+Data Source configurations are stored in the YAML file `gx/great_expectations.yml`, in the top-level block whose key is `fluent_datasources.` 
+
+We’ll walk through examples of different Data Source configurations in V0 and V1 so you can see how to translate between the two.
+
+#### Pandas
+Here is a side-by-side comparison of a Data Source called `pandas_fs_ds` with 4 assets called: `yearly_taxi_data`, `monthly_taxi_data`, `daily_taxi_data`, and `arbitrary_taxi_data`.
+
+<table>
+    <tr>
+        <th>V0 Pandas Filesystem Config</th>
+        <th>V1 Pandas Filesystem Config</th>
+    </tr>
+    <tr>
+        <td>
+        ```yaml
+        fluent_datasources:
+            pandas_fs_ds:
+                type: pandas_filesystem
+                assets:
+                yearly_taxi_data:
+                    type: csv
+                    batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
+                monthly_taxi_data:
+                    type: csv
+                    batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv
+                daily_taxi_data:
+                    type: csv
+                    batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
+                arbitrary_taxi_data:
+                    type: csv
+                    batching_regex: sampled_yellow_tripdata_(?P<code>\w+)\.csv
+                base_directory: data
+        ```
+        </td>
+        <td>
+        ```yaml
+        fluent_datasources:
+            pandas_fs_ds:
+                type: pandas_filesystem
+                id: 2ea309bf-bb5f-421b-ab6b-ea1cc9e70c8e
+                assets:
+                taxi_data:
+                    type: csv
+                    id: 34b98eca-790f-4504-ab4b-b65bc128b5ee
+                    batch_definitions:
+                    yearly_batches:
+                        id: a04f8071-33d9-4834-b667-e3d8c2ca70aa
+                        partitioner:
+                        regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
+                        sort_ascending: true
+                    monthly_batches:
+                        id: f07aa73d-bf56-438e-9dc2-0d05fb7d32a1
+                        partitioner:
+                        regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv
+                        sort_ascending: true
+                        param_names:
+                            - year
+                            - month
+                    daily_batches:
+                        id: 37b4b2eb-4b37-46c6-b51c-f2d21ba0e6d6
+                        partitioner:
+                        regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
+                        sort_ascending: true
+                        param_names:
+                            - year
+                            - month
+                            - day
+                base_directory: data
+        ```
+        </td>
+    </tr>
+</table>
+
+In `0.X`, a Data Source represents where the data lives and the execution engine (e.g. reading data from the local filesystem using pandas) and a Data Asset represents the data file format and how the data should be partitioned (e.g. a parameterized regex which matches file names). In `1.0` the Data Source has the same meaning. However, the Data Asset now only represents the data file format and there is a new concept, *Batch Definition*, which represents how the data is partitioned. This manifests as an extra layer in the YAML asset block.
+
+**pandas_fs_ds (example)**: The keys below `fluent_datasources` are the names of the Data Source. This is unchanged.
+
+**type**: The type of Data Source. This is unchanged.
+
+**assets**: A list of the Data Assets. Each key is an asset name in both V0 and V1. The asset value is different. In V0 the nested keys are:
+
+> **type**: This is unchanged
+
+> **batching_regex**: This has been replaced with batch_definitions. The format for batch_definitions follows. You will notice that the regex now lives in the partitioners regex field. The batch_definition configuration format is:
+
+>> **yearly_batches (example Batch Definition name)**: These keys are the names of the batch definitions.
+
+>> **id**: This is an arbitrary UUID and can be chosen to be any unique UUID.
+
+>> **partitioner**: This is a key with information about how the batch is defined
+
+>>> **regex**: This is the regex previously living on the asset keyed by batching_regex
+
+>>> **sort_ascending**: A boolean. `true` if the batch order is increasing in time, `false` if the ordering is decreasing in time. Previously in V0 one could specify an order_by field on the asset which could sort the different date components in different orders (eg year could be sorted increasing in time while month could be sorted decreasing in time). This is no longer supported.
+
+>>> **param_names**: This is a list of the parameter names which will be identical to the named matches from the `regex`. That is, the items will be `year`, `month`, or `day`. If this list would only contain year it can be excluded from the configuration file.
+
+> **id**: This is a new field and is an arbitrary UUID. If migrating you can pick any unique UUID.
+
+**base_directory**: The path to the data files. This is unchanged.
+
+**id**: This is a new field and is an arbitrary UUID. If migrating you can pick any unique UUID.
+
+:::note
+We no longer support arbitrary batching regexes. Batches must be defined by one of our temporal batch definitions which are yearly, monthly, or daily.
+:::
