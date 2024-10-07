@@ -31,6 +31,7 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
     EphemeralDataContext,
 )
 from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
@@ -388,7 +389,16 @@ class TestValidationRun:
         assert key.batch_identifier == BATCH_ID
         assert value.success is True
 
-    @mock.patch.object(ValidationResultsStore, "set")
+    @mock.patch.object(
+        ValidationResultsStore,
+        "set",
+        return_value=GXCloudResourceRef(
+            resource_type="validation_result",
+            id="59b72ca5-4636-44be-a367-46b54ae51fe1",
+            url="url",
+            response_json={"data": {"result_url": "url"}},
+        ),
+    )
     @pytest.mark.unit
     def test_persists_validation_results_for_cloud(
         self,
@@ -403,7 +413,8 @@ class TestValidationRun:
             ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
         ]
 
-        cloud_validation_definition.run()
+        result = cloud_validation_definition.run()
+        assert result.id == "59b72ca5-4636-44be-a367-46b54ae51fe1"
 
         # validate we are calling set on the store with data that's roughly the right shape
         [(_, kwargs)] = mock_validation_results_store_set.call_args_list
