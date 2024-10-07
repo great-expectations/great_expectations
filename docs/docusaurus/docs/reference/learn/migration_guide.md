@@ -29,7 +29,7 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
         <th>V1 Expectation Suite Configuration</th>
     </tr>
     <tr>
-        <td>
+        <td><pre>
         ```json
             {
   "expectation_suite_name": "suite_for_yellow_tripdata",
@@ -68,8 +68,8 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
   }
 }              
         ```
-        </td>
-        <td>
+        </pre></td>
+        <td><pre>
         ```json
         {
   "name": "suite_for_yellow_tripdata",
@@ -110,6 +110,6 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
   "notes": "This is a new field."
 }            
         ```
-        </td>
+        </pre></td>
     </tr>
 </table>
