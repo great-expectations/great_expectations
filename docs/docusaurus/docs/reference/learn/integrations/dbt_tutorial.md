@@ -200,7 +200,7 @@ exit
 ```
 
 ## 6. Use Great Expectations to create data quality tests
-In the next section of this tutorial, you will follow the [Getting Started](https://docs.greatexpectations.io/docs/oss/get_started/get_started_with_gx_and_sql) guide to run GX with SQL within a Docker container. This guide describes the process using Jupyter Notebook, although you can use any Python development tool you prefer.
+In the next section of this tutorial, you will follow the [Getting Started](https://docs.greatexpectations.io/docs/core/connect_to_data/sql_data/) guide to run GX with SQL within a Docker container. This guide describes the process using Jupyter Notebook, although you can use any Python development tool you prefer.
 
 ### Initialize the Jupyter Notebook Server
 Run the following command within the project directory to start the Jupyter Notebook server:
