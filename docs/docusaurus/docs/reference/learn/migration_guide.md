@@ -1922,3 +1922,198 @@ V0 Checkpoint configuration</th>
         </td>
     </tr>
 </table>
+
+### Data Context Variables
+The Data Context variables will be automatically converted for cloud users when switching from V0 to V1. For file context users, we will show the difference in the yaml so you can translate the configuration block in `great_expectations.yml`.
+
+<table>
+    <tr>
+        <th>V0 Data Context configuration</th>
+        <th>V1 Data Context configuration</th>
+    </tr>
+    <tr>
+        <td>
+        ```yaml
+        config_version: 3.0
+        config_variables_file_path: uncommitted/config_variables.yml
+        plugins_directory: plugins/
+        stores:
+        expectations_store:
+            class_name: ExpectationsStore
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: expectations/
+        validations_store:
+            class_name: ValidationsStore
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: uncommitted/validations/
+        evaluation_parameter_store:
+            class_name: EvaluationParameterStore
+        checkpoint_store:
+            class_name: CheckpointStore
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            suppress_store_backend_id: true
+            base_directory: checkpoints/
+        profiler_store:
+            class_name: ProfilerStore
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            suppress_store_backend_id: true
+            base_directory: profilers/
+        expectations_store_name: expectations_store
+        validations_store_name: validations_store
+        evaluation_parameter_store_name: evaluation_parameter_store
+        checkpoint_store_name: checkpoint_store
+        data_docs_sites:
+        local_site:
+            class_name: SiteBuilder
+            show_how_to_buttons: true
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: uncommitted/data_docs/local_site/
+            site_index_builder:
+            class_name: DefaultSiteIndexBuilder
+        anonymous_usage_statistics:
+        data_context_id: a7441dab-9db7-4043-a3e7-011cdab54cfb
+        enabled: false
+        usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+        fluent_datasources:
+        spark_fs:
+            type: spark_filesystem
+            assets:
+            directory_csv_asset:
+                type: directory_csv
+                data_directory: data
+            spark_config:
+            spark.executor.memory: 4g
+            persist: true
+            base_directory: data
+        notebooks:
+        include_rendered_content:
+        globally: false
+        expectation_suite: false
+        expectation_validation_result: false
+        ```
+        </td>
+        <td>
+        ```yaml
+        config_version: 4.0
+        config_variables_file_path: uncommitted/config_variables.yml
+        plugins_directory: plugins/
+        stores:
+        expectations_store:
+            class_name: ExpectationsStore
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: expectations/
+        validation_results_store:
+            class_name: ValidationResultsStore
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: uncommitted/validations/
+        checkpoint_store:
+            class_name: CheckpointStore
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            suppress_store_backend_id: true
+            base_directory: checkpoints/
+        validation_definition_store:
+            class_name: ValidationDefinitionStore
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: validation_definitions/
+        expectations_store_name: expectations_store
+        validation_results_store_name: validation_results_store
+        checkpoint_store_name: checkpoint_store
+        data_docs_sites:
+        local_site:
+            class_name: SiteBuilder
+            show_how_to_buttons: true
+            store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: uncommitted/data_docs/local_site/
+            site_index_builder:
+            class_name: DefaultSiteIndexBuilder
+        analytics_enabled: true
+        fluent_datasources:
+        spark_ds:
+            type: spark
+            id: 134de28d-bfdc-4980-aa2e-4f59788afef3
+            assets:
+            taxi_dataframe_asset:
+                type: dataframe
+                id: 4110d2ff-5711-47df-a4be-eaefc2a638b4
+                batch_metadata: {}
+                batch_definitions:
+                taxi_dataframe_batch_def:
+                    id: 76738b8b-28ab-4857-aa98-f0ff80c8f137
+                    partitioner:
+            spark_config:
+            spark.executor.memory: 4g
+            force_reuse_spark_context: true
+            persist: true
+        data_context_id: 12bc94a0-8ac3-4e97-bf90-03cd3d92f8c4
+        ```
+        </td>
+    </tr>
+</table>
+
+**config_version**: For V1 this should be set to 4.0
+
+**config_variables_file_path**: This is unchanged.
+
+**plugins_directory**: This is unchanged.
+
+**stores**: This is a dictionary of store names to configuration. In V0 the keys names were configurable. In V1, there is a fixed set of keys. These V1 keys are:
+
+> **expectations_store**: The configuration of the expectations store. The value here is unchanged from the value that was stored with the key that was configured in the top-level variable **expectations_store_name**.
+
+> **validation_results_store**: The configuration to the validation results store. The value here is slightly changed from the value that was stored with the key that was configured in the top-level variable  validations_store_name. The value change is ValidationsStore is now ValidationResultsStore.
+
+> **checkpoint_store**: This key and value are unchanged between V0 and V1.
+
+> **validation_definition_store**: Validation definitions are a new concept in V1. For file-based contexts, you can use this example V1 configuration directly. You can update the base_directory if you need to change the path where the configuration for validation definitions get stored.
+
+**expectations_store_name**: While still present, this must now always be set to “expectations_store”.
+
+**validations_store_name**: This should now be “validation_results_store_name”. Its value must be the value “validation_results_store“.
+
+**evaluation_parameter_store_name**: This key has been removed. One can no longer store evaluation_parameters since they are now a runtime concept called expectation_parameters. If you want to set a default value of an expectation parameter, you should do that in code where you run the validation.
+
+**checkpoint_store_name**: This parameter name is unchanged. The value must be “checkpoint_store”.
+
+**data_docs_sites**: This key and its value are unchanged in V1.
+
+**anonymous_usage_statistics**: 
+
+> **enabled**: This value is now the top-level key analytics_enabled
+
+> **data_context_id**: This value is now the top-level key data_context_id
+
+> **usage_statistics_url**: This field is no longer configurable.
+
+**fluent_datasources**: While this appears in the great_expectations.yml file, it is not a data context variable. Please see the “Data Sources and Data Assets” portion of this doc for instructions on migrating this from V0 to V1.
+
+**notebooks**: This is no longer supported and does not appear in V1’s configuration.
+
+**include_rendered_content**: This only mattered for GX Cloud users and no longer appears in this configuration file.
+
+##### New V1 Fields
+
+**data_context_id**: If previously one had the field **anonymous_usage_statistics.data_context_id** set, one should use that value here. Otherwise, this can be set to a unique, arbitrary UUID.
+
+##### Store Backends
+In previous versions of GX, we supported a number of configurable backend stores, including ones that persisted to databases, S3, Google Cloud Platform, and Azure. V1 drops support for these; file contexts only use `TupleFilesystemStoreBackend` and cloud contexts only use cloud stores. A number of GX users have a need for persisting their configurations, or subsets of their configurations, outside of their filesystem and either cannot or would prefer not to use cloud contexts. While GX no longer supports the tooling for these persistence models directly, users may use external libraries/services to handle this, e.g. copying their config to S3 via boto3.
+
+#### V1 API
+In V1, the configuration for all data context variables can be changed via the Python API. For a data context named context one can view via `context.variables.<variable_name>` and update via:
+
+```python
+context.variables.<variable_name> = new_value
+context.variables.save()
+
+# At this time you need to reload the context to have it take effect
+context = gx.get_context() 
+```
