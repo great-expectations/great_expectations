@@ -1782,8 +1782,7 @@ We only show the V0 configuration and code samples here because the V1 configura
 
 <table>
     <tr>
-        <th>
-V0 Checkpoint configuration</th>
+        <th>V0 Checkpoint configuration</th>
     </tr>
     <tr>
         <td>
