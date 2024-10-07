@@ -389,16 +389,7 @@ class TestValidationRun:
         assert key.batch_identifier == BATCH_ID
         assert value.success is True
 
-    @mock.patch.object(
-        ValidationResultsStore,
-        "set",
-        return_value=GXCloudResourceRef(
-            resource_type="validation_result",
-            id="59b72ca5-4636-44be-a367-46b54ae51fe1",
-            url="url",
-            response_json={"data": {"result_url": "url"}},
-        ),
-    )
+    @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
     def test_persists_validation_results_for_cloud(
         self,
@@ -413,8 +404,7 @@ class TestValidationRun:
             ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
         ]
 
-        result = cloud_validation_definition.run()
-        assert result.id == "59b72ca5-4636-44be-a367-46b54ae51fe1"
+        cloud_validation_definition.run()
 
         # validate we are calling set on the store with data that's roughly the right shape
         [(_, kwargs)] = mock_validation_results_store_set.call_args_list
@@ -422,6 +412,35 @@ class TestValidationRun:
         value = kwargs["value"]
         assert isinstance(key, GXCloudIdentifier)
         assert value.success is True
+
+    @mock.patch.object(
+        ValidationResultsStore,
+        "set",
+        return_value=GXCloudResourceRef(
+            resource_type="validation_result",
+            id="59b72ca5-4636-44be-a367-46b54ae51fe1",
+            url="https://api.greatexpectations.io/validation_result/59b72ca5-4636-44be-a367-46b54ae51fe1",
+            response_json={"data": {"result_url": "my_result_url"}},
+        ),
+    )
+    @pytest.mark.unit
+    def test_cloud_validation_def_adds_id_and_url_to_result(
+        self,
+        mock_validation_results_store_set: MagicMock,
+        mock_validator: MagicMock,
+        cloud_validation_definition: ValidationDefinition,
+    ):
+        expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
+        cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        cloud_validation_definition.suite.save()
+        mock_validator.graph_validate.return_value = [
+            ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
+        ]
+
+        result = cloud_validation_definition.run()
+
+        assert result.id == "59b72ca5-4636-44be-a367-46b54ae51fe1"
+        assert result.result_url == "my_result_url"
 
     @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
