@@ -31,7 +31,6 @@ from marshmallow import ValidationError
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
-    deprecated_method_or_class,
     new_argument,
     new_method_or_class,
     public_api,
@@ -839,7 +838,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
-    @deprecated_method_or_class("1.2.0")
     def get_datasource(self, name: str = "default") -> FluentDatasource:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
