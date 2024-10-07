@@ -3,15 +3,19 @@ from __future__ import annotations
 import logging
 import re
 from collections import UserDict
+from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Final,
+    Iterable,
     List,
     Mapping,
     Optional,
     Sequence,
     Tuple,
+    Type,
     overload,
 )
 
@@ -63,6 +67,11 @@ try:
 except ImportError:
     clickhouse_sqlalchemy = None
 
+try:
+    import databricks.sqlalchemy as sqla_databricks
+except (ImportError, AttributeError):
+    sqla_databricks = None  # type: ignore[assignment]
+
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
 from great_expectations.compatibility import bigquery as sqla_bigquery
@@ -70,6 +79,7 @@ from great_expectations.compatibility.bigquery import bigquery_types_tuple
 
 if TYPE_CHECKING:
     import pandas as pd
+    from typing_extensions import TypeAlias
 
 try:
     import teradatasqlalchemy.dialect
@@ -79,12 +89,38 @@ except ImportError:
     teradatatypes = None
 
 
+MAX_RESULT_RECORDS: Final[int] = 200
+
+UnexpectedIndexList: TypeAlias = List[Dict[str, Any]]
+
+
+def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
+    """
+    Check if the Databricks dialect is being provided.
+    """
+    if not sqla_databricks:
+        return False
+    try:
+        if isinstance(dialect, sqla_databricks.DatabricksDialect):
+            return True
+        if hasattr(dialect, "DatabricksDialect"):
+            return True
+        if issubclass(dialect, sqla_databricks.DatabricksDialect):  # type: ignore[arg-type]
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
-    column, regex, dialect, positive=True
-):
+    column: sa.Column,
+    regex: str,
+    dialect: ModuleType | Type[sa.Dialect] | sa.Dialect,
+    positive: bool = True,
+) -> sa.SQLColumnExpression | None:
     try:
         # postgres
-        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):  # type: ignore[union-attr]
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
@@ -96,11 +132,18 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     except AttributeError:
         pass
 
+    # databricks sql
+    if _is_databricks_dialect(dialect):
+        if positive:
+            return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+        else:
+            return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
+
     # redshift
     # noinspection PyUnresolvedReferences
     try:
         if hasattr(dialect, "RedshiftDialect") or (
-            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)  # type: ignore[union-attr]
         ):
             if positive:
                 return sqlalchemy.BinaryExpression(
@@ -117,7 +160,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # MySQL
-        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
+        if issubclass(dialect.dialect, sa.dialects.mysql.dialect):  # type: ignore[union-attr]
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
@@ -134,7 +177,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # Snowflake
         if issubclass(
-            dialect.dialect,
+            dialect.dialect,  # type: ignore[union-attr]
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
             if positive:
@@ -216,7 +259,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # Teradata
-        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
+        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):  # type: ignore[union-attr]
             if positive:
                 return (
                     sa.func.REGEXP_SIMILAR(
@@ -237,7 +280,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # sqlite
         # regex_match for sqlite introduced in sqlalchemy v1.4
-        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(
+        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(  # type: ignore[union-attr]
             sa.__version__
         ) >= version.parse("1.4"):
             if positive:
@@ -256,7 +299,9 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     return None
 
 
-def _get_dialect_type_module(dialect=None):
+def _get_dialect_type_module(
+    dialect: ModuleType | Type[sa.Dialect] | sa.Dialect | None = None,
+) -> ModuleType | Type[sa.Dialect] | sa.Dialect:
     if dialect is None:
         logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
@@ -274,7 +319,7 @@ def _get_dialect_type_module(dialect=None):
         if (
             isinstance(
                 dialect,
-                sqla_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,  # type: ignore[attr-defined]
             )
             and bigquery_types_tuple is not None
         ):
@@ -286,7 +331,7 @@ def _get_dialect_type_module(dialect=None):
     try:
         if (
             issubclass(
-                dialect,
+                dialect,  # type: ignore[arg-type]
                 teradatasqlalchemy.dialect.TeradataDialect,
             )
             and teradatatypes is not None
@@ -836,14 +881,14 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
     return None if verify_only else normalized_batch_columns_mappings
 
 
-def parse_value_set(value_set):
+def parse_value_set(value_set: Iterable) -> list:
     parsed_value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
     return parsed_value_set
 
 
-def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
-    column, dialect, like_pattern, positive=True
-):
+def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915
+    column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
+) -> sa.BinaryExpression | None:
     dialect_supported: bool = False
 
     try:
@@ -867,6 +912,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
             ),
         ):
             dialect_supported = True
+
+    if _is_databricks_dialect(dialect):
+        dialect_supported = True
 
     try:
         if hasattr(dialect, "RedshiftDialect"):
@@ -1206,9 +1254,9 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(  # noqa: C901
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
     exclude_unexpected_values: bool = False,
-) -> List[Dict[str, Any]]:
+) -> UnexpectedIndexList:
     """
-    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    Builds unexpected_index_list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there are multiple named indices.
     Args:
         domain_records_df: reference to Pandas dataframe
@@ -1238,7 +1286,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(  # noqa: C901
         else:
             tuple_index[column_name] = domain_records_df_index_names.index(column_name, 0)
 
-    unexpected_index_list: List[Dict[str, Any]] = list()
+    unexpected_index_list: UnexpectedIndexList = []
 
     if exclude_unexpected_values and len(unexpected_indices) != 0:
         primary_key_dict_list: dict[str, List[Any]] = {
@@ -1269,9 +1317,9 @@ def get_unexpected_indices_for_single_pandas_named_index(
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
     exclude_unexpected_values: bool = False,
-) -> List[Dict[str, Any]]:
+) -> UnexpectedIndexList:
     """
-    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    Builds unexpected_index_list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there is a single named index.
     Args:
         domain_records_df: reference to Pandas dataframe
@@ -1285,7 +1333,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     if not expectation_domain_column_list:
         return []
     unexpected_index_values_by_named_index: List[int | str] = list(domain_records_df.index)
-    unexpected_index_list: List[Dict[str, Any]] = list()
+    unexpected_index_list: UnexpectedIndexList = []
     if not (
         len(unexpected_index_column_names) == 1
         and unexpected_index_column_names[0] == domain_records_df.index.name
@@ -1319,7 +1367,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
     result_format: Dict[str, Any],
     execution_engine: PandasExecutionEngine,
     metrics: Dict[str, Any],
-) -> List[int] | List[Dict[str, Any]]:
+) -> UnexpectedIndexList:
     """
     Helper method to compute unexpected_index_list for PandasExecutionEngine. Handles logic needed for named indices.
 
@@ -1336,7 +1384,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
 
     """  # noqa: E501
     unexpected_index_column_names: List[str]
-    unexpected_index_list: List[Dict[str, Any]]
+    unexpected_index_list: UnexpectedIndexList
     exclude_unexpected_values: bool = result_format.get("exclude_unexpected_values", False)
 
     if domain_records_df.index.name is not None:

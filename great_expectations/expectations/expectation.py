@@ -63,8 +63,9 @@ from great_expectations.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
     COLUMN_LIST_DESCRIPTION,
     MOSTLY_DESCRIPTION,
+    WINDOWS_DESCRIPTION,
 )
-from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
+from great_expectations.expectations.model_field_types import (
     Mostly,
 )
 from great_expectations.expectations.registry import (
@@ -75,6 +76,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.expectations.sql_tokens_and_types import (
     valid_sql_tokens_and_types,
 )
+from great_expectations.expectations.window import Window
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -330,6 +332,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
+    windows: Optional[List[Window]] = pydantic.Field(default=None, description=WINDOWS_DESCRIPTION)
     examples: ClassVar[List[dict]] = []
 
     _save_callback: Union[Callable[[Expectation], Expectation], None] = pydantic.PrivateAttr(
@@ -341,8 +344,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if not isinstance(other, Expectation):
             return False
 
-        self_dict = self.dict()
-        other_dict = other.dict()
+        # rendered_content is derived from the rest of the expectation, and can/should
+        # be excluded from equality checks
+        exclude: set[str] = {"rendered_content"}
+
+        self_dict = self.dict(exclude=exclude)
+        other_dict = other.dict(exclude=exclude)
 
         # Simplify notes and meta equality - falsiness is equivalent
         for attr in ("notes", "meta"):
@@ -1819,7 +1826,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     """  # noqa: E501
 
     column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
-    mostly: Mostly = 1.0
+    mostly: Mostly = 1.0  # type: ignore[assignment] # TODO: Fix in CORE-412
 
     catch_exceptions: bool = True
 
@@ -2085,7 +2092,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
 
     column_A: StrictStr = Field(min_length=1, description=COLUMN_A_DESCRIPTION)
     column_B: StrictStr = Field(min_length=1, description=COLUMN_B_DESCRIPTION)
-    mostly: Mostly = 1.0
+    mostly: Mostly = 1.0  # type: ignore[assignment] # TODO: Fix in CORE-412
 
     catch_exceptions: bool = True
 

@@ -13,6 +13,8 @@ Use one of the following methods to request support:
 - Send an email to support@greatexpectations.io.
 - Create a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17).
 - Post a message in the [GX Cloud Slack community channel](https://greatexpectationstalk.slack.com/archives/C051D941XAL).
+- Learn how to set up GX Cloud from our team by [Joining a workshop](https://hubs.li/Q02nK_ZH0)
+- Get a walkthrough of the product by [requesting a demo](https://greatexpectations.io/demo)
 
 ## GX Core support
 
@@ -34,7 +36,7 @@ The following are some recommendations for resolving issues on your own. Resolvi
 
 Search the docs you're using currently for an answer to your issue or question.
 
-If you're new to GX Cloud, review [About GX Cloud](/cloud/about_gx.md).
+If you're new to GX Cloud, review the [GX Cloud overview](/cloud/overview/gx_cloud_overview.md).
 
 If you're new to GX Core, see the [Introduction to GX Core](/core/introduction/introduction.mdx).
 

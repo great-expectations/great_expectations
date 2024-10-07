@@ -188,14 +188,17 @@ class TestCheckpointSerialization:
             data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
-        with mock.patch.object(
-            ValidationDefinition,
-            "json",
-            return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(
-            ValidationDefinition,
-            "is_fresh",
-            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+        with (
+            mock.patch.object(
+                ValidationDefinition,
+                "json",
+                return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
+            ),
+            mock.patch.object(
+                ValidationDefinition,
+                "is_fresh",
+                return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+            ),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -209,14 +212,17 @@ class TestCheckpointSerialization:
             data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
-        with mock.patch.object(
-            ValidationDefinition,
-            "json",
-            return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(
-            ValidationDefinition,
-            "is_fresh",
-            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+        with (
+            mock.patch.object(
+                ValidationDefinition,
+                "json",
+                return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
+            ),
+            mock.patch.object(
+                ValidationDefinition,
+                "is_fresh",
+                return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+            ),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -612,7 +618,6 @@ class TestCheckpointResult:
         assert validation_result.success is True
         assert len(validation_result.results) == 1 and validation_result.results[0].success is True
 
-        assert result.checkpoint_config == checkpoint
         assert result.success is True
 
     @pytest.mark.unit
@@ -1307,3 +1312,235 @@ def test_is_fresh_raises_error_when_child_deps_not_found(in_memory_runtime_conte
     assert diagnostics.success is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], ValidationDefinitionNotFoundError)
+
+
+@pytest.mark.unit
+def test_is_fresh_raises_errors_for_all_child_validation_definitions(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    datasource = context.data_sources.add_pandas(name="my_pandas_ds")
+    asset = datasource.add_dataframe_asset(name="my_pandas_asset")
+    bd_1 = asset.add_batch_definition_whole_dataframe(name="my_bd_1")
+    bd_2 = asset.add_batch_definition_whole_dataframe(name="my_bd_2")
+
+    suite_1 = ExpectationSuite(name="my_suite_1")
+    suite_2 = ExpectationSuite(name="my_suite_2")
+
+    vd_1 = ValidationDefinition(name="my_vd_1", data=bd_1, suite=suite_1)
+    vd_2 = ValidationDefinition(name="my_vd_2", data=bd_2, suite=suite_2)
+
+    cp = Checkpoint(name="my_cp", validation_definitions=[vd_1, vd_2])
+
+    diagnostics = cp.is_fresh()
+    assert diagnostics.success is False
+    assert len(diagnostics.errors) == 5
+    assert [type(err) for err in diagnostics.errors] == [
+        ExpectationSuiteNotAddedError,
+        ValidationDefinitionNotAddedError,
+        ExpectationSuiteNotAddedError,
+        ValidationDefinitionNotAddedError,
+        CheckpointNotAddedError,
+    ]
+
+
+class TestCheckpointPydanticSerializationMethods:
+    """
+    Test overridden Pydantic serialization methods for Checkpoint
+    (dict and json)
+    """
+
+    datasource_name: str = "my_pandas_ds"
+    asset_name: str = "my_pandas_asset"
+    batch_definition_name: str = "my_bd"
+    suite_name: str = "my_suite"
+    validation_definition_name: str = "my_vd"
+    checkpoint_name: str = "my_cp"
+
+    def _build_checkpoint_with_factories(
+        self,
+        context: AbstractDataContext,
+    ) -> Checkpoint:
+        datasource = context.data_sources.add_pandas(name=self.datasource_name)
+        asset = datasource.add_dataframe_asset(name=self.asset_name)
+        bd = asset.add_batch_definition_whole_dataframe(name=self.batch_definition_name)
+        suite = context.suites.add(ExpectationSuite(name=self.suite_name))
+        vd = context.validation_definitions.add(
+            ValidationDefinition(name=self.validation_definition_name, data=bd, suite=suite)
+        )
+        return context.checkpoints.add(
+            Checkpoint(name=self.checkpoint_name, validation_definitions=[vd])
+        )
+
+    def _build_checkpoint_without_factories(self) -> Checkpoint:
+        bd = BatchDefinition(name=self.batch_definition_name)
+        suite = ExpectationSuite(name=self.suite_name)
+        vd = ValidationDefinition(name=self.validation_definition_name, data=bd, suite=suite)
+        return Checkpoint(name=self.checkpoint_name, validation_definitions=[vd])
+
+    @pytest.mark.unit
+    def test_dict_serializes_correctly(self, in_memory_runtime_context):
+        context = in_memory_runtime_context
+        cp = self._build_checkpoint_with_factories(context)
+
+        dict_val = cp.dict()
+        assert dict_val == {
+            "actions": [],
+            "id": mock.ANY,
+            "name": self.checkpoint_name,
+            "result_format": "SUMMARY",
+            "validation_definitions": [
+                {
+                    "id": mock.ANY,
+                    "name": self.validation_definition_name,
+                },
+            ],
+        }
+
+        for id in (dict_val["id"], dict_val["validation_definitions"][0]["id"]):
+            try:
+                uuid.UUID(id)
+            except TypeError:
+                pytest.fail("id is not a valid UUID")
+
+    @pytest.mark.unit
+    def test_dict_raises_freshness_errors(self):
+        cp = self._build_checkpoint_without_factories()
+        with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
+            cp.dict()
+
+        assert len(e.value.errors) == 3
+        assert [type(err) for err in e.value.errors] == [
+            BatchDefinitionNotAddedError,
+            ExpectationSuiteNotAddedError,
+            ValidationDefinitionNotAddedError,
+        ]
+
+    @pytest.mark.unit
+    def test_json_serializes_correctly(self, in_memory_runtime_context):
+        context = in_memory_runtime_context
+
+        cp = self._build_checkpoint_with_factories(context)
+
+        json_val = cp.json()
+        dict_val = json.loads(json_val)
+        assert dict_val == {
+            "actions": [],
+            "id": mock.ANY,
+            "name": self.checkpoint_name,
+            "result_format": "SUMMARY",
+            "validation_definitions": [
+                {
+                    "id": mock.ANY,
+                    "name": self.validation_definition_name,
+                },
+            ],
+        }
+
+        for id in (dict_val["id"], dict_val["validation_definitions"][0]["id"]):
+            try:
+                uuid.UUID(id)
+            except TypeError:
+                pytest.fail("id is not a valid UUID")
+
+    @pytest.mark.unit
+    def test_json_raises_freshness_errors(self):
+        cp = self._build_checkpoint_without_factories()
+        with pytest.raises(CheckpointRelatedResourcesFreshnessError) as e:
+            cp.json()
+
+        assert len(e.value.errors) == 3
+        assert [type(err) for err in e.value.errors] == [
+            BatchDefinitionNotAddedError,
+            ExpectationSuiteNotAddedError,
+            ValidationDefinitionNotAddedError,
+        ]
+
+
+@mock.patch(
+    "great_expectations.data_context.data_context.context_factory.project_manager.is_using_cloud",
+)
+@pytest.mark.unit
+def test_loaded_checkpoint_can_run(
+    mock_is_using_cloud,
+    empty_data_context: AbstractDataContext,
+):
+    mock_is_using_cloud.return_value = True
+    col = "col"
+    name = "checkpoint_testing"
+    bd = (
+        empty_data_context.data_sources.add_pandas(name)
+        .add_dataframe_asset(name)
+        .add_batch_definition_whole_dataframe(name)
+    )
+    suite = empty_data_context.suites.add(
+        ExpectationSuite(
+            name="test_suite",
+            expectations=[
+                gxe.ExpectColumnValuesToBeInSet(
+                    column=col,
+                    value_set=[1],
+                )
+            ],
+        )
+    )
+    vd = empty_data_context.validation_definitions.add(
+        ValidationDefinition(
+            name=name,
+            suite=suite,
+            data=bd,
+        )
+    )
+    empty_data_context.checkpoints.add(
+        Checkpoint(
+            name=name,
+            validation_definitions=[vd],
+        )
+    )
+
+    cp = empty_data_context.checkpoints.get(name)
+
+    results = cp.run({"dataframe": pd.DataFrame({col: [1, 1]})})
+    assert results.success
+
+
+@pytest.mark.unit
+def test_checkpoint_expectation_parameters(
+    empty_data_context: AbstractDataContext,
+) -> None:
+    col = "col"
+    name = "checkpoint_testing"
+    bd = (
+        empty_data_context.data_sources.add_pandas(name)
+        .add_dataframe_asset(name)
+        .add_batch_definition_whole_dataframe(name)
+    )
+    suite = empty_data_context.suites.add(
+        ExpectationSuite(
+            name="test_suite",
+            expectations=[
+                gxe.ExpectColumnValuesToBeInSet(
+                    column=col,
+                    value_set={"$PARAMETER": "values"},
+                )
+            ],
+        )
+    )
+    vd = empty_data_context.validation_definitions.add(
+        ValidationDefinition(
+            name=name,
+            suite=suite,
+            data=bd,
+        )
+    )
+    checkpoint = empty_data_context.checkpoints.add(
+        Checkpoint(
+            name=name,
+            validation_definitions=[vd],
+        )
+    )
+
+    results = checkpoint.run(
+        expectation_parameters={"values": [1, 2]},
+        batch_parameters={"dataframe": pd.DataFrame({col: [1, 2]})},
+    )
+    assert results.success

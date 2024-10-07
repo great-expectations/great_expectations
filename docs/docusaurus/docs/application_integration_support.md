@@ -22,14 +22,14 @@ The following table defines the GX Cloud, GX Core, and Community Supported integ
 
 | Integration Type                 | GX Cloud                              | GX Core                                                                                    | Community            |
 | -------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------- |
-| Data Sources<sup>1</sup>         | Snowflake<br/> PostgreSQL<sup>2</sup> | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>BigQuery<br/>Spark<br/>Pandas | MSSQL<br/>MySQL<br/> |
+| Data Sources<sup>1</sup>         | Snowflake<br/>Databricks (SQL)<br/> PostgreSQL<sup>2</sup> | Snowflake<br/>Databricks (SQL)<br/>PostgreSQL<br/>Sqlite<br/>BigQuery<br/>Spark<br/>Pandas | MSSQL<br/>MySQL<br/> |
 | Configuration Stores<sup>3</sup> | In-app                                | File system                                                                                | None                 |
 | Data Doc Stores                  | In-app                                | File system                                                                                | None                 |
 | Actions                          | Slack                                 | Slack <br/>Email                                                                           | None                 |
 | Credential Stores                | Environment variables                 | Environment variables <br/> YAML<sup>4</sup>                                               | None                 |
 | Orchestrator                     | Airflow <sup>5</sup> <sup>6</sup>     | Airflow <sup>5</sup> <sup>6</sup>                                                          | None                 |
 
-<sup>1</sup> We've also seen GX work with the following data sources in the past but we can't guarentee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
+<sup>1</sup> We've also seen GX work with the following data sources in the past but we can't guarantee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
 <sup>2</sup> Support for BigQuery in GX Cloud will be available in a future release.<br/>
 <sup>3</sup> This includes configuration storage for Expectations, Checkpoints, Validation Definitions, and Validation Result<br/>
 <sup>4</sup> config_variables.yml<br/>
@@ -53,7 +53,7 @@ The following table defines the operating systems supported by GX Cloud and GX C
 | ---------------------- | --------- | --------- |
 | Mac/Linux <sup>1</sup> | Mac/Linux | Mac/Linux |
 
-<sup>1</sup> GX does not currently support Windows. However, we've seen users successfuly deploying GX on Windows.
+<sup>1</sup> GX does not currently support Windows. However, we've seen users successfully deploying GX on Windows.
 
 ### Python versions
 
@@ -61,7 +61,7 @@ The following table defines the Python versions supported by GX Cloud and GX Cor
 
 | GX Cloud    | GX Core     | Community   |
 | ----------- | ----------- | ----------- |
-| 3.8 to 3.11 | 3.8 to 3.11 | 3.8 to 3.11 |
+| 3.9 to 3.11 | 3.9 to 3.11 | 3.9 to 3.11 |
 
 ### GX versions
 
@@ -70,3 +70,15 @@ The following table defines the GX versions supported by GX Cloud and GX Core.
 | GX Cloud | GX Core | Community |
 | -------- | ------- | --------- |
 | ≥1.0     | ≥1.0    | ≥1.0      |
+
+### Web browsers
+
+The following web browsers are supported by GX Cloud.
+
+- [Google Chrome](https://www.google.com/chrome/) — the latest version is fully supported
+
+- [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/) — the latest version is fully supported
+
+- [Apple Safari](https://www.apple.com/safari/) — the latest version is fully supported
+
+- [Microsoft Edge](https://www.microsoft.com/en-us/edge?ep=82&form=MA13KI&es=24) — the latest version is fully supported

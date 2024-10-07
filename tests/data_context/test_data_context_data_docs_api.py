@@ -1,12 +1,16 @@
 import os
 from unittest import mock
 
+import pandas as pd
 import pytest
 import pytest_mock
 
+import great_expectations as gx
+from great_expectations.checkpoint.actions import UpdateDataDocsAction
 from great_expectations.checkpoint.checkpoint import CheckpointResult
 from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResult
 from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -16,14 +20,71 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions import DataContextError
 
+CHECKPOINT_NAME = "my_checkpoint"
+COLUMN_NAME = "my-column"
+
+
+@pytest.fixture
+def data_context_with_checkpoint(empty_data_context: AbstractDataContext) -> AbstractDataContext:
+    context = empty_data_context
+    bd = (
+        context.data_sources.add_pandas(name="my-ds")
+        .add_dataframe_asset(name="my-asset")
+        .add_batch_definition_whole_dataframe(name="my-bd")
+    )
+    suite = context.suites.add(
+        gx.ExpectationSuite(
+            name="my-suite",
+            expectations=[gx.expectations.ExpectColumnValuesToNotBeNull(column="my-column")],
+        )
+    )
+    vd = context.validation_definitions.add(
+        gx.ValidationDefinition(name="my-validation_def", data=bd, suite=suite)
+    )
+    context.checkpoints.add(gx.Checkpoint(name=CHECKPOINT_NAME, validation_definitions=[vd]))
+    return context
+
 
 @pytest.mark.unit
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_open_docs_with_no_site(mock_webbrowser, context_with_no_sites):
-    context = context_with_no_sites
+@mock.patch("webbrowser.open")
+def test_open_docs_with_no_run_checkpoints(
+    mock_webbrowser, empty_data_context: AbstractDataContext
+) -> None:
+    context = empty_data_context
+
+    with pytest.raises(gx.exceptions.NoDataDocsError):
+        context.open_data_docs()
+    assert mock_webbrowser.call_count == 0
+
+
+@pytest.mark.unit
+@mock.patch("webbrowser.open")
+def test_open_data_docs_with_checkpoint_run_with_no_data_docs_action(
+    mock_webbrowser, data_context_with_checkpoint: AbstractDataContext
+):
+    context = data_context_with_checkpoint
+    checkpoint = context.checkpoints.get(CHECKPOINT_NAME)
+    checkpoint.run(batch_parameters={"dataframe": pd.DataFrame({COLUMN_NAME: [1, 2, 3]})})
+
+    with pytest.raises(gx.exceptions.NoDataDocsError):
+        context.open_data_docs()
+    assert mock_webbrowser.call_count == 0
+
+
+@pytest.mark.unit
+@mock.patch("webbrowser.open")
+def test_open_data_docs_with_checkpoint_run_with_data_docs_action(
+    mock_webbrowser, data_context_with_checkpoint: AbstractDataContext
+):
+    context = data_context_with_checkpoint
+    checkpoint = context.checkpoints.get(CHECKPOINT_NAME)
+    checkpoint.actions.append(UpdateDataDocsAction(name="store_result"))
+    checkpoint.save()
+
+    checkpoint.run(batch_parameters={"dataframe": pd.DataFrame({COLUMN_NAME: [1, 2, 3]})})
 
     context.open_data_docs()
-    assert mock_webbrowser.call_count == 0
+    assert mock_webbrowser.call_count == 1
 
 
 @pytest.mark.unit
@@ -407,8 +468,9 @@ def test_view_validation_result(
     }
     checkpoint_result = mocker.Mock(spec=CheckpointResult, run_results=run_results)
 
-    with mock.patch("webbrowser.open") as mock_open, mock.patch(
-        "great_expectations.data_context.store.StoreBackend.has_key", return_value=True
+    with (
+        mock.patch("webbrowser.open") as mock_open,
+        mock.patch("great_expectations.data_context.store.StoreBackend.has_key", return_value=True),
     ):
         context.view_validation_result(checkpoint_result)
 

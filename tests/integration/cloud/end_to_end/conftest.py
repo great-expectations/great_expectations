@@ -157,7 +157,7 @@ def table_factory() -> Iterator[TableFactory]:
         )
         created_tables: list[dict[Literal["table_name", "schema_name"], str | None]] = []
 
-        with gx_engine.get_connection() as conn:  # type: ignore[var-annotated]
+        with gx_engine.get_connection() as conn:
             transaction = conn.begin()
             if schema_name:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema_name}"))

@@ -22,7 +22,7 @@ def test_all_core_model_schemas_are_serializable():
         model.schema_json()
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem  # ~4s
 def test_schemas_updated():
     all_models = {
         cls_name: expectation

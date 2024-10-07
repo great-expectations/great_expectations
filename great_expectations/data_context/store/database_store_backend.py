@@ -285,7 +285,8 @@ class DatabaseStoreBackend(StoreBackend):
     def _move(self) -> None:  # type: ignore[override]
         raise NotImplementedError
 
-    def get_url_for_key(self, key):  # type: ignore[explicit-override] # FIXME
+    @override
+    def get_url_for_key(self, key, protocol=None) -> str:
         url = self._convert_engine_and_key_to_url(key)
         return url
 

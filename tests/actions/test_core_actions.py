@@ -381,6 +381,24 @@ class TestV1ActionRun:
         )
 
     @pytest.mark.unit
+    def test_EmailAction_equality(self):
+        """I know, this one seems silly. But this was a bug."""
+        a = EmailAction(
+            name="my_action",
+            smtp_address="test",
+            smtp_port="587",
+            receiver_emails="test@gmail.com",
+        )
+        b = EmailAction(
+            name="my_action",
+            smtp_address="test",
+            smtp_port="587",
+            receiver_emails="test@gmail.com",
+        )
+
+        assert a == b
+
+    @pytest.mark.unit
     @pytest.mark.parametrize(
         "emails, expected_email_list",
         [
@@ -612,6 +630,14 @@ class TestV1ActionRun:
         mock_pypd_event.assert_not_called()
 
     @pytest.mark.unit
+    def test_SlackNotificationAction_equality(self):
+        """I kow, this one seems silly. But this was a bug."""
+        a = SlackNotificationAction(name="my_action", slack_webhook="test", notify_on="all")
+        b = SlackNotificationAction(name="my_action", slack_webhook="test", notify_on="all")
+
+        assert a == b
+
+    @pytest.mark.unit
     def test_SlackNotificationAction_run(self, checkpoint_result: CheckpointResult):
         action = SlackNotificationAction(name="my_action", slack_webhook="test", notify_on="all")
 
@@ -785,6 +811,14 @@ class TestV1ActionRun:
         assert "Successfully posted results" in result["result"]
 
     @pytest.mark.unit
+    def test_UpdateDataDocsAction_equality(self):
+        """I kow, this one seems silly. But this was a bug for other actions."""
+        a = UpdateDataDocsAction(name="my_action")
+        b = UpdateDataDocsAction(name="my_action")
+
+        assert a == b
+
+    @pytest.mark.unit
     def test_UpdateDataDocsAction_run(
         self, mocker: MockerFixture, checkpoint_result: CheckpointResult
     ):
@@ -919,3 +953,21 @@ class TestV1ActionRun:
             validation_identifier_a: {},
             validation_identifier_b: {},
         }
+
+
+@pytest.mark.unit
+def test_SlackNotificationAction_variable_substitution_webhook(mock_context):
+    SlackNotificationAction(name="my_action", slack_webhook="${SLACK_WEBHOOK}")
+
+    mock_context.config_provider.substitute_config.assert_called_once_with("${SLACK_WEBHOOK}")
+
+
+@pytest.mark.unit
+def test_SlackNotificationAction_variable_substitution_token_and_channel(mock_context):
+    SlackNotificationAction(
+        name="my_action", slack_token="${SLACK_TOKEN}", slack_channel="${SLACK_CHANNEL}"
+    )
+
+    assert mock_context.config_provider.substitute_config.call_count == 2
+    mock_context.config_provider.substitute_config.assert_any_call("${SLACK_CHANNEL}")
+    mock_context.config_provider.substitute_config.assert_any_call("${SLACK_TOKEN}")

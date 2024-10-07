@@ -8,6 +8,7 @@ from typing import (
     Callable,
     Literal,
     Mapping,
+    Optional,
     Type,
     overload,
 )
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.alias_types import PathStr
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import (
         AbstractDataContext,
         CloudDataContext,
@@ -134,13 +136,16 @@ class ProjectManager:
         site_name: str | None = None,
         only_if_exists: bool = True,
         site_names: list[str] | None = None,
-    ) -> list[dict[str, str]]:
+    ) -> list[dict[str, Optional[str]]]:
         return self._project.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
             only_if_exists=only_if_exists,
             site_names=site_names,
         )
+
+    def get_config_provider(self) -> _ConfigurationProvider:
+        return self._project.config_provider
 
     def _build_context(  # noqa: PLR0913
         self,
