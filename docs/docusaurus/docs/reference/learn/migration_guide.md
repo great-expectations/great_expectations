@@ -30,7 +30,7 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
     </tr>
     <tr>
         <td><pre>
-        ```json
+        ```python
             {
   "expectation_suite_name": "suite_for_yellow_tripdata",
   "data_asset_type": "CSVAsset",
