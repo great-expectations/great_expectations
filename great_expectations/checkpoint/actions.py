@@ -236,31 +236,18 @@ class SlackNotificationAction(DataDocsAction):
 
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
-        config_provider = project_manager.get_config_provider()
-        for credential in ("slack_webhook", "slack_token", "slack_channel"):
-            if isinstance(values[credential], ConfigStr):
-                values[credential] = cls._substitute_slack_credential(
-                    slack_credential=values[credential],
-                    config_provider=config_provider,
-                )
-
+        slack_webhook = values["slack_webhook"]
+        slack_token = values["slack_token"]
+        slack_channel = values["slack_channel"]
         try:
-            if values["slack_webhook"]:
-                assert not values["slack_token"] and not values["slack_channel"]
+            if slack_webhook:
+                assert not slack_token and not slack_channel
             else:
-                assert values["slack_token"] and values["slack_channel"]
+                assert slack_token and slack_channel
         except AssertionError:
             raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")  # noqa: TRY003
 
         return values
-
-    @classmethod
-    def _substitute_slack_credential(
-        cls, slack_credential: ConfigStr, config_provider: _ConfigurationProvider
-    ) -> str:
-        return slack_credential.get_config_value(config_provider=config_provider)
 
     @override
     def run(
@@ -329,14 +316,35 @@ class SlackNotificationAction(DataDocsAction):
         )
 
     def _send_slack_notification(self, payload: dict) -> dict:
+        from great_expectations.data_context.data_context.context_factory import project_manager
+
+        config_provider = project_manager.get_config_provider()
+        substituted_slack_webhook = self._substitute_slack_credential(
+            slack_credential=self.slack_webhook, config_provider=config_provider
+        )
+        substituted_slack_token = self._substitute_slack_credential(
+            slack_credential=self.slack_token, config_provider=config_provider
+        )
+        substituted_slack_channel = self._substitute_slack_credential(
+            slack_credential=self.slack_channel, config_provider=config_provider
+        )
+
         # this will actually send the POST request to the Slack webapp server
         slack_notif_result = send_slack_notification(
             payload=payload,
-            slack_webhook=str(self.slack_webhook) if self.slack_webhook else None,
-            slack_token=str(self.slack_token) if self.slack_token else None,
-            slack_channel=str(self.slack_channel) if self.slack_channel else None,
+            slack_webhook=substituted_slack_webhook,
+            slack_token=substituted_slack_token,
+            slack_channel=substituted_slack_channel,
         )
         return {"slack_notification_result": slack_notif_result}
+
+    @staticmethod
+    def _substitute_slack_credential(
+        slack_credential: ConfigStr | str | None, config_provider: _ConfigurationProvider
+    ) -> str | None:
+        if not isinstance(slack_credential, ConfigStr):
+            return slack_credential
+        return slack_credential.get_config_value(config_provider=config_provider)
 
 
 @public_api
