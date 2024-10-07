@@ -186,6 +186,8 @@ Data Source configurations are stored in the YAML file `gx/great_expectations.ym
 We’ll walk through examples of different Data Source configurations in V0 and V1 so you can see how to translate between the two.
 
 #### Pandas
+
+##### Pandas Filesystem Data
 Here is a side-by-side comparison of a Data Source called `pandas_fs_ds` with 4 assets called: `yearly_taxi_data`, `monthly_taxi_data`, `daily_taxi_data`, and `arbitrary_taxi_data`.
 
 <table>
@@ -288,7 +290,7 @@ In `0.X`, a Data Source represents where the data lives and the execution engine
 We no longer support arbitrary batching regexes. Batches must be defined by one of our temporal batch definitions which are yearly, monthly, or daily.
 :::
 
-#### Pandas Filesystem Creation via API
+##### Pandas Filesystem Creation via API
 
 <table>
     <tr>
@@ -325,7 +327,7 @@ We no longer support arbitrary batching regexes. Batches must be defined by one 
     </tr>
 </table>
 
-#### Pandas Dataframe
+##### Pandas Dataframe
 <table>
     <tr>
         <th>V0 Pandas Dataframe Config</th>
@@ -382,3 +384,300 @@ In both `V0` and `V1` a pandas Data Source reads in data from a pandas dataframe
 > **id**: In V1, the asset has a unique ID. Migrators can assign any unique UUID.
 
 **id**: In V1, the Data Source has a unique ID. Migrators can assign any unique UUID.
+
+##### Pandas Dataframe Creation via API 
+<table>
+    <tr>
+        <th>V0 Pandas Dataframe Creation via API</th>
+        <th>V1 Pandas Dataframe Creation via API</th>
+    </tr>
+    <tr>
+        <td>
+        ```python
+        dataframe_ds = context.sources.add_pandas(name="pd_df_ds")
+        dataframe_asset = dataframe_ds.add_dataframe_asset(name="taxi_dataframe_asset")
+        ```
+        </td>
+        <td>
+        ```python
+        dataframe_ds = context.data_sources.add_pandas(name="pd_df_ds")
+        dataframe_asset = dataframe_ds.add_dataframe_asset(name="taxi_dataframe_asset")
+        dataframe_bd = dataframe_asset.add_batch_definition_whole_dataframe(name="taxi_dataframe_batch_def")
+        ```
+        </td>
+    </tr>
+</table>
+
+#### Snowflake
+Here is a side-by-side comparision of a both a `V0` Snowflake table and query Data Asset to their equivalents in `V1`. We walk through all the currently supported V1 Batch Definitions: yearly, monthly, daily, and whole table.
+
+<table>
+    <tr>
+        <th>V0 Snowflake Config</th>
+        <th>V1 Snowflake Config</th>
+    </tr>
+    <tr>
+        <td>
+        ```yaml
+        fluent_datasources:
+            snowflake_ds:
+                type: snowflake
+                assets:
+                yearly_taxi_data:
+                    type: table
+                    order_by:
+                    - key: year
+                        reverse: false
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup_datetime
+                    method_name: split_on_year
+                    table_name: TAXI_DATA_ALL_SAMPLES
+                    schema_name:
+                monthly_taxi_data:
+                    type: table
+                    order_by:
+                    - key: year
+                        reverse: true
+                    - key: month
+                        reverse: true
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup_datetime
+                    method_name: split_on_year_and_month
+                    table_name: TAXI_DATA_ALL_SAMPLES
+                    schema_name:
+                daily_taxi_data:
+                    type: table
+                    order_by:
+                    - key: year
+                        reverse: false
+                    - key: month
+                        reverse: false
+                    - key: day
+                        reverse: false
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup_datetime
+                    method_name: split_on_year_and_month_and_day
+                    table_name: TAXI_DATA_ALL_SAMPLES
+                    schema_name:
+                all_taxi_data:
+                    type: table
+                    order_by: []
+                    batch_metadata: {}
+                    table_name: TAXI_DATA_ALL_SAMPLES
+                    schema_name:
+                query_yearly:
+                    type: query
+                    order_by:
+                    - key: year
+                        reverse: false
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup_datetime
+                    method_name: split_on_year
+                    query: select * from TAXI_DATA_ALL_SAMPLES
+                query_monthly:
+                    type: query
+                    order_by:
+                    - key: year
+                        reverse: true
+                    - key: month
+                        reverse: true
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup_datetime
+                    method_name: split_on_year_and_month
+                    query: select * from TAXI_DATA_ALL_SAMPLES
+                query_daily:
+                    type: query
+                    order_by:
+                    - key: year
+                        reverse: false
+                    - key: month
+                        reverse: false
+                    - key: day
+                        reverse: false
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup_datetime
+                    method_name: split_on_year_and_month_and_day
+                    query: select * from TAXI_DATA_ALL_SAMPLES
+                whole_query:
+                    type: query
+                    order_by: []
+                    batch_metadata: {}
+                    query: select * from TAXI_DATA_ALL_SAMPLES
+                connection_string: 
+                snowflake://<user_login_name>:<password>@<account_identifier>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>    
+        ```
+        </td>
+        <td>
+        ```yaml
+        fluent_datasources:
+            snowflake_ds:
+                type: snowflake
+                id: f4ac98d6-dccf-4373-b5f3-ac90ed60b139
+                assets:
+                taxi_data:
+                    type: table
+                    id: ad9e8ece-0c14-45bc-bcdd-ef2e40922df4
+                    batch_metadata: {}
+                    batch_definitions:
+                    table_yearly:
+                        id: 75a41bce-da84-425f-a3d3-92acd5c5f7f8
+                        partitioner:
+                        column_name: PICKUP_DATETIME
+                        sort_ascending: true
+                        method_name: partition_on_year
+                    table_monthly:
+                        id: 67ec396a-e7ca-499d-8cb7-84a803d976af
+                        partitioner:
+                        column_name: PICKUP_DATETIME
+                        sort_ascending: false
+                        method_name: partition_on_year_and_month
+                    table_daily:
+                        id: 7d410bd4-ca6d-464d-b82d-3b070e6fd229
+                        partitioner:
+                        column_name: PICKUP_DATETIME
+                        sort_ascending: true
+                        method_name: partition_on_year_and_month_and_day
+                    whole_table:
+                        id: bd88cdd9-a5f4-4bdf-bbf3-e43827996dd0
+                        partitioner:
+                    table_name: TAXI_DATA_ALL_SAMPLES
+                    schema_name: public
+                query_data:
+                    type: query
+                    id: 44b0eccc-54f2-46e1-a6f9-3558662d4f8a
+                    batch_metadata: {}
+                    batch_definitions:
+                    query_yearly:
+                        id: 7f3909d4-912f-44aa-8140-7ab4e7b13f4e
+                        partitioner:
+                        column_name: PICKUP_DATETIME
+                        sort_ascending: true
+                        method_name: partition_on_year
+                    query_monthly:
+                        id: d0c347fc-03e5-4880-a8e8-1eff04432c2f
+                        partitioner:
+                        column_name: PICKUP_DATETIME
+                        sort_ascending: false
+                        method_name: partition_on_year_and_month
+                    query_daily:
+                        id: 1f6701bd-b470-4ddb-a001-4cc6167ab4d0
+                        partitioner:
+                        column_name: PICKUP_DATETIME
+                        sort_ascending: true
+                        method_name: partition_on_year_and_month_and_day
+                    whole_query:
+                        id: 4817cf80-1727-4aad-b31a-5552efeea441
+                        partitioner:
+                    query: SELECT * FROM TAXI_DATA_ALL_SAMPLES
+                connection_string: 
+                    snowflake://<user_login_name>:<password>@<account_identifier>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>
+        ```
+        </td>
+    </tr>
+</table>
+
+In `0.X`, a Data Source represents where the data is persisted and the execution engine (e.g. the Snowflake database) and a Data Asset represents the data and how the data should be partitioned (e.g. by a datetime column). In `1.0` the Data Source has the same meaning. However, the Data Asset now represents only the data and there is a new concept, the batch definition, which represents how the data is partitioned. This manifests as an extra layer in the YAML asset block.
+
+A few configurations are **NO LONGER SUPPORTED**:
+
+- In V1, we currently only allow batching by time (e.g. year, month, day). In V0 one could split the data into batches in lots of ways. For example a table could be split by a value in a column or a file regex could contain arbitrary match expressions. We consider non-time based splitting to represent different conceptual assets that may happen to reside in the same table. For those, one should compute views or use a query asset.
+
+- In V0, one could set the sorting order independently for the year, month, and day dimensions. That is, one could sort ascending by year, but then descending by month and day. In V1 we only allow sorting of all the batches in ascending or descending order. For example, one can no longer sort year and month in the opposite order.
+
+**snowflake_ds (example)**: The keys under fluent_datasources are the names of the datasources.
+
+**type**: The type of Data Source, this is unchanged.
+
+**assets**: The keys to Data Assets are the names of the assets. In this example yearly_taxi_data is the name of a V0 asset. In V1, the asset is called taxi_data.
+
+> **type**: The type of asset (table or query). This is unchanged.
+
+> **order_by**: This is no longer a key. The information has moved inside the V1 batch definitions under the partitioner.
+
+> **splitter**: This is no longer a key has been replaced by batch_definitions. The format for batch definitions is:
+
+>> **table_yearly (an example)**: The name of the Batch Definition is the key to each configuration.
+
+>>> **id**:  Migrators can assign any unique UUID.
+
+>>> **partitioner**: Contains the batching and sorting information. This has no value for a “whole table” partitioner.
+
+>>>> **column_name**: The column on which to split the data. This must be a DATETIME field.
+
+>>>> **sort_ascending**: A boolean. true sorts the most recent batch first, while false sorts with the most recent batch last.
+
+>>>> **method_name**: A string indicating the batching resolution. The options are: partition_on_year, partition_on_year_and_month, partition_on_year_and_month_and_day.
+
+> **batch_metadata**: This is unchanged.
+
+> **table_name (TableAsset only)**: The name of the table that holds data for this asset. This is unchanged.
+
+> **schema_name (TableAsset only)**: The name of the schema to which the table belongs. In V1 this is now a required field.
+
+> **query (QueryAsset only)**: The query to be run to generate the data for this asset. This is unchanged.
+
+> **id (New in V1)**: This is a new field in V1 and is a random UUID. Migrators can assign any unique UUID.
+
+**id (New in V1)**: An id for the Data Asset. Migrators can assign any unique UUID.
+
+##### Snowflake Creation via API
+<table>
+    <tr>
+        <th>V0 Snowflake Creation via API</th>
+        <th>V1 Snowflake Creation via API</th>
+    </tr>
+    <tr>
+        <td>
+        ```python
+        # Create datasource
+        connection_string = "snowflake://<user_login_name>:<password>@<account_identifier>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>"
+        snowflake_ds = context.sources.add_snowflake(name="snowflake_ds", connection_string=connection_string)
+
+        # Create table assets
+        yearly_snowflake_asset = snowflake_ds.add_table_asset(name="yearly_taxi_data", table_name="TAXI_DATA_ALL_SAMPLES", order_by=["+year"])
+        yearly_snowflake_asset.add_splitter_year(column_name="pickup_datetime")
+        monthly_snowflake_asset = snowflake_ds.add_table_asset(name="monthly_taxi_data", table_name="TAXI_DATA_ALL_SAMPLES", order_by=["-year", "-month"])
+        monthly_snowflake_asset.add_splitter_year_and_month(column_name="pickup_datetime")
+        daily_snowflake_asset = snowflake_ds.add_table_asset(name="daily_taxi_data", table_name="TAXI_DATA_ALL_SAMPLES", order_by=["+year", "+month", "+day"])
+        daily_snowflake_asset.add_splitter_year_and_month_and_day(column_name="pickup_datetime")
+        whole_table_snowflake_asset = snowflake_ds.add_table_asset(name="all_taxi_data", table_name="TAXI_DATA_ALL_SAMPLES")
+
+        # Create query assets
+        yearly_query_asset = snowflake_ds.add_query_asset(name="query_yearly", query="select * from TAXI_DATA_ALL_SAMPLES", order_by=["+year"])
+        yearly_query_asset.add_splitter_year(column_name="pickup_datetime")
+        monthly_query_asset = snowflake_ds.add_query_asset(name="query_monthly", query="select * from TAXI_DATA_ALL_SAMPLES", order_by=["-year", "-month"])
+        monthly_query_asset.add_splitter_year_and_month(column_name="pickup_datetime")
+        daily_query_asset = snowflake_ds.add_query_asset(name="query_daily", query="select * from TAXI_DATA_ALL_SAMPLES", order_by=["+year", "+month", "+day"])
+        daily_query_asset.add_splitter_year_and_month_and_day(column_name="pickup_datetime")
+        query_whole_table_asset = snowflake_ds.add_query_asset(name="whole_query", query="select * from TAXI_DATA_ALL_SAMPLES")
+        ```
+        </td>
+        <td>
+        ```python
+        # Create datasource
+        connection_string = "snowflake://<user_login_name>:<password>@<account_identifier>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>"
+        snowflake_ds = context.sources.add_snowflake(name="snowflake_ds", connection_string=connection_string)
+
+        # Create table asset and batch definitions
+        table_asset = snowflake_ds.add_table_asset(name="taxi_data", table_name="TAXI_DATA_ALL_SAMPLES")
+        table_yearly = table_asset.add_batch_definition_yearly(name="table_yearly", column="PICKUP_DATETIME", sort_ascending=True)
+        table_monthly = table_asset.add_batch_definition_monthly(name="table_monthly", column="PICKUP_DATETIME", sort_ascending=False)
+        table_daily = table_asset.add_batch_definition_daily(name="table_daily", column="PICKUP_DATETIME", sort_ascending=True)
+        whole_table = table_asset.add_batch_definition_whole_table(name="whole_table")
+
+        # Create query asset and batch definitions
+        query_asset = snowflake_ds.add_query_asset(name="query_data", query="SELECT * FROM TAXI_DATA_ALL_SAMPLES")
+        query_yearly = query_asset.add_batch_definition_yearly(name="query_yearly", column="PICKUP_DATETIME", sort_ascending=True)
+        query_monthly = query_asset.add_batch_definition_monthly(name="query_monthly", column="PICKUP_DATETIME", sort_ascending=False)
+        query_daily = query_asset.add_batch_definition_daily(name="query_daily", column="PICKUP_DATETIME", sort_ascending=True)
+        query_whole_table = query_asset.add_batch_definition_whole_table(name="whole_query")
+        ```
+        </td>
+    </tr>
+</table>
