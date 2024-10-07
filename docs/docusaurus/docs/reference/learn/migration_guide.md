@@ -30,7 +30,7 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
     </tr>
     <tr>
         <td><pre>
-        ```python
+        ```json
             {
                 "expectation_suite_name": "suite_for_yellow_tripdata",
                 "data_asset_type": "CSVAsset",
@@ -113,3 +113,27 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
         </pre></td>
     </tr>
 </table>
+
+**expectation_suite_name**: This is now called name and has the name of the suite.
+
+**data_asset_type**: This has been removed. Expectation suites can be associated with any asset type.
+
+**evaluation_parameters**: This has been renamed to suite_parameters. The contents are unchanged.
+
+**expectations**: This is a list of expectations. The expectation keys have changed as follows
+
+    **expectation_type**: This has been changed to type.
+
+    **kwargs**: This is unchanged
+
+    **meta**: This dictionary that a user can populate with whatever metadata they would like. The notes key that Great Expectations Cloud used has been pulled out into a top level key.
+
+    **id**: This new field introduced in 1.0 can be any arbitrary, unique UUID. When migrating, generate and add a UUID.
+
+    **notes (new field)**: This new top-level field replaces meta.notes. This is consumed by Great Expectations Cloud to display user notes on the Cloud UI.
+
+**ge_cloud_id**: This is now id. This is now a required field. Migrators can generate a unique, arbitrary UUID and add it.
+
+**meta**: The format is unchanged.
+
+**notes**: This is new in 1.0 and is an arbitrary string.
