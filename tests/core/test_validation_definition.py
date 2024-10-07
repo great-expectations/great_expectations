@@ -419,7 +419,7 @@ class TestValidationRun:
         return_value=GXCloudResourceRef(
             resource_type="validation_result",
             id="59b72ca5-4636-44be-a367-46b54ae51fe1",
-            url="https://api.greatexpectations.io/validation_result/59b72ca5-4636-44be-a367-46b54ae51fe1",
+            url="https://api.greatexpectations.io/api/v1/organizations/11111111-ba69-4295-8fe1-61eef96f12b4/validation-results",
             response_json={"data": {"result_url": "my_result_url"}},
         ),
     )

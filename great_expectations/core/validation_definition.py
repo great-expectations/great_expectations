@@ -318,6 +318,7 @@ class ValidationDefinition(BaseModel):
 
         if isinstance(ref, GXCloudResourceRef):
             results.id = ref.id
+            # FIXME(cdkini): There is currently a bug in GX Cloud where the result_url is None
             results.result_url = self._validation_results_store.parse_result_url_from_gx_cloud_ref(
                 ref
             )
