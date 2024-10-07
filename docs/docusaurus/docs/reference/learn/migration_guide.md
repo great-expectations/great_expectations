@@ -1640,3 +1640,285 @@ One unique thing to notice is that while in the API code snippet below all actio
         </td>
     </tr>
 </table>
+
+##### Case 3: Combined top level and validation configuration
+We only show the V0 configuration and code samples here because the V1 configuration and code is identical to case 1.
+
+<table>
+    <tr>
+        <th>V0 Checkpoint configuration</th>
+    </tr>
+    <tr>
+        <td>
+        ```yaml
+        name: top_level_and_validation_checkpoint
+        config_version: 1.0
+        template_name:
+        module_name: great_expectations.checkpoint
+        class_name: Checkpoint
+        run_name_template:
+        expectation_suite_name: my_suite
+        batch_request: {}
+        action_list:
+        - name: store_validation_result
+            action:
+            class_name: StoreValidationResultAction
+        - name: store_evaluation_params
+            action:
+            class_name: StoreEvaluationParametersAction
+        - name: update_data_docs
+            action:
+            class_name: UpdateDataDocsAction
+        - name: my_email_action
+            action:
+            class_name: EmailAction
+            notify_on: all
+            use_tls: true
+            use_ssl: false
+            renderer:
+                module_name: great_expectations.render.renderer.email_renderer
+                class_name: EmailRenderer
+            smtp_address: smtp.myserver.com
+            smtp_port: 587
+            sender_login: sender@myserver.com
+            sender_password: XXXXXXXXXX
+            sender_alias: alias@myserver.com
+            receiver_emails: receiver@myserver.com
+        evaluation_parameters: {}
+        runtime_configuration: {}
+        validations:
+        - batch_request:
+            datasource_name: pd_fs_ds
+            data_asset_name: monthly_taxi_data
+            options: {}
+            batch_slice:
+        profilers: []
+        ge_cloud_id:
+        expectation_suite_ge_cloud_id:
+        ```
+        </td>
+    </tr>
+</table>
+
+##### Case 3: API calls
+
+<table>
+    <tr>
+        <th>V0 Checkpoint API</th>
+    </tr>
+    <tr>
+        <td>
+        ```python
+        import great_expectations as gx
+
+        context = gx.get_context(mode="file")
+
+        datasource = context.sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
+        monthly = datasource.add_csv_asset(name="monthly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name="my_suite",
+            data_asset_type="CSVAsset",
+        )
+        validator = context.get_validator(batch_request=monthly.build_batch_request(), expectation_suite_name="my_suite")
+        validator.expect_column_values_to_be_between(column="passenger_count", min_value=0, max_value=10)
+        validator.save_expectation_suite(discard_failed_expectations=False)
+
+        batch_request = monthly.build_batch_request()
+
+        email_action_config = {
+            "name": "my_email_action",
+            "action": {
+                "class_name": "EmailAction",
+                "notify_on": "all",
+                "use_tls": True,
+                "use_ssl": False,
+                "renderer": {
+                    "module_name": "great_expectations.render.renderer.email_renderer",
+                    "class_name": "EmailRenderer"
+                },
+                "smtp_address": "smtp.myserver.com",
+                "smtp_port": 587,
+                "sender_login": "sender@myserver.com",
+                "sender_password": "XXXXXXXXXX",
+                "sender_alias": "alias@myserver.com",
+                "receiver_emails": "receiver@myserver.com",
+            }
+        }
+
+        action_list = [
+            {'name': 'store_validation_result',
+            'action': {'class_name': 'StoreValidationResultAction'}},
+            {'name': 'store_evaluation_params',
+            'action': {'class_name': 'StoreEvaluationParametersAction'}},
+            {'name': 'update_data_docs',
+            'action': {'class_name': 'UpdateDataDocsAction'}},
+            email_action_config
+        ]
+
+        checkpoint_config = {
+            "name": "top_level_and_validation_checkpoint",
+            "config_version": 1.0,
+            "class_name": "Checkpoint",
+            "module_name": "great_expectations.checkpoint",
+            "expectation_suite_name": "my_suite",
+            "action_list": action_list,
+            "validations": [
+                {
+                    "batch_request": batch_request,
+                }
+            ],
+        }
+
+        context.add_checkpoint(**checkpoint_config)
+        result = context.run_checkpoint("top_level_and_validation_checkpoint")
+        ```
+        </td>
+    </tr>
+</table>
+
+##### Case 4: Combined top level with validation configuration override
+We only show the V0 configuration and code samples here because the V1 configuration and code is identical to case 1.
+
+<table>
+    <tr>
+        <th>
+V0 Checkpoint configuration</th>
+    </tr>
+    <tr>
+        <td>
+        ```yaml
+        name: top_level_and_validation_override_checkpoint
+        config_version: 1.0
+        template_name:
+        module_name: great_expectations.checkpoint
+        class_name: Checkpoint
+        run_name_template:
+        expectation_suite_name: my_suite
+        batch_request: {}
+        action_list:
+        - name: store_validation_result
+            action:
+            class_name: StoreValidationResultAction
+        - name: store_evaluation_params
+            action:
+            class_name: StoreEvaluationParametersAction
+        - name: update_data_docs
+            action:
+            class_name: UpdateDataDocsAction
+        - name: my_email_action
+            action:
+            class_name: EmailAction
+            notify_on: all
+            use_tls: true
+            use_ssl: false
+            renderer:
+                module_name: great_expectations.render.renderer.email_renderer
+                class_name: EmailRenderer
+            smtp_address: smtp.myserver.com
+            smtp_port: 587
+            sender_login: sender@myserver.com
+            sender_password: XXXXXXXXXX
+            sender_alias: alias@myserver.com
+            receiver_emails: receiver@myserver.com
+        evaluation_parameters: {}
+        runtime_configuration: {}
+        validations:
+        - batch_request:
+            datasource_name: pd_fs_ds
+            data_asset_name: monthly_taxi_data
+            options: {}
+            batch_slice:
+            expectation_suite_name: my_other_suite
+        profilers: []
+        ge_cloud_id:
+        expectation_suite_ge_cloud_id:
+        ```
+        </td>
+    </tr>
+</table>
+
+##### Case 4: API calls
+<table>
+    <tr>
+        <th>V0 Checkpoint API</th>
+    </tr>
+    <tr>
+        <td>
+        ```python
+        import great_expectations as gx
+
+        context = gx.get_context(mode="file")
+
+        datasource = context.sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
+        monthly = datasource.add_csv_asset(name="monthly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name="my_suite",
+            data_asset_type="CSVAsset",
+        )
+        validator = context.get_validator(batch_request=monthly.build_batch_request(), expectation_suite_name="my_suite")
+        validator.expect_column_values_to_be_between(column="passenger_count", min_value=0, max_value=10)
+        validator.save_expectation_suite(discard_failed_expectations=False)
+
+        other_suite = context.add_expectation_suite(
+            expectation_suite_name="my_other_suite",
+            data_asset_type="CSVAsset",
+        )
+        validator = context.get_validator(batch_request=monthly.build_batch_request(), expectation_suite_name="my_other_suite")
+        validator.expect_column_values_to_be_between(column="passenger_count", min_value=0, max_value=4)
+        validator.save_expectation_suite(discard_failed_expectations=False)
+
+        batch_request = monthly.build_batch_request()
+
+        email_action_config = {
+            "name": "my_email_action",
+            "action": {
+                "class_name": "EmailAction",
+                "notify_on": "all",
+                "use_tls": True,
+                "use_ssl": False,
+                "renderer": {
+                    "module_name": "great_expectations.render.renderer.email_renderer",
+                    "class_name": "EmailRenderer"
+                },
+                "smtp_address": "smtp.myserver.com",
+                "smtp_port": 587,
+                "sender_login": "sender@myserver.com",
+                "sender_password": "XXXXXXXXXX",
+                "sender_alias": "alias@myserver.com",
+                "receiver_emails": "receiver@myserver.com",
+            }
+        }
+
+        action_list = [
+            {'name': 'store_validation_result',
+            'action': {'class_name': 'StoreValidationResultAction'}},
+            {'name': 'store_evaluation_params',
+            'action': {'class_name': 'StoreEvaluationParametersAction'}},
+            {'name': 'update_data_docs',
+            'action': {'class_name': 'UpdateDataDocsAction'}},
+            email_action_config
+        ]
+
+        checkpoint_config = {
+            "name": "top_level_and_validation_override_checkpoint",
+            "config_version": 1.0,
+            "class_name": "Checkpoint",
+            "module_name": "great_expectations.checkpoint",
+            "expectation_suite_name": "my_suite",
+            "action_list": action_list,
+            "validations": [
+                {
+                    "expectation_suite_name": "my_other_suite",
+                    "batch_request": batch_request,
+                }
+            ],
+        }
+
+        context.add_checkpoint(**checkpoint_config)
+        result = context.run_checkpoint("top_level_and_validation_override_checkpoint")
+        ```
+        </td>
+    </tr>
+</table>
