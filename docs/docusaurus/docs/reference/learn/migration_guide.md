@@ -1186,3 +1186,307 @@ The configuration for `0.X` because we only allow splitting the data into batche
         </td>
     </tr>
 </table>
+
+### Checkpoints
+In V0, there were multiple equivalent ways to configure the exact same `Checkpoint`. This is because a `Checkpoint` object contained a `validations` parameter which was a list of the validations the `Checkpoint` would run. Each item in this list took all the arguments necessary for a validation such as the Expectation Suite, the Batch Request, the actions, etc. However, all these same arguments are also present on the `Checkpoint` initializer. Usually, if an argument was present in the validation, that would be used, but if any argument was not present in a validation, GX would fall back to the argument defined on the `Checkpoint` itself. We’d call these default values the “top-level values”. In addition, if the `validations` argument was an empty list or `None`, GX would infer the `Checkpoint` had 1 validation and create one using only “top-level values”. In this case, we’d call this validation a “top-level validation”. This fallback led to some confusing behavior, especially since it wasn’t consistently implemented. 
+
+In V1, we have removed all top-level arguments so every validation must be fully specified in the `validation_definitions` argument which is the analog to the old `validations` argument. We’ve also promoted the Validation Definition to its own domain object since it encapsulates the unit of validation. Checkpoints are groupings of Validation Definitions packaged with actions that may be taken after a validation is run. With this in mind, the V0 checkpoint configuration has been broken into 2 files, a Validation Definition configuration file and a checkpoint configuration file.
+
+We walk through 4 cases of V0 configuration files:
+
+Case 1: An empty validations argument so only a top-level validation exists.
+
+Case 2: No top-level validations so all values come from the validations argument.
+
+Case 3: A validation with values specified both in the validation and on the top level.
+
+Case 4: A validation with values specified on the top level that is overridden in the validation.
+
+We hope that this gives enough breadth over the possible ways to convert a Checkpoint that a migrator will have a helpful example. If there are missing cases that you’d like to see appear, please reach out.
+
+#### Case 1: Empty Validations Argument
+The V0 configuration lives in `gx/checkpoints/<CHECKPOINT_NAME>.yml`. In V1, the configuration is JSON and lives in 2 files: `gx/checkpoints/<CHECKPOINT_NAME>` and `gx/validation_definitions/<VALIDATION_DEFINITION_NAME>`.
+
+<table>
+    <tr>
+        <th>V0: gx/checkpoints/my_checkpoint.yml</th>
+        <th>V1: gx/checkpoints/my_checkpoint and gx/validation_definitions/my_validation_definition</th>
+    </tr>
+    <tr>
+        <td>
+        ```yaml
+        name: my_checkpoint
+        config_version: 1.0
+        template_name:
+        module_name: great_expectations.checkpoint
+        class_name: Checkpoint
+        run_name_template:
+        expectation_suite_name: my_suite
+        batch_request:
+        datasource_name: pd_fs_ds
+        data_asset_name: monthly_taxi_data
+        action_list:
+        - name: store_validation_result
+            action:
+            class_name: StoreValidationResultAction
+        - name: store_evaluation_params
+            action:
+            class_name: StoreEvaluationParametersAction
+        - name: update_data_docs
+            action:
+            class_name: UpdateDataDocsAction
+        - name: my_email_action
+            action:
+            class_name: EmailAction
+            notify_on: all
+            use_tls: true
+            use_ssl: false
+            renderer:
+                module_name: great_expectations.render.renderer.email_renderer
+                class_name: EmailRenderer
+            smtp_address: smtp.myserver.com
+            smtp_port: 587
+            sender_login: sender@myserver.com
+            sender_password: XXXXXXXXXX
+            sender_alias: alias@myserver.com
+            receiver_emails: receiver@myserver.com
+        evaluation_parameters: {}
+        runtime_configuration: {}
+        validations: []
+        profilers: []
+        ge_cloud_id:
+        expectation_suite_ge_cloud_id:
+        ```
+        </td>
+        <td>
+        **gx/validation_definitions/my_validation_definition**
+        ```json
+        {
+            "data": {
+                "asset": {
+                "id": "ae696e27-fb6a-45fb-a2a0-bf1b8627c07e",
+                "name": "taxi_data"
+                },
+                "batch_definition": {
+                "id": "9b396884-ef73-47f5-b8f7-c2fc1306589b",
+                "name": "monthly_batches"
+                },
+                "datasource": {
+                "id": "934fd0e2-4c34-4e88-be1a-6b56ed69d614",
+                "name": "pd_fs_ds"
+                }
+            },
+            "id": "cbd6552b-12d4-4b9f-92d5-1223eb6730d8",
+            "name": "my_validation_definition",
+            "suite": {
+                "id": "a71b700d-867a-46be-b5f2-6b9402dcc925",
+                "name": "my_suite"
+            }
+        }
+        ```
+
+        **gx/checkpoints/my_checkpoint**
+        ```json
+        {
+            "actions": [
+                {
+                "name": "update_data_docs",
+                "site_names": [],
+                "type": "update_data_docs"
+                },
+                {
+                "name": "my_email_action",
+                "notify_on": "all",
+                "notify_with": null,
+                "receiver_emails": "receiver@myserver.com",
+                "renderer": {
+                    "class_name": "EmailRenderer",
+                    "module_name": "great_expectations.render.renderer.email_renderer"
+                },
+                "sender_alias": "alias@myserver.com",
+                "sender_login": "sender@myserver.com",
+                "sender_password": "XXXXXXXXXX",
+                "smtp_address": "smtp.myserver.com",
+                "smtp_port": "587",
+                "type": "email",
+                "use_ssl": false,
+                "use_tls": true
+                }    
+            ],
+            "id": "ff7a0cd3-6b64-463a-baa0-4b5b4d7512b5",
+            "name": "my_checkpoint",
+            "result_format": "SUMMARY",
+            "validation_definitions": [
+                {
+                "id": "cbd6552b-12d4-4b9f-92d5-1223eb6730d8",
+                "name": "my_validation_definition"
+                }
+            ]
+            } 
+        ```
+        </td>
+    </tr>
+</table>
+
+We provide a mapping from the V0 fields to the V1 fields along with any new V1 fields.
+
+**name**: This gets mapped to the name field in the V1 Checkpoint configuration file.
+
+**config_version**: This is no longer a parameter.
+
+**template_name**: This is no longer a supported feature. If you need to migrate this over, you should find the template values and set them explicitly in the new Checkpoint.
+
+**module_name**: This is no longer necessary and is inferred so is no longer a supported parameter.
+
+**class_name**: This is no longer necessary and is inferred so is no longer a supported parameter.
+
+**run_name_template**: This is no longer a supported feature.
+
+**expectation_suite_name**: This is now found in the validation definition configuration in **suite.name**.
+
+**batch_request**: There is no longer a batch request concept in V1. The Data Source and Data Asset are now found in the Validation Definition configuration **data** field. The data field has 3 keys: **asset**, **batch_definition**, and **datasource**. The value is a dictionary with the keys:
+
+> **name**: The name of the asset/batch_definition/datasource found in great_expectations.yml.
+
+> **id**: The id for the asset/batch_definition/datasource found in great_expectations.yml.
+
+**action_list**: This is now mapped to the checkpoint configurations actions key which is a list of dictionaries where each dictionary configures one action. The name for an action in a V0 action list maps to the V1 action dictionary name key. A few things to note:
+- V1 has no default actions.
+- The `store_validation_result` is no longer an action since validation results are always stored and this is built into running a checkpoint (and running a validation definition directly).
+- The `store_evaluation_params` action no longer exists since runtime parameters must now be passed in at runtime so we don’t store defaults anywhere.
+- The `update_data_docs` action is no longer automatically added and must be explicitly added. Its configuration is a list of **site_names**. If you’ve configured these in V0, you can move them over directly and they have the same values. There is a new field called type, which all actions have, that is a unique literal string for a particular action. For this action type should be set to “update_data_docs”.
+
+**evaluation_parameters**: This is no longer supported at the checkpoint level. In V0 one could also configure evaluation_parameters in the expectation suite parameters. One can still do that there (now called suite_parameters, see the Expectation Suites and Expectations section) and using that Expectation Suite will enable these parameters for checkpoints using that suite.
+
+**runtime_configuration**: The runtime configuration supported by V1 is result format. There is now an explicit result_format key in the checkpoint configuration whose value is one of the following strings: SUMMARY, COMPLETE, BASIC, BOOLEAN_ONLY.
+
+**validations**: This is now the checkpoint configuration field **validation_definitions** which is a list of dictionaries where each item in the list corresponds to a validation definition. There are 2 keys in the Validation Definition dictionary:
+
+> **id**: This must match the top-level id field in the validation_definitions configuration file that corresponds to this validation definition.
+
+> **name**: This must match the top-level name field in the validation_definitions configuration file that corresponds to this validation definition.
+
+> There are now restrictions on which validations can be grouped together in a checkpoint. Each Validation Definition in a Checkpoint must take the same batch parameters at runtime. So if you grouped together multiple validations together in V0 whose batches are parameterized differently (e.g. one uses a “whole table” batch definition and another uses a “daily” batch definition) they will have to be split up into multiple checkpoints.
+
+**profilers**: This feature has been removed in V1. Some form of profilers will be re-introduced in V1 at a later date.
+
+**ge_cloud_id**: This should be empty for file-based configurations and has been removed in V1.
+
+**expectation_suite_ge_cloud_id**: This should be empty for file based configurations and has been removed in V1.
+
+##### Case 1: API calls
+<table>
+    <tr>
+        <th>V0 Checkpoint API</th>
+        <th>V1 Checkpoint API</th>
+    </tr>
+    <tr>
+        <td>
+        ```python
+        import great_expectations as gx
+        from great_expectations.checkpoint.actions import EmailAction
+
+        context = gx.get_context(mode="file")
+
+
+        datasource = context.sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
+        monthly = datasource.add_csv_asset(name="monthly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name="my_suite",
+            data_asset_type="CSVAsset",
+        )
+
+        validator = context.get_validator(batch_request=monthly.build_batch_request(), expectation_suite_name="my_suite")
+        validator.expect_column_values_to_be_between(column="passenger_count", min_value=0, max_value=10)
+        validator.save_expectation_suite(discard_failed_expectations=False)
+
+
+        batch_request = monthly.build_batch_request()  # options={"year": "2019", "month": "01"})
+
+        email_action_config = {
+            "name": "my_email_action",
+            "action": {
+                "class_name": "EmailAction",
+                "notify_on": "all",
+                "use_tls": True,
+                "use_ssl": False,
+                "renderer": {
+                    "module_name": "great_expectations.render.renderer.email_renderer",
+                    "class_name": "EmailRenderer"
+                },
+                "smtp_address": "smtp.myserver.com",
+                "smtp_port": 587,
+                "sender_login": "sender@myserver.com",
+                "sender_password": "XXXXXXXXXX",
+                "sender_alias": "alias@myserver.com",
+                "receiver_emails": "receiver@myserver.com",
+            }
+        }
+
+        action_list = [
+            {'name': 'store_validation_result',
+            'action': {'class_name': 'StoreValidationResultAction'}},
+            {'name': 'store_evaluation_params',
+            'action': {'class_name': 'StoreEvaluationParametersAction'}},
+            {'name': 'update_data_docs',
+            'action': {'class_name': 'UpdateDataDocsAction'}},
+            email_action_config
+        ]
+
+        checkpoint_config = {
+            "name": "my_checkpoint",
+            "config_version": 1.0,
+            "class_name": "Checkpoint",
+            "module_name": "great_expectations.checkpoint",
+            "expectation_suite_name": "my_suite",
+            "batch_request": batch_request,
+            "action_list": action_list,
+        }
+
+        checkpoint = context.add_checkpoint(**checkpoint_config)
+        result = context.run_checkpoint("my_checkpoint")
+        ```
+        </td>
+        <td>
+        ```python
+        import great_expectations as gx
+        import great_expectations.expectations as gxe
+
+        context = gx.get_context(mode="file")
+        data_source = context.data_sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="./data")
+        file_csv_asset = data_source.add_csv_asset(name="taxi_data")
+        monthly = file_csv_asset.add_batch_definition_monthly(name="monthly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+
+        suite = context.suites.add(gx.ExpectationSuite(name="my_suite"))
+        suite.add_expectation(gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=10))
+
+        validation_definition = context.validation_definitions.add(
+            gx.ValidationDefinition(data=monthly, suite=suite, name="my_validation_definition")
+        )
+        checkpoint = context.checkpoints.add(
+            gx.Checkpoint(
+                name="my_checkpoint",
+                validation_definitions=[validation_definition],
+                actions=[
+                    gx.checkpoint.UpdateDataDocsAction(name="update_data_docs"),
+                    gx.checkpoint.EmailAction(
+                        name="my_email_action",
+                        notify_on="all",
+                        use_tls=True,
+                        use_ssl=False,
+                        smtp_address="smtp.myserver.com",
+                        smtp_port=587,
+                        sender_login="sender@myserver.com",
+                        sender_password="XXXXXXXXXX",
+                        sender_alias="alias@myserver.com",
+                        receiver_emails="receiver@myserver.com",
+                    ),
+                ],
+            )
+        )
+        result = checkpoint.run()
+        ```
+        </td>
+    </tr>
+</table>
