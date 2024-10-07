@@ -174,7 +174,7 @@ Here you are using the `docker exec` command to open an interactive terminal ins
 Next, run the `dbt deps` command to install dependencies. Then, copy the seed data into the seeds folder by running `cp jaffle-data/*.csv` and run the `dbt seed` command to import the data into the PostgreSQL database. By default, it will import the data into a new schema called `jaffle_shop_raw`. This step might take a few minutes to complete.
 
 ```bash
-dpt deps
+dbt deps
 cp jaffle-data/*.csv seeds
 dbt seed
 ```
