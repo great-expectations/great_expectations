@@ -249,6 +249,12 @@ class SlackNotificationAction(DataDocsAction):
 
         return values
 
+    @classmethod
+    def _substitute_slack_credential(
+        cls, slack_credential: ConfigStr, config_provider: _ConfigurationProvider
+    ) -> str:
+        return slack_credential.get_config_value(config_provider=config_provider)
+
     @override
     def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
