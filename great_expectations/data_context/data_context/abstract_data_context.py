@@ -7,6 +7,7 @@ import os
 import pathlib
 import sys
 import uuid
+import warnings
 import webbrowser
 from abc import ABC, abstractmethod
 from collections import OrderedDict
@@ -851,6 +852,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ValueError: The input `datasource_name` is None.
         """
+        warnings.warn(
+            "context.get_datasource is deprecated as of v1.2.0. "
+            "Please use context.data_sources.get instead",
+            category=DeprecationWarning,
+        )
         try:
             return self.data_sources.get(name)
         except KeyError as e:

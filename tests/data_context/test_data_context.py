@@ -109,7 +109,7 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
     titanic_data_context: AbstractDataContext,
 ):
     # this is deprecated
-    with pytest.raises(ValueError):
+    with pytest.warns(DeprecationWarning), pytest.raises(ValueError):
         _ = titanic_data_context.get_datasource("fakey_mc_fake")
 
 
@@ -120,8 +120,12 @@ def test_data_context_get_datasource(
     # this is deprecated
     name = "my datasource"
     ds = titanic_data_context.data_sources.add_pandas(name)
-    fetched_ds = titanic_data_context.get_datasource(name)
+    with pytest.warns(DeprecationWarning) as warning_records:
+        fetched_ds = titanic_data_context.get_datasource(name)
+
     assert fetched_ds == ds
+    assert len(warning_records) == 1
+    assert "context.get_datasource is deprecated" in str(warning_records.list[0].message)
 
 
 @pytest.mark.unit
