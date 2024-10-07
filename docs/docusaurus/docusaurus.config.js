@@ -78,7 +78,7 @@ module.exports = {
       contextualSearch: true,
     },
     prism: {
-      additionalLanguages: ['bash', 'json'],
+      additionalLanguages: ['bash', 'json', 'python'],
       theme: require('./src/theme/CodeBlock/theme'),
       magicComments: [
         // Remember to extend the default highlight class name as well!

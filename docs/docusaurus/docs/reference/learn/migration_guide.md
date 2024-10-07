@@ -19,7 +19,7 @@ In GX `0.X` and in GX `1.0`, every Expectation Suite has its own configuration f
 
 `gx/expectations/<suite_name>.json`
 
-### Configuration file differences
+#### Configuration file differences
 
 Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
 
@@ -122,18 +122,60 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
 
 **expectations**: This is a list of expectations. The expectation keys have changed as follows
 
-    **expectation_type**: This has been changed to type.
+> **expectation_type**: This has been changed to type.
 
-    **kwargs**: This is unchanged
+> **kwargs**: This is unchanged
 
-    **meta**: This dictionary that a user can populate with whatever metadata they would like. The notes key that Great Expectations Cloud used has been pulled out into a top level key.
+> **meta**: This dictionary that a user can populate with whatever metadata they would like. The notes key that Great Expectations Cloud used has been pulled out into a top level key.
 
-    **id**: This new field introduced in 1.0 can be any arbitrary, unique UUID. When migrating, generate and add a UUID.
+> **id**: This new field introduced in 1.0 can be any arbitrary, unique UUID. When migrating, generate and add a UUID.
 
-    **notes (new field)**: This new top-level field replaces meta.notes. This is consumed by Great Expectations Cloud to display user notes on the Cloud UI.
+> **notes (new field)**: This new top-level field replaces meta.notes. This is consumed by Great Expectations Cloud to display user notes on the Cloud UI.
 
 **ge_cloud_id**: This is now id. This is now a required field. Migrators can generate a unique, arbitrary UUID and add it.
 
 **meta**: The format is unchanged.
 
 **notes**: This is new in 1.0 and is an arbitrary string.
+
+#### Suite Creation API Calls
+
+The suites above were created with the following API calls. This example demonstrates how to create an equivalent suite to your V0 suite in V1.
+
+<table>
+    <tr>
+        <th>V0 Expectation Suite API</th>
+        <th>V1 Expectation Suite API</th>
+    </tr>
+    <tr>
+        <td>
+        ```python
+        suite = context.add_expectation_suite(
+            expectation_suite_name="suite_for_yellow_tripdata",
+            meta={"foo": "bar", "notes": "Here are some suite notes."},
+            evaluation_parameters={"parameter_name": "value"},
+            data_asset_type="CSVAsset", # V1 no longer supports this argument, expectations are type independent
+        )
+        validator = context.get_validator(batch_request=asset.build_batch_request(), expectation_suite_name="suite_for_yellow_tripdata")
+        validator.expect_column_values_to_be_between(column="passenger_count", min_value=0, max_value=4)
+        validator.expect_column_values_to_be_in_set(column="VendorID", value_set=[1,2,3,4])
+        validator.save_expectation_suite(discard_failed_expectations=False)
+        ```
+        </td>
+        <td>
+        ```python
+        suite = context.suites.add(
+            gx.ExpectationSuite(
+                name="suite_for_yellow_tripdata",
+                meta={"foo": "bar"},
+                suite_parameters={"parameter_name": "value"},
+                notes="Here are some suite notes.",
+                id="77373d6f-3561-4d62-b150-96c36dccbe55",
+            )
+        )
+        suite.add_expectation(gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=4))
+        suite.add_expectation(gxe.ExpectColumnValuesToBeInSet(column="VendorID", value_set=[1,2,3,4]))
+        ```
+        </td>
+    </tr>
+</table>
