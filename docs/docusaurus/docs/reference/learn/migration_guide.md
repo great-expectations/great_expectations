@@ -681,3 +681,243 @@ A few configurations are **NO LONGER SUPPORTED**:
         </td>
     </tr>
 </table>
+
+#### Postgres
+The postgres Data Source/Asset migration from `V0` to `V1` is almost identical to the Snowflake one in terms of fields. All the fields are identical and how to migrate them from `V0` to `V1` is identical so please refer to the Snowflake section for a description. The differences in values are:
+- The **type** field value is `postgres` instead of `snowflake` 
+- We are NOT requiring schemas in V1 for postgres table assets.
+
+Here is an example great_expectations.yml  fluent_datasources block and creation of this datasource and asset via the API.
+
+The provided connection string is a sample dataset GX maintains.
+
+Here is an example `great_expectations.yml` `fluent_datasources` block and creation of this datasource and asset via the API.
+
+The provided connection string is a sample dataset GX maintains.
+
+<table>
+    <tr>
+        <th>V0 Postgres Config</th>
+        <th>V1 Postgres Config</th>
+    </tr>
+    <tr>
+        <td>
+        ```yaml
+        fluent_datasources:
+            postgres_ds:
+                type: postgres
+                assets:
+                yearly_taxi_data:
+                    type: table
+                    order_by:
+                    - key: year
+                        reverse: false
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup
+                    method_name: split_on_year
+                    table_name: nyc_taxi_data
+                    schema_name:
+                monthly_taxi_data:
+                    type: table
+                    order_by:
+                    - key: year
+                        reverse: true
+                    - key: month
+                        reverse: true
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup
+                    method_name: split_on_year_and_month
+                    table_name: nyc_taxi_data
+                    schema_name:
+                daily_taxi_data:
+                    type: table
+                    order_by:
+                    - key: year
+                        reverse: false
+                    - key: month
+                        reverse: false
+                    - key: day
+                        reverse: false
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup
+                    method_name: split_on_year_and_month_and_day
+                    table_name: nyc_taxi_data
+                    schema_name:
+                all_taxi_data:
+                    type: table
+                    order_by: []
+                    batch_metadata: {}
+                    table_name: nyc_taxi_data
+                    schema_name:
+                query_yearly:
+                    type: query
+                    order_by:
+                    - key: year
+                        reverse: false
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup
+                    method_name: split_on_year
+                    query: select * from nyc_taxi_data
+                query_monthly:
+                    type: query
+                    order_by:
+                    - key: year
+                        reverse: true
+                    - key: month
+                        reverse: true
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup
+                    method_name: split_on_year_and_month
+                    query: select * from nyc_taxi_data
+                query_daily:
+                    type: query
+                    order_by:
+                    - key: year
+                        reverse: false
+                    - key: month
+                        reverse: false
+                    - key: day
+                        reverse: false
+                    batch_metadata: {}
+                    splitter:
+                    column_name: pickup
+                    method_name: split_on_year_and_month_and_day
+                    query: select * from nyc_taxi_data
+                whole_query:
+                    type: query
+                    order_by: []
+                    batch_metadata: {}
+                    query: select * from nyc_taxi_data
+                connection_string: 
+                postgresql+psycopg2://try_gx:try_gx@postgres.workshops.greatexpectations.io/gx_example_db
+        ```
+        </td>
+        <td>
+        ```yaml
+        fluent_datasources:
+            postgres_ds:
+                type: postgres
+                id: cc4984f4-dbad-4488-8b0a-47ec47fc294c
+                assets:
+                taxi_data:
+                    type: table
+                    id: cb140e3c-d33f-4920-9bfc-2a23de990283
+                    batch_metadata: {}
+                    batch_definitions:
+                    table_yearly:
+                        id: 23e9d1c7-d22e-44f3-b1fa-eb0db1df4ce8
+                        partitioner:
+                        column_name: pickup
+                        sort_ascending: true
+                        method_name: partition_on_year
+                    table_monthly:
+                        id: be939a11-a257-4f9a-83c8-8efd1b25d9c9
+                        partitioner:
+                        column_name: pickup
+                        sort_ascending: false
+                        method_name: partition_on_year_and_month
+                    table_daily:
+                        id: 80fb4af2-2ab2-4a09-a05d-849835677c45
+                        partitioner:
+                        column_name: pickup
+                        sort_ascending: true
+                        method_name: partition_on_year_and_month_and_day
+                    whole_table:
+                        id: 09674cda-573c-400b-9a64-10dcdaecb60b
+                        partitioner:
+                    table_name: nyc_taxi_data
+                    schema_name:
+                query_data:
+                    type: query
+                    id: 9ad6b38b-2337-4f51-bae2-31afb212c5f2
+                    batch_metadata: {}
+                    batch_definitions:
+                    query_yearly:
+                        id: 56455714-0622-46b0-857f-60d964e1d004
+                        partitioner:
+                        column_name: pickup
+                        sort_ascending: true
+                        method_name: partition_on_year
+                    query_monthly:
+                        id: e96513f1-12b8-419d-a1b9-4aacedfd396d
+                        partitioner:
+                        column_name: pickup
+                        sort_ascending: false
+                        method_name: partition_on_year_and_month
+                    query_daily:
+                        id: 996a2813-6eff-4c8a-88c6-5ca9ab60e275
+                        partitioner:
+                        column_name: pickup
+                        sort_ascending: true
+                        method_name: partition_on_year_and_month_and_day
+                    whole_query:
+                        id: f947cbc4-3d3b-4f92-bee0-4186fdac2b61
+                        partitioner:
+                    query: SELECT * FROM nyc_taxi_data
+                connection_string: 
+                postgresql+psycopg2://try_gx:try_gx@postgres.workshops.greatexpectations.io/gx_example_db
+        ```
+        </td>
+    </tr>
+</table>
+
+##### Postgresql Creation via API
+<table>
+    <tr>
+        <th>V0 Postgres Creation  via API</th>
+        <th>V1 Postgres Creation  via API</th>
+    </tr>
+    <tr>
+        <td>
+        ```python
+        # Creating a datasource
+        connection_string = "postgresql+psycopg2://try_gx:try_gx@postgres.workshops.greatexpectations.io/gx_example_db"
+        ds = context.sources.add_postgres(name="postgres_ds", connection_string=connection_string)
+
+        # Creating table assets
+        yearly_asset = ds.add_table_asset(name="yearly_taxi_data", table_name="nyc_taxi_data", order_by=["+year"])
+        yearly_asset.add_splitter_year(column_name="pickup")
+        monthly_asset = ds.add_table_asset(name="monthly_taxi_data", table_name="nyc_taxi_data", order_by=["-year", "-month"])
+        monthly_asset.add_splitter_year_and_month(column_name="pickup")
+        daily_asset = ds.add_table_asset(name="daily_taxi_data", table_name="nyc_taxi_data", order_by=["+year", "+month", "+day"])
+        daily_asset.add_splitter_year_and_month_and_day(column_name="pickup")
+        whole_table_asset = ds.add_table_asset(name="all_taxi_data", table_name="nyc_taxi_data")
+
+        # Creating query Assets
+        yearly_query_asset = ds.add_query_asset(name="query_yearly", query="select * from nyc_taxi_data", order_by=["+year"])
+        yearly_query_asset.add_splitter_year(column_name="pickup")
+        monthly_query_asset = ds.add_query_asset(name="query_monthly", query="select * from nyc_taxi_data", order_by=["-year", "-month"])
+        monthly_query_asset.add_splitter_year_and_month(column_name="pickup")
+        daily_query_asset = ds.add_query_asset(name="query_daily", query="select * from nyc_taxi_data", order_by=["+year", "+month", "+day"])
+        daily_query_asset.add_splitter_year_and_month_and_day(column_name="pickup")
+        query_whole_table_asset = ds.add_query_asset(name="whole_query", query="select * from nyc_taxi_data")
+        ```
+        </td>
+        <td>
+        ```python 
+        # Creating a datasource
+        connection_string = "postgresql+psycopg2://try_gx:try_gx@postgres.workshops.greatexpectations.io/gx_example_db"
+        ds = context.data_sources.add_postgres(name="postgres_ds", connection_string=connection_string)
+
+        # Creating a table asset and batch definitions
+        table_asset = ds.add_table_asset(name="taxi_data", table_name="nyc_taxi_data")
+        table_yearly = table_asset.add_batch_definition_yearly(name="table_yearly", column="pickup", sort_ascending=True)
+        table_monthly = table_asset.add_batch_definition_monthly(name="table_monthly", column="pickup", sort_ascending=False)
+        table_daily = table_asset.add_batch_definition_daily(name="table_daily", column="pickup", sort_ascending=True)
+        whole_table = table_asset.add_batch_definition_whole_table(name="whole_table")
+
+        # Creating a query asset and batch definitions
+        query_asset = ds.add_query_asset(name="query_data", query="SELECT * FROM nyc_taxi_data")
+        query_yearly = query_asset.add_batch_definition_yearly(name="query_yearly", column="pickup", sort_ascending=True)
+        query_monthly = query_asset.add_batch_definition_monthly(name="query_monthly", column="pickup", sort_ascending=False)
+        query_daily = query_asset.add_batch_definition_daily(name="query_daily", column="pickup", sort_ascending=True)
+        query_whole_table = query_asset.add_batch_definition_whole_table(name="whole_query")
+        ```
+        </td>
+    </tr>
+</table>
