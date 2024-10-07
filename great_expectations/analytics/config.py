@@ -11,14 +11,14 @@ from great_expectations.compatibility.pydantic import (
 
 
 class _EnvConfig(BaseSettings):
-    gx_analytics_enabled: bool = True
+    gx_analytics_enabled: Optional[bool] = None
 
     gx_posthog_debug: bool = False
     gx_posthog_host: HttpUrl = "https://posthog.greatexpectations.io"  # type: ignore[assignment] # default will be coerced
     gx_posthog_project_api_key: str = "phc_ph6ugZ1zq94dli0r1xgFg19fk2bb1EdDoLn9NZnCvRs"
 
     @property
-    def posthog_enabled(self) -> bool:
+    def posthog_enabled(self) -> Optional[bool]:
         return self.gx_analytics_enabled
 
     @property
