@@ -287,3 +287,98 @@ In `0.X`, a Data Source represents where the data lives and the execution engine
 :::note
 We no longer support arbitrary batching regexes. Batches must be defined by one of our temporal batch definitions which are yearly, monthly, or daily.
 :::
+
+#### Pandas Filesystem Creation via API
+
+<table>
+    <tr>
+        <th>V0 Pandas Filesystem Creation via API</th>
+        <th>V1 Pandas Filesystem Creation via API</th>
+    </tr>
+    <tr>
+        <td>
+        ```python
+        # Pandas Filesystem Data Source
+        datasource = context.sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
+
+        # Data Assets
+        yearly = datasource.add_csv_asset(name="yearly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
+        monthly = datasource.add_csv_asset(name="monthly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+        daily = datasource.add_csv_asset(name="daily_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
+        arbitrary = datasource.add_csv_asset(name="arbitrary_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<code>\w+)\.csv")
+        ```
+        </td>
+        <td>
+        ```python
+        # Pandas Filesystem Data Source
+        data_source = context.data_sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
+
+        # CSV Data Asset
+        file_csv_asset = data_source.add_csv_asset(name="taxi_data")
+
+        # Batch Definitions
+        yearly = file_csv_asset.add_batch_definition_yearly(name="yearly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
+        monthly = file_csv_asset.add_batch_definition_monthly(name="monthly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+        daily = file_csv_asset.add_batch_definition_daily(name="daily_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
+        ```
+        </td>
+    </tr>
+</table>
+
+#### Pandas Dataframe
+<table>
+    <tr>
+        <th>V0 Pandas Dataframe Config</th>
+        <th>V1 Pandas Dataframe Config</th>
+    </tr>
+    <tr>
+        <td>
+        ```yaml
+        fluent_datasources:
+        pd_df_ds:
+            type: pandas
+            assets:
+            taxi_dataframe_asset:
+                type: dataframe
+                batch_metadata: {}
+        ```
+        </td>
+        <td>
+        ```yaml
+        fluent_datasources:
+            pd_df_ds:
+                type: pandas
+                assets:
+                taxi_dataframe_asset:
+                    type: dataframe
+                    batch_metadata: {}
+                    batch_definitions:
+                    taxi_dataframe_batch_def:
+                        id: bf0de640-7791-4654-86b0-5f737319e993
+                        partitioner:
+                    id: 352b392d-f0a5-4c7c-911f-fd68903599e0
+                id: 4e0a4b9c-efc2-40e8-8114-6a45ac697554
+        ```
+        </td>
+    </tr>
+</table>
+
+In both `V0` and `V1` a pandas Data Source reads in data from a pandas dataframe. In `V1` there is a concept of a *Batch Definition* that is used to partition data into batches. For a pandas dataframe the only *Batch Definition* currently available is the whole dataframe *Batch Definition*.
+
+**pd_df_ds (example)**: The keys below fluent_datasources are the names of the Data Sources. This is unchanged.
+
+**assets**: A list of the Data Assets. Each key is an asset name in both V0 and V1. The asset value is different.
+
+> **type**: The type of Data Source. This is unchanged.
+
+> **batch_metadata**: Arbitrary key/values pairs used to annotate the Data Asset. In V1 this is unchanged, it still describes the asset.
+
+> **batch_definitions**: This is new in V1. There is only 1 option here. The key is the name of the Batch Definition. It has 2 fields:
+
+>> **id**: An arbitrary UUID. Migrators can assign any unique UUID.
+
+>> **partitioner**: This is left empty as we only allow the whole dataframe
+
+> **id**: In V1, the asset has a unique ID. Migrators can assign any unique UUID.
+
+**id**: In V1, the Data Source has a unique ID. Migrators can assign any unique UUID.
