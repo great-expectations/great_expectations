@@ -14,6 +14,27 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.1.1
+* [BUGFIX] Ensure that `SlackNotificationAction` credentials don't get serialized ([#10476](https://github.com/great-expectations/great_expectations/pull/10476))
+* [BUGFIX] Ensure that Cloud-backed validation results get IDs ([#10478](https://github.com/great-expectations/great_expectations/pull/10478))
+* [DOCS] Remove Python 3.8 reference from readme ([#10474](https://github.com/great-expectations/great_expectations/pull/10474))
+* [DOCS] dbt Tutorial created in collaboration with Jonathan Porter ([#10458](https://github.com/great-expectations/great_expectations/pull/10458))
+* [DOCS] Replace terms.json urls in v0.18 ([#10479](https://github.com/great-expectations/great_expectations/pull/10479)) (thanks @deborahniesz)
+* [MAINTENANCE] Bump dompurify from 3.0.11 to 3.1.7 in /docs/docusaurus ([#10465](https://github.com/great-expectations/great_expectations/pull/10465))
+* [MAINTENANCE] Bump express from 4.19.2 to 4.21.0 in /docs/docusaurus ([#10464](https://github.com/great-expectations/great_expectations/pull/10464))
+* [MAINTENANCE] Bump webpack from 5.88.2 to 5.94.0 in /docs/docusaurus ([#10463](https://github.com/great-expectations/great_expectations/pull/10463))
+* [MAINTENANCE] Bump micromatch from 4.0.5 to 4.0.8 in /docs/docusaurus ([#10466](https://github.com/great-expectations/great_expectations/pull/10466))
+* [MAINTENANCE] Remove old team and non-gx employees from teams.yml ([#10469](https://github.com/great-expectations/great_expectations/pull/10469))
+* [MAINTENANCE] Remove contrib pipeline. ([#10470](https://github.com/great-expectations/great_expectations/pull/10470))
+* [MAINTENANCE] Remove `makefun` dependency ([#10472](https://github.com/great-expectations/great_expectations/pull/10472))
+* [MAINTENANCE] Add `public-api` check back to CI ([#10449](https://github.com/great-expectations/great_expectations/pull/10449))
+* [MAINTENANCE] Clean up requirements files ([#10485](https://github.com/great-expectations/great_expectations/pull/10485))
+* [MAINTENANCE] Remove `ipython` dependency ([#10487](https://github.com/great-expectations/great_expectations/pull/10487))
+* [MAINTENANCE] Remove `pytz` dependency ([#10489](https://github.com/great-expectations/great_expectations/pull/10489))
+* [MAINTENANCE] Update experimental metric repository for V1 backend api ([#10486](https://github.com/great-expectations/great_expectations/pull/10486))
+* [MAINTENANCE] Remove `urllib3` dependency ([#10488](https://github.com/great-expectations/great_expectations/pull/10488))
+
+
 ### 1.1.0
 * [FEATURE] Update `Batch.validate()` API to accept expectation parameters ([#10456](https://github.com/great-expectations/great_expectations/pull/10456))
 * [BUGFIX] README.md updated link ([#10446](https://github.com/great-expectations/great_expectations/pull/10446))
@@ -29,40 +50,6 @@ Before we completely remove the functionality in a new major release, there will
 * [MAINTENANCE] Mark GX as stable on PyPi ([#10457](https://github.com/great-expectations/great_expectations/pull/10457))
 * [MAINTENANCE] Add Alena Hutchinson to core developers team ([#10459](https://github.com/great-expectations/great_expectations/pull/10459))
 * [MAINTENANCE] Remove Python 3.8 Support (EOL) ([#10441](https://github.com/great-expectations/great_expectations/pull/10441))
-
-### 1.1.0
-* [FEATURE] Improve context.data_sources autocomplete ([#10447](https://github.com/great-expectations/great_expectations/pull/10447))
-* [FEATURE] Update `Batch.validate()` API to accept expectation parameters ([#10456](https://github.com/great-expectations/great_expectations/pull/10456))
-* [BUGFIX] README.md updated link ([#10446](https://github.com/great-expectations/great_expectations/pull/10446))
-* [BUGFIX] Ensure that fluent_datasources show up in context ([#10438](https://github.com/great-expectations/great_expectations/pull/10438))
-* [BUGFIX] Enable `SlackNotificationAction` variable substitution ([#10443](https://github.com/great-expectations/great_expectations/pull/10443))
-* [BUGFIX] Ensure that `SlackNotificationAction` credentials don't get serialized ([#10476](https://github.com/great-expectations/great_expectations/pull/10476))
-* [BUGFIX] Ensure that Cloud-backed validation results get IDs ([#10478](https://github.com/great-expectations/great_expectations/pull/10478))
-* [DOCS] Bump python version to 3.9 in docs ([#10453](https://github.com/great-expectations/great_expectations/pull/10453))
-* [DOCS] add example of environment variable substitution ([#10417](https://github.com/great-expectations/great_expectations/pull/10417)) (thanks @adeola-ak)
-* [DOCS] Add `Databricks (SQL)` to Cloud supported list ([#10452](https://github.com/great-expectations/great_expectations/pull/10452))
-* [DOCS] Remove Python 3.8 reference from readme ([#10474](https://github.com/great-expectations/great_expectations/pull/10474))
-* [DOCS] dbt Tutorial created in collaboration with Jonathan Porter ([#10458](https://github.com/great-expectations/great_expectations/pull/10458))
-* [DOCS] Replace terms.json urls in v0.18 ([#10479](https://github.com/great-expectations/great_expectations/pull/10479)) (thanks @deborahniesz)
-* [MAINTENANCE] Use `Comparable` type alias for Expectation min/max value ([#10448](https://github.com/great-expectations/great_expectations/pull/10448))
-* [MAINTENANCE] Remove `mostly` from `ExpectColumnUniqueValueCountToBeBetween` ([#10450](https://github.com/great-expectations/great_expectations/pull/10450))
-* [MAINTENANCE] Limit Result Format and `QueryMetricProvider` total unexpected records ([#10432](https://github.com/great-expectations/great_expectations/pull/10432))
-* [MAINTENANCE] Mark GX as stable on PyPi ([#10457](https://github.com/great-expectations/great_expectations/pull/10457))
-* [MAINTENANCE] Add Alena Hutchinson to core developers team ([#10459](https://github.com/great-expectations/great_expectations/pull/10459))
-* [MAINTENANCE] Remove Python 3.8 Support (EOL) ([#10441](https://github.com/great-expectations/great_expectations/pull/10441))
-* [MAINTENANCE] Bump dompurify from 3.0.11 to 3.1.7 in /docs/docusaurus ([#10465](https://github.com/great-expectations/great_expectations/pull/10465))
-* [MAINTENANCE] Bump express from 4.19.2 to 4.21.0 in /docs/docusaurus ([#10464](https://github.com/great-expectations/great_expectations/pull/10464))
-* [MAINTENANCE] Bump webpack from 5.88.2 to 5.94.0 in /docs/docusaurus ([#10463](https://github.com/great-expectations/great_expectations/pull/10463))
-* [MAINTENANCE] Bump micromatch from 4.0.5 to 4.0.8 in /docs/docusaurus ([#10466](https://github.com/great-expectations/great_expectations/pull/10466))
-* [MAINTENANCE] Remove old team and non-gx employees from teams.yml ([#10469](https://github.com/great-expectations/great_expectations/pull/10469))
-* [MAINTENANCE] Remove contrib pipeline. ([#10470](https://github.com/great-expectations/great_expectations/pull/10470))
-* [MAINTENANCE] Remove `makefun` dependency ([#10472](https://github.com/great-expectations/great_expectations/pull/10472))
-* [MAINTENANCE] Add `public-api` check back to CI ([#10449](https://github.com/great-expectations/great_expectations/pull/10449))
-* [MAINTENANCE] Clean up requirements files ([#10485](https://github.com/great-expectations/great_expectations/pull/10485))
-* [MAINTENANCE] Remove `ipython` dependency ([#10487](https://github.com/great-expectations/great_expectations/pull/10487))
-* [MAINTENANCE] Remove `pytz` dependency ([#10489](https://github.com/great-expectations/great_expectations/pull/10489))
-* [MAINTENANCE] Update experimental metric repository for V1 backend api ([#10486](https://github.com/great-expectations/great_expectations/pull/10486))
-* [MAINTENANCE] Remove `urllib3` dependency ([#10488](https://github.com/great-expectations/great_expectations/pull/10488))
 
 ### 1.0.6
 * [FEATURE] Add windows attribute to support experimental gx-cloud feature ([#10402](https://github.com/great-expectations/great_expectations/pull/10402))
