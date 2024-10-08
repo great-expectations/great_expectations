@@ -33,7 +33,7 @@ def spark_validation_definition(
             expectations=[
                 gx.expectations.ExpectColumnValuesToBeInSet(
                     column="column",
-                    value_set=DATAFRAME_VALUES,  # type: ignore[arg-type] # TODO: Fix in CORE-412
+                    value_set=DATAFRAME_VALUES,
                 ),
             ],
         )
