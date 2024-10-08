@@ -31,66 +31,26 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
       {value: 'v1_expectation_suite_config', label: 'V1 Expectation Suite Configuration'}
    ]}
 >
-<TabItem value="v0_expectation_suite_config" label="V0 Expectation Suite Configuration">
-```json
-{
-    "expectation_suite_name": "suite_for_yellow_tripdata",
-    "data_asset_type": "CSVAsset",
-    "evaluation_parameters": {
-        "parameter_name": "value"
-},
-"expectations": [
+    <TabItem value="v0_expectation_suite_config" label="V0 Expectation Suite Configuration">
+    ```json
     {
-        "expectation_type": "expect_column_values_to_be_between",
-        "kwargs": {
-            "column": "passenger_count",
-            "max_value": 4,
-            "min_value": 0
-        },
-        "meta": {}
-    },
-    {
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-            "column": "VendorID",
-            "value_set": [
-                1,
-                2,
-                3,
-                4
-            ]
-        },
-    "meta": {}
-    }
-],
-"ge_cloud_id": null,
-"meta": {
-    "foo": "bar",
-    "great_expectations_version": "0.18.19"
-    }
-}              
-```
-</TabItem>
-<TabItem value="v1_expectation_suite_config" label="V1 Expectation Suite Configuration">
-```json
-{
-    "name": "suite_for_yellow_tripdata",
-    "suite_parameters": {
-        "parameter_name": "value"
+        "expectation_suite_name": "suite_for_yellow_tripdata",
+        "data_asset_type": "CSVAsset",
+        "evaluation_parameters": {
+            "parameter_name": "value"
     },
     "expectations": [
         {
-            "type": "expect_column_values_to_be_between",
+            "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {
                 "column": "passenger_count",
-                "max_value": 4.0,
-                "min_value": 0.0
+                "max_value": 4,
+                "min_value": 0
             },
-            "meta": {},
-            "id": "24dc475c-38a3-4234-ab47-b13d0f233242"
+            "meta": {}
         },
         {
-            "type": "expect_column_values_to_be_in_set",
+            "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {
                 "column": "VendorID",
                 "value_set": [
@@ -100,19 +60,60 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
                     4
                 ]
             },
-            "meta": {},
-            "id": "d8b3b4e9-296f-4dd5-bd29-aac6a00cba1c"
+        "meta": {}
         }
     ],
-    "id": "77373d6f-3561-4d62-b150-96c36dccbe55",
+    "ge_cloud_id": null,
     "meta": {
         "foo": "bar",
-        "great_expectations_version": "1.0.0"
-    },
-    "notes": "This is a new field."
-}            
-```
-</TabItem>
+        "great_expectations_version": "0.18.19"
+        }
+    }              
+    ```
+    </TabItem>
+    <TabItem value="v1_expectation_suite_config" label="V1 Expectation Suite Configuration">
+    ```json
+    {
+        "name": "suite_for_yellow_tripdata",
+        "suite_parameters": {
+            "parameter_name": "value"
+        },
+        "expectations": [
+            {
+                "type": "expect_column_values_to_be_between",
+                "kwargs": {
+                    "column": "passenger_count",
+                    "max_value": 4.0,
+                    "min_value": 0.0
+                },
+                "meta": {},
+                "id": "24dc475c-38a3-4234-ab47-b13d0f233242"
+            },
+            {
+                "type": "expect_column_values_to_be_in_set",
+                "kwargs": {
+                    "column": "VendorID",
+                    "value_set": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ]
+                },
+                "meta": {},
+                "id": "d8b3b4e9-296f-4dd5-bd29-aac6a00cba1c"
+            }
+        ],
+        "id": "77373d6f-3561-4d62-b150-96c36dccbe55",
+        "meta": {
+            "foo": "bar",
+            "great_expectations_version": "1.0.0"
+        },
+        "notes": "This is a new field."
+    }            
+    ```
+    </TabItem>
+</Tabs>
 
 **expectation_suite_name**: This is now called name and has the name of the suite.
 
