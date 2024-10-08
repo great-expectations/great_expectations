@@ -1279,7 +1279,7 @@ The V0 configuration lives in `gx/checkpoints/<CHECKPOINT_NAME>.yml`. In V1, the
     ```
     </TabItem>
     <TabItem value="v1_checkpoints_yaml" label="V1: gx/checkpoints/my_checkpoint and gx/validation_definitions/my_validation_definition">
-    gx/validation_definitions/my_validation_definition
+    **gx/validation_definitions/my_validation_definition**
     ```json
     {
         "data": {
@@ -1305,7 +1305,7 @@ The V0 configuration lives in `gx/checkpoints/<CHECKPOINT_NAME>.yml`. In V1, the
     }
     ```
 
-    gx/checkpoints/my_checkpoint
+    **gx/checkpoints/my_checkpoint**
     ```json
     {
         "actions": [
