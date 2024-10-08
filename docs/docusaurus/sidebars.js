@@ -434,6 +434,14 @@ module.exports = {
         'reference/learn/data_quality_use_cases/freshness'
       ]
     },
+    {
+      type: 'category',
+      label: 'Integrations',
+      link: { type: 'doc', id: 'reference/learn/integrations/integrations_lp' },
+      items: [
+        'reference/learn/integrations/dbt_tutorial',
+      ]
+    },
     'reference/learn/usage_statistics',
     'reference/learn/glossary'
   ],

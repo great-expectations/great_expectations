@@ -954,20 +954,28 @@ class TestV1ActionRun:
             validation_identifier_b: {},
         }
 
+    @pytest.mark.unit
+    def test_SlackNotificationAction_variable_substitution_webhook(
+        self, mock_context, checkpoint_result
+    ):
+        action = SlackNotificationAction(name="my_action", slack_webhook="${SLACK_WEBHOOK}")
 
-@pytest.mark.unit
-def test_SlackNotificationAction_variable_substitution_webhook(mock_context):
-    SlackNotificationAction(name="my_action", slack_webhook="${SLACK_WEBHOOK}")
+        with mock.patch("great_expectations.checkpoint.actions.send_slack_notification"):
+            action.run(checkpoint_result)
 
-    mock_context.config_provider.substitute_config.assert_called_once_with("${SLACK_WEBHOOK}")
+        mock_context.config_provider.substitute_config.assert_called_once_with("${SLACK_WEBHOOK}")
 
+    @pytest.mark.unit
+    def test_SlackNotificationAction_variable_substitution_token_and_channel(
+        self, mock_context, checkpoint_result
+    ):
+        action = SlackNotificationAction(
+            name="my_action", slack_token="${SLACK_TOKEN}", slack_channel="${SLACK_CHANNEL}"
+        )
 
-@pytest.mark.unit
-def test_SlackNotificationAction_variable_substitution_token_and_channel(mock_context):
-    SlackNotificationAction(
-        name="my_action", slack_token="${SLACK_TOKEN}", slack_channel="${SLACK_CHANNEL}"
-    )
+        with mock.patch("great_expectations.checkpoint.actions.send_slack_notification"):
+            action.run(checkpoint_result)
 
-    assert mock_context.config_provider.substitute_config.call_count == 2
-    mock_context.config_provider.substitute_config.assert_any_call("${SLACK_CHANNEL}")
-    mock_context.config_provider.substitute_config.assert_any_call("${SLACK_TOKEN}")
+        assert mock_context.config_provider.substitute_config.call_count == 2
+        mock_context.config_provider.substitute_config.assert_any_call("${SLACK_CHANNEL}")
+        mock_context.config_provider.substitute_config.assert_any_call("${SLACK_TOKEN}")
