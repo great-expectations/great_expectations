@@ -23,96 +23,96 @@ In GX `0.X` and in GX `1.0`, every Expectation Suite has its own configuration f
 
 Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
 
-<table>
-    <tr>
-        <th>V0 Expectation Suite Configuration</th>
-        <th>V1 Expectation Suite Configuration</th>
-    </tr>
-    <tr>
-        <td><pre>
-        ```json
-            {
-                "expectation_suite_name": "suite_for_yellow_tripdata",
-                "data_asset_type": "CSVAsset",
-                "evaluation_parameters": {
-                    "parameter_name": "value"
-            },
-            "expectations": [
-                {
-                    "expectation_type": "expect_column_values_to_be_between",
-                    "kwargs": {
-                        "column": "passenger_count",
-                        "max_value": 4,
-                        "min_value": 0
-                    },
-                    "meta": {}
-                },
-                {
-                    "expectation_type": "expect_column_values_to_be_in_set",
-                    "kwargs": {
-                        "column": "VendorID",
-                        "value_set": [
-                            1,
-                            2,
-                            3,
-                            4
-                        ]
-                    },
-                "meta": {}
-                }
-            ],
-            "ge_cloud_id": null,
-            "meta": {
-                "foo": "bar",
-                "great_expectations_version": "0.18.19"
-                }
-            }              
-        ```
-        </pre></td>
-        <td><pre>
-        ```json
+<Tabs 
+   queryString="expectation_config"
+   defaultValue="v0_expectation_suite_config"
+   values={[
+      {value: 'v0_expectation_suite_config', label: 'V0 Expectation Suite Configuration'},
+      {value: 'v1_expectation_suite_config', label: 'V1 Expectation Suite Configuration'}
+   ]}
+>
+<TabItem value="v0_expectation_suite_config" label="V0 Expectation Suite Configuration">
+```json
+{
+    "expectation_suite_name": "suite_for_yellow_tripdata",
+    "data_asset_type": "CSVAsset",
+    "evaluation_parameters": {
+        "parameter_name": "value"
+},
+"expectations": [
+    {
+        "expectation_type": "expect_column_values_to_be_between",
+        "kwargs": {
+            "column": "passenger_count",
+            "max_value": 4,
+            "min_value": 0
+        },
+        "meta": {}
+    },
+    {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {
+            "column": "VendorID",
+            "value_set": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+    "meta": {}
+    }
+],
+"ge_cloud_id": null,
+"meta": {
+    "foo": "bar",
+    "great_expectations_version": "0.18.19"
+    }
+}              
+```
+</TabItem>
+<TabItem value="v1_expectation_suite_config" label="V1 Expectation Suite Configuration">
+```json
+{
+    "name": "suite_for_yellow_tripdata",
+    "suite_parameters": {
+        "parameter_name": "value"
+    },
+    "expectations": [
         {
-            "name": "suite_for_yellow_tripdata",
-            "suite_parameters": {
-                "parameter_name": "value"
+            "type": "expect_column_values_to_be_between",
+            "kwargs": {
+                "column": "passenger_count",
+                "max_value": 4.0,
+                "min_value": 0.0
             },
-            "expectations": [
-                {
-                    "type": "expect_column_values_to_be_between",
-                    "kwargs": {
-                        "column": "passenger_count",
-                        "max_value": 4.0,
-                        "min_value": 0.0
-                    },
-                    "meta": {},
-                    "id": "24dc475c-38a3-4234-ab47-b13d0f233242"
-                },
-                {
-                    "type": "expect_column_values_to_be_in_set",
-                    "kwargs": {
-                        "column": "VendorID",
-                        "value_set": [
-                            1,
-                            2,
-                            3,
-                            4
-                        ]
-                    },
-                    "meta": {},
-                    "id": "d8b3b4e9-296f-4dd5-bd29-aac6a00cba1c"
-                }
-            ],
-            "id": "77373d6f-3561-4d62-b150-96c36dccbe55",
-            "meta": {
-                "foo": "bar",
-                "great_expectations_version": "1.0.0"
+            "meta": {},
+            "id": "24dc475c-38a3-4234-ab47-b13d0f233242"
+        },
+        {
+            "type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "VendorID",
+                "value_set": [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
             },
-            "notes": "This is a new field."
-        }            
-        ```
-        </pre></td>
-    </tr>
-</table>
+            "meta": {},
+            "id": "d8b3b4e9-296f-4dd5-bd29-aac6a00cba1c"
+        }
+    ],
+    "id": "77373d6f-3561-4d62-b150-96c36dccbe55",
+    "meta": {
+        "foo": "bar",
+        "great_expectations_version": "1.0.0"
+    },
+    "notes": "This is a new field."
+}            
+```
+</TabItem>
 
 **expectation_suite_name**: This is now called name and has the name of the suite.
 
@@ -138,7 +138,7 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
 
 **notes**: This is new in 1.0 and is an arbitrary string.
 
-#### Suite Creation API Calls
+#### Expectation Suite API Calls
 
 The suites above were created with the following API calls. This example demonstrates how to create an equivalent suite to your V0 suite in V1.
 
@@ -185,7 +185,7 @@ Data Source configurations are stored in the YAML file `gx/great_expectations.ym
 
 We’ll walk through examples of different Data Source configurations in V0 and V1 so you can see how to translate between the two.
 
-#### Pandas
+#### Pandas API
 
 ##### Pandas Filesystem Data
 Here is a side-by-side comparison of a Data Source called `pandas_fs_ds` with 4 assets called: `yearly_taxi_data`, `monthly_taxi_data`, `daily_taxi_data`, and `arbitrary_taxi_data`.
@@ -408,7 +408,7 @@ In both `V0` and `V1` a pandas Data Source reads in data from a pandas dataframe
     </tr>
 </table>
 
-#### Snowflake
+#### Snowflake API
 Here is a side-by-side comparision of a both a `V0` Snowflake table and query Data Asset to their equivalents in `V1`. We walk through all the currently supported V1 Batch Definitions: yearly, monthly, daily, and whole table.
 
 <table>
@@ -682,7 +682,7 @@ A few configurations are **NO LONGER SUPPORTED**:
     </tr>
 </table>
 
-#### Postgres
+#### Postgres API
 The postgres Data Source/Asset migration from `V0` to `V1` is almost identical to the Snowflake one in terms of fields. All the fields are identical and how to migrate them from `V0` to `V1` is identical so please refer to the Snowflake section for a description. The differences in values are:
 - The **type** field value is `postgres` instead of `snowflake` 
 - We are NOT requiring schemas in V1 for postgres table assets.
@@ -920,7 +920,7 @@ The provided connection string is a sample dataset GX maintains.
     </tr>
 </table>
 
-#### Spark
+#### Spark API
 ##### Spark Filesystem
 This is almost identical to the pandas filesystem and we only present a daily and a yearly asset conversion here.
 
@@ -1923,7 +1923,7 @@ We only show the V0 configuration and code samples here because the V1 configura
 </table>
 
 ### Data Context Variables
-The Data Context variables will be automatically converted for cloud users when switching from V0 to V1. For file context users, we will show the difference in the yaml so you can translate the configuration block in `great_expectations.yml`.
+The Data Context variables will be automatically converted for GX Cloud users when switching from V0 to V1. For file context users, we will show the difference in the yaml so you can translate the configuration block in `great_expectations.yml`.
 
 <table>
     <tr>
@@ -2067,7 +2067,7 @@ The Data Context variables will be automatically converted for cloud users when 
 
 **stores**: This is a dictionary of store names to configuration. In V0 the keys names were configurable. In V1, there is a fixed set of keys. These V1 keys are:
 
-> **expectations_store**: The configuration of the expectations store. The value here is unchanged from the value that was stored with the key that was configured in the top-level variable **expectations_store_name**.
+> **expectations_store**: The configuration of the Expectations store. The value here is unchanged from the value that was stored with the key that was configured in the top-level variable **expectations_store_name**.
 
 > **validation_results_store**: The configuration to the validation results store. The value here is slightly changed from the value that was stored with the key that was configured in the top-level variable  validations_store_name. The value change is ValidationsStore is now ValidationResultsStore.
 
