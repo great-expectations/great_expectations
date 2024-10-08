@@ -4,10 +4,9 @@ import copy
 import json
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
+from tqdm import tqdm
+
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.util import (
-    determine_progress_bar_method_by_environment,
-)
 from great_expectations.experimental.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
@@ -141,7 +140,7 @@ class Rule(SerializableDictDot):
 
         rule_state.reset_parameter_containers()
 
-        pbar_method: Callable = determine_progress_bar_method_by_environment()
+        pbar_method: Callable = tqdm
 
         domain: Domain
         for domain in pbar_method(

@@ -5,12 +5,11 @@ import logging
 import re
 import warnings
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Mapping, MutableMapping, Optional, TypeVar, Union
 from urllib.parse import urlparse
 
 import dateutil.parser
 import numpy as np
-from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import SQLALCHEMY_NOT_IMPORTED, LegacyRow, Row
@@ -96,38 +95,6 @@ def nested_update(
         else:
             d[k] = v
     return d
-
-
-def in_jupyter_notebook():
-    try:
-        shell = get_ipython().__class__.__name__
-        if shell == "ZMQInteractiveShell":
-            return True  # Jupyter notebook or qtconsole
-        elif shell == "TerminalInteractiveShell":
-            return False  # Terminal running IPython
-        else:
-            return False  # Other type (?)
-    except NameError:
-        return False  # Probably standard Python interpreter
-
-
-def determine_progress_bar_method_by_environment() -> Callable:
-    """
-    As tqdm has specific methods for progress bar creation and iteration,
-    we require a utility to determine which method to use.
-
-    If in a Jupyter notebook, we want to use `tqdm.notebook.tqdm`. Otherwise,
-    we default to the standard `tqdm.tqdm`. Please see the docs for more information: https://tqdm.github.io/
-
-    Returns:
-        The appropriate tqdm method for the environment in question.
-    """
-    from tqdm import tqdm
-    from tqdm.notebook import tqdm as tqdm_notebook
-
-    if in_jupyter_notebook():
-        return tqdm_notebook
-    return tqdm
 
 
 def substitute_all_strftime_format_strings(
