@@ -30,4 +30,3 @@ types-tabulate
 types-tqdm
 types-typed-ast
 types-tzlocal
-types-urllib3
