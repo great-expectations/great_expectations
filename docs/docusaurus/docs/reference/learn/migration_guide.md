@@ -1001,10 +1001,10 @@ This is almost identical to the pandas filesystem and we only present a daily an
    defaultValue="v0_spark_filesystem_api"
    values={[
       {value: 'v0_spark_filesystem_api', label: 'V0 Spark Filesystem API'},
-      {value: 'v1_spark_filesystem_api', label: 'V1 Spark Filesystem API''}
+      {value: 'v1_spark_filesystem_api', label: 'V1 Spark Filesystem API'}
    ]}
 >
-    <TabItem value="v0_spark_filesystem_api" label="V0 Spark Filesystem API'">
+    <TabItem value="v0_spark_filesystem_api" label="V0 Spark Filesystem API">
     ```python
     import great_expectations as gx
     context = gx.get_context(mode="file")
@@ -1014,7 +1014,7 @@ This is almost identical to the pandas filesystem and we only present a daily an
     daily = datasource.add_csv_asset(name="daily_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
     ```
     </TabItem>
-    <TabItem value="v1_spark_filesystem_api" label="V1 Spark Filesystem API'">
+    <TabItem value="v1_spark_filesystem_api" label="V1 Spark Filesystem API">
     ```python
     import great_expectations as gx
     context = gx.get_context(mode="file")
