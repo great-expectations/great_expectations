@@ -1001,10 +1001,10 @@ This is almost identical to the pandas filesystem and we only present a daily an
    defaultValue="v0_spark_filesystem_api"
    values={[
       {value: 'v0_spark_filesystem_api', label: 'V0 Spark Filesystem API'},
-      {value: 'v1_spark_filesystem_api', label: 'V1 park Filesystem API''}
+      {value: 'v1_spark_filesystem_api', label: 'V1 Spark Filesystem API''}
    ]}
 >
-    <TabItem value="v0_spark_filesystem_api" label="V0 park Filesystem API'">
+    <TabItem value="v0_spark_filesystem_api" label="V0 Spark Filesystem API'">
     ```python
     import great_expectations as gx
     context = gx.get_context(mode="file")
@@ -1014,7 +1014,7 @@ This is almost identical to the pandas filesystem and we only present a daily an
     daily = datasource.add_csv_asset(name="daily_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
     ```
     </TabItem>
-    <TabItem value="v1_spark_filesystem_api" label="V1 park Filesystem API'">
+    <TabItem value="v1_spark_filesystem_api" label="V1 Spark Filesystem API'">
     ```python
     import great_expectations as gx
     context = gx.get_context(mode="file")
@@ -1233,7 +1233,7 @@ The V0 configuration lives in `gx/checkpoints/<CHECKPOINT_NAME>.yml`. In V1, the
       {value: 'v1_checkpoints_yaml', label: 'V1: gx/checkpoints/my_checkpoint and gx/validation_definitions/my_validation_definition'}
    ]}
 >
-    <TabItem value="v0_checkpoints_yaml" label="V0 Snowflake Config">
+    <TabItem value="v0_checkpoints_yaml" label="V0: gx/checkpoints/my_checkpoint.yml">
     ```yaml
     name: my_checkpoint
     config_version: 1.0
@@ -1278,8 +1278,8 @@ The V0 configuration lives in `gx/checkpoints/<CHECKPOINT_NAME>.yml`. In V1, the
     expectation_suite_ge_cloud_id:
     ```
     </TabItem>
-    <TabItem value="v1_checkpoints_yaml" label="V1 Snowflake Config">
-    **gx/validation_definitions/my_validation_definition**
+    <TabItem value="v1_checkpoints_yaml" label="V1: gx/checkpoints/my_checkpoint and gx/validation_definitions/my_validation_definition">
+    gx/validation_definitions/my_validation_definition
     ```json
     {
         "data": {
@@ -1305,7 +1305,7 @@ The V0 configuration lives in `gx/checkpoints/<CHECKPOINT_NAME>.yml`. In V1, the
     }
     ```
 
-    **gx/checkpoints/my_checkpoint**
+    gx/checkpoints/my_checkpoint
     ```json
     {
         "actions": [
