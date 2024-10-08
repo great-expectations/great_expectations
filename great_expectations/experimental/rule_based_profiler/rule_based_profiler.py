@@ -8,8 +8,6 @@ import sys
 import traceback
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
-from tqdm import tqdm
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
@@ -18,6 +16,7 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.util import (
+    determine_progress_bar_method_by_environment,
     nested_update,
 )
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -303,7 +302,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         sys.stdout.write("\n")
         sys.stdout.flush()
 
-        pbar_method: Callable = tqdm
+        pbar_method: Callable = determine_progress_bar_method_by_environment()
 
         rule_state: RuleState
         rule: Rule
