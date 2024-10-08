@@ -1951,139 +1951,140 @@ We only show the V0 configuration and code samples here because the V1 configura
 ### Data Context Variables
 The Data Context variables will be automatically converted for GX Cloud users when switching from V0 to V1. For file context users, we will show the difference in the yaml so you can translate the configuration block in `great_expectations.yml`.
 
-<table>
-    <tr>
-        <th>V0 Data Context configuration</th>
-        <th>V1 Data Context configuration</th>
-    </tr>
-    <tr>
-        <td>
-        ```yaml
-        config_version: 3.0
-        config_variables_file_path: uncommitted/config_variables.yml
-        plugins_directory: plugins/
-        stores:
-        expectations_store:
-            class_name: ExpectationsStore
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: expectations/
-        validations_store:
-            class_name: ValidationsStore
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: uncommitted/validations/
-        evaluation_parameter_store:
-            class_name: EvaluationParameterStore
-        checkpoint_store:
-            class_name: CheckpointStore
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            suppress_store_backend_id: true
-            base_directory: checkpoints/
-        profiler_store:
-            class_name: ProfilerStore
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            suppress_store_backend_id: true
-            base_directory: profilers/
-        expectations_store_name: expectations_store
-        validations_store_name: validations_store
-        evaluation_parameter_store_name: evaluation_parameter_store
-        checkpoint_store_name: checkpoint_store
-        data_docs_sites:
-        local_site:
-            class_name: SiteBuilder
-            show_how_to_buttons: true
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: uncommitted/data_docs/local_site/
-            site_index_builder:
-            class_name: DefaultSiteIndexBuilder
-        anonymous_usage_statistics:
-        data_context_id: a7441dab-9db7-4043-a3e7-011cdab54cfb
-        enabled: false
-        usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-        fluent_datasources:
-        spark_fs:
-            type: spark_filesystem
-            assets:
-            directory_csv_asset:
-                type: directory_csv
-                data_directory: data
-            spark_config:
-            spark.executor.memory: 4g
-            persist: true
-            base_directory: data
-        notebooks:
-        include_rendered_content:
-        globally: false
-        expectation_suite: false
-        expectation_validation_result: false
-        ```
-        </td>
-        <td>
-        ```yaml
-        config_version: 4.0
-        config_variables_file_path: uncommitted/config_variables.yml
-        plugins_directory: plugins/
-        stores:
-        expectations_store:
-            class_name: ExpectationsStore
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: expectations/
-        validation_results_store:
-            class_name: ValidationResultsStore
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: uncommitted/validations/
-        checkpoint_store:
-            class_name: CheckpointStore
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            suppress_store_backend_id: true
-            base_directory: checkpoints/
-        validation_definition_store:
-            class_name: ValidationDefinitionStore
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: validation_definitions/
-        expectations_store_name: expectations_store
-        validation_results_store_name: validation_results_store
-        checkpoint_store_name: checkpoint_store
-        data_docs_sites:
-        local_site:
-            class_name: SiteBuilder
-            show_how_to_buttons: true
-            store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: uncommitted/data_docs/local_site/
-            site_index_builder:
-            class_name: DefaultSiteIndexBuilder
-        analytics_enabled: true
-        fluent_datasources:
-        spark_ds:
-            type: spark
-            id: 134de28d-bfdc-4980-aa2e-4f59788afef3
-            assets:
-            taxi_dataframe_asset:
-                type: dataframe
-                id: 4110d2ff-5711-47df-a4be-eaefc2a638b4
-                batch_metadata: {}
-                batch_definitions:
-                taxi_dataframe_batch_def:
-                    id: 76738b8b-28ab-4857-aa98-f0ff80c8f137
-                    partitioner:
-            spark_config:
-            spark.executor.memory: 4g
-            force_reuse_spark_context: true
-            persist: true
-        data_context_id: 12bc94a0-8ac3-4e97-bf90-03cd3d92f8c4
-        ```
-        </td>
-    </tr>
-</table>
+<Tabs 
+   queryString="data_context_config"
+   defaultValue="v0_data_context_config"
+   values={[
+      {value: 'v0_data_context_config', label: 'V0 Data Context Configuration'},
+      {value: 'v1_data_context_config', label: 'V1 Data Context Configuration'}
+   ]}
+>
+    <TabItem value="v0_data_context_config" label="V0 Data Context Configuration">
+    ```yaml
+    config_version: 3.0
+    config_variables_file_path: uncommitted/config_variables.yml
+    plugins_directory: plugins/
+    stores:
+    expectations_store:
+        class_name: ExpectationsStore
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: expectations/
+    validations_store:
+        class_name: ValidationsStore
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: uncommitted/validations/
+    evaluation_parameter_store:
+        class_name: EvaluationParameterStore
+    checkpoint_store:
+        class_name: CheckpointStore
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        suppress_store_backend_id: true
+        base_directory: checkpoints/
+    profiler_store:
+        class_name: ProfilerStore
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        suppress_store_backend_id: true
+        base_directory: profilers/
+    expectations_store_name: expectations_store
+    validations_store_name: validations_store
+    evaluation_parameter_store_name: evaluation_parameter_store
+    checkpoint_store_name: checkpoint_store
+    data_docs_sites:
+    local_site:
+        class_name: SiteBuilder
+        show_how_to_buttons: true
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: uncommitted/data_docs/local_site/
+        site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+    anonymous_usage_statistics:
+    data_context_id: a7441dab-9db7-4043-a3e7-011cdab54cfb
+    enabled: false
+    usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+    fluent_datasources:
+    spark_fs:
+        type: spark_filesystem
+        assets:
+        directory_csv_asset:
+            type: directory_csv
+            data_directory: data
+        spark_config:
+        spark.executor.memory: 4g
+        persist: true
+        base_directory: data
+    notebooks:
+    include_rendered_content:
+    globally: false
+    expectation_suite: false
+    expectation_validation_result: false
+    ```
+    </TabItem>
+    <TabItem value="v1_data_context_config" label="V0 Data Context Configuration">
+    ```yaml
+    config_version: 4.0
+    config_variables_file_path: uncommitted/config_variables.yml
+    plugins_directory: plugins/
+    stores:
+    expectations_store:
+        class_name: ExpectationsStore
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: expectations/
+    validation_results_store:
+        class_name: ValidationResultsStore
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: uncommitted/validations/
+    checkpoint_store:
+        class_name: CheckpointStore
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        suppress_store_backend_id: true
+        base_directory: checkpoints/
+    validation_definition_store:
+        class_name: ValidationDefinitionStore
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: validation_definitions/
+    expectations_store_name: expectations_store
+    validation_results_store_name: validation_results_store
+    checkpoint_store_name: checkpoint_store
+    data_docs_sites:
+    local_site:
+        class_name: SiteBuilder
+        show_how_to_buttons: true
+        store_backend:
+        class_name: TupleFilesystemStoreBackend
+        base_directory: uncommitted/data_docs/local_site/
+        site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+    analytics_enabled: true
+    fluent_datasources:
+    spark_ds:
+        type: spark
+        id: 134de28d-bfdc-4980-aa2e-4f59788afef3
+        assets:
+        taxi_dataframe_asset:
+            type: dataframe
+            id: 4110d2ff-5711-47df-a4be-eaefc2a638b4
+            batch_metadata: {}
+            batch_definitions:
+            taxi_dataframe_batch_def:
+                id: 76738b8b-28ab-4857-aa98-f0ff80c8f137
+                partitioner:
+        spark_config:
+        spark.executor.memory: 4g
+        force_reuse_spark_context: true
+        persist: true
+    data_context_id: 12bc94a0-8ac3-4e97-bf90-03cd3d92f8c4
+    ```
+    </TabItem>
+</Tabs>
 
 **config_version**: For V1 this should be set to 4.0
 
