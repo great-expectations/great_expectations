@@ -211,7 +211,6 @@ module = [
     "databricks.*",
     "google.*",
     "great_expectations.compatibility.pydantic.*",
-    "ipywidgets.*",
     "mistune.*",
     "moto.*",
     "pact.*",
