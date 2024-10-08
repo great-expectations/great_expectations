@@ -936,171 +936,175 @@ The provided connection string is a sample dataset GX maintains.
 ##### Spark Filesystem
 This is almost identical to the pandas filesystem and we only present a daily and a yearly asset conversion here.
 
-<table>
-    <tr>
-        <th>V0 Spark filesystem config</th>
-        <th>V1 Spark filesystem config</th>
-    </tr>
-    <tr>
-        <td>
-        ```yaml
-        fluent_datasources:
-            spark_fs:
-                type: spark_filesystem
-                assets:
-                yearly_taxi_data:
-                    type: csv
-                    batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
-                daily_taxi_data:
-                    type: csv
-                    batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
-                spark_config:
-                spark.executor.memory: 4g
-                persist: true
-                base_directory: data
-        ```
-        </td>
-        <td>
-        ```yaml
-        fluent_datasources:
-            spark_fs:
-                type: spark_filesystem
-                id: 62a7c671-8f2a-468c-be53-a82576d7b436
-                assets:
-                taxi_data:
-                    type: csv
-                    id: 78d5ccc2-1697-490f-886a-c9672d5548c6
-                    batch_definitions:
-                    yearly_batches:
-                        id: 4a0ff04f-a9fe-4c36-b680-0b1c61f4e0c2
-                        partitioner:
-                        regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
-                        sort_ascending: true
-                    daily_batches:
-                        id: b2e056fe-6f1d-4fdc-ab69-75d3a19f1a44
-                        partitioner:
-                        regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
-                        sort_ascending: true
-                        param_names:
-                            - year
-                            - month
-                            - day
-                spark_config:
-                spark.executor.memory: 4g
-                persist: true
-                base_directory: data
-        ```
-        </td>
-    </tr>
-</table>
+<Tabs 
+   queryString="spark_filesystem_config"
+   defaultValue="v0_spark_filesystem_config"
+   values={[
+      {value: 'v0_spark_filesystem_config', label: 'V0 Spark Filesystem Config'},
+      {value: 'v1_spark_filesystem_config', label: 'V1 Spark Filesystem Config'}
+   ]}
+>
+    <TabItem value="v0_spark_filesystem_config" label="V0 Spark Filesystem Config">
+    ```yaml
+    fluent_datasources:
+        spark_fs:
+            type: spark_filesystem
+            assets:
+            yearly_taxi_data:
+                type: csv
+                batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
+            daily_taxi_data:
+                type: csv
+                batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
+            spark_config:
+            spark.executor.memory: 4g
+            persist: true
+            base_directory: data
+    ```
+    </TabItem>
+    <TabItem value="v1_spark_filesystem_config" label="V1 Spark Filesystem Config">
+    ```yaml
+    fluent_datasources:
+        spark_fs:
+            type: spark_filesystem
+            id: 62a7c671-8f2a-468c-be53-a82576d7b436
+            assets:
+            taxi_data:
+                type: csv
+                id: 78d5ccc2-1697-490f-886a-c9672d5548c6
+                batch_definitions:
+                yearly_batches:
+                    id: 4a0ff04f-a9fe-4c36-b680-0b1c61f4e0c2
+                    partitioner:
+                    regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
+                    sort_ascending: true
+                daily_batches:
+                    id: b2e056fe-6f1d-4fdc-ab69-75d3a19f1a44
+                    partitioner:
+                    regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
+                    sort_ascending: true
+                    param_names:
+                        - year
+                        - month
+                        - day
+            spark_config:
+            spark.executor.memory: 4g
+            persist: true
+            base_directory: data
+    ```
+    </TabItem>
+</Tabs>
 
 ##### Spark Filesystem API
-<table>
-    <tr>
-        <th>V0 Spark filesystem API</th>
-        <th>V1 Spark filesystem API</th>
-    </tr>
-    <tr>
-        <td>
-        ```python
-        import great_expectations as gx
-        context = gx.get_context(mode="file")
+<Tabs 
+   queryString="spark_filesystem_api"
+   defaultValue="v0_spark_filesystem_api"
+   values={[
+      {value: 'v0_spark_filesystem_api', label: 'V0 Spark Filesystem API'},
+      {value: 'v1_spark_filesystem_api', label: 'V1 park Filesystem API''}
+   ]}
+>
+    <TabItem value="v0_spark_filesystem_api" label="V0 park Filesystem API'">
+    ```python
+    import great_expectations as gx
+    context = gx.get_context(mode="file")
 
-        datasource = context.sources.add_spark_filesystem(name="spark_fs", base_directory="data", spark_config={"spark.executor.memory": "4g"}, persist=True)
-        yearly = datasource.add_csv_asset(name="yearly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
-        daily = datasource.add_csv_asset(name="daily_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
-        ```
-        </td>
-        <td>
-        ```python
-        import great_expectations as gx
-        context = gx.get_context(mode="file")
+    datasource = context.sources.add_spark_filesystem(name="spark_fs", base_directory="data", spark_config={"spark.executor.memory": "4g"}, persist=True)
+    yearly = datasource.add_csv_asset(name="yearly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
+    daily = datasource.add_csv_asset(name="daily_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
+    ```
+    </TabItem>
+    <TabItem value="v1_spark_filesystem_api" label="V1 park Filesystem API'">
+    ```python
+    import great_expectations as gx
+    context = gx.get_context(mode="file")
 
-        data_source = context.data_sources.add_spark_filesystem(name="spark_fs", base_directory="data", spark_config={"spark.executor.memory": "4g"}, persist=True)
-        asset = data_source.add_csv_asset(name="taxi_data")
-        yearly = asset.add_batch_definition_yearly(name="yearly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
-        daily = asset.add_batch_definition_daily(name="daily_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
-        ```
-        </td>
-    </tr>
-</table>
+    data_source = context.data_sources.add_spark_filesystem(name="spark_fs", base_directory="data", spark_config={"spark.executor.memory": "4g"}, persist=True)
+    asset = data_source.add_csv_asset(name="taxi_data")
+    yearly = asset.add_batch_definition_yearly(name="yearly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
+    daily = asset.add_batch_definition_daily(name="daily_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
+    ```
+    </TabItem>
+</Tabs>
 
 ##### Spark Dataframe
 Here is a side-by-side comparison of the Spark dataframe data source configuration. 
 
-<table>
-    <tr>
-        <th>V0 Spark dataframe config</th>
-        <th>V1 Spark dataframe config</th>
-    </tr>
-    <tr>
-        <td>
-        ```yaml
-        fluent_datasources:
-            spark_ds:
-                type: spark
-                assets:
-                taxi_dataframe_asset:
-                    type: dataframe
-                    batch_metadata: {}
-                spark_config:
-                spark.executor.memory: 4g
-                force_reuse_spark_context: true
-                persist: true
-        ```
-        </td>
-        <td>
-        ```yaml
-        fluent_datasources:
-            spark_ds:
-                type: spark
-                id: 134de28d-bfdc-4980-aa2e-4f59788afef3
-                assets:
-                taxi_dataframe_asset:
-                    type: dataframe
-                    id: 4110d2ff-5711-47df-a4be-eaefc2a638b4
-                    batch_metadata: {}
-                    batch_definitions:
-                    taxi_dataframe_batch_def:
-                        id: 76738b8b-28ab-4857-aa98-f0ff80c8f137
-                        partitioner:
-                spark_config:
-                spark.executor.memory: 4g
-                force_reuse_spark_context: true
-                persist: true
-        ```
-        </td>
-    </tr>
-</table>
+<Tabs 
+   queryString="spark_dataframe_config"
+   defaultValue="v0_spark_dataframe_config"
+   values={[
+      {value: 'v0_spark_dataframe_config', label: 'V0 Spark Dataframe Config'},
+      {value: 'v1_spark_dataframe_config', label: 'V1 Spark Dataframe Config'}
+   ]}
+>
+    <TabItem value="v0_spark_dataframe_config" label="V0 Spark Dataframe Config">
+    ```yaml
+    fluent_datasources:
+        spark_ds:
+            type: spark
+            assets:
+            taxi_dataframe_asset:
+                type: dataframe
+                batch_metadata: {}
+            spark_config:
+            spark.executor.memory: 4g
+            force_reuse_spark_context: true
+            persist: true
+    ```
+    </TabItem>
+    <TabItem value="v1_spark_dataframe_config" label="V1 Spark Dataframe Config">
+    ```yaml
+    fluent_datasources:
+        spark_ds:
+            type: spark
+            id: 134de28d-bfdc-4980-aa2e-4f59788afef3
+            assets:
+            taxi_dataframe_asset:
+                type: dataframe
+                id: 4110d2ff-5711-47df-a4be-eaefc2a638b4
+                batch_metadata: {}
+                batch_definitions:
+                taxi_dataframe_batch_def:
+                    id: 76738b8b-28ab-4857-aa98-f0ff80c8f137
+                    partitioner:
+            spark_config:
+            spark.executor.memory: 4g
+            force_reuse_spark_context: true
+            persist: true
+    ```
+    </TabItem>
+</Tabs>
 
 ##### Spark dataframe API
-<table>
-    <tr>
-        <th>V0 Spark dataframe API</th>
-        <th>V1 Spark dataframe API</th>
-    </tr>
-    <tr>
-        <td>
-        ```python
-        import great_expectations as gx
-        context = gx.get_context(mode="file")
+<Tabs 
+   queryString="spark_dataframe_api"
+   defaultValue="v0_spark_dataframe_api"
+   values={[
+      {value: 'v0_spark_dataframe_api', label: 'V0 Spark Dataframe API'},
+      {value: 'v1_spark_dataframe_api', label: 'V1 Spark Dataframe API'}
+   ]}
+>
+    <TabItem value="v0_spark_dataframe_api" label="V0 Spark Dataframe API">
+    ```python
+    import great_expectations as gx
+    context = gx.get_context(mode="file")
 
-        dataframe_ds = context.sources.add_spark(name="spark_ds", spark_config={"spark.executor.memory": "4g"}, force_reuse_spark_context=True, persist=True)
-        dataframe_asset = dataframe_ds.add_dataframe_asset(name="taxi_dataframe_asset")
-        ```
-        </td>
-        <td>
-        ```python
-        import great_expectations as gx
-        context = gx.get_context(mode="file")
+    dataframe_ds = context.sources.add_spark(name="spark_ds", spark_config={"spark.executor.memory": "4g"}, force_reuse_spark_context=True, persist=True)
+    dataframe_asset = dataframe_ds.add_dataframe_asset(name="taxi_dataframe_asset")
+    ```
+    </TabItem>
+    <TabItem value="v1_spark_dataframe_api" label="V1 Spark Dataframe API">
+    ```python
+    import great_expectations as gx
+    context = gx.get_context(mode="file")
 
-        dataframe_ds = context.data_sources.add_spark(name="spark_ds", spark_config={"spark.executor.memory": "4g"}, force_reuse_spark_context=True, persist=True)
-        dataframe_asset = dataframe_ds.add_dataframe_asset(name="taxi_dataframe_asset")
-        dataframe_bd = dataframe_asset.add_batch_definition_whole_dataframe(name=ƒ"taxi_dataframe_batch_def")
-        ```
-        </td>
-    </tr>
-</table>
+    dataframe_ds = context.data_sources.add_spark(name="spark_ds", spark_config={"spark.executor.memory": "4g"}, force_reuse_spark_context=True, persist=True)
+    dataframe_asset = dataframe_ds.add_dataframe_asset(name="taxi_dataframe_asset")
+    dataframe_bd = dataframe_asset.add_batch_definition_whole_dataframe(name=ƒ"taxi_dataframe_batch_def")
+    ```
+    </TabItem>
+</Tabs>
 
 #### Spark Directory Asset
 Spark directory assets are different than our other dataframe Data Assets. These assets pull all the files from a directory into a single dataframe. Then, like for SQL Data Sources, one specifies a column when adding the Batch Definition. This column will be used to split the dataframe into batches.
@@ -1109,95 +1113,97 @@ For this example all the data files live in directory `data/data2/` relative to 
 
 In V0, we split the data based on an exact string. In V1, our batch definitions are all based on datetime (eg batches are by day, month, or year). 
 
-<table>
-    <tr>
-        <th>V0 Spark directory asset config</th>
-        <th>V1 Spark directory asset config</th>
-    </tr>
-    <tr>
-        <td>
-        ```yaml
-        fluent_datasources:
-            spark:
-                type: spark_filesystem
-                assets:
-                spark_asset:
-                    type: directory_csv
-                    header: true
-                    data_directory: data2
-                spark_config:
-                spark.executor.memory: 4g
-                persist: true
-                base_directory: data
-        ```
-        </td>
-        <td>
-        ```yaml
-        fluent_datasources:
-            spark:
-                type: spark_filesystem
-                id: a35e995d-dd60-45e4-90f0-061d2bda6544
-                assets:
-                spark_asset:
-                    type: directory_csv
-                    id: 9454840d-f064-4129-b8ff-38cfbb71af99
-                    batch_definitions:
-                    monthly:
-                        id: 853d02de-54b1-45a7-a4e2-b9f8a8ca0a33
-                        partitioner:
-                        column_name: tpep_pickup_datetime
-                        method_name: partition_on_year_and_month
-                    header: true
-                    data_directory: data2
-                spark_config:
-                spark.executor.memory: 4g
-                persist: true
-                base_directory: data
-        ```
-        </td>
-    </tr>
-</table>
+<Tabs 
+   queryString="spark_directory_asset_config"
+   defaultValue="v0_spark_directory_asset_config"
+   values={[
+      {value: 'v0_spark_directory_asset_config', label: 'V0 Spark Directory Asset Config'},
+      {value: 'v1_spark_directory_asset_config', label: 'V1 Spark Directory Asset Config'}
+   ]}
+>
+    <TabItem value="v0_spark_directory_asset_config" label="V0 Spark Directory Asset Config">
+    ```yaml
+    fluent_datasources:
+        spark:
+            type: spark_filesystem
+            assets:
+            spark_asset:
+                type: directory_csv
+                header: true
+                data_directory: data2
+            spark_config:
+            spark.executor.memory: 4g
+            persist: true
+            base_directory: data
+    ```
+    </TabItem>
+    <TabItem value="v1_spark_directory_asset_config" label="V1 Spark Directory Asset Config">
+    ```yaml
+    fluent_datasources:
+        spark:
+            type: spark_filesystem
+            id: a35e995d-dd60-45e4-90f0-061d2bda6544
+            assets:
+            spark_asset:
+                type: directory_csv
+                id: 9454840d-f064-4129-b8ff-38cfbb71af99
+                batch_definitions:
+                monthly:
+                    id: 853d02de-54b1-45a7-a4e2-b9f8a8ca0a33
+                    partitioner:
+                    column_name: tpep_pickup_datetime
+                    method_name: partition_on_year_and_month
+                header: true
+                data_directory: data2
+            spark_config:
+            spark.executor.memory: 4g
+            persist: true
+            base_directory: data
+    ```
+    </TabItem>
+</Tabs>
 
 The configuration for `0.X` because we only allow splitting the data into batches by exact string match and we require uses to fully specify the batch request options in GX `0.X` (batch parameters in GX `1.0`). I am not showing all the spark specific configuration options. They are both supported in the same way in GX `0.X` and GX `1.0`.
 
 ##### Spark directory asset API
-<table>
-    <tr>
-        <th>V0 Spark directory asset API</th>
-        <th>V1 Spark directory asset API</th>
-    </tr>
-    <tr>
-        <td>
-        ```python
-        import great_expectations as gx
+<Tabs 
+   queryString="spark_directory_asset_api"
+   defaultValue="v0_spark_directory_asset_api"
+   values={[
+      {value: 'v0_spark_directory_asset_api', label: 'V0 Spark Directory Asset API'},
+      {value: 'v1_spark_directory_asset_api', label: 'V1 Spark Directory Asset API'}
+   ]}
+>
+    <TabItem value="v0_spark_directory_asset_api" label="V0 Spark Directory Asset API">
+    ```python
+    import great_expectations as gx
 
-        context = gx.get_context(mode="file")
+    context = gx.get_context(mode="file")
 
-        ds = context.sources.add_spark_filesystem(name="spark", base_directory="data", spark_config={"spark.executor.memory": "4g"}, persist=True)
+    ds = context.sources.add_spark_filesystem(name="spark", base_directory="data", spark_config={"spark.executor.memory": "4g"}, persist=True)
 
-        asset = ds.add_directory_csv_asset(name="spark_asset", data_directory="data2", header=True)
-        # This must really be a year-month date column instead of a datetime column for splitting by month in GX 0.X
-        asset.add_splitter_column_value(column_name="tpep_pickup_datetime")
-        # There is no sorting added because in GX 0.X, one has to specify all parameters so sorting is a no-op
+    asset = ds.add_directory_csv_asset(name="spark_asset", data_directory="data2", header=True)
+    # This must really be a year-month date column instead of a datetime column for splitting by month in GX 0.X
+    asset.add_splitter_column_value(column_name="tpep_pickup_datetime")
+    # There is no sorting added because in GX 0.X, one has to specify all parameters so sorting is a no-op
 
-        ```
-        </td>
-        <td>
-        ```python
-        import great_expectations as gx
+    ```
+    </TabItem>
+    <TabItem value="v1_spark_directory_asset_api" label="V1 Spark Directory Asset API">
+    ```python
+    import great_expectations as gx
 
-        context = gx.get_context(mode="file")
-        ds = context.data_sources.add_spark_filesystem(name="spark", base_directory="data", spark_config={"spark.executor.memory": "4g"}, persist=True)
-        asset = ds.add_directory_csv_asset(name="spark_asset", data_directory="data2", header=True)
-        bd = asset.add_batch_definition_monthly(name="monthly", column="tpep_pickup_datetime")
+    context = gx.get_context(mode="file")
+    ds = context.data_sources.add_spark_filesystem(name="spark", base_directory="data", spark_config={"spark.executor.memory": "4g"}, persist=True)
+    asset = ds.add_directory_csv_asset(name="spark_asset", data_directory="data2", header=True)
+    bd = asset.add_batch_definition_monthly(name="monthly", column="tpep_pickup_datetime")
 
-        b = bd.get_batch()
-        b.head(fetch_all=True)
+    b = bd.get_batch()
+    b.head(fetch_all=True)
 
-        ```
-        </td>
-    </tr>
-</table>
+    ```
+    </TabItem>
+</Tabs>
 
 ### Checkpoints
 In V0, there were multiple equivalent ways to configure the exact same `Checkpoint`. This is because a `Checkpoint` object contained a `validations` parameter which was a list of the validations the `Checkpoint` would run. Each item in this list took all the arguments necessary for a validation such as the Expectation Suite, the Batch Request, the actions, etc. However, all these same arguments are also present on the `Checkpoint` initializer. Usually, if an argument was present in the validation, that would be used, but if any argument was not present in a validation, GX would fall back to the argument defined on the `Checkpoint` itself. We’d call these default values the “top-level values”. In addition, if the `validations` argument was an empty list or `None`, GX would infer the `Checkpoint` had 1 validation and create one using only “top-level values”. In this case, we’d call this validation a “top-level validation”. This fallback led to some confusing behavior, especially since it wasn’t consistently implemented. 
