@@ -2,6 +2,8 @@
 id: migration_guide
 title: "GX V0 to V1 Migration Guide"
 ---
+import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs';
 
 ## Overview
 This guide for migrating your Great Expectations V0 configurations to V1 covers all the Great Expectations domain objects found in V0 and shows how they map to their equivalent V1 domain objects.
