@@ -23,14 +23,6 @@ StorableTypes: TypeAlias = MetricRun
 T = TypeVar("T", bound=StorableTypes)
 
 
-class PayloadData(BaseModel):
-    type: str
-    attributes: Dict[str, Any]
-
-    class Config:
-        extra = "forbid"
-
-
 def orjson_dumps(v, *, default):
     import orjson  # Import here since this is only installed in the cloud environment
 
@@ -49,7 +41,7 @@ def orjson_loads(v, *args, **kwargs):
 
 
 class Payload(BaseModel):
-    data: PayloadData
+    data: Dict[str, Any]
 
     class Config:
         extra = "forbid"
@@ -76,21 +68,8 @@ class CloudDataStore(DataStore[StorableTypes]):
         # https://docs.python.org/3.11/library/weakref.html#weakref.finalize
         self._finalizer = weakref.finalize(self, close_session, self._session)
 
-    def _map_to_url(self, value: StorableTypes) -> str:
-        if isinstance(value, MetricRun):
-            return "/metric-runs"
-
-    def _map_to_resource_type(self, value: StorableTypes) -> str:
-        if isinstance(value, MetricRun):
-            return "metric-run"
-
     def _build_payload(self, value: StorableTypes) -> str:
-        payload = Payload(
-            data=PayloadData(
-                type=self._map_to_resource_type(value),
-                attributes=value.dict(exclude={"metrics": {"__all__": {"__orig_class__"}}}),
-            )
-        )
+        payload = Payload(data=value.dict(exclude={"metrics": {"__all__": {"__orig_class__"}}}))
         return payload.json()
 
     def _build_url(self, value: StorableTypes) -> str:
@@ -98,7 +77,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         config = self._context.ge_cloud_config
         return urllib.parse.urljoin(
             config.base_url,
-            f"organizations/{config.organization_id}{self._map_to_url(value)}",
+            f"api/v1/organizations/{config.organization_id}/metric-runs",
         )
 
     @override
