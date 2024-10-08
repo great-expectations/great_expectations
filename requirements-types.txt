@@ -22,7 +22,6 @@ types-psycopg2
 types-pycurl
 types-Pygments
 types-python-dateutil
-types-pytz
 types-PyYAML
 types-requests
 types-six
