@@ -145,43 +145,44 @@ Here is a side-by-side comparison of a suite called `suite_for_yellow_tripdata`:
 
 The suites above were created with the following API calls. This example demonstrates how to create an equivalent suite to your V0 suite in V1.
 
-<table>
-    <tr>
-        <th>V0 Expectation Suite API</th>
-        <th>V1 Expectation Suite API</th>
-    </tr>
-    <tr>
-        <td>
-        ```python
-        suite = context.add_expectation_suite(
-            expectation_suite_name="suite_for_yellow_tripdata",
-            meta={"foo": "bar", "notes": "Here are some suite notes."},
-            evaluation_parameters={"parameter_name": "value"},
-            data_asset_type="CSVAsset", # V1 no longer supports this argument, expectations are type independent
+<Tabs 
+   queryString="expectation_suite_api"
+   defaultValue="v0_expectation_suite_api"
+   values={[
+      {value: 'v0_expectation_suite_api', label: 'V0 Expectation Suite API'},
+      {value: 'v1_expectation_suite_api', label: 'V1 Expectation Suite API'}
+   ]}
+>
+    <TabItem value="v0_expectation_suite_api" label="V0 Expectation Suite API">
+    ```python
+    suite = context.add_expectation_suite(
+        expectation_suite_name="suite_for_yellow_tripdata",
+        meta={"foo": "bar", "notes": "Here are some suite notes."},
+        evaluation_parameters={"parameter_name": "value"},
+        data_asset_type="CSVAsset", # V1 no longer supports this argument, expectations are type independent
+    )
+    validator = context.get_validator(batch_request=asset.build_batch_request(), expectation_suite_name="suite_for_yellow_tripdata")
+    validator.expect_column_values_to_be_between(column="passenger_count", min_value=0, max_value=4)
+    validator.expect_column_values_to_be_in_set(column="VendorID", value_set=[1,2,3,4])
+    validator.save_expectation_suite(discard_failed_expectations=False)
+    ```
+    </TabItem>
+    <TabItem value="v1_expectation_suite_api" label="V1 Expectation Suite API">
+    ```python
+    suite = context.suites.add(
+        gx.ExpectationSuite(
+            name="suite_for_yellow_tripdata",
+            meta={"foo": "bar"},
+            suite_parameters={"parameter_name": "value"},
+            notes="Here are some suite notes.",
+            id="77373d6f-3561-4d62-b150-96c36dccbe55",
         )
-        validator = context.get_validator(batch_request=asset.build_batch_request(), expectation_suite_name="suite_for_yellow_tripdata")
-        validator.expect_column_values_to_be_between(column="passenger_count", min_value=0, max_value=4)
-        validator.expect_column_values_to_be_in_set(column="VendorID", value_set=[1,2,3,4])
-        validator.save_expectation_suite(discard_failed_expectations=False)
-        ```
-        </td>
-        <td>
-        ```python
-        suite = context.suites.add(
-            gx.ExpectationSuite(
-                name="suite_for_yellow_tripdata",
-                meta={"foo": "bar"},
-                suite_parameters={"parameter_name": "value"},
-                notes="Here are some suite notes.",
-                id="77373d6f-3561-4d62-b150-96c36dccbe55",
-            )
-        )
-        suite.add_expectation(gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=4))
-        suite.add_expectation(gxe.ExpectColumnValuesToBeInSet(column="VendorID", value_set=[1,2,3,4]))
-        ```
-        </td>
-    </tr>
-</table>
+    )
+    suite.add_expectation(gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=4))
+    suite.add_expectation(gxe.ExpectColumnValuesToBeInSet(column="VendorID", value_set=[1,2,3,4]))
+    ```
+    </TabItem>
+</Tabs>
 
 ### Data Sources and Data Assets
 Data Source configurations are stored in the YAML file `gx/great_expectations.yml`, in the top-level block whose key is `fluent_datasources.` 
@@ -193,71 +194,72 @@ We’ll walk through examples of different Data Source configurations in V0 and 
 ##### Pandas Filesystem Data
 Here is a side-by-side comparison of a Data Source called `pandas_fs_ds` with 4 assets called: `yearly_taxi_data`, `monthly_taxi_data`, `daily_taxi_data`, and `arbitrary_taxi_data`.
 
-<table>
-    <tr>
-        <th>V0 Pandas Filesystem Config</th>
-        <th>V1 Pandas Filesystem Config</th>
-    </tr>
-    <tr>
-        <td>
-        ```yaml
-        fluent_datasources:
-            pandas_fs_ds:
-                type: pandas_filesystem
-                assets:
-                yearly_taxi_data:
-                    type: csv
-                    batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
-                monthly_taxi_data:
-                    type: csv
-                    batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv
-                daily_taxi_data:
-                    type: csv
-                    batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
-                arbitrary_taxi_data:
-                    type: csv
-                    batching_regex: sampled_yellow_tripdata_(?P<code>\w+)\.csv
-                base_directory: data
-        ```
-        </td>
-        <td>
-        ```yaml
-        fluent_datasources:
-            pandas_fs_ds:
-                type: pandas_filesystem
-                id: 2ea309bf-bb5f-421b-ab6b-ea1cc9e70c8e
-                assets:
-                taxi_data:
-                    type: csv
-                    id: 34b98eca-790f-4504-ab4b-b65bc128b5ee
-                    batch_definitions:
-                    yearly_batches:
-                        id: a04f8071-33d9-4834-b667-e3d8c2ca70aa
-                        partitioner:
-                        regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
-                        sort_ascending: true
-                    monthly_batches:
-                        id: f07aa73d-bf56-438e-9dc2-0d05fb7d32a1
-                        partitioner:
-                        regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv
-                        sort_ascending: true
-                        param_names:
-                            - year
-                            - month
-                    daily_batches:
-                        id: 37b4b2eb-4b37-46c6-b51c-f2d21ba0e6d6
-                        partitioner:
-                        regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
-                        sort_ascending: true
-                        param_names:
-                            - year
-                            - month
-                            - day
-                base_directory: data
-        ```
-        </td>
-    </tr>
-</table>
+<Tabs 
+   queryString="pandas_filesystem_config"
+   defaultValue="v0_pandas_filesystem_config"
+   values={[
+      {value: 'v0_pandas_filesystem_config', label: 'V0 Pandas Filesystem Config'},
+      {value: 'v1_pandas_filesystem_config', label: 'V0 Pandas Filesystem Config'}
+   ]}
+>
+    <TabItem value="v0_pandas_filesystem_config" label="V0 Pandas Filesystem Config">
+    ```yaml
+    fluent_datasources:
+        pandas_fs_ds:
+            type: pandas_filesystem
+            assets:
+            yearly_taxi_data:
+                type: csv
+                batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
+            monthly_taxi_data:
+                type: csv
+                batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv
+            daily_taxi_data:
+                type: csv
+                batching_regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
+            arbitrary_taxi_data:
+                type: csv
+                batching_regex: sampled_yellow_tripdata_(?P<code>\w+)\.csv
+            base_directory: data
+    ```
+    </TabItem>
+    <TabItem value="v1_pandas_filesystem_config" label="V1 Pandas Filesystem Config">
+    ```yaml
+    fluent_datasources:
+        pandas_fs_ds:
+            type: pandas_filesystem
+            id: 2ea309bf-bb5f-421b-ab6b-ea1cc9e70c8e
+            assets:
+            taxi_data:
+                type: csv
+                id: 34b98eca-790f-4504-ab4b-b65bc128b5ee
+                batch_definitions:
+                yearly_batches:
+                    id: a04f8071-33d9-4834-b667-e3d8c2ca70aa
+                    partitioner:
+                    regex: sampled_yellow_tripdata_(?P<year>\d{4})\.csv
+                    sort_ascending: true
+                monthly_batches:
+                    id: f07aa73d-bf56-438e-9dc2-0d05fb7d32a1
+                    partitioner:
+                    regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv
+                    sort_ascending: true
+                    param_names:
+                        - year
+                        - month
+                daily_batches:
+                    id: 37b4b2eb-4b37-46c6-b51c-f2d21ba0e6d6
+                    partitioner:
+                    regex: sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv
+                    sort_ascending: true
+                    param_names:
+                        - year
+                        - month
+                        - day
+            base_directory: data
+    ```
+    </TabItem>
+</Tabs>
 
 In `0.X`, a Data Source represents where the data lives and the execution engine (e.g. reading data from the local filesystem using pandas) and a Data Asset represents the data file format and how the data should be partitioned (e.g. a parameterized regex which matches file names). In `1.0` the Data Source has the same meaning. However, the Data Asset now only represents the data file format and there is a new concept, *Batch Definition*, which represents how the data is partitioned. This manifests as an extra layer in the YAML asset block.
 
@@ -295,78 +297,80 @@ We no longer support arbitrary batching regexes. Batches must be defined by one 
 
 ##### Pandas Filesystem Creation via API
 
-<table>
-    <tr>
-        <th>V0 Pandas Filesystem Creation via API</th>
-        <th>V1 Pandas Filesystem Creation via API</th>
-    </tr>
-    <tr>
-        <td>
-        ```python
-        # Pandas Filesystem Data Source
-        datasource = context.sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
+<Tabs 
+   queryString="pandas_filesystem_creation"
+   defaultValue="v0_pandas_filesystem_creation"
+   values={[
+      {value: 'v0_pandas_filesystem_creation', label: 'V0 Pandas Filesystem Creation via API'},
+      {value: 'v1_pandas_filesystem_creation', label: 'V1 Pandas Filesystem Creation via API'}
+   ]}
+>
+    <TabItem value="v0_pandas_filesystem_creation" label="V0 Pandas Filesystem Creation via API">
+    ```python
+    # Pandas Filesystem Data Source
+    datasource = context.sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
 
-        # Data Assets
-        yearly = datasource.add_csv_asset(name="yearly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
-        monthly = datasource.add_csv_asset(name="monthly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
-        daily = datasource.add_csv_asset(name="daily_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
-        arbitrary = datasource.add_csv_asset(name="arbitrary_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<code>\w+)\.csv")
-        ```
-        </td>
-        <td>
-        ```python
-        # Pandas Filesystem Data Source
-        data_source = context.data_sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
+    # Data Assets
+    yearly = datasource.add_csv_asset(name="yearly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
+    monthly = datasource.add_csv_asset(name="monthly_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+    daily = datasource.add_csv_asset(name="daily_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
+    arbitrary = datasource.add_csv_asset(name="arbitrary_taxi_data", batching_regex=r"sampled_yellow_tripdata_(?P<code>\w+)\.csv")
+    ```
+    </TabItem>
+    <TabItem value="v1_pandas_filesystem_creation" label="V1 Pandas Filesystem Creation via API">
+    ```python
+    # Pandas Filesystem Data Source
+    data_source = context.data_sources.add_pandas_filesystem(name="pd_fs_ds", base_directory="data")
 
-        # CSV Data Asset
-        file_csv_asset = data_source.add_csv_asset(name="taxi_data")
+    # CSV Data Asset
+    file_csv_asset = data_source.add_csv_asset(name="taxi_data")
 
-        # Batch Definitions
-        yearly = file_csv_asset.add_batch_definition_yearly(name="yearly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
-        monthly = file_csv_asset.add_batch_definition_monthly(name="monthly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
-        daily = file_csv_asset.add_batch_definition_daily(name="daily_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
-        ```
-        </td>
-    </tr>
-</table>
+    # Batch Definitions
+    yearly = file_csv_asset.add_batch_definition_yearly(name="yearly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})\.csv")
+    monthly = file_csv_asset.add_batch_definition_monthly(name="monthly_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+    daily = file_csv_asset.add_batch_definition_daily(name="daily_batches", regex=r"sampled_yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})\.csv")
+    ```
+    </TabItem>
+</Tabs>
 
 ##### Pandas Dataframe
-<table>
-    <tr>
-        <th>V0 Pandas Dataframe Config</th>
-        <th>V1 Pandas Dataframe Config</th>
-    </tr>
-    <tr>
-        <td>
-        ```yaml
-        fluent_datasources:
+<Tabs 
+   queryString="pandas_dataframe_config"
+   defaultValue="v0_pandas_dataframe_config"
+   values={[
+      {value: 'v0_pandas_dataframe_config', label: 'V0 Pandas Dataframe Config'},
+      {value: 'v1_pandas_dataframe_config', label: 'V1 Pandas Dataframe Config'}
+   ]}
+>
+    <TabItem value="v0_pandas_filesystem_config" label="V0 Pandas Dataframe Config">
+    ```yaml
+    fluent_datasources:
+    pd_df_ds:
+        type: pandas
+        assets:
+        taxi_dataframe_asset:
+            type: dataframe
+            batch_metadata: {}
+    ```
+    </TabItem>
+    <TabItem value="v1_pandas_filesystem_config" label="V1 Pandas Dataframe Config">
+    ```yaml
+    fluent_datasources:
         pd_df_ds:
             type: pandas
             assets:
             taxi_dataframe_asset:
                 type: dataframe
                 batch_metadata: {}
-        ```
-        </td>
-        <td>
-        ```yaml
-        fluent_datasources:
-            pd_df_ds:
-                type: pandas
-                assets:
-                taxi_dataframe_asset:
-                    type: dataframe
-                    batch_metadata: {}
-                    batch_definitions:
-                    taxi_dataframe_batch_def:
-                        id: bf0de640-7791-4654-86b0-5f737319e993
-                        partitioner:
-                    id: 352b392d-f0a5-4c7c-911f-fd68903599e0
-                id: 4e0a4b9c-efc2-40e8-8114-6a45ac697554
-        ```
-        </td>
-    </tr>
-</table>
+                batch_definitions:
+                taxi_dataframe_batch_def:
+                    id: bf0de640-7791-4654-86b0-5f737319e993
+                    partitioner:
+                id: 352b392d-f0a5-4c7c-911f-fd68903599e0
+            id: 4e0a4b9c-efc2-40e8-8114-6a45ac697554
+    ```
+    </TabItem>
+</Tabs>
 
 In both `V0` and `V1` a pandas Data Source reads in data from a pandas dataframe. In `V1` there is a concept of a *Batch Definition* that is used to partition data into batches. For a pandas dataframe the only *Batch Definition* currently available is the whole dataframe *Batch Definition*.
 
