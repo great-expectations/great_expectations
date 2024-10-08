@@ -19,7 +19,7 @@ Before we completely remove the functionality in a new major release, there will
 * [BUGFIX] Ensure that Cloud-backed validation results get IDs ([#10478](https://github.com/great-expectations/great_expectations/pull/10478))
 * [DOCS] Remove Python 3.8 reference from readme ([#10474](https://github.com/great-expectations/great_expectations/pull/10474))
 * [DOCS] dbt Tutorial created in collaboration with Jonathan Porter ([#10458](https://github.com/great-expectations/great_expectations/pull/10458))
-* [DOCS] Replace terms.json urls in v0.18 ([#10479](https://github.com/great-expectations/great_expectations/pull/10479)) (thanks @deborahniesz)
+* [DOCS] Replace terms.json urls in v0.18 ([#10479](https://github.com/great-expectations/great_expectations/pull/10479))
 * [MAINTENANCE] Bump dompurify from 3.0.11 to 3.1.7 in /docs/docusaurus ([#10465](https://github.com/great-expectations/great_expectations/pull/10465))
 * [MAINTENANCE] Bump express from 4.19.2 to 4.21.0 in /docs/docusaurus ([#10464](https://github.com/great-expectations/great_expectations/pull/10464))
 * [MAINTENANCE] Bump webpack from 5.88.2 to 5.94.0 in /docs/docusaurus ([#10463](https://github.com/great-expectations/great_expectations/pull/10463))
