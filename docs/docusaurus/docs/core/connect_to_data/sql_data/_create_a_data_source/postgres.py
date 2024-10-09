@@ -34,6 +34,6 @@ data_source = context.data_sources.add_postgres(
 # highlight-end
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py verify data source">
-print(context.get_datasource(datasource_name))
+print(context.data_sources.get(datasource_name))
 # </snippet>
 # </snippet>
