@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from functools import cached_property
 from typing import TYPE_CHECKING, Optional
 
@@ -125,9 +126,9 @@ class Validator:
 
         runtime_configuration: dict
         if isinstance(self.result_format, ResultFormat):
-            runtime_configuration = {"result_format": self.result_format.value}
+            runtime_configuration = {"result_format": copy(self.result_format.value)}
         else:
-            runtime_configuration = {"result_format": self.result_format}
+            runtime_configuration = {"result_format": copy(self.result_format)}
 
         results = self._wrapped_validator.graph_validate(
             configurations=processed_expectation_configs,

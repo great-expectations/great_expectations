@@ -145,7 +145,7 @@ def test_result_format_complete(validator: Validator, failing_expectation: Expec
 def test_v1_validator_doesnt_mutate_result_format(
     validator: Validator, expectation_suite: ExpectationSuite
 ):
-    """This test verifies a bugfix where the legay Validator mutates a ResultFormat
+    """This test verifies a bugfix where the legacy Validator mutates a ResultFormat
     dict provided by the user.
     """
     result_format_dict = {
