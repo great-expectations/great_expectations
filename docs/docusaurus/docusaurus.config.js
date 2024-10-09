@@ -78,7 +78,7 @@ module.exports = {
       contextualSearch: true,
     },
     prism: {
-      additionalLanguages: ['bash'],
+      additionalLanguages: ['bash', 'json', 'python', 'yaml'],
       theme: require('./src/theme/CodeBlock/theme'),
       magicComments: [
         // Remember to extend the default highlight class name as well!
@@ -298,7 +298,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '1.1.0',
+              label: '1.1.1',
             },
             ['0.18']: {
               label: '0.18.21',
