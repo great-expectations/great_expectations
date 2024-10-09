@@ -49,7 +49,7 @@ my_batch_request = my_asset.build_batch_request(options={"dataframe": dataframe}
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_asset">
-my_asset = context.get_datasource("my_datasource").get_asset("my_asset")
+my_asset = context.data_sources.get("my_datasource").get_asset("my_asset")
 # </snippet>
 
 # Python

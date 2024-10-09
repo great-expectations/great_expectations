@@ -23,7 +23,7 @@ context = gx.get_context()
 
 # Retrieve a Data Source
 datasource_name = "my_datasource"
-data_source = context.get_datasource(datasource_name)
+data_source = context.data_sources.get(datasource_name)
 
 # Get the Data Asset from the Data Source
 asset_name = "MY_TABLE_ASSET"

@@ -97,16 +97,6 @@ class DataContext:
         self._datasources[datasource.name] = datasource
         return datasource
 
-    def get_datasource(self, name: str) -> Datasource:
-        # NOTE: this same method exists on AbstractDataContext
-        # TODO (kilo59): implement as __getitem__ ?
-        try:
-            return self._datasources[name]
-        except KeyError as exc:
-            raise LookupError(
-                f"'{name}' not found. Available datasources are {list(self._datasources.keys())}"
-            ) from exc
-
     def _save_project_config(self) -> None: ...
 
 
@@ -478,7 +468,7 @@ def test_add_datasource(context_with_fluent_datasource):
 @pytest.mark.parametrize("use_positional_arg", [True, False])
 def test_add_datasource_with_datasource_object(context_with_fluent_datasource, use_positional_arg):
     context, config_file_path, data_dir = context_with_fluent_datasource
-    new_datasource = copy.deepcopy(context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME))
+    new_datasource = copy.deepcopy(context.data_sources.get(DEFAULT_CRUD_DATASOURCE_NAME))
     new_datasource.name = "new_datasource"
     if use_positional_arg:
         context.data_sources.add_pandas_filesystem(new_datasource)
@@ -538,7 +528,7 @@ def test_update_datasource_with_datasource_object(
     context_with_fluent_datasource, use_positional_arg
 ):
     context, config_file_path, data_dir = context_with_fluent_datasource
-    datasource = context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME)
+    datasource = context.data_sources.get(DEFAULT_CRUD_DATASOURCE_NAME)
     assert_fluent_datasource_content(
         config_file_path=config_file_path,
         fluent_datasource_config={
