@@ -8,7 +8,7 @@ from setuptools import find_packages, setup
 
 import versioneer
 
-SUPPORTED_PYTHON = ">=3.9,<3.12"
+SUPPORTED_PYTHON = ">=3.9,<3.13"
 
 
 def get_python_requires() -> str:
