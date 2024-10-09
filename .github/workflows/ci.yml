@@ -759,11 +759,17 @@ jobs:
     permissions:
       id-token: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - uses: actions/checkout@master
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
           python-version: "3.9"
+
       - name: Update pip
         run: python -m pip install --upgrade pip
 
