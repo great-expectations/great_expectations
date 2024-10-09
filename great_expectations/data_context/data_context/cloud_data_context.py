@@ -625,9 +625,10 @@ class CloudDataContext(SerializableDataContext):
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
-        url = result.result_url
-        assert url, "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"  # noqa: E501
-        self._open_url_in_browser(url)
+        for validation_result in result.run_results.values():
+            url = validation_result.result_url
+            if url:
+                self._open_url_in_browser(url)
 
     @override
     def _add_datasource(
