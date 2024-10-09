@@ -344,6 +344,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         self.config.analytics_enabled = enable
         self._init_analytics()
+        self.variables.save()
 
     @public_api
     def update_project_config(
