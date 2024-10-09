@@ -535,7 +535,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         # We currently don't allow one to overwrite a datasource with this internal method
-        if datasource_name in self.data_sources.all():
+        if datasource_name in self._datasources:
             raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"Can not write the fluent datasource {datasource_name} because a datasource of that "  # noqa: E501
                 "name already exists in the data context."
