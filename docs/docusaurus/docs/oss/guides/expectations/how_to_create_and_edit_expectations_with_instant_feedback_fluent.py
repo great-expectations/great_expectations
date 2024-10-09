@@ -13,7 +13,7 @@ context.data_sources.add_pandas(
 )
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_data_asset_and_build_batch_request">
-data_asset = context.get_datasource("my_datasource").get_asset("my_data_asset")
+data_asset = context.data_sources.get("my_datasource").get_asset("my_data_asset")
 batch_request = data_asset.build_batch_request()
 # </snippet>
 

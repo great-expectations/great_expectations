@@ -98,7 +98,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
     context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     datasource_name = "my_pandas_filesystem_datasource"
-    datasource = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.data_sources.get(datasource_name=datasource_name)
 
     batching_regex = r"^Titanic_1911\.csv"
     glob_directive = "*.csv"
@@ -109,7 +109,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
     )
 
     datasource_name = "my_pandas_dataframes_datasource"
-    datasource = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.data_sources.get(datasource_name=datasource_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     asset = datasource.add_dataframe_asset(name="my_other_dataframe_asset")
@@ -136,7 +136,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
     context = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     datasource_name = "my_pandas_filesystem_datasource"
-    datasource = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.data_sources.get(datasource_name=datasource_name)
 
     batching_regex = r"^Titanic_1911\.csv"
     glob_directive = "*.csv"
