@@ -223,7 +223,6 @@ module = [
     "scipy.*",
     "sempy.*",
     "shapely.*",
-    "snapshottest.*",
     "snowflake.*",
     "sqlalchemy_bigquery.*",
     "sqlalchemy_dremio.*",
