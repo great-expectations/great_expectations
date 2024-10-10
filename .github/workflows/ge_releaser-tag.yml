@@ -26,8 +26,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
-
+      - name: Clone ge_releaser
+        run: git clone git@github.com:greatexpectationslabs/ge_releaser.git ..
       - name: Install ge_releaser
-        run: pip install git+https://github.com/greatexpectationslabs/ge_releaser/
+        run: pip install -e ../ge_releaser
       - name: Run command
         run: ge_releaser tag ${{ github.event.inputs.hash }} ${{ github.event.inputs.version }} --stable
