@@ -18,6 +18,21 @@ class DataSourceType(str, enum.Enum):
 def parameterize_batch_for_data_sources(
     types: list[DataSourceType], data: list[int], description: Optional[str] = None
 ) -> Callable[[F], F]:
+    """Test decorator that parametrizes a test function with batches for various data sources.
+
+    This injects a `batch_for_datasource` parameter into the test function for each data source
+    type.
+
+    example use:
+        @parameterize_batch_for_data_sources(
+            types=[DataSourceType.FOO, DataSourceType.BAR],
+            data=[1, 2],
+            # description="test_stuff",
+        )
+        def test_stuff(batch_for_datasource) -> None:
+            ...
+    """
+
     def decorator(func: F) -> F:
         pytest_params = [
             pytest.param(
@@ -39,6 +54,10 @@ def parameterize_batch_for_data_sources(
 
 @pytest.fixture
 def batch_for_datasource(request: pytest.FixtureRequest) -> Generator[Any, None, None]:
+    """Fixture that yields a batch for a specific data source type.
+
+    This must be used in conjunction with `indirect=True` to defer execution
+    """
     data, data_source_type = request.param
     batch_setup_cls = data_source_to_batch_setup[data_source_type]
     batch_setup = batch_setup_cls(data)
@@ -49,6 +68,7 @@ def batch_for_datasource(request: pytest.FixtureRequest) -> Generator[Any, None,
 
 
 def _data_source_type_to_mark(type: DataSourceType) -> pytest.MarkDecorator:
+    """Get the appropriate mark for a data source type."""
     if type in {DataSourceType.FOO}:
         return pytest.mark.unit
     elif type in {DataSourceType.BAR}:
