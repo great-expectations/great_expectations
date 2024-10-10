@@ -1,4 +1,6 @@
-name: GE Releaser - Tag
+# NOTE: Run this first during the release process
+# Docs: https://github.com/greatexpectationslabs/ge_releaser/
+name: GE Releaser - Tag (1/3)
 
 on:
   workflow_dispatch:
