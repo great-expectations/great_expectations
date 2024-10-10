@@ -14,6 +14,15 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.1.2
+* [FEATURE] Add context.enable_analytics method ([#10385](https://github.com/great-expectations/great_expectations/pull/10385))
+* [BUGFIX] V1 Validator shouldn't mutate user's result format dict ([#10496](https://github.com/great-expectations/great_expectations/pull/10496))
+* [DOCS] V0 to V1 Migration Guide ([#10477](https://github.com/great-expectations/great_expectations/pull/10477))
+* [DOCS] Update min version in `_data.jsx` ([#10494](https://github.com/great-expectations/great_expectations/pull/10494))
+* [MAINTENANCE] Remove `result_url` from `CheckpointResult` ([#10493](https://github.com/great-expectations/great_expectations/pull/10493))
+* [MAINTENANCE] Deprecate context.get_datasource ([#10471](https://github.com/great-expectations/great_expectations/pull/10471))
+* [MAINTENANCE] Remove `snapshottest` dependency ([#10498](https://github.com/great-expectations/great_expectations/pull/10498))
+
 ### 1.1.1
 * [BUGFIX] Ensure that `SlackNotificationAction` credentials don't get serialized ([#10476](https://github.com/great-expectations/great_expectations/pull/10476))
 * [BUGFIX] Ensure that Cloud-backed validation results get IDs ([#10478](https://github.com/great-expectations/great_expectations/pull/10478))
