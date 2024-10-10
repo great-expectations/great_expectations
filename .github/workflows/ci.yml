@@ -197,7 +197,7 @@ jobs:
 
   unit-tests:
     env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -397,7 +397,7 @@ jobs:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
@@ -552,8 +552,6 @@ jobs:
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py312-min-versions:
-    env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -612,12 +610,13 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         exclude:
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
