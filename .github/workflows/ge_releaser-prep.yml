@@ -5,7 +5,7 @@ name: GE Releaser - Prep (2/3)
 on: workflow_dispatch
 
 jobs:
-  tag-release:
+  prepare-changelogs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,4 +18,5 @@ jobs:
 
       - name: Install ge_releaser
         run: pip install git+https://github.com/greatexpectationslabs/ge_releaser/
-      - run: ge_releaser prep
+      - name: Run command
+        run: ge_releaser prep

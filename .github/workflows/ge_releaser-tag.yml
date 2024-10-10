@@ -29,4 +29,5 @@ jobs:
 
       - name: Install ge_releaser
         run: pip install git+https://github.com/greatexpectationslabs/ge_releaser/
-      - run: ge_releaser tag ${{ github.event.inputs.hash }} ${{ github.event.inputs.version }} --stable
+      - name: Run command
+        run: ge_releaser tag ${{ github.event.inputs.hash }} ${{ github.event.inputs.version }} --stable
