@@ -16,7 +16,9 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
+      - name: Clone ge_releaser
+        run: git clone https://github.com/greatexpectationslabs/ge_releaser/ ..
       - name: Install ge_releaser
-        run: pip install git+https://github.com/greatexpectationslabs/ge_releaser/
+        run: pip install ../ge_releaser/
       - name: Run command
         run: ge_releaser publish
