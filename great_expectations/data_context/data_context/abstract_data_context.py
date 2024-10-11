@@ -426,8 +426,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     def datasource_store(self) -> DatasourceStore:
         return self._datasource_store
 
-    @public_api
     @property
+    @public_api
     def suites(self) -> SuiteFactory:
         if not self._suites:
             raise gx_exceptions.DataContextError(  # noqa: TRY003
