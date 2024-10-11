@@ -973,8 +973,9 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
     tokens = marker_string.split()
     if len(tokens) == 1:
         yield tokens[0]
-    elif marker_string == "openpyxl or pyarrow or project or sqlite or aws_creds":
+    elif marker_string == "athena or openpyxl or pyarrow or project or sqlite or aws_creds":
         yield "aws_creds"
+        yield "athena"
         yield "openpyxl"
         yield "pyarrow"
         yield "project"

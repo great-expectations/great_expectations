@@ -422,7 +422,7 @@ jobs:
       fail-fast: false
       matrix:
         markers:
-          - openpyxl or pyarrow or project or sqlite or aws_creds
+          - athena or openpyxl or pyarrow or project or sqlite or aws_creds
           - aws_deps
           - big
           - databricks
@@ -435,7 +435,6 @@ jobs:
           - spark_connect
           - trino
           - clickhouse
-          - athena
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
