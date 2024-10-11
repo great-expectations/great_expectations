@@ -426,6 +426,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def datasource_store(self) -> DatasourceStore:
         return self._datasource_store
 
+    @public_api
     @property
     def suites(self) -> SuiteFactory:
         if not self._suites:
