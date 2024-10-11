@@ -95,9 +95,7 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
                     "kwargs": pact.Like(
                         {
                             "column": "passenger_count",
-                            "max_value": 5,
-                            "min_value": 0,
-                            "mostly": 0.97,
+                            "other_field": "another_value",
                         }
                     ),
                     "meta": pact.Like({}),
