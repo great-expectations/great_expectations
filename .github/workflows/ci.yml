@@ -196,8 +196,6 @@ jobs:
           flags: ${{ matrix.doc-step }}
 
   unit-tests:
-    env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -397,7 +395,6 @@ jobs:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
@@ -629,7 +626,6 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
