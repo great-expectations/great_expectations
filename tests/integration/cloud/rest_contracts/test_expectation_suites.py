@@ -88,6 +88,21 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
             "name": pact.Like("raw_health.critical_1a"),
             "id": pact.Format().uuid,
             "meta": {"great_expectations_version": pact.Like("0.13.23")},
+            "expectations": pact.EachLike(
+                {
+                    "type": pact.Like("expect_column_values_to_be_between"),
+                    "id": pact.Format().uuid,
+                    "kwargs": pact.Like(
+                        {
+                            "column": "passenger_count",
+                            "max_value": 5,
+                            "min_value": 0,
+                            "mostly": 0.97,
+                        }
+                    ),
+                    "meta": pact.Like({}),
+                }
+            ),
         },
         minimum=1,
     ),
