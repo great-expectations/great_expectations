@@ -436,6 +436,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._suites
 
     @property
+    @public_api
     def checkpoints(self) -> CheckpointFactory:
         if not self._checkpoints:
             raise gx_exceptions.DataContextError(  # noqa: TRY003
@@ -444,6 +445,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._checkpoints
 
     @property
+    @public_api
     def validation_definitions(self) -> ValidationDefinitionFactory:
         if not self._validation_definitions:
             raise gx_exceptions.DataContextError(  # noqa: TRY003
