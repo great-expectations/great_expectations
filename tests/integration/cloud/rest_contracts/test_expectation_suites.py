@@ -88,6 +88,19 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
             "name": pact.Like("raw_health.critical_1a"),
             "id": pact.Format().uuid,
             "meta": {"great_expectations_version": pact.Like("0.13.23")},
+            "expectations": pact.EachLike(
+                {
+                    "type": pact.Like("expect_column_values_to_be_between"),
+                    "id": pact.Format().uuid,
+                    "kwargs": pact.Like(
+                        {
+                            "column": "passenger_count",
+                            "other_field": "another_value",
+                        }
+                    ),
+                    "meta": pact.Like({}),
+                }
+            ),
         },
         minimum=1,
     ),
@@ -170,7 +183,6 @@ def test_get_non_existent_expectation_suite(
             cloud_data_context.suites.get(name="non_existent")
 
 
-@pytest.mark.xfail(strict=True, reason="TODO: Fix in V1-331")
 @pytest.mark.cloud
 def test_get_expectation_suites(
     pact_test: pact.Pact,
