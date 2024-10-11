@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store import ExpectationsStore
 
 
+@public_api
 class SuiteFactory(Factory[ExpectationSuite]):
     def __init__(self, store: ExpectationsStore):
         self._store = store
