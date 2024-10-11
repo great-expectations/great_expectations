@@ -665,6 +665,7 @@ jobs:
         py310-min-versions,
         py311-min-versions,
         py312-min-versions,
+        py313-min-versions,
         pydantic-v1,
         airflow-min-versions,
         import_gx,
