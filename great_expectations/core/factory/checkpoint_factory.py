@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 
+@public_api
 class CheckpointFactory(Factory[Checkpoint]):
     def __init__(self, store: CheckpointStore):
         self._store = store
