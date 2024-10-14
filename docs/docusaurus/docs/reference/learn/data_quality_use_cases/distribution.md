@@ -54,7 +54,7 @@ Ensures that specified quantiles of a column fall within provided ranges.
 **Use Case**: Robustly monitors key statistics of the overall distribution, which is valuable for tracking metrics like median purchase amount or 90th percentile product ratings.
 
 ```python
-gxe.expect_column_quantile_values_to_be_between(
+gxe.ExpectColumnQuantileValuesToBeBetween(
     column="purchase_amount",
     quantile_ranges={
         "quantiles": [0.5, 0.9],
@@ -75,7 +75,7 @@ Validates that the standard deviation of a column is within a specified range.
 **Use Case**: Watches for unusual changes in variance that could signal issues in data collection or processing pipelines.
 
 ```python
-gxe.expect_column_stdev_to_be_between(
+gxe.ExpectColumnStdevToBeBetween(
     column="purchase_amount",
     min_value=500,
     max_value=2000
@@ -102,7 +102,7 @@ Ensures that all values in a column fall between a specified minimum and maximum
 **Use Case**: Essential for bounding numerical values within valid ranges, such as ensuring product ratings or purchase amounts are within reasonable limits.
 
 ```python
-gxe.expect_column_values_to_be_between(
+gxe.ExpectColumnValuesToBeBetween(
     column="product_rating",
     min_value=1,
     max_value=5,
@@ -119,7 +119,7 @@ Checks that the Z-scores (number of standard deviations from mean) of all values
 **Use Case**: Powerful for identifying individual outliers and anomalous data points that could represent data entry issues or unusual transactions.
 
 ```python
-gxe.expect_column_value_z_scores_to_be_less_than(
+gxe.ExpectColumnValueZScoresToBeLessThan(
     column="purchase_amount",
     threshold=3,
 )
