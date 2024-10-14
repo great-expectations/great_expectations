@@ -464,3 +464,17 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
   # /docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_suite_parameters
   # /docs/oss/guides/expectations/advanced/how_to_dynamically_load_suite_parameters_from_a_database
   # /docs/oss/guides/expectations/advanced/identify_failed_rows_expectations
+
+
+## Redirects for version 0.18 URLs
+
+/docs/oss/guides/validation/checkpoints/aG93X3RvX2 /docs/0.18/oss/guides/validation/checkpoints/checkpoint_lp
+/docs/oss/guides/setup/configuring_data_docs/aG93X3RvX2 /docs/0.18/oss/guides/setup/configuring_data_docs/host_and_share_data_docs
+/docs/oss/guides/expectations/aG93X3RvX2 /docs/0.18/oss/guides/expectations/expectations_lp
+
+/docs/oss/* /docs/0.18/oss/:splat
+/docs/reference/learn/terms/data_docs /docs/0.18/reference/learn/terms/data_docs
+/docs/reference/learn/terms/* /docs/0.18/reference/learn/terms/:splat
+/docs/reference/learn/expectations/* /docs/0.18/reference/learn/expectations/:splat
+/docs/reference/learn/conceptual_guides/* /docs/0.18/reference/learn/conceptual_guides/:splat
+/docs/reference/api/* /docs/0.18/reference/api/:splat
