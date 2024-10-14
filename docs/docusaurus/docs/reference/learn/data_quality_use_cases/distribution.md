@@ -56,21 +56,6 @@ gxe.expect_column_values_to_be_between(
 
 <small>View `ExpectColumnValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_between).</small>
 
-### Expect Column Pair Values A To Be Greater Than B
-
-Validates that values in one column are greater than corresponding values in another column.
-
-**Use Case**: Crucial for maintaining valid relationships between data entities, like verifying that return dates are later than purchase dates.
-
-```python
-gxe.expect_column_pair_values_A_to_be_greater_than_B(
-    column_A="return_date",
-    column_B="purchase_date",
-)
-```
-
-<small>View `ExpectColumnPairValuesAToBeGreaterThanB` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_pair_values_A_to_be_greater_than_B).</small>
-
 ### Expect Column Value Z Scores To Be Less Than
 
 Checks that the Z-scores (number of standard deviations from mean) of all values are below a threshold.
