@@ -90,7 +90,7 @@ gxe.expect_column_stdev_to_be_between(
 :::tip[GX tip for column-level Expectations]
 - Use the `mostly` parameter to allow for acceptable deviations in your data, providing flexibility in your validations.
 - Regularly update your reference distributions (e.g., in `ExpectColumnKlDivergenceToBeLessThan`) to reflect the most recent data patterns.
-- Combine multiple distribution Expectations to create a comprehensive validation suite that covers central tendency, dispersion, and shape of your data distribution.
+- Don't rely on a single distribution Expectation. Combine Expectations that check different aspects like the center (`ExpectColumnMeanToBeBetween`), spread (`ExpectColumnQuantileValuesToBeBetween`), and shape (`ExpectColumnKlDivergenceToBeLessThan`) of the distribution. Using multiple Expectations in concert gives a more comprehensive validation.
 :::
 
 ### Row-level Expectations
@@ -126,6 +126,12 @@ gxe.expect_column_value_z_scores_to_be_less_than(
 ```
 
 <small>View `ExpectColumnValueZScoresToBeLessThan` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_value_z_scores_to_be_less_than).</small>
+
+:::tip[GX tip for column-level Expectations]
+- Base the range in `ExpectColumnValuesToBeBetween` on domain knowledge to ensure validity.
+- Use `ExpectColumnValueZScoresToBeLessThan` to flag outliers, but set the threshold carefully to avoid false alarms.
+- Analyze unexpected rows flagged by Row-level Expectations to uncover deeper insights about data issues.
+:::
 
 ## Additional distribution Expectations
 
