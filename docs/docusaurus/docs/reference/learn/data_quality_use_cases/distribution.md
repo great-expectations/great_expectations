@@ -137,11 +137,11 @@ gxe.ExpectColumnValueZScoresToBeLessThan(
 
 In addition to the key distribution Expectations discussed above, GX offers a range of other Expectations that can be useful for validating and monitoring data distributions. Some examples include:
 
-- `ExpectColumnMedianToBeBetween`: Checks if the median value of a column is within a specified range. The median is the middle value when the data is sorted in ascending or descending order. This Expectation is useful for ensuring that the central tendency of the data falls within acceptable limits.
+- `ExpectColumnMedianToBeBetween`: Checks if the median value of a column is within a specified range. The median is the middle value when the data is sorted in ascending or descending order. This Expectation is useful for ensuring that the central tendency of the data falls within acceptable limits. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_median_to_be_between))
 
-- `ExpectColumnSumToBeBetween`: Verifies that the sum of all values in a column is between a specified minimum and maximum value. This Expectation helps you check if the total of your data is within expected boundaries, which can be helpful for catching data anomalies or ensuring consistency.
+- `ExpectColumnSumToBeBetween`: Verifies that the sum of all values in a column is between a specified minimum and maximum value. This Expectation helps you check if the total of your data is within expected boundaries, which can be helpful for catching data anomalies or ensuring consistency. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_sum_to_be_between))
 
-- `ExpectColumnKLDivergenceToBeLessThan`: Compares the distribution of a specified column to a reference distribution using the Kullback-Leibler (KL) divergence metric. KL divergence measures the difference between two probability distributions. This Expectation checks if the KL divergence is below a specified threshold, allowing you to assess the similarity between the actual and expected data distributions.
+- `ExpectColumnKLDivergenceToBeLessThan`: Compares the distribution of a specified column to a reference distribution using the Kullback-Leibler (KL) divergence metric. KL divergence measures the difference between two probability distributions. This Expectation checks if the KL divergence is below a specified threshold, allowing you to assess the similarity between the actual and expected data distributions. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_kl_divergence_to_be_less_than))
 
 These additional Expectations provide more advanced techniques for comparing and validating data distributions, allowing you to create even more comprehensive and tailored validation suites.
 
