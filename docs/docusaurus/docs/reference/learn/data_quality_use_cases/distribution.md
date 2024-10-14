@@ -40,38 +40,14 @@ In this dataset, `purchase_amount` represents the amount spent by customers in v
 
 GX offers several Expectations specifically designed for managing data distribution. These can be added to an Expectation Suite via the GX Cloud UI or using the GX Core Python library.
 
-### Expect Column Values To Be Between
+:::TODO:::
 
-Ensures that all values in a column fall between a specified minimum and maximum value.
+![Add a distribution Expectation in GX Cloud](#TODO)
 
-**Use Case**: Essential for bounding numerical values within valid ranges, such as ensuring product ratings or purchase amounts are within reasonable limits.
 
-```python
-gxe.expect_column_values_to_be_between(
-    column="product_rating",
-    min_value=1,
-    max_value=5,
-)
-```
+### Column-level Expectations
 
-<small>View `ExpectColumnValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_between).</small>
-
-### Expect Column Value Z Scores To Be Less Than
-
-Checks that the Z-scores (number of standard deviations from mean) of all values are below a threshold.
-
-**Use Case**: Powerful for identifying individual outliers and anomalous data points that could represent data entry issues or unusual transactions.
-
-```python
-gxe.expect_column_value_z_scores_to_be_less_than(
-    column="purchase_amount",
-    threshold=3,
-)
-```
-
-<small>View `ExpectColumnValueZScoresToBeLessThan` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_value_z_scores_to_be_less_than).</small>
-
-### Expect Column Quantile Values To Be Between
+#### Expect Column Quantile Values To Be Between
 
 Ensures that specified quantiles of a column fall within provided ranges.
 
@@ -92,7 +68,7 @@ gxe.expect_column_quantile_values_to_be_between(
 
 <small>View `ExpectColumnQuantileValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_quantile_values_to_be_between).</small>
 
-### Expect Column Stdev To Be Between
+#### Expect Column Stdev To Be Between
 
 Validates that the standard deviation of a column is within a specified range.
 
@@ -111,11 +87,45 @@ gxe.expect_column_stdev_to_be_between(
 <br/>
 <br/>
 
-:::tip[GX tips for distribution Expectations]
+:::tip[GX tip for column-level Expectations]
 - Use the `mostly` parameter to allow for acceptable deviations in your data, providing flexibility in your validations.
 - Regularly update your reference distributions (e.g., in `ExpectColumnKlDivergenceToBeLessThan`) to reflect the most recent data patterns.
 - Combine multiple distribution Expectations to create a comprehensive validation suite that covers central tendency, dispersion, and shape of your data distribution.
 :::
+
+### Row-level Expectations
+
+#### Expect Column Values To Be Between
+
+Ensures that all values in a column fall between a specified minimum and maximum value.
+
+**Use Case**: Essential for bounding numerical values within valid ranges, such as ensuring product ratings or purchase amounts are within reasonable limits.
+
+```python
+gxe.expect_column_values_to_be_between(
+    column="product_rating",
+    min_value=1,
+    max_value=5,
+)
+```
+
+<small>View `ExpectColumnValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_between).</small>
+
+
+#### Expect Column Value Z Scores To Be Less Than
+
+Checks that the Z-scores (number of standard deviations from mean) of all values are below a threshold.
+
+**Use Case**: Powerful for identifying individual outliers and anomalous data points that could represent data entry issues or unusual transactions.
+
+```python
+gxe.expect_column_value_z_scores_to_be_less_than(
+    column="purchase_amount",
+    threshold=3,
+)
+```
+
+<small>View `ExpectColumnValueZScoresToBeLessThan` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_value_z_scores_to_be_less_than).</small>
 
 ## Additional distribution Expectations
 
