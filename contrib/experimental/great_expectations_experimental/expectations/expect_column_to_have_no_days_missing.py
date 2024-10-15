@@ -42,7 +42,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
             .select_from(selectable)
             .where(column.is_not(None))
         )
-        
+
         all_unique_dates = [i[0] for i in execution_engine.execute_query(query).fetchall()]
 
         # Only sqlite returns as strings, so make date objects be strings
