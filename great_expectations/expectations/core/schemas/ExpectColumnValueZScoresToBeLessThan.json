@@ -86,9 +86,7 @@
             "type": "string"
         },
         "condition_parser": {
-            "title": "Condition Parser",
-            "default": "pandas",
-            "type": "string"
+            "$ref": "#/definitions/ConditionParser"
         },
         "threshold": {
             "title": "Threshold",
@@ -246,6 +244,16 @@
                 "offset"
             ],
             "additionalProperties": false
+        },
+        "ConditionParser": {
+            "title": "ConditionParser",
+            "description": "Type of parser to be used to interpret a Row Condition.",
+            "enum": [
+                "great_expectations__experimental__",
+                "pandas",
+                "spark"
+            ],
+            "type": "string"
         }
     }
 }
