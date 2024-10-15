@@ -53,17 +53,7 @@ Ensures that specified quantiles of a column fall within provided ranges.
 
 **Use Case**: Robustly monitors key statistics of the overall distribution, which is valuable for tracking metrics like median purchase amount or 90th percentile product ratings.
 
-```python
-gxe.ExpectColumnQuantileValuesToBeBetween(
-    column="purchase_amount",
-    quantile_ranges={
-        "quantiles": [0.5, 0.9],
-        "value_ranges": [
-            [50, 200],
-            [500, 2000]
-        ]
-    }
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnQuantileValuesToBeBetween"
 ```
 
 <small>View `ExpectColumnQuantileValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_quantile_values_to_be_between).</small>
@@ -74,12 +64,7 @@ Validates that the standard deviation of a column is within a specified range.
 
 **Use Case**: Watches for unusual changes in variance that could signal issues in data collection or processing pipelines.
 
-```python
-gxe.ExpectColumnStdevToBeBetween(
-    column="purchase_amount",
-    min_value=500,
-    max_value=2000
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnStdevToBeBetween"
 ```
 
 <small>View `ExpectColumnStdevToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between).</small>
@@ -101,16 +86,10 @@ Ensures that all values in a column fall between a specified minimum and maximum
 
 **Use Case**: Essential for bounding numerical values within valid ranges, such as ensuring product ratings or purchase amounts are within reasonable limits.
 
-```python
-gxe.ExpectColumnValuesToBeBetween(
-    column="product_rating",
-    min_value=1,
-    max_value=5,
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValuesToBeBetween"
 ```
 
 <small>View `ExpectColumnValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_between).</small>
-
 
 #### Expect Column Value Z Scores To Be Less Than
 
@@ -118,14 +97,13 @@ Checks that the Z-scores (number of standard deviations from mean) of all values
 
 **Use Case**: Powerful for identifying individual outliers and anomalous data points that could represent data entry issues or unusual transactions.
 
-```python
-gxe.ExpectColumnValueZScoresToBeLessThan(
-    column="purchase_amount",
-    threshold=3,
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValueZScoresToBeLessThan"
 ```
 
 <small>View `ExpectColumnValueZScoresToBeLessThan` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_value_z_scores_to_be_less_than).</small>
+
+<br/>
+<br/>
 
 :::tip[GX tip for column-level Expectations]
 - Base the range in `ExpectColumnValuesToBeBetween` on domain knowledge to ensure validity.
@@ -209,20 +187,7 @@ This example demonstrates how to validate the age distribution in the customer d
 
 **GX solution**: Use `ExpectColumnValuesToBeBetween` and `ExpectColumnMeanToBeBetween` to ensure transaction amounts are within expected ranges and the mean remains consistent.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_workflow.py transaction_anomalies"
-# Validate that purchase_amount is within expected range
-validator.expect_column_values_to_be_between(
-    column="purchase_amount",
-    min_value=1,
-    max_value=10000,
-)
-
-# Validate that the mean of purchase_amount is within expected range
-validator.expect_column_mean_to_be_between(
-    column="purchase_amount",
-    min_value=200,
-    max_value=500
-)
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py detecting_anomalies"
 ```
 
 ### Monitoring data drift in model inputs
@@ -232,18 +197,7 @@ validator.expect_column_mean_to_be_between(
 **GX solution**: Use `ExpectColumnKlDivergenceToBeLessThan` to compare current data distribution with a reference distribution and detect drift.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_workflow.py model_data_drift"
-# Set up reference distribution (e.g., from training data)
-reference_distribution = {
-    "bins": [0, 100, 500, 1000, 5000, 10000],
-    "weights": [0.05, 0.25, 0.35, 0.25, 0.1]
-}
 
-# Validate that KL divergence is below threshold
-validator.expect_column_kl_divergence_to_be_less_than(
-    column="purchase_amount",
-    partition_object=reference_distribution,
-    threshold=0.1
-)
 ```
 
 ### Ensuring consistency in time-series data
@@ -253,18 +207,6 @@ validator.expect_column_kl_divergence_to_be_less_than(
 **GX solution**: Use `ExpectColumnQuantileValuesToBeBetween` to check that quantiles of the data remain within expected ranges.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_workflow.py time_series_consistency"
-# Validate that quantiles are within expected ranges
-validator.expect_column_quantile_values_to_be_between(
-    column="purchase_amount",
-    quantile_ranges={
-        "quantiles": [0.25, 0.5, 0.75],
-        "value_ranges": [
-            [100, 150],
-            [200, 250],
-            [300, 400]
-        ]
-    }
-)
 ```
 
 ## Avoid common distribution analysis pitfalls
