@@ -153,7 +153,7 @@ This example demonstrates how to validate the age distribution in the customer d
 
 **GX solution**: Use `ExpectColumnKlDivergenceToBeLessThan` to compare current data distribution with a reference distribution and detect drift.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_workflow.py model_data_drift"
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py model_data_drift"
 
 ```
 
@@ -163,7 +163,7 @@ This example demonstrates how to validate the age distribution in the customer d
 
 **GX solution**: Use `ExpectColumnQuantileValuesToBeBetween` to check that quantiles of the data remain within expected ranges.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_workflow.py time_series_consistency"
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py time_series_consistency"
 ```
 
 ## Avoid common distribution analysis pitfalls
