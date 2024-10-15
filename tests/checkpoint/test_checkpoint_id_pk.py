@@ -81,14 +81,14 @@ WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
 
 @pytest.fixture
 def expect_column_values_to_be_in_set() -> gxe.ExpectColumnValuesToBeInSet:
-    return gxe.ExpectColumnValuesToBeInSet(column="animals", value_set=["cat", "fish", "dog"])  # type: ignore[arg-type] # TODO: Fix in CORE-412
+    return gxe.ExpectColumnValuesToBeInSet(column="animals", value_set=["cat", "fish", "dog"])
 
 
 @pytest.fixture
 def expect_column_values_to_not_be_in_set() -> gxe.ExpectColumnValuesToNotBeInSet:
     return gxe.ExpectColumnValuesToNotBeInSet(
         column="animals",
-        value_set=["giraffe", "lion", "zebra"],  # type: ignore[arg-type] # TODO: Fix in CORE-412
+        value_set=["giraffe", "lion", "zebra"],
     )
 
 

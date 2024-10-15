@@ -110,4 +110,4 @@ class _ValueSet(Iterable):
             ]
 
 
-ValueSet = Annotated[_ValueSet, Union[list, set]]
+ValueSet = Annotated[Union[list, set], _ValueSet]

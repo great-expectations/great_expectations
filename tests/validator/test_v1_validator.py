@@ -23,7 +23,7 @@ from great_expectations.validator.v1_validator import Validator
 def failing_expectation() -> Expectation:
     return gxe.ExpectColumnValuesToBeInSet(
         column="event_type",
-        value_set=["start", "stop"],  # type: ignore[arg-type] # TODO: Fix in CORE-412
+        value_set=["start", "stop"],
     )
 
 
@@ -185,7 +185,7 @@ def test_validate_expectation_with_batch_asset_options(
     result = validator.validate_expectation(
         gxe.ExpectColumnValuesToBeInSet(
             column="event_type",
-            value_set=[desired_event_type],  # type: ignore[arg-type] # TODO: Fix in CORE-412
+            value_set=[desired_event_type],
         )
     )
     print(f"Result dict ->\n{pf(result)}")
@@ -242,7 +242,7 @@ def test_non_cloud_validate_does_not_render_results(
             expectations=[
                 gxe.ExpectColumnValuesToBeInSet(
                     column="event_type",
-                    value_set=["start"],  # type: ignore[arg-type] # TODO: Fix in CORE-412
+                    value_set=["start"],
                 )
             ],
         )
@@ -269,7 +269,7 @@ def test_cloud_validate_renders_results_when_appropriate(
             expectations=[
                 gxe.ExpectColumnValuesToBeInSet(
                     column="event_type",
-                    value_set=["start"],  # type: ignore[arg-type] # TODO: Fix in CORE-412
+                    value_set=["start"],
                 )
             ],
         )
