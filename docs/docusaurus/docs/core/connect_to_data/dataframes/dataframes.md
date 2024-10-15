@@ -253,7 +253,7 @@ Because dataframes exist in memory and cease to exist when a Python session ends
    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/dataframes/_examples/_batch_parameters_batch_definition.py - batch parameters example"
    ```
 
-   The following examples create a dataframe by reading a `.csv` file and stores it in a Batch Parameter dictionary:
+   The following examples create a dataframe by reading a `.csv` file and storing it in a Batch Parameter dictionary:
 
    <Tabs queryString="execution_engine" groupId="execution_engine" defaultValue='pandas'>
 
