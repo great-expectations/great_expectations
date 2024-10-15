@@ -100,7 +100,7 @@ def test_get_domain_records_with_column_domain(
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b")<5',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
         }
     )
 
@@ -123,7 +123,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b")<5',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "filter_conditions": [
                 RowCondition(
                     condition="b IS NOT NULL",
@@ -152,7 +152,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("a")<2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "filter_conditions": [
                 RowCondition(
                     condition="b IS NOT NULL",
@@ -181,7 +181,7 @@ def test_get_domain_records_with_different_column_domain_and_multiple_filter_con
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("a")<10',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "filter_conditions": [
                 RowCondition(
                     condition="b IS NOT NULL",
@@ -221,7 +221,7 @@ def test_get_domain_records_with_column_pair_domain(
             "column_A": "a",
             "column_B": "b",
             "row_condition": 'col("b")>2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "both_values_are_missing",
         }
     )
@@ -250,7 +250,7 @@ def test_get_domain_records_with_column_pair_domain(
             "column_A": "b",
             "column_B": "c",
             "row_condition": 'col("b")>2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "either_value_is_missing",
         }
     )
@@ -279,7 +279,7 @@ def test_get_domain_records_with_column_pair_domain(
             "column_A": "b",
             "column_B": "c",
             "row_condition": 'col("a")<6',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "neither",
         }
     )
@@ -315,7 +315,7 @@ def test_get_domain_records_with_multicolumn_domain(
         domain_kwargs={
             "column_list": ["a", "c"],
             "row_condition": 'col("b")>2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "all_values_are_missing",
         }
     )
@@ -348,7 +348,7 @@ def test_get_domain_records_with_multicolumn_domain(
         domain_kwargs={
             "column_list": ["b", "c"],
             "row_condition": 'col("a")<5',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "any_value_is_missing",
         }
     )
@@ -905,8 +905,8 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
         )
 
 
-# Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain  # noqa: E501
-def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session):
+# Testing to ensure that great expectation parser also works in terms of defining a compute domain  # noqa: E501
+def test_get_compute_domain_with_gx_condition_parser(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -927,7 +927,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session)
         domain_kwargs={
             "column": "b",
             "row_condition": 'col("b") == 2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
         },
         domain_type="column",
     )
@@ -945,7 +945,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session)
         domain_kwargs={
             "column": "b",
             "row_condition": 'col("b") == 2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
         }
     )
     # Ensuring data has been properly queried

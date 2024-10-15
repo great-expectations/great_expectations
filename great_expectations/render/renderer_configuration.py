@@ -475,12 +475,10 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             row_condition_str = "True"
 
         row_condition_str = (
-            row_condition_str.replace("&", " AND ")
-            .replace(" and ", " AND ")
-            .replace("|", " OR ")
-            .replace(" or ", " OR ")
-            .replace("~", " NOT ")
-            .replace(" not ", " NOT ")
+            row_condition_str.replace("&", " and ")
+            .replace("|", " or ")
+            .replace("~", " is not ")
+            .replace("==", " is ")
         )
         row_condition_str = " ".join(row_condition_str.split())
 

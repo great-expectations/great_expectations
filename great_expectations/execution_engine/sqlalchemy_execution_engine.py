@@ -653,7 +653,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # Filtering by row condition.
         if "row_condition" in domain_kwargs and domain_kwargs["row_condition"] is not None:
             condition_parser = domain_kwargs["condition_parser"]
-            if condition_parser == "great_expectations__experimental__":
+            if condition_parser == "great_expectations":
                 parsed_condition = parse_condition_to_sqlalchemy(domain_kwargs["row_condition"])
                 selectable = sa.select(sa.text("*")).select_from(selectable).where(parsed_condition)  # type: ignore[arg-type]
             else:
