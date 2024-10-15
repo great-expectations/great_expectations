@@ -53,8 +53,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         self.forbidden_substrings = forbidden_substrings
         self.platform_specific_separator = platform_specific_separator
 
-        if filepath_template is not None and filepath_suffix is not None:
-            raise ValueError("filepath_suffix may only be used when filepath_template is None")  # noqa: TRY003
+        if filepath_template and filepath_suffix:
+            # Template takes precedence over suffix if both are provided
+            filepath_suffix = None
 
         self.filepath_template = filepath_template
         if filepath_prefix and len(filepath_prefix) > 0:
