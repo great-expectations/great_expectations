@@ -139,6 +139,8 @@ class ExpectTableRowCountToEqual(BatchExpectation):
     """  # noqa: E501
 
     value: Union[int, SuiteParameterDict] = pydantic.Field(description=VALUE_DESCRIPTION)
+    row_condition: Union[str, None] = None
+    condition_parser: Union[str, None] = None
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",

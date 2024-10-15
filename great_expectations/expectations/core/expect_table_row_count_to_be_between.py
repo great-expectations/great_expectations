@@ -160,6 +160,8 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     max_value: Union[int, SuiteParameterDict, datetime, None] = pydantic.Field(
         default=None, description=MAX_VALUE_DESCRIPTION
     )
+    row_condition: Union[str, None] = None
+    condition_parser: Union[str, None] = None
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",

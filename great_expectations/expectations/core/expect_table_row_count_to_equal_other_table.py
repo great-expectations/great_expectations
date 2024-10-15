@@ -147,6 +147,8 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     """  # noqa: E501
 
     other_table_name: str = pydantic.Field(description=OTHER_TABLE_NAME_DESCRIPTION)
+    row_condition: Union[str, None] = None
+    condition_parser: Union[str, None] = None
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
