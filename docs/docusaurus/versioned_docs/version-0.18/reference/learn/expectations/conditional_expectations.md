@@ -3,7 +3,7 @@ title: Conditional Expectations
 ---
 
 :::note
-Conditional Expectations are available for Pandas, Snowflake, Databricks, Spark, and SQLAlchemy backends.
+Conditional Expectations are available for Pandas, Spark, and SQLAlchemy backends.
 :::
 
 You can create an Expectation for an entire dataset, or for a subset of the dataset. Some variables are dependent on the values of other variables. For example, a column that specifies that the country of origin must not be null for people of foreign descent.

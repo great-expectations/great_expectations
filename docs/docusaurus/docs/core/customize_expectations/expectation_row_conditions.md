@@ -10,7 +10,7 @@ import PrereqPreconfiguredDataContext from '../_core_components/prerequisites/_p
 import PrereqPreconfiguredDataSourceAndAsset from '../_core_components/prerequisites/_data_source_and_asset_connected_to_data.md';
 
 :::note
-Conditional Expectations are available for Pandas, Snowflake, Databricks, Spark, and SQLAlchemy backends.
+Conditional Expectations are available for Pandas, Spark, and SQLAlchemy backends.
 :::
 
 By default Expectations apply to the entire dataset retrieved in a Batch.  However, sometimes an Expectation is not relevant for every row and validating every row could cause false positives or false negatives in the Validation Results.

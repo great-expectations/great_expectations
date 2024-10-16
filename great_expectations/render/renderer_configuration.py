@@ -481,7 +481,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             .replace(" or ", " OR ")
             .replace("~", " NOT ")
             .replace(" not ", " NOT ")
-            .replace("==", " IS ")
+            .replace("==", " is ")
         )
         row_condition_str = " ".join(row_condition_str.split())
 
