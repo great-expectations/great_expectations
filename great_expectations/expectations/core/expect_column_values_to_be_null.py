@@ -170,7 +170,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    condition_parser: Union[None, str] = "pandas"
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "column",
         "row_condition",

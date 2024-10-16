@@ -14,6 +14,17 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.1.3
+* [BUGFIX] Fix datadocs icons ([#10511](https://github.com/great-expectations/great_expectations/pull/10511))
+* [DOCS] Add `public_api` decorators to object factories ([#10513](https://github.com/great-expectations/great_expectations/pull/10513))
+* [DOCS] Patch incorrect label in migration guide ([#10518](https://github.com/great-expectations/great_expectations/pull/10518))
+* [MAINTENANCE] Remove `snapshottest` dependency ([#10498](https://github.com/great-expectations/great_expectations/pull/10498))
+* [MAINTENANCE] Add GH Actions for release process ([#10502](https://github.com/great-expectations/great_expectations/pull/10502))
+* [MAINTENANCE] Support Python 3.12 ([#10503](https://github.com/great-expectations/great_expectations/pull/10503))
+* [MAINTENANCE] Patch `ge_releaser` installation pattern in released-related GH Actions ([#10509](https://github.com/great-expectations/great_expectations/pull/10509))
+* [MAINTENANCE] Enable pact test for all expectation suites ([#10506](https://github.com/great-expectations/great_expectations/pull/10506))
+* [MAINTENANCE] Isolate `clickhouse` marker in CI ([#10512](https://github.com/great-expectations/great_expectations/pull/10512))
+
 ### 1.1.2
 * [FEATURE] Add context.enable_analytics method ([#10385](https://github.com/great-expectations/great_expectations/pull/10385))
 * [BUGFIX] V1 Validator shouldn't mutate user's result format dict ([#10496](https://github.com/great-expectations/great_expectations/pull/10496))
