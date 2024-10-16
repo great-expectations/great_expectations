@@ -9,10 +9,6 @@ import PrereqGxInstalled from '../_core_components/prerequisites/_gx_installatio
 import PrereqPreconfiguredDataContext from '../_core_components/prerequisites/_preconfigured_data_context.md';
 import PrereqPreconfiguredDataSourceAndAsset from '../_core_components/prerequisites/_data_source_and_asset_connected_to_data.md';
 
-:::note
-Conditional Expectations are available for Pandas, Spark, and SQLAlchemy backends.
-:::
-
 By default Expectations apply to the entire dataset retrieved in a Batch.  However, sometimes an Expectation is not relevant for every row and validating every row could cause false positives or false negatives in the Validation Results.
 
 For example, you may define an Expectation that a column specifying the country of origin of a product should not be null.  If that Expectation is only relevant when the product is a foreign import then applying the Expectation to every row in the Batch could result in a large number of false negatives when the country of origin column is null for products produced by local industry.
