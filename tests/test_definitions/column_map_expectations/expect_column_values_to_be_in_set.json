@@ -177,7 +177,7 @@
         "condition_parser": "bad_parser"
       },
       "out": {
-        "traceback_substring": "condition_parser is required"
+        "traceback_substring": "not a valid enumeration member"
       }
     }
     ]},
