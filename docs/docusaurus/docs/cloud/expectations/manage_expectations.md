@@ -113,7 +113,7 @@ The optional `{batch}` named query references the Batch of data under test. When
 
 3. Click the **Expectations** tab.
 
-4. Click **Edit Expectations** for the Expectation that you want to edit.
+4. Click **Edit Expectation** for the Expectation that you want to edit.
 
 5. Edit the Expectation configuration.
 
