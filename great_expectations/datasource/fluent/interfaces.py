@@ -755,7 +755,6 @@ class Datasource(
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
         return self._execution_engine
 
-    @public_api
     def get_batch(self, batch_request: BatchRequest) -> Batch:
         """A Batch that corresponds to the BatchRequest.
 
