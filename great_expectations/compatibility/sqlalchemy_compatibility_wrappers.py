@@ -5,6 +5,7 @@ import warnings
 from typing import Callable, Iterator, Sequence
 
 import pandas as pd
+from sqlalchemy.exc import SAWarning
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.not_imported import is_version_less_than
@@ -206,14 +207,16 @@ def add_dataframe_to_db(  # noqa: PLR0913
                 method=method,  # type: ignore[arg-type]
             )
     else:
-        df.to_sql(
-            name=name,
-            con=con,
-            schema=schema,
-            if_exists=if_exists,  # type: ignore[arg-type]
-            index=index,
-            index_label=index_label,
-            chunksize=chunksize,
-            dtype=dtype,
-            method=method,  # type: ignore[arg-type]
-        )
+        with warnings.catch_warnings():
+            warnings.filterwarnings(action="ignore", category=SAWarning)
+            df.to_sql(
+                name=name,
+                con=con,
+                schema=schema,
+                if_exists=if_exists,  # type: ignore[arg-type]
+                index=index,
+                index_label=index_label,
+                chunksize=chunksize,
+                dtype=dtype,
+                method=method,  # type: ignore[arg-type]
+            )
