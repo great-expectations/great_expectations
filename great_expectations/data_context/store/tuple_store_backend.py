@@ -1,4 +1,3 @@
-# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from __future__ import annotations
 
 import functools
@@ -54,7 +53,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         self.platform_specific_separator = platform_specific_separator
 
         if filepath_template and filepath_suffix:
-            # Template takes precedence over suffix if both are provided
+            logger.info(
+                "Both filepath_template and filepath_suffix provided. Ignoring filepath_suffix."
+            )
             filepath_suffix = None
 
         self.filepath_template = filepath_template
@@ -78,7 +79,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             self._fixed_length_key = True
 
     @staticmethod
-    def _is_missing_prefix_or_suffix(filepath_prefix: str, filepath_suffix: str, key: str) -> bool:
+    def _is_missing_prefix_or_suffix(
+        filepath_prefix: str | None, filepath_suffix: str | None, key: str
+    ) -> bool:
         missing_prefix = bool(filepath_prefix and not key.startswith(filepath_prefix))
         missing_suffix = bool(filepath_suffix and not key.endswith(filepath_suffix))
         return missing_prefix or missing_suffix
