@@ -279,9 +279,8 @@ class SphinxInvokeDocsBuilder:
             else:
                 link_sidebar_entry = self._get_sidebar_entry(html_file_path=href_path)
 
-            relative_link = self._relative_path_between_documents(
-                sidebar_entry.mdx_relpath, link_sidebar_entry.mdx_relpath
-            )
+            relative_link = link_sidebar_entry.mdx_relpath
+
             without_extension = str(relative_link).replace(".mdx", "")
             if not without_extension.endswith("_class"):
                 raise Exception(  # noqa: TRY002, TRY003
