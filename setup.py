@@ -39,7 +39,6 @@ def get_extras_require():
         "teradata",  # https://pypi.org/project/teradatasqlalchemy   https://support.teradata.com/knowledge?id=kb_article_view&sys_kb_id=a5a869149729251ced863fe3f153af27
     )
     sqla_keys = (
-        "athena",  # https://github.com/laughingman7743/PyAthena/blob/master/pyproject.toml
         "dremio",  # https://github.com/narendrans/sqlalchemy_dremio/blob/master/setup.py
         "hive",  # https://github.com/dropbox/PyHive/blob/master/setup.py
         "mssql",  # https://github.com/mkleehammer/pyodbc/blob/master/setup.py

@@ -27,7 +27,6 @@ Requirements
 - **reqs/requirements-dev-sqlalchemy.txt**: Includes every requirements file for every sqlalchemy dialect; should not do `pip install -r reqs/requirements-dev-sqlalchemy.txt`
     - reqs/requirements-dev-lite.txt
     - reqs/requirements-dev-sqlalchemy1.txt
-    - reqs/requirements-dev-athena.txt: `pip install ".[athena]"`
     - reqs/requirements-dev-bigquery.txt: `pip install ".[bigquery]"` and `pip install ".[gcp]"`
     - reqs/requirements-dev-clickhouse.txt: `pip install ".[clickhouse]"`
     - reqs/requirements-dev-dremio.txt: `pip install ".[dremio]"`

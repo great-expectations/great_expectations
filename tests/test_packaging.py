@@ -117,7 +117,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-trino.txt"]
         | req_set_dict["requirements-dev-hive.txt"]
         | req_set_dict["requirements-dev-vertica.txt"]
-        | req_set_dict["requirements-dev-sqlalchemy1.txt"]
+        | req_set_dict["requirements-dev-sqlalchemy2.txt"]
     ) == req_set_dict["requirements-dev-sqlalchemy.txt"]
 
     assert (
@@ -138,7 +138,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-test.txt"]
         | req_set_dict["requirements-dev-spark.txt"]
-        | req_set_dict["requirements-dev-sqlalchemy1.txt"]
+        | req_set_dict["requirements-dev-sqlalchemy2.txt"]
         | req_set_dict["requirements-dev-sqlalchemy.txt"]
         | req_set_dict["requirements-dev-arrow.txt"]
         | req_set_dict["requirements-dev-athena.txt"]
@@ -208,7 +208,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-sqlalchemy.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev-sqlalchemy.txt", "sqlalchemy", (("<", "2.0.0"),)),
         ("requirements-dev-sqlalchemy.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
-        ("requirements-dev-sqlalchemy1.txt", "sqlalchemy", (("<", "2.0.0"),)),
+        ("requirements-dev-sqlalchemy2.txt", "sqlalchemy", (("<", "2.0.0"),)),
         ("requirements-dev-test.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev-test.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev-test.txt", "moto", (("<", "5.0"), (">=", "4.2.13"))),
