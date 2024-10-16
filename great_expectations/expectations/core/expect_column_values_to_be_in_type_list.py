@@ -205,7 +205,6 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    condition_parser: Union[str, None] = "pandas"
     type_list: Union[List[str], SuiteParameterDict, None] = pydantic.Field(
         description=TYPE_LIST_DESCRIPTION
     )

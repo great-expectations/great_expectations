@@ -22,7 +22,7 @@ When you run a validation on an Expectation, a Checkpoint is added. The Checkpoi
 
 4. Click **Validate**.
 
-5. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Batches & run History** pane.
+5. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Batches & run history** pane.
 
 6. Optional. Click **Share** to copy the URL for the Validation Results and share them with another GX Cloud user.
 
@@ -48,7 +48,7 @@ To make the identification of Data Assets containing partitions easier, partitio
 
 6. Click **Validate**.
 
-7. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Batches & run History** pane.
+7. When the confirmation message appears, click **See results**, or click the **Validations** tab and select the Validation in the **Batches & run history** pane.
 
 8. Optional. Click **Share** to copy the URL for the Validation Results and share them with another GX Cloud user.
 

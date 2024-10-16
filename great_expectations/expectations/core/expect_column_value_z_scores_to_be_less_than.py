@@ -172,7 +172,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    condition_parser: Union[str, None] = "pandas"
     threshold: Union[float, SuiteParameterDict] = pydantic.Field(description=THRESHOLD_DESCRIPTION)
     double_sided: Union[bool, SuiteParameterDict] = pydantic.Field(
         description=DOUBLE_SIDED_DESCRIPTION
