@@ -427,7 +427,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     @property
     def ge_cloud_resource_type(self) -> GXCloudRESTResource:
-        return self._ge_cloud_resource_type  # type: ignore[return-value]
+        return self._ge_cloud_resource_type
 
     @property
     def ge_cloud_credentials(self) -> dict:
