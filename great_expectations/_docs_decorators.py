@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from dataclasses import dataclass
 from textwrap import dedent
 from typing import Any, Callable, Optional, TypeVar
@@ -78,7 +79,7 @@ class _PublicApiIntrospector:
 public_api_introspector = _PublicApiIntrospector()
 
 
-def public_api(func: F) -> F:
+def public_api(func_or_cls: F) -> F:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:
@@ -89,10 +90,28 @@ def public_api(func: F) -> F:
 
     This tag is added at import time.
     """
-    public_api_introspector.add(func)
-    existing_docstring = func.__doc__ if func.__doc__ else ""
-    func.__doc__ = WHITELISTED_TAG + existing_docstring
-    return func
+    public_api_introspector.add(func_or_cls)
+    existing_docstring = func_or_cls.__doc__ if func_or_cls.__doc__ else ""
+    func_or_cls.__doc__ = WHITELISTED_TAG + existing_docstring
+
+    _populate_public_api_registry(func_or_cls)
+    return func_or_cls
+
+
+_public_api_registry = defaultdict(set)
+
+
+def _populate_public_api_registry(func_or_cls: F) -> None:
+    if isinstance(func_or_cls, type):
+        key = f"{func_or_cls.__module__}.{func_or_cls.__qualname__}"
+        _public_api_registry[key].add("__init__")
+    else:
+        parts = func_or_cls.__qualname__.split(".")
+        if len(parts) >= 2:  # noqa: PLR2004
+            cls = parts[0]
+            func = parts[1]
+            key = f"{func_or_cls.__module__}.{cls}"
+            _public_api_registry[key].add(func)
 
 
 def deprecated_method_or_class(
