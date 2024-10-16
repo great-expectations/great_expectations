@@ -605,6 +605,7 @@ def _sort_batch_identifiers_with_none_metadata_values(
 _DataAssetT = TypeVar("_DataAssetT", bound=DataAsset)
 
 
+@public_api
 class Datasource(
     FluentBaseModel,
     Generic[_DataAssetT, _ExecutionEngineT],
@@ -693,6 +694,7 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
+    @public_api
     def add_batch_definition(
         self, batch_definition: BatchDefinition[PartitionerT]
     ) -> BatchDefinition[PartitionerT]:
@@ -719,6 +721,7 @@ class Datasource(
         output.set_data_asset(batch_definition.data_asset)
         return output
 
+    @public_api
     def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
@@ -752,6 +755,7 @@ class Datasource(
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
         return self._execution_engine
 
+    @public_api
     def get_batch(self, batch_request: BatchRequest) -> Batch:
         """A Batch that corresponds to the BatchRequest.
 
@@ -791,6 +795,7 @@ class Datasource(
         asset: _DataAssetT
         return {asset.name for asset in self.assets}
 
+    @public_api
     def get_asset(self, name: str) -> _DataAssetT:
         """Returns the DataAsset referred to by asset_name
 
@@ -813,6 +818,7 @@ class Datasource(
                 f'"{name}" not found. Available assets are ({", ".join(self.get_asset_names())})'
             ) from exc
 
+    @public_api
     def delete_asset(self, name: str) -> None:
         """Removes the DataAsset referred to by asset_name from internal list of available DataAsset objects.
 
