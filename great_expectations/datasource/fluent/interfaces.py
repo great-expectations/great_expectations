@@ -287,6 +287,7 @@ _ExecutionEngineT = TypeVar("_ExecutionEngineT")
 DatasourceT = TypeVar("DatasourceT", bound="Datasource")
 
 
+@public_api
 class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
@@ -453,6 +454,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
+    @public_api
     def get_batch_definition(self, name: str) -> BatchDefinition[PartitionerT]:
         batch_definitions = [
             batch_definition
@@ -694,7 +696,6 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    @public_api
     def add_batch_definition(
         self, batch_definition: BatchDefinition[PartitionerT]
     ) -> BatchDefinition[PartitionerT]:
@@ -721,7 +722,6 @@ class Datasource(
         output.set_data_asset(batch_definition.data_asset)
         return output
 
-    @public_api
     def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
