@@ -30,7 +30,6 @@ def files_with_deprecation_warnings() -> List[str]:
         "great_expectations/compatibility/pyspark.py",
         "great_expectations/compatibility/sqlalchemy_and_pandas.py",
         "great_expectations/compatibility/sqlalchemy_compatibility_wrappers.py",
-        "great_expectations/rule_based_profiler/altair/encodings.py",  # ignoring because of imprecise matching logic  # noqa: E501
     ]
     for file_to_exclude in files_to_exclude:
         if file_to_exclude in files:
