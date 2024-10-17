@@ -137,8 +137,6 @@ The data used in the examples for this procedure is passenger data for the Titan
     
       row_condition='col("foo") > 5'  # foo is greater than 5
     
-      row_condition='col("foo") != "a-b"'  # foo is not "a-b" (SQL only)
-    
       row_condition='col("foo") <= 3.14'  # foo is less than 3.14
     
       row_condition='col("foo") <= date("2023-03-13")'  # foo is earlier than 2023-03-13
