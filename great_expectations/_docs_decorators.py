@@ -44,7 +44,7 @@ class _PublicApiIntrospector:
         return self._class_registry
 
     def add(self, func: F) -> None:
-        self._add_to_registry(func)
+        self._add_to_class_registry(func)
         try:
             # We use an if statement instead of a ternary to work around
             # mypy's inability to type narrow inside a ternary.
@@ -67,7 +67,7 @@ class _PublicApiIntrospector:
             logger.exception(f"Could not add this function to the public API list: {func}")
             raise
 
-    def _add_to_registry(self, func: F) -> None:
+    def _add_to_class_registry(self, func: F) -> None:
         if isinstance(func, type):
             key = f"{func.__module__}.{func.__qualname__}"
             self._class_registry[key].add("__init__")
@@ -78,6 +78,8 @@ class _PublicApiIntrospector:
                 method = parts[1]
                 key = f"{func.__module__}.{cls}"
                 self._class_registry[key].add(method)
+            else:
+                logger.info("Skipping function %s because it does not have a class", func)
 
     @override
     def __str__(self) -> str:
