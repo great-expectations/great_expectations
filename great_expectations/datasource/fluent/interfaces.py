@@ -287,6 +287,7 @@ _ExecutionEngineT = TypeVar("_ExecutionEngineT")
 DatasourceT = TypeVar("DatasourceT", bound="Datasource")
 
 
+@public_api
 class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.

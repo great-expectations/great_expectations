@@ -29,7 +29,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/core/yaml_handler.py Name: YAMLHandler",
     "File: great_expectations/core/yaml_handler.py Name: dump",
     "File: great_expectations/core/yaml_handler.py Name: load",
-    "File: great_expectations/data_context/data_context/abstract_data_context.py Name: AbstractDataContext",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_store",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: delete_datasource",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: get_docs_sites_urls",

@@ -170,6 +170,7 @@ class _SparkDatasource(Datasource):
     # End Abstract Methods
 
 
+@public_api
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
