@@ -287,6 +287,7 @@ _ExecutionEngineT = TypeVar("_ExecutionEngineT")
 DatasourceT = TypeVar("DatasourceT", bound="Datasource")
 
 
+@public_api
 class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
@@ -453,6 +454,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
+    @public_api
     def get_batch_definition(self, name: str) -> BatchDefinition[PartitionerT]:
         batch_definitions = [
             batch_definition
@@ -605,6 +607,7 @@ def _sort_batch_identifiers_with_none_metadata_values(
 _DataAssetT = TypeVar("_DataAssetT", bound=DataAsset)
 
 
+@public_api
 class Datasource(
     FluentBaseModel,
     Generic[_DataAssetT, _ExecutionEngineT],
@@ -791,6 +794,7 @@ class Datasource(
         asset: _DataAssetT
         return {asset.name for asset in self.assets}
 
+    @public_api
     def get_asset(self, name: str) -> _DataAssetT:
         """Returns the DataAsset referred to by asset_name
 
@@ -813,6 +817,7 @@ class Datasource(
                 f'"{name}" not found. Available assets are ({", ".join(self.get_asset_names())})'
             ) from exc
 
+    @public_api
     def delete_asset(self, name: str) -> None:
         """Removes the DataAsset referred to by asset_name from internal list of available DataAsset objects.
 
