@@ -40,7 +40,7 @@ class _PublicApiIntrospector:
     _class_registry: dict[str, set[str]] = defaultdict(set)
 
     @property
-    def class_registry(self) -> dict[str, list[str]]:
+    def class_registry(self) -> dict[str, set[str]]:
         return self._class_registry
 
     def add(self, func: F) -> None:
