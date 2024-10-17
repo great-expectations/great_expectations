@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
 class ColumnDistinctDates(ColumnAggregateMetricProvider):
-    """Metric that get all unique dates from date column"""
+    """Metric that get all unique dates from date column (excluding null values)"""
 
     metric_name = "column.distinct_dates"
 
@@ -36,8 +36,13 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
 
-        # get all unique dates from timestamp
-        query = sa.select(sa.func.Date(column).distinct()).select_from(selectable)
+        # get all unique dates from timestamp (excluding null values)
+        query = (
+            sa.select(sa.func.Date(column).distinct())
+            .select_from(selectable)
+            .where(column.is_not(None))
+        )
+
         all_unique_dates = [i[0] for i in execution_engine.execute_query(query).fetchall()]
 
         # Only sqlite returns as strings, so make date objects be strings
