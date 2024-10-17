@@ -65,6 +65,7 @@ class AmbiguousPathError(ValueError):
         self.path = path
 
 
+@public_api
 class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[DatasourceT], ABC):
     """Base class for PathDataAssets which batch by applying a regex to file names."""
 

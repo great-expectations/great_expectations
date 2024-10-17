@@ -125,6 +125,7 @@ class LegacyDescriptiveRendererType(str, Enum):
     VALUE_COUNTS_BAR_CHART = ".".join([LegacyRendererType.DESCRIPTIVE, "value_counts_bar_chart"])
 
 
+@public_api
 class RenderedContent:
     @public_api
     def to_json_dict(self) -> dict[str, JSONValues]:
@@ -172,6 +173,7 @@ class RenderedContent:
         return json_dict
 
 
+@public_api
 class RenderedComponentContent(RenderedContent):
     def __init__(self, content_block_type, styling=None) -> None:
         self.content_block_type = content_block_type
@@ -194,6 +196,7 @@ class RenderedComponentContent(RenderedContent):
         return d
 
 
+@public_api
 class RenderedHeaderContent(RenderedComponentContent):
     def __init__(
         self,
@@ -231,6 +234,7 @@ class RenderedHeaderContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedGraphContent(RenderedComponentContent):
     def __init__(
         self,
@@ -338,6 +342,7 @@ class RenderedTableContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedTabsContent(RenderedComponentContent):
     def __init__(
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
@@ -370,6 +375,7 @@ class RenderedTabsContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedBootstrapTableContent(RenderedComponentContent):
     def __init__(  # noqa: PLR0913
         self,
@@ -425,6 +431,7 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedContentBlockContainer(RenderedComponentContent):
     def __init__(
         self, content_blocks, styling=None, content_block_type="content_block_container"
@@ -445,6 +452,7 @@ class RenderedContentBlockContainer(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedMarkdownContent(RenderedComponentContent):
     def __init__(self, markdown, styling=None, content_block_type="markdown") -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
@@ -511,6 +519,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         return str(self) == str(other)
 
 
+@public_api
 class RenderedBulletListContent(RenderedComponentContent):
     def __init__(
         self,
@@ -548,6 +557,7 @@ class RenderedBulletListContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class ValueListContent(RenderedComponentContent):
     def __init__(
         self,
@@ -585,6 +595,7 @@ class ValueListContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class TextContent(RenderedComponentContent):
     def __init__(
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
@@ -679,6 +690,7 @@ class CollapseContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedDocumentContent(RenderedContent):
     # NOTE: JPC 20191028 - review these keys to consolidate and group
     def __init__(  # noqa: PLR0913
@@ -736,6 +748,7 @@ class RenderedDocumentContent(RenderedContent):
         return d
 
 
+@public_api
 class RenderedSectionContent(RenderedContent):
     def __init__(self, content_blocks, section_name=None) -> None:
         if not isinstance(content_blocks, list) and all(
@@ -762,6 +775,7 @@ class RenderedSectionContent(RenderedContent):
         return d
 
 
+@public_api
 class RenderedAtomicValue(DictDot):
     def __init__(  # noqa: PLR0913
         self,
@@ -821,6 +835,7 @@ class RenderedAtomicValue(DictDot):
         return json_dict
 
 
+@public_api
 class RenderedAtomicValueGraph(DictDot):
     def __init__(
         self,
@@ -905,6 +920,7 @@ class RenderedAtomicValueSchema(Schema):
         return RenderedAtomicValueSchema.remove_null_attrs(data=data)
 
 
+@public_api
 class RenderedAtomicContent(RenderedContent):
     def __init__(
         self,
