@@ -588,13 +588,11 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
         # if we already moved the suite parameter raw_kwargs to a param,
         # we need to combine the param passed to add_param() with those existing raw_kwargs
-        if (
-            name in self.params.__dict__ and self.params.__dict__[name]["suite_parameter"]  # type: ignore[index]
-        ):
+        if name in self.params.__dict__ and self.params.__dict__[name]["suite_parameter"]:
             self.params.__dict__[name] = renderer_param(
                 schema=RendererSchema(type=param_type),
                 value=value,
-                suite_parameter=self.params.__dict__[name]["suite_parameter"],  # type: ignore[index]
+                suite_parameter=self.params.__dict__[name]["suite_parameter"],
             )
         else:
             self.params.__dict__[name] = renderer_param(
