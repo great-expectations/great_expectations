@@ -371,7 +371,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
 
     # End Abstract Methods
 
-    @public_api
     def add_batch_definition(
         self,
         name: str,
