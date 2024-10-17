@@ -18,9 +18,6 @@ def get_python_requires() -> str:
     """
     if os.getenv("GX_PYTHON_EXPERIMENTAL"):
         return ">=3.9"
-    elif os.getenv("NETLIFY"):
-        # Netlify only supports Python 3.8 (EOL 2024-10-31) and 2.7 (EOl 2020-01-01).
-        return ">=3.8"
     return SUPPORTED_PYTHON
 
 
