@@ -1,9 +1,14 @@
+import random
+
 import pandas as pd
 import pytest
 
 from great_expectations.compatibility import aws
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
+)
+from great_expectations.expectations import (
+    ExpectColumnValuesToBeInSet,
 )
 from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.util import is_library_loadable
@@ -96,3 +101,20 @@ def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
         },
         meta={},
     )
+
+
+@pytest.mark.unit
+def test_expect_column_values_to_be_in_set_render_performance():
+    x = ExpectColumnValuesToBeInSet(
+        column="foo_column_name", value_set=[random.randint(0, 10) for _ in range(1000)]
+    )
+
+    import cProfile
+
+    profiler = cProfile.Profile()
+    profiler.enable()
+
+    x.render()
+
+    profiler.disable()
+    profiler.print_stats(sort="time")
