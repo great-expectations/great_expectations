@@ -37,8 +37,14 @@ class _PublicApiInfo:
 
 class _PublicApiIntrospector:
     _public_api: dict[str, list[_PublicApiInfo]] = {}
+    _class_registry: dict[str, set[str]] = defaultdict(set)
+
+    @property
+    def class_registry(self) -> dict[str, list[str]]:
+        return self._class_registry
 
     def add(self, func: F) -> None:
+        self._add_to_registry(func)
         try:
             # We use an if statement instead of a ternary to work around
             # mypy's inability to type narrow inside a ternary.
@@ -61,6 +67,18 @@ class _PublicApiIntrospector:
             logger.exception(f"Could not add this function to the public API list: {func}")
             raise
 
+    def _add_to_registry(self, func: F) -> None:
+        if isinstance(func, type):
+            key = f"{func.__module__}.{func.__qualname__}"
+            self._class_registry[key].add("__init__")
+        else:
+            parts = func.__qualname__.split(".")
+            if len(parts) >= 2:  # noqa: PLR2004
+                cls = parts[0]
+                method = parts[1]
+                key = f"{func.__module__}.{cls}"
+                self._class_registry[key].add(method)
+
     @override
     def __str__(self) -> str:
         out = []
@@ -79,7 +97,7 @@ class _PublicApiIntrospector:
 public_api_introspector = _PublicApiIntrospector()
 
 
-def public_api(func_or_cls: F) -> F:
+def public_api(func: F) -> F:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:
@@ -90,28 +108,11 @@ def public_api(func_or_cls: F) -> F:
 
     This tag is added at import time.
     """
-    public_api_introspector.add(func_or_cls)
-    existing_docstring = func_or_cls.__doc__ if func_or_cls.__doc__ else ""
-    func_or_cls.__doc__ = WHITELISTED_TAG + existing_docstring
+    public_api_introspector.add(func)
+    existing_docstring = func.__doc__ if func.__doc__ else ""
+    func.__doc__ = WHITELISTED_TAG + existing_docstring
 
-    _populate_public_api_registry(func_or_cls)
-    return func_or_cls
-
-
-_public_api_registry = defaultdict(set)
-
-
-def _populate_public_api_registry(func_or_cls: F) -> None:
-    if isinstance(func_or_cls, type):
-        key = f"{func_or_cls.__module__}.{func_or_cls.__qualname__}"
-        _public_api_registry[key].add("__init__")
-    else:
-        parts = func_or_cls.__qualname__.split(".")
-        if len(parts) >= 2:  # noqa: PLR2004
-            cls = parts[0]
-            func = parts[1]
-            key = f"{func_or_cls.__module__}.{cls}"
-            _public_api_registry[key].add(func)
+    return func
 
 
 def deprecated_method_or_class(
