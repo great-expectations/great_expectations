@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, ClassVar, Optional, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -39,6 +39,8 @@ class _PublicApiIntrospector:
     _public_api: dict[str, list[_PublicApiInfo]] = {}
     _class_registry: dict[str, set[str]] = defaultdict(set)
 
+    CLASS_DEFINITION: ClassVar[str] = "class_def"
+
     @property
     def class_registry(self) -> dict[str, set[str]]:
         return self._class_registry
@@ -70,7 +72,7 @@ class _PublicApiIntrospector:
     def _add_to_class_registry(self, func: F) -> None:
         if isinstance(func, type):
             key = f"{func.__module__}.{func.__qualname__}"
-            self._class_registry[key].add("__init__")
+            self._class_registry[key].add(self.CLASS_DEFINITION)
         else:
             parts = func.__qualname__.split(".")
             if len(parts) >= 2:  # noqa: PLR2004

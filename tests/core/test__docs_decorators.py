@@ -79,11 +79,10 @@ class TestPublicAPI:
                     pass
         """
         class_registry = public_api_introspector.class_registry
-
         classes_that_need_public_api_decorator: dict[str, list[str]] = {}
 
         for class_, methods in class_registry.items():
-            if "__init__" not in methods:
+            if public_api_introspector.CLASS_DEFINITION not in methods:
                 classes_that_need_public_api_decorator[class_] = sorted(methods)
 
         print(f"Classes missing @public_api ->\n{pf(classes_that_need_public_api_decorator)}")
