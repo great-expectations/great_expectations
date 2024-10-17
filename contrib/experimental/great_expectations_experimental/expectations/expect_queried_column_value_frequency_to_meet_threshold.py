@@ -178,7 +178,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "value": ["a", "b"],
                         "threshold": [0.5, 0.5],
                         "row_condition": 'col("col1")==2',
-                        "condition_parser": "great_expectations__experimental__",
+                        "condition_parser": "great_expectations",
                     },
                     "out": {"success": True},
                 },

@@ -62,7 +62,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
         value=value,
         row_condition=row_condition,
-        condition_parser="great_expectations__experimental__",
+        condition_parser="great_expectations",
     )
 
     assert result["success"] is success and result["result"]["observed_value"] == observed
@@ -108,7 +108,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
         value=value,
         query=query,
         row_condition=row_condition,
-        condition_parser="great_expectations__experimental__",
+        condition_parser="great_expectations",
     )
 
     assert result["success"] is success and result["result"]["observed_value"] == observed
@@ -145,7 +145,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
         value=value,
         row_condition=row_condition,
-        condition_parser="great_expectations__experimental__",
+        condition_parser="great_expectations",
     )
 
     assert result["success"] is success and result["result"]["observed_value"] == observed
@@ -188,7 +188,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
         value=value,
         query=query,
         row_condition=row_condition,
-        condition_parser="great_expectations__experimental__",
+        condition_parser="great_expectations",
     )
 
     assert result["success"] is success and result["result"]["observed_value"] == observed

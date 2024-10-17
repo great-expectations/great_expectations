@@ -109,7 +109,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                     "in": {
                         "value": 2,
                         "row_condition": 'col("col1")==2',
-                        "condition_parser": "great_expectations__experimental__",
+                        "condition_parser": "great_expectations",
                     },
                     "out": {"success": True},
                 },

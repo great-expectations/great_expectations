@@ -186,7 +186,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "value": ["a", "b"],
                         "threshold": [0.6, 0.4],
                         "row_condition": 'col("col1")==2',
-                        "condition_parser": "great_expectations__experimental__",
+                        "condition_parser": "great_expectations",
                     },
                     "out": {"success": False},
                     "only_for": ["sqlite", "spark"],

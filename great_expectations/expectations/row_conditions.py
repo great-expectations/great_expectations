@@ -74,8 +74,7 @@ class RowConditionParserType(enum.Enum):
     """Type of condition or parser to be used to interpret a RowCondition
 
     Note that many of these are forward looking and are not yet implemented.
-    In the future `GE` can replace the `great_expectations__experimental__`
-    name for the condition_parser and this enum can be used internally
+    In the future this enum can be used internally
     instead of strings for the condition_parser user input.
     """
 

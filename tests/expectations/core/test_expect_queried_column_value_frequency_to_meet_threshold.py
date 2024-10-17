@@ -69,7 +69,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
                     value="male",
                     threshold=0.5,
                     row_condition=row_condition,
-                    condition_parser="great_expectations__experimental__",
+                    condition_parser="great_expectations",
                 )
             )
     else:
@@ -79,7 +79,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
                 value="male",
                 threshold=0.5,
                 row_condition=row_condition,
-                condition_parser="great_expectations__experimental__",
+                condition_parser="great_expectations",
             )
         )
     assert result["success"] == success and result["result"]["observed_value"] == observed
@@ -154,7 +154,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                     threshold=0.5,
                     query=query,
                     row_condition=row_condition,
-                    condition_parser="great_expectations__experimental__",
+                    condition_parser="great_expectations",
                 )
             )
     else:
@@ -165,7 +165,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                 threshold=0.5,
                 query=query,
                 row_condition=row_condition,
-                condition_parser="great_expectations__experimental__",
+                condition_parser="great_expectations",
             )
         )
     assert result["success"] == success and result["result"]["observed_value"] == observed
@@ -208,7 +208,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
                     value="male",
                     threshold=0.5,
                     row_condition=row_condition,
-                    condition_parser="great_expectations__experimental__",
+                    condition_parser="great_expectations",
                 )
             )
     else:
@@ -218,7 +218,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
                 value="male",
                 threshold=0.5,
                 row_condition=row_condition,
-                condition_parser="great_expectations__experimental__",
+                condition_parser="great_expectations",
             )
         )
     assert result["success"] == success and result["result"]["observed_value"] == observed
@@ -274,7 +274,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                     threshold=0.5,
                     query=query,
                     row_condition=row_condition,
-                    condition_parser="great_expectations__experimental__",
+                    condition_parser="great_expectations",
                 )
             )
     else:
@@ -285,7 +285,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                 threshold=0.5,
                 query=query,
                 row_condition=row_condition,
-                condition_parser="great_expectations__experimental__",
+                condition_parser="great_expectations",
             )
         )
     assert result["success"] == success and result["result"]["observed_value"] == observed
@@ -306,7 +306,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_va
                 value=["male", "female"],
                 threshold=[0.6, 0.3],
                 row_condition='col("Age")>17',
-                condition_parser="great_expectations__experimental__",
+                condition_parser="great_expectations",
             )
         )
 

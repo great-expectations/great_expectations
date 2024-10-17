@@ -384,7 +384,7 @@ def test_get_domain_records_with_column_domain(sa):
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b")<5',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
         }
     )
     domain_data = execution_engine.execute_query(get_sqlalchemy_domain_data(data)).fetchall()
@@ -410,7 +410,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b")<5',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "filter_conditions": [
                 RowCondition(
                     condition='col("b").notnull()',
@@ -442,7 +442,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("a")<2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "filter_conditions": [
                 RowCondition(
                     condition='col("b").notnull()',
@@ -477,7 +477,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
             domain_kwargs={
                 "column": "a",
                 "row_condition": 'col("a")<2',
-                "condition_parser": "great_expectations__experimental__",
+                "condition_parser": "great_expectations",
                 "filter_conditions": [
                     RowCondition(
                         condition='col("b").notnull()',
@@ -507,7 +507,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "column_A": "a",
             "column_B": "b",
             "row_condition": 'col("b")>2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "both_values_are_missing",
         }
     )
@@ -535,7 +535,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "column_A": "b",
             "column_B": "c",
             "row_condition": 'col("b")>2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "either_value_is_missing",
         }
     )
@@ -561,7 +561,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "column_A": "b",
             "column_B": "c",
             "row_condition": 'col("a")<6',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "neither",
         }
     )
@@ -600,7 +600,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
         domain_kwargs={
             "column_list": ["a", "c"],
             "row_condition": 'col("b")>2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "all_values_are_missing",
         }
     )
@@ -634,7 +634,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
         domain_kwargs={
             "column_list": ["b", "c"],
             "row_condition": 'col("a")<5',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
             "ignore_row_if": "any_value_is_missing",
         }
     )
@@ -822,7 +822,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b") > 24',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
         },
         domain_type="column",
     )
@@ -846,9 +846,9 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
 
-# Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain  # noqa: E501
+# Testing to ensure that great expectation parser also works in terms of defining a compute domain  # noqa: E501
 @pytest.mark.sqlite
-def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
+def test_get_compute_domain_with_gx_condition_parser(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
@@ -858,7 +858,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
         domain_kwargs={
             "column": "b",
             "row_condition": 'col("b") == 2',
-            "condition_parser": "great_expectations__experimental__",
+            "condition_parser": "great_expectations",
         },
         domain_type="column",
     )
