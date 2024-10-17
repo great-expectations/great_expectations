@@ -74,6 +74,9 @@ class _RendererValueBase(BaseModel):
         validate_assignment = True
         arbitrary_types_allowed = True
 
+    def __len__(self) -> int:
+        return len(self.__class__.__fields__)
+
     @override
     def dict(  # noqa: PLR0913
         self,
