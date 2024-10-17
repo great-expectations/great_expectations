@@ -286,7 +286,7 @@
         },
         "CSVAsset": {
             "title": "CSVAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "description": "--Public API--Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -897,7 +897,7 @@
         },
         "DirectoryCSVAsset": {
             "title": "DirectoryCSVAsset",
-            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
+            "description": "--Public API--Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1204,7 +1204,7 @@
         },
         "ParquetAsset": {
             "title": "ParquetAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "description": "--Public API--Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1329,7 +1329,7 @@
         },
         "DirectoryParquetAsset": {
             "title": "DirectoryParquetAsset",
-            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
+            "description": "--Public API--Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1460,7 +1460,7 @@
         },
         "ORCAsset": {
             "title": "ORCAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "description": "--Public API--Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1568,7 +1568,7 @@
         },
         "DirectoryORCAsset": {
             "title": "DirectoryORCAsset",
-            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
+            "description": "--Public API--Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1682,7 +1682,7 @@
         },
         "JSONAsset": {
             "title": "JSONAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "description": "--Public API--Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1954,7 +1954,7 @@
         },
         "DirectoryJSONAsset": {
             "title": "DirectoryJSONAsset",
-            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
+            "description": "--Public API--Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2232,7 +2232,7 @@
         },
         "TextAsset": {
             "title": "TextAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "description": "--Public API--Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2337,7 +2337,7 @@
         },
         "DirectoryTextAsset": {
             "title": "DirectoryTextAsset",
-            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
+            "description": "--Public API--Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2448,7 +2448,7 @@
         },
         "DeltaAsset": {
             "title": "DeltaAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "description": "--Public API--Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2508,7 +2508,7 @@
         },
         "DirectoryDeltaAsset": {
             "title": "DirectoryDeltaAsset",
-            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
+            "description": "--Public API--Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {

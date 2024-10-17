@@ -79,7 +79,10 @@ class _PublicApiIntrospector:
                 key = f"{func.__module__}.{cls}"
                 self._class_registry[key].add(method)
             else:
-                logger.info("Skipping function %s because it does not have a class", func)
+                logger.info(
+                    "Skipping registering function %s because it does not have a class",
+                    func.__qualname__,
+                )
 
     @override
     def __str__(self) -> str:
