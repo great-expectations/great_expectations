@@ -1,5 +1,23 @@
 #!/bin/bash
 
+if [ -n "$NETLIFY" ]; then
+    echo "Running on netlify - pointing mise at python 3.12"
+    # Intended to get around this error from Netlify:
+    # 11:16:39 AM: mise ERROR No version is set for shim: pip
+    # 11:16:39 AM: Set a global default version with one of the following:
+    # 11:16:39 AM: mise use -g python@3.12.6
+    # 11:16:39 AM: mise ERROR Run with --verbose or MISE_VERBOSE=1 for more information
+    # 11:16:39 AM: Installing api docs dependencies.
+    # 11:16:39 AM: mise ERROR No version is set for shim: pip
+    # 11:16:39 AM: Set a global default version with one of the following:
+    # 11:16:39 AM: mise use -g python@3.12.6
+    # 11:16:39 AM: mise ERROR Run with --verbose or MISE_VERBOSE=1 for more information
+    # 11:16:39 AM: ../build_docs: line 11: invoke: command not found
+    mise use -g python@3.12.6
+else
+    echo "Not running on netlify - skipping mise command"
+fi
+
 echo "Installing Great Expectations library dev dependencies."
 (cd ../../; pip install -c constraints-dev.txt -e ".[test]")
 
