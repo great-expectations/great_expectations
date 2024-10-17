@@ -667,7 +667,7 @@ illegal.  Please check your config."""  # noqa: E501
             condition_parser = domain_kwargs.get("condition_parser", None)
             if condition_parser == ConditionParser.SPARK:
                 data = data.filter(row_condition)
-            elif condition_parser == ConditionParser.GX:
+            elif condition_parser in [ConditionParser.GX, ConditionParser.GX_DEPRECATED]:
                 parsed_condition = parse_condition_to_spark(row_condition)
                 data = data.filter(parsed_condition)
             else:
