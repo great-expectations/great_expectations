@@ -314,7 +314,7 @@ jobs:
         run: cd docs/docusaurus && yarn install && yarn test
 
   docs-link-checker:
-    needs: [ docs-build ]
+    needs: [docs-build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
