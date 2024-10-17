@@ -1,4 +1,5 @@
 import random
+import time
 
 import pandas as pd
 import pytest
@@ -109,12 +110,8 @@ def test_expect_column_values_to_be_in_set_render_performance():
         column="foo_column_name", value_set=[random.randint(0, 10) for _ in range(1000)]
     )
 
-    import cProfile
-
-    profiler = cProfile.Profile()
-    profiler.enable()
-
+    start = time.time()
     x.render()
-
-    profiler.disable()
-    profiler.print_stats(sort="time")
+    end = time.time()
+    duration_s = end - start
+    assert duration_s < 1.0, f"Rendering took {duration_s} seconds"
