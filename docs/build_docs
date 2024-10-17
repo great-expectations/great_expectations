@@ -19,10 +19,10 @@ else
 fi
 
 echo "Installing Great Expectations library dev dependencies."
-(cd ../../; pip install -c constraints-dev.txt -e ".[test]")
+(cd ../../; python -m pip install -c constraints-dev.txt -e ".[test]")
 
 echo "Installing api docs dependencies."
-(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
+(cd ../sphinx_api_docs_source; python -m pip install -r requirements-dev-api-docs.txt)
 
 # TODO: change netlify settings so we don't need to do this
 cd ../..
