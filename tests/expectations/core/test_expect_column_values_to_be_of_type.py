@@ -106,7 +106,8 @@ def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
 @pytest.mark.unit
 def test_expect_column_values_to_be_in_set_render_performance():
     """
-    This test prevents a historical bug in which rendering took ~10 seconds to render 400 items.
+    This test prevents a historical bug in which rendering took ~1 minute.
+    Currently, all unit tests are configured to timeout after 2 seconds.
     """
 
     large_number = 50
