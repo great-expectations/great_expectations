@@ -1,4 +1,4 @@
-import time
+import timeit
 
 import pandas as pd
 import pytest
@@ -116,8 +116,5 @@ def test_expect_column_values_to_be_in_set_render_performance():
         column="foo_column_name", value_set=["foo" for _ in range(large_number)]
     )
 
-    start = time.time()
-    x.render()
-    end = time.time()
-    duration_s = end - start
+    duration_s = timeit.timeit(x.render, number=1)
     assert duration_s < 2, f"Rendering took {duration_s} seconds"
