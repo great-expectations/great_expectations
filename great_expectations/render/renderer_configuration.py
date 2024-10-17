@@ -74,9 +74,6 @@ class _RendererValueBase(BaseModel):
         validate_assignment = True
         arbitrary_types_allowed = True
 
-    def __len__(self) -> int:
-        return len(self.__class__.__fields__)
-
     @override
     def dict(  # noqa: PLR0913
         self,
@@ -433,28 +430,28 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
     @root_validator()
     def _validate_for_params(cls, values: dict) -> dict:
+        _params: Optional[Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]] = (
+            values.get("_params")
+        )
         if not values["params"]:
-            _params: Optional[Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]] = (
-                values.get("_params")
-            )
-            if _params:
-                renderer_param_definitions: Dict[str, Any] = {}
-                for name in _params:
-                    renderer_param_type: Type[BaseModel] = (
-                        RendererConfiguration._get_renderer_value_base_model_type(name=name)
-                    )
-                    renderer_param_definitions[name] = (
-                        Optional[renderer_param_type],
-                        ...,
-                    )
-                renderer_params: Type[BaseModel] = create_model(
-                    "RendererParams",
-                    **renderer_param_definitions,
-                    __base__=_RendererValueBase,
+            values["params"] = _RendererValueBase()
+        if _params is not None and _params != values["params"]:
+            renderer_param_definitions: Dict[str, Any] = {}
+            for name in _params:
+                renderer_param_type: Type[BaseModel] = (
+                    RendererConfiguration._get_renderer_value_base_model_type(name=name)
                 )
-                values["params"] = renderer_params(**_params)
-            else:
-                values["params"] = _RendererValueBase()
+                renderer_param_definitions[name] = (
+                    Optional[renderer_param_type],
+                    ...,
+                )
+            renderer_params: Type[BaseModel] = create_model(
+                "RendererParams",
+                **renderer_param_definitions,
+                __base__=_RendererValueBase,
+            )
+            values["params"] = renderer_params(**_params)
+
         return values
 
     @staticmethod
