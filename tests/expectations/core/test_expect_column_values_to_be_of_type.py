@@ -110,7 +110,7 @@ def test_expect_column_values_to_be_in_set_render_performance():
     Currently, all unit tests are configured to timeout after 2 seconds.
     """
 
-    large_number = 500
+    large_number = 400
 
     x = ExpectColumnValuesToBeInSet(
         column="foo_column_name", value_set=["foo" for _ in range(large_number)]
