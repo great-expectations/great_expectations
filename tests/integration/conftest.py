@@ -32,7 +32,7 @@ def parameterize_batch_for_data_sources(
     example use:
         @parameterize_batch_for_data_sources(
             data_source_configs=[DataSourceType.FOO, DataSourceType.BAR],
-            data=[1, 2],
+            data=pd.DataFrame{"col_name": [1, 2]},
             # description="test_stuff",
         )
         def test_stuff(batch_for_datasource) -> None:
@@ -44,7 +44,7 @@ def parameterize_batch_for_data_sources(
             pytest.param(
                 (data, t),
                 id=t.get_test_id(description),
-                marks=[_data_source_config_to_mark(t)],
+                marks=[t.pytest_mark],
             )
             for t in data_source_configs
         ]
@@ -75,20 +75,6 @@ def batch_for_datasource(request: pytest.FixtureRequest) -> Generator[Batch, Non
     batch_setup.teardown()
 
 
-def _data_source_config_to_mark(data_source_config: DataSourceConfig) -> pytest.MarkDecorator:
-    """Get the appropriate mark for a data source type."""
-    if isinstance(data_source_config, PandasDataFrameDatasource):
-        return pytest.mark.unit
-    elif isinstance(data_source_config, PandasFilesystemDatasource):
-        return pytest.mark.filesystem
-    elif isinstance(data_source_config, PostgresDataSource):
-        return pytest.mark.postgresql
-    elif isinstance(data_source_config, SnowflakeDataSource):
-        return pytest.mark.snowflake
-    else:
-        assert False
-
-
 # === DataSource config section ===
 @dataclass(frozen=True)
 class DataSourceConfig(ABC):
@@ -100,8 +86,14 @@ class DataSourceConfig(ABC):
         """Label that will show up in test name."""
         ...
 
+    @property
     @abstractmethod
-    def create_batch_setup(self, data: list) -> BatchSetup:
+    def pytest_mark(self) -> pytest.MarkDecorator:
+        """Mark for pytest"""
+        ...
+
+    @abstractmethod
+    def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
         """Create a batch setup object for this data source."""
 
     def get_test_id(self, test_description: str | None) -> str:
@@ -122,8 +114,13 @@ class PandasDataFrameDatasource(DataSourceConfig):
     def label(self) -> str:
         return "PandasDataFrameDatasource"
 
+    @property
     @override
-    def create_batch_setup(self, data: list) -> BatchSetup:
+    def pytest_mark(self) -> pytest.MarkDecorator:
+        return pytest.mark.unit
+
+    @override
+    def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
         return PandasDataFrameBatchSetup(data=data, config=self)
 
 
@@ -134,7 +131,7 @@ class PandasFilesystemDatasource(DataSourceConfig):
         return "PandasFilesystemDatasource"
 
     @override
-    def create_batch_setup(self, data: list) -> BatchSetup:
+    def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
         return NotImplemented
 
 
@@ -144,8 +141,13 @@ class PostgresDataSource(_SqlDataSourceConfig):
     def label(self) -> str:
         return "PostgresDatasource"
 
+    @property
     @override
-    def create_batch_setup(self, data: list) -> BatchSetup:
+    def pytest_mark(self) -> pytest.MarkDecorator:
+        return pytest.mark.postgresql
+
+    @override
+    def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
         return PostgresBatchSetup(data=data, config=self)
 
 
@@ -167,9 +169,13 @@ _ConfigT = TypeVar("_ConfigT", bound=DataSourceConfig)
 class BatchSetup(ABC, Generic[_ConfigT]):
     """ABC for classes that set up and tear down batches."""
 
-    def __init__(self, config: _ConfigT, data: list) -> None:
+    def __init__(self, config: _ConfigT, data: pd.DataFrame) -> None:
         self.config = config
         self.data = data
+
+    @cached_property
+    def _context(self) -> AbstractDataContext:
+        return gx.get_context(mode="ephemeral")
 
     @abstractmethod
     def make_batch(self) -> Batch: ...
@@ -205,10 +211,6 @@ class PandasDataFrameBatchSetup(BatchSetup[PandasDataFrameDatasource]):
 
     @override
     def teardown(self) -> None: ...
-
-    @cached_property
-    def _context(self) -> AbstractDataContext:
-        return gx.get_context(mode="ephemeral")
 
 
 class PostgresBatchSetup(BatchSetup[PostgresDataSource]):
