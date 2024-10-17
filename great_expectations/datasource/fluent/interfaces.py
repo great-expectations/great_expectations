@@ -453,7 +453,15 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
+    @public_api
     def get_batch_definition(self, name: str) -> BatchDefinition[PartitionerT]:
+        """Get a batch definition.
+
+        Args:
+            name (str): Name of the BatchDefinition to get.
+        Raises:
+            KeyError: If the BatchDefinition does not exist.
+        """
         batch_definitions = [
             batch_definition
             for batch_definition in self.batch_definitions
