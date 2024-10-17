@@ -111,7 +111,6 @@ def public_api(func: F) -> F:
     public_api_introspector.add(func)
     existing_docstring = func.__doc__ if func.__doc__ else ""
     func.__doc__ = WHITELISTED_TAG + existing_docstring
-
     return func
 
 
