@@ -7,6 +7,7 @@ import os
 import pathlib
 import sys
 import uuid
+import warnings
 import webbrowser
 from abc import ABC, abstractmethod
 from collections import OrderedDict
@@ -273,18 +274,19 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _determine_analytics_enabled(self) -> bool:
         """
-        In order to determine whether analytics should be enabled, we check two sources:
-          - The `analytics_enabled` key in the GX config file
-            - If missing, we assume True.
+        Determine if analytics are enabled using the following precedence
+          - The `analytics_enabled` key in the GX config
           - The `GX_ANALYTICS_ENABLED` environment variable
-
-        If both are True, analytics will be enabled. If either is False, analytics will be disabled.
+          - Otherwise, assume True
         """
-        config_file_enabled = self.config.analytics_enabled
-        if config_file_enabled is None:
-            config_file_enabled = True
+        config_enabled = self.config.analytics_enabled
         env_var_enabled = ENV_CONFIG.posthog_enabled
-        return config_file_enabled and env_var_enabled
+        if config_enabled is not None:
+            return config_enabled
+        elif env_var_enabled is not None:
+            return env_var_enabled
+        else:
+            return True
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -332,6 +334,18 @@ class AbstractDataContext(ConfigPeer, ABC):
             - Ephemeral : not saved, and logging message outputted
         """  # noqa: E501
         return self.variables.save()
+
+    @public_api
+    def enable_analytics(self, enable: Optional[bool]) -> None:
+        """
+        Enable or disable analytics for this DataContext.
+        With non-ephemeral contexts, this can be preserved via context.variables.save().
+
+        If set to None, the `GX_ANALYTICS_ENABLED` environment variable will be used.
+        """
+        self.config.analytics_enabled = enable
+        self._init_analytics()
+        self.variables.save()
 
     @public_api
     def update_project_config(
@@ -413,6 +427,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._datasource_store
 
     @property
+    @public_api
     def suites(self) -> SuiteFactory:
         if not self._suites:
             raise gx_exceptions.DataContextError(  # noqa: TRY003
@@ -421,6 +436,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._suites
 
     @property
+    @public_api
     def checkpoints(self) -> CheckpointFactory:
         if not self._checkpoints:
             raise gx_exceptions.DataContextError(  # noqa: TRY003
@@ -429,6 +445,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._checkpoints
 
     @property
+    @public_api
     def validation_definitions(self) -> ValidationDefinitionFactory:
         if not self._validation_definitions:
             raise gx_exceptions.DataContextError(  # noqa: TRY003
@@ -849,16 +866,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ValueError: The input `datasource_name` is None.
         """
-        if name is None:
-            raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")  # noqa: TRY003
-
+        # deprecated-v1.2.0
+        warnings.warn(
+            "context.get_datasource is deprecated as of v1.2.0. "
+            "Please use context.data_sources.get instead",
+            category=DeprecationWarning,
+        )
         try:
-            datasource = self.data_sources.all()[name]
+            return self.data_sources.get(name)
         except KeyError as e:
             raise ValueError(str(e)) from e
-
-        datasource._data_context = self
-        return datasource
 
     def add_store(self, name: str, config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.
@@ -1495,11 +1512,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 batch_kwargs_generator_names = [batch_kwargs_generator_names]
             if len(batch_kwargs_generator_names) == len(datasource_names):
                 for datasource_name in datasource_names:
-                    datasource = self.get_datasource(datasource_name)
+                    datasource = self.data_sources.get(datasource_name)
                     fluent_data_asset_names[datasource_name] = sorted(datasource.get_asset_names())
 
             elif len(batch_kwargs_generator_names) == 1:
-                datasource = self.get_datasource(datasource_names[0])
+                datasource = self.data_sources.get(datasource_names[0])
                 fluent_data_asset_names[datasource_names[0]] = sorted(datasource.get_asset_names())
 
             else:
@@ -1510,10 +1527,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:  # generator_names is None
             for datasource_name in datasource_names:
                 try:
-                    datasource = self.get_datasource(datasource_name)
+                    datasource = self.data_sources.get(datasource_name)
                     fluent_data_asset_names[datasource_name] = sorted(datasource.get_asset_names())
 
-                except ValueError:
+                except KeyError:
                     # handle the edge case of a non-existent datasource
                     fluent_data_asset_names[datasource_name] = {}
 
@@ -1539,7 +1556,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             BatchKwargs
 
         """  # noqa: E501
-        datasource_obj = self.get_datasource(datasource)
+        datasource_obj = self.data_sources.get(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
             data_asset_name=data_asset_name,

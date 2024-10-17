@@ -66,14 +66,6 @@
             "title": "Batch Id",
             "type": "string"
         },
-        "row_condition": {
-            "title": "Row Condition",
-            "type": "string"
-        },
-        "condition_parser": {
-            "title": "Condition Parser",
-            "type": "string"
-        },
         "unexpected_rows_query": {
             "title": "Unexpected Rows Query",
             "description": "A SQL or Spark-SQL query to be executed for validation.",

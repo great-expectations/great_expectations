@@ -1,0 +1,24 @@
+# NOTE: Only run this after GE Releaser - Tag and GE Releaser - Prep
+# Docs: https://github.com/greatexpectationslabs/ge_releaser/
+name: GE Releaser - Publish (3/3)
+
+on: workflow_dispatch
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Clone ge_releaser
+        run: git clone https://github.com/greatexpectationslabs/ge_releaser/ ..
+      - name: Install ge_releaser
+        run: pip install ../ge_releaser/
+      - name: Run command
+        run: ge_releaser publish

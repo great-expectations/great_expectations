@@ -66,14 +66,6 @@
             "title": "Batch Id",
             "type": "string"
         },
-        "row_condition": {
-            "title": "Row Condition",
-            "type": "string"
-        },
-        "condition_parser": {
-            "title": "Condition Parser",
-            "type": "string"
-        },
         "column_list": {
             "title": "Column List",
             "description": "Set of columns to be checked.",
@@ -90,6 +82,13 @@
             "minimum": 0.0,
             "maximum": 1.0,
             "multipleOf": 0.01
+        },
+        "row_condition": {
+            "title": "Row Condition",
+            "type": "string"
+        },
+        "condition_parser": {
+            "$ref": "#/definitions/ConditionParser"
         },
         "ignore_row_if": {
             "title": "Ignore Row If",
@@ -238,6 +237,16 @@
                 "offset"
             ],
             "additionalProperties": false
+        },
+        "ConditionParser": {
+            "title": "ConditionParser",
+            "description": "Type of parser to be used to interpret a Row Condition.",
+            "enum": [
+                "great_expectations__experimental__",
+                "pandas",
+                "spark"
+            ],
+            "type": "string"
         }
     }
 }

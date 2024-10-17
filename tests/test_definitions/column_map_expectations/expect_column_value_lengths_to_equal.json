@@ -129,7 +129,7 @@
         "condition_parser": "bad_parser"
       },
       "out" : {
-        "traceback_substring": "must be 'python' or 'pandas'"
+        "traceback_substring": "not a valid enumeration member"
       }
     }]
   }]

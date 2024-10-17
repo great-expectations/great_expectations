@@ -197,7 +197,7 @@ jobs:
 
   unit-tests:
     env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -272,9 +272,8 @@ jobs:
         run: python ci/checks/check_integration_test_gets_run.py
       - name: name_tag_snippet_referenced_checker
         run: python ci/checks/check_name_tag_snippets_referenced.py
-      # Disabling public_api_report during V1 development; should be re-enabled upon completion of public API audit
-      # - name: public_api_report
-      #   run: invoke public-api
+      - name: public_api_report
+        run: invoke public-api
       - name: link_checker
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs -sp static --skip-external
 
@@ -398,7 +397,7 @@ jobs:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
@@ -423,7 +422,7 @@ jobs:
       fail-fast: false
       matrix:
         markers:
-          - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
+          - athena or openpyxl or pyarrow or project or sqlite or aws_creds
           - aws_deps
           - big
           - databricks
@@ -435,6 +434,7 @@ jobs:
           - spark
           - spark_connect
           - trino
+          - clickhouse
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
@@ -444,12 +444,9 @@ jobs:
           - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.10' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.11' }}
-          - python-version: "3.12" # need sqlalchemy 2.0 support
-            markers: snowflake
-          - python-version: "3.12" # clickhouse/pyathena need dependency update
-            markers: athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
-          - python-version: "3.12" # numpy related issue
-            markers: databricks
+            # clickhouse needs dependency update
+          - python-version: "3.12"
+            markers: clickhouse
 
     steps:
       - name: Checkout
@@ -553,8 +550,6 @@ jobs:
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py312-min-versions:
-    env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
@@ -613,12 +608,13 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
-      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         exclude:
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

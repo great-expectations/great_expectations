@@ -48,7 +48,7 @@ data_source_name = "my_data_source"
 data_asset_name = "my_data_asset"
 batch_definition_name = "my_batch_definition"
 batch_definition = (
-    context.get_datasource(data_source_name)
+    context.data_sources.get(data_source_name)
     .get_asset(data_asset_name)
     .get_batch_definition(batch_definition_name)
 )

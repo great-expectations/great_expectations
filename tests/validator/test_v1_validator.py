@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from pprint import pformat as pf
 from unittest import mock
 
@@ -50,7 +51,7 @@ def fds_data_asset(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
 ) -> DataAsset:
-    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
+    datasource = fds_data_context.data_sources.get(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
     return datasource.get_asset("trip_asset")
 
@@ -60,7 +61,7 @@ def fds_data_asset_with_event_type_partitioner(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
 ) -> DataAsset:
-    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
+    datasource = fds_data_context.data_sources.get(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
     return datasource.get_asset("trip_asset_partition_by_event_type")
 
@@ -138,6 +139,22 @@ def test_result_format_complete(validator: Validator, failing_expectation: Expec
     assert "partial_unexpected_list" in result.result
     assert "partial_unexpected_counts" in result.result
     assert "unexpected_list" in result.result
+
+
+@pytest.mark.unit
+def test_v1_validator_doesnt_mutate_result_format(
+    validator: Validator, expectation_suite: ExpectationSuite
+):
+    """This test verifies a bugfix where the legacy Validator mutates a ResultFormat
+    dict provided by the user.
+    """
+    result_format_dict = {
+        "result_format": "COMPLETE",
+    }
+    backup_result_format_dict = copy(result_format_dict)
+    validator.result_format = result_format_dict
+    validator.validate_expectation_suite(expectation_suite=expectation_suite)
+    assert result_format_dict == backup_result_format_dict
 
 
 @pytest.mark.unit

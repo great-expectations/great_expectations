@@ -702,7 +702,7 @@ class Datasource(
                 "Cannot save datasource without a data context."
             )
 
-        loaded_datasource = self.data_context.get_datasource(self.name)
+        loaded_datasource = self.data_context.data_sources.get(self.name)
         if loaded_datasource is not self:
             # CachedDatasourceDict will return self; only add batch definition if this is a remote
             # copy
@@ -726,7 +726,7 @@ class Datasource(
                 "Cannot save datasource without a data context."
             )
 
-        loaded_datasource = self.data_context.get_datasource(self.name)
+        loaded_datasource = self.data_context.data_sources.get(self.name)
         if loaded_datasource is not self:
             # CachedDatasourceDict will return self; only add batch definition if this is a remote
             # copy

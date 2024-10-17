@@ -52,13 +52,13 @@ def datasource_name(
     # if the test was skipped, we may not have a datasource to clean up
     # in that case, we create one simply to test get and delete
     try:
-        _ = context.get_datasource(name=datasource_name)
+        _ = context.data_sources.get(name=datasource_name)
     except ValueError:
         _ = context.data_sources.add_pandas(name=datasource_name)
-        context.get_datasource(name=datasource_name)
+        context.data_sources.get(name=datasource_name)
     context.delete_datasource(name=datasource_name)
     with pytest.raises(ValueError):
-        _ = context.get_datasource(name=datasource_name)
+        _ = context.data_sources.get(name=datasource_name)
 
 
 @pytest.fixture(scope="module")

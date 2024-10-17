@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 import json
 import logging
 from copy import deepcopy
@@ -10,7 +9,6 @@ from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility.typing_extensions import override
@@ -20,7 +18,6 @@ from great_expectations.core.batch import (  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
-from great_expectations.core.util import in_jupyter_notebook
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render import (
@@ -193,24 +190,6 @@ class ExpectationValidationResult(SerializableDictDot):
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
         """  # noqa: E501
         json_dict: dict = self.to_json_dict()
-        if in_jupyter_notebook():
-            if (
-                "expectation_config" in json_dict
-                and "kwargs" in json_dict["expectation_config"]
-                and "auto" in json_dict["expectation_config"]["kwargs"]
-                and json_dict["expectation_config"]["kwargs"]["auto"]
-            ):
-                json_dict["expectation_config"]["meta"] = {
-                    "auto_generated_at": datetime.datetime.now(datetime.timezone.utc).strftime(
-                        "%Y%m%dT%H%M%S.%fZ"
-                    ),
-                    "great_expectations_version": ge_version,
-                }
-                json_dict["expectation_config"]["kwargs"].pop("auto")
-                json_dict["expectation_config"]["kwargs"].pop("batch_id", None)
-            else:
-                json_dict.pop("expectation_config", None)
-
         return json.dumps(json_dict, indent=2)
 
     @override

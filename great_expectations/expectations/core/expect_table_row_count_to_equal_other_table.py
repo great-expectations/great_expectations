@@ -9,6 +9,7 @@ from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_types import ConditionParser  # noqa: TCH001
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
     LegacyRendererType,
@@ -147,6 +148,8 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     """  # noqa: E501
 
     other_table_name: str = pydantic.Field(description=OTHER_TABLE_NAME_DESCRIPTION)
+    row_condition: Union[str, None] = None
+    condition_parser: Union[ConditionParser, None] = None
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",

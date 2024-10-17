@@ -211,7 +211,6 @@ module = [
     "databricks.*",
     "google.*",
     "great_expectations.compatibility.pydantic.*",
-    "ipywidgets.*",
     "mistune.*",
     "moto.*",
     "pact.*",
@@ -224,7 +223,6 @@ module = [
     "scipy.*",
     "sempy.*",
     "shapely.*",
-    "snapshottest.*",
     "snowflake.*",
     "sqlalchemy_bigquery.*",
     "sqlalchemy_dremio.*",
@@ -598,8 +596,6 @@ filterwarnings = [
     # Found when running tests in tests/profile/test_basic_suite_builder_profiler.py
     # Example Actual Warning: RuntimeWarning: invalid value encountered in reduce
     "ignore: invalid value encountered in reduce",
-    # urllib3
-    "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
     # boto
     # Example Actual Warning: Found when importing botocore when collecting tests with 3.10.
     # ImportWarning: _SixMetaPathImporter.find_spec() not found; falling back to find_module()

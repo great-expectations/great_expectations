@@ -153,7 +153,7 @@ class TestValidationDefinitionInteraction:
 def slack_action():
     return SlackNotificationAction(
         name="my_slack_action",
-        slack_webhook="slack_webhook",
+        slack_webhook="${SLACK_WEBHOOK}",
     )
 
 
@@ -252,7 +252,7 @@ class TestCheckpointSerialization:
                         "show_failed_expectations": False,
                         "slack_channel": None,
                         "slack_token": None,
-                        "slack_webhook": "slack_webhook",
+                        "slack_webhook": "${SLACK_WEBHOOK}",
                         "type": "slack",
                     },
                     {
@@ -375,7 +375,7 @@ class TestCheckpointSerialization:
                     "show_failed_expectations": False,
                     "slack_channel": None,
                     "slack_token": None,
-                    "slack_webhook": "slack_webhook",
+                    "slack_webhook": "${SLACK_WEBHOOK}",
                     "type": "slack",
                 },
                 {
