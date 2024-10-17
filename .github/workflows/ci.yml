@@ -323,7 +323,7 @@ jobs:
         env:
           NODE_OPTIONS: --max_old_space_size=4096
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
-        run: cd docs/docusaurus && yarn check-links
+        run: cd docs/docusaurus && yarn install && yarn check-links
 
   cloud-tests:
     needs: [unit-tests, static-analysis, ci-is-on-main-repo]
