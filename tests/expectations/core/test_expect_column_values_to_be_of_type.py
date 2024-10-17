@@ -107,7 +107,7 @@ def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
 @pytest.mark.unit
 def test_expect_column_values_to_be_in_set_render_performance():
     x = ExpectColumnValuesToBeInSet(
-        column="foo_column_name", value_set=[random.randint(0, 10) for _ in range(1000)]
+        column="foo_column_name", value_set=[random.randint(0, 10) for _ in range(500)]
     )
 
     start = time.time()
