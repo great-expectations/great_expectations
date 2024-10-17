@@ -1,9 +1,14 @@
+import timeit
+
 import pandas as pd
 import pytest
 
 from great_expectations.compatibility import aws
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
+)
+from great_expectations.expectations import (
+    ExpectColumnValuesToBeInSet,
 )
 from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.util import is_library_loadable
@@ -96,3 +101,19 @@ def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
         },
         meta={},
     )
+
+
+@pytest.mark.unit
+def test_expect_column_values_to_be_in_set_render_performance():
+    """
+    This test prevents a historical bug in which rendering took ~10 seconds to render 400 items.
+    """
+
+    large_number = 400
+
+    x = ExpectColumnValuesToBeInSet(
+        column="foo_column_name", value_set=["foo" for _ in range(large_number)]
+    )
+
+    duration_s = timeit.timeit(x.render, number=1)
+    assert duration_s < 2, f"Rendering took {duration_s} seconds"
