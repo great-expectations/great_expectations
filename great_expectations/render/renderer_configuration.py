@@ -16,7 +16,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
 )
 
 import dateutil
@@ -74,9 +73,6 @@ class _RendererValueBase(BaseModel):
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
-
-    def __len__(self) -> int:
-        return len(self.__fields__)
 
     @override
     def dict(  # noqa: PLR0913
@@ -571,15 +567,6 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         renderer_param: Type[BaseModel] = RendererConfiguration._get_renderer_value_base_model_type(
             name=name
         )
-        renderer_param_definition: Dict[str, Any] = {name: (Optional[renderer_param], ...)}
-
-        # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
-        # See: https://github.com/pydantic/pydantic/issues/3930
-        renderer_params: Type[BaseModel] = create_model(
-            "RendererParams",
-            **renderer_param_definition,
-            __base__=self.params.__class__,
-        )
 
         if value is None:
             value = self.kwargs.get(name)
@@ -591,34 +578,22 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                 param_types=param_type, value=value
             )
 
-        renderer_params_args: Dict[str, Optional[Any]]
         if value is None:
-            renderer_params_args = {
-                **self.params.dict(exclude_none=False),
-                name: None,
-            }
-        else:
-            assert isinstance(param_type, RendererValueType)
-            renderer_params_args = self.params.dict(exclude_none=False)
-            # if we already moved the suite parameter raw_kwargs to a param,
-            # we need to combine the param passed to add_param() with those existing raw_kwargs
-            if (
-                name in renderer_params_args and renderer_params_args[name]["suite_parameter"]  # type: ignore[index]
-            ):
-                new_args = {
-                    name: renderer_param(
-                        schema=RendererSchema(type=param_type),
-                        value=value,
-                        suite_parameter=renderer_params_args[name]["suite_parameter"],  # type: ignore[index]
-                    )
-                }
-            else:
-                new_args = {
-                    name: renderer_param(
-                        schema=RendererSchema(type=param_type),
-                        value=value,
-                    )
-                }
-            renderer_params_args.update(new_args)
+            self.params.__dict__[name] = None
+            return
 
-        self.params = cast(RendererParams, renderer_params(**renderer_params_args))
+        assert isinstance(param_type, RendererValueType)
+
+        # if we already moved the suite parameter raw_kwargs to a param,
+        # we need to combine the param passed to add_param() with those existing raw_kwargs
+        if name in self.params.__dict__ and self.params.__dict__[name]["suite_parameter"]:
+            self.params.__dict__[name] = renderer_param(
+                schema=RendererSchema(type=param_type),
+                value=value,
+                suite_parameter=self.params.__dict__[name]["suite_parameter"],
+            )
+        else:
+            self.params.__dict__[name] = renderer_param(
+                schema=RendererSchema(type=param_type),
+                value=value,
+            )
