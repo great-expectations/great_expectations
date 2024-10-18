@@ -1249,7 +1249,7 @@ class Validator:
             )
 
             self._data_context = validation_data_context
-        except Exception:
+        except Exception:  # noqa: TRY302
             raise
         finally:
             self._active_validation = False

@@ -31,7 +31,7 @@ class ColumnParameterizedDistributionKSTestPValue(ColumnAggregateMetricProvider)
         # Validate params
         try:
             validate_distribution_parameters(distribution=distribution, params=params)
-        except ValueError as e:
+        except ValueError as e:  # noqa: TRY302
             raise e  # noqa: TRY201
 
         # Format arguments for scipy.kstest
