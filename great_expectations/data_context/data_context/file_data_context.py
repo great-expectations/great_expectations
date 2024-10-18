@@ -200,7 +200,7 @@ class FileDataContext(SerializableDataContext):
             return DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
-        except gx_exceptions.InvalidDataContextConfigError:  # noqa: TRY302
+        except gx_exceptions.InvalidDataContextConfigError:  # noqa: TRY203
             # Just to be explicit about what we intended to catch
             raise
 
