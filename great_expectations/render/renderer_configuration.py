@@ -445,12 +445,14 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                     Optional[renderer_param_type],
                     ...,
                 )
+            existing_params = values["params"].__dict__
+            combined_params = {**existing_params, **_params}
             renderer_params: Type[BaseModel] = create_model(
                 "RendererParams",
                 **renderer_param_definitions,
                 __base__=_RendererValueBase,
             )
-            values["params"] = renderer_params(**_params)
+            values["params"] = renderer_params(**combined_params)
 
         return values
 
