@@ -435,7 +435,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         )
         if not values["params"]:
             values["params"] = _RendererValueBase()
-        if _params is not None and _params != values["params"]:
+        if _params and _params != values["params"]:
             renderer_param_definitions: Dict[str, Any] = {}
             for name in _params:
                 renderer_param_type: Type[BaseModel] = (
