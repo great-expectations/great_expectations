@@ -9,13 +9,13 @@ import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
-
 <OverviewCard title={frontMatter.title}>
       {frontMatter.description}
 </OverviewCard>
 
 
 <LinkCardGrid>
+
   <LinkCard 
       topIcon 
       label="Metadata Stores"
