@@ -1,6 +1,6 @@
 {
     "title": "DirectoryCSVAsset",
-    "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
+    "description": "--Public API--Base class for PathDataAssets which batch by combining the contents of a directory.",
     "type": "object",
     "properties": {
         "name": {

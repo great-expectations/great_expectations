@@ -1,3 +1,5 @@
+from pprint import pformat as pf
+
 import pytest
 
 from great_expectations._docs_decorators import (
@@ -6,6 +8,7 @@ from great_expectations._docs_decorators import (
     new_argument,
     new_method_or_class,
     public_api,
+    public_api_introspector,
 )
 
 # @public_api
@@ -59,6 +62,31 @@ class TestPublicAPI:
     def test_public_api_decorator_no_docstring(self):
         assert _func_no_docstring_public_api.__doc__ == "--Public API--"
         assert _func_no_docstring_public_api.__name__ == "_func_no_docstring_public_api"
+
+    @pytest.mark.unit
+    def test_public_api_methods_have_decorated_parent_class(self):
+        """
+        In order for the public_api decorator to work and result in rendered docs,
+        the parent class of a decorated method must also be decorated.
+
+        Example:
+
+            # Failure to decorate this class means that `my_method` won't be rendered in the docs.
+            class MyClass:
+
+                @public_api
+                def my_method(self):
+                    pass
+        """
+        class_registry = public_api_introspector.class_registry
+        classes_that_need_public_api_decorator: dict[str, list[str]] = {}
+
+        for class_, methods in class_registry.items():
+            if public_api_introspector.CLASS_DEFINITION not in methods:
+                classes_that_need_public_api_decorator[class_] = sorted(methods)
+
+        print(f"Classes missing @public_api ->\n{pf(classes_that_need_public_api_decorator)}")
+        assert sorted(classes_that_need_public_api_decorator.keys()) == []
 
 
 # @deprecated

@@ -83,6 +83,7 @@ class PandasDatasourceError(Exception):
     pass
 
 
+@public_api
 class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",

@@ -1,6 +1,6 @@
 {
     "title": "JSONAsset",
-    "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+    "description": "--Public API--Base class for PathDataAssets which batch by applying a regex to file names.",
     "type": "object",
     "properties": {
         "name": {
