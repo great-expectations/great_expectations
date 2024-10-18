@@ -285,7 +285,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         try:
             expectations_module = importlib.import_module(f"{package}.expectations")
             return expectations_module
-        except ModuleNotFoundError:  # noqa: TRY302
+        except ModuleNotFoundError:  # noqa: TRY203
             raise
 
     @staticmethod
