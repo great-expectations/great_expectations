@@ -36,7 +36,7 @@ Data can be validated against individual Expectations.  This workflow is general
 
 1. Run the Expectation on the Batch of data.
 
-   In this example, the Expectation to test was defined with preset parameters and is already stored in the variable `expectation`. The variable `batch` contains a Batch that was retrieved from a `.csv` file using the pandas defualt Data Source:
+   In this example, the Expectation to test was defined with preset parameters and is already stored in the variable `expectation`. The variable `batch` contains a Batch that was retrieved from a `.csv` file using the pandas default Data Source:
 
    ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - test expectation with preset parameters"
    ```
