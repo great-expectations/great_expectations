@@ -1854,7 +1854,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             project_config_dict = dataContextConfigSchema.load(project_config_dict)
             context_config: DataContextConfig = DataContextConfig(**project_config_dict)
             return context_config
-        except ValidationError:  # noqa: TRY302
+        except ValidationError:
             raise
 
     @overload
