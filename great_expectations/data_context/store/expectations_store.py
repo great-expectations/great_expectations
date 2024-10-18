@@ -13,7 +13,6 @@ from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -80,11 +79,7 @@ class ExpectationsStore(Store):
             verify_dynamic_loading_support(module_name=store_backend_module_name)
             store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
-            # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
-            if issubclass(store_backend_class, TupleStoreBackend):
-                # Provide defaults for this common case
-                store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
-            elif issubclass(store_backend_class, DatabaseStoreBackend):
+            if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 store_backend["table_name"] = store_backend.get(
                     "table_name", "ge_expectations_store"
