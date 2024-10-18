@@ -15,7 +15,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
 
 
 <LinkCardGrid>
-  
   <LinkCard 
       topIcon 
       label="Metadata Stores"
