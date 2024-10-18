@@ -40,16 +40,16 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
         try:
             xmlschema_doc = etree.fromstring(xml_schema)
             xmlschema = etree.XMLSchema(xmlschema_doc)
-        except etree.ParseError:  # noqa: TRY302
+        except etree.ParseError:  # noqa: TRY203
             raise
-        except:  # noqa: TRY302
+        except:  # noqa: TRY203
             raise
 
         def matches_xml_schema(val):
             try:
                 xml_doc = etree.fromstring(val)
                 return xmlschema(xml_doc)
-            except:  # noqa: TRY302
+            except:  # noqa: TRY203
                 raise
 
         return column.map(matches_xml_schema)
@@ -59,9 +59,9 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
         try:
             xmlschema_doc = etree.fromstring(xml_schema)
             xmlschema = etree.XMLSchema(xmlschema_doc)
-        except etree.ParseError:  # noqa: TRY302
+        except etree.ParseError:  # noqa: TRY203
             raise
-        except:  # noqa: TRY302
+        except:  # noqa: TRY203
             raise
 
         def matches_xml_schema(val):
@@ -70,7 +70,7 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
             try:
                 xml_doc = etree.fromstring(val)
                 return xmlschema(xml_doc)
-            except:  # noqa: TRY302
+            except:  # noqa: TRY203
                 raise
 
         matches_xml_schema_udf = F.udf(matches_xml_schema, pyspark.types.BooleanType())
