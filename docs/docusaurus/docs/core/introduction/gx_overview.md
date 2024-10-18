@@ -53,7 +53,7 @@ For a full list of available Expectations, see [the Expectation Gallery](https:/
 
 An **Expectation Suite** is a collection of Expectations. Expectation Suites can be used to validate a Batch of data using multiple Expectations, streamlining the validation process. You can define multiple Expectation Suites for the same data to cover different use cases, and you can apply the same Expectation Suite to different Batches.
 
-For more information defining Expectations and creating Expectation Suites, see [Define Expectations](/core/define_expectations/define_expectations.md).
+For more information about defining Expectations and creating Expectation Suites, see [Define Expectations](/core/define_expectations/define_expectations.md).
 
 ### Run Validations
 
