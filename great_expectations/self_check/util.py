@@ -938,9 +938,12 @@ def modify_locale(func: Callable[P, None]) -> Callable[P, None]:
         old_locale = locale.setlocale(locale.LC_TIME, None)
         print(old_locale)
         # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
-        new_locale = locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
-        assert new_locale == "en_US.UTF-8"
-        func(*args, **kwargs)
+        try:
+            new_locale = locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
+            assert new_locale == "en_US.UTF-8"
+            func(*args, **kwargs)
+        finally:
+            locale.setlocale(locale.LC_TIME, old_locale)
 
     return locale_wrapper
 
