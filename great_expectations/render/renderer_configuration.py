@@ -430,28 +430,30 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
     @root_validator()
     def _validate_for_params(cls, values: dict) -> dict:
+        _params: Optional[Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]] = (
+            values.get("_params")
+        )
         if not values["params"]:
-            _params: Optional[Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]] = (
-                values.get("_params")
-            )
-            if _params:
-                renderer_param_definitions: Dict[str, Any] = {}
-                for name in _params:
-                    renderer_param_type: Type[BaseModel] = (
-                        RendererConfiguration._get_renderer_value_base_model_type(name=name)
-                    )
-                    renderer_param_definitions[name] = (
-                        Optional[renderer_param_type],
-                        ...,
-                    )
-                renderer_params: Type[BaseModel] = create_model(
-                    "RendererParams",
-                    **renderer_param_definitions,
-                    __base__=_RendererValueBase,
+            values["params"] = _RendererValueBase()
+        if _params and _params != values["params"]:
+            renderer_param_definitions: Dict[str, Any] = {}
+            for name in _params:
+                renderer_param_type: Type[BaseModel] = (
+                    RendererConfiguration._get_renderer_value_base_model_type(name=name)
                 )
-                values["params"] = renderer_params(**_params)
-            else:
-                values["params"] = _RendererValueBase()
+                renderer_param_definitions[name] = (
+                    Optional[renderer_param_type],
+                    ...,
+                )
+            existing_params = values["params"].__dict__
+            combined_params = {**existing_params, **_params}
+            renderer_params: Type[BaseModel] = create_model(
+                "RendererParams",
+                **renderer_param_definitions,
+                __base__=_RendererValueBase,
+            )
+            values["params"] = renderer_params(**combined_params)
+
         return values
 
     @staticmethod
@@ -477,6 +479,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             .replace(" or ", " OR ")
             .replace("~", " NOT ")
             .replace(" not ", " NOT ")
+            .replace("==", " is ")
         )
         row_condition_str = " ".join(row_condition_str.split())
 
