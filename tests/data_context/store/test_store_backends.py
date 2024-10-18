@@ -453,7 +453,7 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
 """
     )
 
-    assert set(my_store.list_keys()) == {(".ge_store_backend_id",), ("AAA",)}
+    assert set(my_store.list_keys()) == {("AAA",)}
 
 
 @mock_s3
