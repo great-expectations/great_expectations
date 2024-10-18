@@ -11,7 +11,7 @@ In this guide, you will learn how to leverage GX to effectively handle missing d
 
 ## Prerequisite knowledge
 
-This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Overview](https://docs.greatexpectations.io/docs/guides/overview) to familiarize yourself with key concepts and setup procedures.
+This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Overview](/cloud/overview/gx_cloud_overview.md) to familiarize yourself with key concepts and setup procedures.
 
 ## Data preview
 
@@ -60,7 +60,7 @@ Ensures that values within a specific column are not `NULL`.
 - Use these Expectations to track data as it progresses through your pipeline. Apply `ExpectColumnValuesToBeNull` to fields expected to be empty in early stages, and `ExpectColumnValuesToNotBeNull` to those same fields in later stages.
 :::
 
-## Examples and scenarios
+## Examples and scenarios 
 
 The examples given in this section provide insight into how and when to apply missingness Expectations to identify different varieties of missing data. The focus of this guidance is on the specifics of the Expectations, rather than the overall workflow, which can be implemented using either GX Cloud or GX Core.
 
