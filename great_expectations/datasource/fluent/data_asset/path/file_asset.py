@@ -306,4 +306,4 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         self, partitioner: Optional[FileNamePartitioner]
     ) -> Optional[PartitionerSortingProtocol]:
         # FileNamePartitioner already implements PartitionerSortingProtocol
-        return partitioner
+        return partitioner  # type: ignore[return-value]  # returns narrower type than allowed
