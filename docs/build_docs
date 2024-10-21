@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "Installing Great Expectations library dev dependencies."
-which python
 (cd ../../; pip install -c constraints-dev.txt -e ".[test]")
 
 echo "Installing api docs dependencies."
