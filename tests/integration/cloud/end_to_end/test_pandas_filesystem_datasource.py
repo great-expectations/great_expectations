@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import pathlib
 import uuid
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Generator, Iterator
 
 import pandas as pd
 import pytest
 
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -16,7 +17,6 @@ if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
-        BatchRequest,
         DataAsset,
         PandasFilesystemDatasource,
     )
@@ -73,45 +73,70 @@ def datasource(
     return datasource
 
 
+@pytest.fixture(scope="module")
+def asset_name() -> str:
+    return f"da_{uuid.uuid4().hex}"
+
+
+@pytest.fixture(scope="module")
+def batch_definition_name() -> str:
+    return f"batch_def_{uuid.uuid4().hex}"
+
+
+@pytest.fixture(scope="module")
 def csv_asset(
     datasource: PandasFilesystemDatasource,
     asset_name: str,
-) -> CSVAsset:
-    return datasource.add_csv_asset(
+) -> Generator[CSVAsset, None, None]:
+    """Test CSVAsset lifecycle"""
+    yield datasource.add_csv_asset(
         name=asset_name,
-    )
-
-
-def parquet_asset(
-    datasource: PandasFilesystemDatasource,
-    asset_name: str,
-) -> ParquetAsset:
-    return datasource.add_parquet_asset(
-        name=asset_name,
-    )
-
-
-@pytest.fixture(scope="module", params=[csv_asset, parquet_asset])
-def data_asset(
-    datasource: PandasFilesystemDatasource,
-    get_missing_data_asset_error_type: type[Exception],
-    request,
-) -> Iterator[DataAsset]:
-    """Test the entire Data Asset CRUD lifecycle here and in Data Asset-specific fixtures."""
-    asset_name = f"da_{uuid.uuid4().hex}"
-    yield request.param(
-        datasource=datasource,
-        asset_name=asset_name,
     )
     datasource.delete_asset(name=asset_name)
-    with pytest.raises(get_missing_data_asset_error_type):
+    with pytest.raises(LookupError):
         datasource.get_asset(name=asset_name)
 
 
 @pytest.fixture(scope="module")
-def batch_request(data_asset: DataAsset) -> BatchRequest:
-    """Build a BatchRequest depending on the types of Data Assets tested in the module."""
-    return data_asset.build_batch_request()
+def csv_batch_definition(
+    batch_definition_name: str, csv_asset: CSVAsset, csv_path: pathlib.Path
+) -> BatchDefinition:
+    return csv_asset.add_batch_definition_path(
+        name=batch_definition_name,
+        path=csv_path,
+    )
+
+
+@pytest.fixture(scope="module")
+def parquet_asset(
+    datasource: PandasFilesystemDatasource,
+    asset_name: str,
+) -> Generator[ParquetAsset, None, None]:
+    """Test ParquetAsset lifecycle"""
+    yield datasource.add_parquet_asset(
+        name=asset_name,
+    )
+    datasource.delete_asset(name=asset_name)
+    with pytest.raises(LookupError):
+        datasource.get_asset(name=asset_name)
+
+
+@pytest.fixture(scope="module")
+def parquet_batch_definition(
+    batch_definition_name: str, parquet_asset: CSVAsset, parquet_path: pathlib.Path
+) -> BatchDefinition:
+    return parquet_asset.add_batch_definition_path(
+        name=batch_definition_name,
+        path=parquet_path,
+    )
+
+
+@pytest.fixture(scope="module", params=["csv_batch_definition", "parquet_batch_definition"])
+def batch_definition(
+    request,
+) -> Iterator[DataAsset]:
+    """Parametrize the BatchDefinition fixtures under test"""
+    return request.getfixturevalue(request.param)
 
 
 @pytest.fixture(scope="module")
