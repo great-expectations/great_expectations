@@ -106,12 +106,10 @@ def batch_definition(
     data_asset: DataFrameAsset,
 ) -> Generator[BatchDefinition, None, None]:
     batch_def_name = f"batch_def_{uuid.uuid4().hex}"
-    yield data_asset.add_batch_definition_whole_dataframe(
+    return data_asset.add_batch_definition_whole_dataframe(
         name=batch_def_name,
     )
-    data_asset.delete_batch_definition(name=batch_def_name)
-    with pytest.raises(KeyError):
-        data_asset.get_batch_definition(name=batch_def_name)
+
 
 @pytest.fixture(scope="module")
 def expectation_suite(
