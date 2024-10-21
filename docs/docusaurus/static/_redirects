@@ -448,8 +448,17 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/reference/terms/* /docs/reference/learn/terms/:splat
 
 
-## Redirects for GX Core prerelease
+## Redirects for GX Core version 1.0 prerelease
+/docs/1.0-prerelease/core/introduction/about_gx /docs/core/introduction/
+/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts /docs/core/set_up_a_gx_environment/create_a_data_context
+/docs/1.0-prerelease/core/installation_and_setup/install_gx /docs/core/set_up_a_gx_environment/install_gx
+/docs/1.0-prerelease/core/installation_and_setup/set_up_a_python_environment /docs/core/set_up_a_gx_environment/install_python
+
+/docs/core/installation_and_setup/install_gx /docs/core/set_up_a_gx_environment/install_gx
+
 /docs/1.0-prerelease/oss/*  /docs/1.0-prerelease/core/introduction/about_gx
+/docs/1.0-prerelease/* /docs/:splat
+
   # /docs/oss/guides/expectations/creating_custom_expectations/*    /docs/core/expectations/manage_expectations#customize-an-expectation-class
   # /docs/oss/guides/expectations/how_to_edit_an_existing_expectationsuite  /docs/core/expectation_suites/manage_expectation_suites
   # /docs/oss/guides/expectations/* /docs/core/expectations/manage_expectations
@@ -464,3 +473,17 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
   # /docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_suite_parameters
   # /docs/oss/guides/expectations/advanced/how_to_dynamically_load_suite_parameters_from_a_database
   # /docs/oss/guides/expectations/advanced/identify_failed_rows_expectations
+
+
+## Redirects for broken version 0.18 URLs
+
+/docs/oss/guides/validation/checkpoints/aG93X3RvX2 /docs/0.18/oss/guides/validation/checkpoints/checkpoint_lp
+/docs/oss/guides/setup/configuring_data_docs/aG93X3RvX2 /docs/0.18/oss/guides/setup/configuring_data_docs/host_and_share_data_docs
+/docs/oss/guides/expectations/aG93X3RvX2 /docs/0.18/oss/guides/expectations/expectations_lp
+
+/docs/oss/* /docs/0.18/oss/:splat
+/docs/reference/learn/terms/data_docs /docs/0.18/reference/learn/terms/data_docs
+/docs/reference/learn/terms/* /docs/0.18/reference/learn/terms/:splat
+/docs/reference/learn/expectations/* /docs/0.18/reference/learn/expectations/:splat
+/docs/reference/learn/conceptual_guides/* /docs/0.18/reference/learn/conceptual_guides/:splat
+/docs/reference/api/* /docs/0.18/reference/api/:splat

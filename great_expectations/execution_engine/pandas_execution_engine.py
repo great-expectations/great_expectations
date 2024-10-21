@@ -54,6 +54,7 @@ from great_expectations.execution_engine.partition_and_sample.pandas_data_partit
 from great_expectations.execution_engine.partition_and_sample.pandas_data_sampler import (
     PandasDataSampler,
 )
+from great_expectations.expectations.model_field_types import ConditionParser
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -525,15 +526,12 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
         if row_condition:
             condition_parser = domain_kwargs.get("condition_parser", None)
 
-            # Ensuring proper condition parser has been provided
-            if condition_parser not in ["python", "pandas"]:
-                raise ValueError(  # noqa: TRY003
-                    "condition_parser is required when setting a row_condition,"
-                    " and must be 'python' or 'pandas'"
-                )
-            else:
-                # Querying row condition
+            if condition_parser == ConditionParser.PANDAS:
                 data = data.query(row_condition, parser=condition_parser)
+            else:
+                raise ValueError(  # noqa: TRY003
+                    "condition_parser for Pandas is required when setting a row_condition."
+                )
 
         if "column" in domain_kwargs:
             return data
