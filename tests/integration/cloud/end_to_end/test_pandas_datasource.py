@@ -1,27 +1,26 @@
 from __future__ import annotations
 
 import uuid
-import warnings
-from typing import TYPE_CHECKING, Iterator, Generator
+from typing import TYPE_CHECKING, Generator, Iterator
 
 import pandas as pd
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations import ValidationDefinition
+from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.datasource.fluent.pandas_datasource import DataFrameAsset
-import great_expectations.expectations as gxe
 from great_expectations.exceptions import DataContextError
-from great_expectations.core import ExpectationSuite, ExpectationValidationResult
-from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
 
 if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
         BatchRequest,
         DataAsset,
-        PandasDatasource, GxInvalidDatasourceWarning,
-)
+        PandasDatasource,
+    )
     from great_expectations.validator.validator import Validator
 
 
@@ -104,7 +103,7 @@ def batch_request(
 def batch_definition(
     context: CloudDataContext,
     data_asset: DataFrameAsset,
-) -> Generator[BatchDefinition, None, None]:
+) -> BatchDefinition:
     batch_def_name = f"batch_def_{uuid.uuid4().hex}"
     return data_asset.add_batch_definition_whole_dataframe(
         name=batch_def_name,
@@ -123,12 +122,7 @@ def expectation_suite(
     yield context.suites.add(
         ExpectationSuite(
             name=expectation_suite_name,
-            expectations=[
-                gxe.ExpectColumnValuesToNotBeNull(
-                    column="string",
-                    mostly=1
-                )
-            ]
+            expectations=[gxe.ExpectColumnValuesToNotBeNull(column="string", mostly=1)],
         )
     )
     context.suites.delete(name=expectation_suite_name)
@@ -176,11 +170,9 @@ def test_interactive_validator(
     Note: There is no need to test getting a Validator or using Validator.head(). That is already
     tested in the validator fixture.
     """
-    expectation_validation_result = (
-        validator.expect_column_values_to_not_be_null(
-            column="datetime",
-            mostly=1,
-        )
+    expectation_validation_result = validator.expect_column_values_to_not_be_null(
+        column="datetime",
+        mostly=1,
     )
     assert expectation_validation_result.success
 
@@ -188,7 +180,5 @@ def test_interactive_validator(
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint, pandas_test_df):
     """Test running a Checkpoint that was created using the entities defined in this module."""
-    checkpoint_result = checkpoint.run(batch_parameters={
-        "dataframe": pandas_test_df
-    })
+    checkpoint_result = checkpoint.run(batch_parameters={"dataframe": pandas_test_df})
     assert checkpoint_result.success
