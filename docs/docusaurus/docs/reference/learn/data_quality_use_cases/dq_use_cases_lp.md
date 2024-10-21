@@ -27,8 +27,6 @@ established rules." to="/reference/learn/data_quality_use_cases/schema" icon="/i
 
   <LinkCard topIcon label="Distribution" description="Validate that data values adhere to expected ranges." to="/reference/learn/data_quality_use_cases/distribution" icon="/img/actions_icon.svg"/>
 
-  <LinkCard topIcon label="Freshness" description="Monitor the frequency at which data is available for use." to="/reference/learn/data_quality_use_cases/freshness" icon="/img/actions_icon.svg"/>
-
   <LinkCard topIcon label="Volume" description="Validate that record quantity falls within expected bounds." to="/reference/learn/data_quality_use_cases/volume" icon="/img/actions_icon.svg"/>
 
 </LinkCardGrid>
