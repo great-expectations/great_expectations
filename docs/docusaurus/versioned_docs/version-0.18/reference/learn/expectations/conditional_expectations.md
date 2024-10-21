@@ -8,7 +8,7 @@ Conditional Expectations are **experimental**, and they are available for Pandas
 
 You can create an Expectation for an entire dataset, or for a subset of the dataset. Some variables are dependent on the values of other variables. For example, a column that specifies that the country of origin must not be null for people of foreign descent.
 
-Great Expectations lets you express Conditional Expectations with a `row_condition` argument that can be passed to all Dataset Expectations. The `row_condition` argument should be a boolean expression string. In addition, you must provide the `condition_parser` argument which defines the syntax of conditions. When implementing conditional Expectations with Pandas, this argument must be set to `"pandas"`. When implementing conditional Expectations with Spark or SQLAlchemy, this argument must be set to `"great_expectations__experimental__"`. 
+Great Expectations lets you express Conditional Expectations with a `row_condition` argument that can be passed to all Dataset Expectations. The `row_condition` argument should be a boolean expression string. In addition, you must provide the `condition_parser` argument which defines the syntax of conditions. When implementing conditional Expectations with Pandas, this argument must be set to `"pandas"`. When implementing conditional Expectations with Spark or SQLAlchemy, this argument must be set to `"great_expectations__experimental__"`.
 
 :::note
 In Pandas the `row_condition` value is passed to `pandas.DataFrame.query()` before Expectation Validation. See [pandas.DataFrame.query](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html).

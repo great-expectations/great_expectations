@@ -18,7 +18,7 @@ As mentioned above, you will have PostgreSQL to store the data, dbt to transform
 Finally, to interact with our data, you will be using pgAdmin to query/view it (though you can use another database query tool if you want), the Great Expectations data docs to see our data quality results, Airflow to run our pipeline, and a CLI to interact with some of the services. 
 
 
-## Prerequiresites
+## Prerequisites
 :::note
 In addition to the prerequisites below, you are recommneded to use an IDE like VSCode to organize your project.
 :::

@@ -323,8 +323,6 @@ class FileDataContextVariables(DataContextVariables):
                 # this would be `deep_copy'ed in `instantiate_class_from_config` too
                 self.data_context.fluent_config.fluent_datasources = []
             yield
-        except Exception:  # noqa: TRY302
-            raise
         finally:
             if config_fluent_datasources_stash:
                 logger.info(

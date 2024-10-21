@@ -45,7 +45,7 @@ class TableHead(TableMetricProvider):
         if metric_value_kwargs.get("fetch_all", cls.default_kwarg_values["fetch_all"]):
             return df
         n_rows: int = (
-            metric_value_kwargs.get("n_rows")
+            metric_value_kwargs.get("n_rows")  # type: ignore[assignment] # FIXME expected 'int', got 'Any | None'
             if metric_value_kwargs.get("n_rows") is not None
             else cls.default_kwarg_values["n_rows"]
         )
@@ -65,7 +65,7 @@ class TableHead(TableMetricProvider):
         )
 
         n_rows: int = (
-            metric_value_kwargs.get("n_rows")
+            metric_value_kwargs.get("n_rows")  # type: ignore[assignment] # FIXME expected 'int', got 'Any | None'
             if metric_value_kwargs.get("n_rows") is not None
             else cls.default_kwarg_values["n_rows"]
         )
@@ -109,7 +109,7 @@ class TableHead(TableMetricProvider):
             rows = df.collect()
         else:
             n_rows: int = (
-                metric_value_kwargs.get("n_rows")
+                metric_value_kwargs.get("n_rows")  # type: ignore[assignment] # FIXME expected 'int', got 'Any | None'
                 if metric_value_kwargs.get("n_rows") is not None
                 else cls.default_kwarg_values["n_rows"]
             )

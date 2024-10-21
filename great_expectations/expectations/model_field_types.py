@@ -1,3 +1,4 @@
+from enum import Enum
 from numbers import Number
 from typing import Any, Callable, Dict, Generator, Iterable, Union
 
@@ -111,3 +112,12 @@ class _ValueSet(Iterable):
 
 
 ValueSet = Annotated[_ValueSet, Union[list, set]]
+
+
+class ConditionParser(str, Enum):
+    """Type of parser to be used to interpret a Row Condition."""
+
+    GX = "great_expectations"
+    GX_DEPRECATED = "great_expectations__experimental__"
+    PANDAS = "pandas"
+    SPARK = "spark"

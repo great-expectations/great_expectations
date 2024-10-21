@@ -199,7 +199,7 @@ Here is a side-by-side comparison of a Data Source called `pandas_fs_ds` with 4 
    defaultValue="v0_pandas_filesystem_config"
    values={[
       {value: 'v0_pandas_filesystem_config', label: 'V0 Pandas Filesystem Config'},
-      {value: 'v1_pandas_filesystem_config', label: 'V0 Pandas Filesystem Config'}
+      {value: 'v1_pandas_filesystem_config', label: 'V1 Pandas Filesystem Config'}
    ]}
 >
     <TabItem value="v0_pandas_filesystem_config" label="V0 Pandas Filesystem Config">
