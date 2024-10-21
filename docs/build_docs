@@ -14,11 +14,13 @@ if [ -n "$NETLIFY" ]; then
     # 11:16:39 AM: mise ERROR Run with --verbose or MISE_VERBOSE=1 for more information
     # 11:16:39 AM: ../build_docs: line 11: invoke: command not found
     mise use -g python@3.12.6
+    which python
 else
     echo "Not running on netlify - skipping mise command"
 fi
 
 echo "Installing Great Expectations library dev dependencies."
+which python
 (cd ../../; python -m pip install -c constraints-dev.txt -e ".[test]")
 
 echo "Installing api docs dependencies."
