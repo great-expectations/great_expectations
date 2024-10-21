@@ -33,7 +33,7 @@ class CheckpointStore(Store):
         store_name: str = "no_store_name",
     ) -> None:
         store_backend_class = self._determine_store_backend_class(store_backend)
-        if issubclass(store_backend_class, TupleStoreBackend):
+        if store_backend and issubclass(store_backend_class, TupleStoreBackend):
             store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
 
         super().__init__(

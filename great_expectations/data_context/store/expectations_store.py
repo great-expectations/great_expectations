@@ -76,15 +76,18 @@ class ExpectationsStore(Store):
 
         store_backend_class = self._determine_store_backend_class(store_backend)
         # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
-        if issubclass(store_backend_class, TupleStoreBackend):
-            # Provide defaults for this common case
-            store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
-        elif issubclass(store_backend_class, DatabaseStoreBackend):
-            # Provide defaults for this common case
-            store_backend["table_name"] = store_backend.get("table_name", "ge_expectations_store")
-            store_backend["key_columns"] = store_backend.get(
-                "key_columns", ["expectation_suite_name"]
-            )
+        if store_backend:
+            if issubclass(store_backend_class, TupleStoreBackend):
+                # Provide defaults for this common case
+                store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
+            elif issubclass(store_backend_class, DatabaseStoreBackend):
+                # Provide defaults for this common case
+                store_backend["table_name"] = store_backend.get(
+                    "table_name", "ge_expectations_store"
+                )
+                store_backend["key_columns"] = store_backend.get(
+                    "key_columns", ["expectation_suite_name"]
+                )
 
         super().__init__(
             store_backend=store_backend,
