@@ -23,7 +23,7 @@ stages:
         timeoutInMinutes: 30
         condition: and(or(eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
           spark.version: "3.3.2"
           matching_aws_java_sdk_bundle_version: "1.11.1026"
 
@@ -61,7 +61,7 @@ stages:
         timeoutInMinutes: 30
         condition: or(eq(variables.isDevelop, true), eq(variables.isManual, true))
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         steps:
           - task: UsePythonVersion@0

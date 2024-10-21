@@ -159,7 +159,7 @@ class PandasDataSampler(DataSampler):
                 )
             )
 
-        matches = df[column_name].map(
+        matches: pd.Series = df[column_name].map(
             lambda x: hash_func(str(x).encode()).hexdigest()[-1 * hash_digits :] == hash_value
         )
         return df[matches]

@@ -1088,7 +1088,7 @@ class Validator:
         message="Only the str version of this argument is deprecated. run_id should be a RunIdentifier or dict. Support will be removed in 0.16.0.",  # noqa: E501
         version="0.13.0",
     )
-    def validate(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def validate(  # noqa: C901, PLR0912, PLR0913
         self,
         expectation_suite: str | ExpectationSuite | None = None,
         run_id: str | RunIdentifier | Dict[str, str] | None = None,
@@ -1249,8 +1249,6 @@ class Validator:
             )
 
             self._data_context = validation_data_context
-        except Exception:  # noqa: TRY302
-            raise
         finally:
             self._active_validation = False
 

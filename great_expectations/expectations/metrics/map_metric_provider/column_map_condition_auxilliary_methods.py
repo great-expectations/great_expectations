@@ -5,12 +5,14 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Sequence,
     Tuple,
     Union,
 )
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.expectations.metrics.util import (
+    MAX_RESULT_RECORDS,
     get_dbms_compatible_metric_domain_kwargs,
 )
 
@@ -29,6 +31,8 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
 )
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.compatibility import pyspark, sqlalchemy
 
 
@@ -42,7 +46,7 @@ def _pandas_column_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[dict]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
@@ -86,84 +90,10 @@ def _pandas_column_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return list(domain_values)
+        return list(domain_values[:MAX_RESULT_RECORDS])
 
-    return list(domain_values[: result_format["partial_unexpected_count"]])
-
-
-# TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>  # noqa: E501
-def _pandas_column_map_series_and_domain_values(
-    cls,
-    execution_engine: PandasExecutionEngine,
-    metric_domain_kwargs: dict,
-    metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
-    **kwargs,
-):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
-    (
-        boolean_mapped_unexpected_values,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = metrics["unexpected_condition"]
-    (
-        map_series,
-        compute_domain_kwargs_2,
-        accessor_domain_kwargs_2,
-    ) = metrics["metric_partial_fn"]
-    assert (
-        compute_domain_kwargs == compute_domain_kwargs_2
-    ), "map_series and condition must have the same compute domain"
-    assert (
-        accessor_domain_kwargs == accessor_domain_kwargs_2
-    ), "map_series and condition must have the same accessor kwargs"
-
-    if "column" not in accessor_domain_kwargs:
-        raise ValueError(  # noqa: TRY003
-            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
-(_pandas_column_map_series_and_domain_values).
-"""  # noqa: E501
-        )
-
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
-    ###
-    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
-    # currently handle filter_column_isnull differently than other map_fn / map_condition
-    # cases.
-    ###
-    filter_column_isnull = kwargs.get(
-        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    )
-    if filter_column_isnull:
-        df = df[df[column_name].notnull()]
-
-    domain_values = df[column_name]
-
-    domain_values = domain_values[
-        boolean_mapped_unexpected_values == True  # noqa: E712
-    ]
-    map_series = map_series[boolean_mapped_unexpected_values == True]  # noqa: E712
-
-    result_format = metric_value_kwargs["result_format"]
-
-    if result_format["result_format"] == "COMPLETE":
-        return (
-            list(domain_values),
-            list(map_series),
-        )
-
-    return (
-        list(domain_values[: result_format["partial_unexpected_count"]]),
-        list(map_series[: result_format["partial_unexpected_count"]]),
-    )
+    limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+    return list(domain_values[:limit])
 
 
 def _pandas_column_map_condition_value_counts(
@@ -173,7 +103,7 @@ def _pandas_column_map_condition_value_counts(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> pd.Series[int]:
     """Returns respective value counts for distinct column values"""
     (
         boolean_mapped_unexpected_values,
@@ -238,7 +168,7 @@ def _sqlalchemy_column_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Tuple],
     **kwargs,
-):
+) -> list[dict]:
     """
     Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
     expected Expectation condition for ColumnMapExpectation Expectations.
@@ -284,7 +214,10 @@ def _sqlalchemy_column_map_condition_values(
         )
         query = query.limit(10000)  # BigQuery upper bound on query parameters
 
-    return [val.unexpected_values for val in execution_engine.execute_query(query).fetchall()]
+    return [
+        val.unexpected_values
+        for val in execution_engine.execute_query(query).fetchmany(MAX_RESULT_RECORDS)
+    ]
 
 
 def _sqlalchemy_column_map_condition_value_counts(
@@ -294,7 +227,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> Union[Sequence[sa.Row[Any]], Any]:
     """
     Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -335,7 +268,7 @@ def _spark_column_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[dict]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
@@ -365,19 +298,15 @@ def _spark_column_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
 
+    # note that without an explicit column alias,
+    # spark will use only the final portion
+    # of a nested column as the column name
     if result_format["result_format"] == "COMPLETE":
-        rows = filtered.select(
-            F.col(column_name).alias(column_name)
-        ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name  # noqa: E501
+        query = filtered.select(F.col(column_name).alias(column_name)).limit(MAX_RESULT_RECORDS)
     else:
-        rows = (
-            filtered.select(
-                F.col(column_name).alias(column_name)
-            )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name  # noqa: E501
-            .limit(result_format["partial_unexpected_count"])
-            .collect()
-        )
-    return [row[column_name] for row in rows]
+        limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+        query = filtered.select(F.col(column_name).alias(column_name)).limit(limit)
+    return [row[column_name] for row in query.collect()]
 
 
 def _spark_column_map_condition_value_counts(
@@ -387,7 +316,7 @@ def _spark_column_map_condition_value_counts(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[pyspark.Row]:
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]

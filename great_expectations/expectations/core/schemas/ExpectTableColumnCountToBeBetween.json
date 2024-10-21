@@ -66,14 +66,6 @@
             "title": "Batch Id",
             "type": "string"
         },
-        "row_condition": {
-            "title": "Row Condition",
-            "type": "string"
-        },
-        "condition_parser": {
-            "title": "Condition Parser",
-            "type": "string"
-        },
         "min_value": {
             "title": "Min Value",
             "description": "The minimum number of columns, inclusive.",
@@ -83,6 +75,10 @@
                 },
                 {
                     "type": "object"
+                },
+                {
+                    "type": "string",
+                    "format": "date"
                 },
                 {
                     "type": "string",
@@ -99,6 +95,10 @@
                 },
                 {
                     "type": "object"
+                },
+                {
+                    "type": "string",
+                    "format": "date"
                 },
                 {
                     "type": "string",

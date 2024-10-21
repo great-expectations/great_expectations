@@ -5,7 +5,7 @@ requires = ["setuptools", "wheel"]
 # build-backend = "setuptools.build_meta"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 plugins = [
     "pydantic.mypy",
     "sqlalchemy.ext.mypy.plugin"
@@ -211,7 +211,6 @@ module = [
     "databricks.*",
     "google.*",
     "great_expectations.compatibility.pydantic.*",
-    "ipywidgets.*",
     "mistune.*",
     "moto.*",
     "pact.*",
@@ -224,7 +223,6 @@ module = [
     "scipy.*",
     "sempy.*",
     "shapely.*",
-    "snapshottest.*",
     "snowflake.*",
     "sqlalchemy_bigquery.*",
     "sqlalchemy_dremio.*",
@@ -243,7 +241,7 @@ warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 100
 lint.preview = true  # This enables preview rules for specified rules e.g. NPY201
 lint.explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-single-preview-rules
@@ -317,6 +315,7 @@ lint.ignore = [
     # https://beta.ruff.rs/docs/rules/#flake8-pyi-pyi
     "PYI053", # string-or-bytes-too-long - causes mypy to fail on some of our type stubs
     "PYI054", # numeric-literal-too-long - causes mypy to fail on some of our type stubs
+    "UP035", # TODO: remove once min version of pydantic supports using collections.abc types
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     # TODO: enable these
     "B904", # raise-without-from-inside-except
@@ -597,8 +596,6 @@ filterwarnings = [
     # Found when running tests in tests/profile/test_basic_suite_builder_profiler.py
     # Example Actual Warning: RuntimeWarning: invalid value encountered in reduce
     "ignore: invalid value encountered in reduce",
-    # urllib3
-    "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
     # boto
     # Example Actual Warning: Found when importing botocore when collecting tests with 3.10.
     # ImportWarning: _SixMetaPathImporter.find_spec() not found; falling back to find_module()

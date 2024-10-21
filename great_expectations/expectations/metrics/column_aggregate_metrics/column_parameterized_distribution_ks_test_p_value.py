@@ -28,11 +28,7 @@ class ColumnParameterizedDistributionKSTestPValue(ColumnAggregateMetricProvider)
         if p_value <= 0 or p_value >= 1:
             raise ValueError("p_value must be between 0 and 1 exclusive")  # noqa: TRY003
 
-        # Validate params
-        try:
-            validate_distribution_parameters(distribution=distribution, params=params)
-        except ValueError as e:  # noqa: TRY302
-            raise e  # noqa: TRY201
+        validate_distribution_parameters(distribution=distribution, params=params)
 
         # Format arguments for scipy.kstest
         if isinstance(params, dict):

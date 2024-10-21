@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from pprint import pformat as pf
 from unittest import mock
 
@@ -22,7 +23,7 @@ from great_expectations.validator.v1_validator import Validator
 def failing_expectation() -> Expectation:
     return gxe.ExpectColumnValuesToBeInSet(
         column="event_type",
-        value_set=["start", "stop"],
+        value_set=["start", "stop"],  # type: ignore[arg-type] # TODO: Fix in CORE-412
     )
 
 
@@ -50,7 +51,7 @@ def fds_data_asset(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
 ) -> DataAsset:
-    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
+    datasource = fds_data_context.data_sources.get(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
     return datasource.get_asset("trip_asset")
 
@@ -60,7 +61,7 @@ def fds_data_asset_with_event_type_partitioner(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
 ) -> DataAsset:
-    datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
+    datasource = fds_data_context.data_sources.get(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
     return datasource.get_asset("trip_asset_partition_by_event_type")
 
@@ -141,6 +142,22 @@ def test_result_format_complete(validator: Validator, failing_expectation: Expec
 
 
 @pytest.mark.unit
+def test_v1_validator_doesnt_mutate_result_format(
+    validator: Validator, expectation_suite: ExpectationSuite
+):
+    """This test verifies a bugfix where the legacy Validator mutates a ResultFormat
+    dict provided by the user.
+    """
+    result_format_dict = {
+        "result_format": "COMPLETE",
+    }
+    backup_result_format_dict = copy(result_format_dict)
+    validator.result_format = result_format_dict
+    validator.validate_expectation_suite(expectation_suite=expectation_suite)
+    assert result_format_dict == backup_result_format_dict
+
+
+@pytest.mark.unit
 def test_validate_expectation_success(validator: Validator, passing_expectation: Expectation):
     result = validator.validate_expectation(passing_expectation)
 
@@ -168,7 +185,7 @@ def test_validate_expectation_with_batch_asset_options(
     result = validator.validate_expectation(
         gxe.ExpectColumnValuesToBeInSet(
             column="event_type",
-            value_set=[desired_event_type],
+            value_set=[desired_event_type],  # type: ignore[arg-type] # TODO: Fix in CORE-412
         )
     )
     print(f"Result dict ->\n{pf(result)}")
@@ -225,7 +242,7 @@ def test_non_cloud_validate_does_not_render_results(
             expectations=[
                 gxe.ExpectColumnValuesToBeInSet(
                     column="event_type",
-                    value_set=["start"],
+                    value_set=["start"],  # type: ignore[arg-type] # TODO: Fix in CORE-412
                 )
             ],
         )
@@ -252,7 +269,7 @@ def test_cloud_validate_renders_results_when_appropriate(
             expectations=[
                 gxe.ExpectColumnValuesToBeInSet(
                     column="event_type",
-                    value_set=["start"],
+                    value_set=["start"],  # type: ignore[arg-type] # TODO: Fix in CORE-412
                 )
             ],
         )

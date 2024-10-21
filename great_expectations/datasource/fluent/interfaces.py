@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias, TypeGuard
 
     from great_expectations.core.result_format import ResultFormatUnion
+    from great_expectations.core.suite_parameters import SuiteParameterDict
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -370,7 +371,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
 
     # End Abstract Methods
 
-    @public_api
     def add_batch_definition(
         self,
         name: str,
@@ -452,7 +452,15 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
+    @public_api
     def get_batch_definition(self, name: str) -> BatchDefinition[PartitionerT]:
+        """Get a batch definition.
+
+        Args:
+            name (str): Name of the BatchDefinition to get.
+        Raises:
+            KeyError: If the BatchDefinition does not exist.
+        """
         batch_definitions = [
             batch_definition
             for batch_definition in self.batch_definitions
@@ -701,7 +709,7 @@ class Datasource(
                 "Cannot save datasource without a data context."
             )
 
-        loaded_datasource = self.data_context.get_datasource(self.name)
+        loaded_datasource = self.data_context.data_sources.get(self.name)
         if loaded_datasource is not self:
             # CachedDatasourceDict will return self; only add batch definition if this is a remote
             # copy
@@ -725,7 +733,7 @@ class Datasource(
                 "Cannot save datasource without a data context."
             )
 
-        loaded_datasource = self.data_context.get_datasource(self.name)
+        loaded_datasource = self.data_context.data_sources.get(self.name)
         if loaded_datasource is not self:
             # CachedDatasourceDict will return self; only add batch definition if this is a remote
             # copy
@@ -1122,6 +1130,7 @@ class Batch:
         expect: Expectation,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationValidationResult: ...
 
     @overload
@@ -1130,6 +1139,7 @@ class Batch:
         expect: ExpectationSuite,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
@@ -1138,14 +1148,19 @@ class Batch:
         expect: Expectation | ExpectationSuite,
         *,
         result_format: ResultFormatUnion = DEFAULT_RESULT_FORMAT,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
         from great_expectations.core import ExpectationSuite
         from great_expectations.expectations.expectation import Expectation
 
         if isinstance(expect, Expectation):
-            return self._validate_expectation(expect, result_format=result_format)
+            return self._validate_expectation(
+                expect, result_format=result_format, expectation_parameters=expectation_parameters
+            )
         elif isinstance(expect, ExpectationSuite):
-            return self._validate_expectation_suite(expect, result_format=result_format)
+            return self._validate_expectation_suite(
+                expect, result_format=result_format, expectation_parameters=expectation_parameters
+            )
         else:
             # If we are type checking, we should never fall through to this case. However, exploratory  # noqa: E501
             # workflows are not being type checked.
@@ -1157,19 +1172,23 @@ class Batch:
         self,
         expect: Expectation,
         result_format: ResultFormatUnion,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationValidationResult:
         return self._create_validator(
             result_format=result_format,
-        ).validate_expectation(expect)
+        ).validate_expectation(expectation=expect, expectation_parameters=expectation_parameters)
 
     def _validate_expectation_suite(
         self,
         expect: ExpectationSuite,
         result_format: ResultFormatUnion,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationSuiteValidationResult:
         return self._create_validator(
             result_format=result_format,
-        ).validate_expectation_suite(expect)
+        ).validate_expectation_suite(
+            expectation_suite=expect, expectation_parameters=expectation_parameters
+        )
 
     def _create_validator(self, *, result_format: ResultFormatUnion) -> V1Validator:
         from great_expectations.validator.v1_validator import Validator as V1Validator

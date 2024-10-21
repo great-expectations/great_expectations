@@ -147,7 +147,7 @@ def sql_execution_engine_with_mini_taxi_selectable(sa, sql_execution_engine_with
             {
                 "column": "total_amount",
                 "row_condition": 'col("pk_1")==0',
-                "condition_parser": "great_expectations__experimental__",
+                "condition_parser": "great_expectations",
             },
             [],
         ),
@@ -155,7 +155,7 @@ def sql_execution_engine_with_mini_taxi_selectable(sa, sql_execution_engine_with
             {
                 "column": "total_amount",
                 "row_condition": 'col("pk_1")!=0',
-                "condition_parser": "great_expectations__experimental__",
+                "condition_parser": "great_expectations",
             },
             [14.8],
         ),
@@ -216,7 +216,7 @@ def test_sqlalchemy_column_map_condition_values(
             {
                 "column": "total_amount",
                 "row_condition": 'col("pk_1")==0',
-                "condition_parser": "great_expectations__experimental__",
+                "condition_parser": "great_expectations",
             },
             [],
         ),
@@ -225,7 +225,7 @@ def test_sqlalchemy_column_map_condition_values(
             {
                 "column": "total_amount",
                 "row_condition": 'col("pk_1")>=0',
-                "condition_parser": "great_expectations__experimental__",
+                "condition_parser": "great_expectations",
             },
             [14.8],
         ),

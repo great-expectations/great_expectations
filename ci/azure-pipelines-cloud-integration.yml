@@ -7,7 +7,7 @@ stages:
       - job: bigquery_performance_test
         timeoutInMinutes: 30 # this should be more than sufficient since the performance typically runs < 5 min
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         strategy:
           matrix:
@@ -67,7 +67,7 @@ stages:
       - job: bigquery_expectations_test
         timeoutInMinutes: 150 # Each stage runs in about 60 min and 30 min respectively.
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         strategy:
           matrix:
@@ -114,7 +114,7 @@ stages:
       - job: snowflake_expectations_test
         timeoutInMinutes: 45 # snowflake tests will run in about 30 min
         variables:
-          python.version: "3.8"
+          python.version: "3.9"
 
         steps:
           - task: UsePythonVersion@0

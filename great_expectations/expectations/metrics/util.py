@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Final,
     Iterable,
     List,
     Mapping,
@@ -78,6 +79,7 @@ from great_expectations.compatibility.bigquery import bigquery_types_tuple
 
 if TYPE_CHECKING:
     import pandas as pd
+    from typing_extensions import TypeAlias
 
 try:
     import teradatasqlalchemy.dialect
@@ -85,6 +87,11 @@ try:
 except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
+
+
+MAX_RESULT_RECORDS: Final[int] = 200
+
+UnexpectedIndexList: TypeAlias = List[Dict[str, Any]]
 
 
 def _is_databricks_dialect(dialect: ModuleType | sa.Dialect | Type[sa.Dialect]) -> bool:
@@ -1247,9 +1254,9 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(  # noqa: C901
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
     exclude_unexpected_values: bool = False,
-) -> List[Dict[str, Any]]:
+) -> UnexpectedIndexList:
     """
-    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    Builds unexpected_index_list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there are multiple named indices.
     Args:
         domain_records_df: reference to Pandas dataframe
@@ -1279,7 +1286,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(  # noqa: C901
         else:
             tuple_index[column_name] = domain_records_df_index_names.index(column_name, 0)
 
-    unexpected_index_list: List[Dict[str, Any]] = list()
+    unexpected_index_list: UnexpectedIndexList = []
 
     if exclude_unexpected_values and len(unexpected_indices) != 0:
         primary_key_dict_list: dict[str, List[Any]] = {
@@ -1310,9 +1317,9 @@ def get_unexpected_indices_for_single_pandas_named_index(
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
     exclude_unexpected_values: bool = False,
-) -> List[Dict[str, Any]]:
+) -> UnexpectedIndexList:
     """
-    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    Builds unexpected_index_list for Pandas Dataframe in situation where the named
     columns is also a named index. This method handles the case when there is a single named index.
     Args:
         domain_records_df: reference to Pandas dataframe
@@ -1326,7 +1333,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     if not expectation_domain_column_list:
         return []
     unexpected_index_values_by_named_index: List[int | str] = list(domain_records_df.index)
-    unexpected_index_list: List[Dict[str, Any]] = list()
+    unexpected_index_list: UnexpectedIndexList = []
     if not (
         len(unexpected_index_column_names) == 1
         and unexpected_index_column_names[0] == domain_records_df.index.name
@@ -1360,7 +1367,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
     result_format: Dict[str, Any],
     execution_engine: PandasExecutionEngine,
     metrics: Dict[str, Any],
-) -> List[int] | List[Dict[str, Any]]:
+) -> UnexpectedIndexList:
     """
     Helper method to compute unexpected_index_list for PandasExecutionEngine. Handles logic needed for named indices.
 
@@ -1377,7 +1384,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
 
     """  # noqa: E501
     unexpected_index_column_names: List[str]
-    unexpected_index_list: List[Dict[str, Any]]
+    unexpected_index_list: UnexpectedIndexList
     exclude_unexpected_values: bool = result_format.get("exclude_unexpected_values", False)
 
     if domain_records_df.index.name is not None:

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from copy import copy
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_validation_result import (
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
     from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.result_format import ResultFormatUnion
+    from great_expectations.core.suite_parameters import SuiteParameterDict
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.expectations.expectation import (
         Expectation,
@@ -49,10 +51,13 @@ class Validator:
     def validate_expectation(
         self,
         expectation: Expectation,
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationValidationResult:
         """Run a single expectation against the batch definition"""
-        results = self._validate_expectation_configs([expectation.configuration])
+        results = self._validate_expectation_configs(
+            expectation_configs=[expectation.configuration],
+            expectation_parameters=expectation_parameters,
+        )
 
         assert len(results) == 1
         return results[0]
@@ -60,12 +65,12 @@ class Validator:
     def validate_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> ExpectationSuiteValidationResult:
         """Run an expectation suite against the batch definition"""
         results = self._validate_expectation_configs(
-            expectation_suite.expectation_configurations,
-            expectation_parameters,
+            expectation_configs=expectation_suite.expectation_configurations,
+            expectation_parameters=expectation_parameters,
         )
         statistics = calc_validation_statistics(results)
 
@@ -112,7 +117,7 @@ class Validator:
     def _validate_expectation_configs(
         self,
         expectation_configs: list[ExpectationConfiguration],
-        expectation_parameters: Optional[dict[str, Any]] = None,
+        expectation_parameters: Optional[SuiteParameterDict] = None,
     ) -> list[ExpectationValidationResult]:
         """Run a list of expectation configurations against the batch definition"""
         processed_expectation_configs = self._wrapped_validator.process_expectations_for_validation(
@@ -121,9 +126,9 @@ class Validator:
 
         runtime_configuration: dict
         if isinstance(self.result_format, ResultFormat):
-            runtime_configuration = {"result_format": self.result_format.value}
+            runtime_configuration = {"result_format": copy(self.result_format.value)}
         else:
-            runtime_configuration = {"result_format": self.result_format}
+            runtime_configuration = {"result_format": copy(self.result_format)}
 
         results = self._wrapped_validator.graph_validate(
             configurations=processed_expectation_configs,

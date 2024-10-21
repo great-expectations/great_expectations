@@ -41,10 +41,10 @@ Data can be validated against individual Expectations.  This workflow is general
    ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - test expectation with preset parameters"
    ```
    
-<!--    In this example, the Expectation to test was defined to take Expectation Parameters at runtime:
+   In this example, the Expectation to test was defined to take Expectation Parameters at runtime:
  
-    ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - test expectation with expectation parameters"
-    ``` -->
+   ```python title="Python" name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - test expectation with expectation parameters"
+   ```
 
 2. Evaluate the returned Validation Results.
 
@@ -139,10 +139,10 @@ Data can be validated against individual Expectations.  This workflow is general
    }
    ```
 
-<!--    When an Expectation uses an Expectation Parameter dictionary you don't have to modify anything on the Expectation object.  Instead, update the dictionary with new values and then test it with the updated dictionary:
+   When an Expectation uses an Expectation Parameter dictionary you don't have to modify anything on the Expectation object.  Instead, update the dictionary with new values and then test it with the updated dictionary:
  
-    ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - modify and retest Expectation Parameters dictionary" 
-    ``` -->
+   ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - modify and retest Expectation Parameters dictionary" 
+   ```
 
    For more information about Validation Results, what they contain, and how to adjust their verbosity see [Choose result format](../trigger_actions_based_on_results/choose_a_result_format/choose_a_result_format.md).
 

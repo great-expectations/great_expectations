@@ -128,7 +128,7 @@ class DataSourceManager:
             )
 
         # rollback type registrations if exception occurs
-        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:  # noqa: E501
+        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:  # fmt: skip # noqa: E501
             cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource(
@@ -366,8 +366,8 @@ class DataSourceManager:
         self, name: str, datasource_type: Type[Datasource], raise_if_none: bool = True
     ) -> None:
         try:
-            current_datasource = self._data_context.get_datasource(name)
-        except ValueError as e:
+            current_datasource = self._data_context.data_sources.get(name)
+        except KeyError as e:
             if raise_if_none:
                 raise ValueError(f"There is no datasource {name} in the data context.") from e  # noqa: TRY003
             current_datasource = None

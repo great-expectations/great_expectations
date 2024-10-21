@@ -1,12 +1,9 @@
-from datetime import datetime
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,
-)
+from great_expectations.core.types import Comparable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -142,8 +139,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     ]
     # </snippet>
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
+    min_value: Optional[Comparable] = None
+    max_value: Optional[Comparable] = None
     strict_min: bool = False
     strict_max: bool = False
 

@@ -15,6 +15,7 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
     _is_sqlalchemy_metric_selectable,
 )
 from great_expectations.expectations.metrics.util import (
+    MAX_RESULT_RECORDS,
     get_dbms_compatible_metric_domain_kwargs,
 )
 from great_expectations.util import (
@@ -40,7 +41,7 @@ def _pandas_column_pair_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[tuple[Any, Any]]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
@@ -92,9 +93,10 @@ def _pandas_column_pair_map_condition_values(
         )
     ]
     if result_format["result_format"] == "COMPLETE":
-        return unexpected_list
+        return unexpected_list[:MAX_RESULT_RECORDS]
 
-    return unexpected_list[: result_format["partial_unexpected_count"]]
+    limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+    return unexpected_list[:limit]
 
 
 def _pandas_column_pair_map_condition_filtered_row_count(
@@ -104,7 +106,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> int:
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
@@ -137,7 +139,7 @@ def _sqlalchemy_column_pair_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[tuple[Any, Any]]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
@@ -172,11 +174,12 @@ def _sqlalchemy_column_pair_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
-        query = query.limit(result_format["partial_unexpected_count"])
+        limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+        query = query.limit(limit)
 
     unexpected_list = [
         (val.unexpected_values_A, val.unexpected_values_B)
-        for val in execution_engine.execute_query(query).fetchall()
+        for val in execution_engine.execute_query(query).fetchmany(MAX_RESULT_RECORDS)
     ]
     return unexpected_list
 
@@ -188,7 +191,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> Any | None:
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
@@ -216,7 +219,7 @@ def _spark_column_pair_map_condition_values(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> list[tuple[Any, Any]]:
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         unexpected_condition,
@@ -249,25 +252,22 @@ def _spark_column_pair_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
-        rows = filtered.select(
+        query = filtered.select(
             [
                 F.col(column_A_name).alias(column_A_name),
                 F.col(column_B_name).alias(column_B_name),
             ]
-        ).collect()
+        ).limit(MAX_RESULT_RECORDS)
     else:
-        rows = (
-            filtered.select(
-                [
-                    F.col(column_A_name).alias(column_A_name),
-                    F.col(column_B_name).alias(column_B_name),
-                ]
-            )
-            .limit(result_format["partial_unexpected_count"])
-            .collect()
-        )
+        limit = min(result_format["partial_unexpected_count"], MAX_RESULT_RECORDS)
+        query = filtered.select(
+            [
+                F.col(column_A_name).alias(column_A_name),
+                F.col(column_B_name).alias(column_B_name),
+            ]
+        ).limit(limit)
 
-    unexpected_list = [(row[column_A_name], row[column_B_name]) for row in rows]
+    unexpected_list = [(row[column_A_name], row[column_B_name]) for row in query.collect()]
     return unexpected_list
 
 
@@ -278,7 +278,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> int:
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 

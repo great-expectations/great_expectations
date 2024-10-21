@@ -60,7 +60,7 @@ def cloud_context(empty_cloud_context_fluent: CloudDataContext) -> AbstractDataC
 
 @pytest.fixture
 def datasource(file_context_with_assets: AbstractDataContext) -> PandasDatasource:
-    output = file_context_with_assets.get_datasource(DATASOURCE_NAME)
+    output = file_context_with_assets.data_sources.get(DATASOURCE_NAME)
     assert isinstance(output, PandasDatasource)
     return output
 
@@ -107,7 +107,7 @@ def test_add_batch_definition__persists(
     partitioner = ColumnPartitionerYearly(column_name="test-column")
     batch_definition = empty_data_asset.add_batch_definition(name, partitioner=partitioner)
 
-    loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
+    loaded_datasource = file_context.data_sources.get(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
@@ -122,7 +122,7 @@ def test_add_batch_definition_with_partitioner__persists(
     partitioner = ColumnPartitionerYearly(column_name="test-column")
     empty_data_asset.add_batch_definition(name, partitioner=partitioner)
 
-    loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
+    loaded_datasource = file_context.data_sources.get(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
@@ -171,21 +171,21 @@ def _test_add_batch_definition__does_not_clobber_other_assets(
     context: AbstractDataContext,
     datasource_name: str,
 ):
-    ds1 = context.get_datasource(datasource_name)
+    ds1 = context.data_sources.get(datasource_name)
     assert isinstance(ds1, PandasDatasource)
     my_asset = ds1.add_csv_asset("my asset", "taxi.csv")  # type: ignore [arg-type]
 
     # adding an asset currently clobbers the datasource, so for now we
     # need to reload the datasource AFTER adding the asset
     # TODO: Move fetching ds2 up with ds1 after V1-124
-    ds2 = context.get_datasource(datasource_name)
+    ds2 = context.data_sources.get(datasource_name)
     assert isinstance(ds2, PandasDatasource)
     your_asset = ds2.add_csv_asset("your asset", "taxi.csv")  # type: ignore [arg-type]
 
     my_batch_definition = my_asset.add_batch_definition("my batch config")
     your_batch_definition = your_asset.add_batch_definition("your batch config")
 
-    loaded_datasource = context.get_datasource(datasource_name)
+    loaded_datasource = context.data_sources.get(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
     assert loaded_datasource.get_asset(my_asset.name).batch_definitions == [my_batch_definition]
     assert loaded_datasource.get_asset(your_asset.name).batch_definitions == [your_batch_definition]
@@ -218,8 +218,8 @@ def _test_add_batch_definition__does_not_clobber_other_batch_definitions(
     datasource_name: str,
     asset_name: str,
 ):
-    ds1 = context.get_datasource(datasource_name)
-    ds2 = context.get_datasource(datasource_name)
+    ds1 = context.data_sources.get(datasource_name)
+    ds2 = context.data_sources.get(datasource_name)
     assert isinstance(ds1, PandasDatasource)
     assert isinstance(ds2, PandasDatasource)
 
@@ -229,7 +229,7 @@ def _test_add_batch_definition__does_not_clobber_other_batch_definitions(
     my_batch_definition = asset_1.add_batch_definition("my batch config")
     your_batch_definition = asset_2.add_batch_definition("your batch config")
 
-    loaded_datasource = context.get_datasource(datasource_name)
+    loaded_datasource = context.data_sources.get(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
     assert loaded_datasource.get_asset(asset_name).batch_definitions == [
         my_batch_definition,
@@ -257,7 +257,7 @@ def test_delete_batch_definition__persists(
 ):
     data_asset_with_batch_definition.delete_batch_definition(persisted_batch_definition.name)
 
-    loaded_datasource = file_context_with_assets.get_datasource(DATASOURCE_NAME)
+    loaded_datasource = file_context_with_assets.data_sources.get(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
@@ -331,12 +331,12 @@ def _test_delete_batch_definition__does_not_clobber_other_assets(
 ):
     # each asset has one batch config; delete it
     for asset_name in asset_names:
-        datasource = context.get_datasource(datasource_name)
+        datasource = context.data_sources.get(datasource_name)
         assert isinstance(datasource, Datasource)
         asset = datasource.get_asset(asset_name)
         asset.delete_batch_definition(asset.batch_definitions[0].name)
 
-    loaded_datasource = context.get_datasource(datasource_name)
+    loaded_datasource = context.data_sources.get(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
 
     # ensure neither call to delete_batch_definition() didn't clobber each other

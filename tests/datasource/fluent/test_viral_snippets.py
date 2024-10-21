@@ -15,13 +15,12 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.partitioners import ColumnPartitionerMonthly
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
+from great_expectations.datasource.fluent import SqliteDatasource
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
-
-    from great_expectations.datasource.fluent import SqliteDatasource
 
 
 YAML = YAMLHandler()
@@ -62,7 +61,7 @@ def test_serialize_fluent_config(
 
 @pytest.mark.filesystem
 def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
-    datasource = seeded_file_context.get_datasource("sqlite_taxi")
+    datasource = seeded_file_context.data_sources.get("sqlite_taxi")
     assert isinstance(datasource, Datasource)
     partitioner = ColumnPartitionerMonthly(column_name="pickup_datetime")
     batch_request = datasource.get_asset("my_asset").build_batch_request(
@@ -176,7 +175,8 @@ def test_context_add_or_update_datasource(
     datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
     context.data_sources.add_or_update_sqlite(datasource)
 
-    updated_datasource: SqliteDatasource = context.data_sources.all()[datasource.name]
+    updated_datasource = context.data_sources.all()[datasource.name]
+    assert isinstance(updated_datasource, SqliteDatasource)
     assert updated_datasource.connection_string == "sqlite:///"
 
 

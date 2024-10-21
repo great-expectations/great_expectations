@@ -21,6 +21,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
 )
+from great_expectations.datasource.datasource_dict import DatasourceDict
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
     FabricPowerBIDatasource,
@@ -734,6 +735,9 @@ class DataSourceManager:
         workspace: Optional[Union[uuid.UUID, str]] = None,
         dataset: Union[uuid.UUID, str] = ...,
     ) -> FabricPowerBIDatasource: ...
+    def all(self) -> DatasourceDict: ...
+    def delete(self, name: str) -> None: ...
+    def get(self, name: str) -> Datasource: ...
 
 def _iter_all_registered_types(
     include_datasource: bool = True, include_data_asset: bool = True

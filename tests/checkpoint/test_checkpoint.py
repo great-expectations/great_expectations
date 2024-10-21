@@ -153,7 +153,7 @@ class TestValidationDefinitionInteraction:
 def slack_action():
     return SlackNotificationAction(
         name="my_slack_action",
-        slack_webhook="slack_webhook",
+        slack_webhook="${SLACK_WEBHOOK}",
     )
 
 
@@ -188,14 +188,17 @@ class TestCheckpointSerialization:
             data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
-        with mock.patch.object(
-            ValidationDefinition,
-            "json",
-            return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(
-            ValidationDefinition,
-            "is_fresh",
-            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+        with (
+            mock.patch.object(
+                ValidationDefinition,
+                "json",
+                return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
+            ),
+            mock.patch.object(
+                ValidationDefinition,
+                "is_fresh",
+                return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+            ),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -209,14 +212,17 @@ class TestCheckpointSerialization:
             data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
-        with mock.patch.object(
-            ValidationDefinition,
-            "json",
-            return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
-        ), mock.patch.object(
-            ValidationDefinition,
-            "is_fresh",
-            return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+        with (
+            mock.patch.object(
+                ValidationDefinition,
+                "json",
+                return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
+            ),
+            mock.patch.object(
+                ValidationDefinition,
+                "is_fresh",
+                return_value=ValidationDefinitionFreshnessDiagnostics(errors=[]),
+            ),
         ):
             yield in_memory_context.validation_definitions.add(vc)
 
@@ -246,7 +252,7 @@ class TestCheckpointSerialization:
                         "show_failed_expectations": False,
                         "slack_channel": None,
                         "slack_token": None,
-                        "slack_webhook": "slack_webhook",
+                        "slack_webhook": "${SLACK_WEBHOOK}",
                         "type": "slack",
                     },
                     {
@@ -369,7 +375,7 @@ class TestCheckpointSerialization:
                     "show_failed_expectations": False,
                     "slack_channel": None,
                     "slack_token": None,
-                    "slack_webhook": "slack_webhook",
+                    "slack_webhook": "${SLACK_WEBHOOK}",
                     "type": "slack",
                 },
                 {

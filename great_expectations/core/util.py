@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 
 import dateutil.parser
 import numpy as np
-from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import SQLALCHEMY_NOT_IMPORTED, LegacyRow, Row
@@ -100,6 +99,8 @@ def nested_update(
 
 def in_jupyter_notebook():
     try:
+        from IPython import get_ipython  # type: ignore[import-not-found]
+
         shell = get_ipython().__class__.__name__
         if shell == "ZMQInteractiveShell":
             return True  # Jupyter notebook or qtconsole
@@ -107,7 +108,7 @@ def in_jupyter_notebook():
             return False  # Terminal running IPython
         else:
             return False  # Other type (?)
-    except NameError:
+    except (NameError, ImportError):
         return False  # Probably standard Python interpreter
 
 

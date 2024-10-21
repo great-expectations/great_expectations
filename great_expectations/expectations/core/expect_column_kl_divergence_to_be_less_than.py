@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 import altair as alt
@@ -10,9 +9,7 @@ import pandas as pd
 from scipy import stats
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
-)
+from great_expectations.core.types import Comparable  # noqa: TCH001
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
@@ -331,12 +328,8 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         default=0, ge=0, le=1, description=TAIL_WEIGHT_HOLDOUT_DESCRIPTION
     )
     bucketize_data: bool = pydantic.Field(True, description=BUCKETIZE_DATA_DESCRIPTION)
-    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        None, description=MIN_VALUE_DESCRIPTION
-    )
-    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        None, description=MAX_VALUE_DESCRIPTION
-    )
+    min_value: Optional[Comparable] = pydantic.Field(None, description=MIN_VALUE_DESCRIPTION)
+    max_value: Optional[Comparable] = pydantic.Field(None, description=MAX_VALUE_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {

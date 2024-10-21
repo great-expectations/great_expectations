@@ -52,39 +52,37 @@ print(new_validation_results)
 # </snippet>
 
 
-# TODO: Post 1.0 this functionality should be enabled and these examples can be inserted into the example script above.
-#    Corresponding text has been included (as comments) in test_an_expectation.md
-# # Alternatively, define an Expectation that uses an Expectation Parameter dictionary:
-# expectation = gx.expectations.ExpectColumnMaxToBeBetween(
-#     column="passenger_count",
-#     min_value={"$PARAMETER": "expect_passenger_max_to_be_above"},
-#     max_value={"$PARAMETER": "expect_passenger_max_to_be_below"},
-# )
-#
-# # Define the Expectation Parameter values and test the Expectation:
-# # <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - test expectation with expectation parameters">
-# runtime_expectation_parameters = {
-#     "expect_passenger_max_to_be_above": 4,
-#     "expect_passenger_max_to_be_below": 6,
-# }
-# validation_results = batch.validate(
-#     expectation, expectation_parameters=runtime_expectation_parameters
-# )
-# # </snippet>
-#
-# # Evaluate the Validation Results:
-#
-# print(validation_results)
-#
-#
-# # If needed, update the Expectation Parameter dictionary and test again:
-# # <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - modify and retest Expectation Parameters dictionary">
-# runtime_expectation_parameters = {
-#     "expect_passenger_max_to_be_above": 1,
-#     "expect_passenger_max_to_be_below": 6,
-# }
-# validation_results = batch.validate(
-#     expectation, expectation_parameters=runtime_expectation_parameters
-# )
-# print(validation_results)
-# # </snippet>
+# Alternatively, define an Expectation that uses an Expectation Parameter dictionary:
+expectation = gx.expectations.ExpectColumnMaxToBeBetween(
+    column="passenger_count",
+    min_value={"$PARAMETER": "expect_passenger_max_to_be_above"},
+    max_value={"$PARAMETER": "expect_passenger_max_to_be_below"},
+)
+
+# Define the Expectation Parameter values and test the Expectation:
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - test expectation with expectation parameters">
+runtime_expectation_parameters = {
+    "expect_passenger_max_to_be_above": 4,
+    "expect_passenger_max_to_be_below": 6,
+}
+validation_results = batch.validate(
+    expectation, expectation_parameters=runtime_expectation_parameters
+)
+# </snippet>
+
+# Evaluate the Validation Results:
+
+print(validation_results)
+
+
+# If needed, update the Expectation Parameter dictionary and test again:
+# <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - modify and retest Expectation Parameters dictionary">
+runtime_expectation_parameters = {
+    "expect_passenger_max_to_be_above": 1,
+    "expect_passenger_max_to_be_below": 6,
+}
+validation_results = batch.validate(
+    expectation, expectation_parameters=runtime_expectation_parameters
+)
+print(validation_results)
+# </snippet>

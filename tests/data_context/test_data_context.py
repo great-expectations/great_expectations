@@ -14,6 +14,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -105,10 +106,26 @@ def test_get_expectation_suite_include_rendered_content(
 
 @pytest.mark.unit
 def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
-    titanic_data_context,
+    titanic_data_context: AbstractDataContext,
 ):
-    with pytest.raises(ValueError):
+    # this is deprecated
+    with pytest.warns(DeprecationWarning), pytest.raises(ValueError):
         _ = titanic_data_context.get_datasource("fakey_mc_fake")
+
+
+@pytest.mark.unit
+def test_data_context_get_datasource(
+    titanic_data_context: AbstractDataContext,
+):
+    # this is deprecated
+    name = "my datasource"
+    ds = titanic_data_context.data_sources.add_pandas(name)
+    with pytest.warns(DeprecationWarning) as warning_records:
+        fetched_ds = titanic_data_context.get_datasource(name)
+
+    assert fetched_ds == ds
+    assert len(warning_records) == 1
+    assert "context.get_datasource is deprecated" in str(warning_records.list[0].message)
 
 
 @pytest.mark.unit
@@ -603,8 +620,6 @@ def test_load_config_variables_property(basic_data_context_config, tmp_path_fact
         context = get_context(basic_data_context_config, context_root_dir=base_path)
         config_vars = context.config_variables
         assert config_vars["env"] == "prod"
-    except Exception:  # noqa: TRY302
-        raise
     finally:
         # Make sure we unset the environment variable we're using
         monkeypatch.delenv("TEST_CONFIG_FILE_ENV")

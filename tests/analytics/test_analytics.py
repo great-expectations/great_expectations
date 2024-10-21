@@ -1,3 +1,4 @@
+from typing import Optional
 from unittest import mock
 from uuid import UUID
 
@@ -11,6 +12,10 @@ from great_expectations.analytics.config import (
     update_config,
 )
 from great_expectations.analytics.events import DataContextInitializedEvent
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    InMemoryStoreBackendDefaults,
+)
 from tests.datasource.fluent._fake_cloud_api import FAKE_USER_ID
 
 TESTING_UUID = UUID("00000000-c000-0000-0000-000000000000")
@@ -78,9 +83,12 @@ def test_event_identifiers(analytics_config):
 def test_ephemeral_context_init(monkeypatch):
     monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", True)  # Enable usage stats
 
-    with mock.patch(
-        "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
-    ) as mock_init, mock.patch("posthog.capture") as mock_submit:
+    with (
+        mock.patch(
+            "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
+        ) as mock_init,
+        mock.patch("posthog.capture") as mock_submit,
+    ):
         _ = gx.get_context(mode="ephemeral")
 
     mock_init.assert_called_once_with(
@@ -107,9 +115,12 @@ def test_ephemeral_context_init(monkeypatch):
 def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
     monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", True)  # Enable usage stats
 
-    with mock.patch(
-        "great_expectations.data_context.data_context.cloud_data_context.init_analytics"
-    ) as mock_init, mock.patch("posthog.capture") as mock_submit:
+    with (
+        mock.patch(
+            "great_expectations.data_context.data_context.cloud_data_context.init_analytics"
+        ) as mock_init,
+        mock.patch("posthog.capture") as mock_submit,
+    ):
         _ = gx.get_context(
             cloud_access_token=cloud_details.access_token,
             cloud_organization_id=cloud_details.org_id,
@@ -135,4 +146,81 @@ def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
             "gx_version": mock.ANY,
         },
         groups={"data_context": mock.ANY},
+    )
+
+
+@pytest.mark.parametrize(
+    ("environment_variable", "constructor_variable", "expected_value"),
+    [
+        (False, None, False),
+        (False, False, False),
+        (False, True, True),  # enabling in config overrides environment variable
+        (True, None, True),
+        (True, False, False),
+        (True, True, True),
+    ],
+)
+@pytest.mark.unit
+def test_analytics_enabled_on_load(
+    environment_variable: bool,
+    constructor_variable: Optional[bool],
+    expected_value: bool,
+    monkeypatch,
+):
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", environment_variable)
+    project_config = DataContextConfig(
+        store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True),
+        analytics_enabled=constructor_variable,
+    )
+
+    with mock.patch(
+        "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
+    ) as mock_init:
+        gx.get_context(
+            mode="ephemeral",
+            project_config=project_config,
+        )
+
+    mock_init.assert_called_with(
+        enable=expected_value,
+        data_context_id=mock.ANY,
+        organization_id=mock.ANY,
+        oss_id=mock.ANY,
+        user_id=mock.ANY,
+    )
+
+
+@pytest.mark.parametrize("environment_variable", [None, False, True])
+@pytest.mark.parametrize("constructor_variable", [None, False, True])
+@pytest.mark.parametrize("enable_analytics", [False, True])
+@pytest.mark.unit
+def test_analytics_enabled_after_setting_explicitly(
+    environment_variable: bool,
+    constructor_variable: Optional[bool],
+    enable_analytics: bool,
+    monkeypatch,
+):
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", environment_variable)
+    project_config = DataContextConfig(
+        store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True),
+        analytics_enabled=constructor_variable,
+    )
+
+    with mock.patch(
+        "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
+    ) as mock_init:
+        context = gx.get_context(
+            mode="ephemeral",
+            project_config=project_config,
+        )
+
+        context.enable_analytics(enable_analytics)
+
+    assert context.config.analytics_enabled == enable_analytics
+    mock_init.assert_called_with(
+        enable=enable_analytics,
+        data_context_id=mock.ANY,
+        organization_id=mock.ANY,
+        oss_id=mock.ANY,
+        user_id=mock.ANY,
     )
