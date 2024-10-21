@@ -47,6 +47,17 @@ GX offers several Expectations specifically designed for managing data distribut
 
 ### Column-level Expectations
 
+#### Expect Column Mean To Be Between
+
+Validates that the mean (average) value of a column falls within a specified range.
+
+**Use Case**: Essential for monitoring the central tendency of numerical data, helping detect overall shifts in distribution that might indicate data quality issues or significant changes in the dataset.
+
+```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnMeanToBeBetween"
+```
+
+<small>View `ExpectColumnMeanToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_mean_to_be_between).</small>
+
 #### Expect Column Quantile Values To Be Between
 
 Ensures that specified quantiles of a column fall within provided ranges.
@@ -118,8 +129,6 @@ In addition to the key distribution Expectations discussed above, GX offers a ra
 - `ExpectColumnMaxToBeBetween`: Verifies that the maximum value in a column falls within a specified range. This Expectation is useful for detecting outliers or unexpected high values that could skew your data analysis or indicate data quality issues. It's particularly valuable when dealing with numerical data where upper bounds are critical, such as price data or sensor readings. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_max_to_be_between))
 
 - `ExpectColumnMinToBeBetween`: Ensures that the minimum value in a column is within a defined range. This Expectation helps identify unexpected low values or potential data entry errors. It's especially useful for fields where there's a logical lower limit, such as age, quantity, or non-negative measurements. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_min_to_be_between))
-
-- `ExpectColumnMeanToBeBetween`: Checks if the mean (average) value of a column falls within a specified range. This Expectation is crucial for monitoring the central tendency of your data, helping to detect shifts in the overall distribution that might not be apparent from looking at extremes alone. It's particularly useful for continuous data where the average is a meaningful metric, such as customer spending or product ratings. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_mean_to_be_between))
 
 - `ExpectColumnMedianToBeBetween`: Checks if the median value of a column is within a specified range. The median is the middle value when the data is sorted in ascending or descending order. This Expectation is useful for ensuring that the central tendency of the data falls within acceptable limits. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_median_to_be_between))
 

@@ -46,6 +46,16 @@ suite = context.suites.add(gx.ExpectationSuite(name="example distribution expect
 # Start Expectation snippets.
 
 suite.add_expectation(
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnMeanToBeBetween">
+    gxe.ExpectColumnMeanToBeBetween(
+        column="purchase_amount",
+        min_value=50,
+        max_value=1000
+    )
+    # </snippet>
+)
+
+suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnQuantileValuesToBeBetween">
     gxe.ExpectColumnQuantileValuesToBeBetween(
         column="purchase_amount",
