@@ -121,16 +121,15 @@ detecting_anomalies_expectations = [
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py model_data_drift">
-    # Set up reference distribution (e.g., from training data)
-    reference_distribution={
-        "bins": [0, 100, 500, 1000, 5000, 10000],
-        "weights": [0.05, 0.25, 0.35, 0.25, 0.1]
-    }
 
     # Validate that KL divergence is below threshold
     gxe.ExpectColumnKlDivergenceToBeLessThan(
         column="purchase_amount",
-        partition_object=reference_distribution,
+        partition_object={
+            # Set up reference distribution (e.g., from training data)
+            "bins": [0, 100, 500, 1000, 5000, 10000],
+            "weights": [0.05, 0.25, 0.35, 0.25, 0.1]
+        },
         threshold=0.1
     )
     # </snippet>
