@@ -68,7 +68,7 @@ class ExpectationsStore(Store):
         self,
         store_backend: dict | None = None,
         runtime_environment: dict | None = None,
-        store_name: str | None = None,
+        store_name: str = "no_store_name",
         data_context: AbstractDataContext | None = None,
     ) -> None:
         self._expectationSuiteSchema = ExpectationSuiteSchema()
