@@ -1,3 +1,4 @@
+# PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
 from __future__ import annotations
 
 import functools
@@ -32,7 +33,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         filepath_template=None,
         filepath_prefix=None,
-        filepath_suffix: str | None = None,
+        filepath_suffix=None,
         forbidden_substrings=None,
         platform_specific_separator=True,
         fixed_length_key=False,
@@ -52,11 +53,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         self.forbidden_substrings = forbidden_substrings
         self.platform_specific_separator = platform_specific_separator
 
-        if filepath_template and filepath_suffix:
-            logger.info(
-                "Both filepath_template and filepath_suffix provided. Ignoring filepath_suffix."
-            )
-            filepath_suffix = None
+        if filepath_template is not None and filepath_suffix is not None:
+            raise ValueError("filepath_suffix may only be used when filepath_template is None")  # noqa: TRY003
 
         self.filepath_template = filepath_template
         if filepath_prefix and len(filepath_prefix) > 0:
@@ -79,9 +77,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             self._fixed_length_key = True
 
     @staticmethod
-    def _is_missing_prefix_or_suffix(
-        filepath_prefix: str | None, filepath_suffix: str | None, key: str
-    ) -> bool:
+    def _is_missing_prefix_or_suffix(filepath_prefix: str, filepath_suffix: str, key: str) -> bool:
         missing_prefix = bool(filepath_prefix and not key.startswith(filepath_prefix))
         missing_suffix = bool(filepath_suffix and not key.endswith(filepath_suffix))
         return missing_prefix or missing_suffix
@@ -231,7 +227,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         base_directory,
         filepath_template=None,
         filepath_prefix=None,
-        filepath_suffix: str | None = ".json",
+        filepath_suffix=None,
         forbidden_substrings=None,
         platform_specific_separator=True,
         root_directory=None,

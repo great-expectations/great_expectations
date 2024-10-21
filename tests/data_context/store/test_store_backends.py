@@ -447,13 +447,13 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
         == f"""\
 {test_dir}/
     .ge_store_backend_id
-    AAA.json
+    AAA
     .ipynb_checkpoints/
         foo.json
 """
     )
 
-    assert set(my_store.list_keys()) == {("AAA",)}
+    assert set(my_store.list_keys()) == {(".ge_store_backend_id",), ("AAA",)}
 
 
 @mock_s3
@@ -1298,15 +1298,6 @@ def test_TupleS3StoreBackend_list_over_1000_keys(aws_credentials):
     keys = my_store.list_keys()
     # len(keys) == num_keys_to_add + 1 because of the .ge_store_backend_id
     assert len(keys) == num_keys_to_add + 1
-
-
-@pytest.mark.filesystem
-def test_file_backed_store_backends_use_json(empty_data_context):
-    context = empty_data_context
-    for store in context.stores.values():
-        backend = store.store_backend
-        assert isinstance(backend, TupleFilesystemStoreBackend)
-        assert backend.filepath_suffix == ".json"
 
 
 @pytest.mark.filesystem
