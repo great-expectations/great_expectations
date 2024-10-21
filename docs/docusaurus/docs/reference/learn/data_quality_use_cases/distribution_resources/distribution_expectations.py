@@ -99,10 +99,7 @@ suite.add_expectation(
     # </snippet>
 )
 
-suite.add_expectation(
-    # TODO: Paul is not sure how to add multiple expectations to the suite at once, or some way to
-    # display this snippet cleanly.
-    #
+detecting_anomalies_expectations = [
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py detecting_anomalies">
     # Validate that purchase_amount is within expected range
     gxe.ExpectColumnValuesToBeBetween(
@@ -118,7 +115,9 @@ suite.add_expectation(
         max_value=500
     )
     # </snippet>
-)
+]
+
+[suite.add_expectation(expectation) for expectation in detecting_anomalies_expectations]
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py model_data_drift">
