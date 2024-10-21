@@ -40,7 +40,9 @@ data_asset = datasource.add_table_asset(name="data asset", table_name="purchases
 batch_definition = data_asset.add_batch_definition_whole_table("batch definition")
 batch = batch_definition.get_batch()
 
-suite = context.suites.add(gx.ExpectationSuite(name="example distribution expectations"))
+suite = context.suites.add(
+    gx.ExpectationSuite(name="example distribution expectations")
+)
 
 #############################
 # Start Expectation snippets.
@@ -48,9 +50,7 @@ suite = context.suites.add(gx.ExpectationSuite(name="example distribution expect
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnMeanToBeBetween">
     gxe.ExpectColumnMeanToBeBetween(
-        column="purchase_amount",
-        min_value=50,
-        max_value=1000
+        column="purchase_amount", min_value=50, max_value=1000
     )
     # </snippet>
 )
@@ -61,11 +61,8 @@ suite.add_expectation(
         column="purchase_amount",
         quantile_ranges={
             "quantiles": [0.5, 0.9],
-            "value_ranges": [
-                [50, 200],
-                [500, 2000]
-            ]
-        }
+            "value_ranges": [[50, 200], [500, 2000]],
+        },
     )
     # </snippet>
 )
@@ -73,9 +70,7 @@ suite.add_expectation(
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnStdevToBeBetween">
     gxe.ExpectColumnStdevToBeBetween(
-        column="purchase_amount",
-        min_value=500,
-        max_value=2000
+        column="purchase_amount", min_value=500, max_value=2000
     )
     # </snippet>
 )
@@ -107,13 +102,10 @@ detecting_anomalies_expectations = [
         min_value=1,
         max_value=10000,
     ),
-
     # Validate that the mean of purchase_amount is within expected range
     gxe.ExpectColumnMeanToBeBetween(
-        column="purchase_amount",
-        min_value=200,
-        max_value=500
-    )
+        column="purchase_amount", min_value=200, max_value=500
+    ),
     # </snippet>
 ]
 
@@ -121,16 +113,15 @@ detecting_anomalies_expectations = [
 
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py model_data_drift">
-
     # Validate that KL divergence is below threshold
     gxe.ExpectColumnKlDivergenceToBeLessThan(
         column="purchase_amount",
         partition_object={
             # Set up reference distribution (e.g., from training data)
             "bins": [0, 100, 500, 1000, 5000, 10000],
-            "weights": [0.05, 0.25, 0.35, 0.25, 0.1]
+            "weights": [0.05, 0.25, 0.35, 0.25, 0.1],
         },
-        threshold=0.1
+        threshold=0.1,
     )
     # </snippet>
 )
@@ -141,12 +132,8 @@ suite.add_expectation(
         column="purchase_amount",
         quantile_ranges={
             "quantiles": [0.25, 0.5, 0.75],
-            "value_ranges": [
-                [100, 150],
-                [200, 250],
-                [300, 400]
-            ]
-        }
+            "value_ranges": [[100, 150], [200, 250], [300, 400]],
+        },
     )
     # </snippet>
 )
