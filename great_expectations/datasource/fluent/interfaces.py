@@ -372,7 +372,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
 
     # End Abstract Methods
 
-    @public_api
     def add_batch_definition(
         self,
         name: str,
@@ -456,6 +455,13 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
 
     @public_api
     def get_batch_definition(self, name: str) -> BatchDefinition[PartitionerT]:
+        """Get a batch definition.
+
+        Args:
+            name (str): Name of the BatchDefinition to get.
+        Raises:
+            KeyError: If the BatchDefinition does not exist.
+        """
         batch_definitions = [
             batch_definition
             for batch_definition in self.batch_definitions
