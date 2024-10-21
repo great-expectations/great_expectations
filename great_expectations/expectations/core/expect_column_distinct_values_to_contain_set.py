@@ -54,6 +54,10 @@ SUPPORTED_DATA_SOURCES = [
 DATA_QUALITY_ISSUES = ["Sets"]
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 

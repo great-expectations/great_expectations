@@ -51,6 +51,10 @@ SUPPORTED_DATA_SOURCES = [
 DATA_QUALITY_ISSUES = ["Volume"]
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectTableRowCountToBeBetween(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 

@@ -48,6 +48,10 @@ SUPPORTED_DATA_SOURCES = [
 DATA_QUALITY_ISSUES = ["Cardinality"]
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 

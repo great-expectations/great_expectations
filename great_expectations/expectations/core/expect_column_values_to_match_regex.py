@@ -43,6 +43,10 @@ DATA_QUALITY_ISSUES = ["Pattern matching"]
 SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 

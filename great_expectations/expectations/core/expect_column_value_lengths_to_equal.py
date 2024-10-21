@@ -53,6 +53,10 @@ SUPPORTED_DATA_SOURCES = [
 ]
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 

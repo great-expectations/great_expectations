@@ -33,6 +33,10 @@ except ImportError:
     pass
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
     """Expect the column entries to be data written in JavaScript Object Notation.
 

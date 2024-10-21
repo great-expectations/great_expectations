@@ -69,6 +69,10 @@ SUPPORTED_DATA_SOURCES = [
 DATA_QUALITY_ISSUES = ["Numerical data"]
 
 
+from great_expectations._docs_decorators import public_api
+
+
+@public_api
 class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
