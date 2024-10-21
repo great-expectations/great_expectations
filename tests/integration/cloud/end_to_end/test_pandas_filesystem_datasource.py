@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING, Generator, Iterator
 import pandas as pd
 import pytest
 
+from great_expectations import ValidationDefinition
 from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.exceptions import DataContextError
+from great_expectations.expectations import ExpectColumnValuesToNotBeNull
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -28,13 +31,23 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
-def base_dir(tmp_path: pathlib.Path) -> pathlib.Path:
+def base_dir(tmp_path: pathlib.Path, csv_path, parquet_path) -> pathlib.Path:
     dir_path = tmp_path / "data"
     dir_path.mkdir()
     df = pd.DataFrame({"name": ["bob", "alice"]})
-    df.to_csv(dir_path / "data.csv")
-    df.to_parquet(dir_path / "data.parquet")
+    df.to_csv(dir_path / csv_path)
+    df.to_parquet(dir_path / parquet_path)
     return pathlib.Path(dir_path)
+
+
+@pytest.fixture(scope="module")
+def csv_path() -> pathlib.Path:
+    return pathlib.Path( "data.csv")
+
+
+@pytest.fixture(scope="module")
+def parquet_path() -> pathlib.Path:
+    return pathlib.Path( "data.parquet")
 
 
 @pytest.fixture(scope="module")
@@ -147,16 +160,45 @@ def expectation_suite(
     """Add Expectations for the Data Assets defined in this module.
     Note: There is no need to test Expectation Suite CRUD.
     Those assertions can be found in the expectation_suite fixture."""
-    expectation_suite.add_expectation_configuration(
-        expectation_configuration=ExpectationConfiguration(
-            type="expect_column_values_to_not_be_null",
-            kwargs={
-                "column": "name",
-                "mostly": 1,
-            },
+    expectation_suite.add_expectation(
+        ExpectColumnValuesToNotBeNull(column="name", mostly=1)
+    )
+    expectation_suite.save()
+    return expectation_suite
+
+
+@pytest.fixture(scope="module")
+def validation_definition(
+    context: CloudDataContext,
+    expectation_suite: ExpectationSuite,
+    batch_definition: BatchDefinition,
+) -> Generator[ValidationDefinition, None, None]:
+    validation_def_name = f"val_def_{uuid.uuid4().hex}"
+    yield context.validation_definitions.add(
+        ValidationDefinition(
+            name=validation_def_name,
+            data=batch_definition,
+            suite=expectation_suite,
         )
     )
-    return expectation_suite
+    context.validation_definitions.delete(name=validation_def_name)
+
+
+@pytest.fixture(scope="module")
+def checkpoint(
+    context: CloudDataContext,
+    validation_definition: ValidationDefinition,
+) -> Iterator[Checkpoint]:
+    checkpoint_name = f"{validation_definition.name} Checkpoint"
+
+    checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=[validation_definition])
+    checkpoint = context.checkpoints.add(checkpoint=checkpoint)
+    yield checkpoint
+    context.checkpoints.delete(name=checkpoint_name)
+
+    with pytest.raises(DataContextError):
+        context.checkpoints.get(name=checkpoint_name)
+
 
 
 @pytest.mark.xfail(
@@ -180,9 +222,7 @@ def test_interactive_validator(
     assert expectation_validation_result.success
 
 
-@pytest.mark.xfail(
-    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
-)
+
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""
