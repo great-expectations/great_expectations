@@ -334,8 +334,7 @@ class ExecutionEngine(ABC):
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
-        """EXPERIMENTAL
-
+        """
         Add a row condition for handling null filter.
 
         Args:
