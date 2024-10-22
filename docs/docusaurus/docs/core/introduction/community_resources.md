@@ -35,9 +35,9 @@ To contribute to GX documentation or code, see one of the following resources:
 - To submit a custom package to GX for consideration, see [CONTRIBUTING_PACKAGES](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md) in the `great_expectations` repository.
 -->
 
-If you're not sure where to start, or you want to learn what other contributors are doing, go to the [GX Slack community](https://greatexpectations.io/slack) and introduce yourself in the [#contributing channel](https://greatexpectationstalk.slack.com/archives/CV828B2UX).
+If you're not sure where to start, or you want to learn what other contributors are doing, check out the [community-supported tab in the GX Issues board](https://github.com/orgs/great-expectations/projects/2/views/1?pane=info) and/or check out the [GX Slack community](https://greatexpectations.io/slack) and introduce yourself in the [#contributing channel](https://greatexpectationstalk.slack.com/archives/CV828B2UX).
 
-If you're interested in helping out, review the [GitHub issues list](https://github.com/great-expectations/great_expectations/issues) and self-assign a help wanted issue. If you can't find an issue that interests you, and you want to add an improvement or change, create a new issue. If you're working on an existing or new issue, add a comment to introduce yourself and to let everyone know you’re working on the issue.
+If you're interested in helping out, pick out an issue with a `community-supported` label and either comment on an issue you’re interested in working on or assign it to yourself. If you can't find an issue that interests you, and you want to add an improvement or change, create a new issue and add a comment to introduce yourself and let everyone know you’re working on the issue. [Read more about the GX Issues board here](https://github.com/orgs/great-expectations/projects/2/views/3?pane=info).
 
 ## Connect with our community
 
