@@ -12,6 +12,7 @@ trigger:
 
 variables:
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  targettingDevelop: $[eq(variables['Build.TargetBranch'], 'refs/heads/develop')]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
 
 stages:
@@ -21,7 +22,7 @@ stages:
     jobs:
       - job: test_docs_aws_spark
         timeoutInMinutes: 30
-        condition: and(or(eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
+        condition: and(or(eq(variables.isDevelop, true), or(eq(variables.targettingDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
         variables:
           python.version: "3.9"
           spark.version: "3.3.2"
