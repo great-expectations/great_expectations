@@ -76,7 +76,7 @@ class _PublicApiIntrospector:
         else:
             parts = func.__qualname__.split(".")
             METHOD_PARTS_LENGTH = 2
-            if len(parts) == METHOD_PARTS_LENGTH:
+            if len(parts) >= METHOD_PARTS_LENGTH:
                 cls = parts[0]
                 method = parts[1]
                 key = f"{func.__module__}.{cls}"
