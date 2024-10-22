@@ -73,8 +73,15 @@
         },
         "use_nullable_dtypes": {
             "title": "Use Nullable Dtypes",
-            "default": false,
             "type": "boolean"
+        },
+        "dtype_backend": {
+            "title": "Dtype Backend",
+            "enum": [
+                "pyarrow",
+                "numpy_nullable"
+            ],
+            "type": "string"
         },
         "kwargs": {
             "title": "Kwargs",
@@ -375,18 +382,27 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
                         "year"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -402,11 +418,6 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -414,7 +425,27 @@
                         "month"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "month"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -430,11 +461,6 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -443,7 +469,33 @@
                         "day"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "month"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "day"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -458,6 +510,13 @@
                     "title": "Regex",
                     "type": "string",
                     "format": "regex"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [],
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 0
                 },
                 "sort_ascending": {
                     "title": "Sort Ascending",

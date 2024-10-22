@@ -1,6 +1,6 @@
 {
     "title": "ClipboardAsset",
-    "description": "Read text from clipboard and pass to read_csv.\n\nParameters\n----------\nsep : str, default '\\s+'\n    A string or regex delimiter. The default of '\\s+' denotes\n    one or more whitespace characters.\n\n**kwargs\n    See read_csv for the full argument list.\n\nReturns\n-------\nDataFrame\n    A parsed DataFrame object.",
+    "description": "Read text from clipboard and pass to :func:`~pandas.read_csv`.\n\nParses clipboard contents similar to how CSV files are parsed\nusing :func:`~pandas.read_csv`.\n\nParameters\n----------\nsep : str, default '\\\\s+'\n    A string or regex delimiter. The default of ``'\\\\s+'`` denotes\n    one or more whitespace characters.\n\ndtype_backend : {'numpy_nullable', 'pyarrow'}, default 'numpy_nullable'\n    Back-end data type applied to the resultant :class:`DataFrame`\n    (still experimental). Behaviour is as follows:\n\n    * ``\"numpy_nullable\"``: returns nullable-dtype-backed :class:`DataFrame`\n      (default).\n    * ``\"pyarrow\"``: returns pyarrow-backed nullable :class:`ArrowDtype`\n      DataFrame.\n\n    .. versionadded:: 2.0\n\n**kwargs\n    See :func:`~pandas.read_csv` for the full argument list.\n\nReturns\n-------\nDataFrame\n    A parsed :class:`~pandas.DataFrame` object.\n\nSee Also\n--------\nDataFrame.to_clipboard : Copy object to the system clipboard.\nread_csv : Read a comma-separated values (csv) file into DataFrame.\nread_fwf : Read a table of fixed-width formatted lines into DataFrame.\n\nExamples\n--------\n>>> df = pd.DataFrame([[1, 2, 3], [4, 5, 6]], columns=['A', 'B', 'C'])\n>>> df.to_clipboard()  # doctest: +SKIP\n>>> pd.read_clipboard()  # doctest: +SKIP\n     A  B  C\n0    1  2  3\n1    4  5  6",
     "type": "object",
     "properties": {
         "name": {
@@ -42,6 +42,14 @@
         "sep": {
             "title": "Sep",
             "default": "\\s+",
+            "type": "string"
+        },
+        "dtype_backend": {
+            "title": "Dtype Backend",
+            "enum": [
+                "pyarrow",
+                "numpy_nullable"
+            ],
             "type": "string"
         },
         "kwargs": {
@@ -342,18 +350,27 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
                         "year"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -369,11 +386,6 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -381,7 +393,27 @@
                         "month"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "month"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -397,11 +429,6 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -410,7 +437,33 @@
                         "day"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "month"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "day"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -425,6 +478,13 @@
                     "title": "Regex",
                     "type": "string",
                     "format": "regex"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [],
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 0
                 },
                 "sort_ascending": {
                     "title": "Sort Ascending",

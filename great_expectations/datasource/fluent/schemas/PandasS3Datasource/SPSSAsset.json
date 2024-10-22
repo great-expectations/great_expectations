@@ -1,6 +1,6 @@
 {
     "title": "SPSSAsset",
-    "description": "Load an SPSS file from the file path, returning a DataFrame.\n\n.. versionadded:: 0.25.0\n\nParameters\n----------\npath : str or Path\n    File path.\nusecols : list-like, optional\n    Return a subset of the columns. If None, return all columns.\nconvert_categoricals : bool, default is True\n    Convert categorical columns into pd.Categorical.\n\nReturns\n-------\nDataFrame",
+    "description": "Load an SPSS file from the file path, returning a DataFrame.\n\nParameters\n----------\npath : str or Path\n    File path.\nusecols : list-like, optional\n    Return a subset of the columns. If None, return all columns.\nconvert_categoricals : bool, default is True\n    Convert categorical columns into pd.Categorical.\ndtype_backend : {'numpy_nullable', 'pyarrow'}, default 'numpy_nullable'\n    Back-end data type applied to the resultant :class:`DataFrame`\n    (still experimental). Behaviour is as follows:\n\n    * ``\"numpy_nullable\"``: returns nullable-dtype-backed :class:`DataFrame`\n      (default).\n    * ``\"pyarrow\"``: returns pyarrow-backed nullable :class:`ArrowDtype`\n      DataFrame.\n\n    .. versionadded:: 2.0\n\nReturns\n-------\nDataFrame\n\nExamples\n--------\n>>> df = pd.read_spss(\"spss_data.sav\")  # doctest: +SKIP",
     "type": "object",
     "properties": {
         "name": {
@@ -65,6 +65,14 @@
             "title": "Convert Categoricals",
             "default": true,
             "type": "boolean"
+        },
+        "dtype_backend": {
+            "title": "Dtype Backend",
+            "enum": [
+                "pyarrow",
+                "numpy_nullable"
+            ],
+            "type": "string"
         }
     },
     "required": [
@@ -99,18 +107,27 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
                         "year"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -126,11 +143,6 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -138,7 +150,27 @@
                         "month"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "month"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -154,11 +186,6 @@
                     "type": "string",
                     "format": "regex"
                 },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -167,7 +194,33 @@
                         "day"
                     ],
                     "type": "array",
-                    "items": {}
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": [
+                        {
+                            "enum": [
+                                "year"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "month"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "enum": [
+                                "day"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -182,6 +235,13 @@
                     "title": "Regex",
                     "type": "string",
                     "format": "regex"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [],
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 0
                 },
                 "sort_ascending": {
                     "title": "Sort Ascending",
