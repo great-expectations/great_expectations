@@ -124,7 +124,9 @@ def test_vcs_schemas_match(  # noqa: C901
 
     schema_as_dict = json.loads(json_str)
     _sort_lists(schema_as_dict=schema_as_dict)
-    fluent_ds_or_asset_model_as_dict = fluent_ds_or_asset_model.schema()
+    # we have tuples in our schema, which are mutated to lists when dumped to json
+    # dump and reload the schema dict to ensure we are comparing
+    fluent_ds_or_asset_model_as_dict = json.loads(json.dumps(fluent_ds_or_asset_model.schema()))
     _sort_lists(schema_as_dict=fluent_ds_or_asset_model_as_dict)
 
     if "Excel" in str(schema_path):
