@@ -524,7 +524,7 @@ We also have labels to indicate the level of support you can expect for each iss
 - `community-supported`:  related to a part of the code-base that is not tested and actively maintained with new GX Core or GX Cloud releases; however, we actively welcome ongoing maintenance from the community
 - `not-supported`: an issue that we at GX will not be maintaining, and we will not support PRs or contributions from the community on the topic
 
-Issues without either a `community-supported` or `not-supported` label can be assumed to be **GX-supported**, which means they are related to a part of the code-base that is tested and actively maintained with new GX Core or GX Cloud releases. 
+Issues without either a `community-supported` or `not-supported` label can be assumed to be **GX-supported**, which means they are related to a part of the code-base that is tested and actively maintained with new GX Core or GX Cloud releases.
 
 ## Contributor license agreement (CLA)
 
