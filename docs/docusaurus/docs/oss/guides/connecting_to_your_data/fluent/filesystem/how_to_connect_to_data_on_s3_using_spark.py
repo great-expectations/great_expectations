@@ -5,6 +5,8 @@ pytest -v --docs-tests -k "how_to_connect_to_data_on_s3_using_spark" tests/integ
 ```
 """
 
+import os
+
 import great_expectations as gx
 
 context = gx.get_context()
@@ -13,19 +15,27 @@ context = gx.get_context()
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py define_add_spark_s3_args">
 datasource_name = "my_s3_datasource"
 bucket_name = "my_bucket"
-boto3_options = {}
+boto3_options = {
+    "aws_access_key_id": os.environ["AWS_ACCESS_KEY_ID"],
+    "aws_secret_access_key": os.environ["AWS_SECRET_ACCESS_KEY"],
+    "aws_session_token": os.environ["AWS_SESSION_TOKEN"],
+}
 # </snippet>
 
 bucket_name = "superconductive-docs-test"
 
+
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py create_datasource">
 datasource = context.data_sources.add_spark_s3(
-    name=datasource_name, bucket=bucket_name, boto3_options=boto3_options
+    name=datasource_name,
+    bucket=bucket_name,
+    boto3_options=boto3_options,
 )
 # </snippet>
 
 assert datasource_name in context.data_sources.all()
+
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py add_asset">
@@ -34,19 +44,18 @@ s3_prefix = "data/taxi_yellow_tripdata_samples/"
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 data_asset = datasource.add_csv_asset(
     name=asset_name,
-    batching_regex=batching_regex,
     s3_prefix=s3_prefix,
     header=True,
     infer_schema=True,
 )
+batch_definition = data_asset.add_batch_definition_monthly(
+    name="monthy_batch_definition",
+    regex=batching_regex,
+)
 # </snippet>
 
-assert data_asset
 
-assert datasource.get_asset_names() == {"my_taxi_data_asset"}
-
-my_batch_request = data_asset.build_batch_request({"year": "2019", "month": "03"})
-batch = data_asset.get_batch(my_batch_request)
+batch = batch_definition.get_batch(batch_parameters={"year": "2019", "month": "03"})
 assert set(batch.columns()) == {
     "vendor_id",
     "pickup_datetime",
