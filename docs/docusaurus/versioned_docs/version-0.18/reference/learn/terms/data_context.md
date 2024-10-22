@@ -40,7 +40,7 @@ A Data Context includes basic create, read, update, and delete (CRUD) operations
 
 The Data Context helps you create components such as Data Sources, Checkpoints, and Expectation Suites and manage where the information about those components is stored.  
 
-For production deployments, you will want to define these components according to your Data Source and production environment. This may include storing information about those components in something other than your local environment. To view implementation examples for specific environments and Data Sources, see [Integrations](https://docs.greatexpectations.io/docs/category/integrations).
+For production deployments, you will want to define these components according to your Data Source and production environment. This may include storing information about those components in something other than your local environment. To view implementation examples for specific environments and Data Sources, see [Integrations](https://greatexpectations.io/integrations/).
 
 ## GX Cloud compatibility
 
