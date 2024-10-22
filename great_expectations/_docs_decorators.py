@@ -39,7 +39,9 @@ class _PublicApiIntrospector:
     _public_api: dict[str, list[_PublicApiInfo]] = {}
     _class_registry: dict[str, set[str]] = defaultdict(set)
 
-    CLASS_DEFINITION: ClassVar[str] = "class_def"
+    # This is a special key that is used to indicate that a class definition
+    # is being added to the registry.
+    CLASS_DEFINITION: ClassVar[str] = "<class_def>"
 
     @property
     def class_registry(self) -> dict[str, set[str]]:
@@ -75,7 +77,7 @@ class _PublicApiIntrospector:
             self._class_registry[key].add(self.CLASS_DEFINITION)
         else:
             parts = func.__qualname__.split(".")
-            METHOD_PARTS_LENGTH = 2
+            METHOD_PARTS_LENGTH = 2  # Standalone functions will have a length of 1
             if len(parts) >= METHOD_PARTS_LENGTH:
                 cls = parts[0]
                 method = parts[1]
