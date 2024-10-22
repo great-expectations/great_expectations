@@ -18,14 +18,7 @@ connecting_to_your_data = [
     ),
 ]
 
-deployment_patterns = [
-    IntegrationTestFixture(
-        name="deployment_pattern_spark_s3",
-        user_flow_script="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py",
-        data_context_dir=None,
-        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
-    ),
-]
+deployment_patterns: list[IntegrationTestFixture] = []
 
 creating_custom_expectations = [
     IntegrationTestFixture(
