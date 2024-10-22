@@ -19,13 +19,14 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
 )
-from great_expectations.data_context.util import load_class
 from great_expectations.util import (
     filter_properties_dict,
-    verify_dynamic_loading_support,
 )
 
 if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
     from great_expectations.expectations.expectation import Expectation
 
     _TExpectation = TypeVar("_TExpectation", bound=Expectation)
@@ -65,22 +66,17 @@ class ExpectationsStore(Store):
 
     def __init__(
         self,
-        store_backend=None,
-        runtime_environment=None,
-        store_name=None,
-        data_context=None,
+        store_backend: dict | None = None,
+        runtime_environment: dict | None = None,
+        store_name: str = "no_store_name",
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         self._expectationSuiteSchema = ExpectationSuiteSchema()
         self._data_context = data_context
-        if store_backend is not None:
-            store_backend_module_name = store_backend.get(
-                "module_name", "great_expectations.data_context.store"
-            )
-            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
-            verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
-            # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
+        store_backend_class = self._determine_store_backend_class(store_backend)
+        # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
+        if store_backend:
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
                 store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
