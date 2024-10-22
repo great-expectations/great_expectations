@@ -5,8 +5,6 @@ pytest -v --docs-tests -k "how_to_connect_to_data_on_s3_using_spark" tests/integ
 ```
 """
 
-import os
-
 import great_expectations as gx
 
 context = gx.get_context()
@@ -15,11 +13,7 @@ context = gx.get_context()
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py define_add_spark_s3_args">
 datasource_name = "my_s3_datasource"
 bucket_name = "my_bucket"
-boto3_options = {
-    "aws_access_key_id": os.environ["AWS_ACCESS_KEY_ID"],
-    "aws_secret_access_key": os.environ["AWS_SECRET_ACCESS_KEY"],
-    "aws_session_token": os.environ["AWS_SESSION_TOKEN"],
-}
+boto3_options = {}
 # </snippet>
 
 bucket_name = "superconductive-docs-test"
