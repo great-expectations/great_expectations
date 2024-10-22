@@ -128,6 +128,19 @@
                 }
             ]
         },
+        "squeeze": {
+            "title": "Squeeze",
+            "type": "boolean"
+        },
+        "prefix": {
+            "title": "Prefix",
+            "type": "string"
+        },
+        "mangle_dupe_cols": {
+            "title": "Mangle Dupe Cols",
+            "default": true,
+            "type": "boolean"
+        },
         "dtype": {
             "title": "Dtype",
             "type": "object"
@@ -142,15 +155,14 @@
             ],
             "type": "string"
         },
+        "converters": {
+            "title": "Converters"
+        },
         "true_values": {
-            "title": "True Values",
-            "type": "array",
-            "items": {}
+            "title": "True Values"
         },
         "false_values": {
-            "title": "False Values",
-            "type": "array",
-            "items": {}
+            "title": "False Values"
         },
         "skipinitialspace": {
             "title": "Skipinitialspace",
@@ -181,11 +193,7 @@
             "type": "integer"
         },
         "na_values": {
-            "title": "Na Values",
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "title": "Na Values"
         },
         "keep_default_na": {
             "title": "Keep Default Na",
@@ -208,21 +216,11 @@
             "type": "boolean"
         },
         "parse_dates": {
-            "title": "Parse Dates",
-            "anyOf": [
-                {
-                    "type": "boolean"
-                },
-                {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            ]
+            "title": "Parse Dates"
         },
         "infer_datetime_format": {
             "title": "Infer Datetime Format",
+            "default": false,
             "type": "boolean"
         },
         "keep_date_col": {
@@ -230,9 +228,8 @@
             "default": false,
             "type": "boolean"
         },
-        "date_format": {
-            "title": "Date Format",
-            "type": "string"
+        "date_parser": {
+            "title": "Date Parser"
         },
         "dayfirst": {
             "title": "Dayfirst",
@@ -323,10 +320,16 @@
             "title": "Dialect",
             "type": "string"
         },
+        "error_bad_lines": {
+            "title": "Error Bad Lines",
+            "type": "boolean"
+        },
+        "warn_bad_lines": {
+            "title": "Warn Bad Lines",
+            "type": "boolean"
+        },
         "on_bad_lines": {
-            "title": "On Bad Lines",
-            "default": "error",
-            "type": "string"
+            "title": "On Bad Lines"
         },
         "delim_whitespace": {
             "title": "Delim Whitespace",
@@ -335,8 +338,7 @@
         },
         "low_memory": {
             "title": "Low Memory",
-            "default": true,
-            "type": "boolean"
+            "default": true
         },
         "memory_map": {
             "title": "Memory Map",
@@ -354,14 +356,6 @@
         "storage_options": {
             "title": "Storage Options",
             "type": "object"
-        },
-        "dtype_backend": {
-            "title": "Dtype Backend",
-            "enum": [
-                "pyarrow",
-                "numpy_nullable"
-            ],
-            "type": "string"
         }
     },
     "required": [
@@ -657,27 +651,18 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
                         "year"
                     ],
                     "type": "array",
-                    "minItems": 1,
-                    "maxItems": 1,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -693,6 +678,11 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -700,27 +690,7 @@
                         "month"
                     ],
                     "type": "array",
-                    "minItems": 2,
-                    "maxItems": 2,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "month"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -736,6 +706,11 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -744,33 +719,7 @@
                         "day"
                     ],
                     "type": "array",
-                    "minItems": 3,
-                    "maxItems": 3,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "month"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "day"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -785,13 +734,6 @@
                     "title": "Regex",
                     "type": "string",
                     "format": "regex"
-                },
-                "param_names": {
-                    "title": "Param Names",
-                    "default": [],
-                    "type": "array",
-                    "minItems": 0,
-                    "maxItems": 0
                 },
                 "sort_ascending": {
                     "title": "Sort Ascending",

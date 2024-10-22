@@ -1,6 +1,6 @@
 {
     "title": "ORCAsset",
-    "description": "Load an ORC object from the file path, returning a DataFrame.\n\nParameters\n----------\npath : str, path object, or file-like object\n    String, path object (implementing ``os.PathLike[str]``), or file-like\n    object implementing a binary ``read()`` function. The string could be a URL.\n    Valid URL schemes include http, ftp, s3, and file. For file URLs, a host is\n    expected. A local file could be:\n    ``file://localhost/path/to/table.orc``.\ncolumns : list, default None\n    If not None, only these columns will be read from the file.\n    Output always follows the ordering of the file and not the columns list.\n    This mirrors the original behaviour of\n    :external+pyarrow:py:meth:`pyarrow.orc.ORCFile.read`.\ndtype_backend : {'numpy_nullable', 'pyarrow'}, default 'numpy_nullable'\n    Back-end data type applied to the resultant :class:`DataFrame`\n    (still experimental). Behaviour is as follows:\n\n    * ``\"numpy_nullable\"``: returns nullable-dtype-backed :class:`DataFrame`\n      (default).\n    * ``\"pyarrow\"``: returns pyarrow-backed nullable :class:`ArrowDtype`\n      DataFrame.\n\n    .. versionadded:: 2.0\n\nfilesystem : fsspec or pyarrow filesystem, default None\n    Filesystem object to use when reading the parquet file.\n\n    .. versionadded:: 2.1.0\n\n**kwargs\n    Any additional kwargs are passed to pyarrow.\n\nReturns\n-------\nDataFrame\n\nNotes\n-----\nBefore using this function you should read the :ref:`user guide about ORC <io.orc>`\nand :ref:`install optional dependencies <install.warn_orc>`.\n\nIf ``path`` is a URI scheme pointing to a local or remote file (e.g. \"s3://\"),\na ``pyarrow.fs`` filesystem will be attempted to read the file. You can also pass a\npyarrow or fsspec filesystem object into the filesystem keyword to override this\nbehavior.\n\nExamples\n--------\n>>> result = pd.read_orc(\"example_pa.orc\")  # doctest: +SKIP",
+    "description": "Load an ORC object from the file path, returning a DataFrame.\n\n.. versionadded:: 1.0.0\n\nParameters\n----------\npath : str, path object, or file-like object\n    String, path object (implementing ``os.PathLike[str]``), or file-like\n    object implementing a binary ``read()`` function. The string could be a URL.\n    Valid URL schemes include http, ftp, s3, and file. For file URLs, a host is\n    expected. A local file could be:\n    ``file://localhost/path/to/table.orc``.\ncolumns : list, default None\n    If not None, only these columns will be read from the file.\n**kwargs\n    Any additional kwargs are passed to pyarrow.\n\nReturns\n-------\nDataFrame\n\nNotes\n-----\nBefore using this function you should read the :ref:`user guide about ORC <io.orc>`\nand :ref:`install optional dependencies <install.warn_orc>`.",
     "type": "object",
     "properties": {
         "name": {
@@ -51,14 +51,6 @@
                 "type": "string"
             }
         },
-        "dtype_backend": {
-            "title": "Dtype Backend",
-            "enum": [
-                "pyarrow",
-                "numpy_nullable"
-            ],
-            "type": "string"
-        },
         "kwargs": {
             "title": "Kwargs",
             "description": "Extra keyword arguments that will be passed to the reader method",
@@ -97,27 +89,18 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
                         "year"
                     ],
                     "type": "array",
-                    "minItems": 1,
-                    "maxItems": 1,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -133,6 +116,11 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -140,27 +128,7 @@
                         "month"
                     ],
                     "type": "array",
-                    "minItems": 2,
-                    "maxItems": 2,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "month"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -176,6 +144,11 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -184,33 +157,7 @@
                         "day"
                     ],
                     "type": "array",
-                    "minItems": 3,
-                    "maxItems": 3,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "month"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "day"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -225,13 +172,6 @@
                     "title": "Regex",
                     "type": "string",
                     "format": "regex"
-                },
-                "param_names": {
-                    "title": "Param Names",
-                    "default": [],
-                    "type": "array",
-                    "minItems": 0,
-                    "maxItems": 0
                 },
                 "sort_ascending": {
                     "title": "Sort Ascending",

@@ -1,6 +1,6 @@
 {
     "title": "SQLTableAsset",
-    "description": "Read SQL database table into a DataFrame.\n\nGiven a table name and a SQLAlchemy connectable, returns a DataFrame.\nThis function does not support DBAPI connections.\n\nParameters\n----------\ntable_name : str\n    Name of SQL table in database.\ncon : SQLAlchemy connectable or str\n    A database URI could be provided as str.\n    SQLite DBAPI connection mode not supported.\nschema : str, default None\n    Name of SQL schema in database to query (if database flavor\n    supports this). Uses default schema if None (default).\nindex_col : str or list of str, optional, default: None\n    Column(s) to set as index(MultiIndex).\ncoerce_float : bool, default True\n    Attempts to convert values of non-string, non-numeric objects (like\n    decimal.Decimal) to floating point. Can result in loss of Precision.\nparse_dates : list or dict, default None\n    - List of column names to parse as dates.\n    - Dict of ``{column_name: format string}`` where format string is\n      strftime compatible in case of parsing string times or is one of\n      (D, s, ns, ms, us) in case of parsing integer timestamps.\n    - Dict of ``{column_name: arg dict}``, where the arg dict corresponds\n      to the keyword arguments of :func:`pandas.to_datetime`\n      Especially useful with databases without native Datetime support,\n      such as SQLite.\ncolumns : list, default None\n    List of column names to select from SQL table.\nchunksize : int, default None\n    If specified, returns an iterator where `chunksize` is the number of\n    rows to include in each chunk.\ndtype_backend : {'numpy_nullable', 'pyarrow'}, default 'numpy_nullable'\n    Back-end data type applied to the resultant :class:`DataFrame`\n    (still experimental). Behaviour is as follows:\n\n    * ``\"numpy_nullable\"``: returns nullable-dtype-backed :class:`DataFrame`\n      (default).\n    * ``\"pyarrow\"``: returns pyarrow-backed nullable :class:`ArrowDtype`\n      DataFrame.\n\n    .. versionadded:: 2.0\n\nReturns\n-------\nDataFrame or Iterator[DataFrame]\n    A SQL table is returned as two-dimensional data structure with labeled\n    axes.\n\nSee Also\n--------\nread_sql_query : Read SQL query into a DataFrame.\nread_sql : Read SQL query or database table into a DataFrame.\n\nNotes\n-----\nAny datetime values with time zone information will be converted to UTC.\n\nExamples\n--------\n>>> pd.read_sql_table('table_name', 'postgres:///db_name')  # doctest:+SKIP",
+    "description": "Read SQL database table into a DataFrame.\n\nGiven a table name and a SQLAlchemy connectable, returns a DataFrame.\nThis function does not support DBAPI connections.\n\nParameters\n----------\ntable_name : str\n    Name of SQL table in database.\ncon : SQLAlchemy connectable or str\n    A database URI could be provided as str.\n    SQLite DBAPI connection mode not supported.\nschema : str, default None\n    Name of SQL schema in database to query (if database flavor\n    supports this). Uses default schema if None (default).\nindex_col : str or list of str, optional, default: None\n    Column(s) to set as index(MultiIndex).\ncoerce_float : bool, default True\n    Attempts to convert values of non-string, non-numeric objects (like\n    decimal.Decimal) to floating point. Can result in loss of Precision.\nparse_dates : list or dict, default None\n    - List of column names to parse as dates.\n    - Dict of ``{column_name: format string}`` where format string is\n      strftime compatible in case of parsing string times or is one of\n      (D, s, ns, ms, us) in case of parsing integer timestamps.\n    - Dict of ``{column_name: arg dict}``, where the arg dict corresponds\n      to the keyword arguments of :func:`pandas.to_datetime`\n      Especially useful with databases without native Datetime support,\n      such as SQLite.\ncolumns : list, default None\n    List of column names to select from SQL table.\nchunksize : int, default None\n    If specified, returns an iterator where `chunksize` is the number of\n    rows to include in each chunk.\n\nReturns\n-------\nDataFrame or Iterator[DataFrame]\n    A SQL table is returned as two-dimensional data structure with labeled\n    axes.\n\nSee Also\n--------\nread_sql_query : Read SQL query into a DataFrame.\nread_sql : Read SQL query or database table into a DataFrame.\n\nNotes\n-----\nAny datetime values with time zone information will be converted to UTC.\n\nExamples\n--------\n>>> pd.read_sql_table('table_name', 'postgres:///db_name')  # doctest:+SKIP",
     "type": "object",
     "properties": {
         "name": {
@@ -114,14 +114,6 @@
         "chunksize": {
             "title": "Chunksize",
             "type": "integer"
-        },
-        "dtype_backend": {
-            "title": "Dtype Backend",
-            "enum": [
-                "pyarrow",
-                "numpy_nullable"
-            ],
-            "type": "string"
         }
     },
     "required": [
@@ -418,27 +410,18 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
                         "year"
                     ],
                     "type": "array",
-                    "minItems": 1,
-                    "maxItems": 1,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -454,6 +437,11 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -461,27 +449,7 @@
                         "month"
                     ],
                     "type": "array",
-                    "minItems": 2,
-                    "maxItems": 2,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "month"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -497,6 +465,11 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "param_names": {
                     "title": "Param Names",
                     "default": [
@@ -505,33 +478,7 @@
                         "day"
                     ],
                     "type": "array",
-                    "minItems": 3,
-                    "maxItems": 3,
-                    "items": [
-                        {
-                            "enum": [
-                                "year"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "month"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "enum": [
-                                "day"
-                            ],
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
+                    "items": {}
                 }
             },
             "required": [
@@ -546,13 +493,6 @@
                     "title": "Regex",
                     "type": "string",
                     "format": "regex"
-                },
-                "param_names": {
-                    "title": "Param Names",
-                    "default": [],
-                    "type": "array",
-                    "minItems": 0,
-                    "maxItems": 0
                 },
                 "sort_ascending": {
                     "title": "Sort Ascending",
