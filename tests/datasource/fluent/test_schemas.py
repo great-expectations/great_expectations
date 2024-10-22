@@ -8,9 +8,9 @@ from typing import Any, Generator, Type
 
 import pandas
 import pytest
-from great_expectations.compatibility import pydantic
 from packaging.version import Version
 
+from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import (
     _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed  # noqa: E501
     _SCHEMAS_DIR,
@@ -24,6 +24,7 @@ from great_expectations.datasource.fluent.sources import (
 PANDAS_VERSION: str = pandas.__version__
 PYTHON_VERSION: Version = Version(f"{sys.version_info.major}.{sys.version_info.minor}")
 MIN_PYDANTIC_VERSION = "2.0.0"
+
 
 def min_supported_python() -> Version:
     return Version("3.9")
