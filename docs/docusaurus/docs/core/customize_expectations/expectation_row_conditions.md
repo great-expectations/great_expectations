@@ -9,10 +9,6 @@ import PrereqGxInstalled from '../_core_components/prerequisites/_gx_installatio
 import PrereqPreconfiguredDataContext from '../_core_components/prerequisites/_preconfigured_data_context.md';
 import PrereqPreconfiguredDataSourceAndAsset from '../_core_components/prerequisites/_data_source_and_asset_connected_to_data.md';
 
-:::note
-Conditional Expectations are **experimental**, and they are available for Pandas, Spark, and SQLAlchemy backends.
-:::
-
 By default Expectations apply to the entire dataset retrieved in a Batch.  However, sometimes an Expectation is not relevant for every row and validating every row could cause false positives or false negatives in the Validation Results.
 
 For example, you may define an Expectation that a column specifying the country of origin of a product should not be null.  If that Expectation is only relevant when the product is a foreign import then applying the Expectation to every row in the Batch could result in a large number of false negatives when the country of origin column is null for products produced by local industry.
@@ -49,7 +45,7 @@ The data used in the examples for this procedure is passenger data for the Titan
 
 1. Determine the `condition_parser` for your `row_condition`.
 
-   The `condition_parser` defines the syntax of `row_condition` strings.  When implementing conditional Expectations with pandas, this argument must be set to `"pandas"`. When implementing conditional Expectations with Spark or SQLAlchemy, this argument must be set to `"great_expectations__experimental__"`.
+   The `condition_parser` defines the syntax of `row_condition` strings.  When implementing conditional Expectations with pandas, this argument must be set to `"pandas"`. When implementing conditional Expectations with Spark or SQLAlchemy, this argument must be set to `"great_expectations"`.
 
    Conditional Expectations will fail if the Batch they are validating comes from a different type of Data Source than is indicated by the `condition_parser` argument.
 
@@ -140,8 +136,6 @@ The data used in the examples for this procedure is passenger data for the Titan
       row_condition='col("foo").notNull()'  # foo is not null
     
       row_condition='col("foo") > 5'  # foo is greater than 5
-    
-      row_condition='col("foo") != "a-b"'  # foo is not "a-b" (SQL only)
     
       row_condition='col("foo") <= 3.14'  # foo is less than 3.14
     

@@ -26,8 +26,6 @@ from typing import (
     overload,
 )
 
-from marshmallow import ValidationError
-
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
@@ -1849,14 +1847,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         """  # noqa: E501
         if isinstance(project_config, DataContextConfig):
             return project_config
-        try:
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
-            project_config_dict = dataContextConfigSchema.dump(project_config)
-            project_config_dict = dataContextConfigSchema.load(project_config_dict)
-            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
-            return context_config
-        except ValidationError:  # noqa: TRY302
-            raise
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
+        project_config_dict = dataContextConfigSchema.dump(project_config)
+        project_config_dict = dataContextConfigSchema.load(project_config_dict)
+        context_config: DataContextConfig = DataContextConfig(**project_config_dict)
+        return context_config
 
     @overload
     def _normalize_absolute_or_relative_path(self, path: str) -> str: ...

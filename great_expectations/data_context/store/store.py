@@ -35,6 +35,7 @@ from great_expectations.exceptions import (
     DataContextError,
     StoreBackendError,
 )
+from great_expectations.util import load_class, verify_dynamic_loading_support
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `NotRequired`, so it can't be imported at runtime
@@ -110,6 +111,16 @@ class Store:
                 "Invalid StoreBackend configuration: expected a StoreBackend instance."
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
+
+    @staticmethod
+    def _determine_store_backend_class(store_backend: dict | None) -> type:
+        store_backend = store_backend or {}
+        store_backend_module_name = store_backend.get(
+            "module_name", "great_expectations.data_context.store"
+        )
+        store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
+        verify_dynamic_loading_support(module_name=store_backend_module_name)
+        return load_class(store_backend_class_name, store_backend_module_name)
 
     @classmethod
     def gx_cloud_response_json_to_object_dict(cls, response_json: Dict) -> Dict:
