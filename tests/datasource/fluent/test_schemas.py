@@ -8,6 +8,7 @@ from typing import Any, Generator, Type
 
 import pandas
 import pytest
+from great_expectations.compatibility import pydantic
 from packaging.version import Version
 
 from great_expectations.datasource.fluent import (
@@ -22,7 +23,7 @@ from great_expectations.datasource.fluent.sources import (
 
 PANDAS_VERSION: str = pandas.__version__
 PYTHON_VERSION: Version = Version(f"{sys.version_info.major}.{sys.version_info.minor}")
-
+MIN_PYDANTIC_VERSION = "2.0.0"
 
 def min_supported_python() -> Version:
     return Version("3.9")
@@ -114,8 +115,12 @@ def test_vcs_schemas_match(  # noqa: C901
     if "Pandas" in str(schema_dir) and _PANDAS_SCHEMA_VERSION != PANDAS_VERSION:
         pytest.xfail(reason=f"schema generated with pandas {_PANDAS_SCHEMA_VERSION}")
 
+    if pydantic.VERSION < MIN_PYDANTIC_VERSION:
+        pytest.xfail(reason="schema must be generated and tested with pydantic V2.")
+
     print(f"python version: {sys.version.split()[0]}")
-    print(f"pandas version: {PANDAS_VERSION}\n")
+    print(f"pandas version: {PANDAS_VERSION}")
+    print(f"pydantic version: {pydantic.VERSION}\n")
 
     schema_path = schema_dir.joinpath(f"{fluent_ds_or_asset_model.__name__}.json")
     print(schema_path)
