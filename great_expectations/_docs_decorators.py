@@ -75,7 +75,8 @@ class _PublicApiIntrospector:
             self._class_registry[key].add(self.CLASS_DEFINITION)
         else:
             parts = func.__qualname__.split(".")
-            if len(parts) >= 2:  # noqa: PLR2004
+            METHOD_PARTS_LENGTH = 2
+            if len(parts) == METHOD_PARTS_LENGTH:
                 cls = parts[0]
                 method = parts[1]
                 key = f"{func.__module__}.{cls}"
