@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.pandas_file_path_datasource import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
