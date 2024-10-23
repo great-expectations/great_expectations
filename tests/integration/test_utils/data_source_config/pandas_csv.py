@@ -9,23 +9,23 @@ from tests.integration.test_utils.data_source_config.base import (
 )
 
 
-class PandasDataFrameDatasourceConfig(DataSourceConfig):
+class PandasCsvDatasourceConfig(DataSourceConfig):
     @property
     @override
     def label(self) -> str:
-        return "pandas-csv-datasource"
+        return "pandas-data-frame-datasource"
 
     @property
     @override
     def pytest_mark(self) -> pytest.MarkDecorator:
-        return pytest.mark.filesystem
+        return pytest.mark.unit
 
     @override
     def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
-        return PandasDataFrameBatchSetup(data=data, config=self)
+        return PandasCsvBatchSetup(data=data, config=self)
 
 
-class PandasDataFrameBatchSetup(BatchSetup[PandasDataFrameDatasourceConfig]):
+class PandasCsvBatchSetup(BatchSetup[PandasCsvDatasourceConfig]):
     @override
     def make_batch(self) -> Batch:
         name = self._random_resource_name()
