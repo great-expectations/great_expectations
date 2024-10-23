@@ -1,30 +1,26 @@
 ---
 sidebar_label: 'Distribution'
-title: 'Analyze data distribution with GX'
+title: 'Validate data distribution with GX'
 ---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-Data **distribution** analysis is a critical aspect of data quality management, focusing on understanding the spread, shape, and characteristics of data within a dataset. Proper distribution analysis helps identify anomalies, outliers, and patterns that may impact data reliability and the accuracy of analytical insights. By leveraging Great Expectations (GX) to analyze and validate data distributions, organizations can ensure their datasets maintain expected characteristics, leading to more robust and trustworthy data-driven decision-making processes.
+Data distribution analysis is a critical aspect of data quality management, focusing on understanding the spread, shape, and characteristics of data within a dataset. Data distribution is a pivotal indicator of the quality and reliability of your datasets. Key considerations include:
 
-This guide will walk you through leveraging GX to effectively manage and validate data distribution, helping you maintain high-quality datasets and enhance the trustworthiness of your data-driven insights.
+* **Statistical validity**: Many statistical analyses and machine learning models assume a certain data distribution. Deviations from expected distributions can invalidate these models.
+* **Anomaly detection**: Unexpected changes in data distribution can signal anomalies, outliers, or fraud, which can skew analytical results or impair model performance.
+* **Data consistency**: Consistent data distribution over time ensures that comparisons and trends are meaningful and accurate.
+* **Quality control**: Monitoring data distribution helps in maintaining data integrity by detecting data corruption, system errors, or changes in data collection processes.
 
-## Understanding the impact of data distribution on quality
-
-Data distribution plays a pivotal role in the quality and reliability of your datasets. Key considerations include:
-
-1. **Anomaly Detection**: Unexpected changes in data distribution can signal anomalies, outliers, or fraud, which can skew analytical results or impair model performance.
-2. **Statistical Validity**: Many statistical analyses and machine learning models assume a certain data distribution. Deviations from expected distributions can invalidate these models.
-3. **Data Consistency**: Consistent data distribution over time ensures that comparisons and trends are meaningful and accurate.
-4. **Quality Control**: Monitoring data distribution helps in maintaining data integrity by detecting data corruption, system errors, or changes in data collection processes.
-
-By proactively analyzing and validating data distribution, you can detect and address issues early, maintaining the integrity and reliability of your data ecosystem.
+By leveraging Great Expectations (GX) to analyze and validate data distributions, organizations can ensure their datasets maintain expected characteristics. This guide will walk you through using GX to effectively manage and validate data distribution, helping you to maintain high-quality datasets and enhance the trustworthiness of your data-driven insights.
 
 ## Prerequisite knowledge
 
-This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Overview](https://docs.greatexpectations.io/docs/guides/overview) to familiarize yourself with key concepts and setup procedures.
+This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Cloud](https://docs.greatexpectations.io/docs/cloud/overview/gx_cloud_overview) and [GX Core](https://docs.greatexpectations.io/docs/guides/overview) overviews to familiarize yourself with key concepts and setup procedures.
 
 ## Data preview
 
-The examples in this guide use a sample dataset of customer transactions, available as a [CSV file on GitHub](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/distribution_purchases.csv).
+The examples in this guide use a sample dataset of customer transactions that is provided from a public Postgres database table. The sample data is also available in [CSV format](https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/learn_data_quality_use_cases/distribution_purchases.csv).
 
 | transaction_id | customer_id | purchase_amount | purchase_date     | product_category | product_rating | return_date       |
 |----------------|-------------|-----------------|-------------------|------------------|----------------|-------------------|
@@ -38,118 +34,149 @@ In this dataset, `purchase_amount` represents the amount spent by customers in v
 
 ## Key distribution Expectations
 
-GX offers several Expectations specifically designed for managing data distribution. These can be added to an Expectation Suite via the GX Cloud UI or using the GX Core Python library.
+GX offers a collection of Expectations used to validate data distribution. These Expectations be added to an Expectation Suite via the GX Cloud UI or using the GX Core Python library.
 
 :::TODO:::
 
 ![Add a distribution Expectation in GX Cloud](#TODO)
 
 
-### Column-level Expectations
+### Expect column KL divergence to be less than
 
-#### Expect Column Mean To Be Between
+Compares the distribution of a specified column to a reference distribution using the Kullback-Leibler (KL) divergence metric. KL divergence measures the difference between two probability distributions.
 
-Validates that the mean (average) value of a column falls within a specified range.
+**Use Case**: This Expectation checks if the KL divergence is below a specified threshold, allowing you to assess the similarity between the actual and expected data distributions.
 
-**Use Case**: Essential for monitoring the central tendency of numerical data, helping detect overall shifts in distribution that might indicate data quality issues or significant changes in the dataset.
-
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnMeanToBeBetween"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnKlDivergenceToBeLessThan"
 ```
 
-<small>View `ExpectColumnMeanToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_mean_to_be_between).</small>
+<small>View `ExpectColumnKLDivergenceToBeLessThan` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_kl_divergence_to_be_less_than).</small>
 
-#### Expect Column Quantile Values To Be Between
 
-Ensures that specified quantiles of a column fall within provided ranges.
-
-**Use Case**: Robustly monitors key statistics of the overall distribution, which is valuable for tracking metrics like median purchase amount or 90th percentile product ratings.
-
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnQuantileValuesToBeBetween"
-```
-
-<small>View `ExpectColumnQuantileValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_quantile_values_to_be_between).</small>
-
-#### Expect Column Stdev To Be Between
-
-Validates that the standard deviation of a column is within a specified range.
-
-**Use Case**: Watches for unusual changes in variance that could signal issues in data collection or processing pipelines.
-
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnStdevToBeBetween"
-```
-
-<small>View `ExpectColumnStdevToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between).</small>
-
-<br/>
-<br/>
-
-:::tip[GX tip for column-level Expectations]
-- Use the `mostly` parameter to allow for acceptable deviations in your data, providing flexibility in your validations.
-- Regularly update your reference distributions (e.g., in `ExpectColumnKlDivergenceToBeLessThan`) to reflect the most recent data patterns.
-- Don't rely on a single distribution Expectation. Combine Expectations that check different aspects like the center (`ExpectColumnMeanToBeBetween`), spread (`ExpectColumnQuantileValuesToBeBetween`), and shape (`ExpectColumnKlDivergenceToBeLessThan`) of the distribution. Using multiple Expectations in concert gives a more comprehensive validation.
-:::
-
-### Row-level Expectations
-
-#### Expect Column Values To Be Between
-
-Ensures that all values in a column fall between a specified minimum and maximum value.
-
-**Use Case**: Essential for bounding numerical values within valid ranges, such as ensuring product ratings or purchase amounts are within reasonable limits.
-
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValuesToBeBetween"
-```
-
-<small>View `ExpectColumnValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_between).</small>
-
-#### Expect Column Value Z Scores To Be Less Than
+### Expect column value z-scores to be less than
 
 Checks that the Z-scores (number of standard deviations from mean) of all values are below a threshold.
 
 **Use Case**: Powerful for identifying individual outliers and anomalous data points that could represent data entry issues or unusual transactions.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValueZScoresToBeLessThan"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValueZScoresToBeLessThan"
 ```
 
 <small>View `ExpectColumnValueZScoresToBeLessThan` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_value_z_scores_to_be_less_than).</small>
 
-<br/>
-<br/>
 
-:::tip[GX tip for column-level Expectations]
-- Base the range in `ExpectColumnValuesToBeBetween` on domain knowledge to ensure validity.
-- Use `ExpectColumnValueZScoresToBeLessThan` to flag outliers, but set the threshold carefully to avoid false alarms.
-- Analyze unexpected rows flagged by Row-level Expectations to uncover deeper insights about data issues.
+### Expect column values to be between
+
+Ensures that all values in a column fall between a specified minimum and maximum value.
+
+**Use Case**: Essential for bounding numerical values within valid ranges, such as ensuring product ratings or purchase amounts are within reasonable limits.
+
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValuesToBeBetween"
+```
+
+<small>View `ExpectColumnValuesToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_between).</small>
+
+
+### Column-level summary statistic Expectations
+
+GX provides a group of Expectations to validate that the summary statistics of a column fall within expected ranges. The table below lists the available Expectations in this category.
+
+| Column summary statistic | Expectation name | View in the Expectation Gallery |
+| :-- | :-- | :-- |
+| Minimum | Expect column min to be between | [`ExpectColumnMinToBeBetween`](https://greatexpectations.io/expectations/expect_column_min_to_be_between) |
+| Maximum | Expect column max to be between | [`ExpectColumnMaxToBeBetween`](https://greatexpectations.io/expectations/expect_column_max_to_be_between) |
+| Mean | Expect column mean to be between | [`ExpectColumnMeanToBeBetween`](https://greatexpectations.io/expectations/expect_column_mean_to_be_between) |
+| Median | Expect column median to be between | [`ExpectColumnMedianToBeBetween`](https://greatexpectations.io/expectations/expect_column_median_to_be_between) |
+| Sum | Expect column sum to be between | [`ExpectColumnSumToBeBetween`](https://greatexpectations.io/expectations/expect_column_sum_to_be_between) |
+| Standard deviation | Expect column stdev to be between | [`ExpectColumnStdevToBeBetween`](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between) |
+| Quantile values | Expect column quantile values to be between | [`ExpectColumnQuantileValuesToBeBetween`](https://greatexpectations.io/expectations/expect_column_quantile_values_to_be_between) |
+
+
+The `ExpectColumnMinToBeBetween`, `ExpectColumnMaxToBeBetween`, `ExpectColumnMeanToBeBetween`, `ExpectColumnMedianToBeBetween`, `ExpectColumnSumToBeBetween`, and `ExpectColumnStdevToBeBetween` Expectations adhere to the same usage pattern and arguments. To define the expected range for the column and summary statistic, supply the `column` name along with `min_value` and `max_value` to define the lower and upper bounds of the expected statistic value range, respectively.
+
+For example, if using `ExpectColumnMeanToBeBetween`:
+
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnMeanToBeBetween"
+```
+
+To use the `ExpectColumnQuantileValuesToBeBetween` Expectation, specify the `quantiles` and `value_ranges` as arguments.
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnQuantileValuesToBeBetween"
+```
+
+
+:::tip[GX tips for distribution Expectations]
+- Use the `mostly` parameter to allow for acceptable deviations in your data, providing flexibility in your validations.
+- `ExpectColumnValuesToBeBetween` can often be confused with `ExpectColumnMinToBeBetween` and `ExpectColumnMaxToBeBetween`. Use `ExpectColumnValuesToBeBetween` to define a single minimum or maxiumum value that is used to validate each value in the column.
+Use `ExpectColumnMinToBeBetween` and `ExpectColumnMaxToBeBetween` to define a range that is used to validate the overall column minimum or maximum.
+- Don't rely on a single distribution Expectation. Combine Expectations that check different aspects like the center (`ExpectColumnMeanToBeBetween`), spread (`ExpectColumnQuantileValuesToBeBetween`), and shape (`ExpectColumnKlDivergenceToBeLessThan`) of the distribution. Using multiple Expectations in concert gives a more comprehensive validation.
 :::
 
-## Additional distribution Expectations
 
-In addition to the key distribution Expectations discussed above, GX offers a range of other Expectations that can be useful for validating and monitoring data distributions. Some examples include:
+## Example: Validate distribution of a column
 
-- `ExpectColumnMaxToBeBetween`: Verifies that the maximum value in a column falls within a specified range. This Expectation is useful for detecting outliers or unexpected high values that could skew your data analysis or indicate data quality issues. It's particularly valuable when dealing with numerical data where upper bounds are critical, such as price data or sensor readings. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_max_to_be_between))
+**Goal**: Using a collection of distribution Expectations and either GX Cloud or GX Core, validate the distribution of the `purchase_amount` column.
 
-- `ExpectColumnMinToBeBetween`: Ensures that the minimum value in a column is within a defined range. This Expectation helps identify unexpected low values or potential data entry errors. It's especially useful for fields where there's a logical lower limit, such as age, quantity, or non-negative measurements. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_min_to_be_between))
+<Tabs
+   defaultValue="gx_cloud"
+   values={[
+      {value: 'gx_cloud', label: 'GX Cloud'},
+      {value: 'gx_core', label: 'GX Core'}
+   ]}
+>
 
-- `ExpectColumnMedianToBeBetween`: Checks if the median value of a column is within a specified range. The median is the middle value when the data is sorted in ascending or descending order. This Expectation is useful for ensuring that the central tendency of the data falls within acceptable limits. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_median_to_be_between))
+<TabItem value="gx_cloud" label="GX Cloud">
 
-- `ExpectColumnSumToBeBetween`: Verifies that the sum of all values in a column is between a specified minimum and maximum value. This Expectation helps you check if the total of your data is within expected boundaries, which can be helpful for catching data anomalies or ensuring consistency. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_sum_to_be_between))
+Use the GX Cloud UI to walk through the following steps.
 
-- `ExpectColumnKLDivergenceToBeLessThan`: Compares the distribution of a specified column to a reference distribution using the Kullback-Leibler (KL) divergence metric. KL divergence measures the difference between two probability distributions. This Expectation checks if the KL divergence is below a specified threshold, allowing you to assess the similarity between the actual and expected data distributions. (View in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_kl_divergence_to_be_less_than))
+1. Create a Postgres Data Asset for the `distribution_purchases` table, using the connection string:
+   ```
+   postgresql+psycopg2://try_gx:try_gx@postgres.workshops.greatexpectations.io/gx_learn_data_quality
+   ```
 
-These additional Expectations provide more advanced techniques for comparing and validating data distributions, allowing you to create even more comprehensive and tailored validation suites.
+2. Add an **Expect column mean to be between** Expectation to the freshly created Data Asset's default Expectation Suite.
+    * Column: `purchase_amount`
+    * Min Value: 1250
+    * Max Value: 1500
 
-To learn more about these and other available Expectations, be sure to explore the [Expectation Gallery](https://greatexpectations.io/expectations). The gallery provides a complete list of Expectations, along with code examples and use cases to help you effectively apply them to your specific data quality challenges.
+3. Add an **Expect column median to be between** Expectation to the Expectation Suite.
+    * Column: `purchase_amount`
+    * Min Value: 1000
+    * Max Value: 1250
 
-## Examples
+4. Add an **Expect column value z-scores to be less than** Expectation to the Expectation Suite.
+    * Column: `purchase_amount`
+    * Threshold: 2
+    * Mostly: 90%
 
-### Validating customer age distribution
+6. Click the **Validate** button to validate the purchase data with the distribution Expectations.
+7. Click **Validate**.
+8. Review Validation Results.
 
-Here's an example GX Core workflow that validates the age distribution in the sample customer data:
+**Result**: All Expectations pass.
+
+![Validation Results for distribution Expectations in GX Cloud UI](distribution_resources/distribution_example_validation_results.png)
+
+</TabItem>
+
+<TabItem value="gx_core" label="GX Core">
+Run the following GX Core workflow.
 
 ```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_workflow.py full workflow"
 ```
 
-This example demonstrates how to validate the age distribution in the customer dataset using multiple distribution Expectations.
+**Result**:
+```python title="Python output"
+Expectation Suite passed: True
+
+expect_column_kl_divergence_to_be_less_than: True
+expect_column_mean_to_be_between: True
+expect_column_median_to_be_between: True
+```
+
+</TabItem>
+</Tabs>
+
+**GX solution**: GX provides Expectations in both GX Cloud or GX Core that enable validation of a variety of distribution aspects, including shape, center, and spread.
 
 ## Scenarios
 
@@ -159,18 +186,12 @@ This example demonstrates how to validate the age distribution in the customer d
 
 **GX solution**: Use `ExpectColumnValuesToBeBetween` and `ExpectColumnMeanToBeBetween` to ensure transaction amounts are within expected ranges and the mean remains consistent.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py detecting_anomalies"
-```
-
 ### Monitoring data drift in model inputs
 
 **Context**: Machine learning models assume that the input data distribution remains consistent over time. Data drift can degrade model performance.
 
 **GX solution**: Use `ExpectColumnKlDivergenceToBeLessThan` to compare current data distribution with a reference distribution and detect drift.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py model_data_drift"
-
-```
 
 ### Ensuring consistency in time-series data
 
@@ -178,35 +199,31 @@ This example demonstrates how to validate the age distribution in the customer d
 
 **GX solution**: Use `ExpectColumnQuantileValuesToBeBetween` to check that quantiles of the data remain within expected ranges.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py time_series_consistency"
-```
 
 ## Avoid common distribution analysis pitfalls
 
-- **Assuming Static Distributions**: Data distributions often evolve over time due to seasonality, trends, or changes in data collection. It's crucial to regularly update reference distributions and Expectations to reflect the current state of the data.
+- **Assuming static distributions**: Data distributions often evolve over time due to seasonality, trends, or changes in data collection. It is crucial to regularly update reference distributions and Expectations to reflect the current state of the data.
 
-- **Overlooking Data Quality Issues**: Data entry errors, missing values, or outliers can significantly distort the distribution. Ensuring comprehensive data quality checks, including handling missing data and outliers, is essential for accurate distribution analysis.
+- **Overlooking data quality issues**: Data entry errors, missing values, or outliers can significantly distort the distribution. Comprehensive data quality checks, including handling missing data and outliers, is an essential complement to distribution analysis and validation.
 
-- **Not Accounting for Multimodal Distributions**: Some datasets may have multiple peaks, requiring appropriate methods and Expectations that can handle multimodal distributions. Ignoring multimodality can lead to inaccurate interpretations of the data.
+- **Not accounting for multimodal distributions**: Some datasets may have multiple peaks, requiring appropriate methods and Expectations that can handle multimodal distributions. Ignoring multimodality can lead to inaccurate interpretations of the data.
 
-- **Neglecting Time-based Changes**: Distributions may change over time due to seasonality or long-term trends. Implementing time-based analysis alongside point-in-time checks is crucial for understanding and adapting to evolving data distributions.
+- **Neglecting time-based changes**: Distributions may change over time due to seasonality or long-term trends. Implementing time-based analysis alongside point-in-time checks is crucial for understanding and adapting to evolving data distributions.
 
-- **Insufficient Sample Size**: Small sample sizes may not accurately represent the true distribution of the data. It's important to ensure that the sample size is large enough to capture the underlying distribution and avoid drawing incorrect conclusions based on limited data.
+- **Insufficient sample size**: Small sample sizes may not accurately represent the true distribution of the data. It's important to ensure that the sample size is large enough to capture the underlying distribution and avoid drawing incorrect conclusions based on limited data.
 
-## Next steps: Enhancing distribution management
+## The path forward
 
-Effectively managing data distribution is essential for ensuring data integrity and reliability. To build upon the strategies discussed in this guide, consider the following actions:
+Effectively managing and validating data distribution is essential for ensuring data integrity and reliability. To build upon the strategies discussed in this guide, consider the following actions:
 
-1. **Integrate Distribution Checks into Pipelines**: Embed distribution-focused Expectations into your data pipelines to automate monitoring and quickly detect anomalies.
+1. **Integrate distribution checks into pipelines**: Embed distribution-focused Expectations into your data pipelines to automate monitoring and quickly detect anomalies.
 
-2. **Leverage Historical Data**: Use historical data to establish baseline distributions, and update them regularly to account for trends and seasonality.
+2. **Leverage historical data**: Use historical data to establish baseline distributions, and update them regularly to account for trends and seasonality.
 
-3. **Combine with Other Data Quality Checks**: Incorporate distribution analysis with other data quality aspects such as volume, missingness, and data types for a comprehensive validation strategy.
+3. **Combine with other data quality checks**: Incorporate distribution analysis with other data quality aspects such as volume, missingness, and data types for a comprehensive validation strategy.
 
-4. **Visualize Distribution Changes**: Implement tools to visualize data distributions over time, aiding in the detection of subtle shifts.
+4. **Visualize distribution changes**: Implement tools to visualize data distributions over time, aiding in the detection of subtle shifts.
 
-5. **Collaborate Across Teams**: Work with data scientists, analysts, and domain experts to interpret distribution changes and adjust Expectations accordingly.
+5. **Collaborate across teams**: Work with data scientists, analysts, and domain experts to interpret distribution changes and adjust Expectations accordingly.
 
-By consistently applying these practices and expanding your validation processes, you can strengthen the integrity of your data and improve the accuracy of your analyses and models. Continue exploring our data quality series to learn more about integrating various aspects of data quality into your workflows.
-
-
+By consistently applying these practices and expanding your validation processes, you can strengthen the integrity of your data and improve the accuracy of your analyses and models. Continue exploring our [data quality series](/reference/learn/data_quality_use_cases/dq_use_cases_lp.md) to learn more about integrating various aspects of data quality into your workflows.

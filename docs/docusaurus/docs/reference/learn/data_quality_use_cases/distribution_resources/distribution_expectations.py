@@ -48,29 +48,24 @@ suite = context.suites.add(
 # Start Expectation snippets.
 
 suite.add_expectation(
-    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnMeanToBeBetween">
-    gxe.ExpectColumnMeanToBeBetween(
-        column="purchase_amount", min_value=50, max_value=1000
-    )
-    # </snippet>
-)
-
-suite.add_expectation(
-    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnQuantileValuesToBeBetween">
-    gxe.ExpectColumnQuantileValuesToBeBetween(
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValueZScoresToBeLessThan">
+    gxe.ExpectColumnValueZScoresToBeLessThan(
         column="purchase_amount",
-        quantile_ranges={
-            "quantiles": [0.5, 0.9],
-            "value_ranges": [[50, 200], [500, 2000]],
-        },
+        threshold=3,
+        double_sided=True
     )
     # </snippet>
 )
 
 suite.add_expectation(
-    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnStdevToBeBetween">
-    gxe.ExpectColumnStdevToBeBetween(
-        column="purchase_amount", min_value=500, max_value=2000
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnKlDivergenceToBeLessThan">
+    gxe.ExpectColumnKlDivergenceToBeLessThan(
+        column="purchase_amount",
+        partition_object={
+            "bins": [0, 1000, 2000, 3000, 4000],
+            "weights": [0.5, 0.15, 0.2, 0.15],
+        },
+        threshold=0.1,
     )
     # </snippet>
 )
@@ -86,53 +81,20 @@ suite.add_expectation(
 )
 
 suite.add_expectation(
-    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValueZScoresToBeLessThan">
-    gxe.ExpectColumnValueZScoresToBeLessThan(
-        column="purchase_amount",
-        threshold=3,
-    )
-    # </snippet>
-)
-
-detecting_anomalies_expectations = [
-    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py detecting_anomalies">
-    # Validate that purchase_amount is within expected range
-    gxe.ExpectColumnValuesToBeBetween(
-        column="purchase_amount",
-        min_value=1,
-        max_value=10000,
-    ),
-    # Validate that the mean of purchase_amount is within expected range
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnMeanToBeBetween">
     gxe.ExpectColumnMeanToBeBetween(
-        column="purchase_amount", min_value=200, max_value=500
-    ),
-    # </snippet>
-]
-
-[suite.add_expectation(expectation) for expectation in detecting_anomalies_expectations]
-
-suite.add_expectation(
-    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py model_data_drift">
-    # Validate that KL divergence is below threshold
-    gxe.ExpectColumnKlDivergenceToBeLessThan(
-        column="purchase_amount",
-        partition_object={
-            # Set up reference distribution (e.g., from training data)
-            "bins": [0, 100, 500, 1000, 5000, 10000],
-            "weights": [0.05, 0.25, 0.35, 0.25, 0.1],
-        },
-        threshold=0.1,
+        column="purchase_amount", min_value=50, max_value=1000
     )
     # </snippet>
 )
 
 suite.add_expectation(
-    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py time_series_consistency">
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnQuantileValuesToBeBetween">
     gxe.ExpectColumnQuantileValuesToBeBetween(
         column="purchase_amount",
         quantile_ranges={
-            "quantiles": [0.25, 0.5, 0.75],
-            "value_ranges": [[100, 150], [200, 250], [300, 400]],
+            "quantiles": [0.5, 0.9],
+            "value_ranges": [[50, 200], [500, 2000]],
         },
     )
     # </snippet>
