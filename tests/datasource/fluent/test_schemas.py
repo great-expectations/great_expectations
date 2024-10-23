@@ -115,7 +115,7 @@ def test_vcs_schemas_match(  # noqa: C901
         pytest.xfail(reason=f"schema generated with pandas {_PANDAS_SCHEMA_VERSION}")
 
     print(f"python version: {sys.version.split()[0]}")
-    print(f"pandas version: {PANDAS_VERSION}\n")
+    print(f"pandas version: {PANDAS_VERSION}")
 
     schema_path = schema_dir.joinpath(f"{fluent_ds_or_asset_model.__name__}.json")
     print(schema_path)
@@ -124,7 +124,9 @@ def test_vcs_schemas_match(  # noqa: C901
 
     schema_as_dict = json.loads(json_str)
     _sort_lists(schema_as_dict=schema_as_dict)
-    fluent_ds_or_asset_model_as_dict = fluent_ds_or_asset_model.schema()
+    # we have tuples in our schema, which are mutated to lists when dumped to json
+    # dump and reload the schema dict to ensure we are comparing
+    fluent_ds_or_asset_model_as_dict = json.loads(fluent_ds_or_asset_model.schema_json())
     _sort_lists(schema_as_dict=fluent_ds_or_asset_model_as_dict)
 
     if "Excel" in str(schema_path):

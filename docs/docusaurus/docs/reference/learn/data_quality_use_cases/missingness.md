@@ -11,7 +11,7 @@ In this guide, you will learn how to leverage GX to effectively handle missing d
 
 ## Prerequisite knowledge
 
-This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Overview](https://docs.greatexpectations.io/docs/guides/overview) to familiarize yourself with key concepts and setup procedures.
+This article assumes basic familiarity with GX components and workflows. If you're new to GX, start with the [GX Overview](https://docs.greatexpectations.io/docs/cloud/overview/gx_cloud_overview/) to familiarize yourself with key concepts and setup procedures.
 
 ## Data preview
 

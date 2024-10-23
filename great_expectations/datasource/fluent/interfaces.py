@@ -110,7 +110,7 @@ class PartitionerSortingProtocol(Protocol):
     sort_ascending: bool
 
     @property
-    def param_names(self) -> list[str]:
+    def param_names(self) -> Union[list[str], tuple[str, ...]]:
         """The parameter names that specify a batch derived from this partitioner
 
         For example, for PartitionerYearMonth this returns ["year", "month"]. For more
@@ -287,6 +287,7 @@ _ExecutionEngineT = TypeVar("_ExecutionEngineT")
 DatasourceT = TypeVar("DatasourceT", bound="Datasource")
 
 
+@public_api
 class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
@@ -371,7 +372,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
 
     # End Abstract Methods
 
-    @public_api
     def add_batch_definition(
         self,
         name: str,
@@ -453,7 +453,15 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT], ABC):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
+    @public_api
     def get_batch_definition(self, name: str) -> BatchDefinition[PartitionerT]:
+        """Get a batch definition.
+
+        Args:
+            name (str): Name of the BatchDefinition to get.
+        Raises:
+            KeyError: If the BatchDefinition does not exist.
+        """
         batch_definitions = [
             batch_definition
             for batch_definition in self.batch_definitions
@@ -605,6 +613,7 @@ def _sort_batch_identifiers_with_none_metadata_values(
 _DataAssetT = TypeVar("_DataAssetT", bound=DataAsset)
 
 
+@public_api
 class Datasource(
     FluentBaseModel,
     Generic[_DataAssetT, _ExecutionEngineT],
@@ -791,6 +800,7 @@ class Datasource(
         asset: _DataAssetT
         return {asset.name for asset in self.assets}
 
+    @public_api
     def get_asset(self, name: str) -> _DataAssetT:
         """Returns the DataAsset referred to by asset_name
 
@@ -813,6 +823,7 @@ class Datasource(
                 f'"{name}" not found. Available assets are ({", ".join(self.get_asset_names())})'
             ) from exc
 
+    @public_api
     def delete_asset(self, name: str) -> None:
         """Removes the DataAsset referred to by asset_name from internal list of available DataAsset objects.
 
