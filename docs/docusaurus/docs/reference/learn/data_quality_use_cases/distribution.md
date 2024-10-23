@@ -36,9 +36,11 @@ In this dataset, `purchase_amount` represents the amount spent by customers in v
 
 GX offers a collection of Expectations used to validate data distribution. These Expectations be added to an Expectation Suite via the GX Cloud UI or using the GX Core Python library.
 
-:::TODO:::
+![Add a distribution Expectation in GX Cloud](distribution_resources/distribution_add_expectation.gif)
 
-![Add a distribution Expectation in GX Cloud](#TODO)
+:::note[Distribution Expectation availability]
+`ExpectColumnKLDivergenceToBeLessThan` and `ExpectColumnQuantileValuesToBeBetween` can be added to a GX Cloud Expectation Suite, but currently must be added using GX Core instead of the GX Cloud UI.
+:::
 
 
 ### Expect column KL divergence to be less than
@@ -180,18 +182,17 @@ expect_column_median_to_be_between: True
 
 ## Scenarios
 
-### Detecting anomalies in transaction amounts
+### Detecting distribution anomalies
 
-**Context**: Sudden spikes or drops in transaction amounts can indicate fraud, data entry errors, or system issues. Monitoring the distribution helps in early detection of such anomalies.
+**Context**: Sudden spikes or drops in values can indicate data entry errors, upstream pipeline problems, or other unexpected system issues. Monitoring data distribution helps in early detection of such anomalies.
 
-**GX solution**: Use `ExpectColumnValuesToBeBetween` and `ExpectColumnMeanToBeBetween` to ensure transaction amounts are within expected ranges and the mean remains consistent.
+**GX solution**: Use `ExpectColumnValuesToBeBetween` and `ExpectColumnMeanToBeBetween` to ensure values are within expected ranges and the mean remains consistent. Use `ExpectColumnValueZScoresToBeLessThan` to validate that data retain their expected relationship to the distribution mean.
 
 ### Monitoring data drift in model inputs
 
-**Context**: Machine learning models assume that the input data distribution remains consistent over time. Data drift can degrade model performance.
+**Context**: Machine learning models assume that the input data distribution remains consistent over time. Data drift can degrade model performance, and is a key factor in determining a model retraining cadence.
 
 **GX solution**: Use `ExpectColumnKlDivergenceToBeLessThan` to compare current data distribution with a reference distribution and detect drift.
-
 
 ### Ensuring consistency in time-series data
 
