@@ -240,6 +240,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_path_succes
     expected_batch_definition = BatchDefinition(
         name=name, partitioner=FileNamePartitionerPath(regex=expected_regex)
     )
+    assert isinstance(expected_batch_definition.partitioner, FileNamePartitionerPath)
     datasource.add_batch_definition.return_value = expected_batch_definition
     file_path_data_connector.get_matched_data_references.return_value = [PATH_NAME]
 
@@ -339,6 +340,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_succ
         name=name,
         partitioner=FileNamePartitionerYearly(regex=batching_regex, sort_ascending=sort),
     )
+    assert isinstance(expected_batch_definition.partitioner, FileNamePartitionerYearly)
     datasource.add_batch_definition.return_value = expected_batch_definition
 
     # act
@@ -422,6 +424,8 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_suc
         name=name,
         partitioner=FileNamePartitionerMonthly(regex=batching_regex, sort_ascending=sort),
     )
+    assert isinstance(expected_batch_definition.partitioner, FileNamePartitionerMonthly)
+
     datasource.add_batch_definition.return_value = expected_batch_definition
 
     # act
@@ -494,6 +498,8 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_succe
         name=name,
         partitioner=FileNamePartitionerDaily(regex=batching_regex, sort_ascending=sort),
     )
+    assert isinstance(expected_batch_definition.partitioner, FileNamePartitionerDaily)
+
     datasource.add_batch_definition.return_value = expected_batch_definition
 
     # act
