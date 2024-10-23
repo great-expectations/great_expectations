@@ -36,8 +36,9 @@ class DataSourceConfig(ABC):
     def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
         """Create a batch setup object for this data source."""
 
-    def get_test_id(self, test_description: Optional[str]) -> str:
-        parts: list[Optional[str]] = [test_description, self.label, self.name]
+    @property
+    def test_id(self) -> str:
+        parts: list[Optional[str]] = [self.label, self.name]
         non_null_parts = [p for p in parts if p is not None]
 
         return "-".join(non_null_parts)

@@ -1,4 +1,4 @@
-from typing import Callable, Generator, Optional, Sequence, TypeVar
+from typing import Callable, Generator, Sequence, TypeVar
 
 import pandas as pd
 import pytest
@@ -14,7 +14,6 @@ _F = TypeVar("_F", bound=Callable)
 def parameterize_batch_for_data_sources(
     data_source_configs: Sequence[DataSourceConfig],
     data: pd.DataFrame,
-    description: Optional[str] = None,
 ) -> Callable[[_F], _F]:
     """Test decorator that parametrizes a test function with batches for various data sources.
     This injects a `batch_for_datasource` parameter into the test function for each data source
@@ -33,7 +32,7 @@ def parameterize_batch_for_data_sources(
         pytest_params = [
             pytest.param(
                 (data, t),
-                id=t.get_test_id(description),
+                id=t.test_id,
                 marks=[t.pytest_mark],
             )
             for t in data_source_configs

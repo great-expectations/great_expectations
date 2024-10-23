@@ -24,7 +24,6 @@ def test_min(batch_for_datasource) -> None:
         PandasDataFrameDatasourceConfig(),
     ],
     data=pd.DataFrame({"a": [1, 2], "b": [3, 4]}),
-    description="max",
 )
 def test_max(batch_for_datasource) -> None:
     expectation = gxe.ExpectColumnMaxToBeBetween(column="a", min_value=2, max_value=2)
