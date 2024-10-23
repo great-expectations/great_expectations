@@ -120,6 +120,8 @@ class PartitionerSortingProtocol(Protocol):
 
 
 class PartitionerProtocol(PartitionerSortingProtocol, Protocol):
+    """arbitrary comment"""
+
     @property
     def columns(self) -> list[str]:
         """The names of the column used to partition the data"""
