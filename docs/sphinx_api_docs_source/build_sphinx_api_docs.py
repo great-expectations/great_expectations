@@ -286,7 +286,7 @@ class SphinxInvokeDocsBuilder:
                 raise Exception(  # noqa: TRY002, TRY003
                     f"Expected class mdx file path to end with _class; this could indicate a method link that will break: {without_extension}"
                 )
-            internal_ref["href"] = str(without_extension)
+            internal_ref["href"] = "/docs/reference/api/" + str(without_extension)
 
         doc_str = str(doc)
 
