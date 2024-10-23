@@ -93,8 +93,6 @@ def datasource(
 def data_asset(
     datasource: SnowflakeDatasource,
     table_factory: TableFactory,
-    get_missing_data_asset_error_type: type[Exception],
-    request,
 ) -> Generator[DataAsset, None, None]:
     """Test the entire Data Asset CRUD lifecycle here and in Data Asset-specific fixtures."""
     asset_name = f"da_{uuid.uuid4().hex}"
@@ -110,7 +108,7 @@ def data_asset(
         table_name=table_name,
     )
     datasource.delete_asset(name=asset_name)
-    with pytest.raises(get_missing_data_asset_error_type):
+    with pytest.raises(LookupError):
         datasource.get_asset(name=asset_name)
 
 
