@@ -50,9 +50,7 @@ suite = context.suites.add(
 suite.add_expectation(
     # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnValueZScoresToBeLessThan">
     gxe.ExpectColumnValueZScoresToBeLessThan(
-        column="purchase_amount",
-        threshold=3,
-        double_sided=True
+        column="purchase_amount", threshold=3, double_sided=True
     )
     # </snippet>
 )
