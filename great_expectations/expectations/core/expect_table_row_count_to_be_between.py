@@ -116,7 +116,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         Passing Case:
             Input:
                 ExpectTableRowCountToBeBetween(
-                    min_value=1
+                    min_value=1,
                     max_value=4
             )
 

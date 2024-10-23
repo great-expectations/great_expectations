@@ -44,7 +44,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
 
    Actions can be found in the `great_expectations.checkpoint` module.  All Action class names end with `*Action`.
 
-   The following is an example of how to create an Action list that will trigger a `SlackAlertAction` and an `UpdateDataDocsAction`:
+   The following is an example of how to create an Action list that will trigger a `SlackNotificationAction` and an `UpdateDataDocsAction`:
 
    ```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/create_a_checkpoint_with_actions.py - define an Action list"
    ```

@@ -71,6 +71,6 @@ batch = batch_definition.get_batch(batch_parameters={"year": "2019", "month": "0
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_from_a_batch_definition.py - verify populated Batch">
-batch.head()
+print(batch.head())
 # </snippet>
 # </snippet>

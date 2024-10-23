@@ -84,7 +84,7 @@ Organization access tokens are typically required for external application authe
 
 1. In GX Cloud, click **Settings** > **Tokens**.
 
-2. In the **Organization access tokens** or **Access tokens** panes, click **Delete**.
+2. In the **User access tokens** or **Organization access tokens** panes, click **Delete Token**.
 
 3. Click **Delete**.
 

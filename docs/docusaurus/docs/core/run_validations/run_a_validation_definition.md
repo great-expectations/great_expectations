@@ -45,7 +45,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 
    Validation Results are automatically saved in your Data Context when a Validation Definition's `run()` method is called.  For convenience, the `run()` method also returns the Validation Results as an object you can review.
 
-   :::tip
+   :::tip Result verbosity
 
    You can set the level of detail returned in a Validation Definition's results by passing a Result Format configuration as the `result_format` parameter of your Validation Definition's `run(...)` method.  For more information on Result Formats, see [Choose a result format](/core/trigger_actions_based_on_results/choose_a_result_format/choose_a_result_format.md).
 
@@ -58,7 +58,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
    
    When you print the returned Validation Result object you will recieve a json representation of the results.  By default this will include a `"results"` list that includes each Expectation in your Validation Definition's Expectation Suite, whether the Expectation was successfully met or failed to pass, and some sumarized information explaining the why the Expectation succeeded or failed.
 
-   :::tip
+   :::tip Result presentation
 
    GX Cloud users can view the Validation Results in the GX Cloud UI by following the url provided with:
 

@@ -39,7 +39,7 @@ A Validation Definition is a fixed reference that links a Batch of data to an Ex
 
 1. Retrieve an Expectation Suite with Expectations.
 
-   Update the value of `suite_name` in the following code with the name of your Expectation Suite.  Then execute the code to retrieve that Expectation Suite:
+   Update the value of `expectation_suite_name` in the following code with the name of your Expectation Suite.  Then execute the code to retrieve that Expectation Suite:
 
    ```python title="Python" name="docs/docusaurus/docs/core/run_validations/_examples/create_a_validation_definition.py - retrieve an Expectation Suite"
    ```

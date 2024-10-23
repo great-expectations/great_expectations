@@ -79,6 +79,3 @@ To make the identification of Data Assets containing partitions easier, partitio
 6. Optional. Hover over a circle in the Validation timeline to view details about a specific Validation run, including the observed values.
 
     ![Validation timeline detail](/img/view_validation_timeline_detail.png)
-
-7. Optional. To hide the Validation timeline, click the **Validation timeline** (![Validation timeline icon](/img/validation_timeline.png)) icon.
-

@@ -30,6 +30,6 @@ sample_batch = context.data_sources.pandas_default.read_csv(file_path)
 
 # Verify that data was read into `sample_batch`:
 # <snippet name="docs/docusaurus/docs/core/define_expectations/_examples/retrieve_a_batch_of_test_data_pandas_default.py - verify data was read into a Batch">
-sample_batch.head()
+print(sample_batch.head())
 # </snippet>
 # </snippet>

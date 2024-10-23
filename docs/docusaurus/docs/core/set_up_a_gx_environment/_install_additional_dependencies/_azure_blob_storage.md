@@ -30,7 +30,7 @@ Azure Blob Storage stores unstructured data on the Microsoft cloud data storage 
 
    To store your Azure Blob Storage credentials as an environment variable, replace `<YOUR-STORAGE-ACCOUNT-NAME>` and `<YOUR-STORAGE-ACCOUNT-KEY>` in the following terminal command with your Azure Blob Storage account values:
 
-   ```title="Terminal input"
+   ```bash title="Terminal input"
    export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY>"
    ```
 

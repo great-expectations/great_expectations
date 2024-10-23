@@ -9,7 +9,7 @@ import AccessCredentials from './_access_credentials.md'
 
 
 
-To connect GX to your SQL data, you will first need your connection string and corresponding credentials. Because your connection string and credentials provide access to your data they should be stored securely outside of version control.  GX Core allows you to securely store credentials and connection strings as environment variables or in an uncommitted config file.  These variables are then accessed through string substitution in your version controlled code.
+To connect GX to your SQL data, you will need your connection string and corresponding credentials. Because your connection string and credentials provide access to your data they should be stored securely outside of version control.  GX Core allows you to securely store credentials and connection strings as environment variables or in an uncommitted config file.  These variables are then accessed through string substitution in your version controlled code.
 
 ### Prerequisites
 

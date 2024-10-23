@@ -13,7 +13,7 @@ import InstallSql from './_install_additional_dependencies/_sql.md'
 import InstallSpark from './_install_additional_dependencies/_spark.md'
 
 Some environments and Data Sources require additional Python libraries or third party utilities that are not included in the base installation of
-GX Core. Use the information provided here to install the necessary dependencies for Amazon S3, Azure Blob Storage, Google Cloud Storage, and SQL databases.
+GX Core. Use the information provided here to install the necessary dependencies for your databases.
 
 <Tabs queryString="dependencies" groupId="additional-dependencies" defaultValue='amazon' values={[{value: 'amazon', label: 'Amazon S3'}, {label: 'Microsoft Azure Blob Storage', value:'azure'}, {label: 'Google Cloud Storage', value:'gcs'}, {label: 'SQL databases', value:'sql'}, {label: 'Spark', value:'spark'}]}>
 
