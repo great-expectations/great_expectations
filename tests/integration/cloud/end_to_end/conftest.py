@@ -5,7 +5,7 @@ import os
 import pathlib
 import uuid
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Final, Iterator, Literal, Protocol
+from typing import TYPE_CHECKING, Final, Generator, Iterator, Literal, Protocol
 
 import numpy as np
 import pytest
@@ -16,7 +16,6 @@ from great_expectations.checkpoint import Checkpoint
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
-from great_expectations.exceptions.exceptions import BuildBatchRequestError
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -65,10 +64,12 @@ def datasource_name(
 def expectation_suite(
     context: CloudDataContext,
 ) -> Iterator[ExpectationSuite]:
+    """This ExpectationSuite is shared by each E2E test, so its expected that the data
+    used by each test follows the same shape."""
     expectation_suite_name = f"es_{uuid.uuid4().hex}"
     expectation_suite = context.suites.add(ExpectationSuite(name=expectation_suite_name))
     assert len(expectation_suite.expectations) == 0
-    expectation_suite.add_expectation(ExpectColumnValuesToNotBeNull(column="name", mostly=1))
+    expectation_suite.add_expectation(ExpectColumnValuesToNotBeNull(column="name", mostly=1))  # type: ignore[arg-type]  # todo: fix in core-412
     assert len(expectation_suite.expectations) == 1
     expectation_suite.save()
     yield context.suites.get(name=expectation_suite_name)
@@ -80,7 +81,9 @@ def expectation_suite(
 @pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
-) -> Iterator[Checkpoint]:
+) -> Generator[Checkpoint, None, None]:
+    """This Checkpoint is used by each E2E test. It's expected that each test
+    will override its list of validation definitions within the test module."""
     checkpoint_name = f"E2E Test Checkpoint {uuid.uuid4().hex}"
 
     checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=[])
@@ -95,16 +98,6 @@ def checkpoint(
 @pytest.fixture(scope="module")
 def tmp_path(tmp_path_factory) -> pathlib.Path:
     return tmp_path_factory.mktemp("project")
-
-
-@pytest.fixture(scope="package")
-def get_missing_data_asset_error_type() -> type[Exception]:
-    return LookupError
-
-
-@pytest.fixture(scope="package")
-def in_memory_batch_request_missing_dataframe_error_type() -> type[Exception]:
-    return BuildBatchRequestError
 
 
 class TableFactory(Protocol):
