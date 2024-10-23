@@ -21,7 +21,7 @@ class PandasDataFrameDatasourceConfig(DataSourceConfig):
         return pytest.mark.filesystem
 
     @override
-    def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
+    def create_batch_setup(self, data: pd.DataFrame, request: pytest.FixtureRequest) -> BatchSetup:
         return PandasDataFrameBatchSetup(data=data, config=self)
 
 

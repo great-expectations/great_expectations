@@ -1,3 +1,5 @@
+import pathlib
+
 import pandas as pd
 import pytest
 
@@ -21,23 +23,36 @@ class PandasCsvDatasourceConfig(DataSourceConfig):
         return pytest.mark.unit
 
     @override
-    def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
-        return PandasCsvBatchSetup(data=data, config=self)
+    def create_batch_setup(self, data: pd.DataFrame, request: pytest.FixtureRequest) -> BatchSetup:
+        tmp_path = request.getfixturevalue("tmp_path")
+        assert isinstance(tmp_path, pathlib.Path)
+
+        return PandasCsvBatchSetup(data=data, config=self, tmp_path=tmp_path)
 
 
 class PandasCsvBatchSetup(BatchSetup[PandasCsvDatasourceConfig]):
+    def __init__(self, config: PandasCsvDatasourceConfig, data: pd.DataFrame, tmp_path) -> None:
+        super().__init__(config=config, data=data)
+
+        self.tmp_path = tmp_path
+
     @override
     def make_batch(self) -> Batch:
         name = self._random_resource_name()
         return (
             self._context.data_sources.add_pandas(name)
-            .add_dataframe_asset(name)
+            .add_csv_asset(name, self.csv_path)
             .add_batch_definition_whole_dataframe(name)
-            .get_batch(batch_parameters={"dataframe": self.data})
+            .get_batch()
         )
 
     @override
-    def setup(self) -> None: ...
+    def setup(self) -> None:
+        self.data.to_csv(self.csv_path, index=False)
 
     @override
     def teardown(self) -> None: ...
+
+    @property
+    def csv_path(self) -> pathlib.Path:
+        return self.tmp_path / "data.csv"
