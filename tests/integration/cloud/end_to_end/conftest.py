@@ -24,6 +24,8 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations import ExpectColumnValuesToNotBeNull
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.compatibility import pyspark, sqlalchemy
 
 LOGGER: Final = logging.getLogger("tests")
@@ -170,32 +172,20 @@ def table_factory() -> Iterator[TableFactory]:
             transaction.commit()
 
 
-@pytest.fixture(scope="module")
-def spark_df_from_pandas_df():
-    """
-    Construct a spark dataframe from pandas dataframe.
-    Returns:
-        Function that can be used in your test e.g.:
-        spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
-    """
-
-    def _construct_spark_df_from_pandas(
-        spark_session,
-        pandas_df,
-    ):
-        spark_df = spark_session.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in pandas_df.to_records(index=False)
-            ],
-            pandas_df.columns.tolist(),
-        )
-        return spark_df
-
-    return _construct_spark_df_from_pandas
+def construct_spark_df_from_pandas(
+    spark_session: pyspark.SparkSession,
+    pandas_df: pd.DataFrame,
+) -> pyspark.DataFrame:
+    spark_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x for x in record.tolist()
+            )
+            for record in pandas_df.to_records(index=False)
+        ],
+        pandas_df.columns.tolist(),
+    )
+    return spark_df
 
 
 @pytest.fixture(scope="module")
