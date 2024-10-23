@@ -4,9 +4,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.datasource.fluent.interfaces import Batch
-from tests.integration.test_utils.data_source_config.base_data_source_config import (
-    DataSourceConfig,
-)
+from tests.integration.test_utils.data_source_config import DataSourceConfig
 
 _F = TypeVar("_F", bound=Callable)
 
