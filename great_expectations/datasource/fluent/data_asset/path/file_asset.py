@@ -119,9 +119,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         return self.add_batch_definition(
             name=name,
             partitioner=FileNamePartitionerYearly(
-                regex=regex,
-                param_names=("year",),
-                sort_ascending=sort_ascending
+                regex=regex, param_names=("year",), sort_ascending=sort_ascending
             ),
         )
 
@@ -173,9 +171,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         return self.add_batch_definition(
             name=name,
             partitioner=FileNamePartitionerDaily(
-                regex=regex,
-                param_names=("year", "month", "day"),
-                sort_ascending=sort_ascending
+                regex=regex, param_names=("year", "month", "day"), sort_ascending=sort_ascending
             ),
         )
 
