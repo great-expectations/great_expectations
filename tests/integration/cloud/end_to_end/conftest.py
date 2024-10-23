@@ -12,21 +12,19 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions.exceptions import BuildBatchRequestError
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations import ExpectColumnValuesToNotBeNull
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
     from great_expectations.compatibility import pyspark, sqlalchemy
-    from great_expectations.datasource.fluent import BatchRequest
-    from great_expectations.validator.validator import Validator
 
 LOGGER: Final = logging.getLogger("tests")
 
@@ -68,43 +66,22 @@ def expectation_suite(
     expectation_suite_name = f"es_{uuid.uuid4().hex}"
     expectation_suite = context.suites.add(ExpectationSuite(name=expectation_suite_name))
     assert len(expectation_suite.expectations) == 0
-    yield expectation_suite
-    expectation_suite = context.suites.get(name=expectation_suite_name)
-    assert len(expectation_suite.expectations) > 0
+    expectation_suite.add_expectation(ExpectColumnValuesToNotBeNull(column="name", mostly=1))
+    assert len(expectation_suite.expectations) == 1
+    expectation_suite.save()
+    yield context.suites.get(name=expectation_suite_name)
     context.suites.delete(expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
-        _ = context.suites.get(name=expectation_suite_name)
-
-
-@pytest.fixture(scope="module")
-def validator(
-    context: CloudDataContext,
-    batch_request: BatchRequest,
-    expectation_suite: ExpectationSuite,
-) -> Iterator[Validator]:
-    validator: Validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite.name,
-    )
-    validator.head()
-    yield validator
-    validator.save_expectation_suite()
-    expectation_suite = validator.get_expectation_suite()
-    _ = context.suites.get(
-        name=expectation_suite.name,
-    )
+        context.suites.get(name=expectation_suite_name)
 
 
 @pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
-    batch_request: BatchRequest,
-    expectation_suite: ExpectationSuite,
 ) -> Iterator[Checkpoint]:
-    checkpoint_name = f"{batch_request.data_asset_name} | {expectation_suite.name}"
+    checkpoint_name = f"E2E Test Checkpoint {uuid.uuid4().hex}"
 
-    validation_definitions: list[ValidationDefinition] = []
-    checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=validation_definitions)
+    checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=[])
     checkpoint = context.checkpoints.add(checkpoint=checkpoint)
     yield checkpoint
     context.checkpoints.delete(name=checkpoint_name)

@@ -11,8 +11,6 @@ from great_expectations import ValidationDefinition
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
-from great_expectations.exceptions import DataContextError
-from great_expectations.expectations import ExpectColumnValuesToNotBeNull
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult
@@ -148,19 +146,6 @@ def batch_definition(
 
 
 @pytest.fixture(scope="module")
-def expectation_suite(
-    context: CloudDataContext,
-    expectation_suite: ExpectationSuite,
-) -> ExpectationSuite:
-    """Add Expectations for the Data Assets defined in this module.
-    Note: There is no need to test Expectation Suite CRUD.
-    Those assertions can be found in the expectation_suite fixture."""
-    expectation_suite.add_expectation(ExpectColumnValuesToNotBeNull(column="name", mostly=1))
-    expectation_suite.save()
-    return expectation_suite
-
-
-@pytest.fixture(scope="module")
 def validation_definition(
     context: CloudDataContext,
     expectation_suite: ExpectationSuite,
@@ -179,18 +164,12 @@ def validation_definition(
 
 @pytest.fixture(scope="module")
 def checkpoint(
-    context: CloudDataContext,
+    checkpoint: Checkpoint,
     validation_definition: ValidationDefinition,
-) -> Iterator[Checkpoint]:
-    checkpoint_name = f"{validation_definition.name} Checkpoint"
-
-    checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=[validation_definition])
-    checkpoint = context.checkpoints.add(checkpoint=checkpoint)
-    yield checkpoint
-    context.checkpoints.delete(name=checkpoint_name)
-
-    with pytest.raises(DataContextError):
-        context.checkpoints.get(name=checkpoint_name)
+) -> Checkpoint:
+    checkpoint.validation_definitions = [validation_definition]
+    checkpoint.save()
+    return checkpoint
 
 
 @pytest.mark.cloud
