@@ -3,7 +3,7 @@ import pytest
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.interfaces import Batch
-from tests.integration.test_utils.data_source_config.base_data_source_config import (
+from tests.integration.test_utils.data_source_config.base import (
     BatchSetup,
     DataSourceConfig,
 )
