@@ -76,16 +76,16 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
             # You can also set GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID as environment variables
             GX_CLOUD_ACCESS_TOKEN = "<YOUR_ACCESS_TOKEN>"
             GX_CLOUD_ORGANIZATION_ID = "<YOUR_CLOUD_ORGANIZATION_ID>"
-            # Find the checkpoint id in the GX Cloud UI beside the Validate button
-            CHECKPOINT_ID = ""
+            # Find the checkpoint name in the GX Cloud UI beside the Validate button
+            CHECKPOINT_NAME = ""
             context = gx.get_context(
                 mode="cloud", 
                 cloud_organization_id=GX_CLOUD_ACCESS_TOKEN, 
                 cloud_access_token=GX_CLOUD_ORGANIZATION_ID
             )
-            checkpoint = next(c for c in context.checkpoints.all() if c.id == CHECKPOINT_ID)
+            checkpoint = context.checkpoints.get(CHECKPOINT_NAME)
             checkpoint.run()
-            return f"Checkpoint ran: {CHECKPOINT_ID}"
+            return f"Checkpoint ran: {CHECKPOINT_NAME}"
         run_checkpoint()
 
     run_this = gx_dag_with_deco()
