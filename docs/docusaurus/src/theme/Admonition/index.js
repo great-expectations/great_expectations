@@ -18,7 +18,13 @@ export default function AdmonitionWrapper(props) {
     case 'danger':
       return <Admonition {...props} icon={<DangerIcon/>} />;
     case 'cta':
-      return <Admonition {...props} icon={<CtaIcon/>} />;
+      if (props.icon == null) {
+        // Display default CtaIcon if no other icon is supplied.
+        return <Admonition {...props} icon={<CtaIcon/>} />;
+      } else {
+        // Enable calling admonition to specify a custom icon.
+        return <Admonition {...props} icon={props.icon} />;
+      }
     default:
       return <Admonition {...props} />
   }

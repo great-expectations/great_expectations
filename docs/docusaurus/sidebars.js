@@ -436,9 +436,10 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Integrations',
+      label: 'Integration tutorials',
       link: { type: 'doc', id: 'reference/learn/integrations/integrations_lp' },
       items: [
+        'reference/learn/integrations/airflow_pipeline_tutorial',
         'reference/learn/integrations/dbt_tutorial',
       ]
     },

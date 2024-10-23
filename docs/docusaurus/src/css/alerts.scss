@@ -64,10 +64,11 @@
     background-color: var(--color-cta-contrast-background);
     border: 3px solid var(--color-cta-secondary-dark);
     border-left-width: var(--ifm-alert-border-left-width);
+    padding-bottom: 20px;
 
     div:first-child {
       font-size: var(--ifm-h3-font-size);
-      text-transform: capitalize;
+      text-transform: none;
 
       & span {
         font-size: var(--p-font-size);
