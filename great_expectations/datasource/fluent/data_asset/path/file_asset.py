@@ -144,8 +144,9 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            param_names=("year", "month"),
-            partitioner=FileNamePartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerMonthly(
+                regex=regex, param_names=("year", "month"), sort_ascending=sort_ascending
+            ),
         )
 
     @public_api
