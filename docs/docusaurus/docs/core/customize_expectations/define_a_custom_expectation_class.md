@@ -14,7 +14,7 @@ Existing Expectation Classes can be customized to include additional information
 Advantages of subclassing an Expectation and providing customized attributes rather than creating an instance of the parent Expectation and passing in parameters include:
 
    - All instances of the Expectation that use the default values will be updated if changes are made to the class definition.
-   - More descriptive Expectation names can be provided that indicate the buisness logic behind the Expectation.
+   - More descriptive Expectation names can be provided that indicate the business logic behind the Expectation.
    - Customized text can be provided to describe the Expectation when Data Docs are generated from Validation Results.
 
 <h2>Prerequisites</h2>
