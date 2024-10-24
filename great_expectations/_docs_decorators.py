@@ -85,13 +85,21 @@ class _PublicApiIntrospector:
 
     def _add_method_to_registry(self, func: F) -> None:
         parts = func.__qualname__.split(".")
-        METHOD_PARTS_LENGTH = 2  # Standalone functions will have a length of 1
+        METHOD_PARTS_LENGTH = 2
         if len(parts) == METHOD_PARTS_LENGTH:
             cls = parts[0]
             method = parts[1]
             key = f"{func.__module__}.{cls}"
             self._class_registry[key].add(method)
+        elif len(parts) > METHOD_PARTS_LENGTH:
+            # Direct usages of public_api and/or usage in closures cause len > 2
+            # This is only present in DataSourceManager and its dynamic registry
+            logger.info(
+                "Skipping registering function %s because it is dynamically defined",
+                func.__qualname__,
+            )
         else:
+            # Standalone functions will have a length of 1
             logger.info(
                 "Skipping registering function %s because it does not have a class",
                 func.__qualname__,
