@@ -18,7 +18,7 @@ repos:
       - id: detect-private-key
         exclude: tests/test_fixtures/database_key_test*|tests/datasource/fluent/test_snowflake_datasource\.py
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.7.0"
+    rev: "v0.7.1"
     hooks:
       - id: ruff
         args: ["--fix"]
