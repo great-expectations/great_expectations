@@ -429,7 +429,7 @@ class TestV1ActionRun:
             out = action.run(checkpoint_result=checkpoint_result)
 
         # Should contain success/failure in title
-        assert "True" in mock_send_email.call_args.kwargs["title"]
+        assert "Success" in mock_send_email.call_args.kwargs["title"]
 
         # Should contain suite names and other relevant domain object identifiers in the body
         run_results = tuple(checkpoint_result.run_results.values())
