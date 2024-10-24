@@ -89,7 +89,7 @@ The optional `{batch}` named query references the Batch of data under test. When
 
 6. If you are adding your first expectation on this data asset, you may be able to select a time-based Batch interval for that asset.
 
-   - A batch is a feature of the data asset, and allows you to validate your data incrementally. A batch interval can only be defined once per data asset.
+   - A batch is a feature of the data asset, and allows you to validate your data incrementally. A batch interval can only be defined once per data asset; you cannot change it after setting it.
 
    - In order to be able to select a batch interval, the data asset must have at least one DATE or DATETIME column.
 

@@ -168,7 +168,7 @@ Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_
 :::tip[GX tips for table-level Expectations]
 - Implement `ExpectColumnToExist` early in your data pipeline to catch missing columns as soon as possible, minimizing downstream errors and rework.
 - Periodically review and update `ExpectTableColumnCountToEqual` Expectation alongside any schema changes, especially when new regulatory requirements emerge.
-- Use `ExpectTableColumnsToMatchOrderedList` over `ExpectTableColumnsToMatchSet` when order matters, such as in scripts directly referencing column positions.
+- Use `ExpectTableColumnsToMatchOrderedList` instead of `ExpectTableColumnsToMatchSet` when order matters, such as in scripts directly referencing column positions.
 - Opt for `ExpectTableColumnsToMatchSet` when integrating datasets from various sources where column order might differ, but consistency in available data is required.
 - Regularly review the allowed range in `ExpectTableColumnCountToBeBetween` as your dataset evolves, ensuring it aligns with business requirements and anticipates potential future expansion.
 :::
@@ -176,7 +176,7 @@ Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_
 
 ## Examples and scenarios
 
-**GX Cloud** provides a visual interface to create and run schema validation workflows. The GX Cloud workflow to validate data schema is intuitive and straightforward: create a Data Asset, define an Expectation Suite, run a Checkpoint, and review Validation Results.
+**GX Cloud** provides a visual interface to create and run schema validation workflows. The GX Cloud workflow for validating data schema is to create a Data Asset, define an Expectation Suite, run a Checkpoint, and review Validation Results.
 
 ![Validate schema Expectations in GX Cloud](./schema_resources/gx_cloud_schema_expectations_validate.gif)
 

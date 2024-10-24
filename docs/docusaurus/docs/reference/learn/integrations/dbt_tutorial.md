@@ -378,7 +378,7 @@ Add Postgres credentials:
     - Connection id: postgres
     - Connection Type: Postgres
     - Host: database
-    - Schema: postgres
+    - Database: postgres
     - Login: postgres
     - Password: postgres
     - Port: 5432
