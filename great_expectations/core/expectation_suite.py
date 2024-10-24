@@ -14,6 +14,7 @@ from typing import (
     Union,
 )
 
+import deepdiff
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 
 import great_expectations.exceptions as gx_exceptions
@@ -42,7 +43,7 @@ from great_expectations.exceptions import (
     ExpectationSuiteNotFreshError,
     StoreBackendError,
 )
-from great_expectations.exceptions.exceptions import InvalidKeyError
+from great_expectations.exceptions.exceptions import GreatExpectationsError, InvalidKeyError
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     convert_to_json_serializable,  # noqa: TID251
@@ -293,9 +294,16 @@ class ExpectationSuite(SerializableDictDot):
                 errors=[ExpectationSuiteError(f"Could not deserialize suite '{self.name}'")]
             )
 
-        return ExpectationSuiteFreshnessDiagnostics(
-            errors=[] if self == suite else [ExpectationSuiteNotFreshError(name=self.name)]
-        )
+        errors: list[GreatExpectationsError] = []
+        if self != suite:
+            diff = deepdiff.DeepDiff(self, suite, exclude_paths=["expectation_configurations"])
+            errors.append(
+                ExpectationSuiteNotFreshError(
+                    name=self.name, changed_attrs=sorted(diff.affected_root_keys)
+                )
+            )
+
+        return ExpectationSuiteFreshnessDiagnostics(errors=errors)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""

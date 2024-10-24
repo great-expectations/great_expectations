@@ -24,6 +24,8 @@ Hierarchy:
         CheckpointNotFreshError
 """
 
+from typing import Sequence
+
 from great_expectations.exceptions.exceptions import (
     DataContextError,
     GreatExpectationsAggregateError,
@@ -56,9 +58,10 @@ class ExpectationSuiteNotAddedError(ResourceFreshnessError):
 
 
 class ExpectationSuiteNotFreshError(ResourceFreshnessError):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, changed_attrs: Sequence[str]) -> None:
+        self.changed_attrs = changed_attrs
         super().__init__(
-            f"ExpectationSuite '{name}' has changed since it has last been saved. "
+            f"ExpectationSuite '{name}' has changed since it has last been saved (fields: {self.changed_attrs}). "  # noqa: E501
             "Please update with `<SUITE_OBJECT>.save()`, then try your action again."
         )
 
