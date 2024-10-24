@@ -346,6 +346,21 @@ def _test_add_expectation_disregards_provided_id(context):
     assert added_expectation.id != provided_id
 
 
+@pytest.mark.filesystem
+def test_add_adds_ids_to_suite_and_expectations(empty_data_context):
+    context = empty_data_context
+
+    expectation_a = gxe.ExpectColumnValuesToBeInSet(column="a", value_set=[1, 2, 3])
+    expectation_b = gxe.ExpectColumnMaxToBeBetween(column="b", min_value=0, max_value=10)
+    suite = ExpectationSuite("test-suite", expectations=[expectation_a, expectation_b])
+
+    assert all(obj.id is None for obj in (expectation_a, expectation_b, suite))
+
+    suite = context.suites.add(suite)
+
+    assert all(obj.id is not None for obj in (expectation_a, expectation_b, suite))
+
+
 @pytest.mark.cloud
 def test_update_expectation_success_cloud_backend(empty_cloud_data_context):
     context = empty_cloud_data_context
