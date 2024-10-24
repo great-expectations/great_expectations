@@ -13,12 +13,12 @@ class PandasDataFrameDatasourceConfig(DataSourceConfig):
     @property
     @override
     def label(self) -> str:
-        return "pandas-csv-datasource"
+        return "pandas-data-frame"
 
     @property
     @override
     def pytest_mark(self) -> pytest.MarkDecorator:
-        return pytest.mark.filesystem
+        return pytest.mark.unit
 
     @override
     def create_batch_setup(self, data: pd.DataFrame, request: pytest.FixtureRequest) -> BatchSetup:
