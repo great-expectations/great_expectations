@@ -60,7 +60,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 
    :::tip Result presentation
 
-   When using a [GX Cloud Data Context](/core/set_up_a_gx_environment/create_a_data_context/?context_type=gx_cloud), you can view the Validation Results in the GX Cloud UI by following the url provided with:
+   When using a [GX Cloud Data Context](/core/set_up_a_gx_environment/create_a_data_context.md?context_type=gx_cloud), you can view the Validation Results in the GX Cloud UI by following the url provided with:
 
    ```python title="Python"
    print(validation_results.result_url)
