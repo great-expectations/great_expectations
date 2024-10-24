@@ -24,7 +24,7 @@ Before we completely remove the functionality in a new major release, there will
 * [DOCS] Add redirects for old URLs that no longer exist ([#10516](https://github.com/great-expectations/great_expectations/pull/10516))
 * [DOCS] Update Data Doc site configuration page ([#10536](https://github.com/great-expectations/great_expectations/pull/10536))
 * [DOCS] Add base `Datasource` to Public API ([#10527](https://github.com/great-expectations/great_expectations/pull/10527))
-* [DOCS] DSB-1009: Add Learn page for GX <> Airflow data pipeline tutorial ([#10534](https://github.com/great-expectations/great_expectations/pull/10534))
+* [DOCS] DSB-1009: Add Learn page for GX - Airflow data pipeline tutorial ([#10534](https://github.com/great-expectations/great_expectations/pull/10534))
 * [DOCS] Change href from relative path to root in API docs (version 0.18) ([#10507](https://github.com/great-expectations/great_expectations/pull/10507))
 * [DOCS] Fixing broken links ([#10541](https://github.com/great-expectations/great_expectations/pull/10541))
 * [DOCS] Community/issues board mentions ([#10548](https://github.com/great-expectations/great_expectations/pull/10548))
