@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import pathlib
 import uuid
+from pathlib import Path
 from typing import TYPE_CHECKING, Generator, Iterator
 
-import pandas as pd
 import pytest
 
 from great_expectations import ValidationDefinition
@@ -13,6 +12,8 @@ from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
@@ -26,38 +27,38 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
-def base_dir(tmp_path: pathlib.Path, csv_path, parquet_path) -> pathlib.Path:
+def base_dir(tmp_path: Path, csv_path: Path, parquet_path: Path, test_data: pd.DataFrame) -> Path:
     dir_path = tmp_path / "data"
     dir_path.mkdir()
-    df = pd.DataFrame({"name": ["bob", "alice"]})
-    df.to_csv(dir_path / csv_path)
-    df.to_parquet(dir_path / parquet_path)
-    return pathlib.Path(dir_path)
+    # write data for all asset types
+    test_data.to_csv(dir_path / csv_path)
+    test_data.to_parquet(dir_path / parquet_path)
+    return Path(dir_path)
 
 
 @pytest.fixture(scope="module")
-def csv_path() -> pathlib.Path:
-    return pathlib.Path("data.csv")
+def csv_path() -> Path:
+    return Path("data.csv")
 
 
 @pytest.fixture(scope="module")
-def parquet_path() -> pathlib.Path:
-    return pathlib.Path("data.parquet")
+def parquet_path() -> Path:
+    return Path("data.parquet")
 
 
 @pytest.fixture(scope="module")
-def updated_base_dir(tmp_path: pathlib.Path) -> pathlib.Path:
+def updated_base_dir(tmp_path: Path) -> Path:
     dir_path = tmp_path / "other_data"
     dir_path.mkdir()
-    return pathlib.Path(dir_path)
+    return Path(dir_path)
 
 
 @pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
     datasource_name: str,
-    base_dir: pathlib.Path,
-    updated_base_dir: pathlib.Path,
+    base_dir: Path,
+    updated_base_dir: Path,
 ) -> PandasFilesystemDatasource:
     """Test Adding and Updating the Datasource associated with this module.
     Note: There is no need to test Get or Delete Datasource.
@@ -102,7 +103,7 @@ def csv_asset(
 
 @pytest.fixture(scope="module")
 def csv_batch_definition(
-    batch_definition_name: str, csv_asset: CSVAsset, csv_path: pathlib.Path
+    batch_definition_name: str, csv_asset: CSVAsset, csv_path: Path
 ) -> BatchDefinition:
     return csv_asset.add_batch_definition_path(
         name=batch_definition_name,
@@ -129,7 +130,7 @@ def parquet_asset(
 
 @pytest.fixture(scope="module")
 def parquet_batch_definition(
-    batch_definition_name: str, parquet_asset: CSVAsset, parquet_path: pathlib.Path
+    batch_definition_name: str, parquet_asset: CSVAsset, parquet_path: Path
 ) -> BatchDefinition:
     return parquet_asset.add_batch_definition_path(
         name=batch_definition_name,

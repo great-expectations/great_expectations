@@ -4,7 +4,6 @@ import logging
 import os
 import pathlib
 import uuid
-from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Generator, Iterator, Literal, Protocol
 
 import numpy as np
@@ -40,6 +39,16 @@ def context() -> CloudDataContext:
     )
     assert isinstance(context, CloudDataContext)
     return context
+
+
+@pytest.fixture(scope="module")
+def test_data() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4],
+            "name": [1, 2, 3, 4],
+        },
+    )
 
 
 @pytest.fixture(scope="module")
@@ -149,7 +158,6 @@ def table_factory() -> Iterator[TableFactory]:
     yield _table_factory
 
     # teardown
-    print(f"dropping tables\n{pf(all_created_tables)}")
     for dialect, tables in all_created_tables.items():
         engine = engines[dialect]
         with engine.connect() as conn:

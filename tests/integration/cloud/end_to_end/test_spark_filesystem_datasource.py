@@ -4,7 +4,6 @@ import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator
 
-import pandas as pd
 import pytest
 
 from great_expectations import ValidationDefinition
@@ -14,6 +13,8 @@ from great_expectations.datasource.fluent.data_connector.filesystem_data_connect
 )
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
@@ -29,14 +30,11 @@ def csv_path() -> Path:
 
 
 @pytest.fixture(scope="module")
-def base_dir(tmp_path: Path, csv_path: Path) -> Path:
+def base_dir(tmp_path: Path, csv_path: Path, test_data: pd.DataFrame) -> Path:
     dir_path = tmp_path / "data"
     dir_path.mkdir()
-    df = pd.DataFrame(
-        {"name": [1, 2, 3, 4], "id": ["one", "two", "three", "four"]},
-    )
     csv_path = dir_path / csv_path
-    df.to_csv(csv_path)
+    test_data.to_csv(csv_path)
     return dir_path
 
 

@@ -3,7 +3,6 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Generator
 
-import pandas as pd
 import pytest
 
 from great_expectations import ValidationDefinition
@@ -17,20 +16,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         PandasDatasource,
     )
-
-
-@pytest.fixture(scope="module")
-def pandas_test_df() -> pd.DataFrame:
-    d = {
-        "string": ["a", "b", "c"],
-        "datetime": [
-            pd.to_datetime("2020-01-01"),
-            pd.to_datetime("2020-01-02"),
-            pd.to_datetime("2020-01-03"),
-        ],
-    }
-    df = pd.DataFrame(data=d)
-    return df
 
 
 @pytest.fixture(scope="module")
@@ -116,7 +101,7 @@ def checkpoint(
 
 
 @pytest.mark.cloud
-def test_checkpoint_run(checkpoint: Checkpoint, pandas_test_df):
+def test_checkpoint_run(checkpoint: Checkpoint, test_data):
     """Test running a Checkpoint that was created using the entities defined in this module."""
-    checkpoint_result = checkpoint.run(batch_parameters={"dataframe": pandas_test_df})
+    checkpoint_result = checkpoint.run(batch_parameters={"dataframe": test_data})
     assert checkpoint_result.success

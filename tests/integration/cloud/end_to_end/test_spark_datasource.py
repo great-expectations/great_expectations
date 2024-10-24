@@ -3,7 +3,6 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Generator
 
-import pandas as pd
 import pytest
 
 from great_expectations import ValidationDefinition
@@ -12,6 +11,8 @@ from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 from tests.integration.cloud.end_to_end.conftest import construct_spark_df_from_pandas
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.compatibility import pyspark
     from great_expectations.core import ExpectationSuite
@@ -70,14 +71,10 @@ def data_asset(
 
 
 @pytest.fixture(scope="module")
-def spark_dataframe(spark_session):
-    pandas_df = pd.DataFrame(
-        {
-            "id": [1, 2, 3, 4],
-            "name": [1, 2, 3, 4],
-        },
-    )
-    return construct_spark_df_from_pandas(spark_session, pandas_df)
+def spark_dataframe(
+    spark_session: pyspark.SparkSession, test_data: pd.DataFrame
+) -> pyspark.DataFrame:
+    return construct_spark_df_from_pandas(spark_session, test_data)
 
 
 @pytest.fixture(scope="module")
