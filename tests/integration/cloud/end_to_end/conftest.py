@@ -75,11 +75,14 @@ def expectation_suite(
     """This ExpectationSuite is shared by each E2E test, so its expected that the data
     used by each test follows the same shape."""
     expectation_suite_name = f"es_{uuid.uuid4().hex}"
-    expectation_suite = context.suites.add(ExpectationSuite(name=expectation_suite_name))
-    assert len(expectation_suite.expectations) == 0
-    expectation_suite.add_expectation(ExpectColumnValuesToNotBeNull(column="name", mostly=1))  # type: ignore[arg-type]  # todo: fix in core-412
-    assert len(expectation_suite.expectations) == 1
-    expectation_suite.save()
+    context.suites.add(
+        ExpectationSuite(
+            name=expectation_suite_name,
+            expectations=[
+                ExpectColumnValuesToNotBeNull(column="name", mostly=1)  # type: ignore[arg-type]  # todo: fix in core-412
+            ],
+        )
+    )
     yield context.suites.get(name=expectation_suite_name)
     context.suites.delete(expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
