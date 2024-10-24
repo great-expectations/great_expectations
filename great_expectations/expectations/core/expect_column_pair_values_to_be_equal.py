@@ -66,7 +66,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
-            {IGNORE_ROW_IF_DESCRIPTION} Default "neither".
+            {IGNORE_ROW_IF_DESCRIPTION} Default "both_values_are_missing".
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
