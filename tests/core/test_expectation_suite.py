@@ -1230,3 +1230,31 @@ def test_is_fresh_fails_on_suite_deserialization(in_memory_runtime_context):
     assert diagnostics.success is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteError)
+
+
+@pytest.mark.unit
+def test_is_fresh_ignores_expectation_ordering(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    expectation_1 = gxe.ExpectColumnMeanToBeBetween(column="first")
+    expectation_2 = gxe.ExpectColumnMeanToBeBetween(column="second")
+    expectation_3 = gxe.ExpectColumnMeanToBeBetween(column="third")
+
+    suite = context.suites.add(
+        ExpectationSuite(
+            name="my_suite", expectations=[expectation_1, expectation_2, expectation_3]
+        )
+    )
+
+    suite_dict = {
+        "name": "my_suite",
+        # Order of expectations from the store is not the same as the original suite
+        "expectations": [
+            {"type": e.expectation_type, "kwargs": {"column": e.column}, "id": e.id}
+            for e in (expectation_2, expectation_3, expectation_1)
+        ],
+    }
+    with mock.patch.object(ExpectationsStore, "get", return_value=suite_dict):
+        diagnostics = suite.is_fresh()
+
+    assert diagnostics.success is True

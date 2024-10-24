@@ -340,6 +340,19 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         default=None
     )
 
+    def __lt__(self, other: object) -> bool:
+        # Enables sorting of Expectations
+        if not isinstance(other, Expectation):
+            return False
+
+        if self.expectation_type != other.expectation_type:
+            return self.expectation_type < other.expectation_type
+
+        if self.id and other.id:
+            return self.id < other.id
+
+        return False
+
     @override
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Expectation):
