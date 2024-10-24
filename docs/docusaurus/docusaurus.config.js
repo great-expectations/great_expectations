@@ -73,7 +73,7 @@ module.exports = {
       // See: https://docusaurus.io/docs/search#connecting-algolia
       appId: 'PFK639M3JK',
       apiKey: 'fc3e3b1588b46d8d476aca9c1cadd53f',
-      indexName: 'greatexpectations',
+      indexName: 'greatexpectations_replica',
       searchPagePath: 'search',
       contextualSearch: true,
     },
