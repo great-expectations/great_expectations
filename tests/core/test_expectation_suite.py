@@ -1198,6 +1198,7 @@ def test_is_fresh_freshness(in_memory_runtime_context):
     assert diagnostics.success is False
     assert len(diagnostics.errors) == 1
     assert isinstance(diagnostics.errors[0], gx_exceptions.ExpectationSuiteNotFreshError)
+    assert diagnostics.errors[0].changed_attrs == ["expectations"]
 
 
 @pytest.mark.unit
