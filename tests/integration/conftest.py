@@ -54,7 +54,7 @@ def batch_for_datasource(request: pytest.FixtureRequest) -> Generator[Batch, Non
     assert isinstance(data, pd.DataFrame)
     assert isinstance(data_source_config, DataSourceTestConfig)
 
-    batch_setup = data_source_config.create_batch_setup(data)
+    batch_setup = data_source_config.create_batch_setup(data, request)
 
     batch_setup.setup()
     yield batch_setup.make_batch()

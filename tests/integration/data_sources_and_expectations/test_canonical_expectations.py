@@ -4,12 +4,14 @@ import great_expectations.expectations as gxe
 from tests.integration.conftest import parameterize_batch_for_data_sources
 from tests.integration.test_utils.data_source_config import (
     PandasDataFrameDatasourceTestConfig,
+    PandasFilesystemCsvDatasourceTestConfig,
 )
 
 
 @parameterize_batch_for_data_sources(
     data_source_configs=[
         PandasDataFrameDatasourceTestConfig(),
+        PandasFilesystemCsvDatasourceTestConfig(),
     ],
     data=pd.DataFrame({"a": [1, 2]}),
 )
@@ -22,6 +24,7 @@ def test_expect_column_min_to_be_between(batch_for_datasource) -> None:
 @parameterize_batch_for_data_sources(
     data_source_configs=[
         PandasDataFrameDatasourceTestConfig(),
+        PandasFilesystemCsvDatasourceTestConfig(),
     ],
     data=pd.DataFrame({"a": [1, 2]}),
 )

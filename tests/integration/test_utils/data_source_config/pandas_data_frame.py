@@ -13,7 +13,7 @@ class PandasDataFrameDatasourceTestConfig(DataSourceTestConfig):
     @property
     @override
     def label(self) -> str:
-        return "pandas-data-frame-datasource"
+        return "pandas-data-frame"
 
     @property
     @override
@@ -21,7 +21,9 @@ class PandasDataFrameDatasourceTestConfig(DataSourceTestConfig):
         return pytest.mark.unit
 
     @override
-    def create_batch_setup(self, data: pd.DataFrame) -> BatchTestSetup:
+    def create_batch_setup(
+        self, data: pd.DataFrame, request: pytest.FixtureRequest
+    ) -> BatchTestSetup:
         return PandasDataFrameBatchTestSetup(data=data, config=self)
 
 

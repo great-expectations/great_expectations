@@ -14,6 +14,7 @@ from great_expectations.datasource.fluent.interfaces import Batch
 if TYPE_CHECKING:
     import pandas as pd
     import pytest
+    from pytest import FixtureRequest
 
 
 @dataclass(frozen=True)
@@ -33,7 +34,7 @@ class DataSourceTestConfig(ABC):
         ...
 
     @abstractmethod
-    def create_batch_setup(self, data: pd.DataFrame) -> BatchTestSetup:
+    def create_batch_setup(self, data: pd.DataFrame, request: FixtureRequest) -> BatchTestSetup:
         """Create a batch setup object for this data source."""
 
     @property
