@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
 
 
+@public_api
 class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT], ABC):
     """Base class for PathDataAssets which batch by combining the contents of a directory."""
 
