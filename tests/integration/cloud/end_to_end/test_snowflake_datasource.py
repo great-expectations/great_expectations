@@ -52,6 +52,7 @@ def datasource(
         name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
+        schema=RANDOM_SCHEMA,
     )
     return datasource
 
@@ -71,7 +72,6 @@ def data_asset(
     )
     yield datasource.add_table_asset(
         name=asset_name,
-        schema_name=RANDOM_SCHEMA,
         table_name=table_name,
     )
     datasource.delete_asset(name=asset_name)
