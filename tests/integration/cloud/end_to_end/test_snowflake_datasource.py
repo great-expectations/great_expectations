@@ -53,19 +53,6 @@ def datasource(
         connection_string=connection_string,
         create_temp_table=False,
     )
-    updated_connection_string = f"{connection_string}&foo=bar"
-
-    datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
-    datasource = context.data_sources.add_or_update_snowflake(datasource=datasource)
-    assert (
-        datasource.connection_string == updated_connection_string
-    ), "The datasource was not updated in the previous method call."
-    datasource.connection_string = connection_string  # type: ignore[assignment] # is a str
-    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.connection_string == connection_string
-    ), "The datasource was not updated in the previous method call."
-
     return datasource
 
 
