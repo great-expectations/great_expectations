@@ -92,10 +92,10 @@ class _PublicApiIntrospector:
             key = f"{func.__module__}.{cls}"
             self._class_registry[key].add(method)
         elif len(parts) > METHOD_PARTS_LENGTH:
-            # Direct usages of public_api and/or usage in closures cause len > 2
+            # public_api interacts oddly with closures so we ignore
             # This is only present in DataSourceManager and its dynamic registry
             logger.info(
-                "Skipping registering function %s because it is dynamically defined",
+                "Skipping registering function %s because it is a closure",
                 func.__qualname__,
             )
         else:
