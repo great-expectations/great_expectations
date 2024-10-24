@@ -2,9 +2,9 @@
 
 If you’ve noticed an issue in the documentation, or have recommendations for improving the content, you can submit your request as a GitHub issue in this repository. To avoid forking the repository, Great Expectations recommends using the GitHub Markdown editor to edit documentation.
 
-1. Go to the topic file in the [GitHub Great Expectations docs repository](https://github.com/great-expectations/great_expectations/tree/develop/docs) you want to edit. 
+1. In the [`docusaurus/docs` folder](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs), go to the topic file you want to edit. 
 
-    The topic URL includes the topic file name. For example, the URL for the Great Expectations Quickstart is https://docs.greatexpectations.io/docs/tutorials/quickstart. The URL indicates the topic is located in the `tutorials` folder, and it's named `quickstart`.
+    The topic URL includes the topic file name. For example, the URL for the Great Expectations Core overview is https://docs.greatexpectations.io/docs/core/introduction/gx_overview. The URL indicates the topic is located in the `core/introduction` folder, and it's named `gx_overview`.
 
 2. Click the file and then click **Edit this file**.
 

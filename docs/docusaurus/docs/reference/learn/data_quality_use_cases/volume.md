@@ -38,7 +38,7 @@ Ensures that the number of rows in a dataset falls within a specified range.
 
 **Use Case**: Validate that transaction volumes are within expected bounds, alerting to unusual spikes or drops in activity.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToBeBetween"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToBeBetween"
 ```
 
 <small>View `ExpectTableRowCountToBeBetween` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between).</small>
@@ -50,7 +50,7 @@ Verifies that the dataset contains exactly the specified number of records.
 
 **Use Case**: Ensure that a specific number of records are processed, useful for batch operations or reconciliation tasks.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqual"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqual"
 ```
 
 <small>View `ExpectTableRowCountToEqual` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal).</small>
@@ -62,7 +62,7 @@ Compares the row count of the current table to another table within the same dat
 
 **Use Case**: Verify data consistency across different stages of a pipeline or between source and target systems.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqualOtherTable"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_expectations.py ExpectTableRowCountToEqualOtherTable"
 ```
 
 <small>View `ExpectTableRowCountToEqualOtherTable` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_table_row_count_to_equal_other_table).</small>
@@ -93,7 +93,7 @@ Compares the row count of the current table to another table within the same dat
 <TabItem value="gx_core" label="GX Core">
 Run the following GX Core workflow.
 
-```python title="" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/volume_resources/volume_workflow.py full example code"
 ```
 
 **Result**:

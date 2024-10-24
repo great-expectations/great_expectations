@@ -27,9 +27,9 @@ import PrereqGxInstallation from '../../_core_components/prerequisites/_gx_insta
    ```python title='Python input' name="core/set_up_a_gx_environment/_create_a_data_context/file_data_context.py import great_expectations and get a context"
    ```
 
-   When you specify `mode='file'`, the `get_context()` method instantiates and returns the first File Data Context it finds in the folder hierarchy of your current working directory.  
+   When you specify `mode="file"`, the `get_context()` method instantiates and returns the first File Data Context it finds in the folder hierarchy of your current working directory.  
 
-   If a File Data Context configuration is not found, `get_context(mode='file')` creates a new File Data Context in your current working directory and then instantiates and returns the newly created File Data Context.
+   If a File Data Context configuration is not found, `get_context(mode="file")` creates a new File Data Context in your current working directory and then instantiates and returns the newly created File Data Context.
 
    Alternatively, you can request a specific File Data Context by providing a folder path with the `project_root_dir` parameter.  If a File Data Context exists in the specified folder it will be instantiated and returned.  If a File Data Context is not found in the specified folder, a new File Data Context will be created.
 

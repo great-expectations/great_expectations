@@ -89,19 +89,19 @@ The optional `{batch}` named query references the Batch of data under test. When
 
 6. If you are adding your first expectation on this data asset, you may be able to select a time-based Batch interval for that asset.
 
-- A batch is a feature of the data asset, and allows you to validate your data incrementally. A batch interval can only be defined once per data asset.
+   - A batch is a feature of the data asset, and allows you to validate your data incrementally. A batch interval can only be defined once per data asset; you cannot change it after setting it.
 
-- In order to be able to select a batch interval, the data asset must have at least one DATE or DATETIME column.
+   - In order to be able to select a batch interval, the data asset must have at least one DATE or DATETIME column.
 
-- Select the **Entire table** tab to provide all Data Asset records to your Expectations and validations, or select the **Yearly**/**Monthly**/**Daily** tab to use subsets of Data Asset records for your Expectations and validations.
+   - Select the **Entire table** tab to provide all Data Asset records to your Expectations and validations, or select the **Yearly**/**Monthly**/**Daily** tab to use subsets of Data Asset records for your Expectations and validations.
 
-- Select **Yearly** to partition Data Asset records by year, select **Monthly** to partition Data Asset records by year and month, or select **Daily** to partition Data Asset records by year, month, and day.
+   - Select **Yearly** to partition Data Asset records by year, select **Monthly** to partition Data Asset records by year and month, or select **Daily** to partition Data Asset records by year, month, and day.
 
-- **Batch column** - Select a name column from a prefilled list of DATE and DATETIME columns containing the date and time data.
+   - **Batch column** - Select a name column from a prefilled list of DATE and DATETIME columns containing the date and time data.
 
 7. Complete the mandatory and optional fields for the Expectation. A recurring validation schedule will be applied automatically to your Expectation, based on the settings of your Expectation Suite.
 
-8. Click **Save** or click **Save & Add More** and then repeat steps 4 and 5 to add additional Expectations.
+8. Click **Save** or click **Save & Add More** and then repeat steps 5 and 7 to add additional Expectations.
 
 9. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 

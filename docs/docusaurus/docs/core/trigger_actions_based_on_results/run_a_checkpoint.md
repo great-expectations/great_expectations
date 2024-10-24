@@ -52,7 +52,7 @@ In this procedure your Data Context is assumed to be stored in the variable `con
 
    You then pass a dictionary to the `expectation_parameters` argument of a Checkpoint's `run` method.  The contents of this dictionary consist of keys that were defined for parameters when the Checkpoint's Expectations were created, paired with the values that should be used for the corresponding parmeters when the Checkpoint runs.
 
-   Below is an example of an `ExpectColumnValuesToBeBetween` Expectation that is set to accept parameters at runtime:
+   Below is an example of an `ExpectColumnMaxToBeBetween` Expectation that is set to accept parameters at runtime:
 
    ```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py - example Expectation"
    ```
@@ -62,8 +62,8 @@ In this procedure your Data Context is assumed to be stored in the variable `con
    ```python title="Python" name="docs/docusaurus/docs/core/trigger_actions_based_on_results/_examples/run_a_checkpoint.py - define Expectation Parameters"
    ```
 
-  If none of the Expectations in a Validation Definition are configured to accept runtime Expectation parameters, the `expectation_parameters` argument can be omitted from the Checkpoint's `run(...)` method.
-
+   If none of the Expectations in a Validation Definition are configured to accept runtime Expectation parameters, the `expectation_parameters` argument can be omitted from the Checkpoint's `run(...)` method.
+   
    For more information on configuring an Expectation to accept runtime parameters, how to set the lookup key for an Expectation's parameters, and additional examples of how to format an `expectation_parameters` dictionary see the runtime guidance under [Create an Expectation](/core/define_expectations/create_an_expectation.md).
 
 3. Run the Checkpoint.

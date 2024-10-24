@@ -24,7 +24,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
 1. Retrieve your Data Asset.
 
-   Replace the value of `data_source_name` with the name of your Data Source and the value of `asset_name` with the name of your Data Asset in the following code.  Then execute it to retrieve an existing Data Source and Data Asset from your Data Context:
+   Replace the value of `data_source_name` with the name of your Data Source and the value of `data_asset_name` with the name of your Data Asset in the following code.  Then execute it to retrieve an existing Data Source and Data Asset from your Data Context:
 
    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_whole_directory.py - retrieve Data Asset"
    ```

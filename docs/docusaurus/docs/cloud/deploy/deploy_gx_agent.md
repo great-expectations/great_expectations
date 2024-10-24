@@ -10,7 +10,7 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 
-The GX Agent is used to run an [agent-enabled deployment](/cloud/deploy/deployment_patterns.md#agent-enabled-deployment) of GX Cloud. If you are running a fully hosted or read-only deployment, you do not need to deploy the GX Agent.
+The GX Agent is used to run an [agent-enabled deployment](/cloud/deploy/deployment_patterns.md#agent-enabled-deployment) of GX Cloud. If you are running a fully-hosted or read-only deployment, you do not need to deploy the GX Agent.
 
 :::info Enable the GX Agent
 

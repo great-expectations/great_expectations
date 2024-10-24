@@ -26,7 +26,7 @@ GX Cloud data validation workflows are created using GX Cloud components, entiti
 
 ### Standard data validation workflow
 
-A GX Cloud data validation workflow can be implemented using a short, clear set of steps:
+A GX Cloud data validation workflow can be implemented using the following steps:
 
 ![Standard GX Cloud workflow](./overview_images/gx_cloud_workflow.png)
 

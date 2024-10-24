@@ -70,6 +70,6 @@ Add schedules to your GX Cloud Expectation Suites to take advantage of automated
 
 2. In the **Data Assets** list, click the Data Asset name.
 
-3. Click the **Expectations** tab and then select the Expectation Suite you'd like to apply a schedule to.
+3. Click the **Expectations** tab and then select the Expectation Suite you'd like to change.
 
 4. Pause the schedule for the Expectation Suite using the toggle in the Scheduling component.

@@ -110,7 +110,7 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         Passing Case:
             Input:
                 ExpectTableColumnCountToBeBetween(
-                    min_value=1
+                    min_value=1,
                     max_value=3
             )
 
