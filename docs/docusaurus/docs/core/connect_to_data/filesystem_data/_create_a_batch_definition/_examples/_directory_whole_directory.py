@@ -18,6 +18,6 @@ batch_definition = file_data_asset.add_batch_definition_whole_directory(
 
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/filesystem_data/_create_a_batch_definition/_examples/_directory_whole_directory.py - retrieve and verify Batch">
 batch = batch_definition.get_batch()
-batch.head()
+print(batch.head())
 # </snippet>
 # </snippet>
