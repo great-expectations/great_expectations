@@ -1,6 +1,3 @@
-from .base import BatchTestSetup, DataSourceTestConfig
-from .pandas_data_frame import PandasDataFrameBatchTestSetup, PandasDataFrameDatasourceTestConfig
-from .pandas_filesystem_csv import (
-    PandasFilesystemCsvBatchTestSetup,
-    PandasFilesystemCsvDatasourceTestConfig,
-)
+from .base import DataSourceTestConfig
+from .pandas_data_frame import PandasDataFrameDatasourceTestConfig
+from .pandas_filesystem_csv import PandasFilesystemCsvDatasourceTestConfig

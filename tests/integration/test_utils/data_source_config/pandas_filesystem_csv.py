@@ -41,7 +41,7 @@ class PandasFilesystemCsvBatchTestSetup(BatchTestSetup[PandasFilesystemCsvDataso
         self,
         config: PandasFilesystemCsvDatasourceTestConfig,
         data: pd.DataFrame,
-        base_dir,
+        base_dir: pathlib.Path,
     ) -> None:
         super().__init__(config=config, data=data)
         self._base_dir = base_dir
