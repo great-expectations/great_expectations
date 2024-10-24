@@ -14,6 +14,33 @@ When we deprecate our public APIs, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition to the new API.
 
+### 1.2.0
+* [BUGFIX] Remove `row_condition` from Expectations for which it does not apply ([#10519](https://github.com/great-expectations/great_expectations/pull/10519))
+* [BUGFIX] fix rendering performance ([#10530](https://github.com/great-expectations/great_expectations/pull/10530))
+* [BUGFIX] Ensure that file-backed domain objects are stored in JSON files ([#10523](https://github.com/great-expectations/great_expectations/pull/10523))
+* [BUGFIX] File Path Batch Definitions serialize incorrectly ([#10543](https://github.com/great-expectations/great_expectations/pull/10543))
+* [DOCS] Bump max Python version in docs ([#10522](https://github.com/great-expectations/great_expectations/pull/10522))
+* [DOCS] Fix some typos ([#10521](https://github.com/great-expectations/great_expectations/pull/10521))
+* [DOCS] Add redirects for old URLs that no longer exist ([#10516](https://github.com/great-expectations/great_expectations/pull/10516))
+* [DOCS] Update Data Doc site configuration page ([#10536](https://github.com/great-expectations/great_expectations/pull/10536))
+* [DOCS] Add base `Datasource` to Public API ([#10527](https://github.com/great-expectations/great_expectations/pull/10527))
+* [DOCS] DSB-1009: Add Learn page for GX - Airflow data pipeline tutorial ([#10534](https://github.com/great-expectations/great_expectations/pull/10534))
+* [DOCS] Change href from relative path to root in API docs (version 0.18) ([#10507](https://github.com/great-expectations/great_expectations/pull/10507))
+* [DOCS] Fixing broken links ([#10541](https://github.com/great-expectations/great_expectations/pull/10541))
+* [DOCS] Community/issues board mentions ([#10548](https://github.com/great-expectations/great_expectations/pull/10548))
+* [DOCS] Update _redirects ([#10558](https://github.com/great-expectations/great_expectations/pull/10558))
+* [MAINTENANCE] ruff 0.6.9 + mypy 0.12 ([#10525](https://github.com/great-expectations/great_expectations/pull/10525))
+* [MAINTENANCE] Bump `ruff` to `0.7.0` ([#10535](https://github.com/great-expectations/great_expectations/pull/10535))
+* [MAINTENANCE] Add `DataAsset.get_batch_definition` to public API docs ([#10533](https://github.com/great-expectations/great_expectations/pull/10533))
+* [MAINTENANCE] Remove `TRY203` Ruff violations ([#10540](https://github.com/great-expectations/great_expectations/pull/10540))
+* [MAINTENANCE] Update gx row_condition parser ([#10524](https://github.com/great-expectations/great_expectations/pull/10524))
+* [MAINTENANCE] Use python 3.12 in netlify ([#10531](https://github.com/great-expectations/great_expectations/pull/10531))
+* [MAINTENANCE] Update airflow snippet to use checkpoint name rather than id ([#10551](https://github.com/great-expectations/great_expectations/pull/10551))
+* [MAINTENANCE] Fix azure aws/spark tests ([#10550](https://github.com/great-expectations/great_expectations/pull/10550))
+* [MAINTENANCE] Remove util functions from public API ([#10557](https://github.com/great-expectations/great_expectations/pull/10557))
+* [MAINTENANCE] Basic expectation testing framework ([#10554](https://github.com/great-expectations/great_expectations/pull/10554))
+* [MAINTENANCE] Reenable xfailed e2e tests ([#10555](https://github.com/great-expectations/great_expectations/pull/10555))
+
 ### 1.1.3
 * [BUGFIX] Fix datadocs icons ([#10511](https://github.com/great-expectations/great_expectations/pull/10511))
 * [DOCS] Add `public_api` decorators to object factories ([#10513](https://github.com/great-expectations/great_expectations/pull/10513))
