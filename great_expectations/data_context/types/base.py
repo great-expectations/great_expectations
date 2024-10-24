@@ -153,7 +153,6 @@ class BaseYamlConfig(SerializableDictDot):
         """
         return object_to_yaml_str(obj=self.commented_map)
 
-    @public_api
     @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict containing this DataContextConfig.
@@ -357,7 +356,6 @@ class AssetConfig(SerializableDictDot):
     def module_name(self) -> Optional[str]:
         return self._module_name
 
-    @public_api
     @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this AssetConfig.
@@ -591,7 +589,6 @@ class DataConnectorConfig(AbstractConfig):
     def module_name(self):
         return self._module_name
 
-    @public_api
     @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this DataConnectorConfig.
@@ -1078,7 +1075,6 @@ class GXCloudConfig(DictDot):
         self.organization_id = organization_id
         self.access_token = access_token
 
-    @public_api
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this GXCloudConfig.
 

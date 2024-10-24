@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, ClassVar, Optional, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -37,7 +38,19 @@ class _PublicApiInfo:
 class _PublicApiIntrospector:
     _public_api: dict[str, list[_PublicApiInfo]] = {}
 
+    # Only used for testing
+    _class_registry: dict[str, set[str]] = defaultdict(set)
+
+    # This is a special key that is used to indicate that a class definition
+    # is being added to the registry.
+    CLASS_DEFINITION: ClassVar[str] = "<class_def>"
+
+    @property
+    def class_registry(self) -> dict[str, set[str]]:
+        return self._class_registry
+
     def add(self, func: F) -> None:
+        self._add_to_class_registry(func)
         try:
             # We use an if statement instead of a ternary to work around
             # mypy's inability to type narrow inside a ternary.
@@ -59,6 +72,38 @@ class _PublicApiIntrospector:
         except Exception:
             logger.exception(f"Could not add this function to the public API list: {func}")
             raise
+
+    def _add_to_class_registry(self, func: F) -> None:
+        if isinstance(func, type):
+            self._add_class_definition_to_registry(func)
+        else:
+            self._add_method_to_registry(func)
+
+    def _add_class_definition_to_registry(self, cls: type) -> None:
+        key = f"{cls.__module__}.{cls.__qualname__}"
+        self._class_registry[key].add(self.CLASS_DEFINITION)
+
+    def _add_method_to_registry(self, func: F) -> None:
+        parts = func.__qualname__.split(".")
+        METHOD_PARTS_LENGTH = 2
+        if len(parts) == METHOD_PARTS_LENGTH:
+            cls = parts[0]
+            method = parts[1]
+            key = f"{func.__module__}.{cls}"
+            self._class_registry[key].add(method)
+        elif len(parts) > METHOD_PARTS_LENGTH:
+            # public_api interacts oddly with closures so we ignore
+            # This is only present in DataSourceManager and its dynamic registry
+            logger.info(
+                "Skipping registering function %s because it is a closure",
+                func.__qualname__,
+            )
+        else:
+            # Standalone functions will have a length of 1
+            logger.info(
+                "Skipping registering function %s because it does not have a class",
+                func.__qualname__,
+            )
 
     @override
     def __str__(self) -> str:
