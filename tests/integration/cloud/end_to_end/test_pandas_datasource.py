@@ -1,40 +1,21 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Generator
 
-import pandas as pd
 import pytest
 
+from great_expectations import ValidationDefinition
+from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.datasource.fluent.pandas_datasource import DataFrameAsset
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
-    from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
-        BatchRequest,
-        DataAsset,
         PandasDatasource,
     )
-    from great_expectations.validator.validator import Validator
-
-
-@pytest.fixture(scope="module")
-def pandas_test_df() -> pd.DataFrame:
-    d = {
-        "string": ["a", "b", "c"],
-        "datetime": [
-            pd.to_datetime("2020-01-01"),
-            pd.to_datetime("2020-01-02"),
-            pd.to_datetime("2020-01-03"),
-        ],
-    }
-    df = pd.DataFrame(data=d)
-    return df
 
 
 @pytest.fixture(scope="module")
@@ -49,7 +30,7 @@ def datasource(
         name=datasource_name,
     )
     assert datasource.name == datasource_name
-    new_datasource_name = f"ds{uuid.uuid4().hex}"
+    new_datasource_name = f"data_source_{uuid.uuid4().hex}"
     datasource.name = new_datasource_name
     datasource = context.data_sources.add_or_update_pandas(
         datasource=datasource,
@@ -67,90 +48,60 @@ def datasource(
     return datasource
 
 
-def dataframe_asset(
-    datasource: PandasDatasource,
-    asset_name: str,
-) -> DataFrameAsset:
-    return datasource.add_dataframe_asset(
-        name=asset_name,
-    )
-
-
-@pytest.fixture(scope="module", params=[dataframe_asset])
+@pytest.fixture(scope="module")
 def data_asset(
     datasource: PandasDatasource,
-    get_missing_data_asset_error_type: type[Exception],
-    request,
-) -> Iterator[DataAsset]:
+) -> Generator[DataFrameAsset, None, None]:
     """Test the entire Data Asset CRUD lifecycle here and in Data Asset-specific fixtures."""
-    asset_name = f"da_{uuid.uuid4().hex}"
-    yield request.param(
-        datasource=datasource,
-        asset_name=asset_name,
+    asset_name = f"asset_{uuid.uuid4().hex}"
+    yield datasource.add_dataframe_asset(
+        name=asset_name,
     )
     datasource.delete_asset(name=asset_name)
-    with pytest.raises(get_missing_data_asset_error_type):
+    with pytest.raises(LookupError):
         datasource.get_asset(name=asset_name)
 
 
 @pytest.fixture(scope="module")
-def batch_request(
-    data_asset: DataAsset,
-    pandas_test_df: pd.DataFrame,
-    in_memory_batch_request_missing_dataframe_error_type: type[Exception],
-) -> BatchRequest:
-    """Build a BatchRequest depending on the types of Data Assets tested in the module."""
-    if isinstance(data_asset, DataFrameAsset):
-        with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
-            data_asset.build_batch_request()
-        batch_request = data_asset.build_batch_request(options={"dataframe": pandas_test_df})
-    else:
-        batch_request = data_asset.build_batch_request()
-    return batch_request
+def batch_definition(
+    context: CloudDataContext,
+    data_asset: DataFrameAsset,
+) -> BatchDefinition:
+    batch_def_name = f"batch_def_{uuid.uuid4().hex}"
+    return data_asset.add_batch_definition_whole_dataframe(
+        name=batch_def_name,
+    )
 
 
 @pytest.fixture(scope="module")
-def expectation_suite(
+def validation_definition(
     context: CloudDataContext,
     expectation_suite: ExpectationSuite,
-) -> ExpectationSuite:
-    """Add Expectations for the Data Assets defined in this module.
-    Note: There is no need to test Expectation Suite CRUD.
-    Those assertions can be found in the expectation_suite fixture.
-    """
-    expectation_suite.add_expectation_configuration(
-        expectation_configuration=ExpectationConfiguration(
-            type="expect_column_values_to_not_be_null",
-            kwargs={
-                "column": "string",
-                "mostly": 1,
-            },
+    batch_definition: BatchDefinition,
+) -> Generator[ValidationDefinition, None, None]:
+    validation_def_name = f"val_def_{uuid.uuid4().hex}"
+    yield context.validation_definitions.add(
+        ValidationDefinition(
+            name=validation_def_name,
+            data=batch_definition,
+            suite=expectation_suite,
         )
     )
-    return expectation_suite
+    context.validation_definitions.delete(name=validation_def_name)
+
+
+@pytest.fixture(scope="module")
+def checkpoint(
+    checkpoint: Checkpoint,
+    validation_definition: ValidationDefinition,
+) -> Checkpoint:
+    checkpoint.validation_definitions = [validation_definition]
+    checkpoint.save()
+    return checkpoint
 
 
 @pytest.mark.cloud
-def test_interactive_validator(
-    context: CloudDataContext,
-    validator: Validator,
-):
-    """Test interactive evaluation of the Data Assets in this module using an existing Validator.
-    Note: There is no need to test getting a Validator or using Validator.head(). That is already
-    tested in the validator fixture.
-    """
-    expectation_validation_result: ExpectationValidationResult = (
-        validator.expect_column_values_to_not_be_null(
-            column="datetime",
-            mostly=1,
-        )
-    )
-    assert expectation_validation_result.success
-
-
-@pytest.mark.xfail(reason="Fails due to a V1 change in the Checkpoint shape.", strict=True)
-@pytest.mark.cloud
-def test_checkpoint_run(checkpoint: Checkpoint):
+def test_checkpoint_run(checkpoint: Checkpoint, test_data):
     """Test running a Checkpoint that was created using the entities defined in this module."""
-    checkpoint_result: CheckpointResult = checkpoint.run()
+    checkpoint_result = checkpoint.run(batch_parameters={"dataframe": test_data})
     assert checkpoint_result.success

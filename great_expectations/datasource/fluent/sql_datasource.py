@@ -484,6 +484,7 @@ SqlPartitioner = Union[
 ]
 
 
+@public_api
 class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT]):
     """A _SQLAsset Mixin
 

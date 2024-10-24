@@ -3,29 +3,9 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 multiple_backend = []
 
-connecting_to_your_data = [
-    IntegrationTestFixture(
-        name="s3_spark_inferred_and_runtime_yaml_example",
-        user_flow_script="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.SPARK, BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="s3_spark_inferred_and_runtime_python_example",
-        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/cloud/s3/components_spark/inferred_and_runtime_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.SPARK, BackendDependencies.AWS],
-    ),
-]
+connecting_to_your_data: list[IntegrationTestFixture] = []
 
-deployment_patterns = [
-    IntegrationTestFixture(
-        name="deployment_pattern_spark_s3",
-        user_flow_script="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py",
-        data_context_dir=None,
-        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
-    ),
-]
+deployment_patterns: list[IntegrationTestFixture] = []
 
 creating_custom_expectations = [
     IntegrationTestFixture(
