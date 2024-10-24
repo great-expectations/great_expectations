@@ -4,7 +4,7 @@ If you’ve noticed an issue in the documentation, or have recommendations for i
 
 1. In the [`docusaurus/docs` folder](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs), go to the topic file you want to edit. 
 
-    The topic URL includes the topic file name. For example, the URL for the Great Core overview is https://docs.greatexpectations.io/docs/core/introduction/gx_overview. The URL indicates the topic is located in the `core/introduction` folder, and it's named `gx_overview`.
+    The topic URL includes the topic file name. For example, the URL for the Great Expectations Core overview is https://docs.greatexpectations.io/docs/core/introduction/gx_overview. The URL indicates the topic is located in the `core/introduction` folder, and it's named `gx_overview`.
 
 2. Click the file and then click **Edit this file**.
 
