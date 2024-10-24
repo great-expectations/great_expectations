@@ -110,7 +110,7 @@ class PartitionerSortingProtocol(Protocol):
     sort_ascending: bool
 
     @property
-    def param_names(self) -> list[str]:
+    def param_names(self) -> Union[list[str], tuple[str, ...]]:
         """The parameter names that specify a batch derived from this partitioner
 
         For example, for PartitionerYearMonth this returns ["year", "month"]. For more
