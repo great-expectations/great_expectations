@@ -438,3 +438,38 @@ def test_expectation_equality_ignores_rendered_content():
     expectation_b.rendered_content = None
 
     assert expectation_a == expectation_b
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "expectation_a, expectation_b, expected_result",
+    [
+        pytest.param(
+            gxe.ExpectColumnValuesToBeBetween(column="foo"), {}, False, id="different_objects"
+        ),
+        pytest.param(
+            gxe.ExpectColumnDistinctValuesToBeInSet(column="bar"),
+            gxe.ExpectColumnValuesToBeBetween(column="foo"),
+            True,
+            id="different_expectation_types",
+        ),
+        pytest.param(
+            gxe.ExpectColumnValuesToBeBetween(column="foo"),
+            gxe.ExpectColumnValuesToBeBetween(column="foo"),
+            False,
+            id="equivalent_expectations",
+        ),
+        pytest.param(
+            gxe.ExpectColumnValuesToBeBetween(
+                column="foo", id="bbbe648e-0a43-431b-81a0-04e68f1473ae"
+            ),
+            gxe.ExpectColumnValuesToBeBetween(
+                column="foo", id="aaae648e-0a43-431b-81a0-04e68f1473ae"
+            ),
+            False,
+            id="equiv_expectations_with_ids",
+        ),
+    ],
+)
+def test_expectations___lt__(expectation_a, expectation_b, expected_result):
+    assert (expectation_a < expectation_b) is expected_result
