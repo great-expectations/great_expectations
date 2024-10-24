@@ -13,9 +13,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
       {frontMatter.description}
 </OverviewCard>
 
-
 <LinkCardGrid>
-  
   <LinkCard 
       topIcon 
       label="Metadata Stores"
