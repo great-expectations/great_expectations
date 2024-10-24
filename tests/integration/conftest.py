@@ -4,13 +4,13 @@ import pandas as pd
 import pytest
 
 from great_expectations.datasource.fluent.interfaces import Batch
-from tests.integration.test_utils.data_source_config import DataSourceConfig
+from tests.integration.test_utils.data_source_config import DataSourceTestConfig
 
 _F = TypeVar("_F", bound=Callable)
 
 
 def parameterize_batch_for_data_sources(
-    data_source_configs: Sequence[DataSourceConfig],
+    data_source_configs: Sequence[DataSourceTestConfig],
     data: pd.DataFrame,
 ) -> Callable[[_F], _F]:
     """Test decorator that parametrizes a test function with batches for various data sources.
@@ -52,7 +52,7 @@ def batch_for_datasource(request: pytest.FixtureRequest) -> Generator[Batch, Non
     """
     data, data_source_config = request.param
     assert isinstance(data, pd.DataFrame)
-    assert isinstance(data_source_config, DataSourceConfig)
+    assert isinstance(data_source_config, DataSourceTestConfig)
 
     batch_setup = data_source_config.create_batch_setup(data)
 

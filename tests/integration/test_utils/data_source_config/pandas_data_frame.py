@@ -4,12 +4,12 @@ import pytest
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.test_utils.data_source_config.base import (
-    BatchSetup,
-    DataSourceConfig,
+    BatchTestSetup,
+    DataSourceTestConfig,
 )
 
 
-class PandasDataFrameDatasourceConfig(DataSourceConfig):
+class PandasDataFrameDatasourceTestConfig(DataSourceTestConfig):
     @property
     @override
     def label(self) -> str:
@@ -21,11 +21,11 @@ class PandasDataFrameDatasourceConfig(DataSourceConfig):
         return pytest.mark.unit
 
     @override
-    def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
-        return PandasDataFrameBatchSetup(data=data, config=self)
+    def create_batch_setup(self, data: pd.DataFrame) -> BatchTestSetup:
+        return PandasDataFrameBatchTestSetup(data=data, config=self)
 
 
-class PandasDataFrameBatchSetup(BatchSetup[PandasDataFrameDatasourceConfig]):
+class PandasDataFrameBatchTestSetup(BatchTestSetup[PandasDataFrameDatasourceTestConfig]):
     @override
     def make_batch(self) -> Batch:
         name = self._random_resource_name()

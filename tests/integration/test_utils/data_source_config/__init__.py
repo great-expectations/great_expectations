@@ -1,9 +1,2 @@
-from .base import BatchSetup, DataSourceConfig
-from .pandas_data_frame import PandasDataFrameBatchSetup, PandasDataFrameDatasourceConfig
-
-__all__ = [
-    "BatchSetup",
-    "DataSourceConfig",
-    "PandasDataFrameBatchSetup",
-    "PandasDataFrameDatasourceConfig",
-]
+from .base import BatchTestSetup, DataSourceTestConfig
+from .pandas_data_frame import PandasDataFrameBatchTestSetup, PandasDataFrameDatasourceTestConfig

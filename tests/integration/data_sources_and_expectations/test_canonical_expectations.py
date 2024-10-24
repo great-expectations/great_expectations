@@ -3,13 +3,13 @@ import pandas as pd
 import great_expectations.expectations as gxe
 from tests.integration.conftest import parameterize_batch_for_data_sources
 from tests.integration.test_utils.data_source_config import (
-    PandasDataFrameDatasourceConfig,
+    PandasDataFrameDatasourceTestConfig,
 )
 
 
 @parameterize_batch_for_data_sources(
     data_source_configs=[
-        PandasDataFrameDatasourceConfig(),
+        PandasDataFrameDatasourceTestConfig(),
     ],
     data=pd.DataFrame({"a": [1, 2]}),
 )
@@ -21,7 +21,7 @@ def test_min(batch_for_datasource) -> None:
 
 @parameterize_batch_for_data_sources(
     data_source_configs=[
-        PandasDataFrameDatasourceConfig(),
+        PandasDataFrameDatasourceTestConfig(),
     ],
     data=pd.DataFrame({"a": [1, 2], "b": [3, 4]}),
 )

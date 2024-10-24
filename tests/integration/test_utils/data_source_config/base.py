@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class DataSourceConfig(ABC):
+class DataSourceTestConfig(ABC):
     name: Optional[str] = None
 
     @property
@@ -33,7 +33,7 @@ class DataSourceConfig(ABC):
         ...
 
     @abstractmethod
-    def create_batch_setup(self, data: pd.DataFrame) -> BatchSetup:
+    def create_batch_setup(self, data: pd.DataFrame) -> BatchTestSetup:
         """Create a batch setup object for this data source."""
 
     @property
@@ -44,10 +44,10 @@ class DataSourceConfig(ABC):
         return "-".join(non_null_parts)
 
 
-_ConfigT = TypeVar("_ConfigT", bound=DataSourceConfig)
+_ConfigT = TypeVar("_ConfigT", bound=DataSourceTestConfig)
 
 
-class BatchSetup(ABC, Generic[_ConfigT]):
+class BatchTestSetup(ABC, Generic[_ConfigT]):
     """ABC for classes that set up and tear down batches."""
 
     def __init__(self, config: _ConfigT, data: pd.DataFrame) -> None:
