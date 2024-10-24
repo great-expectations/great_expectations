@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Final, List, Literal, Union
+from typing import List, Literal, Tuple, Union
 
 from great_expectations.compatibility import pydantic
 
@@ -81,25 +81,25 @@ ColumnPartitioner = Union[
 
 class FileNamePartitionerYearly(pydantic.BaseModel):
     regex: re.Pattern
-    param_names = ["year"]
+    param_names: Tuple[Literal["year"]] = ("year",)
     sort_ascending: bool = True
 
 
 class FileNamePartitionerMonthly(pydantic.BaseModel):
     regex: re.Pattern
-    param_names = ["year", "month"]
+    param_names: Tuple[Literal["year"], Literal["month"]] = ("year", "month")
     sort_ascending: bool = True
 
 
 class FileNamePartitionerDaily(pydantic.BaseModel):
     regex: re.Pattern
-    param_names = ["year", "month", "day"]
+    param_names: Tuple[Literal["year"], Literal["month"], Literal["day"]] = ("year", "month", "day")
     sort_ascending: bool = True
 
 
 class FileNamePartitionerPath(pydantic.BaseModel):
     regex: re.Pattern
-    param_names: Final[List[str]] = []
+    param_names: Tuple[()] = ()
     sort_ascending: bool = True
 
 

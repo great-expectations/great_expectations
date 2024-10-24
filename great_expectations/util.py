@@ -46,7 +46,6 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import LegacyRow, Row
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -1181,7 +1180,6 @@ def convert_to_json_serializable(
 ) -> None: ...
 
 
-@public_api  # - complexity 32
 def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     data: JSONConvertable,
 ) -> JSONValues:

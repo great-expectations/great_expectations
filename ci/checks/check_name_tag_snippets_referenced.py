@@ -47,10 +47,6 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py test_yaml_config",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation_2",  # noqa: E501
-    "docs/docusaurus/docs/oss/guides/connecting_to_your_data/cloud/s3/components_spark/inferred_and_runtime_python_example.py datasource config",  # noqa: E501
-    "docs/docusaurus/docs/oss/guides/connecting_to_your_data/cloud/s3/components_spark/inferred_and_runtime_python_example.py test datasource config",  # noqa: E501
-    "docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py datasource config",
-    "docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example_spark_s3.py test datasource config",  # noqa: E501
     "docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_filter_parameters",  # noqa: E501
@@ -67,21 +63,6 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py test_yaml_config",  # noqa: E501
     "docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_batch_list",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_batch_request",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_data_docs_store",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_expectations",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py build_docs",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py create_checkpoint",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_expectations_store",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_validation_results_store",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_list",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_request",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_validator",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py imports",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_expectations_store",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_validation_results_store",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py run checkpoint",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py save_expectations",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py set_new_validation_results_store",
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_data_docs_store",
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py create_checkpoint",
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_expectations_store",

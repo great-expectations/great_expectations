@@ -6,12 +6,12 @@ import pytest
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.test_utils.data_source_config.base import (
-    BatchSetup,
-    DataSourceConfig,
+    BatchTestSetup,
+    DataSourceTestConfig,
 )
 
 
-class PandasFilesystemCsvDatasourceConfig(DataSourceConfig):
+class PandasFilesystemCsvDatasourceTestConfig(DataSourceTestConfig):
     @property
     @override
     def label(self) -> str:
@@ -23,21 +23,23 @@ class PandasFilesystemCsvDatasourceConfig(DataSourceConfig):
         return pytest.mark.filesystem
 
     @override
-    def create_batch_setup(self, data: pd.DataFrame, request: pytest.FixtureRequest) -> BatchSetup:
+    def create_batch_setup(
+        self, data: pd.DataFrame, request: pytest.FixtureRequest
+    ) -> BatchTestSetup:
         tmp_path = request.getfixturevalue("tmp_path")
         assert isinstance(tmp_path, pathlib.Path)
 
-        return PandasFilesystemCsvBatchSetup(
+        return PandasFilesystemCsvBatchTestSetup(
             data=data,
             config=self,
             base_dir=tmp_path,
         )
 
 
-class PandasFilesystemCsvBatchSetup(BatchSetup[PandasFilesystemCsvDatasourceConfig]):
+class PandasFilesystemCsvBatchTestSetup(BatchTestSetup[PandasFilesystemCsvDatasourceTestConfig]):
     def __init__(
         self,
-        config: PandasFilesystemCsvDatasourceConfig,
+        config: PandasFilesystemCsvDatasourceTestConfig,
         data: pd.DataFrame,
         base_dir,
     ) -> None:

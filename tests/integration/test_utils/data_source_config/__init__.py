@@ -1,15 +1,6 @@
-from .base import BatchSetup, DataSourceConfig
-from .pandas_data_frame import PandasDataFrameBatchSetup, PandasDataFrameDatasourceConfig
+from .base import BatchTestSetup, DataSourceTestConfig
+from .pandas_data_frame import PandasDataFrameBatchTestSetup, PandasDataFrameDatasourceTestConfig
 from .pandas_filesystem_csv import (
-    PandasFilesystemCsvBatchSetup,
-    PandasFilesystemCsvDatasourceConfig,
+    PandasFilesystemCsvBatchTestSetup,
+    PandasFilesystemCsvDatasourceTestConfig,
 )
-
-__all__ = [
-    "BatchSetup",
-    "DataSourceConfig",
-    "PandasDataFrameBatchSetup",
-    "PandasDataFrameDatasourceConfig",
-    "PandasFilesystemCsvBatchSetup",
-    "PandasFilesystemCsvDatasourceConfig",
-]

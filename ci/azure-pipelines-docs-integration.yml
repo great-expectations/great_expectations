@@ -21,7 +21,7 @@ stages:
     jobs:
       - job: test_docs_aws_spark
         timeoutInMinutes: 30
-        condition: and(or(eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
+        condition: ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true)
         variables:
           python.version: "3.9"
           spark.version: "3.3.2"
