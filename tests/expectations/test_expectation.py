@@ -473,3 +473,26 @@ def test_expectation_equality_ignores_rendered_content():
 )
 def test_expectations___lt__(expectation_a, expectation_b, expected_result):
     assert (expectation_a < expectation_b) is expected_result
+
+
+@pytest.mark.unit
+def test_expectation_sorting():
+    expectation_a = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", id="80b6d508-a843-426e-97c0-7ff64d35ac04"
+    )
+    expectation_b = gxe.ExpectColumnValuesToBeBetween(
+        column="foo", id="4cd1e63a-880b-46ea-93e8-c11636df18b8"
+    )
+    expectation_c = gxe.ExpectTableColumnCountToBeBetween()
+    expectation_d = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
+    expectation_e = gxe.ExpectColumnMedianToBeBetween(column="foo", min_value=0, max_value=10)
+
+    expectations = [expectation_a, expectation_b, expectation_c, expectation_d, expectation_e]
+
+    assert sorted(expectations) == [
+        expectation_d,
+        expectation_e,
+        expectation_b,
+        expectation_a,
+        expectation_c,
+    ]
