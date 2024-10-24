@@ -91,7 +91,10 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
             raise AmbiguousPathError(path=path)
         return self.add_batch_definition(
             name=name,
-            partitioner=FileNamePartitionerPath(regex=regex),
+            partitioner=FileNamePartitionerPath(
+                regex=regex,
+                param_names=(),
+            ),
         )
 
     @public_api
@@ -115,7 +118,9 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
         return self.add_batch_definition(
             name=name,
-            partitioner=FileNamePartitionerYearly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerYearly(
+                regex=regex, param_names=("year",), sort_ascending=sort_ascending
+            ),
         )
 
     @public_api
@@ -139,7 +144,9 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=FileNamePartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerMonthly(
+                regex=regex, param_names=("year", "month"), sort_ascending=sort_ascending
+            ),
         )
 
     @public_api
@@ -164,7 +171,9 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=FileNamePartitionerDaily(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerDaily(
+                regex=regex, param_names=("year", "month", "day"), sort_ascending=sort_ascending
+            ),
         )
 
     @classmethod
