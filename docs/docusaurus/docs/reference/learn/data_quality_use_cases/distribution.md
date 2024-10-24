@@ -49,7 +49,7 @@ Compares the distribution of a specified column to a reference distribution usin
 
 **Use Case**: This Expectation checks if the KL divergence is below a specified threshold, allowing you to assess the similarity between the actual and expected data distributions.
 
-```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnKlDivergenceToBeLessThan"
+```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnKLDivergenceToBeLessThan"
 ```
 
 <small>View `ExpectColumnKLDivergenceToBeLessThan` in the [Expectation Gallery](https://greatexpectations.io/expectations/expect_column_kl_divergence_to_be_less_than).</small>
@@ -110,7 +110,7 @@ To use the `ExpectColumnQuantileValuesToBeBetween` Expectation, specify the `qua
 - Use the `mostly` parameter to allow for acceptable deviations in your data, providing flexibility in your validations.
 - `ExpectColumnValuesToBeBetween` can often be confused with `ExpectColumnMinToBeBetween` and `ExpectColumnMaxToBeBetween`. Use `ExpectColumnValuesToBeBetween` to define a single minimum or maxiumum value that is used to validate each value in the column.
 Use `ExpectColumnMinToBeBetween` and `ExpectColumnMaxToBeBetween` to define a range that is used to validate the overall column minimum or maximum.
-- Don't rely on a single distribution Expectation. Combine Expectations that check different aspects like the center (`ExpectColumnMeanToBeBetween`), spread (`ExpectColumnQuantileValuesToBeBetween`), and shape (`ExpectColumnKlDivergenceToBeLessThan`) of the distribution. Using multiple Expectations in concert gives a more comprehensive validation.
+- Don't rely on a single distribution Expectation. Combine Expectations that check different aspects like the center (`ExpectColumnMeanToBeBetween`), spread (`ExpectColumnQuantileValuesToBeBetween`), and shape (`ExpectColumnKLDivergenceToBeLessThan`) of the distribution. Using multiple Expectations in concert gives a more comprehensive validation.
 :::
 
 
@@ -192,7 +192,7 @@ expect_column_median_to_be_between: True
 
 **Context**: Machine learning models assume that the input data distribution remains consistent over time. Data drift can degrade model performance, and is a key factor in determining a model retraining cadence.
 
-**GX solution**: Use `ExpectColumnKlDivergenceToBeLessThan` to compare current data distribution with a reference distribution and detect drift.
+**GX solution**: Use `ExpectColumnKLDivergenceToBeLessThan` to compare current data distribution with a reference distribution and detect drift.
 
 ### Ensuring consistency in time-series data
 

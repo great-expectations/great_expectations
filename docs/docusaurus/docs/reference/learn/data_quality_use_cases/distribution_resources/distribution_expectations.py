@@ -56,8 +56,8 @@ suite.add_expectation(
 )
 
 suite.add_expectation(
-    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnKlDivergenceToBeLessThan">
-    gxe.ExpectColumnKlDivergenceToBeLessThan(
+    # <snippet name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/distribution_resources/distribution_expectations.py ExpectColumnKLDivergenceToBeLessThan">
+    gxe.ExpectColumnKLDivergenceToBeLessThan(
         column="purchase_amount",
         partition_object={
             "bins": [0, 1000, 2000, 3000, 4000],
