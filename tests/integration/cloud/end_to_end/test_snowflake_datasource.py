@@ -52,7 +52,6 @@ def datasource(
         name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
-        schema=RANDOM_SCHEMA,
     )
     return datasource
 
