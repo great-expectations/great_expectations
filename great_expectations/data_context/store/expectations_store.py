@@ -267,12 +267,12 @@ class ExpectationsStore(Store):
         """
         suite["id"] = str(uuid.uuid4())
         if isinstance(suite, ExpectationSuite):
-            key = "expectation_configurations"
+            for expectation in suite.expectations:
+                expectation.id = str(uuid.uuid4())
         else:
-            # this will be true if a serialized suite is provided
-            key = "expectations"
-        for expectation_configuration in suite[key]:
-            expectation_configuration["id"] = str(uuid.uuid4())
+            for expectation in suite["expectations"]:
+                expectation["id"] = str(uuid.uuid4())
+
         return suite
 
     def _add_ids_on_update(self, suite: ExpectationSuite) -> ExpectationSuite:

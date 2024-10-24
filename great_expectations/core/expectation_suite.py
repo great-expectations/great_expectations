@@ -331,7 +331,7 @@ class ExpectationSuite(SerializableDictDot):
         return all(
             (
                 self.name == other.name,
-                self.expectations == other.expectations,
+                sorted(self.expectations) == sorted(other.expectations),
                 self.suite_parameters == other.suite_parameters,
                 self.meta == other.meta,
             )
