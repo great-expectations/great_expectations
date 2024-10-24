@@ -37,6 +37,8 @@ class _PublicApiInfo:
 
 class _PublicApiIntrospector:
     _public_api: dict[str, list[_PublicApiInfo]] = {}
+
+    # Only used for testing
     _class_registry: dict[str, set[str]] = defaultdict(set)
 
     # This is a special key that is used to indicate that a class definition
@@ -73,21 +75,27 @@ class _PublicApiIntrospector:
 
     def _add_to_class_registry(self, func: F) -> None:
         if isinstance(func, type):
-            key = f"{func.__module__}.{func.__qualname__}"
-            self._class_registry[key].add(self.CLASS_DEFINITION)
+            self._add_class_definition_to_registry(func)
         else:
-            parts = func.__qualname__.split(".")
-            METHOD_PARTS_LENGTH = 2  # Standalone functions will have a length of 1
-            if len(parts) >= METHOD_PARTS_LENGTH:
-                cls = parts[0]
-                method = parts[1]
-                key = f"{func.__module__}.{cls}"
-                self._class_registry[key].add(method)
-            else:
-                logger.info(
-                    "Skipping registering function %s because it does not have a class",
-                    func.__qualname__,
-                )
+            self._add_method_to_registry(func)
+
+    def _add_class_definition_to_registry(self, cls: type) -> None:
+        key = f"{cls.__module__}.{cls.__qualname__}"
+        self._class_registry[key].add(self.CLASS_DEFINITION)
+
+    def _add_method_to_registry(self, func: F) -> None:
+        parts = func.__qualname__.split(".")
+        METHOD_PARTS_LENGTH = 2  # Standalone functions will have a length of 1
+        if len(parts) == METHOD_PARTS_LENGTH:
+            cls = parts[0]
+            method = parts[1]
+            key = f"{func.__module__}.{cls}"
+            self._class_registry[key].add(method)
+        else:
+            logger.info(
+                "Skipping registering function %s because it does not have a class",
+                func.__qualname__,
+            )
 
     @override
     def __str__(self) -> str:
