@@ -10,7 +10,6 @@ from typing import Any, Sequence
 
 import pandas as pd
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -23,7 +22,6 @@ ctx = decimal.Context()
 ctx.prec = DEFAULT_PRECISION
 
 
-@public_api
 def num_to_str(  # noqa: C901
     f: float,
     precision: int = DEFAULT_PRECISION,
@@ -121,7 +119,6 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         return regex_match is not None
 
 
-@public_api
 def substitute_none_for_missing(
     kwargs: dict[str, Any], kwarg_list: Sequence[str]
 ) -> dict[str, Any]:
@@ -155,7 +152,6 @@ def substitute_none_for_missing(
 
 
 # NOTE: the method is pretty dirty
-@public_api
 def parse_row_condition_string_pandas_engine(
     condition_string: str, with_schema: bool = False
 ) -> tuple[str, dict]:
@@ -223,7 +219,6 @@ def parse_row_condition_string_pandas_engine(
     return template_str, params
 
 
-@public_api
 def handle_strict_min_max(params: dict) -> tuple[str, str]:
     """Utility function for the at least and at most conditions based on strictness.
 
