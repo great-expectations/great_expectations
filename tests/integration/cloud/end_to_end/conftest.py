@@ -7,6 +7,7 @@ import uuid
 from typing import TYPE_CHECKING, Final, Generator, Iterator, Literal, Protocol
 
 import numpy as np
+import pandas as pd
 import pytest
 
 import great_expectations as gx
@@ -22,8 +23,6 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations import ExpectColumnValuesToNotBeNull
 
 if TYPE_CHECKING:
-    import pandas as pd
-
     from great_expectations.compatibility import pyspark, sqlalchemy
 
 LOGGER: Final = logging.getLogger("tests")
