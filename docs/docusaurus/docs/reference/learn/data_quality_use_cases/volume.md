@@ -83,7 +83,7 @@ Compares the row count of the current table to another table within the same dat
 **Goal**: Using the `ExpectTableRowCountToBeBetween` Expectation and either GX Core or GX Cloud, validate daily data volume by batching a single Data Asset (a Postgres table) on a time-based column, `transfer_ts`.
 
 <Tabs
-   defaultValue="gx_core"
+   defaultValue="gx_cloud"
    values={[
       {value: 'gx_core', label: 'GX Core'},
       {value: 'gx_cloud', label: 'GX Cloud'}

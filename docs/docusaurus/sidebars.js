@@ -428,11 +428,10 @@ module.exports = {
       label: 'Data quality use cases',
       link: { type: 'doc', id: 'reference/learn/data_quality_use_cases/dq_use_cases_lp' },
       items: [
-        'reference/learn/data_quality_use_cases/schema',
-        'reference/learn/data_quality_use_cases/missingness',
-        'reference/learn/data_quality_use_cases/volume',
         'reference/learn/data_quality_use_cases/distribution',
-        'reference/learn/data_quality_use_cases/freshness'
+        'reference/learn/data_quality_use_cases/missingness',
+        'reference/learn/data_quality_use_cases/schema',
+        'reference/learn/data_quality_use_cases/volume'
       ]
     },
     {
