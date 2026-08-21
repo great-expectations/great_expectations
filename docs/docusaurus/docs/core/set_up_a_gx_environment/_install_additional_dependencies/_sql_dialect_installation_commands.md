@@ -9,6 +9,7 @@ The following table lists the installation commands used to install GX Core depe
 | Databricks | `pip install 'great_expectations[databricks]'` |
 | Microsoft Fabric | `pip install 'great_expectations[fabric]'` |
 | Microsoft SQL Server | `pip install 'great_expectations[sql-server]'` |
+| Oracle | `pip install 'great_expectations[oracle]'` |
 | PostgreSQL | `pip install 'great_expectations[postgresql]'` |
 | Redshift | `pip install 'great_expectations[redshift]'` |
 | Snowflake | `pip install 'great_expectations[snowflake]'` |
