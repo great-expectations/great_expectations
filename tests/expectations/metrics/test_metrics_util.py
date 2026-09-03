@@ -798,6 +798,73 @@ def test_get_dialect_like_pattern_expression_is_resilient_to_missing_dialects(mo
     assert expression is None
 
 
+def _compiled_like_expression(**kwargs) -> str:
+    """Render a LIKE expression against a real dialect so the SQL text can be asserted on."""
+    expression = get_dialect_like_pattern_expression(
+        column=sa.column("col"), dialect=sqlalchemy.dialects.postgresql, **kwargs
+    )
+    assert expression is not None
+    return str(
+        expression.compile(
+            dialect=sqlalchemy.dialects.postgresql.dialect(),
+            compile_kwargs={"literal_binds": True},
+        )
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "positive,expected",
+    [
+        pytest.param(True, "col LIKE 'a!_b' ESCAPE '!'", id="positive"),
+        pytest.param(False, "col NOT LIKE 'a!_b' ESCAPE '!'", id="negative"),
+    ],
+)
+def test_get_dialect_like_pattern_expression_emits_escape_clause(positive: bool, expected: str):
+    """An escape character must reach the SQL as an ESCAPE clause.
+
+    Without it there is no way to match a literal '_' or '%', because both are wildcards.
+    """
+    assert _compiled_like_expression(like_pattern="a!_b", positive=positive, escape="!") == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("positive", [True, False])
+def test_get_dialect_like_pattern_expression_omits_escape_clause_by_default(positive: bool):
+    """Callers that do not ask for an escape must get exactly the SQL they got before."""
+    assert "ESCAPE" not in _compiled_like_expression(like_pattern="a_b", positive=positive)
+
+
+@pytest.mark.unit
+def test_get_dialect_like_pattern_expression_rejects_escape_on_bigquery():
+    """GoogleSQL has no ESCAPE clause, so asking for one must fail with a usable message.
+
+    Emitting the clause anyway would hand the user a database syntax error about SQL they
+    never wrote.
+    """
+    bigquery_dialect = SimpleNamespace(BigQueryDialect=object)
+
+    with pytest.raises(ValueError, match="BigQuery does not support an ESCAPE clause"):
+        get_dialect_like_pattern_expression(
+            column=sa.column("col"),
+            dialect=bigquery_dialect,
+            like_pattern="a!_b",
+            escape="!",
+        )
+
+
+@pytest.mark.unit
+def test_get_dialect_like_pattern_expression_allows_bigquery_without_escape():
+    """The BigQuery guard must only fire when an escape was actually requested."""
+    expression = get_dialect_like_pattern_expression(
+        column=sa.column("col"),
+        dialect=SimpleNamespace(BigQueryDialect=object),
+        like_pattern="a_b",
+    )
+
+    assert expression is not None
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "dialect_name,select_statement_factory,expected_sql,mock_params,should_fail_substitution",

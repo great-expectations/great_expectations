@@ -948,19 +948,47 @@ def parse_value_set(value_set: Iterable) -> list:
 
 
 def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
-    column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
+    column: sa.Column,
+    dialect: ModuleType,
+    like_pattern: str,
+    positive: bool = True,
+    escape: str | None = None,
 ) -> sa.BinaryExpression | None:
+    """Build a LIKE expression for the dialects that support one.
+
+    ``escape`` names the character that removes the special meaning of the ``_`` and ``%``
+    wildcards in ``like_pattern``, and is emitted as a SQL ``ESCAPE '<char>'`` clause. It is
+    required to match those characters literally: dialects disagree about what an
+    unannounced backslash means -- PostgreSQL treats it as an escape by default, SQLite
+    treats it as an ordinary character, and Snowflake requires the clause to be stated --
+    so a pattern relying on the default is not portable. ``None`` emits no clause, which is
+    the behavior of every caller that does not ask for one.
+
+    BigQuery is the exception: GoogleSQL has no ``ESCAPE`` clause and escapes wildcards with
+    a backslash inside the pattern, so passing ``escape`` for that dialect raises.
+    """
     dialect_supported: bool = False
+    is_bigquery: bool = False
 
     try:
         # Bigquery
         if hasattr(dialect, "BigQueryDialect"):
             dialect_supported = True
+            is_bigquery = True
     except (
         AttributeError,
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
+
+    if escape is not None and is_bigquery:
+        # GoogleSQL has no ESCAPE clause; it escapes wildcards with a backslash inside the
+        # pattern itself. Emitting one would be a syntax error, so say so plainly rather
+        # than letting the database reject generated SQL the user never wrote.
+        raise ValueError(  # noqa: TRY003 # FIXME CoP
+            "BigQuery does not support an ESCAPE clause. Escape the '_' and '%' wildcards "
+            "with a backslash inside like_pattern instead (for example 'a\\_b')."
+        )
 
     if hasattr(dialect, "dialect"):
         try:
@@ -1037,9 +1065,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
     if dialect_supported:
         try:
             if positive:
-                return column.like(sqlalchemy.literal(like_pattern))
+                return column.like(sqlalchemy.literal(like_pattern), escape=escape)
             else:
-                return sa.not_(column.like(sqlalchemy.literal(like_pattern)))
+                return sa.not_(column.like(sqlalchemy.literal(like_pattern), escape=escape))
         except AttributeError:
             pass
 
