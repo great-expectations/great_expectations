@@ -964,6 +964,11 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
     so a pattern relying on the default is not portable. ``None`` emits no clause, which is
     the behavior of every caller that does not ask for one.
 
+    Prefer a character other than a backslash. Several dialects also treat a backslash
+    specially inside string literals, before the pattern reaches LIKE at all -- Redshift
+    rejects ``ESCAPE '\\'`` outright -- which is why the character is the caller's to choose
+    rather than fixed.
+
     BigQuery is the exception: GoogleSQL has no ``ESCAPE`` clause and escapes wildcards with
     a backslash inside the pattern, so passing ``escape`` for that dialect raises.
     """

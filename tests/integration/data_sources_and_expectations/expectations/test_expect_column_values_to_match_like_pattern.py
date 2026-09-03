@@ -264,7 +264,7 @@ def test_unescaped_wildcards_still_match_anything(batch_for_datasource: Batch) -
     [
         pytest.param("a!_b", "!", ["a%b", "axb"], id="literal_underscore"),
         pytest.param("a!%b", "!", ["a_b", "axb"], id="literal_percent"),
-        pytest.param("a\\_b", "\\", ["a%b", "axb"], id="backslash_as_escape_character"),
+        pytest.param("a#_b", "#", ["a%b", "axb"], id="a_different_escape_character"),
     ],
 )
 @parameterize_batch_for_data_sources(data_source_configs=ESCAPE_DATA_SOURCES, data=DATA)
@@ -277,14 +277,21 @@ def test_escape_matches_wildcard_characters_literally(
     """An escape character makes '_' and '%' match themselves rather than any character.
 
     Only the single row holding the literal character may match; the other two must be
-    reported as unexpected. The escape character itself is arbitrary, so a backslash and a
-    non-backslash character must behave identically -- which is the point, since dialects
-    disagree about what an unannounced backslash means.
+    reported as unexpected. Which character does the escaping is the caller's choice, so
+    two different ones must produce the same result.
+
+    Backslash is deliberately not one of them. Several dialects also treat it specially
+    inside string literals, before LIKE ever sees the pattern -- Redshift rejects
+    ``ESCAPE '\\'`` outright -- which is the reason this parameter lets callers pick a
+    character that does not collide with their dialect or their data.
     """
     expectation = gxe.ExpectColumnValuesToMatchLikePattern(
         column=WILDCARD_LITERALS, like_pattern=like_pattern, escape=escape
     )
     result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
 
+    # A metric that raised leaves `result` empty, so read the failure out of
+    # exception_info rather than reporting a bare KeyError three frames later.
+    assert "unexpected_list" in result.result, f"metric did not resolve: {result.exception_info}"
     assert not result.success
     assert sorted(result.result["unexpected_list"]) == expected_unexpected

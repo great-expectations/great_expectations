@@ -47,8 +47,11 @@ ESCAPE_DESCRIPTION = (
     "match those characters literally: dialects disagree about an unannounced backslash "
     "(PostgreSQL treats it as an escape, SQLite treats it as an ordinary character, and "
     "Snowflake requires the clause to be stated), so a pattern relying on the default is "
-    "not portable. Omit it to emit no `ESCAPE` clause. Not supported on BigQuery, whose "
-    "GoogleSQL has no `ESCAPE` clause: escape wildcards inside the pattern there instead."
+    "not portable. Prefer a character other than a backslash: several dialects also treat "
+    "a backslash specially inside string literals, before the pattern reaches LIKE, and "
+    "Redshift rejects `ESCAPE '\\'` outright. Omit it to emit no `ESCAPE` clause. Not "
+    "supported on BigQuery, whose GoogleSQL has no `ESCAPE` clause: escape wildcards "
+    "inside the pattern there instead."
 )
 DATA_QUALITY_ISSUES = [DataQualityIssues.VALIDITY.value]
 SUPPORTED_DATA_SOURCES = [
