@@ -40,7 +40,7 @@ context = gx.get_context()
 set_up_context_for_example(context)
 
 
-# <snippet name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define description attribute for a cusom Expectation">
+# <snippet name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define description attribute for a custom Expectation">
 # <snippet name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define default attributes for a custom Expectation class">
 # <snippet name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define a custom Expectation subclass">
 class ExpectValidPassengerCount(gx.expectations.ExpectColumnValuesToBeBetween):

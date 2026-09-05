@@ -37,7 +37,7 @@ Batch Definitions for a Directory Data Asset can be configured to return all of 
 
    <TabItem value="whole_directory" label="Whole directory">
    
-   Because a whole directory Batch Definition returns the records from all of the files it can read in the Data Asset you only need to provide one addditional piece of information to define one:
+   Because a whole directory Batch Definition returns the records from all of the files it can read in the Data Asset you only need to provide one additional piece of information to define one:
 
    - `name`: A name by which you can reference the Batch Definition in the future.  This should be unique within the Data Asset.
  

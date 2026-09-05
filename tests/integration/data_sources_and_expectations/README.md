@@ -43,7 +43,7 @@ classDiagram
 ## Overview of the main flow
 The following shows the rough flow when running tests with `parameterize_batch_for_data_sources` and the `batch_for_datasource` fixture.
 
-Some names have been truncated in the the diagram
+Some names have been truncated in the diagram
 
 An overview of the main pieces:
 

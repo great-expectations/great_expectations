@@ -40,7 +40,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
    To create a new Expectation Suite you will instantiate the `ExpectationSuite` class, which is available from the `great_expectations` module.
 
-   Each Expectation Suite will require a unique name.  In the following code update the variable `suite_name` with a a name relevant to your data.  Then execute the code to create your Expectation Suite:
+   Each Expectation Suite will require a unique name.  In the following code update the variable `suite_name` with a name relevant to your data.  Then execute the code to create your Expectation Suite:
 
    ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/organize_expectations_into_suites.py - create an Expectation Suite"
    ```
@@ -63,7 +63,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
 5. Add the Expectation to the Expectation Suite.
 
-   An Expectation Suite's `add_expectation(...)` method takes in an instance of an Expectation and adds it to the Expectation Suite's configuraton: 
+   An Expectation Suite's `add_expectation(...)` method takes in an instance of an Expectation and adds it to the Expectation Suite's configuration: 
 
    ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/organize_expectations_into_suites.py - add an Expectation in a variable to an Expectation Suite"
    ```

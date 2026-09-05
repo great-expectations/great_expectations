@@ -14,7 +14,7 @@ GX provides two types of Data Assets for Filesystem Data Sources: File Data Asse
 
    <TabItem value="file" label="File Data Asset">
 
-   File Data Assets are used to retrieve data from individual files in formats such as `.csv` or `.parquet`.  The file format that can be read by a File Data Asset is determined when the File Data Asset is created.  The specific file that is read is determind by Batch Definitions that are added to the Data Asset after it is created.
+   File Data Assets are used to retrieve data from individual files in formats such as `.csv` or `.parquet`.  The file format that can be read by a File Data Asset is determined when the File Data Asset is created.  The specific file that is read is determined by Batch Definitions that are added to the Data Asset after it is created.
 
    Both Spark and pandas Filesystem Data Sources support File Data Assets for all supported Filesystem environments.
 
@@ -22,7 +22,7 @@ GX provides two types of Data Assets for Filesystem Data Sources: File Data Asse
 
    <TabItem value="directory" label="Directory Data Asset">
 
-   Directory Data Assets read one or more files in formats such as `.csv` or `.parquet`.  The file format that can be read by a Directory Data Asset is determined when the Directory Data Asset is created.  The data in the corresponding files is concatonated into a single table which can be retrieved as a whole, or further partitioned based on the value of a datetime field.
+   Directory Data Assets read one or more files in formats such as `.csv` or `.parquet`.  The file format that can be read by a Directory Data Asset is determined when the Directory Data Asset is created.  The data in the corresponding files is concatenated into a single table which can be retrieved as a whole, or further partitioned based on the value of a datetime field.
 
    Spark Filesystem Data Sources support Directory Data Assets for all supported Filesystem environments.  However, pandas Filesystem Data Sources do _not_ support Directory Data Assets at all.
 

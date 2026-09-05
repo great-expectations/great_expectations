@@ -96,7 +96,7 @@ You can copy the markdown to a file and render with a tool like [GitHub README i
 
 #### gallery-tracebacks.txt
 
-This file is only created if any exceptions occured while:
+This file is only created if any exceptions occurred while:
 
 - trying to load an Expectation
 - trying to get an Expectation's implementation from the registry
@@ -139,7 +139,7 @@ grep "to evaluate_json" testing-times.txt
 
 The script is run in Azure Pipelines against every core and contributed Expectation, in every backend that we officially test in (pandas, spark, sqlite, postgresql, mysql, mssql, trino, redshift, bigquery, snowflake). The script is run automatically once a day against the develop branch. See the [cron schedule in azure-pipelines-expectation-gallery.yml](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/azure-pipelines-expectation-gallery.yml#L10-L16).
 
-The resulting JSON file is pushed up to S3 at &lt;https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2--staging.json&gt; and the [Algolia indicies](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#algolia-index-names) for the staging site are updated.
+The resulting JSON file is pushed up to S3 at &lt;https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2--staging.json&gt; and the [Algolia indices](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#algolia-index-names) for the staging site are updated.
 
 In the `expectation_gallery` pipeline, there are additional stages after the invocation(s) of `build_gallery.py` to show useful summary output, leveraging the trick mentioned in the [previous section](#full-loggingdebug-output-of-the-build_gallerypy-script).
 

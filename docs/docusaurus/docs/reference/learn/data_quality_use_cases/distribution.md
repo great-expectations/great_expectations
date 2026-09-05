@@ -98,7 +98,7 @@ To use the `ExpectColumnQuantileValuesToBeBetween` Expectation, specify the `qua
 
 :::tip[GX tips for distribution Expectations]
 - Use the `mostly` parameter to allow for acceptable deviations in your data, providing flexibility in your validations.
-- `ExpectColumnValuesToBeBetween` can often be confused with `ExpectColumnMinToBeBetween` and `ExpectColumnMaxToBeBetween`. Use `ExpectColumnValuesToBeBetween` to define a single minimum or maxiumum value that is used to validate each value in the column.
+- `ExpectColumnValuesToBeBetween` can often be confused with `ExpectColumnMinToBeBetween` and `ExpectColumnMaxToBeBetween`. Use `ExpectColumnValuesToBeBetween` to define a single minimum or maximum value that is used to validate each value in the column.
 Use `ExpectColumnMinToBeBetween` and `ExpectColumnMaxToBeBetween` to define a range that is used to validate the overall column minimum or maximum.
 - Don't rely on a single distribution Expectation. Combine Expectations that check different aspects like the center (`ExpectColumnMeanToBeBetween`), spread (`ExpectColumnQuantileValuesToBeBetween`), and shape (`ExpectColumnKLDivergenceToBeLessThan`) of the distribution. Using multiple Expectations in concert gives a more comprehensive validation.
 :::

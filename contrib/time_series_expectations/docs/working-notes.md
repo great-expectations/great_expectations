@@ -24,7 +24,7 @@ This package contains...
 
 - Four Data Assistants for creating time series Expectations: Freshness, Volume, BatchLevelTimeSeries, and RowLevelTimeSeries.
 - Expectations for detecting trends, seasonality, outliers, etc. in time series data
-- Abstract Base Classses for creating additional time series Expectations.
+- Abstract Base Classes for creating additional time series Expectations.
 - Methods for generating time series data for testing purposes.
 - Methods for pulling illustrative data from real-world sources.
 
