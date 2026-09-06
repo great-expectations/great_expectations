@@ -1,3 +1,4 @@
+from typing import Sequence
 from unittest.mock import ANY
 
 import pandas as pd
@@ -17,7 +18,9 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 from tests.integration.test_utils.data_source_config import (
     ALL_DATA_SOURCES,
     SQL_DATA_SOURCES,
+    DataSourceTestConfig,
     PostgreSQLDatasourceTestConfig,
+    SqliteDatasourceTestConfig,
 )
 
 BASIC_COL = "basic"
@@ -26,6 +29,7 @@ MOSTLY_ZERO_DISTRIBUTION = "mostly_zero"
 DISTRIBUTION_WITH_NULLS = "lotta_nulls"
 CONSTANT_COL = "constant"
 CONSTANT_COL_WITH_NULLS = "constant_with_nulls"
+SINGLE_NON_NULL_VALUE = "single_non_null_value"
 
 DATA = pd.DataFrame(
     {
@@ -35,6 +39,9 @@ DATA = pd.DataFrame(
         DISTRIBUTION_WITH_NULLS: [-1, 0, 1, None, None],
         CONSTANT_COL: [5, 5, 5, 5, 5],
         CONSTANT_COL_WITH_NULLS: [5, 5, 5, None, None],
+        # One non-null value, so the sample standard deviation is undefined rather than
+        # zero. This is the input that reaches the guards' `is None` limb on SQL.
+        SINGLE_NON_NULL_VALUE: [5, None, None, None, None],
     },
     dtype="object",
 )
@@ -226,16 +233,51 @@ def test_zero_standard_deviation_is_consistent_across_data_sources(
     """A column with no variance must produce the same verdict on every backend.
 
     The z-score of a constant column divides by a standard deviation of zero, and the
-    backends disagree about what that means: Postgres and SQL Server raise, SQLite and
-    MySQL return NULL, Spark returns Infinity (or raises under ANSI), and pandas produces
-    NaN. Left to the backend, the same data yielded a raised exception on some data
-    sources, a silent pass on others, and every row flagged as an outlier on pandas.
+    backends disagree about what that means: Postgres and SQL Server raise; SQLite, MySQL
+    and Spark return NULL, with Spark raising instead under
+    ``spark.sql.ansi.enabled=true``; and pandas either produces NaN or raises
+    ZeroDivisionError depending on the column's dtype. Left to the backend, the same data
+    yielded a raised exception on some data sources, a silent pass on others, and every
+    row flagged as an outlier on pandas.
 
     A constant column has no outliers, so the expectation succeeds with nothing
     unexpected -- and, critically, does so identically everywhere.
     """
     expectation = gxe.ExpectColumnValueZScoresToBeLessThan(
         column=column, threshold=1.96, double_sided=True
+    )
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    _assert_no_metric_exceptions(result)
+    assert result.success
+    assert result.result["unexpected_count"] == 0
+    assert result.result["unexpected_list"] == []
+
+
+# SQLite is excluded: its `stddev` user-defined function raises outright on fewer than two
+# non-null values, so it never reaches the z-score metric at all. That is a pre-existing
+# defect in `column.standard_deviation`, unrelated to this change and recorded separately.
+UNDEFINED_VARIANCE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
+    config for config in ALL_DATA_SOURCES if not isinstance(config, SqliteDatasourceTestConfig)
+]
+
+
+@parameterize_batch_for_data_sources(data_source_configs=UNDEFINED_VARIANCE_DATA_SOURCES, data=DATA)
+def test_undefined_standard_deviation_is_consistent_across_data_sources(
+    batch_for_datasource: Batch,
+) -> None:
+    """Undefined variance must reach the same verdict as zero variance.
+
+    The sample standard deviation of a single value is undefined, not zero, so this input
+    misses the `== 0` arm of the guards that the constant-column test covers and exercises
+    the dialect-dependent half instead. Postgres, Spark and BigQuery return NULL from
+    `stddev_samp` here, which arrives as None; pandas gets NaN from `Series.std()` and
+    resolves it in `_pandas_condition` rather than in the guard.
+
+    A column that cannot have outliers must not report any, whichever of those paths runs.
+    """
+    expectation = gxe.ExpectColumnValueZScoresToBeLessThan(
+        column=SINGLE_NON_NULL_VALUE, threshold=1.96, double_sided=True
     )
     result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
 
