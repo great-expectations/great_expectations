@@ -8,7 +8,6 @@ import logging
 import pathlib
 import tempfile
 import uuid
-import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -33,7 +32,6 @@ from marshmallow import (
     pre_dump,
     validates_schema,
 )
-from marshmallow.warnings import RemovedInMarshmallow4Warning
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
@@ -62,21 +60,38 @@ if TYPE_CHECKING:
         BatchRequest as FluentBatchRequest,
     )
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
+
+def _build_yaml_handler() -> YAML:
+    """Build a YAML handler for a single dump.
+
+    A handler is deliberately not shared between dumps. ruamel binds the output
+    stream to the handler for the duration of a dump and only unbinds it on
+    success, so a handler that has raised mid-dump stays bound to the stream it
+    failed on and corrupts every later dump made through it.
+    """
+    handler = YAML()
+    handler.indent(mapping=2, sequence=4, offset=2)
+    return handler
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-# NOTE 121822: (kilo59) likely won't moving to marshmallow v4 so we don't care about this
-warnings.simplefilter(action="ignore", category=RemovedInMarshmallow4Warning)
+def _validate_config_version(value: float) -> None:
+    """Raise if the config version is outside the representable range.
+
+    Raising (rather than returning False) is required: returning a falsy value from a
+    validator is a no-op, so a boolean validator silently accepts every value.
+    """
+    if not 0 < value < 100:  # noqa: PLR2004 # FIXME CoP
+        raise ValidationError("config version must be between 0 and 100.")  # noqa: TRY003 # FIXME CoP
 
 
 def object_to_yaml_str(obj):
     output_str: str
     with StringIO() as string_stream:
-        yaml.dump(obj, string_stream)
+        _build_yaml_handler().dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
 
@@ -145,7 +160,7 @@ class BaseYamlConfig(SerializableDictDot):
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
-        yaml.dump(self.commented_map, outfile)
+        _build_yaml_handler().dump(self.commented_map, outfile)
 
     def to_yaml_str(self) -> str:
         """
@@ -253,19 +268,19 @@ class SorterConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.datasource.data_connector.sorter",
+        load_default="great_expectations.datasource.data_connector.sorter",
     )
     orderby = fields.String(
         required=False,
         allow_none=True,
-        missing="asc",
+        load_default="asc",
     )
 
     # allow_none = True because it is only used by some Sorters
     reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
     order_keys_by = fields.String(
@@ -275,12 +290,12 @@ class SorterConfigSchema(Schema):
     key_reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
     datetime_format = fields.String(
         required=False,
-        missing=None,
+        load_default=None,
         allow_none=True,
     )
 
@@ -377,12 +392,12 @@ class AssetConfigSchema(Schema):
     class_name = fields.String(
         required=False,
         allow_none=True,
-        missing="Asset",
+        load_default="Asset",
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
-        missing="great_expectations.datasource.data_connector.asset",
+        allow_none=True,
+        load_default="great_expectations.datasource.data_connector.asset",
     )
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
@@ -619,7 +634,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.datasource.data_connector",
+        load_default="great_expectations.datasource.data_connector",
     )
 
     assets = fields.Dict(
@@ -970,7 +985,7 @@ class ExecutionEngineConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.execution_engine",
+        load_default="great_expectations.execution_engine",
     )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
@@ -1083,8 +1098,8 @@ class GXCloudConfig(DictDot):
 
 
 class DataContextConfigSchema(Schema):
-    config_version: fields.Number = fields.Number(
-        validate=lambda x: 0 < x < 100,  # noqa: PLR2004 # FIXME CoP
+    config_version: fields.Float = fields.Float(
+        validate=_validate_config_version,
         error_messages={"invalid": "config version must be a number."},
     )
     fluent_datasources = fields.Dict(

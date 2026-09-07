@@ -994,36 +994,32 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
             if header:
                 expected_distribution = RenderedGraphContent(
-                    **{
-                        "content_block_type": "graph",
-                        "graph": chart,
-                        "header": header,
-                        "styling": {
-                            "classes": [
-                                f"col-{chart_container_col_width!s}",
-                                "mt-2",
-                                "pl-1",
-                                "pr-1",
-                            ],
-                            "parent": {"styles": {"list-style-type": "none"}},
-                        },
-                    }
+                    content_block_type="graph",
+                    graph=chart,
+                    header=header,
+                    styling={
+                        "classes": [
+                            f"col-{chart_container_col_width!s}",
+                            "mt-2",
+                            "pl-1",
+                            "pr-1",
+                        ],
+                        "parent": {"styles": {"list-style-type": "none"}},
+                    },
                 )
             else:
                 expected_distribution = RenderedGraphContent(
-                    **{
-                        "content_block_type": "graph",
-                        "graph": chart,
-                        "styling": {
-                            "classes": [
-                                f"col-{chart_container_col_width!s}",
-                                "mt-2",
-                                "pl-1",
-                                "pr-1",
-                            ],
-                            "parent": {"styles": {"list-style-type": "none"}},
-                        },
-                    }
+                    content_block_type="graph",
+                    graph=chart,
+                    styling={
+                        "classes": [
+                            f"col-{chart_container_col_width!s}",
+                            "mt-2",
+                            "pl-1",
+                            "pr-1",
+                        ],
+                        "parent": {"styles": {"list-style-type": "none"}},
+                    },
                 )
         return expected_distribution
 
@@ -1548,27 +1544,23 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         )
 
         observed_value_content_block = RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "KL Divergence: $observed_value",
-                    "params": {
-                        "observed_value": (
-                            str(observed_value)
-                            if observed_value
-                            else "None (-infinity, infinity, or NaN)"
-                        ),
-                    },
-                    "styling": {"classes": ["mb-2"]},
+            content_block_type="string_template",
+            string_template={
+                "template": "KL Divergence: $observed_value",
+                "params": {
+                    "observed_value": (
+                        str(observed_value)
+                        if observed_value
+                        else "None (-infinity, infinity, or NaN)"
+                    ),
                 },
-            }
+                "styling": {"classes": ["mb-2"]},
+            },
         )
 
         return RenderedContentBlockContainer(
-            **{
-                "content_block_type": "content_block_container",
-                "content_blocks": [observed_value_content_block, observed_distribution],
-            }
+            content_block_type="content_block_container",
+            content_blocks=[observed_value_content_block, observed_distribution],
         )
 
     @classmethod
@@ -1587,14 +1579,12 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
             return None
 
         header = RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Histogram",
-                    "tooltip": {"content": "expect_column_kl_divergence_to_be_less_than"},
-                    "tag": "h6",
-                },
-            }
+            content_block_type="string_template",
+            string_template={
+                "template": "Histogram",
+                "tooltip": {"content": "expect_column_kl_divergence_to_be_less_than"},
+                "tag": "h6",
+            },
         )
 
         return cls._get_kl_divergence_chart(observed_partition_object, header)

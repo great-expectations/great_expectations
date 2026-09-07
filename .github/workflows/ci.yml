@@ -70,41 +70,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Notify on Lack of Permission
-        if: steps.check-user-permission.outputs.require-result == 'false'
-        id: slack-user-permission
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "MESSAGE": "${{github.actor}} opened a PR from a fork. Please carefully review the code and retry failed jobs.",
-              "GHA_LINK": "${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PERMISSION_CHECK_WEBHOOK_URL }}
-
-      - name: Notify on Bot Commiting
-        if: steps.check-user-permission.outputs.check-result == 'false'
-        id: slack-bot-user
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "MESSAGE": "${{github.actor}} modified a branch but can't run CI. Please carefully review the code and retry failed jobs.",
-              "GHA_LINK": "${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PERMISSION_CHECK_WEBHOOK_URL }}
-
       - name: Add comment to add helpful context for contributors
-        if: steps.check-user-permission.outputs.require-result == 'false' && steps.check-user-permission.outputs.check-result == 'false'
+        if: steps.check-user-permission.outputs.require-result == 'false'
         uses: thollander/actions-comment-pull-request@v2.5.0
         with:
           comment_tag: execution
           message: |
             Thanks for the PR @${{github.actor}} :wave:
 
-            Our GitHub actions pipelines require a user with write permissions to retry the failed jobs. We've sent a message to a maintainer to review your PR. Please be patient and we'll get back to you as soon as possible.
+            Our GitHub actions pipelines require a user with write permissions to retry the failed jobs. A maintainer will review your PR and re-run CI. Please be patient and we'll get back to you as soon as possible.
 
       - name: Fail if No Write Permission
         if: steps.check-user-permission.outputs.require-result == 'false'
@@ -405,30 +379,6 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=4096
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
         run: cd docs/docusaurus && yarn install && bash ../build_docs
-
-      - name: Restore lychee cache
-        uses: actions/cache@v4
-        with:
-          path: .lycheecache
-          key: cache-lychee-${{ github.sha }}
-          restore-keys: cache-lychee-
-
-      # - name: Run broken link checker
-      #   uses: lycheeverse/lychee-action@v2.0.2
-      #   with:
-      #     # We decided to exclude all external HTTP requests but the ones that under the domain greatexpectations.io
-      #     # The reason is to avoid having network errors such as pages that throw 429 after too many requests (like Github)
-      #     # and to prevent other possible errors related to user agent or lychee capturing hrefs from metadata that don't resolve
-      #     # to a specific page (preconnects in JS)
-      #     args: >-
-      #       --method GET
-      #       --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-      #       --max-concurrency 16
-      #       --max-retries 3
-      #       --accept '100..=103,200..=299,403'
-      #       --exclude='http.*'
-      #       --include='^https://(.+\.)?greatexpectations\.io/'
-      #       'docs/docusaurus/build/**/*.html'
 
   docs-tests:
     needs: [check-actor-permissions]
@@ -1017,6 +967,7 @@ jobs:
       - docs-snippets
       - integration-tests
       - marker-tests
+      - pyspark4-marker-tests
       - marker-tests-snowflake
       - redshift
       - py310-min-versions
@@ -1025,6 +976,7 @@ jobs:
       - py313-min-versions
       - pydantic-v1
       - pandas2-test
+      - marshmallow4-test
       - airflow-min-versions
       - import_gx
     runs-on: ubuntu-latest
@@ -1061,6 +1013,7 @@ jobs:
         unit-tests,
         integration-tests,
         marker-tests,
+        pyspark4-marker-tests,
         marker-tests-snowflake,
         py310-min-versions,
         py311-min-versions,
@@ -1068,6 +1021,7 @@ jobs:
         py313-min-versions,
         pydantic-v1,
         pandas2-test,
+        marshmallow4-test,
         airflow-min-versions,
         import_gx,
       ]
@@ -1112,6 +1066,7 @@ jobs:
         unit-tests,
         integration-tests,
         marker-tests,
+        pyspark4-marker-tests,
         marker-tests-snowflake,
         py310-min-versions,
         py311-min-versions,
@@ -1119,6 +1074,7 @@ jobs:
         py313-min-versions,
         pydantic-v1,
         pandas2-test,
+        marshmallow4-test,
         airflow-min-versions,
         import_gx,
         build-n-publish,

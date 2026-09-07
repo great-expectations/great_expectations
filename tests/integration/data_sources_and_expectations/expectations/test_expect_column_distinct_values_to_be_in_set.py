@@ -10,10 +10,12 @@ import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
 from great_expectations.core.result_format import ResultFormat
 from tests.integration.conftest import parameterize_batch_for_data_sources
-from tests.integration.data_sources_and_expectations.test_canonical_expectations import (
-    ALL_DATA_SOURCES,
+from tests.integration.data_sources_and_expectations.data_source_lists import (
     DATA_SOURCES_THAT_SUPPORT_DATE_COMPARISONS,
     JUST_PANDAS_DATA_SOURCES,
+)
+from tests.integration.test_utils.data_source_config import (
+    ALL_DATA_SOURCES,
 )
 
 if TYPE_CHECKING:

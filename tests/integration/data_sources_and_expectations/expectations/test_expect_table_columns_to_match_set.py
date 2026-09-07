@@ -9,9 +9,11 @@ from great_expectations.core.expectation_validation_result import ExpectationVal
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
-from tests.integration.data_sources_and_expectations.test_canonical_expectations import (
-    ALL_DATA_SOURCES,
+from tests.integration.data_sources_and_expectations.data_source_lists import (
     JUST_PANDAS_DATA_SOURCES,
+)
+from tests.integration.test_utils.data_source_config import (
+    ALL_DATA_SOURCES,
     SQL_DATA_SOURCES,
     BigQueryDatasourceTestConfig,
     DatabricksDatasourceTestConfig,
@@ -193,12 +195,24 @@ SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT: Sequence[DataSourceTestConfig] = [
 
 @pytest.mark.unit
 def test_sql_data_sources_without_snowflake_redshift() -> None:
-    # Verify SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT is what is says it is
-    assert len(SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT) + 2 == len(SQL_DATA_SOURCES)
-    assert SnowflakeDatasourceTestConfig() not in SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT
-    assert RedshiftDatasourceTestConfig() not in SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT
-    for datasource in SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT:
-        assert datasource in SQL_DATA_SOURCES
+    """`SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT` is what its name says it is.
+
+    Stated as a set difference in both directions rather than as `len(...) + 2 == len(...)`, which
+    is what this assertion used to be. The count held only while `SQL_DATA_SOURCES` was the
+    hand-written nine that included the generic SQL escape hatch; that name now resolves to the
+    derived eight, which does not, and a count cannot express "two fewer, plus the escape hatch
+    this module keeps on purpose". A count also could not have told a swapped backend from an
+    unchanged list — it passes on any two entries leaving and two arriving.
+
+    This list keeps `GenericSQLDatasourceTestConfig`. It is module-private, parameterizes only this
+    module's tests, and is not one of the derived lists that gate CI, so the reason the escape hatch
+    left those does not reach it.
+    """
+    local = set(SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT)
+    shared = set(SQL_DATA_SOURCES)
+
+    assert shared - local == {SnowflakeDatasourceTestConfig(), RedshiftDatasourceTestConfig()}
+    assert local - shared == {GenericSQLDatasourceTestConfig()}
 
 
 @parameterize_batch_for_data_sources(

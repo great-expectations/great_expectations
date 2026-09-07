@@ -58,8 +58,6 @@
     "render/renderer/profiling_results_overview_section_renderer\\.py",
     "render/renderer/site_builder\\.py",
     "render/renderer/slack_renderer\\.py",
-    "tests/actions/test_core_actions\\.py",
-    "tests/checkpoint/test_checkpoint\\.py",
     "tests/core/test_batch\\.py",
     "tests/core/test_expectation_configuration\\.py",
     "tests/core/test_expectation_suite\\.py",
@@ -91,11 +89,7 @@
     "tests/integration/test_definitions",
     "tests/integration/test_script_runner\\.py",
     "tests/performance",
-    "tests/render",
-    "tests/test_utils\\.py",
-    "tests/validator/test_metric_configuration\\.py",
-    "tests/validator/test_metrics_calculator\\.py",
-    "tests/validator/test_validation_graph\\.py"
+    "tests/validator/test_metric_configuration\\.py"
   ],
   "files": [
     "docs",

@@ -111,14 +111,12 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
             template_str = "Values in $column_A and $column_B must be independent."
 
         rendered_string_template_content = RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": template_str,
-                    "params": params,
-                    "styling": styling,
-                },
-            }
+            content_block_type="string_template",
+            string_template={
+                "template": template_str,
+                "params": params,
+                "styling": styling,
+            },
         )
 
         return [rendered_string_template_content]
@@ -145,23 +143,21 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
                     table.append([crosstab.index[col]] + list(crosstab.iloc[col, :]))
 
                 return RenderedTableContent(
-                    **{
-                        "content_block_type": "table",
-                        "header": f"Observed cramers phi of {observed_value}. \n"
-                        f"Crosstab between {column_A} (rows) and {column_B} (columns):",
-                        "table": table,
-                        "styling": {
-                            "body": {
-                                "classes": [
-                                    "table",
-                                    "table-sm",
-                                    "table-unbordered",
-                                    "col-4",
-                                    "mt-2",
-                                ],
-                            }
-                        },
-                    }
+                    content_block_type="table",
+                    header=f"Observed cramers phi of {observed_value}. \n"
+                    f"Crosstab between {column_A} (rows) and {column_B} (columns):",
+                    table=table,
+                    styling={
+                        "body": {
+                            "classes": [
+                                "table",
+                                "table-sm",
+                                "table-unbordered",
+                                "col-4",
+                                "mt-2",
+                            ],
+                        }
+                    },
                 )
             else:
                 return observed_value

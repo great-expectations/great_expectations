@@ -9,24 +9,28 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from tests.integration.sql_session_manager import SessionSQLEngineManager
-from tests.integration.test_utils.data_source_config.backend_spec import (
-    BackendProvisioning,
-    BackendTier,
-    CiLaneRef,
-    SqlBackendSpec,
-)
+from tests.integration.test_utils.data_source_config.backend_spec import SqlBackendSpec
 from tests.integration.test_utils.data_source_config.base import BatchTestSetup
-from tests.integration.test_utils.data_source_config.registry import register_sql_backend
+from tests.integration.test_utils.data_source_config.data_source_spec import (
+    CiLaneRef,
+    DataSourceProvisioning,
+    ExecutionEngineKind,
+    SupportTier,
+)
+from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
 
 
-@register_sql_backend
+@register_sql_config
 class OracleDatasourceTestConfig(SqlDatasourceTestConfig):
-    BACKEND_SPEC = SqlBackendSpec(
+    DATA_SOURCE_SPEC = SqlBackendSpec(
         label="oracle",
+        public_name="Oracle",
         marker="oracle",
-        provisioning=BackendProvisioning.LOCAL_CONTAINER,
+        provisioning=DataSourceProvisioning.LOCAL_CONTAINER,
+        execution_engine=ExecutionEngineKind.SQL,
+        fluent_types=frozenset({"sql"}),
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="oracle"),
         # A schema in Oracle is a user, not a namespace the shared setup can create with a bare
         # `CREATE SCHEMA` statement: this dialect rejects that DDL with
@@ -41,23 +45,24 @@ class OracleDatasourceTestConfig(SqlDatasourceTestConfig):
             # `ORA-00906: missing left parenthesis`. SingleStore and MySQL declare the same
             # override for the same reason.
             str: sqltypes.VARCHAR(255),
-            # Bare DATETIME is not an Oracle type; DDL fails with
-            # `ORA-00902: invalid datatype`.
+            # The shared default's `DateTime` compiles to this dialect's DATE, which carries a
+            # time of day but no fraction of a second. A declared microsecond is then dropped on
+            # write, with valid DDL and no error: `2024-01-03 12:00:00.123456` comes back
+            # `2024-01-03 12:00:00`. TIMESTAMP is this dialect's sub-second type and round-trips
+            # the declared value intact, so the fixture frame is what the table holds.
             datetime: sqltypes.TIMESTAMP,
             pd.Timestamp: sqltypes.TIMESTAMP,
-            # The shared default maps `float` to an unqualified DECIMAL, which this dialect
-            # resolves to a zero-scale NUMBER: the DDL succeeds but every fractional value
-            # rounds to the nearest integer on insert (10.5 comes back 11, -10.5 comes back
-            # -11). A DECIMAL carrying explicit precision and scale round-trips fractional
-            # values intact. A precision-only FLOAT (the override Trino declares) does not
-            # work here either: this dialect raises an argument error over binary vs. decimal
-            # precision, so a scale-carrying DECIMAL is what's declared instead.
+            # The shared default's precision-carrying FLOAT does not work here: this dialect
+            # raises an argument error over binary vs. decimal precision. A DECIMAL carrying
+            # explicit precision and scale round-trips fractional values intact, so that is
+            # what is declared instead. Not a bare DECIMAL, which this dialect resolves to a
+            # zero-scale NUMBER: the DDL succeeds, but 10.5 comes back 11.
             float: sqltypes.DECIMAL(38, 10),
         },
         dev_requirements_file="reqs/requirements-dev-oracle.txt",
         task_runner_marker="oracle",
         container_service="oracle",
-        tiers=frozenset({BackendTier.CURATED_SQL}),
+        tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
     )
 
     @override

@@ -16,27 +16,59 @@ from tests.integration.test_utils.data_source_config.base import (
     BatchTestSetup,
     DataSourceTestConfig,
 )
+from tests.integration.test_utils.data_source_config.data_source_spec import (
+    CiLaneRef,
+    DataSourceProvisioning,
+    DataSourceSpec,
+    ExecutionEngineKind,
+    MarkerScope,
+    SupportTier,
+)
+from tests.integration.test_utils.data_source_config.registry import register_data_source_config
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
 
 
+@register_data_source_config
 @dataclass(frozen=True)
 class SparkFilesystemCsvDatasourceTestConfig(DataSourceTestConfig):
+    DATA_SOURCE_SPEC = DataSourceSpec(
+        label="spark-filesystem-csv",
+        # The name the shipped supported-data-source vocabulary already fixes for this data
+        # source; spelling a second one here is exactly the drift this record exists to remove.
+        public_name="Spark",
+        # LOCAL_FILE, not LOCAL_CONTAINER, and the distinction is easy to get backwards here.
+        # A compose directory does exist for this marker and the task runner's entry for it does
+        # name that service, so declaring a container would pass the wiring drift check - and
+        # still say something untrue. That compose file starts a Spark Connect server, and exists
+        # so a host without a modern JDK can run Spark tests against it; this config starts no
+        # server at all. It builds an in-process Spark session and reads CSV files off the local
+        # filesystem, so a test run obtains its instance the same way SQLite does. Recorded here
+        # because a later reader will find the compose file and wonder why it is not named.
+        provisioning=DataSourceProvisioning.LOCAL_FILE,
+        execution_engine=ExecutionEngineKind.SPARK,
+        fluent_types=frozenset({"spark_filesystem"}),
+        marker="spark",
+        # Shared, not dedicated: `spark` selects everything Spark-dependent, which is a class of
+        # tests rather than this config's tests alone. More than one record may legitimately
+        # declare it, so it must not be checked for collision as though it named this data
+        # source by itself.
+        marker_scope=MarkerScope.SHARED,
+        ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="spark"),
+        # The shared canonical expectation parameterization runs against this config in the
+        # `spark` lane today, through every one of its expectation modules. Declaring the tier
+        # states that existing result; it switches nothing on. The marker and CI lane the claim
+        # obliges are already declared above.
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
+        dev_requirements_file="reqs/requirements-dev-spark.txt",
+        task_runner_marker="spark",
+    )
+
     # see "read" options: https://spark.apache.org/docs/3.5.3/sql-data-sources-csv.html#data-source-option
     read_options: dict[str, Any] = field(default_factory=dict)
     # see "write" options: https://spark.apache.org/docs/3.5.3/sql-data-sources-csv.html#data-source-option
     write_options: dict[str, Any] = field(default_factory=dict)
-
-    @property
-    @override
-    def label(self) -> str:
-        return "spark-filesystem-csv"
-
-    @property
-    @override
-    def pytest_mark(self) -> pytest.MarkDecorator:
-        return pytest.mark.spark
 
     @override
     def create_batch_setup(
@@ -111,12 +143,16 @@ class SparkFilesystemCsvBatchTestSetup(
         def _clean(val: object, info: _TypeInfo | None) -> object:
             if pd.isna(val):  # type: ignore[call-overload]  # scalar from itertuples
                 return None
+            # PySpark matches on exact type, and `pd.Timestamp` is a subclass rather than the
+            # type it looks for. Unconditional, because this is needed most where no schema was
+            # declared: with one, the value is checked against a known field type; without one,
+            # PySpark infers from the value alone and reads a timestamp it does not recognise as
+            # an empty struct, which is not a column any file format can be asked to write.
+            if isinstance(val, pd.Timestamp):
+                return val.to_pydatetime()
             if info is not None:
                 target, acceptable = info
                 if type(val) not in acceptable:
-                    # pd.Timestamp subclasses datetime but PySpark checks exact types
-                    if isinstance(val, pd.Timestamp):
-                        return val.to_pydatetime()
                     return target(val)
             return val
 

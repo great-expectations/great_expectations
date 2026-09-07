@@ -56,9 +56,7 @@ class ProfilingColumnPropertiesTableContentBlockRenderer(ContentBlockRenderer):
                 table_rows.extend(new_rows)
 
         return RenderedTableContent(
-            **{
-                "content_block_type": "table",
-                "header_row": header_row,
-                "table": table_rows,
-            }
+            content_block_type="table",
+            header_row=header_row,
+            table=table_rows,
         )

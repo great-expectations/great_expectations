@@ -29,31 +29,25 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         cls._render_warnings(evrs, content_blocks)
         cls._render_expectation_types(evrs, content_blocks)
 
-        return RenderedSectionContent(
-            **{"section_name": section_name, "content_blocks": content_blocks}
-        )
+        return RenderedSectionContent(section_name=section_name, content_blocks=content_blocks)
 
     @classmethod
     def _render_header(cls, evrs, content_blocks) -> None:
         content_blocks.append(
             RenderedHeaderContent(
-                **{
-                    "content_block_type": "header",
-                    "header": RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "Overview",
-                                "tag": "h5",
-                                "styling": {"classes": ["m-0"]},
-                            },
-                        }
-                    ),
-                    "styling": {
-                        "classes": ["col-12", "p-0"],
-                        "header": {"classes": ["alert", "alert-secondary"]},
+                content_block_type="header",
+                header=RenderedStringTemplateContent(
+                    content_block_type="string_template",
+                    string_template={
+                        "template": "Overview",
+                        "tag": "h5",
+                        "styling": {"classes": ["m-0"]},
                     },
-                }
+                ),
+                styling={
+                    "classes": ["col-12", "p-0"],
+                    "header": {"classes": ["alert", "alert-secondary"]},
+                },
             )
         )
 
@@ -74,14 +68,12 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         table_rows.append(
             [
                 RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Number of observations",
-                            "tooltip": {"content": "expect_table_row_count_to_be_between"},
-                            "params": {"tooltip_text": "Number of observations"},
-                        },
-                    }
+                    content_block_type="string_template",
+                    string_template={
+                        "template": "Number of observations",
+                        "tooltip": {"content": "expect_table_row_count_to_be_between"},
+                        "params": {"tooltip_text": "Number of observations"},
+                    },
                 ),
                 "--"
                 if not expect_table_row_count_to_be_between_evr
@@ -99,23 +91,19 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         content_blocks.append(
             RenderedTableContent(
-                **{
-                    "content_block_type": "table",
-                    "header": RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "Dataset info",
-                                "tag": "h6",
-                            },
-                        }
-                    ),
-                    "table": table_rows,
-                    "styling": {
-                        "classes": ["col-6", "mt-1", "p-1"],
-                        "body": {"classes": ["table", "table-sm"]},
+                content_block_type="table",
+                header=RenderedStringTemplateContent(
+                    content_block_type="string_template",
+                    string_template={
+                        "template": "Dataset info",
+                        "tag": "h6",
                     },
-                }
+                ),
+                table=table_rows,
+                styling={
+                    "classes": ["col-6", "mt-1", "p-1"],
+                    "body": {"classes": ["table", "table-sm"]},
+                },
             )
         )
 
@@ -131,23 +119,19 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         content_blocks.append(
             RenderedTableContent(
-                **{
-                    "content_block_type": "table",
-                    "header": RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "Variable types",
-                                "tag": "h6",
-                            },
-                        }
-                    ),
-                    "table": table_rows,
-                    "styling": {
-                        "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
-                        "body": {"classes": ["table", "table-sm"]},
+                content_block_type="table",
+                header=RenderedStringTemplateContent(
+                    content_block_type="string_template",
+                    string_template={
+                        "template": "Variable types",
+                        "tag": "h6",
                     },
-                }
+                ),
+                table=table_rows,
+                styling={
+                    "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
+                    "body": {"classes": ["table", "table-sm"]},
+                },
             )
         )
 
@@ -162,57 +146,51 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         bullet_list_items = [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$expectation_type $expectation_count",
+                content_block_type="string_template",
+                string_template={
+                    "template": "$expectation_type $expectation_count",
+                    "params": {
+                        "expectation_type": tr[0],
+                        "expectation_count": tr[1],
+                    },
+                    "styling": {
+                        "classes": [
+                            "list-group-item",
+                            "d-flex",
+                            "justify-content-between",
+                            "align-items-center",
+                        ],
                         "params": {
-                            "expectation_type": tr[0],
-                            "expectation_count": tr[1],
-                        },
-                        "styling": {
-                            "classes": [
-                                "list-group-item",
-                                "d-flex",
-                                "justify-content-between",
-                                "align-items-center",
-                            ],
-                            "params": {
-                                "expectation_count": {
-                                    "classes": [
-                                        "badge",
-                                        "badge-secondary",
-                                        "badge-pill",
-                                    ],
-                                }
-                            },
+                            "expectation_count": {
+                                "classes": [
+                                    "badge",
+                                    "badge-secondary",
+                                    "badge-pill",
+                                ],
+                            }
                         },
                     },
-                    "styling": {"parent": {"styles": {"list-style-type": "none"}}},
-                }
+                },
+                styling={"parent": {"styles": {"list-style-type": "none"}}},
             )
             for tr in bullet_list_items
         ]
 
         bullet_list = RenderedBulletListContent(
-            **{
-                "content_block_type": "bullet_list",
-                "bullet_list": bullet_list_items,
-                "styling": {
-                    "classes": ["col-12", "mt-1"],
-                    "body": {
-                        "classes": ["list-group"],
-                    },
+            content_block_type="bullet_list",
+            bullet_list=bullet_list_items,
+            styling={
+                "classes": ["col-12", "mt-1"],
+                "body": {
+                    "classes": ["list-group"],
                 },
-            }
+            },
         )
 
         bullet_list_collapse = CollapseContent(
-            **{
-                "collapse_toggle_link": "Show Expectation Types...",
-                "collapse": [bullet_list],
-                "styling": {"classes": ["col-12", "p-1"]},
-            }
+            collapse_toggle_link="Show Expectation Types...",
+            collapse=[bullet_list],
+            styling={"classes": ["col-12", "p-1"]},
         )
 
         content_blocks.append(bullet_list_collapse)

@@ -123,10 +123,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
         populated_content_blocks = list(filter(None, content_blocks))
 
         return RenderedSectionContent(
-            **{
-                "section_name": column,
-                "content_blocks": populated_content_blocks,
-            }
+            section_name=column,
+            content_blocks=populated_content_blocks,
         )
 
     @classmethod
@@ -138,43 +136,37 @@ diagnose and repair the underlying issue.  Detailed information follows:
             column_name = "Table-level expectations"
 
         return RenderedHeaderContent(
-            **{
-                "content_block_type": "header",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": convert_to_string_and_escape(column_name),
-                            "tooltip": {
-                                "content": "expect_column_to_exist",
-                                "placement": "top",
-                            },
-                            "tag": "h5",
-                            "styling": {"classes": ["m-0", "p-0"]},
-                        },
-                    }
-                ),
-                "subheader": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": f"Type: {column_type}",
-                            "tooltip": {
-                                "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",  # noqa: E501 # FIXME CoP
-                            },
-                            "tag": "h6",
-                            "styling": {"classes": ["mt-1", "mb-0"]},
-                        },
-                    }
-                ),
-                # {
-                #     "template": column_type,
-                # },
-                "styling": {
-                    "classes": ["col-12", "p-0"],
-                    "header": {"classes": ["alert", "alert-secondary"]},
+            content_block_type="header",
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": convert_to_string_and_escape(column_name),
+                    "tooltip": {
+                        "content": "expect_column_to_exist",
+                        "placement": "top",
+                    },
+                    "tag": "h5",
+                    "styling": {"classes": ["m-0", "p-0"]},
                 },
-            }
+            ),
+            subheader=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": f"Type: {column_type}",
+                    "tooltip": {
+                        "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",  # noqa: E501 # FIXME CoP
+                    },
+                    "tag": "h6",
+                    "styling": {"classes": ["mt-1", "mb-0"]},
+                },
+            ),
+            # {
+            #     "template": column_type,
+            # },
+            styling={
+                "classes": ["col-12", "p-0"],
+                "header": {"classes": ["alert", "alert-secondary"]},
+            },
         )
 
     @classmethod
@@ -218,38 +210,34 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         content_blocks.append(
             RenderedBulletListContent(
-                **{
-                    "content_block_type": "bullet_list",
-                    "header": RenderedStringTemplateContent(
-                        **{  # type: ignore[arg-type] # FIXME CoP
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": 'Expectation types <span class="mr-3 triangle"></span>',
-                                "tag": "h6",
-                            },
-                        }
-                    ),
-                    "bullet_list": bullet_list,
-                    "styling": {
-                        "classes": ["col-12", "mt-1"],
-                        "header": {
-                            "classes": ["collapsed"],
-                            "attributes": {
-                                "data-toggle": "collapse",
-                                "href": "#{{content_block_id}}-body",
-                                "role": "button",
-                                "aria-expanded": "true",
-                                "aria-controls": "collapseExample",
-                            },
-                            "styles": {
-                                "cursor": "pointer",
-                            },
+                content_block_type="bullet_list",
+                header=RenderedStringTemplateContent(
+                    content_block_type="string_template",
+                    string_template={
+                        "template": 'Expectation types <span class="mr-3 triangle"></span>',
+                        "tag": "h6",
+                    },
+                ),
+                bullet_list=bullet_list,
+                styling={
+                    "classes": ["col-12", "mt-1"],
+                    "header": {
+                        "classes": ["collapsed"],
+                        "attributes": {
+                            "data-toggle": "collapse",
+                            "href": "#{{content_block_id}}-body",
+                            "role": "button",
+                            "aria-expanded": "true",
+                            "aria-controls": "collapseExample",
                         },
-                        "body": {
-                            "classes": ["list-group", "collapse"],
+                        "styles": {
+                            "cursor": "pointer",
                         },
                     },
-                }
+                    "body": {
+                        "classes": ["list-group", "collapse"],
+                    },
+                },
             )
         )
 
@@ -265,10 +253,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
         if len(evrs) > 0:
             new_content_block = self._properties_table_renderer.render(evrs)
             new_content_block.header = RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {"template": "Properties", "tag": "h6"},
-                }
+                content_block_type="string_template",
+                string_template={"template": "Properties", "tag": "h6"},
             )
             new_content_block.styling = {
                 "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
@@ -312,22 +298,18 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         if len(table_rows) > 0:
             return RenderedTableContent(
-                **{
-                    "content_block_type": "table",
-                    "header": RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {"template": "Statistics", "tag": "h6"},
-                        }
-                    ),
-                    "table": table_rows,
-                    "styling": {
-                        "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                        "body": {
-                            "classes": ["table", "table-sm", "table-unbordered"],
-                        },
+                content_block_type="table",
+                header=RenderedStringTemplateContent(
+                    content_block_type="string_template",
+                    string_template={"template": "Statistics", "tag": "h6"},
+                ),
+                table=table_rows,
+                styling={
+                    "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
+                    "body": {
+                        "classes": ["table", "table-sm", "table-unbordered"],
                     },
-                }
+                },
             )
         else:
             return
@@ -406,22 +388,18 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         column = cls._get_column_name(validation_results)
 
         new_block = RenderedHeaderContent(
-            **{
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": convert_to_string_and_escape(column),
-                            "tag": "h5",
-                            "styling": {"classes": ["m-0"]},
-                        },
-                    }
-                ),
-                "styling": {
-                    "classes": ["col-12", "p-0"],
-                    "header": {"classes": ["alert", "alert-secondary"]},
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": convert_to_string_and_escape(column),
+                    "tag": "h5",
+                    "styling": {"classes": ["m-0"]},
                 },
-            }
+            ),
+            styling={
+                "classes": ["col-12", "p-0"],
+                "header": {"classes": ["alert", "alert-secondary"]},
+            },
         )
 
         return validation_results, new_block
@@ -441,7 +419,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         content_blocks.append(content_block)
         remaining_evrs, content_block = self._render_table(remaining_evrs, suite_parameters)
         content_blocks.append(content_block)
-        return RenderedSectionContent(**{"section_name": column, "content_blocks": content_blocks})
+        return RenderedSectionContent(section_name=column, content_blocks=content_blocks)
 
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
@@ -461,22 +439,18 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
         column = cls._get_column_name(expectations)
 
         new_block = RenderedHeaderContent(
-            **{
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": convert_to_string_and_escape(column),
-                            "tag": "h5",
-                            "styling": {"classes": ["m-0"]},
-                        },
-                    }
-                ),
-                "styling": {
-                    "classes": ["col-12"],
-                    "header": {"classes": ["alert", "alert-secondary"]},
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": convert_to_string_and_escape(column),
+                    "tag": "h5",
+                    "styling": {"classes": ["m-0"]},
                 },
-            }
+            ),
+            styling={
+                "classes": ["col-12"],
+                "header": {"classes": ["alert", "alert-secondary"]},
+            },
         )
 
         return expectations, new_block

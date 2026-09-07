@@ -1,18 +1,23 @@
-"""Declarative facts about a SQL backend used by the integration test harness.
+"""Declarative facts a SQL backend states about itself, on top of the universal ones.
 
-This module holds only data: the types a SQL backend declares to describe itself, with no
-dependency on the harness that consumes them. It imports nothing from this package's other
-modules, so a throwaway record can be constructed here without importing a backend, and so this
-module sits to the left of everything that consumes it in the dependency graph.
+This module holds only data: the dialect facts that are true of a SQL backend and meaningless for
+any other kind of data source, expressed as a sub-record of the universal one. Keeping them here
+rather than on the universal record means a non-SQL declaration cannot express them and a reader
+of a non-SQL declaration is never shown a field that has no meaning for it.
+
+Its one intra-package import is the module holding the universal record and the vocabulary every
+data source shares, which is itself dependency-free, so a throwaway record can be constructed here
+without importing a backend and this module stays to the left of everything that consumes it in
+the dependency graph.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, FrozenSet, Mapping, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Callable, Mapping, Optional, Sequence, Union
 
-import pytest
+from tests.integration.test_utils.data_source_config.data_source_spec import DataSourceSpec
 
 if TYPE_CHECKING:
     import sqlalchemy as sa
@@ -30,40 +35,6 @@ class TransactionMode(Enum):
     """The backend has no standard transactions; the harness skips explicit commits."""
 
 
-class BackendProvisioning(Enum):
-    """Where a test run gets an instance of this backend."""
-
-    LOCAL_CONTAINER = "local_container"
-    """Started from a compose file for the duration of the test run."""
-
-    LOCAL_FILE = "local_file"
-    """No server at all; the backend is a local file (e.g. SQLite)."""
-
-    EXTERNAL_CREDENTIALS = "external_credentials"
-    """Hosted; reached with credentials read from the environment."""
-
-
-class BackendTier(Enum):
-    """Named suites a backend can participate in."""
-
-    STANDARD_SQL = "standard_sql"
-    """The shared standard SQL data-source list."""
-
-    CURATED_SQL = "curated_sql"
-    """The smaller curated suite."""
-
-
-@dataclass(frozen=True)
-class CiLaneRef:
-    """Where a backend's tests run in the CI workflow."""
-
-    workflow_job: str
-    """A key under ``jobs:`` in the CI workflow file."""
-
-    marker_token: str
-    """The marker token that job selects tests on."""
-
-
 # Produces the dialect-required positional schema items for ONE table. Called once per table so
 # that each table gets its own freshly constructed items; a schema item that binds to a table on
 # attachment cannot be reused across tables. `sa` is imported under TYPE_CHECKING only, the
@@ -72,22 +43,26 @@ class CiLaneRef:
 TableSchemaItemFactory = Callable[[], Sequence["sa.sql.schema.SchemaItem"]]
 
 
-@dataclass(frozen=True)
-class SqlBackendSpec:
-    """Every dialect fact about a SQL backend that is data rather than behavior."""
+@dataclass(frozen=True, kw_only=True)
+class SqlBackendSpec(DataSourceSpec):
+    """Every dialect fact about a SQL backend that is data rather than behavior.
 
-    # identity
-    label: str
-    """Appears in the parameterized test id."""
+    Keyword-only and frozen, matching the record it extends. Keyword-only is what permits the
+    required ``uses_schema`` field below to follow the base record's defaulted fields at all;
+    without it, dataclass inheritance would reject the declaration outright.
+    """
 
-    marker: str
-    """The pytest marker name; may differ from ``label`` (e.g. SQL Server's label is ``mssql``
-    while its marker is ``sql_server``)."""
-
-    # runtime shape
-    provisioning: BackendProvisioning
-    ci_lane: CiLaneRef
     uses_schema: bool
+    """Whether the harness creates a per-test schema for this backend and qualifies its tables
+    with it.
+
+    Required rather than defaulted, deliberately. A backend that forgot to declare it would fall
+    through to whichever value a default named: if that default were ``False``, the backend would
+    silently get schema-less table creation and its tests would exercise a shape nobody chose,
+    which is a wrong-data failure rather than an error. Requiring the field turns the omission
+    into a construction error at the declaration, where a reader can see what is missing.
+    """
+
     transaction_mode: TransactionMode = TransactionMode.EXPLICIT_COMMIT
 
     table_schema_items: Optional[TableSchemaItemFactory] = None
@@ -130,36 +105,3 @@ class SqlBackendSpec:
     """
 
     insert_parameter_limit: Optional[int] = None
-    tiers: FrozenSet[BackendTier] = frozenset()
-    """The named test tiers this backend participates in, e.g.
-    ``tiers=frozenset({BackendTier.CURATED_SQL})``.
-
-    Always write a ``frozenset(...)`` literal, never a bare set literal: a bare
-    ``{BackendTier.CURATED_SQL}`` is a ``set``, which mypy rejects against this ``FrozenSet``
-    field, and ``tests/`` is inside mypy's ``files``, so that is a hard failure rather than a
-    lint note. A backend joining both tiers writes
-    ``frozenset({BackendTier.STANDARD_SQL, BackendTier.CURATED_SQL})``; a backend joining
-    neither tier omits this field.
-    """
-
-    tier_case_exclusions: Mapping[str, str] = field(default_factory=dict)
-    """Case key to reason string, defaulting to empty. Lets a tier member sit out one named case
-    within that tier's suite, with a required reason recorded next to the declaration."""
-
-    # wiring coordinates
-    dev_requirements_file: Optional[str] = None
-    """Repo-relative path, e.g. ``"reqs/requirements-dev-mysql.txt"``."""
-
-    task_runner_marker: Optional[str] = None
-    """Dependency-map key; ``None`` means no entry is needed."""
-
-    container_service: Optional[str] = None
-    """Compose directory name under ``assets/docker/``."""
-
-    @property
-    def pytest_mark(self) -> pytest.MarkDecorator:
-        """Resolve the declared marker name to a pytest mark decorator.
-
-        Compares equal to the literal ``pytest.mark.<name>`` the existing configs return today.
-        """
-        return getattr(pytest.mark, self.marker)

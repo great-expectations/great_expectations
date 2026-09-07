@@ -1871,8 +1871,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         # adding the data_context_id from the project_config
         # to the store_config under the key manually_initialize_store_backend_id
         if (name == self.expectations_store_name) and config.get("store_backend"):
+            # Stringified because this config is persisted as YAML, which has no
+            # representation for a UUID object. An absent id stays absent rather than
+            # becoming the string "None", matching how StoreBackend reads this key.
+            data_context_id = self.variables.data_context_id
             config["store_backend"].update(
-                {"manually_initialize_store_backend_id": self.variables.data_context_id}
+                {
+                    "manually_initialize_store_backend_id": str(data_context_id)
+                    if data_context_id
+                    else ""
+                }
             )
 
         # Set suppress_store_backend_id = True if store is inactive and has a store_backend.

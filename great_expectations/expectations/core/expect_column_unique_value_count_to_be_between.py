@@ -369,14 +369,12 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -394,13 +392,11 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
         assert result, "Must pass in result."
         observed_value = result.result["observed_value"]
         template_string_object = RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Distinct (n)",
-                    "tooltip": {"content": "expect_column_unique_value_count_to_be_between"},
-                },
-            }
+            content_block_type="string_template",
+            string_template={
+                "template": "Distinct (n)",
+                "tooltip": {"content": "expect_column_unique_value_count_to_be_between"},
+            },
         )
         if not observed_value:
             return [template_string_object, "--"]

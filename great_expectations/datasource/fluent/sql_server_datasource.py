@@ -248,7 +248,12 @@ class SQLServerDatasource(SQLDatasource):
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
             or not self._execution_engine
         ):
-            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+            # Copy before the pops below, which mutate the dict they are taken from. The
+            # cached copy must keep the "kwargs" and "connection_string" keys so that it
+            # compares equal to the next freshly computed dict. Caching the same object
+            # left the cache permanently missing both, so the comparison never matched
+            # and every call built a new execution engine and SQLAlchemy engine.
+            cached_execution_engine_kwargs = dict(current_execution_engine_kwargs)
             engine_kwargs = current_execution_engine_kwargs.pop("kwargs", {})
             current_execution_engine_kwargs.pop("connection_string", None)
             engine = self._create_engine()
@@ -257,6 +262,11 @@ class SQLServerDatasource(SQLDatasource):
                 **current_execution_engine_kwargs,
                 **engine_kwargs,
             )
+            # Cache only once the engine exists. Caching first would leave a failed
+            # rebuild holding kwargs no engine was ever built from, so the next call
+            # would compare equal and return the engine from the previous configuration
+            # instead of retrying.
+            self._cached_execution_engine_kwargs = cached_execution_engine_kwargs
         return self._execution_engine
 
     @override

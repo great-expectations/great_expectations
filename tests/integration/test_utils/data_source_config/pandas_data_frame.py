@@ -12,18 +12,41 @@ from tests.integration.test_utils.data_source_config.base import (
     BatchTestSetup,
     DataSourceTestConfig,
 )
+from tests.integration.test_utils.data_source_config.data_source_spec import (
+    CiLaneRef,
+    DataSourceProvisioning,
+    DataSourceSpec,
+    ExecutionEngineKind,
+    MarkerScope,
+    SupportTier,
+)
+from tests.integration.test_utils.data_source_config.registry import register_data_source_config
 
 
+@register_data_source_config
 class PandasDataFrameDatasourceTestConfig(DataSourceTestConfig):
-    @property
-    @override
-    def label(self) -> str:
-        return "pandas-data-frame"
-
-    @property
-    @override
-    def pytest_mark(self) -> pytest.MarkDecorator:
-        return pytest.mark.unit
+    DATA_SOURCE_SPEC = DataSourceSpec(
+        label="pandas-data-frame",
+        public_name="Pandas",
+        provisioning=DataSourceProvisioning.IN_PROCESS,
+        execution_engine=ExecutionEngineKind.PANDAS,
+        fluent_types=frozenset({"pandas"}),
+        marker="unit",
+        # Shared, not dedicated: `unit` selects every unit test in this repository, not this data
+        # source's tests. It names a class of tests that this data source happens to belong to, so
+        # it can legitimately be declared by more than one record and must not be checked for
+        # collision as though it named this data source alone.
+        marker_scope=MarkerScope.SHARED,
+        ci_lane=CiLaneRef(workflow_job="unit-tests", marker_token="unit"),
+        # The shared canonical expectation parameterization runs against this config in the
+        # `unit` lane today, through every one of its expectation modules. Declaring the tier
+        # states that existing result; it switches nothing on. The marker and CI lane the claim
+        # obliges are already declared above.
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
+        # No dev_requirements_file and no task_runner_marker: the task runner's dependency map has
+        # no key for `unit`, because running these tests installs nothing beyond the base
+        # development requirements and starts no service.
+    )
 
     @override
     def create_batch_setup(

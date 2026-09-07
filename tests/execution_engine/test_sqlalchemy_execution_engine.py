@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import TYPE_CHECKING, Dict, Tuple, cast
+from typing import TYPE_CHECKING, Dict, cast
 
 import pandas as pd
 import pytest
@@ -42,7 +42,10 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import get_sqlalchemy_domain_data
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,
+    MetricConfigurationID,
+)
 from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import (
@@ -271,10 +274,10 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: Dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=execution_engine)
     metrics.update(results)
@@ -977,10 +980,10 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
         batch_id="1234",
     )
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: Dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=execution_engine)
     metrics.update(results)
@@ -1060,10 +1063,10 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: Dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=execution_engine)
     metrics.update(results)

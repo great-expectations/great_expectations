@@ -15,6 +15,32 @@ When we deprecate public functionality, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition.
 
+### 1.22.0
+* [BUGFIX] Give the date-part string cast a length Oracle accepts ([#12102](https://github.com/great-expectations/great_expectations/pull/12102))
+* [BUGFIX] Add an Oracle branch to the dialect-regex helper ([#12103](https://github.com/great-expectations/great_expectations/pull/12103))
+* [BUGFIX] Render the derived-table alias in the form each grammar accepts ([#12104](https://github.com/great-expectations/great_expectations/pull/12104))
+* [BUGFIX] Restore the metrics coverage MySQL, SQL Server and Redshift were silently missing ([#12107](https://github.com/great-expectations/great_expectations/pull/12107))
+* [BUGFIX] Render Data Docs pages for results whose meta has no run_id ([#12098](https://github.com/great-expectations/great_expectations/pull/12098)) (thanks @MannXo)
+* [BUGFIX] pass usedforsecurity=False on non-security md5 calls for FIPS hosts ([#12099](https://github.com/great-expectations/great_expectations/pull/12099)) (thanks @nanjeshramesh)
+* [BUGFIX] Drop the taxi test table by name instead of scanning the database ([#12119](https://github.com/great-expectations/great_expectations/pull/12119))
+* [BUGFIX] Stop add_store from crashing and truncating great_expectations.yml ([#12081](https://github.com/great-expectations/great_expectations/pull/12081))
+* [DOCS] Teach users to install, use, and remove the agent skills bundled with GX ([#12074](https://github.com/great-expectations/great_expectations/pull/12074))
+* [DOCS] Teach integer batch parameters across the documentation ([#12066](https://github.com/great-expectations/great_expectations/pull/12066))
+* [DOCS] Restructure the agent skills page for progressive disclosure ([#12106](https://github.com/great-expectations/great_expectations/pull/12106))
+* [MAINTENANCE] Add Oracle to the SQL test harness with live curated coverage ([#12085](https://github.com/great-expectations/great_expectations/pull/12085))
+* [MAINTENANCE] Make the mypy configuration mean what it says ([#12112](https://github.com/great-expectations/great_expectations/pull/12112))
+* [MAINTENANCE] Remove two structural blockers to type-checking the test tree ([#12113](https://github.com/great-expectations/great_expectations/pull/12113))
+* [MAINTENANCE] Refuse silent relaxations of the type-check configuration ([#12115](https://github.com/great-expectations/great_expectations/pull/12115))
+* [MAINTENANCE] Restore the S3 docs fixtures ([#12111](https://github.com/great-expectations/great_expectations/pull/12111))
+* [MAINTENANCE] Request the docs-creds-needed backends that are live again ([#12114](https://github.com/great-expectations/great_expectations/pull/12114))
+* [MAINTENANCE] Run the Azure Blob docs tests against live storage again ([#12117](https://github.com/great-expectations/great_expectations/pull/12117))
+* [MAINTENANCE] Bound every apt call in the SQL Server ODBC driver install ([#12079](https://github.com/great-expectations/great_expectations/pull/12079))
+* [MAINTENANCE] Add a marshmallow 4 CI lane ([#12118](https://github.com/great-expectations/great_expectations/pull/12118))
+* [CONTRIB] Mask Azure connection-string AccountKey regardless of field order ([#12094](https://github.com/great-expectations/great_expectations/pull/12094)) (thanks @dkling-it, @hemalrajput18)
+* [CONTRIB] Fix pandas column-pair validation with non-default indexes ([#12097](https://github.com/great-expectations/great_expectations/pull/12097)) (thanks @joebasrawi)
+* [CONTRIB] add explanatory message to NotImplementedError for unsupported regex dialects ([#12109](https://github.com/great-expectations/great_expectations/pull/12109)) (thanks @ArjunPakhan)
+* [CONTRIB] Support Marshmallow 4.x ([#12092](https://github.com/great-expectations/great_expectations/pull/12092)) (thanks @Dev-iL)
+
 ### 1.21.0
 * [FEATURE] SQL Harness Backend Framework ([#12049](https://github.com/great-expectations/great_expectations/pull/12049))
 * [FEATURE] Trino SQL backend test harness ([#12050](https://github.com/great-expectations/great_expectations/pull/12050))

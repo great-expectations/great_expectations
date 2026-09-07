@@ -119,15 +119,13 @@ class ValidationResultsPageRenderer(Renderer):
         )
 
         return RenderedDocumentContent(
-            **{
-                "renderer_type": "ValidationResultsPageRenderer",
-                "page_title": page_title,
-                "batch_kwargs": batch_kwargs if "batch_kwargs" in validation_results.meta else None,
-                "batch_spec": batch_kwargs if "batch_spec" in validation_results.meta else None,
-                "expectation_suite_name": expectation_suite_name,
-                "sections": sections,
-                "utm_medium": "validation-results-page",
-            }
+            renderer_type="ValidationResultsPageRenderer",
+            page_title=page_title,
+            batch_kwargs=batch_kwargs if "batch_kwargs" in validation_results.meta else None,
+            batch_spec=batch_kwargs if "batch_spec" in validation_results.meta else None,
+            expectation_suite_name=expectation_suite_name,
+            sections=sections,
+            utm_medium="validation-results-page",
         )
 
     def _parse_run_values(
@@ -205,14 +203,12 @@ class ValidationResultsPageRenderer(Renderer):
                 collapse_content_blocks.append(table)
 
         collapse_content_block = CollapseContent(
-            **{
-                "collapse_toggle_link": "Show more info...",
-                "collapse": collapse_content_blocks,
-                "styling": {
-                    "body": {"classes": ["card", "card-body"]},
-                    "classes": ["col-12", "p-1"],
-                },
-            }
+            collapse_toggle_link="Show more info...",
+            collapse=collapse_content_blocks,
+            styling={
+                "body": {"classes": ["card", "card-body"]},
+                "classes": ["col-12", "p-1"],
+            },
         )
 
         return collapse_content_block
@@ -227,10 +223,8 @@ class ValidationResultsPageRenderer(Renderer):
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         sections = [
             RenderedSectionContent(
-                **{
-                    "section_name": "Overview",
-                    "content_blocks": overview_content_blocks,
-                }
+                section_name="Overview",
+                content_blocks=overview_content_blocks,
             )
         ]
 
@@ -252,10 +246,8 @@ class ValidationResultsPageRenderer(Renderer):
         if self.run_info_at_end:
             sections += [
                 RenderedSectionContent(
-                    **{
-                        "section_name": "Run Info",
-                        "content_blocks": collapse_content_blocks,
-                    }
+                    section_name="Run Info",
+                    content_blocks=collapse_content_blocks,
                 )
             ]
 
@@ -363,51 +355,45 @@ class ValidationResultsPageRenderer(Renderer):
             html_success_icon = '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
 
         return RenderedHeaderContent(
-            **{
-                "content_block_type": "header",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Overview",
-                            "tag": "h5",
-                            "styling": {"classes": ["m-0"]},
-                        },
-                    }
-                ),
-                "subheader": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",  # noqa: E501 # FIXME CoP
-                            "params": {
-                                "suite_title": "Expectation Suite:",
-                                "data_asset": "Data asset:",
-                                "data_asset_name": data_asset_name,
-                                "status_title": "Status:",
-                                "expectation_suite_name": expectation_suite_name,
-                                "success": success,
-                                "html_success_icon": html_success_icon,
-                            },
-                            "styling": {
-                                "params": {
-                                    "suite_title": {"classes": ["h6"]},
-                                    "status_title": {"classes": ["h6"]},
-                                    "expectation_suite_name": {
-                                        "tag": "a",
-                                        "attributes": {"href": expectation_suite_path},
-                                    },
-                                },
-                                "classes": ["mb-0", "mt-1"],
-                            },
-                        },
-                    }
-                ),
-                "styling": {
-                    "classes": ["col-12", "p-0"],
-                    "header": {"classes": ["alert", "alert-secondary"]},
+            content_block_type="header",
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": "Overview",
+                    "tag": "h5",
+                    "styling": {"classes": ["m-0"]},
                 },
-            }
+            ),
+            subheader=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",  # noqa: E501 # FIXME CoP
+                    "params": {
+                        "suite_title": "Expectation Suite:",
+                        "data_asset": "Data asset:",
+                        "data_asset_name": data_asset_name,
+                        "status_title": "Status:",
+                        "expectation_suite_name": expectation_suite_name,
+                        "success": success,
+                        "html_success_icon": html_success_icon,
+                    },
+                    "styling": {
+                        "params": {
+                            "suite_title": {"classes": ["h6"]},
+                            "status_title": {"classes": ["h6"]},
+                            "expectation_suite_name": {
+                                "tag": "a",
+                                "attributes": {"href": expectation_suite_path},
+                            },
+                        },
+                        "classes": ["mb-0", "mt-1"],
+                    },
+                },
+            ),
+            styling={
+                "classes": ["col-12", "p-0"],
+                "header": {"classes": ["alert", "alert-secondary"]},
+            },
         )
 
     @classmethod
@@ -435,34 +421,30 @@ class ValidationResultsPageRenderer(Renderer):
         ) or validation_results.meta.get("great_expectations.__version__")
 
         return RenderedTableContent(
-            **{
-                "content_block_type": "table",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Info",
-                            "tag": "h6",
-                            "styling": {"classes": ["m-0"]},
-                        },
-                    }
-                ),
-                "table": [
-                    ["Great Expectations Version", ge_version],
-                    ["Run Name", run_name],
-                    ["Run Time", run_time],
-                ],
-                "styling": {
-                    "classes": ["col-12", "table-responsive", "mt-1"],
-                    "body": {
-                        "classes": ["table", "table-sm"],
-                        "styles": {
-                            "margin-bottom": "0.5rem !important",
-                            "margin-top": "0.5rem !important",
-                        },
+            content_block_type="table",
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": "Info",
+                    "tag": "h6",
+                    "styling": {"classes": ["m-0"]},
+                },
+            ),
+            table=[
+                ["Great Expectations Version", ge_version],
+                ["Run Name", run_name],
+                ["Run Time", run_time],
+            ],
+            styling={
+                "classes": ["col-12", "table-responsive", "mt-1"],
+                "body": {
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important",
                     },
                 },
-            }
+            },
         )
 
     @classmethod
@@ -472,58 +454,52 @@ class ValidationResultsPageRenderer(Renderer):
             if not isinstance(value, (dict, OrderedDict)):
                 table_row = [
                     RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "$value",
-                                "params": {"value": str(kwarg)},
-                                "styling": {
-                                    "default": {"styles": {"word-break": "break-all"}},
-                                },
-                            },
+                        content_block_type="string_template",
+                        string_template={
+                            "template": "$value",
+                            "params": {"value": str(kwarg)},
                             "styling": {
-                                "parent": {
-                                    "classes": ["pr-3"],
-                                }
+                                "default": {"styles": {"word-break": "break-all"}},
                             },
-                        }
+                        },
+                        styling={
+                            "parent": {
+                                "classes": ["pr-3"],
+                            }
+                        },
                     ),
                     RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "$value",
-                                "params": {"value": str(value)},
-                                "styling": {
-                                    "default": {"styles": {"word-break": "break-all"}},
-                                },
-                            },
+                        content_block_type="string_template",
+                        string_template={
+                            "template": "$value",
+                            "params": {"value": str(value)},
                             "styling": {
-                                "parent": {
-                                    "classes": [],
-                                }
+                                "default": {"styles": {"word-break": "break-all"}},
                             },
-                        }
+                        },
+                        styling={
+                            "parent": {
+                                "classes": [],
+                            }
+                        },
                     ),
                 ]
             else:
                 table_row = [
                     RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "$value",
-                                "params": {"value": str(kwarg)},
-                                "styling": {
-                                    "default": {"styles": {"word-break": "break-all"}},
-                                },
-                            },
+                        content_block_type="string_template",
+                        string_template={
+                            "template": "$value",
+                            "params": {"value": str(kwarg)},
                             "styling": {
-                                "parent": {
-                                    "classes": ["pr-3"],
-                                }
+                                "default": {"styles": {"word-break": "break-all"}},
                             },
-                        }
+                        },
+                        styling={
+                            "parent": {
+                                "classes": ["pr-3"],
+                            }
+                        },
                     ),
                     cls._render_nested_table_from_dict(value, sub_table=True),
                 ]
@@ -533,41 +509,35 @@ class ValidationResultsPageRenderer(Renderer):
 
         if sub_table:
             return RenderedTableContent(
-                **{
-                    "content_block_type": "table",
-                    "table": table_rows,
-                    "styling": {
-                        "classes": ["col-6", "table-responsive"],
-                        "body": {"classes": ["table", "table-sm", "m-0"]},
-                        "parent": {"classes": ["pt-0", "pl-0", "border-top-0"]},
-                    },
-                }
+                content_block_type="table",
+                table=table_rows,
+                styling={
+                    "classes": ["col-6", "table-responsive"],
+                    "body": {"classes": ["table", "table-sm", "m-0"]},
+                    "parent": {"classes": ["pt-0", "pl-0", "border-top-0"]},
+                },
             )
         else:
             return RenderedTableContent(
-                **{
-                    "content_block_type": "table",
-                    "header": RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": header,
-                                "tag": "h6",
-                                "styling": {"classes": ["m-0"]},
-                            },
-                        }
-                    ),
-                    "table": table_rows,
-                    "styling": {
-                        "body": {
-                            "classes": ["table", "table-sm"],
-                            "styles": {
-                                "margin-bottom": "0.5rem !important",
-                                "margin-top": "0.5rem !important",
-                            },
-                        }
+                content_block_type="table",
+                header=RenderedStringTemplateContent(
+                    content_block_type="string_template",
+                    string_template={
+                        "template": header,
+                        "tag": "h6",
+                        "styling": {"classes": ["m-0"]},
                     },
-                }
+                ),
+                table=table_rows,
+                styling={
+                    "body": {
+                        "classes": ["table", "table-sm"],
+                        "styles": {
+                            "margin-bottom": "0.5rem !important",
+                            "margin-top": "0.5rem !important",
+                        },
+                    }
+                },
             )
 
     @classmethod
@@ -591,30 +561,26 @@ class ValidationResultsPageRenderer(Renderer):
                     table_rows.append([value, statistics[key]])
 
         return RenderedTableContent(
-            **{
-                "content_block_type": "table",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Statistics",
-                            "tag": "h6",
-                            "styling": {"classes": ["m-0"]},
-                        },
-                    }
-                ),
-                "table": table_rows,
-                "styling": {
-                    "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
-                    "body": {
-                        "classes": ["table", "table-sm"],
-                        "styles": {
-                            "margin-bottom": "0.5rem !important",
-                            "margin-top": "0.5rem !important",
-                        },
+            content_block_type="table",
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": "Statistics",
+                    "tag": "h6",
+                    "styling": {"classes": ["m-0"]},
+                },
+            ),
+            table=table_rows,
+            styling={
+                "classes": ["col-6", "table-responsive", "mt-1", "p-1"],
+                "body": {
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important",
                     },
                 },
-            }
+            },
         )
 
 
@@ -702,10 +668,8 @@ class ExpectationSuitePageRenderer(Renderer):
 
         sections = [
             RenderedSectionContent(
-                **{
-                    "section_name": "Overview",
-                    "content_blocks": overview_content_blocks,
-                }
+                section_name="Overview",
+                content_blocks=overview_content_blocks,
             )
         ]
 
@@ -715,13 +679,11 @@ class ExpectationSuitePageRenderer(Renderer):
             if column != "_nocolumn"
         ]
         return RenderedDocumentContent(
-            **{
-                "renderer_type": "ExpectationSuitePageRenderer",
-                "page_title": f"Expectations / {expectation_suite_name!s}",
-                "expectation_suite_name": expectation_suite_name,
-                "utm_medium": "expectation-suite-page",
-                "sections": sections,
-            }
+            renderer_type="ExpectationSuitePageRenderer",
+            page_title=f"Expectations / {expectation_suite_name!s}",
+            expectation_suite_name=expectation_suite_name,
+            utm_medium="expectation-suite-page",
+            sections=sections,
         )
 
     def _render_table_level_expectations(self, columns):
@@ -733,37 +695,31 @@ class ExpectationSuitePageRenderer(Renderer):
                 expectations=table_level_expectations
             ).content_blocks[1]
             expectation_bullet_list.header = RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Table-Level Expectations",
-                        "tag": "h6",
-                        "styling": {"classes": ["m-0"]},
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "Table-Level Expectations",
+                    "tag": "h6",
+                    "styling": {"classes": ["m-0"]},
+                },
             )
             return expectation_bullet_list
 
     @classmethod
     def _render_expectation_suite_header(cls):
         return RenderedHeaderContent(
-            **{
-                "content_block_type": "header",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Overview",
-                            "tag": "h5",
-                            "styling": {"classes": ["m-0"]},
-                        },
-                    }
-                ),
-                "styling": {
-                    "classes": ["col-12"],
-                    "header": {"classes": ["alert", "alert-secondary"]},
+            content_block_type="header",
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": "Overview",
+                    "tag": "h5",
+                    "styling": {"classes": ["m-0"]},
                 },
-            }
+            ),
+            styling={
+                "classes": ["col-12"],
+                "header": {"classes": ["alert", "alert-secondary"]},
+            },
         )
 
     @classmethod
@@ -775,39 +731,35 @@ class ExpectationSuitePageRenderer(Renderer):
         )
 
         return RenderedTableContent(
-            **{
-                "content_block_type": "table",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Info",
-                            "tag": "h6",
-                            "styling": {"classes": ["m-0"]},
-                        },
-                    }
-                ),
-                "table": [
-                    ["Expectation Suite Name", expectation_suite_name],
-                    ["Great Expectations Version", ge_version],
-                ],
-                "styling": {
-                    "classes": ["col-12", "table-responsive", "mt-1"],
-                    "body": {
-                        "classes": ["table", "table-sm"],
-                        "styles": {
-                            "margin-bottom": "0.5rem !important",
-                            "margin-top": "0.5rem !important",
-                        },
+            content_block_type="table",
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": "Info",
+                    "tag": "h6",
+                    "styling": {"classes": ["m-0"]},
+                },
+            ),
+            table=[
+                ["Expectation Suite Name", expectation_suite_name],
+                ["Great Expectations Version", ge_version],
+            ],
+            styling={
+                "classes": ["col-12", "table-responsive", "mt-1"],
+                "body": {
+                    "classes": ["table", "table-sm"],
+                    "styles": {
+                        "margin-bottom": "0.5rem !important",
+                        "margin-top": "0.5rem !important",
                     },
                 },
-            }
+            },
         )
 
     # TODO: Update tests
     @classmethod
     def _render_expectation_suite_notes(cls, expectations: ExpectationSuite) -> TextContent:
-        content = []
+        content: list[str | RenderedMarkdownContent] = []
 
         total_expectations = len(expectations.expectations)
         columns = []
@@ -828,21 +780,17 @@ class ExpectationSuitePageRenderer(Renderer):
             if isinstance(notes, str):
                 note_content = [
                     RenderedMarkdownContent(
-                        **{
-                            "content_block_type": "markdown",
-                            "markdown": notes,
-                            "styling": {"parent": {}},
-                        }
+                        content_block_type="markdown",
+                        markdown=notes,
+                        styling={"parent": {}},
                     )
                 ]
             elif isinstance(notes, list):
                 note_content = [
                     RenderedMarkdownContent(
-                        **{
-                            "content_block_type": "markdown",
-                            "markdown": note,
-                            "styling": {"parent": {}},
-                        }
+                        content_block_type="markdown",
+                        markdown=note,
+                        styling={"parent": {}},
                     )
                     for note in notes
                 ]
@@ -853,24 +801,20 @@ class ExpectationSuitePageRenderer(Renderer):
                 content += note_content
 
         return TextContent(
-            **{
-                "content_block_type": "text",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": "Notes",
-                            "tag": "h6",
-                            "styling": {"classes": ["m-0"]},
-                        },
-                    }
-                ),
-                "text": content,
-                "styling": {
-                    "classes": ["col-12", "table-responsive", "mt-1"],
-                    "body": {"classes": ["table", "table-sm"]},
+            content_block_type="text",
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={
+                    "template": "Notes",
+                    "tag": "h6",
+                    "styling": {"classes": ["m-0"]},
                 },
-            }
+            ),
+            text=content,
+            styling={
+                "classes": ["col-12", "table-responsive", "mt-1"],
+                "body": {"classes": ["table", "table-sm"]},
+            },
         )
 
 
@@ -975,25 +919,21 @@ class ProfilingResultsPageRenderer(Renderer):
         page_title += f" / {run_time!s}"
 
         return RenderedDocumentContent(
-            **{
-                "renderer_type": "ProfilingResultsPageRenderer",
-                "page_title": page_title,
-                "expectation_suite_name": expectation_suite_name,
-                "utm_medium": "profiling-results-page",
-                "batch_kwargs": batch_kwargs if "batch_kwargs" in validation_results.meta else None,
-                "batch_spec": batch_kwargs if "batch_spec" in validation_results.meta else None,
-                "sections": [
-                    self._overview_section_renderer.render(
-                        validation_results, section_name="Overview"
-                    )
-                ]
-                + [
-                    self._column_section_renderer.render(
-                        columns[column],
-                        section_name=column,
-                        column_type=column_types.get(column),
-                    )
-                    for column in ordered_columns
-                ],
-            }
+            renderer_type="ProfilingResultsPageRenderer",
+            page_title=page_title,
+            expectation_suite_name=expectation_suite_name,
+            utm_medium="profiling-results-page",
+            batch_kwargs=batch_kwargs if "batch_kwargs" in validation_results.meta else None,
+            batch_spec=batch_kwargs if "batch_spec" in validation_results.meta else None,
+            sections=[
+                self._overview_section_renderer.render(validation_results, section_name="Overview")
+            ]
+            + [
+                self._column_section_renderer.render(
+                    columns[column],
+                    section_name=column,
+                    column_type=column_types.get(column),
+                )
+                for column in ordered_columns
+            ],
         )

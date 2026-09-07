@@ -15,12 +15,12 @@ from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.expectations.row_conditions import Column
 from tests.integration.conftest import parameterize_batch_for_data_sources
-from tests.integration.data_sources_and_expectations.test_canonical_expectations import (
+from tests.integration.data_sources_and_expectations.data_source_lists import (
     JUST_PANDAS_DATA_SOURCES,
     NON_SQL_DATA_SOURCES,
-    SQL_DATA_SOURCES,
 )
 from tests.integration.test_utils.data_source_config import (
+    SQL_DATA_SOURCES,
     MySQLDatasourceTestConfig,
     PostgreSQLDatasourceTestConfig,
     SqliteDatasourceTestConfig,

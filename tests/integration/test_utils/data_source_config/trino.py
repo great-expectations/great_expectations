@@ -3,38 +3,39 @@ from typing import Mapping, Optional
 import pandas as pd
 import pytest
 
-from great_expectations.compatibility.sqlalchemy import sqltypes
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from tests.integration.sql_session_manager import SessionSQLEngineManager
 from tests.integration.test_utils.data_source_config.backend_spec import (
-    BackendProvisioning,
-    BackendTier,
-    CiLaneRef,
     SqlBackendSpec,
     TransactionMode,
 )
 from tests.integration.test_utils.data_source_config.base import BatchTestSetup
-from tests.integration.test_utils.data_source_config.registry import register_sql_backend
+from tests.integration.test_utils.data_source_config.data_source_spec import (
+    CiLaneRef,
+    DataSourceProvisioning,
+    ExecutionEngineKind,
+    SupportTier,
+)
+from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
 
 
-@register_sql_backend
+@register_sql_config
 class TrinoDatasourceTestConfig(SqlDatasourceTestConfig):
-    BACKEND_SPEC = SqlBackendSpec(
+    DATA_SOURCE_SPEC = SqlBackendSpec(
         label="trino",
+        public_name="Trino",
         marker="trino",
-        provisioning=BackendProvisioning.LOCAL_CONTAINER,
+        provisioning=DataSourceProvisioning.LOCAL_CONTAINER,
+        execution_engine=ExecutionEngineKind.SQL,
+        fluent_types=frozenset({"sql"}),
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="trino"),
         uses_schema=True,
         transaction_mode=TransactionMode.AUTOCOMMIT,
-        # The shared default maps `float` to an unqualified DECIMAL, which Trino resolves to
-        # scale zero, silently rounding fractional values to integers. A precision-carrying
-        # FLOAT compiles to double precision and round-trips exactly.
-        column_type_overrides={float: sqltypes.FLOAT(precision=53)},
-        tiers=frozenset({BackendTier.CURATED_SQL}),
+        tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-trino.txt",
         task_runner_marker="trino",
         container_service="trino",

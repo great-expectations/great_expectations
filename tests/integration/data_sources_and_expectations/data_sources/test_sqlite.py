@@ -1,8 +1,12 @@
+import pathlib
 from datetime import datetime, timezone
 
 import pandas as pd
+import pytest
 
 import great_expectations.expectations as gxe
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from tests.integration.conftest import parameterize_batch_for_data_sources
 from tests.integration.test_utils.data_source_config import SqliteDatasourceTestConfig
@@ -144,3 +148,41 @@ class TestPartitioning:
             )
         )
         assert result.success
+
+
+@pytest.mark.sqlite
+def test_cached_execution_engine_sees_schema_changes(
+    ephemeral_context_with_defaults: AbstractDataContext,
+    tmp_path: pathlib.Path,
+) -> None:
+    """Reusing the execution engine must not reuse stale table metadata.
+
+    The engine's SQLAlchemy inspector caches what it reflects. With the execution engine
+    cached across validations, a column added between two validations has to show up in
+    the second one, exactly as it did when every validation built a fresh engine. Only a
+    real database reflected twice shows this, so it belongs here rather than in a unit test.
+    """
+    db_path = tmp_path / "schema_changes.db"
+    raw_engine = sa.create_engine(f"sqlite:///{db_path}")
+    with raw_engine.begin() as conn:
+        conn.execute(sa.text("CREATE TABLE t (a INTEGER, b INTEGER)"))
+        conn.execute(sa.text("INSERT INTO t VALUES (1, 2)"))
+
+    ds = ephemeral_context_with_defaults.data_sources.add_sqlite(
+        name="schema_changes", connection_string=f"sqlite:///{db_path}"
+    )
+    batch = (
+        ds.add_table_asset(name="t", table_name="t")
+        .add_batch_definition_whole_table(name="whole")
+        .get_batch()
+    )
+
+    before = batch.validate(gxe.ExpectTableColumnCountToEqual(value=2))
+    assert ds.get_execution_engine() is ds.get_execution_engine()
+    with raw_engine.begin() as conn:
+        conn.execute(sa.text("ALTER TABLE t ADD COLUMN c INTEGER"))
+    after = batch.validate(gxe.ExpectTableColumnCountToEqual(value=2))
+
+    assert before.success is True
+    assert after.success is False
+    assert after.result["observed_value"] == 3

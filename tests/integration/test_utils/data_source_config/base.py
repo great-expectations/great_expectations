@@ -4,7 +4,16 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import TYPE_CHECKING, Generator, Generic, Hashable, Mapping, Optional, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Generator,
+    Generic,
+    Hashable,
+    Mapping,
+    Optional,
+    TypeVar,
+)
 from uuid import UUID, uuid4
 
 import pandas as pd
@@ -19,6 +28,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from tests.integration.test_utils.data_source_config.data_source_spec import DataSourceSpec
     from tests.integration.test_utils.data_source_config.sql import SessionSQLEngineManager
 
 
@@ -33,17 +43,50 @@ class DataSourceTestConfig(ABC, Generic[_ColumnTypes]):
     column_types: Optional[Mapping[str, _ColumnTypes]] = None
     extra_column_types: Mapping[str, Mapping[str, _ColumnTypes]] = field(default_factory=dict)
 
-    @property
-    @abstractmethod
-    def label(self) -> str:
-        """Label that will show up in test name."""
-        ...
+    DATA_SOURCE_SPEC: ClassVar[DataSourceSpec]
+    """The declaration a concrete config states once, describing what its data source is.
+
+    Every data source states it the same way, whether or not it is a SQL backend, so the identity
+    a test run sees is derived from one declaration rather than restated by hand next to it.
+
+    Annotated `ClassVar` so the dataclass machinery treats it as a plain class attribute rather
+    than a frozen-dataclass field: it takes no part in equality or hashing and is not an
+    `__init__` parameter, which is what lets it be added without re-declaring any config or
+    changing any config's constructor, equality, or hash.
+
+    `ClassVar` must stay a runtime import in this module for that to hold. The dataclass
+    machinery recognizes a class variable by resolving the name `ClassVar` in the defining
+    module's namespace as the module runs; behind `TYPE_CHECKING` that name is absent there, the
+    annotation reads as an ordinary field, and the declaration joins every config's constructor
+    and generated field set. Here that surfaces as a `TypeError` at class creation, because the
+    slot follows defaulted fields - loud in this arrangement, but it is the field set changing
+    that matters, and a different field order would let the same mistake through quietly.
+    """
 
     @property
-    @abstractmethod
+    def data_source_spec(self) -> DataSourceSpec:
+        """The declaration governing this instance.
+
+        Resolution is a property rather than a direct read of the class attribute at each call
+        site so that a config whose declaration varies per instance can override the resolution
+        without this base carrying the seam. Only one config needs that variation - the
+        connection-string escape hatch, whose identity depends on a value supplied at
+        construction - and giving this base a per-instance override field for it would add a
+        parameter to every config's constructor and force three further classes to re-declare
+        themselves as dataclasses. A property costs an overriding subclass one method and costs
+        every other subclass nothing.
+        """
+        return self.DATA_SOURCE_SPEC
+
+    @property
+    def label(self) -> str:
+        """Label that will show up in test name."""
+        return self.data_source_spec.label
+
+    @property
     def pytest_mark(self) -> pytest.MarkDecorator:
         """Mark for pytest"""
-        ...
+        return self.data_source_spec.pytest_mark
 
     @abstractmethod
     def create_batch_setup(

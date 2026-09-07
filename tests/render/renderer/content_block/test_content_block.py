@@ -61,6 +61,7 @@ if TYPE_CHECKING:
 def test__render_expectation_notes_with_notes(expectation: Expectation, expected: list[dict]):
     config = expectation.configuration
     content = ContentBlockRenderer._render_expectation_notes(config)
+    assert isinstance(content.collapse, list)
     notes_block = content.collapse[0]
     actual = notes_block.to_json_dict()["text"]
     assert actual == expected

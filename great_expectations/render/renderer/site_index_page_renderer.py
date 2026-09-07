@@ -11,6 +11,7 @@ from dateutil.parser import parse
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.render import (
     RenderedBootstrapTableContent,
+    RenderedComponentContent,
     RenderedDocumentContent,
     RenderedHeaderContent,
     RenderedSectionContent,
@@ -61,20 +62,18 @@ class SiteIndexPageRenderer(Renderer):
             )
 
         return RenderedBootstrapTableContent(
-            **{
-                "table_columns": table_columns,
-                "table_data": table_data,
-                "table_options": table_options,
-                "styling": {
-                    "classes": ["col-12", "ge-index-page-table-container"],
-                    "body": {
-                        "classes": [
-                            "table-sm",
-                            "ge-index-page-expectation_suites-table",
-                        ]
-                    },
+            table_columns=table_columns,
+            table_data=table_data,
+            table_options=table_options,
+            styling={
+                "classes": ["col-12", "ge-index-page-table-container"],
+                "body": {
+                    "classes": [
+                        "table-sm",
+                        "ge-index-page-expectation_suites-table",
+                    ]
                 },
-            }
+            },
         )
 
     # TODO: deprecate dual batch api support in 0.14
@@ -149,15 +148,13 @@ class SiteIndexPageRenderer(Renderer):
             )
 
         return RenderedBootstrapTableContent(
-            **{
-                "table_columns": table_columns,
-                "table_data": table_data,
-                "table_options": table_options,
-                "styling": {
-                    "classes": ["col-12", "ge-index-page-table-container"],
-                    "body": {"classes": ["table-sm", "ge-index-page-profiling-results-table"]},
-                },
-            }
+            table_columns=table_columns,
+            table_data=table_data,
+            table_options=table_options,
+            styling={
+                "classes": ["col-12", "ge-index-page-table-container"],
+                "body": {"classes": ["table-sm", "ge-index-page-profiling-results-table"]},
+            },
         )
 
     # TODO: deprecate dual batch api support in 0.14
@@ -261,38 +258,34 @@ class SiteIndexPageRenderer(Renderer):
             )
 
         return RenderedBootstrapTableContent(
-            **{
-                "table_columns": table_columns,
-                "table_data": table_data,
-                "table_options": table_options,
-                "styling": {
-                    "classes": ["col-12", "ge-index-page-table-container"],
-                    "body": {
-                        "classes": [
-                            "table-sm",
-                            "ge-index-page-validation-results-table",
-                        ]
-                    },
+            table_columns=table_columns,
+            table_data=table_data,
+            table_options=table_options,
+            styling={
+                "classes": ["col-12", "ge-index-page-table-container"],
+                "body": {
+                    "classes": [
+                        "table-sm",
+                        "ge-index-page-validation-results-table",
+                    ]
                 },
-            }
+            },
         )
 
     @classmethod
     def _render_expectation_suite_cell(cls, expectation_suite_name, expectation_suite_path):
         return RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "$link_text",
-                    "params": {"link_text": expectation_suite_name},
-                    "tag": "a",
-                    "styling": {
-                        "styles": {"word-break": "break-all"},
-                        "attributes": {"href": expectation_suite_path},
-                        "classes": ["ge-index-page-table-expectation-suite-link"],
-                    },
+            content_block_type="string_template",
+            string_template={
+                "template": "$link_text",
+                "params": {"link_text": expectation_suite_name},
+                "tag": "a",
+                "styling": {
+                    "styles": {"word-break": "break-all"},
+                    "attributes": {"href": expectation_suite_path},
+                    "classes": ["ge-index-page-table-expectation-suite-link"],
                 },
-            }
+            },
         )
 
     # TODO: deprecate dual batch api support in 0.14
@@ -305,17 +298,15 @@ class SiteIndexPageRenderer(Renderer):
             content_title = "Batch Spec"
             content = json.dumps(batch_spec, indent=2)
         return RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": str(batch_id),
-                    "tooltip": {
-                        "content": f"{content_title}:\n\n{content}",
-                        "placement": "top",
-                    },
-                    "styling": {"classes": ["m-0", "p-0"]},
+            content_block_type="string_template",
+            string_template={
+                "template": str(batch_id),
+                "tooltip": {
+                    "content": f"{content_title}:\n\n{content}",
+                    "placement": "top",
                 },
-            }
+                "styling": {"classes": ["m-0", "p-0"]},
+            },
         )
 
     @classmethod
@@ -343,34 +334,32 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _render_validation_success_cell(cls, validation_success):
         return RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "$validation_success",
-                    "params": {"validation_success": ""},
-                    "styling": {
-                        "params": {
-                            "validation_success": {
-                                "tag": "i",
-                                "classes": [
-                                    "fas",
-                                    "fa-check-circle",
-                                    "text-success",
-                                    "ge-success-icon",
-                                ]
-                                if validation_success
-                                else [
-                                    "fas",
-                                    "fa-times",
-                                    "text-danger",
-                                    "ge-failed-icon",
-                                ],
-                            }
-                        },
-                        "classes": ["ge-index-page-table-validation-links-item"],
+            content_block_type="string_template",
+            string_template={
+                "template": "$validation_success",
+                "params": {"validation_success": ""},
+                "styling": {
+                    "params": {
+                        "validation_success": {
+                            "tag": "i",
+                            "classes": [
+                                "fas",
+                                "fa-check-circle",
+                                "text-success",
+                                "ge-success-icon",
+                            ]
+                            if validation_success
+                            else [
+                                "fas",
+                                "fa-times",
+                                "text-danger",
+                                "ge-failed-icon",
+                            ],
+                        }
                     },
+                    "classes": ["ge-index-page-table-validation-links-item"],
                 },
-            }
+            },
         )
 
     @classmethod
@@ -380,29 +369,25 @@ class SiteIndexPageRenderer(Renderer):
         cta_object = index_links_dict.pop("cta_object", None)
 
         try:
-            content_blocks = []
+            content_blocks: list[RenderedComponentContent] = []
             # site name header
             site_name_header_block = RenderedHeaderContent(
-                **{
-                    "content_block_type": "header",
-                    "header": RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "$title_prefix | $site_name",
-                                "params": {
-                                    "site_name": index_links_dict.get("site_name"),
-                                    "title_prefix": "Data Docs",
-                                },
-                                "styling": {"params": {"title_prefix": {"tag": "strong"}}},
-                            },
-                        }
-                    ),
-                    "styling": {
-                        "classes": ["col-12", "ge-index-page-site-name-title"],
-                        "header": {"classes": ["alert", "alert-secondary"]},
+                content_block_type="header",
+                header=RenderedStringTemplateContent(
+                    content_block_type="string_template",
+                    string_template={
+                        "template": "$title_prefix | $site_name",
+                        "params": {
+                            "site_name": index_links_dict.get("site_name"),
+                            "title_prefix": "Data Docs",
+                        },
+                        "styling": {"params": {"title_prefix": {"tag": "strong"}}},
                     },
-                }
+                ),
+                styling={
+                    "classes": ["col-12", "ge-index-page-site-name-title"],
+                    "header": {"classes": ["alert", "alert-secondary"]},
+                },
             )
             content_blocks.append(site_name_header_block)
 
@@ -435,30 +420,24 @@ class SiteIndexPageRenderer(Renderer):
                 )
 
             tabs_content_block = RenderedTabsContent(
-                **{
-                    "tabs": tabs,
-                    "styling": {
-                        "classes": ["col-12", "ge-index-page-tabs-container"],
-                    },
-                }
+                tabs=tabs,
+                styling={
+                    "classes": ["col-12", "ge-index-page-tabs-container"],
+                },
             )
 
             content_blocks.append(tabs_content_block)
 
             section = RenderedSectionContent(
-                **{
-                    "section_name": index_links_dict.get("site_name"),
-                    "content_blocks": content_blocks,
-                }
+                section_name=index_links_dict.get("site_name"),
+                content_blocks=content_blocks,
             )
             sections.append(section)
 
             index_page_document = RenderedDocumentContent(
-                **{
-                    "renderer_type": "SiteIndexPageRenderer",
-                    "utm_medium": "index-page",
-                    "sections": sections,
-                }
+                renderer_type="SiteIndexPageRenderer",
+                utm_medium="index-page",
+                sections=sections,
             )
 
             if cta_object:

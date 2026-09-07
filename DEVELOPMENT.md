@@ -34,7 +34,7 @@ setup and test mechanics.
 5. Run the following command to specify a new remote upstream repository that will be synced with the fork:
 
     ```sh
-    git remote add upstream git@github.com:great-expectations/great_expectations.git
+    git remote add upstream git@github.com:fivetran/great_expectations.git
     ```
 6. Run the following command to create a branch for your changes:
 

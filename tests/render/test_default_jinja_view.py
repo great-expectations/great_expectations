@@ -65,32 +65,26 @@ def test_render_DefaultJinjaPageView_meta_info():
 
 def test_render_section_page():
     section = RenderedSectionContent(
-        **{
-            "section_name": None,
-            "content_blocks": [
-                RenderedHeaderContent(
-                    **{
-                        "content_block_type": "header",
-                        "header": "Overview",
-                    }
-                ),
-                RenderedTableContent(
-                    **{
-                        "content_block_type": "table",
-                        "header": "Dataset info",
-                        "table": [
-                            ["Number of variables", "12"],
-                            ["Number of observations", "891"],
-                        ],
-                        "styling": {
-                            "classes": ["col-6", "table-responsive"],
-                            "styles": {"margin-top": "20px"},
-                            "body": {"classes": ["table", "table-sm"]},
-                        },
-                    }
-                ),
-            ],
-        }
+        section_name=None,
+        content_blocks=[
+            RenderedHeaderContent(
+                content_block_type="header",
+                header="Overview",
+            ),
+            RenderedTableContent(
+                content_block_type="table",
+                header="Dataset info",
+                table=[
+                    ["Number of variables", "12"],
+                    ["Number of observations", "891"],
+                ],
+                styling={
+                    "classes": ["col-6", "table-responsive"],
+                    "styles": {"margin-top": "20px"},
+                    "body": {"classes": ["table", "table-sm"]},
+                },
+            ),
+        ],
     ).to_json_dict()
 
     rendered_doc = gx.render.view.view.DefaultJinjaSectionView().render(
@@ -148,11 +142,8 @@ def test_render_section_page():
 
 def test_rendering_components_without_section_loop_index():
     header_component_content = RenderedHeaderContent(
-        **{
-            # "component_type": "header",
-            "content_block_type": "header",
-            "header": "Overview",
-        }
+        content_block_type="header",
+        header="Overview",
     ).to_json_dict()
     rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
@@ -224,67 +215,61 @@ def test_rendering_components_with_styling():
     # Medium-complicated example to verify that all the things are correctly piped to all the places
 
     header_component_content = RenderedTableContent(
-        **{
-            "content_block_type": "table",
-            "header": RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$var1 $var2 $var3",
-                        "params": {
-                            "var1": "AAA",
-                            "var2": "BBB",
-                            "var3": "CCC",
-                        },
-                        "styling": {
-                            "default": {"classes": ["x"]},
-                            "params": {"var1": {"classes": ["y"]}},
-                        },
-                    },
-                }
-            ),
-            "subheader": RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$var1 $var2 $var3",
-                        "params": {
-                            "var1": "aaa",
-                            "var2": "bbb",
-                            "var3": "ccc",
-                        },
-                        "styling": {
-                            "default": {"classes": ["xx"]},
-                            "params": {"var1": {"classes": ["yy"]}},
-                        },
-                    },
-                }
-            ),
-            "table": [
-                ["Mean", "446"],
-                ["Minimum", "1"],
-            ],
-            "styling": {
-                "classes": ["root_foo"],
-                "styles": {"root": "bar"},
-                "attributes": {"root": "baz"},
-                "header": {
-                    "classes": ["header_foo"],
-                    "styles": {"header": "bar"},
-                    "attributes": {"header": "baz"},
+        content_block_type="table",
+        header=RenderedStringTemplateContent(
+            content_block_type="string_template",
+            string_template={
+                "template": "$var1 $var2 $var3",
+                "params": {
+                    "var1": "AAA",
+                    "var2": "BBB",
+                    "var3": "CCC",
                 },
-                "subheader": {
-                    "classes": ["subheader_foo"],
-                    "styles": {"subheader": "bar"},
-                    "attributes": {"subheader": "baz"},
-                },
-                "body": {
-                    "classes": ["body_foo"],
-                    "styles": {"body": "bar"},
-                    "attributes": {"body": "baz"},
+                "styling": {
+                    "default": {"classes": ["x"]},
+                    "params": {"var1": {"classes": ["y"]}},
                 },
             },
-        }
+        ),
+        subheader=RenderedStringTemplateContent(
+            content_block_type="string_template",
+            string_template={
+                "template": "$var1 $var2 $var3",
+                "params": {
+                    "var1": "aaa",
+                    "var2": "bbb",
+                    "var3": "ccc",
+                },
+                "styling": {
+                    "default": {"classes": ["xx"]},
+                    "params": {"var1": {"classes": ["yy"]}},
+                },
+            },
+        ),
+        table=[
+            ["Mean", "446"],
+            ["Minimum", "1"],
+        ],
+        styling={
+            "classes": ["root_foo"],
+            "styles": {"root": "bar"},
+            "attributes": {"root": "baz"},
+            "header": {
+                "classes": ["header_foo"],
+                "styles": {"header": "bar"},
+                "attributes": {"header": "baz"},
+            },
+            "subheader": {
+                "classes": ["subheader_foo"],
+                "styles": {"subheader": "bar"},
+                "attributes": {"subheader": "baz"},
+            },
+            "body": {
+                "classes": ["body_foo"],
+                "styles": {"body": "bar"},
+                "attributes": {"body": "baz"},
+            },
+        },
     ).to_json_dict()
     rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
@@ -340,11 +325,8 @@ def test_rendering_components_with_styling():
 # Test all the component types ###
 def test_render_header_component():
     header_component_content = RenderedHeaderContent(
-        **{
-            # "component_type": "header",
-            "content_block_type": "header",
-            "header": "Overview",
-        }
+        content_block_type="header",
+        header="Overview",
     ).to_json_dict()
     rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
@@ -372,17 +354,15 @@ def test_render_header_component():
 
 def test_render_table_component():
     table_component_content = RenderedTableContent(
-        **{
-            "content_block_type": "table",
-            "header": "Overview",
-            "table": [
-                ["Mean", "446"],
-                ["Minimum", "1"],
-            ],
-            "styling": {
-                "classes": ["col-4"],
-            },
-        }
+        content_block_type="table",
+        header="Overview",
+        table=[
+            ["Mean", "446"],
+            ["Minimum", "1"],
+        ],
+        styling={
+            "classes": ["col-4"],
+        },
     ).to_json_dict()
     rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
         {
@@ -428,29 +408,27 @@ def test_render_table_component():
 
 def test_render_value_list():
     value_list_component_content = ValueListContent(
-        **{
-            "content_block_type": "value_list",
-            "header": "Example values",
-            "value_list": [
-                {
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$value",
-                        "params": {"value": "0"},
-                        "styling": {"default": {"classes": ["badge", "badge-info"]}},
-                    },
+        content_block_type="value_list",
+        header="Example values",
+        value_list=[
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$value",
+                    "params": {"value": "0"},
+                    "styling": {"default": {"classes": ["badge", "badge-info"]}},
                 },
-                {
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$value",
-                        "params": {"value": "1"},
-                        "styling": {"default": {"classes": ["badge", "badge-info"]}},
-                    },
+            },
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "$value",
+                    "params": {"value": "1"},
+                    "styling": {"default": {"classes": ["badge", "badge-info"]}},
                 },
-            ],
-            "styling": {"classes": ["col-4"], "styles": {"margin-top": "20px"}},
-        }
+            },
+        ],
+        styling={"classes": ["col-4"], "styles": {"margin-top": "20px"}},
     ).to_json_dict()
 
     rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
@@ -487,12 +465,10 @@ def test_render_value_list():
 
 def test_render_graph():
     graph_component_content = RenderedGraphContent(
-        **{
-            "content_block_type": "graph",
-            "header": "Histogram",
-            "graph": '{"$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json", "autosize": "fit", "config": {"view": {"height": 300, "width": 400}}, "data": {"name": "data-a681d02fb484e64eadd9721b37015d5b"}, "datasets": {"data-a681d02fb484e64eadd9721b37015d5b": [{"bins": 3.7, "weights": 5.555555555555555}, {"bins": 10.8, "weights": 3.439153439153439}, {"bins": 17.9, "weights": 17.857142857142858}, {"bins": 25.0, "weights": 24.206349206349206}, {"bins": 32.0, "weights": 16.137566137566136}, {"bins": 39.1, "weights": 12.3015873015873}, {"bins": 46.2, "weights": 9.788359788359788}, {"bins": 53.3, "weights": 5.423280423280423}, {"bins": 60.4, "weights": 3.439153439153439}, {"bins": 67.5, "weights": 1.8518518518518516}]}, "encoding": {"x": {"field": "bins", "type": "ordinal"}, "y": {"field": "weights", "type": "quantitative"}}, "height": 200, "mark": "bar", "width": 200}',  # noqa: E501 # FIXME CoP
-            "styling": {"classes": ["col-4"]},
-        }
+        content_block_type="graph",
+        header="Histogram",
+        graph='{"$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json", "autosize": "fit", "config": {"view": {"height": 300, "width": 400}}, "data": {"name": "data-a681d02fb484e64eadd9721b37015d5b"}, "datasets": {"data-a681d02fb484e64eadd9721b37015d5b": [{"bins": 3.7, "weights": 5.555555555555555}, {"bins": 10.8, "weights": 3.439153439153439}, {"bins": 17.9, "weights": 17.857142857142858}, {"bins": 25.0, "weights": 24.206349206349206}, {"bins": 32.0, "weights": 16.137566137566136}, {"bins": 39.1, "weights": 12.3015873015873}, {"bins": 46.2, "weights": 9.788359788359788}, {"bins": 53.3, "weights": 5.423280423280423}, {"bins": 60.4, "weights": 3.439153439153439}, {"bins": 67.5, "weights": 1.8518518518518516}]}, "encoding": {"x": {"field": "bins", "type": "ordinal"}, "y": {"field": "weights", "type": "quantitative"}}, "height": 200, "mark": "bar", "width": 200}',  # noqa: E501 # FIXME CoP
+        styling={"classes": ["col-4"]},
     ).to_json_dict()
 
     rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
@@ -533,12 +509,10 @@ def test_render_graph():
 
 def test_render_text():
     text_component_content = TextContent(
-        **{
-            "content_block_type": "text",
-            "header": "Histogram",
-            "text": ["hello"],
-            "styling": {"classes": ["col-4"]},
-        }
+        content_block_type="text",
+        header="Histogram",
+        text=["hello"],
+        styling={"classes": ["col-4"]},
     ).to_json_dict()
 
     rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(
@@ -569,12 +543,10 @@ def test_render_text():
     )
 
     text_component_content = TextContent(
-        **{
-            "content_block_type": "text",
-            "header": "Histogram",
-            "text": ["hello", "goodbye"],
-            "styling": {"classes": ["col-4"]},
-        }
+        content_block_type="text",
+        header="Histogram",
+        text=["hello", "goodbye"],
+        styling={"classes": ["col-4"]},
     ).to_json_dict()
 
     rendered_doc = gx.render.view.view.DefaultJinjaComponentView().render(

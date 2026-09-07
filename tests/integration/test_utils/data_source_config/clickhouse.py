@@ -10,15 +10,18 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from tests.integration.sql_session_manager import SessionSQLEngineManager
 from tests.integration.test_utils.data_source_config.backend_spec import (
-    BackendProvisioning,
-    BackendTier,
-    CiLaneRef,
     SqlBackendSpec,
     TableSchemaItemFactory,
     TransactionMode,
 )
 from tests.integration.test_utils.data_source_config.base import BatchTestSetup
-from tests.integration.test_utils.data_source_config.registry import register_sql_backend
+from tests.integration.test_utils.data_source_config.data_source_spec import (
+    CiLaneRef,
+    DataSourceProvisioning,
+    ExecutionEngineKind,
+    SupportTier,
+)
+from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
 
@@ -47,13 +50,20 @@ _CLICKHOUSE_TABLE_SCHEMA_ITEMS: TableSchemaItemFactory = _clickhouse_table_engin
 # reject nulls at insert. The harness's insert path converts pandas/numpy null sentinels to real
 # `None` before insert, so this matters for round-tripping nulls correctly.
 #
-# `int -> Int64` and `float -> Float64` replace the shared map's `INTEGER` (ClickHouse's 32-bit
-# alias) and `DECIMAL` (no precision/scale, not usable). `date -> Date32` and
-# `datetime -> DateTime64()` replace the shared map's narrower `DATE` (starts at 1970) and
-# `DATETIME` (second resolution); `pd.Timestamp` is overridden alongside `datetime` because it is
-# a separate key in the shared inferred-type map. No length is declared for `str`: a length on
-# this dialect's generic `String` type renders `FixedString(n)`, a padded fixed-width type, not
-# what's wanted here -- unlike the length-carrying `str` override other backends declare.
+# `int -> Int64` replaces the shared map's `INTEGER`, ClickHouse's 32-bit alias. `float ->
+# Float64` replaces its `Float(precision=53)`: this dialect discards the precision, and the bare
+# `FLOAT` left over is this server's *single*-precision `Float32` -- verified against a live
+# server, which stores 16777217.0 as 16777216.0 under it and exactly under `Float64`. That is the
+# same narrowing Databricks needs its own override for, reached the same way (see
+# `DOUBLE_PRECISION_FLOAT_OVERRIDE` in `sql.py`); here the `Nullable(...)` wrapper means the entry
+# has to be declared regardless, so it names the 64-bit type rather than deferring to a shared
+# default that would not survive the trip. `date -> Date32` and `datetime -> DateTime64()` replace
+# the shared map's narrower `DATE` (starts at 1970) and `DateTime()`, which renders a
+# second-resolution `DateTime` on this dialect; `pd.Timestamp` is overridden alongside `datetime`
+# because it is a separate key in the shared inferred-type map. No length is declared for `str`:
+# a length on this dialect's generic `String` type renders `FixedString(n)`, a padded fixed-width
+# type, not what's wanted here -- unlike the length-carrying `str` override other backends
+# declare.
 #
 # The map is built eagerly at module scope, behind an import guard, because -- unlike the
 # table-schema-item factory above, which is deferred since its engine object binds to a table --
@@ -75,12 +85,15 @@ _COLUMN_TYPE_OVERRIDES = (
 )
 
 
-@register_sql_backend
+@register_sql_config
 class ClickHouseDatasourceTestConfig(SqlDatasourceTestConfig):
-    BACKEND_SPEC = SqlBackendSpec(
+    DATA_SOURCE_SPEC = SqlBackendSpec(
         label="clickhouse",
+        public_name="ClickHouse",
         marker="clickhouse",
-        provisioning=BackendProvisioning.LOCAL_CONTAINER,
+        provisioning=DataSourceProvisioning.LOCAL_CONTAINER,
+        execution_engine=ExecutionEngineKind.SQL,
+        fluent_types=frozenset({"sql"}),
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="clickhouse"),
         # ClickHouse has no `CREATE SCHEMA`; the database is carried in the connection string,
         # as MySQL's is.
@@ -93,7 +106,7 @@ class ClickHouseDatasourceTestConfig(SqlDatasourceTestConfig):
         dev_requirements_file="reqs/requirements-dev-clickhouse.txt",
         task_runner_marker="clickhouse",
         container_service="clickhouse",
-        tiers=frozenset({BackendTier.CURATED_SQL}),
+        tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
         tier_case_exclusions={
             # Same root cause already recorded on this backend's scoped module's
             # `test_match_regex`/`test_not_match_regex`: the dialect's regex-matching path calls

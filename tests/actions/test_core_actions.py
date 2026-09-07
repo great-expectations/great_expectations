@@ -461,7 +461,7 @@ class TestMicrosoftTeamsNotificationAction:
     )
     def test_run_integration_success_with_severity_filtering(
         self,
-        notify_on: str,
+        notify_on: NotifyOn,
         expected_notification: bool,
         checkpoint_result: CheckpointResult,
     ):
@@ -503,7 +503,7 @@ class TestMicrosoftTeamsNotificationAction:
     )
     def test_run_integration_failure_with_severity_filtering(
         self,
-        notify_on: str,
+        notify_on: NotifyOn,
         expected_notification: bool,
         checkpoint_result_with_failure: CheckpointResult,
     ):

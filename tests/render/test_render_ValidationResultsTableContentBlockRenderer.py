@@ -273,42 +273,38 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     content_block_fn_expected_output = [
         [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$icon",
-                        "params": {"icon": "", "markdown_status_icon": "✅"},
-                        "styling": {
-                            "params": {
-                                "icon": {
-                                    "classes": [
-                                        "fas",
-                                        "fa-check-circle",
-                                        "text-success",
-                                    ],
-                                    "tag": "i",
-                                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "$icon",
+                    "params": {"icon": "", "markdown_status_icon": "✅"},
+                    "styling": {
+                        "params": {
+                            "icon": {
+                                "classes": [
+                                    "fas",
+                                    "fa-check-circle",
+                                    "text-success",
+                                ],
+                                "tag": "i",
                             }
-                        },
+                        }
                     },
-                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
-                }
+                },
+                styling={"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
             ),
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Must have greater than or equal to $min_value rows.",
-                        "params": {
-                            "min_value": 0,
-                            "max_value": None,
-                            "result_format": "SUMMARY",
-                            "strict_max": None,
-                            "strict_min": None,
-                        },
-                        "styling": None,
+                content_block_type="string_template",
+                string_template={
+                    "template": "Must have greater than or equal to $min_value rows.",
+                    "params": {
+                        "min_value": 0,
+                        "max_value": None,
+                        "result_format": "SUMMARY",
+                        "strict_max": None,
+                        "strict_min": None,
                     },
-                }
+                    "styling": None,
+                },
             ),
             "1,313",
         ]
@@ -318,43 +314,39 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     content_block_fn_expected_output = [
         [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$icon",
-                        "params": {"icon": "", "markdown_status_icon": "✅"},
-                        "styling": {
-                            "params": {
-                                "icon": {
-                                    "classes": [
-                                        "fas",
-                                        "fa-check-circle",
-                                        "text-success",
-                                    ],
-                                    "tag": "i",
-                                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "$icon",
+                    "params": {"icon": "", "markdown_status_icon": "✅"},
+                    "styling": {
+                        "params": {
+                            "icon": {
+                                "classes": [
+                                    "fas",
+                                    "fa-check-circle",
+                                    "text-success",
+                                ],
+                                "tag": "i",
                             }
-                        },
+                        }
                     },
-                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
-                }
+                },
+                styling={"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
             ),
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Must have greater than or equal to $min_value rows.",
-                        "params": {
-                            "meta_properties_to_render": {},
-                            "min_value": 0,
-                            "max_value": None,
-                            "result_format": "SUMMARY",
-                            "strict_max": None,
-                            "strict_min": None,
-                        },
-                        "styling": None,
+                content_block_type="string_template",
+                string_template={
+                    "template": "Must have greater than or equal to $min_value rows.",
+                    "params": {
+                        "meta_properties_to_render": {},
+                        "min_value": 0,
+                        "max_value": None,
+                        "result_format": "SUMMARY",
+                        "strict_max": None,
+                        "strict_min": None,
                     },
-                }
+                    "styling": None,
+                },
             ),
             "1,313",
         ]
@@ -379,43 +371,39 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     content_block_fn_expected_output = [
         [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$icon",
-                        "params": {"icon": "", "markdown_status_icon": "✅"},
-                        "styling": {
-                            "params": {
-                                "icon": {
-                                    "classes": [
-                                        "fas",
-                                        "fa-check-circle",
-                                        "text-success",
-                                    ],
-                                    "tag": "i",
-                                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "$icon",
+                    "params": {"icon": "", "markdown_status_icon": "✅"},
+                    "styling": {
+                        "params": {
+                            "icon": {
+                                "classes": [
+                                    "fas",
+                                    "fa-check-circle",
+                                    "text-success",
+                                ],
+                                "tag": "i",
                             }
-                        },
+                        }
                     },
-                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
-                }
+                },
+                styling={"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
             ),
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Must have greater than or equal to $min_value rows.",
-                        "params": {
-                            "meta_properties_to_render": {"property_that_doesnt_exist": "property"},
-                            "min_value": 0,
-                            "max_value": None,
-                            "result_format": "SUMMARY",
-                            "strict_max": None,
-                            "strict_min": None,
-                        },
-                        "styling": None,
+                content_block_type="string_template",
+                string_template={
+                    "template": "Must have greater than or equal to $min_value rows.",
+                    "params": {
+                        "meta_properties_to_render": {"property_that_doesnt_exist": "property"},
+                        "min_value": 0,
+                        "max_value": None,
+                        "result_format": "SUMMARY",
+                        "strict_max": None,
+                        "strict_min": None,
                     },
-                }
+                    "styling": None,
+                },
             ),
             "1,313",
             ["N/A"],
@@ -435,46 +423,42 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     content_block_fn_expected_output = [
         [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$icon",
-                        "params": {"icon": "", "markdown_status_icon": "✅"},
-                        "styling": {
-                            "params": {
-                                "icon": {
-                                    "classes": [
-                                        "fas",
-                                        "fa-check-circle",
-                                        "text-success",
-                                    ],
-                                    "tag": "i",
-                                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "$icon",
+                    "params": {"icon": "", "markdown_status_icon": "✅"},
+                    "styling": {
+                        "params": {
+                            "icon": {
+                                "classes": [
+                                    "fas",
+                                    "fa-check-circle",
+                                    "text-success",
+                                ],
+                                "tag": "i",
                             }
-                        },
+                        }
                     },
-                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
-                }
+                },
+                styling={"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
             ),
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Must have greater than or equal to $min_value rows.",
-                        "params": {
-                            "meta_properties_to_render": {
-                                "property_that_exists": "property",
-                                "other existing prop": "nested.property",
-                            },
-                            "min_value": 0,
-                            "max_value": None,
-                            "result_format": "SUMMARY",
-                            "strict_max": None,
-                            "strict_min": None,
+                content_block_type="string_template",
+                string_template={
+                    "template": "Must have greater than or equal to $min_value rows.",
+                    "params": {
+                        "meta_properties_to_render": {
+                            "property_that_exists": "property",
+                            "other existing prop": "nested.property",
                         },
-                        "styling": None,
+                        "min_value": 0,
+                        "max_value": None,
+                        "result_format": "SUMMARY",
+                        "strict_max": None,
+                        "strict_min": None,
                     },
-                }
+                    "styling": None,
+                },
             ),
             "1,313",
             ["this is nested"],
@@ -536,39 +520,35 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2
     content_block_fn_expected_output = [
         [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$icon",
-                        "params": {"icon": "", "markdown_status_icon": "✅"},
-                        "styling": {
-                            "params": {
-                                "icon": {
-                                    "classes": [
-                                        "fas",
-                                        "fa-check-circle",
-                                        "text-success",
-                                    ],
-                                    "tag": "i",
-                                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "$icon",
+                    "params": {"icon": "", "markdown_status_icon": "✅"},
+                    "styling": {
+                        "params": {
+                            "icon": {
+                                "classes": [
+                                    "fas",
+                                    "fa-check-circle",
+                                    "text-success",
+                                ],
+                                "tag": "i",
                             }
-                        },
+                        }
                     },
-                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
-                }
+                },
+                styling={"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
             ),
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": custom_expectation_template,
-                        "params": {
-                            "column": "a_column_name",
-                            "result_format": "SUMMARY",
-                        },
-                        "styling": None,
+                content_block_type="string_template",
+                string_template={
+                    "template": custom_expectation_template,
+                    "params": {
+                        "column": "a_column_name",
+                        "result_format": "SUMMARY",
                     },
-                }
+                    "styling": None,
+                },
             ),
             custom_expectation_observed_value,
         ]
@@ -738,19 +718,17 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     )[1](result=evr_failed)
     assert output_2 == [
         RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",  # noqa: E501 # FIXME CoP
-                    "params": {
-                        "unexpected_count": "3",
-                        "unexpected_percent": "≈0.2285%",
-                        "element_count": "1,313",
-                    },
-                    "tag": "strong",
-                    "styling": {"classes": ["text-danger"]},
+            content_block_type="string_template",
+            string_template={
+                "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",  # noqa: E501 # FIXME CoP
+                "params": {
+                    "unexpected_count": "3",
+                    "unexpected_percent": "≈0.2285%",
+                    "element_count": "1,313",
                 },
-            }
+                "tag": "strong",
+                "styling": {"classes": ["text-danger"]},
+            },
         )
     ]
 

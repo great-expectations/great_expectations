@@ -91,8 +91,6 @@ exclude = [
     'render/renderer/site_builder\.py',                                                                    # 3
     'render/renderer/slack_renderer\.py',                                                                  # 9
     # tests
-    'tests/actions/test_core_actions\.py',
-    'tests/checkpoint/test_checkpoint\.py',
     'tests/core/test_batch\.py',
     'tests/core/test_expectation_configuration\.py',
     'tests/core/test_expectation_suite\.py',
@@ -124,11 +122,7 @@ exclude = [
     'tests/integration/test_definitions',
     'tests/integration/test_script_runner\.py',
     'tests/performance',
-    'tests/render',
-    'tests/test_utils\.py',
     'tests/validator/test_metric_configuration\.py',
-    'tests/validator/test_metrics_calculator\.py',
-    'tests/validator/test_validation_graph\.py',
 ]
 
 [[tool.mypy.overrides]]
@@ -411,9 +405,6 @@ filterwarnings = [
     "ignore:Using or importing the ABCs:DeprecationWarning:moto.cloudformation.parsing",
     # This deprecation warning comes from getsentry/responses, a mocking utility for requests. It is a dependency in moto.
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
-    # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
-    "ignore::marshmallow.warnings.RemovedInMarshmallow4Warning",
-    "ignore::marshmallow.warnings.ChangedInMarshmallow4Warning",
 
 
     # --------------------------------------- Great Expectations Warnings ----------------------------------

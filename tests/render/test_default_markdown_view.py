@@ -53,32 +53,26 @@ def expectation_suite_to_render_with_notes():
 
 def test_render_section_page():
     section = RenderedSectionContent(
-        **{
-            "section_name": None,
-            "content_blocks": [
-                RenderedHeaderContent(
-                    **{
-                        "content_block_type": "header",
-                        "header": "Overview",
-                    }
-                ),
-                RenderedTableContent(
-                    **{
-                        "content_block_type": "table",
-                        "header": "Dataset info",
-                        "table": [
-                            ["Number of variables", "12"],
-                            ["Number of observations", "891"],
-                        ],
-                        "styling": {
-                            "classes": ["col-6", "table-responsive"],
-                            "styles": {"margin-top": "20px"},
-                            "body": {"classes": ["table", "table-sm"]},
-                        },
-                    }
-                ),
-            ],
-        }
+        section_name=None,
+        content_blocks=[
+            RenderedHeaderContent(
+                content_block_type="header",
+                header="Overview",
+            ),
+            RenderedTableContent(
+                content_block_type="table",
+                header="Dataset info",
+                table=[
+                    ["Number of variables", "12"],
+                    ["Number of observations", "891"],
+                ],
+                styling={
+                    "classes": ["col-6", "table-responsive"],
+                    "styles": {"margin-top": "20px"},
+                    "body": {"classes": ["table", "table-sm"]},
+                },
+            ),
+        ],
     )
 
     rendered_doc = gx.render.view.view.DefaultMarkdownPageView().render(

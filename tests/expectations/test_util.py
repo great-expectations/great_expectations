@@ -129,14 +129,12 @@ def test_prescriptive_renderer_no_decorator(
         template_str = "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"  # noqa: E501 # FIXME CoP
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -195,14 +193,12 @@ def test_prescriptive_renderer_with_decorator(
         template_str = "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"  # noqa: E501 # FIXME CoP
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 

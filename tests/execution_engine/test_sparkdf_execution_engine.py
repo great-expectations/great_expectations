@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import TYPE_CHECKING, Dict, Tuple
+from typing import TYPE_CHECKING, Dict
 
 import numpy as np
 import pandas as pd
@@ -26,7 +26,10 @@ from great_expectations.expectations.row_conditions import (
     OrCondition,
 )
 from great_expectations.self_check.util import build_spark_engine
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,
+    MetricConfigurationID,
+)
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 
@@ -641,10 +644,10 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         batch_id="1234",
     )
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: Dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
@@ -1056,10 +1059,10 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
         batch_id="my_id",
     )
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: Dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)

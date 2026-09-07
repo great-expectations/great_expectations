@@ -1,13 +1,12 @@
 import logging
 import os
 import uuid
-import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Dict, List, Literal, Optional, Tuple, Union, cast
+from typing import List, Literal, Optional, Tuple, Union, cast
 
 import pandas as pd
-from sqlalchemy.exc import ProgrammingError
+import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
@@ -31,9 +30,10 @@ from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.fluent.redshift_datasource import RedshiftDsn
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
@@ -57,9 +57,7 @@ def create_files_in_directory(
         splits = file_name.split("/")
         for i in range(1, len(splits)):
             subdirectories.append(os.path.join(*splits[:i]))  # noqa: PTH118 # FIXME CoP
-    subdirectories = set(subdirectories)
-
-    for subdirectory in subdirectories:
+    for subdirectory in set(subdirectories):
         os.makedirs(  # noqa: PTH103 # FIXME CoP
             os.path.join(directory, subdirectory),  # noqa: PTH118 # FIXME CoP
             exist_ok=True,
@@ -141,10 +139,19 @@ def build_tuple_filesystem_store_backend(
         "base_directory": base_directory,
     }
     store_backend_config.update(**kwargs)
-    return Store.build_store_from_config(
+    # `Store.build_store_from_config` is declared to return `Store`, which shares no
+    # base with `StoreBackend`: it is a generic, config-driven factory whose actual
+    # return type depends entirely on the `class_name`/`module_name` in the config it
+    # is given, so its own `-> Store` annotation is only ever accurate for the
+    # common case of building a `Store` subclass, not for this call, which builds a
+    # `StoreBackend` subclass. Calling `instantiate_class_from_config` directly
+    # (the exact call `Store.build_store_from_config` makes internally) reaches the
+    # same runtime object without going through a wrapper whose declared return type
+    # doesn't match what is actually being built here.
+    return instantiate_class_from_config(
         config=store_backend_config,
-        module_name=module_name,
         runtime_environment=None,
+        config_defaults={"store_name": None, "module_name": module_name},
     )
 
 
@@ -358,6 +365,7 @@ def get_snowflake_connection_url() -> str:
     sf_private_key = os.environ.get("SNOWFLAKE_PRIVATE_KEY")
 
     # When using private key auth, omit password from connection string
+    user_auth: Optional[str]
     if sf_pswd and not sf_private_key:
         user_auth = f"{sf_user}:{sf_pswd}"
     else:
@@ -557,12 +565,15 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
     elif csv_path and not csv_paths:
         csv_paths = [csv_path]
 
+    if not csv_paths:
+        raise ValueError("Either csv_path or csv_paths is required to load test data.")
+
     all_dfs_concatenated: pd.DataFrame = load_and_concatenate_csvs(
         csv_paths, load_full_dataset, convert_colnames_to_datetime
     )
 
     if random_table_suffix:
-        table_name: str = f"{table_name}_{str(uuid.uuid4())[:8]}"
+        table_name = f"{table_name}_{str(uuid.uuid4())[:8]}"
 
     return_value: LoadedTable = LoadedTable(
         table_name=table_name, inserted_dataframe=all_dfs_concatenated
@@ -606,7 +617,8 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501 # FIXME CoP
             # sensitive information does not make it into our CI logs.
         finally:
-            connection.close()
+            if connection is not None:
+                connection.close()
             engine.dispose()
     else:
         try:
@@ -630,7 +642,7 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
                 )
             return return_value
         except SQLAlchemyError:
-            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501 # FIXME CoP
+            error_message = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501 # FIXME CoP
             logger.error(error_message)  # noqa: TRY400 # FIXME CoP
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501 # FIXME CoP
@@ -640,6 +652,26 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
                 connection.close()
             if engine:
                 engine.dispose()
+
+
+@pytest.mark.unit
+def test_load_data_into_test_database_raises_without_csv_path_or_csv_paths():
+    """`load_data_into_test_database` requires at least one of `csv_path`/`csv_paths`.
+
+    This guard is pure input validation - it runs before any engine or connection is
+    created - so it should fail fast with a ValueError rather than falling back to a
+    less useful downstream failure.
+    """
+    with pytest.raises(
+        ValueError,
+        match=r"Either csv_path or csv_paths is required to load test data\.",
+    ):
+        load_data_into_test_database(
+            table_name="some_table",
+            connection_string="sqlite://",
+            csv_path=None,
+            csv_paths=None,
+        )
 
 
 def load_data_into_test_bigquery_database_with_bigquery_client(
@@ -697,7 +729,7 @@ def load_dataframe_into_test_athena_database_as_table(
         None
     """
 
-    from pyathena.pandas.util import to_sql
+    from pyathena.pandas.util import to_sql  # type: ignore[import-not-found] # FIXME CoP
 
     if not data_location_bucket:
         data_location_bucket = os.getenv("ATHENA_DATA_BUCKET")
@@ -713,143 +745,21 @@ def load_dataframe_into_test_athena_database_as_table(
     )
 
 
-def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:
-    """Drop all tables starting with the provided table_prefix.
-    Note: Uses private method InferredAssetSqlDataConnector._introspect_db()
-    to get the table names to not duplicate code, but should be refactored in the
-    future to not use a private method.
+def drop_table(connection_string: str, table_name: str) -> None:
+    """Drop the named table, if it exists.
 
     Args:
         connection_string: To connect to the database.
-        table_prefix: First characters of the tables you want to remove.
-
-    Returns:
-        List of deleted tables.
+        table_name: Name of the table to drop. Resolved against the schema the
+            connection string points at.
     """
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         connection_string=connection_string, **_engine_kwargs_for(connection_string)
     )
-    introspection_output = introspect_db(execution_engine=execution_engine)
-
-    tables_to_drop: List[str] = []
-    tables_dropped: List[str] = []
-
-    for table in introspection_output:
-        if table["table_name"].startswith(table_prefix):
-            tables_to_drop.append(table["table_name"])
-
-    for table_name in tables_to_drop:
-        print(f"Dropping table {table_name}")
-        execution_engine.execute_query_in_transaction(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
-        tables_dropped.append(table_name)
-
-    tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))
-    if len(tables_skipped) > 0:
-        warnings.warn(f"Warning: Tables skipped: {tables_skipped}")
-
-    return tables_dropped
-
-
-def introspect_db(  # noqa: C901, PLR0912 # FIXME CoP
-    execution_engine: SqlAlchemyExecutionEngine,
-    schema_name: Union[str, None] = None,
-    ignore_information_schemas_and_system_tables: bool = True,
-    information_schemas: Optional[List[str]] = None,
-    system_tables: Optional[List[str]] = None,
-    include_views=True,
-) -> List[Dict[str, str]]:
-    # This code was broken out from the InferredAssetSqlDataConnector when it was removed
-    if information_schemas is None:
-        information_schemas = [
-            "INFORMATION_SCHEMA",  # snowflake, SQL Server, mysql, oracle
-            "information_schema",  # postgres, redshift, mysql
-            "performance_schema",  # mysql
-            "sys",  # mysql
-            "mysql",  # mysql
-        ]
-
-    if system_tables is None:
-        system_tables = ["sqlite_master"]  # sqlite
-
-    engine: sqlalchemy.Engine = execution_engine.engine
-    inspector: sqlalchemy.Inspector = sa.inspect(engine)
-
-    selected_schema_name = schema_name
-
-    tables: List[Dict[str, str]] = []
-    all_schema_names: List[str] = inspector.get_schema_names()
-    for schema in all_schema_names:
-        if ignore_information_schemas_and_system_tables and schema_name in information_schemas:
-            continue
-
-        if selected_schema_name is not None and schema_name != selected_schema_name:
-            continue
-
-        try:
-            table_names: List[str] = inspector.get_table_names(schema=schema)
-        except ProgrammingError:
-            # Likely another test already cleaned up this schema.
-            # TODO: Make tests only clean up after themselves
-            continue
-        for table_name in table_names:
-            if ignore_information_schemas_and_system_tables and (table_name in system_tables):
-                continue
-
-            tables.append(
-                {
-                    "schema_name": schema,
-                    "table_name": table_name,
-                    "type": "table",
-                }
-            )
-
-        # Note Abe 20201112: This logic is currently untested.
-        if include_views:
-            # Note: this is not implemented for bigquery
-            try:
-                view_names = inspector.get_view_names(schema=schema)
-            except NotImplementedError:
-                # Not implemented by Athena dialect
-                pass
-            else:
-                for view_name in view_names:
-                    if ignore_information_schemas_and_system_tables and (
-                        view_name in system_tables
-                    ):
-                        continue
-
-                    tables.append(
-                        {
-                            "schema_name": schema,
-                            "table_name": view_name,
-                            "type": "view",
-                        }
-                    )
-
-    # SQLAlchemy's introspection does not list "external tables" in Redshift Spectrum (tables whose data is stored on S3).  # noqa: E501 # FIXME CoP
-    # The following code fetches the names of external schemas and tables from a special table
-    # 'svv_external_tables'.
-    try:
-        if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
-            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-            result = execution_engine.execute_query(
-                sa.text("select schemaname, tablename from svv_external_tables")
-            ).fetchall()
-            for row in result:
-                tables.append(
-                    {
-                        "schema_name": row[0],
-                        "table_name": row[1],
-                        "type": "table",
-                    }
-                )
-    except Exception as e:
-        # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this  # noqa: E501 # FIXME CoP
-        # exception is highly unlikely to fire.
-        if "UndefinedTable" not in str(e):
-            raise e  # noqa: TRY201 # FIXME CoP
-
-    return tables
+    print(f"Dropping table {table_name}")
+    execution_engine.execute_query_in_transaction(
+        sa.text(f"DROP TABLE IF EXISTS {table_name}").columns()
+    )
 
 
 def check_athena_table_count(
@@ -879,7 +789,8 @@ def check_athena_table_count(
         # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501 # FIXME CoP
         # sensitive information does not make it into our CI logs.
     finally:
-        connection.close()
+        if connection is not None:
+            connection.close()
         engine.dispose()
 
 
@@ -905,7 +816,8 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
             if table != table_to_keep:
                 connection.execute(sa.text(f"DROP TABLE `{table}`;"))
     finally:
-        connection.close()
+        if connection is not None:
+            connection.close()
         engine.dispose()
 
 
@@ -962,7 +874,7 @@ def get_awsathena_db_name(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
     Returns:
         String of the awsathena database name.
     """
-    athena_db_name: str = os.getenv(db_name_env_var)
+    athena_db_name: Optional[str] = os.getenv(db_name_env_var)
     if not athena_db_name:
         raise ValueError(
             f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"  # noqa: E501 # FIXME CoP
@@ -993,16 +905,17 @@ def get_connection_string_and_dialect(
         db_config: dict = yaml_handler.load(f)
 
     dialect: str = db_config["dialect"]
+    connection_string: str
     if dialect == "snowflake":
-        connection_string: str = get_snowflake_connection_url()
+        connection_string = get_snowflake_connection_url()
     elif dialect == "redshift":
-        connection_string: str = get_redshift_connection_url()
+        connection_string = get_redshift_connection_url()
     elif dialect == "bigquery":
-        connection_string: str = get_bigquery_connection_url()
+        connection_string = get_bigquery_connection_url()
     elif dialect == "awsathena":
-        connection_string: str = get_awsathena_connection_url(athena_db_name_env_var)
+        connection_string = get_awsathena_connection_url(athena_db_name_env_var)
     else:
-        connection_string: str = db_config["connection_string"]
+        connection_string = db_config["connection_string"]
 
     return dialect, connection_string
 
@@ -1040,7 +953,10 @@ def add_datasource(
     elif dialect == "postgres":
         return context.data_sources.add_postgres(name=name, connection_string=connection_string)
     elif dialect == "redshift":
-        return context.data_sources.add_redshift(name=name, connection_string=connection_string)
+        return context.data_sources.add_redshift(
+            name=name,
+            connection_string=RedshiftDsn(connection_string, scheme="redshift+psycopg2"),
+        )
     elif dialect == "bigquery":
         return context.data_sources.add_bigquery(name=name, connection_string=connection_string)
     else:

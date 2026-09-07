@@ -1,5 +1,5 @@
 import os
-from typing import TYPE_CHECKING, Dict, Tuple
+from typing import TYPE_CHECKING, Dict
 from unittest import mock
 
 import pandas as pd
@@ -23,7 +23,10 @@ from great_expectations.expectations.row_conditions import (
     OrCondition,
 )
 from great_expectations.util import is_library_loadable
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,
+    MetricConfigurationID,
+)
 from tests.expectations.test_util import get_table_columns_metric
 
 if TYPE_CHECKING:
@@ -378,10 +381,10 @@ def test_resolve_metric_bundle():
     # Building engine and configurations in attempt to resolve metrics
     engine = PandasExecutionEngine(batch_data_dict={"made-up-id": df})
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: Dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
@@ -407,8 +410,10 @@ def test_resolve_metric_bundle():
     metrics.update(results)
 
     # Ensuring metrics have been properly resolved
-    assert metrics[("column.mean", "column=a", ())] == 2.0, "mean metric not properly computed"
-    assert metrics[("column.standard_deviation", "column=a", ())] == 1.0, (
+    assert metrics[MetricConfigurationID("column.mean", "column=a", ())] == 2.0, (
+        "mean metric not properly computed"
+    )
+    assert metrics[MetricConfigurationID("column.standard_deviation", "column=a", ())] == 1.0, (
         "standard deviation metric not properly computed"
     )
 

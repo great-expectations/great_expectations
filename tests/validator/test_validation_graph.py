@@ -1,6 +1,6 @@
 import sys
 import uuid
-from typing import TYPE_CHECKING, Dict, Iterable, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Callable, Dict, Iterable, Optional, cast
 from unittest import mock
 
 import pytest
@@ -13,11 +13,15 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,
+    MetricConfigurationID,
+)
 from great_expectations.validator.validation_graph import (
     MAX_METRIC_COMPUTATION_RETRIES,
     ExpectationValidationGraph,
     MetricEdge,
+    MetricsCalculatorErrorResultValue,
     ValidationGraph,
 )
 
@@ -34,9 +38,9 @@ def pandas_execution_engine_fake(
         @staticmethod
         def resolve_metrics(
             metrics_to_resolve: Iterable[MetricConfiguration],
-            metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
+            metrics: Optional[Dict[MetricConfigurationID, MetricConfiguration]] = None,
             runtime_configuration: Optional[dict] = None,
-        ) -> Dict[Tuple[str, str, str], MetricValue]:
+        ) -> Dict[MetricConfigurationID, MetricValue]:
             """
             This stub method implementation insures that specified "MetricConfiguration", designed to fail, will cause
             appropriate exception to be raised, while its dependencies resolve to actual values ("my_value" is used here
@@ -207,9 +211,11 @@ def test_ExpectationValidationGraph_constructor(
     expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
     validation_graph_with_no_edges: ValidationGraph,
 ):
+    untyped_constructor: Callable[..., ExpectationValidationGraph] = ExpectationValidationGraph
+
     with pytest.raises(ValueError) as ve:
         # noinspection PyUnusedLocal,PyTypeChecker
-        expectation_validation_graph = ExpectationValidationGraph(
+        expectation_validation_graph = untyped_constructor(
             configuration=None,
             graph=None,
         )
@@ -220,7 +226,7 @@ def test_ExpectationValidationGraph_constructor(
 
     with pytest.raises(ValueError) as ve:
         # noinspection PyUnusedLocal,PyTypeChecker
-        expectation_validation_graph = ExpectationValidationGraph(
+        expectation_validation_graph = untyped_constructor(
             configuration=expect_column_values_to_be_unique_expectation_config,
             graph=None,
         )
@@ -258,6 +264,7 @@ def test_ExpectationValidationGraph_get_exception_info(
 ) -> None:
     left = metric_edge.left
     right = metric_edge.right
+    assert right is not None
 
     left_exception = ExceptionInfo(
         exception_traceback="my first traceback",
@@ -269,9 +276,17 @@ def test_ExpectationValidationGraph_get_exception_info(
         raised_exception=False,
     )
 
-    metric_info = {
-        left.id: {"exception_info": left_exception},
-        right.id: {"exception_info": right_exception},
+    metric_info: Dict[MetricConfigurationID, MetricsCalculatorErrorResultValue] = {
+        left.id: {
+            "metric_configuration": left,
+            "exception_info": left_exception,
+            "num_failures": 1,
+        },
+        right.id: {
+            "metric_configuration": right,
+            "exception_info": right_exception,
+            "num_failures": 1,
+        },
     }
 
     expect_column_values_to_be_unique_expectation_validation_graph.update(
@@ -296,7 +311,7 @@ def test_ExpectationValidationGraph_get_exception_info(
 def test_parse_validation_graph(
     expect_column_value_z_scores_to_be_less_than_expectation_validation_graph: ValidationGraph,
 ):
-    available_metrics: Dict[Tuple[str, str, str], MetricValue]
+    available_metrics: Dict[MetricConfigurationID, MetricValue]
 
     # Parse input "ValidationGraph" object and confirm the numbers of ready and still needed metrics.  # noqa: E501 # FIXME CoP
     available_metrics = {}
@@ -309,7 +324,7 @@ def test_parse_validation_graph(
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
     # Show that including "nonexistent" metric in dictionary of resolved metrics does not increase ready_metrics count.  # noqa: E501 # FIXME CoP
-    available_metrics = {("nonexistent", "nonexistent", "nonexistent"): "NONE"}
+    available_metrics = {MetricConfigurationID("nonexistent", "nonexistent", "nonexistent"): "NONE"}
     (
         ready_metrics,
         needed_metrics,
@@ -381,11 +396,6 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
         runtime_configuration=runtime_configuration,
     )
 
-    resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
-    aborted_metrics_info: Dict[
-        Tuple[str, str, str],
-        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-    ]
     _resolved_metrics, aborted_metrics_info = graph.resolve(
         runtime_configuration=runtime_configuration,
         min_graph_edges_pbar_enable=0,
@@ -401,7 +411,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
 
     assert (
         'Error: The column "not_in_table" in BatchData does not exist.'
-        in exception_info["exception_message"]
+        in exception_info.exception_message
     )
 
 
@@ -459,24 +469,14 @@ def test_progress_bar_config(
             "great_expectations.validator.validation_graph.tqdm",
         ) as mock_tqdm,
     ):
-        call_args = {
-            "runtime_configuration": None,
-        }
-        if show_progress_bars is not None:
-            call_args.update(
-                {
-                    "show_progress_bars": show_progress_bars,
-                }
-            )
-
         graph = ValidationGraph(execution_engine=execution_engine)
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
-        aborted_metrics_info: Dict[
-            Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
-        # noinspection PyUnusedLocal
-        _resolved_metrics, _aborted_metrics_info = graph.resolve(**call_args)
+        if show_progress_bars is None:
+            _resolved_metrics, _aborted_metrics_info = graph.resolve(runtime_configuration=None)
+        else:
+            _resolved_metrics, _aborted_metrics_info = graph.resolve(
+                runtime_configuration=None,
+                show_progress_bars=show_progress_bars,
+            )
         assert mock_tqdm.called is True
         assert mock_tqdm.call_args[1]["disable"] is are_progress_bars_disabled
 

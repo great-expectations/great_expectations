@@ -86,17 +86,15 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                 column = None
             return [
                 RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {
-                            "template": template_str,
-                            "params": {
-                                "column": column,
-                                "expectation_type": result.expectation_config.type,
-                                "exception_message": result.exception_info["exception_message"],
-                            },
-                            "styling": styling,
+                    content_block_type="string_template",
+                    string_template={
+                        "template": template_str,
+                        "params": {
+                            "column": column,
+                            "expectation_type": result.expectation_config.type,
+                            "exception_message": result.exception_info["exception_message"],
                         },
-                    }
+                        "styling": styling,
+                    },
                 )
             ]

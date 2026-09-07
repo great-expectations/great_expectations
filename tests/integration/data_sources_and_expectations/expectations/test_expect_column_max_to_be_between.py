@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pandas as pd
 import pytest
@@ -7,10 +7,12 @@ import great_expectations.expectations as gxe
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
-from tests.integration.data_sources_and_expectations.test_canonical_expectations import (
-    ALL_DATA_SOURCES,
+from tests.integration.data_sources_and_expectations.data_source_lists import (
     DATA_SOURCES_THAT_SUPPORT_DATE_COMPARISONS,
     JUST_PANDAS_DATA_SOURCES,
+)
+from tests.integration.test_utils.data_source_config import (
+    ALL_DATA_SOURCES,
 )
 
 COL_NAME = "my_col"
@@ -231,3 +233,41 @@ def test_success_with_suite_param_strict_max_(
         expectation, expectation_parameters={suite_param_key: suite_param_value}
     )
     assert result.success == expected_result
+
+
+# The two tests below moved here from `test_canonical_expectations.py` when that module was retired.
+# They parameterize over the same `ALL_DATA_SOURCES` they always did, and their names are unchanged,
+# so the only thing that moved is which module owns them: the expectation module that owns every
+# other test of this expectation.
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=ALL_DATA_SOURCES,
+    data=pd.DataFrame({"a": [1, 2]}),
+)
+def test_expect_column_max_to_be_between(batch_for_datasource: Batch) -> None:
+    expectation = gxe.ExpectColumnMaxToBeBetween(column="a", min_value=2, max_value=2)
+    result = batch_for_datasource.validate(expectation)
+    assert result.success
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=ALL_DATA_SOURCES,
+    data=pd.DataFrame(
+        {
+            "date": [
+                datetime(year=2021, month=1, day=31, tzinfo=timezone.utc).date(),
+                datetime(year=2022, month=1, day=31, tzinfo=timezone.utc).date(),
+                datetime(year=2023, month=1, day=31, tzinfo=timezone.utc).date(),
+            ]
+        }
+    ),
+)
+def test_expect_column_max_to_be_between__date(batch_for_datasource: Batch) -> None:
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="date",
+        min_value=datetime(year=2023, month=1, day=1, tzinfo=timezone.utc).date(),
+        max_value=datetime(year=2024, month=1, day=1, tzinfo=timezone.utc).date(),
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success

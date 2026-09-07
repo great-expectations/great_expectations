@@ -1,7 +1,4 @@
 from .backend_spec import (
-    BackendProvisioning,
-    BackendTier,
-    CiLaneRef,
     SqlBackendSpec,
     TableSchemaItemFactory,
     TransactionMode,
@@ -9,7 +6,25 @@ from .backend_spec import (
 from .base import DataSourceTestConfig
 from .big_query import BigQueryDatasourceTestConfig
 from .clickhouse import ClickHouseDatasourceTestConfig
+from .data_source_spec import (
+    CiLaneRef,
+    DataSourceProvisioning,
+    DataSourceSpec,
+    ExecutionEngineKind,
+    MarkerScope,
+    SupportTier,
+)
 from .databricks import DatabricksDatasourceTestConfig
+from .declaration_only import (
+    ALLOYDB,
+    AMAZON_S3,
+    AURORA,
+    AZURE_BLOB_STORAGE,
+    CITUS,
+    GOOGLE_CLOUD_STORAGE,
+    MICROSOFT_FABRIC,
+    NEON,
+)
 from .generic_sql import GenericSQLDatasourceTestConfig
 from .mysql import MySQLDatasourceTestConfig
 from .oracle import OracleDatasourceTestConfig
@@ -18,10 +33,16 @@ from .pandas_filesystem_csv import PandasFilesystemCsvDatasourceTestConfig
 from .postgres import PostgreSQLDatasourceTestConfig
 from .redshift import RedshiftDatasourceTestConfig
 from .registry import (
+    RegisteredDataSource,
+    data_source_configs_for_engine,
+    data_source_configs_for_tier,
     isolated_registry,
-    iter_sql_backends,
-    register_sql_backend,
-    sql_backends_for_tier,
+    iter_data_source_configs,
+    iter_data_source_specs,
+    iter_data_sources,
+    register_data_source,
+    register_data_source_config,
+    register_sql_config,
 )
 from .singlestore import SingleStoreDatasourceTestConfig
 from .snowflake import SnowflakeDatasourceTestConfig
@@ -41,7 +62,7 @@ from .trino import TrinoDatasourceTestConfig
 # `isort: split` below asks the import sorter to treat this import as its own block and never
 # merge a later addition into the block above it. That is defence in depth, not the guarantee
 # itself: it only holds while a new backend import lands inside the block above, and does nothing
-# if one is appended after this import instead — `tests/test_sql_backend_registry.py` has the
+# if one is appended after this import instead — `tests/test_data_source_registry.py` has the
 # regression test that catches the ordering violation regardless of where a new import lands.
 # isort: split
 from .tiers import (

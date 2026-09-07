@@ -4,9 +4,11 @@ import pytest
 import great_expectations.expectations as gxe
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
-from tests.integration.data_sources_and_expectations.test_canonical_expectations import (
-    ALL_DATA_SOURCES,
+from tests.integration.data_sources_and_expectations.data_source_lists import (
     JUST_PANDAS_DATA_SOURCES,
+)
+from tests.integration.test_utils.data_source_config import (
+    ALL_DATA_SOURCES,
 )
 
 INT_COL_A = "INT_COL_A"

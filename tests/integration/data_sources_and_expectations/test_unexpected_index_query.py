@@ -7,7 +7,7 @@ import great_expectations.expectations as gxe
 from great_expectations.data_context import get_context
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
-from tests.integration.data_sources_and_expectations.test_canonical_expectations import (
+from tests.integration.test_utils.data_source_config import (
     SQL_DATA_SOURCES,
 )
 

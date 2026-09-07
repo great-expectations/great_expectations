@@ -9,16 +9,17 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from great_expectations.self_check.util import _get_snowflake_connect_args
 from tests.integration.sql_session_manager import SessionSQLEngineManager
-from tests.integration.test_utils.data_source_config.backend_spec import (
-    BackendProvisioning,
-    BackendTier,
-    CiLaneRef,
-    SqlBackendSpec,
-)
+from tests.integration.test_utils.data_source_config.backend_spec import SqlBackendSpec
 from tests.integration.test_utils.data_source_config.base import (
     BatchTestSetup,
 )
-from tests.integration.test_utils.data_source_config.registry import register_sql_backend
+from tests.integration.test_utils.data_source_config.data_source_spec import (
+    CiLaneRef,
+    DataSourceProvisioning,
+    ExecutionEngineKind,
+    SupportTier,
+)
+from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import (
     ConnectionDetails,
     SQLBatchTestSetup,
@@ -29,18 +30,21 @@ if TYPE_CHECKING:
     from great_expectations.types.connect_args import ConnectArgs
 
 
-@register_sql_backend
+@register_sql_config
 class SnowflakeDatasourceTestConfig(SqlDatasourceTestConfig):
-    BACKEND_SPEC = SqlBackendSpec(
+    DATA_SOURCE_SPEC = SqlBackendSpec(
         label="snowflake",
+        public_name="Snowflake",
         marker="snowflake",
-        provisioning=BackendProvisioning.EXTERNAL_CREDENTIALS,
+        provisioning=DataSourceProvisioning.EXTERNAL_CREDENTIALS,
+        execution_engine=ExecutionEngineKind.SQL,
+        fluent_types=frozenset({"snowflake"}),
         # Snowflake's CI lane is a dedicated job (`marker-tests-snowflake`), not a
         # `marker-tests` matrix entry: it is sharded across `pytest-split` groups rather than
         # selected as one matrix cell among many markers.
         ci_lane=CiLaneRef(workflow_job="marker-tests-snowflake", marker_token="snowflake"),
         uses_schema=True,
-        tiers=frozenset({BackendTier.STANDARD_SQL}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-snowflake.txt",
         task_runner_marker="snowflake",
     )

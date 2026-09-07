@@ -9,7 +9,7 @@ import great_expectations as gx
 from tests.test_utils import (
     LoadedTable,
     add_datasource,
-    clean_up_tables_with_prefix,
+    drop_table,
     load_and_concatenate_csvs,
     load_data_into_test_database,
 )
@@ -85,9 +85,9 @@ def loaded_table(dialect: str, connection_string: str) -> LoadedTable:
     finally:
         if not _is_dialect_athena(dialect):
             print("Cleaning up created loaded table")
-            clean_up_tables_with_prefix(
+            drop_table(
                 connection_string=connection_string,
-                table_prefix=loaded_table.table_name,
+                table_name=loaded_table.table_name,
             )
 
 

@@ -177,17 +177,15 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         result[0] = [result[0], expectation_notes]
 
                     horizontal_rule = RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": "",
-                                "tag": "hr",
-                                "styling": {
-                                    "classes": ["mt-1", "mb-1"],
-                                },
+                        content_block_type="string_template",
+                        string_template={
+                            "template": "",
+                            "tag": "hr",
+                            "styling": {
+                                "classes": ["mt-1", "mb-1"],
                             },
-                            "styling": {"parent": {"styles": {"list-style-type": "none"}}},
-                        }
+                        },
+                        styling={"parent": {"styles": {"list-style-type": "none"}}},
                     )
                     result.append(horizontal_rule)
 
@@ -313,41 +311,35 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
         else:
             collapse_link = RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "$icon",
-                        "params": {"icon": ""},
-                        "styling": {
-                            "params": {
-                                "icon": {
-                                    "classes": ["fas", "fa-comment", "text-info"],
-                                    "tag": "i",
-                                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "$icon",
+                    "params": {"icon": ""},
+                    "styling": {
+                        "params": {
+                            "icon": {
+                                "classes": ["fas", "fa-comment", "text-info"],
+                                "tag": "i",
                             }
-                        },
+                        }
                     },
-                }
+                },
             )
 
             if isinstance(notes, str):
                 note_content = [
                     RenderedMarkdownContent(
-                        **{
-                            "content_block_type": "markdown",
-                            "markdown": notes,
-                            "styling": {"parent": {"styles": {"color": "red"}}},
-                        }
+                        content_block_type="markdown",
+                        markdown=notes,
+                        styling={"parent": {"styles": {"color": "red"}}},
                     )
                 ]
             elif isinstance(notes, list):
                 note_content = [
                     RenderedMarkdownContent(
-                        **{
-                            "content_block_type": "markdown",
-                            "markdown": note,
-                            "styling": {"parent": {}},
-                        }
+                        content_block_type="markdown",
+                        markdown=note,
+                        styling={"parent": {}},
                     )
                     for note in notes
                 ]
@@ -355,27 +347,23 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 note_content = None
 
             notes_block = TextContent(
-                **{
-                    "content_block_type": "text",
-                    "subheader": "Notes:",
-                    "text": note_content,
-                    "styling": {
-                        "classes": ["col-12", "mt-2", "mb-2"],
-                        "parent": {"styles": {"list-style-type": "none"}},
-                    },
-                }
+                content_block_type="text",
+                subheader="Notes:",
+                text=note_content,
+                styling={
+                    "classes": ["col-12", "mt-2", "mb-2"],
+                    "parent": {"styles": {"list-style-type": "none"}},
+                },
             )
 
             return CollapseContent(
-                **{
-                    "collapse_toggle_link": collapse_link,
-                    "collapse": [notes_block],
-                    "inline_link": True,
-                    "styling": {
-                        "body": {"classes": ["card", "card-body", "p-1"]},
-                        "parent": {"styles": {"list-style-type": "none"}},
-                    },
-                }
+                collapse_toggle_link=collapse_link,
+                collapse=[notes_block],
+                inline_link=True,
+                styling={
+                    "body": {"classes": ["card", "card-body", "p-1"]},
+                    "parent": {"styles": {"list-style-type": "none"}},
+                },
             )
 
     @classmethod

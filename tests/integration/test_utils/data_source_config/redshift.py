@@ -6,13 +6,14 @@ from urllib.parse import urlencode
 from great_expectations.compatibility.pydantic import BaseSettings
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.redshift_datasource import RedshiftDsn
-from tests.integration.test_utils.data_source_config.backend_spec import (
-    BackendProvisioning,
-    BackendTier,
+from tests.integration.test_utils.data_source_config.backend_spec import SqlBackendSpec
+from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
-    SqlBackendSpec,
+    DataSourceProvisioning,
+    ExecutionEngineKind,
+    SupportTier,
 )
-from tests.integration.test_utils.data_source_config.registry import register_sql_backend
+from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
 
@@ -45,17 +46,20 @@ class RedshiftConnectionConfig(BaseSettings):
         )
 
 
-@register_sql_backend
+@register_sql_config
 class RedshiftDatasourceTestConfig(SqlDatasourceTestConfig):
-    BACKEND_SPEC = SqlBackendSpec(
+    DATA_SOURCE_SPEC = SqlBackendSpec(
         label="redshift",
+        public_name="Redshift",
         marker="redshift",
-        provisioning=BackendProvisioning.EXTERNAL_CREDENTIALS,
+        provisioning=DataSourceProvisioning.EXTERNAL_CREDENTIALS,
+        execution_engine=ExecutionEngineKind.SQL,
+        fluent_types=frozenset({"redshift"}),
         # Redshift's CI lane is a dedicated job rather than a `marker-tests` matrix entry, so
         # the job is named explicitly here rather than being the shared matrix job.
         ci_lane=CiLaneRef(workflow_job="redshift", marker_token="redshift"),
         uses_schema=True,
-        tiers=frozenset({BackendTier.STANDARD_SQL}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-redshift.txt",
         task_runner_marker="redshift",
     )

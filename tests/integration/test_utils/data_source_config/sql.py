@@ -52,6 +52,86 @@ InferrableTypesLookup = dict[type[Any], Union[type[TypeEngine], TypeEngine]]
 InferredColumnTypes = dict[str, Union[type[TypeEngine], TypeEngine]]
 
 
+_SHARED_DEFAULTS: InferrableTypesLookup = {
+    str: sqltypes.VARCHAR,
+    int: sqltypes.INTEGER,
+    # Not a bare DECIMAL: an unqualified decimal is read by several dialects as scale zero,
+    # which rounds every fractional value in a fixture frame to an integer on write, so an
+    # assertion about a value ends up asserting about a different one. Nor `Double`, which one
+    # dialect renders as a type its server does not have.
+    #
+    # A precision-carrying float is the 64-bit type on every dialect here but four, and each of
+    # those four declares its own override: Oracle raises rather than compiling it, over binary
+    # vs. decimal precision; Databricks discards the precision and reads the bare `FLOAT` left
+    # over as its 4-byte type; ClickHouse does the same, that spelling being its `Float32`;
+    # SingleStore keeps the precision and ignores it, creating a 4-byte column anyway. Removing
+    # any of those four surfaces this line's limit, so they and it belong together -- see
+    # `DOUBLE_PRECISION_FLOAT_OVERRIDE` below, which two of them share. The dialects that discard
+    # the precision without an override (SQLite, Snowflake) already mean 64 bits by a bare
+    # `FLOAT`.
+    float: sqltypes.Float(precision=53),
+    bool: sqltypes.BOOLEAN,
+    date: sqltypes.DATE,
+    # `DateTime`, not DATETIME or TIMESTAMP. Those two are emitted verbatim, and each is wrong
+    # somewhere: PostgreSQL has no DATETIME and rejects the DDL, while in T-SQL TIMESTAMP is a
+    # row-version column that refuses an explicit value entirely.
+    datetime: sqltypes.DateTime(),
+    pd.Timestamp: sqltypes.DateTime(),
+}
+"""The Python-type-to-SQL-type map every SQL backend starts from.
+
+These name types every dialect in use here has, and carry a precision wherever leaving it off
+would let the server pick one. An unparameterised type compiles on every dialect, so a mismatch is
+not a DDL error the harness would notice -- it is whatever that server decided the type meant,
+applied silently to the fixture data.
+
+Shared instances rather than per-call ones, which is safe because a SQLAlchemy type instance
+carries no binding to the table it is used on -- the same sharing a backend's declared
+`column_type_overrides` mapping already relies on. Schema *items* are the constructs that bind on
+attachment, and those are declared as a factory for that reason (see `SqlBackendSpec`).
+"""
+
+
+DOUBLE_PRECISION_FLOAT_OVERRIDE: InferrableTypesLookup = (
+    {float: sqltypes.Double()} if hasattr(sqltypes, "Double") else {}
+)
+"""A `float` override for the two backends that need the 8-byte type named and can take it plain.
+
+They get there by different routes, which is why neither is fixable in the default. The Databricks
+dialect discards the precision and emits a bare `FLOAT`, and that spelling is its server's
+single-precision type. SingleStore is handed `FLOAT(53)` intact and, unlike MySQL, does not promote
+it -- `SHOW CREATE TABLE` reports a plain `float`. Either way a Python float, which is a double, is
+stored at half the width the fixture declared, with valid DDL and no error: verified against a live
+SingleStore, which stores 16777217.0 as 16777200.0 under the default and exactly under this.
+`Double` names the width in the type name, leaving the server nothing to pick.
+
+SQLite and Snowflake also emit a bare `FLOAT` and need nothing: both mean 64 bits by it.
+ClickHouse does not, and is the third backend narrowed by the default -- but its types all
+carry a `Nullable(...)` wrapper, so it states its own `Float64` rather than sharing this.
+
+Empty on SQLAlchemy 1.4, where `Double` does not exist. This module is imported there -- the
+minimum-version lane constrains to that floor and collects every test module -- so naming the type
+unconditionally would break collection in a lane that runs none of these backends. An environment
+that did run one under 1.4 would get the narrowing back, which is why the round-trip suite asserts
+the stored value rather than trusting the declaration.
+"""
+
+
+def inferrable_types_for(backend_spec: SqlBackendSpec) -> InferrableTypesLookup:
+    """The Python-type-to-SQL-type map one backend builds its fixture columns from.
+
+    The backend's declared `column_type_overrides` are merged over `_SHARED_DEFAULTS`, so a
+    backend that needs a different type for a given Python type (e.g. a length-carrying string
+    type) states that fact once, in its spec, rather than by overriding a property.
+
+    A function of the declaration rather than of a live setup, because what a backend's fixture
+    columns become is decided entirely by what that backend declares. Resolving it needs no
+    server, no credentials and no engine, which is what lets a test record the answer for every
+    registered backend at once rather than only for the backends a given lane can connect to.
+    """
+    return {**_SHARED_DEFAULTS, **backend_spec.column_type_overrides}
+
+
 class SQLBatchTestSetup(BatchTestSetup[_SqlConfigT, TableAsset], ABC, Generic[_SqlConfigT]):
     SCHEMA_PREFIX = "gx_ci_test_"
 
@@ -78,22 +158,8 @@ class SQLBatchTestSetup(BatchTestSetup[_SqlConfigT, TableAsset], ABC, Generic[_S
 
     @property
     def inferrable_types_lookup(self) -> InferrableTypesLookup:
-        """Dict of Python type keys mapped to SQL dialect-specific SqlAlchemy types.
-
-        The backend's declared `column_type_overrides` are merged over this shared default map,
-        so a backend that needs a different type for a given Python type (e.g. a length-carrying
-        string type) states that fact once, in its spec, rather than by overriding this property.
-        """
-        default: InferrableTypesLookup = {
-            str: sqltypes.VARCHAR,
-            int: sqltypes.INTEGER,
-            float: sqltypes.DECIMAL,
-            bool: sqltypes.BOOLEAN,
-            date: sqltypes.DATE,
-            datetime: sqltypes.DATETIME,
-            pd.Timestamp: sqltypes.DATETIME,
-        }
-        return {**default, **self.backend_spec.column_type_overrides}
+        """Dict of Python type keys mapped to SQL dialect-specific SqlAlchemy types."""
+        return inferrable_types_for(self.backend_spec)
 
     def __init__(
         self,

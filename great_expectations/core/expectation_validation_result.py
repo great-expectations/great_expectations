@@ -390,7 +390,9 @@ class ExpectationValidationResult(SerializableDictDot):
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool(required=False, allow_none=True)
     expectation_config = fields.Nested(
-        lambda: "ExpectationConfigurationSchema",  # type: ignore[arg-type,return-value] # FIXME CoP
+        # marshmallow 3 rejects a callable returning a schema name; marshmallow 4 types it
+        # fine, so unused-ignore keeps --warn-unused-ignores quiet on the newer major.
+        lambda: "ExpectationConfigurationSchema",  # type: ignore[arg-type,return-value,unused-ignore] # FIXME CoP
         required=False,
         allow_none=True,
     )

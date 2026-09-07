@@ -164,23 +164,26 @@ class FileDataContext(SerializableDataContext):
             f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
         )
 
+        fluent_datasources = self._synchronize_fluent_datasources()
+        if fluent_datasources:
+            self.fluent_config.update_datasources(datasources=fluent_datasources)
+            logger.info(
+                f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"  # noqa: E501 # FIXME CoP
+            )
+            fluent_json_dict: dict[str, JSONValues] = self.fluent_config._json_dict()
+            fluent_json_dict = self.fluent_config._exclude_name_fields_from_fluent_datasources(
+                config=fluent_json_dict
+            )
+            self.config._commented_map.update(fluent_json_dict)
+
+        # Serialize before opening the file. Opening in "w" truncates immediately, so
+        # serializing into an already-open handle would leave the project config empty
+        # and unloadable if serialization raised.
+        config_to_write = self.config.to_yaml_str()
+
         try:
             with open(config_filepath, "w", encoding="utf-8") as outfile:
-                fluent_datasources = self._synchronize_fluent_datasources()
-                if fluent_datasources:
-                    self.fluent_config.update_datasources(datasources=fluent_datasources)
-                    logger.info(
-                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"  # noqa: E501 # FIXME CoP
-                    )
-                    fluent_json_dict: dict[str, JSONValues] = self.fluent_config._json_dict()
-                    fluent_json_dict = (
-                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
-                            config=fluent_json_dict
-                        )
-                    )
-                    self.config._commented_map.update(fluent_json_dict)
-
-                self.config.to_yaml(outfile)
+                outfile.write(config_to_write)
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 

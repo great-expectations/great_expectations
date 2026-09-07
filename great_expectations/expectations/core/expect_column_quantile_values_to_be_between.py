@@ -521,23 +521,21 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
             )
 
         quantile_range_table = RenderedTableContent(
-            **{
-                "content_block_type": "table",
-                "header_row": table_header_row,
-                "table": table_rows,
-                "styling": {
-                    "body": {
-                        "classes": [
-                            "table",
-                            "table-sm",
-                            "table-unbordered",
-                            "col-4",
-                            "mt-2",
-                        ],
-                    },
-                    "parent": {"styles": {"list-style-type": "none"}},
+            content_block_type="table",
+            header_row=table_header_row,
+            table=table_rows,
+            styling={
+                "body": {
+                    "classes": [
+                        "table",
+                        "table-sm",
+                        "table-unbordered",
+                        "col-4",
+                        "mt-2",
+                    ],
                 },
-            }
+                "parent": {"styles": {"list-style-type": "none"}},
+            },
         )
 
         return [expectation_string_obj, quantile_range_table]
@@ -572,16 +570,14 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
             )
 
         return RenderedTableContent(
-            **{
-                "content_block_type": "table",
-                "header_row": table_header_row,
-                "table": table_rows,
-                "styling": {
-                    "body": {
-                        "classes": ["table", "table-sm", "table-unbordered", "col-4"],
-                    }
-                },
-            }
+            content_block_type="table",
+            header_row=table_header_row,
+            table=table_rows,
+            styling={
+                "body": {
+                    "classes": ["table", "table-sm", "table-unbordered", "col-4"],
+                }
+            },
         )
 
     @classmethod
@@ -717,22 +713,18 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
             )
 
         return RenderedTableContent(
-            **{
-                "content_block_type": "table",
-                "header": RenderedStringTemplateContent(
-                    **{
-                        "content_block_type": "string_template",
-                        "string_template": {"template": "Quantiles", "tag": "h6"},
-                    }
-                ),
-                "table": table_rows,
-                "styling": {
-                    "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                    "body": {
-                        "classes": ["table", "table-sm", "table-unbordered"],
-                    },
+            content_block_type="table",
+            header=RenderedStringTemplateContent(
+                content_block_type="string_template",
+                string_template={"template": "Quantiles", "tag": "h6"},
+            ),
+            table=table_rows,
+            styling={
+                "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
+                "body": {
+                    "classes": ["table", "table-sm", "table-unbordered"],
                 },
-            }
+            },
         )
 
     def get_validation_dependencies(

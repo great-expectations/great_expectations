@@ -1,6 +1,6 @@
 """Extension-point behavior tests for the shared SQL batch-setup layer.
 
-Every declaration below is a throwaway, never decorated with `register_sql_backend`, so none of it
+Every declaration below is a throwaway, never decorated with `register_sql_config`, so none of it
 joins the registry that the derived data-source lists and completeness checks walk. The schema
 items these declarations contribute are plain SQLAlchemy constructs with no dialect package
 involved, so the whole module runs against a file-backed SQLite database and needs no server.
@@ -28,10 +28,12 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from tests.integration.conftest import parameterize_batch_for_data_sources
 from tests.integration.test_utils.data_source_config import sql as sql_module
 from tests.integration.test_utils.data_source_config.backend_spec import (
-    BackendProvisioning,
-    CiLaneRef,
     SqlBackendSpec,
     TransactionMode,
+)
+from tests.integration.test_utils.data_source_config.data_source_spec import (
+    CiLaneRef,
+    DataSourceProvisioning,
 )
 from tests.integration.test_utils.data_source_config.generic_sql import (
     GenericSQLBatchTestSetup,
@@ -52,8 +54,9 @@ pytestmark = pytest.mark.sqlite
 
 _BASE_SPEC = SqlBackendSpec(
     label="throwaway-table-schema-items",
+    public_name="SQLite",
     marker="sqlite",
-    provisioning=BackendProvisioning.LOCAL_FILE,
+    provisioning=DataSourceProvisioning.LOCAL_FILE,
     ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="sqlite"),
     uses_schema=False,
 )
@@ -65,7 +68,7 @@ only unique enough to keep this module's own throwaway configs distinguishable f
 class _ThrowawayDatasourceTestConfig(SqlDatasourceTestConfig):
     """A file-backed declaration used only to drive the tests in this module."""
 
-    BACKEND_SPEC: ClassVar[SqlBackendSpec] = _BASE_SPEC
+    DATA_SOURCE_SPEC: ClassVar[SqlBackendSpec] = _BASE_SPEC
 
     @override
     def create_batch_setup(
@@ -265,6 +268,67 @@ class TestSchemaNameConflictsWithNoSchemaDeclarationRaises:
         )
 
 
+class TestSharedDefaultTypesSayWhatTheyMean:
+    """A default type that leaves its width unstated lets each server pick one.
+
+    That failure does not announce itself: the DDL is valid everywhere, so nothing errors --
+    the server simply stores something other than what the fixture declared, and an assertion
+    about a value ends up asserting about a different value.
+    """
+
+    def test_a_running_setup_resolves_what_the_declaration_resolves(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        """The check below, and the recorded rendering table in its own module, both read the
+        type map from a backend's declaration rather than from a live setup. That says something
+        about the tables the harness builds only while a running setup reads the same map; a setup
+        resolving its columns some other way would leave both asserting about a map nothing uses.
+        """
+        setup = _ThrowawayBatchTestSetup(
+            data=pd.DataFrame({"col_int": [1]}),
+            config=_ThrowawayDatasourceTestConfig(),
+            base_dir=tmp_path,
+            extra_data=_EXTRA_DATA,
+            context=gx.get_context(mode="ephemeral"),
+        )
+
+        assert setup.inferrable_types_lookup == sql_module.inferrable_types_for(_BASE_SPEC)
+
+    def test_the_float_default_states_its_own_width(self) -> None:
+        """A float type that names no width is the shape that silently loses data.
+
+        Two spellings do it. An unqualified decimal is read by several dialects as scale zero, so
+        every fractional value in a fixture frame is rounded to an integer on write. A float with
+        no width is read by some servers as their 4-byte type, so a Python float -- a double -- is
+        stored at half the width it was declared at. Both produce valid DDL and no error. A type
+        naming its own width -- a double, a float carrying a precision, or a decimal carrying an
+        explicit scale -- leaves the server nothing to decide.
+        """
+        default_float = sql_module.inferrable_types_for(_BASE_SPEC)[float]
+        instance = default_float() if isinstance(default_float, type) else default_float
+
+        assert isinstance(instance, sa.Numeric), (
+            f"the shared default for `float` is {instance!r}, which is not a numeric type at all"
+        )
+        states_its_own_width = (
+            # `Double` names 8 bytes in the type name itself, so it needs no precision. Behind
+            # the same `hasattr` guard the production override carries, and for the same reason:
+            # the type does not exist on the SQLAlchemy 1.4 floor, and a bare attribute access
+            # here raises before any assertion runs. Nothing is lost under 1.4 -- a default this
+            # branch would accept cannot be spelled there -- and the two branches below still
+            # reject every shape that names no width.
+            (hasattr(sa, "Double") and isinstance(instance, sa.Double))
+            or (isinstance(instance, sa.Float) and instance.precision is not None)
+            or (not isinstance(instance, sa.Float) and instance.scale is not None)
+        )
+
+        assert states_its_own_width, (
+            f"the shared default for `float` is {instance!r}, which names no width: the server "
+            "picks one, and a fixture value that does not fit the one it picks is rounded or "
+            "narrowed on write, with valid DDL and no error"
+        )
+
+
 class TestColumnTypeOverridesMergeOverSharedDefault:
     def test_overridden_type_applies_only_to_the_declared_python_type(
         self, tmp_path: pathlib.Path
@@ -418,7 +482,7 @@ class _CountingBatchTestSetup(_ThrowawayBatchTestSetup):
 
 
 class _CacheRegressionDatasourceTestConfig(_ThrowawayDatasourceTestConfig):
-    BACKEND_SPEC: ClassVar[SqlBackendSpec] = _CACHE_REGRESSION_SPEC
+    DATA_SOURCE_SPEC: ClassVar[SqlBackendSpec] = _CACHE_REGRESSION_SPEC
 
     @override
     def create_batch_setup(

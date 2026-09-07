@@ -380,14 +380,12 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -405,15 +403,11 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         assert result, "Must pass in result."
         observed_value = result.result["observed_value"]
         template_string_object = RenderedStringTemplateContent(
-            **{
-                "content_block_type": "string_template",
-                "string_template": {
-                    "template": "Distinct (%)",
-                    "tooltip": {
-                        "content": "expect_column_proportion_of_unique_values_to_be_between"
-                    },
-                },
-            }
+            content_block_type="string_template",
+            string_template={
+                "template": "Distinct (%)",
+                "tooltip": {"content": "expect_column_proportion_of_unique_values_to_be_between"},
+            },
         )
         if not observed_value:
             return [template_string_object, "--"]

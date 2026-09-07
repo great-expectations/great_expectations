@@ -197,7 +197,7 @@ def run_batch_head(  # noqa: C901 # FIXME CoP
             assert isinstance(head_data, HeadData)
             assert len(head_data.data.index) == 5
 
-        assert set(metrics[table_columns_metric.id]) == expected_columns  # type: ignore[arg-type] # FIXME CoP
+        assert set(metrics[table_columns_metric.id]) == expected_columns
 
     else:
         with pytest.raises(ValidationError) as e:

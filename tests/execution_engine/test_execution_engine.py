@@ -20,7 +20,10 @@ from great_expectations.expectations.legacy_row_conditions import (
 )
 
 # Testing ordinary process of adding column row condition
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,
+    MetricConfigurationID,
+)
 from tests.expectations.test_util import get_table_columns_metric
 
 if TYPE_CHECKING:
@@ -199,10 +202,10 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: Dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
@@ -278,10 +281,10 @@ def test_resolve_metrics_with_extraneous_value_key():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: Dict[Tuple[str, str, str], MetricValue]
+    results: Dict[MetricConfigurationID, MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
@@ -310,7 +313,14 @@ def test_resolve_metrics_with_extraneous_value_key():
     metrics.update(results)
 
     # Ensuring extraneous value key did not change computation
-    assert metrics[("column.standard_deviation", "column=a", "value_set=[1, 2, 3, 4, 5]")] == 1.0
+    assert (
+        metrics[
+            MetricConfigurationID(
+                "column.standard_deviation", "column=a", "value_set=[1, 2, 3, 4, 5]"
+            )
+        ]
+        == 1.0
+    )
 
 
 # Testing that metric resolution also works with metric partial function

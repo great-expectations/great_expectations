@@ -272,10 +272,14 @@ class RenderedTableContent(RenderedComponentContent):
     """RenderedTableContent is RenderedComponentContent that is a table.
 
     Args:
-        table: The table to be rendered.
-        header: The header for this content block.
+        table: The table to be rendered. Rows may be a mix of ``RenderedContent``,
+            already-rendered rows (lists of cell values), and other JSON-serializable
+            values.
+        header: The header for this content block. May be a ``RenderedContent``, a
+            dict, or a plain string.
         subheader: The subheader for this content block.
-        header_row: The header row for the table.
+        header_row: The header row for the table. May contain ``RenderedContent`` or
+            plain values such as strings.
         styling: A dictionary containing styling information.
         content_block_type: The type of content block.
         table_options: The options that can be set for the table.
@@ -291,10 +295,10 @@ class RenderedTableContent(RenderedComponentContent):
 
     def __init__(  # noqa: PLR0913 # FIXME CoP
         self,
-        table: list[RenderedContent],
-        header: Optional[Union[RenderedContent, dict]] = None,
+        table: list[Any],
+        header: Optional[Union[RenderedContent, dict, str]] = None,
         subheader: Optional[Union[RenderedContent, dict]] = None,
-        header_row: Optional[list[RenderedContent]] = None,
+        header_row: Optional[list[Any]] = None,
         styling: Optional[dict] = None,
         content_block_type: str = "table",
         table_options: Optional[dict] = None,
@@ -618,7 +622,8 @@ class CollapseContent(RenderedComponentContent):
 
     Args:
         collapse: The content to be collapsed. If a list is provided, it can recursively contain RenderedContent.
-        collpase_toggle_link: The toggle link for this CollapseContent.
+        collapse_toggle_link: The toggle link for this CollapseContent. May be a
+            ``RenderedContent``, a dict, or a plain string.
         header: The header for this content block.
         subheader: The subheader for this content block.
         styling: A dictionary containing styling information.
@@ -629,7 +634,7 @@ class CollapseContent(RenderedComponentContent):
     def __init__(  # noqa: PLR0913 # FIXME CoP
         self,
         collapse: Union[RenderedContent, list],
-        collapse_toggle_link: Optional[Union[RenderedContent, dict]] = None,
+        collapse_toggle_link: Optional[Union[RenderedContent, dict, str]] = None,
         header: Optional[Union[RenderedContent, dict]] = None,
         subheader: Optional[Union[RenderedContent, dict]] = None,
         styling: Optional[dict] = None,

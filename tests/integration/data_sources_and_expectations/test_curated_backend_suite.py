@@ -3,7 +3,7 @@
 A backend joins this suite by declaring curated-tier membership on its own backend declaration
 (see `tests/integration/test_utils/data_source_config/backend_spec.py`) — no edit to this module
 is required. Every case below is parameterized through
-`data_sources_for_tier_case(BackendTier.CURATED_SQL, <case key>)` rather than directly over
+`data_sources_for_tier_case(SupportTier.CURATED_SQL, <case key>)` rather than directly over
 `CURATED_SQL_DATA_SOURCES`, so a downstream backend's declared exclusion for a case takes effect
 uniformly across every case in the suite. A case parameterized over the raw list instead would
 silently ignore that backend's exclusion for exactly that case, which is worse than having no
@@ -31,11 +31,11 @@ from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from great_expectations.expectations.row_conditions import Column
 from tests.integration.conftest import parameterize_batch_for_data_sources
 from tests.integration.test_utils.data_source_config import (
-    BackendTier,
     DataSourceTestConfig,
     SqlDatasourceTestConfig,
+    SupportTier,
     data_sources_for_tier_case,
-    iter_sql_backends,
+    iter_data_source_configs,
 )
 from tests.integration.test_utils.data_source_config.singlestore import (
     SingleStoreDatasourceTestConfig,
@@ -82,7 +82,7 @@ def _sources(case_key: str) -> List[DataSourceTestConfig]:
     Every case in this module calls this helper rather than reading `CURATED_SQL_DATA_SOURCES`
     directly, so a backend's declared exclusion for `case_key` is honored no matter which case
     asks."""
-    return data_sources_for_tier_case(BackendTier.CURATED_SQL, case_key)
+    return data_sources_for_tier_case(SupportTier.CURATED_SQL, case_key)
 
 
 DATA = pd.DataFrame(
@@ -307,8 +307,8 @@ def test_every_declared_exclusion_key_is_a_published_case_key() -> None:
     """
     assert CURATED_CASE_KEYS, "the curated suite must publish at least one case key"
 
-    for config_class in iter_sql_backends():
-        for excluded_key in config_class.BACKEND_SPEC.tier_case_exclusions:
+    for config_class in iter_data_source_configs():
+        for excluded_key in config_class.DATA_SOURCE_SPEC.tier_case_exclusions:
             assert excluded_key in CURATED_CASE_KEYS, (
                 f"{config_class.__name__} declares a tier case exclusion for "
                 f"{excluded_key!r}, which is not one of this suite's published case keys "
@@ -339,9 +339,9 @@ def test_case_accessor_matches_the_curated_list_minus_declared_exclusions() -> N
             config
             for config in CURATED_SQL_DATA_SOURCES
             if case_key
-            not in cast("SqlDatasourceTestConfig", config).BACKEND_SPEC.tier_case_exclusions
+            not in cast("SqlDatasourceTestConfig", config).DATA_SOURCE_SPEC.tier_case_exclusions
         ]
-        assert data_sources_for_tier_case(BackendTier.CURATED_SQL, case_key) == expected
+        assert data_sources_for_tier_case(SupportTier.CURATED_SQL, case_key) == expected
 
 
 @pytest.mark.project
@@ -354,4 +354,4 @@ def test_singlestore_declares_no_case_exclusions() -> None:
     this suite existed and no longer holds after it. That is a regression, not a triage decision,
     so it is asserted directly rather than left to the general per-backend ceiling.
     """
-    assert SingleStoreDatasourceTestConfig.BACKEND_SPEC.tier_case_exclusions == {}
+    assert SingleStoreDatasourceTestConfig.DATA_SOURCE_SPEC.tier_case_exclusions == {}

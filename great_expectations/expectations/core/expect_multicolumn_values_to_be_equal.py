@@ -340,13 +340,11 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{  # type: ignore[arg-type]  # FIXME CoP
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]

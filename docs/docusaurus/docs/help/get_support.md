@@ -11,7 +11,7 @@ Knowing how and where to request GX support can improve response times.
 
 The order in which we are prioritizing support issues are as follows: 
 
-- Issues and PRs in the [GX GitHub repository](https://github.com/great-expectations/great_expectations)
+- Issues and PRs in the [GX GitHub repository](https://github.com/fivetran/great_expectations)
 - Questions posted to the [GX Core Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11)
 - Questions posted to the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82)
 

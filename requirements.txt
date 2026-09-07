@@ -2,7 +2,7 @@ altair>=5.0.0,<7.0.0
 cryptography>=3.2
 jinja2>=3
 jsonschema>=2.5.1
-marshmallow>=3.7.1,<4.0.0
+marshmallow>=3.18.0
 mistune>=0.8.4
 numpy>=1.22.4; python_version >= "3.10"
 numpy>=1.26.0; python_version >= "3.12"
