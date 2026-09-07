@@ -389,6 +389,7 @@ def test_query_asset_as_selectable_wraps_the_whole_statement(dialect_name: str) 
 
     selectable = asset.as_selectable()
 
+    assert isinstance(selectable, sqlalchemy.Subquery)
     dialect = import_module(f"sqlalchemy.dialects.{dialect_name}").dialect()
     rendered = str(sqlalchemy.select("*").select_from(selectable).compile(dialect=dialect))
     alias_prefix = QUERY_ASSET_SUBQUERY_ALIAS_PREFIX_BY_DIALECT[dialect_name]
