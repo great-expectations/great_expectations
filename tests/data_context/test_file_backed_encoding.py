@@ -57,6 +57,8 @@ def test_tuple_filesystem_store_backend_reads_own_writes_under_non_utf8_locale(
     """  # FIXME CoP
     store_dir = tmp_path / "store"
     store_dir.mkdir()
+    payload_path = tmp_path / "payload.txt"
+    payload_path.write_text(NON_ASCII_VALUE, encoding="utf-8")
 
     script = textwrap.dedent(f"""
         from great_expectations.data_context.store.tuple_store_backend import (
@@ -67,13 +69,16 @@ def test_tuple_filesystem_store_backend_reads_own_writes_under_non_utf8_locale(
 
         assert open(os.devnull).encoding != "utf-8"  # locale override did not take effect
 
+        with open({str(payload_path)!r}, encoding="utf-8") as f:
+            non_ascii_value = f.read()
+
         backend = TupleFilesystemStoreBackend(
             root_directory={str(store_dir)!r},
             base_directory={str(store_dir)!r},
             filepath_template="my_file_{{0}}",
         )
-        backend.set(("AAA",), {NON_ASCII_VALUE!r})
-        assert backend.get(("AAA",)) == {NON_ASCII_VALUE!r}
+        backend.set(("AAA",), non_ascii_value)
+        assert backend.get(("AAA",)) == non_ascii_value
         print("OK")
     """)
 
@@ -95,6 +100,8 @@ def test_file_data_context_reloads_non_ascii_project_yaml_under_non_utf8_locale(
     pins its encoding, leaving nothing for the reload assertion to catch.
     """  # FIXME CoP
     project_root = tmp_path / "project"
+    payload_path = tmp_path / "payload.txt"
+    payload_path.write_text(NON_ASCII_VALUE, encoding="utf-8")
 
     write_script = textwrap.dedent(f"""
         import great_expectations as gx
@@ -103,8 +110,11 @@ def test_file_data_context_reloads_non_ascii_project_yaml_under_non_utf8_locale(
 
         assert open(os.devnull).encoding != "utf-8"  # locale override did not take effect
 
+        with open({str(payload_path)!r}, encoding="utf-8") as f:
+            non_ascii_value = f.read()
+
         context = gx.get_context(mode="file", context_root_dir={str(project_root)!r})
-        context.data_sources.add_pandas(name={NON_ASCII_VALUE!r})
+        context.data_sources.add_pandas(name=non_ascii_value)
     """)
     write_result = _run_under_non_utf8_locale(write_script)
     assert write_result.returncode == 0, write_result.stderr
@@ -116,8 +126,11 @@ def test_file_data_context_reloads_non_ascii_project_yaml_under_non_utf8_locale(
 
         assert open(os.devnull).encoding != "utf-8"  # locale override did not take effect
 
+        with open({str(payload_path)!r}, encoding="utf-8") as f:
+            non_ascii_value = f.read()
+
         context = gx.get_context(mode="file", context_root_dir={str(project_root)!r})
-        assert {NON_ASCII_VALUE!r} in context.data_sources.all()
+        assert non_ascii_value in context.data_sources.all()
         print("OK")
     """)
 
@@ -138,6 +151,8 @@ def test_inline_store_backend_saves_non_ascii_variable_under_non_utf8_locale(
     variable to a non-ASCII value and saving.
     """  # FIXME CoP
     project_root = tmp_path / "project"
+    payload_path = tmp_path / "payload.txt"
+    payload_path.write_text(NON_ASCII_VALUE, encoding="utf-8")
 
     write_script = textwrap.dedent(f"""
         import great_expectations as gx
@@ -146,8 +161,11 @@ def test_inline_store_backend_saves_non_ascii_variable_under_non_utf8_locale(
 
         assert open(os.devnull).encoding != "utf-8"  # locale override did not take effect
 
+        with open({str(payload_path)!r}, encoding="utf-8") as f:
+            non_ascii_value = f.read()
+
         context = gx.get_context(mode="file", context_root_dir={str(project_root)!r})
-        context.variables.config_variables_file_path = {NON_ASCII_VALUE!r}
+        context.variables.config_variables_file_path = non_ascii_value
         context.variables.save()
     """)
     write_result = _run_under_non_utf8_locale(write_script)
@@ -160,8 +178,11 @@ def test_inline_store_backend_saves_non_ascii_variable_under_non_utf8_locale(
 
         assert open(os.devnull).encoding != "utf-8"  # locale override did not take effect
 
+        with open({str(payload_path)!r}, encoding="utf-8") as f:
+            non_ascii_value = f.read()
+
         context = gx.get_context(mode="file", context_root_dir={str(project_root)!r})
-        assert context.variables.config_variables_file_path == {NON_ASCII_VALUE!r}
+        assert context.variables.config_variables_file_path == non_ascii_value
         print("OK")
     """)
 
