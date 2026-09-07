@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Mapping, Optional
+from typing import TYPE_CHECKING, Mapping, Optional, Type, Union
 
 from great_expectations.compatibility.pydantic import BaseSettings
-from great_expectations.compatibility.sqlalchemy import sqltypes
+from great_expectations.compatibility.sqlalchemy import TypeEngine, sqltypes
 from great_expectations.compatibility.typing_extensions import override
 from tests.integration.test_utils.data_source_config.backend_spec import (
     SqlBackendSpec,
@@ -17,7 +17,10 @@ from tests.integration.test_utils.data_source_config.data_source_spec import (
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
-from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
+from tests.integration.test_utils.data_source_config.sql import (
+    DOUBLE_PRECISION_FLOAT_OVERRIDE,
+    SQLBatchTestSetup,
+)
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
 
 if TYPE_CHECKING:
@@ -28,6 +31,15 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
     from tests.integration.sql_session_manager import SessionSQLEngineManager
     from tests.integration.test_utils.data_source_config.base import BatchTestSetup
+
+
+# The shared default's precision is discarded by this dialect, and the bare `FLOAT` it leaves is
+# this server's 4-byte type, so the declared override names the 8-byte one instead.
+_COLUMN_TYPE_OVERRIDES: Mapping[type, Union[Type[TypeEngine], TypeEngine]] = {
+    # databricks requires a length for VARCHAR
+    str: sqltypes.VARCHAR(255),
+    **DOUBLE_PRECISION_FLOAT_OVERRIDE,
+}
 
 
 @register_sql_config
@@ -42,10 +54,9 @@ class DatabricksDatasourceTestConfig(SqlDatasourceTestConfig):
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="databricks"),
         uses_schema=True,
         transaction_mode=TransactionMode.AUTOCOMMIT,
-        # databricks requires a length for VARCHAR
-        column_type_overrides={str: sqltypes.VARCHAR(255)},
+        column_type_overrides=_COLUMN_TYPE_OVERRIDES,
         insert_parameter_limit=250,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-databricks.txt",
         task_runner_marker="databricks",
     )

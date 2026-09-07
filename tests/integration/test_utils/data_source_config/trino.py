@@ -3,7 +3,6 @@ from typing import Mapping, Optional
 import pandas as pd
 import pytest
 
-from great_expectations.compatibility.sqlalchemy import sqltypes
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
@@ -36,11 +35,7 @@ class TrinoDatasourceTestConfig(SqlDatasourceTestConfig):
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="trino"),
         uses_schema=True,
         transaction_mode=TransactionMode.AUTOCOMMIT,
-        # The shared default maps `float` to an unqualified DECIMAL, which Trino resolves to
-        # scale zero, silently rounding fractional values to integers. A precision-carrying
-        # FLOAT compiles to double precision and round-trips exactly.
-        column_type_overrides={float: sqltypes.FLOAT(precision=53)},
-        tiers=frozenset({SupportTier.CURATED_SQL}),
+        tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-trino.txt",
         task_runner_marker="trino",
         container_service="trino",

@@ -3,15 +3,16 @@
 A declaration-only record states what a data source *is* - its harness label, the name its users
 know it by, where a test run would obtain an instance of it, and the fluent datasource types it is
 reachable through - together with whatever wiring genuinely exists for it in this repository. It
-asserts nothing about coverage. None of the records here claims a tier, because no suite in this
-repository runs against any of these data sources, and a tier claim asserts that one does.
+asserts nothing about coverage beyond what a claimed tier states. Most records here claim no tier,
+because no suite in this repository runs against them, and a tier claim asserts that one does.
 
 **A declared CI lane and a tier claim are different assertions, and conflating them is the one
 misreading this module has to prevent.** A lane means a job installs this data source's
 dependencies and runs something; a tier means that tier's suite passes here. Only the second is a
 support claim. That distinction is what lets Amazon S3 and Google Cloud Storage declare the real
-lanes that install their client libraries while still claiming no tier - a reader who conflated the
-two would read those two records as tested data sources, which they are not.
+lanes that install their client libraries and, separately, claim the tier whose suite genuinely
+covers their fluent types - a reader who conflated the two would credit the lane alone with a
+support claim it does not make.
 
 Registration goes through the config-less entry point, because none of these has a harness config
 class: requiring one would mean the only data sources this repository can describe are the ones it
@@ -31,6 +32,7 @@ from tests.integration.test_utils.data_source_config.data_source_spec import (
     DataSourceProvisioning,
     DataSourceSpec,
     MarkerScope,
+    SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_data_source
 
@@ -56,6 +58,7 @@ AMAZON_S3 = register_data_source(
         marker="aws_deps",
         marker_scope=MarkerScope.SHARED,
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="aws_deps"),
+        tiers=frozenset({SupportTier.FLUENT_API}),
         task_runner_marker="aws_deps",
         # No dev_requirements_file, deliberately. The `aws_deps` task-runner entry names
         # `reqs/requirements-dev-lite.txt`, which is the shared lite requirements file rather than
@@ -75,6 +78,7 @@ GOOGLE_CLOUD_STORAGE = register_data_source(
         marker="gcs_deps",
         marker_scope=MarkerScope.SHARED,
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="gcs_deps"),
+        tiers=frozenset({SupportTier.FLUENT_API}),
         # Unlike `aws_deps`, this task-runner entry names a data-source-specific requirements file,
         # so the record can declare it truthfully.
         dev_requirements_file="reqs/requirements-dev-gcs.txt",

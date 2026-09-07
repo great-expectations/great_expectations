@@ -91,9 +91,6 @@ exclude = [
     'render/renderer/site_builder\.py',                                                                    # 3
     'render/renderer/slack_renderer\.py',                                                                  # 9
     # tests
-    'tests/actions/test_core_actions\.py',
-    'tests/checkpoint/test_checkpoint\.py',
-
     'tests/data_context/abstract_data_context/test_data_docs_config_crud\.py',
     'tests/data_context/fixtures/plugins/extended_checkpoint\.py',
     'tests/data_context/store/test_configuration_store\.py',
@@ -119,11 +116,7 @@ exclude = [
     'tests/integration/test_definitions',
     'tests/integration/test_script_runner\.py',
     'tests/performance',
-    'tests/render',
-    'tests/test_utils\.py',
     'tests/validator/test_metric_configuration\.py',
-    'tests/validator/test_metrics_calculator\.py',
-    'tests/validator/test_validation_graph\.py',
 ]
 
 [[tool.mypy.overrides]]

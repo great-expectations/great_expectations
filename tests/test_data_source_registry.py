@@ -2120,6 +2120,7 @@ _EXPECTED_DECLARATION_ONLY_SPECS: Mapping[str, DataSourceSpec] = {
         marker="aws_deps",
         marker_scope=MarkerScope.SHARED,
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="aws_deps"),
+        tiers=frozenset({SupportTier.FLUENT_API}),
         task_runner_marker="aws_deps",
     ),
     "aurora": DataSourceSpec(
@@ -2154,6 +2155,7 @@ _EXPECTED_DECLARATION_ONLY_SPECS: Mapping[str, DataSourceSpec] = {
         marker="gcs_deps",
         marker_scope=MarkerScope.SHARED,
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="gcs_deps"),
+        tiers=frozenset({SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-gcs.txt",
         task_runner_marker="gcs_deps",
     ),
@@ -2216,16 +2218,30 @@ class TestDeclarationOnlyRecordsJoinTheRegistryWithoutConfigs:
             replace(registered, provisioning_note=None) == (_EXPECTED_DECLARATION_ONLY_SPECS[label])
         )
 
-    def test_no_declaration_only_record_claims_a_tier(self) -> None:
-        """No suite in this repository runs against any of the eight, so none may claim one.
+    def test_only_the_two_with_wiring_claim_a_tier(self) -> None:
+        """A tier claim tracks whether a suite genuinely covers the record, not whether it is
+        declaration-only.
 
-        This is the assertion that keeps a declared CI lane from being read as a support claim:
-        Amazon S3 and Google Cloud Storage declare real lanes, and a lane means a job installs a
-        data source's dependencies and runs something - not that a tier's suite passes here.
+        Six of the eight declare neither a marker nor a CI lane, so no suite in this repository
+        runs against them and they claim no tier. Amazon S3 and Google Cloud Storage are the
+        exception: they declare a real marker and CI lane, and their fluent types are exercised
+        by the suite backing the fluent-API tier, so they claim that tier - while still being
+        declaration-only in the sense this test class is named for, since neither has a harness
+        config class. This is the assertion that keeps a declared CI lane from being conflated
+        with a tier claim in the other direction: a lane means a job installs a data source's
+        dependencies and runs something, and only a tier claim asserts that a specific suite
+        passes against it.
         """
-        assert {
-            label: spec.tiers for label, spec in _DECLARATION_ONLY_SPECS.items()
-        } == dict.fromkeys(_EXPECTED_DECLARATION_ONLY_SPECS, frozenset())
+        assert {label: spec.tiers for label, spec in _DECLARATION_ONLY_SPECS.items()} == {
+            "alloydb": frozenset(),
+            "amazon-s3": frozenset({SupportTier.FLUENT_API}),
+            "aurora": frozenset(),
+            "azure-blob-storage": frozenset(),
+            "citus": frozenset(),
+            "fabric": frozenset(),
+            "google-cloud-storage": frozenset({SupportTier.FLUENT_API}),
+            "neon": frozenset(),
+        }
 
     def test_citus_records_its_costed_onboarding_surfaces_in_its_provisioning_note(self) -> None:
         """Local-container provisioning with no container service is Citus's honest shape, and
@@ -2528,7 +2544,7 @@ _RETROFITTED_CONTROLS: Mapping[str, _RetrofitControl] = {
             marker="unit",
             marker_scope=MarkerScope.SHARED,
             ci_lane=CiLaneRef(workflow_job="unit-tests", marker_token="unit"),
-            tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+            tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         ),
     ),
     "pandas-filesystem-csv": (
@@ -2543,7 +2559,7 @@ _RETROFITTED_CONTROLS: Mapping[str, _RetrofitControl] = {
             marker="filesystem",
             marker_scope=MarkerScope.SHARED,
             ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="filesystem"),
-            tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+            tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         ),
     ),
     "spark-filesystem-csv": (
@@ -2558,7 +2574,7 @@ _RETROFITTED_CONTROLS: Mapping[str, _RetrofitControl] = {
             marker="spark",
             marker_scope=MarkerScope.SHARED,
             ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="spark"),
-            tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+            tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
             dev_requirements_file="reqs/requirements-dev-spark.txt",
             task_runner_marker="spark",
         ),

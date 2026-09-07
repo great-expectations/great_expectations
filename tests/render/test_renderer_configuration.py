@@ -7,6 +7,7 @@ import pytest
 from great_expectations.compatibility.pydantic import (
     error_wrappers as pydantic_error_wrappers,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationValidationResult,
 )
@@ -77,7 +78,7 @@ def test_successful_renderer_configuration_instantiation(
         type=expectation_type,
         kwargs=kwargs,
     )
-    renderer_configuration = RendererConfiguration(
+    renderer_configuration: RendererConfiguration = RendererConfiguration(
         configuration=expectation_configuration,
         runtime_configuration=runtime_configuration,
     )
@@ -165,7 +166,7 @@ def test_successful_renderer_row_condition_params(
         type=expectation_type,
         kwargs=kwargs,
     )
-    renderer_configuration = RendererConfiguration(
+    renderer_configuration: RendererConfiguration = RendererConfiguration(
         configuration=expectation_configuration,
         runtime_configuration={},
     )
@@ -192,6 +193,7 @@ def test_failed_renderer_configuration_instantiation():
 
 
 class NotString:
+    @override
     def __str__(self):
         raise TypeError("I'm not a string")
 
@@ -213,7 +215,9 @@ def test_renderer_configuration_add_param_validation(
         type="expect_table_row_count_to_equal",
         kwargs={"value": value},
     )
-    renderer_configuration = RendererConfiguration(configuration=expectation_configuration)
+    renderer_configuration: RendererConfiguration = RendererConfiguration(
+        configuration=expectation_configuration
+    )
     with pytest.raises(pydantic_error_wrappers.ValidationError) as e:
         renderer_configuration.add_param(name="value", param_type=param_type)
 
@@ -223,10 +227,15 @@ def test_renderer_configuration_add_param_validation(
         )
     else:
         exception_message = f"Param type: <{param_type}> does not match value: <{value}>."
-    assert any(
-        str(error_wrapper_exc) == exception_message
-        for error_wrapper_exc in [error_wrapper.exc for error_wrapper in e.value.raw_errors]
-    )
+
+    found_expected_error = False
+
+    for error_wrapper in e.value.raw_errors:
+        assert isinstance(error_wrapper, pydantic_error_wrappers.ErrorWrapper)
+        if str(error_wrapper.exc) == exception_message:
+            found_expected_error = True
+
+    assert found_expected_error
 
 
 @pytest.mark.unit

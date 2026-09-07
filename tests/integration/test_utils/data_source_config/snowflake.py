@@ -44,7 +44,7 @@ class SnowflakeDatasourceTestConfig(SqlDatasourceTestConfig):
         # selected as one matrix cell among many markers.
         ci_lane=CiLaneRef(workflow_job="marker-tests-snowflake", marker_token="snowflake"),
         uses_schema=True,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-snowflake.txt",
         task_runner_marker="snowflake",
     )

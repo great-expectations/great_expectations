@@ -45,23 +45,24 @@ class OracleDatasourceTestConfig(SqlDatasourceTestConfig):
             # `ORA-00906: missing left parenthesis`. SingleStore and MySQL declare the same
             # override for the same reason.
             str: sqltypes.VARCHAR(255),
-            # Bare DATETIME is not an Oracle type; DDL fails with
-            # `ORA-00902: invalid datatype`.
+            # The shared default's `DateTime` compiles to this dialect's DATE, which carries a
+            # time of day but no fraction of a second. A declared microsecond is then dropped on
+            # write, with valid DDL and no error: `2024-01-03 12:00:00.123456` comes back
+            # `2024-01-03 12:00:00`. TIMESTAMP is this dialect's sub-second type and round-trips
+            # the declared value intact, so the fixture frame is what the table holds.
             datetime: sqltypes.TIMESTAMP,
             pd.Timestamp: sqltypes.TIMESTAMP,
-            # The shared default maps `float` to an unqualified DECIMAL, which this dialect
-            # resolves to a zero-scale NUMBER: the DDL succeeds but every fractional value
-            # rounds to the nearest integer on insert (10.5 comes back 11, -10.5 comes back
-            # -11). A DECIMAL carrying explicit precision and scale round-trips fractional
-            # values intact. A precision-only FLOAT (the override Trino declares) does not
-            # work here either: this dialect raises an argument error over binary vs. decimal
-            # precision, so a scale-carrying DECIMAL is what's declared instead.
+            # The shared default's precision-carrying FLOAT does not work here: this dialect
+            # raises an argument error over binary vs. decimal precision. A DECIMAL carrying
+            # explicit precision and scale round-trips fractional values intact, so that is
+            # what is declared instead. Not a bare DECIMAL, which this dialect resolves to a
+            # zero-scale NUMBER: the DDL succeeds, but 10.5 comes back 11.
             float: sqltypes.DECIMAL(38, 10),
         },
         dev_requirements_file="reqs/requirements-dev-oracle.txt",
         task_runner_marker="oracle",
         container_service="oracle",
-        tiers=frozenset({SupportTier.CURATED_SQL}),
+        tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
     )
 
     @override

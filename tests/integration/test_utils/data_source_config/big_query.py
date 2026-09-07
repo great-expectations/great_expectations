@@ -52,7 +52,7 @@ class BigQueryDatasourceTestConfig(SqlDatasourceTestConfig):
         # while this is False raises, so that need surfaces as a clear error rather
         # than silently doing the wrong thing.
         uses_schema=False,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-bigquery.txt",
         task_runner_marker="bigquery",
     )

@@ -64,6 +64,15 @@ class SupportTier(Enum):
     meaning for a data source that speaks no dialect.
     """
 
+    FLUENT_API = "fluent_api"
+    """Every fluent datasource type this data source is reached through satisfies the standard
+    create, update and create-or-update contract, including configuration persistence.
+
+    This is a claim about the data source management API, not about reachability: the suite that
+    earns this tier runs with connection testing neutralized. A data source can satisfy it and be
+    unreachable.
+    """
+
 
 class MarkerScope(Enum):
     """Whether a declared marker names this data source alone or a class of them."""

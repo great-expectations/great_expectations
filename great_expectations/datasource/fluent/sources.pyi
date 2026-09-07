@@ -24,9 +24,13 @@ from great_expectations.data_context import (
 )
 from great_expectations.datasource.datasource_dict import DatasourceDict
 from great_expectations.datasource.fluent import (
+    AlloyDatasource,
+    AuroraDatasource,
     BigQueryDatasource,
+    CitusDatasource,
     DatabricksSQLDatasource,
     FabricPowerBIDatasource,
+    NeonDatasource,
     PandasAzureBlobStorageDatasource,
     PandasDatasource,
     PandasDBFSDatasource,
@@ -364,6 +368,130 @@ class DataSourceManager:
         create_temp_table: bool = True,
     ) -> PostgresDatasource: ...
     def delete_postgres(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_alloy(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> AlloyDatasource: ...
+    def update_alloy(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> AlloyDatasource: ...
+    def add_or_update_alloy(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> AlloyDatasource: ...
+    def delete_alloy(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_aurora(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> AuroraDatasource: ...
+    def update_aurora(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> AuroraDatasource: ...
+    def add_or_update_aurora(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> AuroraDatasource: ...
+    def delete_aurora(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_citus(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> CitusDatasource: ...
+    def update_citus(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> CitusDatasource: ...
+    def add_or_update_citus(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> CitusDatasource: ...
+    def delete_citus(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_neon(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> NeonDatasource: ...
+    def update_neon(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> NeonDatasource: ...
+    def add_or_update_neon(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> NeonDatasource: ...
+    def delete_neon(
         self,
         name: str,
     ) -> None: ...
@@ -1062,6 +1190,26 @@ class DataSourceManager:
         workspace: Optional[Union[uuid.UUID, str]] = None,
         dataset: Union[uuid.UUID, str] = ...,
     ) -> FabricPowerBIDatasource: ...
+    def update_fabric_powerbi(
+        self,
+        name: Optional[str] = None,
+        datasource: Optional[FabricPowerBIDatasource] = None,
+        *,
+        workspace: Optional[Union[uuid.UUID, str]] = None,
+        dataset: Union[uuid.UUID, str] = ...,
+    ) -> FabricPowerBIDatasource: ...
+    def add_or_update_fabric_powerbi(
+        self,
+        name: Optional[str] = None,
+        datasource: Optional[FabricPowerBIDatasource] = None,
+        *,
+        workspace: Optional[Union[uuid.UUID, str]] = None,
+        dataset: Union[uuid.UUID, str] = ...,
+    ) -> FabricPowerBIDatasource: ...
+    def delete_fabric_powerbi(
+        self,
+        name: str,
+    ) -> None: ...
     def all(self) -> DatasourceDict: ...
     def delete(self, name: str) -> None: ...
     def get(self, name: str) -> Datasource: ...

@@ -48,7 +48,7 @@ class PandasFilesystemCsvDatasourceTestConfig(DataSourceTestConfig):
         # `filesystem` lane today, through every one of its expectation modules. Declaring the
         # tier states that existing result; it switches nothing on. The marker and CI lane the
         # claim obliges are already declared above.
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         # No dev_requirements_file and no task_runner_marker: the task runner's dependency map has
         # no key for `filesystem`, because running these tests installs nothing beyond the base
         # development requirements and starts no service.

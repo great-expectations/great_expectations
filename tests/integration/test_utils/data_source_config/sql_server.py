@@ -48,7 +48,7 @@ class SQLServerDatasourceTestConfig(SqlDatasourceTestConfig):
         fluent_types=frozenset({"sql_server"}),
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="sql_server"),
         uses_schema=True,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-sql-server.txt",
         task_runner_marker="sql_server",
         container_service="mssql",

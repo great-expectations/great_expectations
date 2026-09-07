@@ -60,7 +60,7 @@ class SparkFilesystemCsvDatasourceTestConfig(DataSourceTestConfig):
         # `spark` lane today, through every one of its expectation modules. Declaring the tier
         # states that existing result; it switches nothing on. The marker and CI lane the claim
         # obliges are already declared above.
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-spark.txt",
         task_runner_marker="spark",
     )
@@ -143,12 +143,16 @@ class SparkFilesystemCsvBatchTestSetup(
         def _clean(val: object, info: _TypeInfo | None) -> object:
             if pd.isna(val):  # type: ignore[call-overload]  # scalar from itertuples
                 return None
+            # PySpark matches on exact type, and `pd.Timestamp` is a subclass rather than the
+            # type it looks for. Unconditional, because this is needed most where no schema was
+            # declared: with one, the value is checked against a known field type; without one,
+            # PySpark infers from the value alone and reads a timestamp it does not recognise as
+            # an empty struct, which is not a column any file format can be asked to write.
+            if isinstance(val, pd.Timestamp):
+                return val.to_pydatetime()
             if info is not None:
                 target, acceptable = info
                 if type(val) not in acceptable:
-                    # pd.Timestamp subclasses datetime but PySpark checks exact types
-                    if isinstance(val, pd.Timestamp):
-                        return val.to_pydatetime()
                     return target(val)
             return val
 

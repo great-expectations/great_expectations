@@ -10,7 +10,7 @@ from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.sql_datasource import TableAsset
+from great_expectations.datasource.fluent.sql_datasource import SQLDatasource, TableAsset
 from great_expectations.datasource.fluent.sql_server_datasource import (
     EntraIDServicePrincipalAuthConnectionDetails,
     MissingODBCDriverError,
@@ -279,6 +279,65 @@ class TestSQLServerDatasource:
         engine1 = ds.get_engine()
         engine2 = ds.get_engine()
         assert engine1 is engine2
+
+    @pytest.mark.usefixtures("create_engine_fake")
+    def test_get_execution_engine_caches_execution_engine(
+        self,
+        connection_details_default: ConnectionDetailsDict,
+    ) -> None:
+        """This override computes its own cache key, so it needs its own coverage.
+
+        Every validation goes through ``get_execution_engine``. If the cache never hits, each
+        validation builds a new SQLAlchemy engine and connection pool, and SQL Server holds a
+        connection open per engine rather than returning it to the pool after each use.
+        """
+        ds = SQLServerDatasource(
+            name="test_ds",
+            connection_string=SQLServerAuthConnectionDetails(**connection_details_default),
+        )
+
+        first = ds.get_execution_engine()
+        second = ds.get_execution_engine()
+
+        assert second is first
+
+    @pytest.mark.usefixtures("create_engine_fake")
+    def test_changed_config_rebuilds_the_execution_engine(
+        self,
+        connection_details_default: ConnectionDetailsDict,
+    ) -> None:
+        """Caching must not outlive the configuration the engine was built from."""
+        ds = SQLServerDatasource(
+            name="test_ds",
+            connection_string=SQLServerAuthConnectionDetails(**connection_details_default),
+        )
+
+        first = ds.get_execution_engine()
+        ds.create_temp_table = not ds.create_temp_table
+
+        assert ds.get_execution_engine() is not first
+
+    @pytest.mark.usefixtures("create_engine_fake")
+    def test_failed_rebuild_does_not_suppress_the_next_one(
+        self,
+        connection_details_default: ConnectionDetailsDict,
+    ) -> None:
+        """A rebuild that raises must not leave the new kwargs cached against the old engine."""
+        ds = SQLServerDatasource(
+            name="test_ds",
+            connection_string=SQLServerAuthConnectionDetails(**connection_details_default),
+        )
+        first = ds.get_execution_engine()
+
+        def _raise_on_construction(*args: Any, **kwargs: Any) -> None:
+            raise RuntimeError("could not connect")
+
+        ds.create_temp_table = not ds.create_temp_table
+        with patch.object(SQLDatasource, "execution_engine_type", _raise_on_construction):
+            with pytest.raises(RuntimeError, match="could not connect"):
+                ds.get_execution_engine()
+
+        assert ds.get_execution_engine() is not first
 
     @pytest.mark.usefixtures("create_engine_fake")
     def test_add_table_asset_inherits_schema_from_datasource(

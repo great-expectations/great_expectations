@@ -32,7 +32,7 @@ class PostgreSQLDatasourceTestConfig(SqlDatasourceTestConfig):
         fluent_types=frozenset({"postgres"}),
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="postgresql"),
         uses_schema=True,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
+        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-postgresql.txt",
         task_runner_marker="postgresql",
         container_service="postgresql",

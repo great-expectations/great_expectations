@@ -253,9 +253,11 @@ point enrolled it, so a declaration-only record cannot be sloppier than a config
 
 **The one misreading to avoid: a declared CI lane and a tier claim are different assertions.** A
 lane means a job installs this data source's dependencies and runs something. A tier means that
-tier's suite passes here. Only the second is a support claim. That distinction is what lets Amazon
-S3 and Google Cloud Storage declare the real lanes that install their client libraries while still
-claiming no tier — reading those two records as tested data sources would be wrong.
+tier's suite passes here. Only the second is a support claim. Amazon S3 and Google Cloud Storage
+show why the two are worth keeping apart: they declare real lanes that install their client
+libraries, and they claim the fluent API tier because that tier's suite covers the fluent types
+they are reached through — but claiming it says nothing about whether either store is reachable,
+and neither claims a tier that would assert expectations run against them.
 
 #### Dedicated and shared markers, and having no marker at all
 

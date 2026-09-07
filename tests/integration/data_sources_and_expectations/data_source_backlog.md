@@ -152,7 +152,9 @@ source would mean the only data sources this repository can name are the ones it
 
 ## Data sources declared but not tested
 
-Each of the eight below has a registered record and no test surface. The records live in
+Each of the eight below has a registered record and no suite validating expectations against
+it. Two of them, Amazon S3 and Google Cloud Storage, do claim the fluent API tier, so their
+fluent types are covered by that tier's suite; the rest carry no tier at all. The records live in
 `tests/integration/test_utils/data_source_config/declaration_only.py`; what a record declares is
 checked by the drift check, and what follows here is what onboarding one would concretely require.
 

@@ -1,4 +1,5 @@
 import datetime
+from numbers import Number
 from typing import TYPE_CHECKING, Any, Union, cast
 from unittest import mock
 
@@ -11,8 +12,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 if TYPE_CHECKING:
-    import pandas as pd
-
     from great_expectations.validator.validator import Validator
 
 
@@ -102,8 +101,6 @@ def _test_column_partition_metric(
     n_bins = 10
 
     increment: Union[float, datetime.timedelta]
-    idx: int
-    element: Union[float, pd.Timestamp]
 
     desired_metric = MetricConfiguration(
         metric_name="column.partition",
@@ -117,10 +114,11 @@ def _test_column_partition_metric(
     results, _ = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
     increment = float(n_bins + 1) / n_bins
-    assert all(
-        isclose(operand_a=element, operand_b=(increment * idx))
-        for idx, element in enumerate(results[desired_metric.id])
-    )
+    for idx, element in enumerate(results[desired_metric.id]):
+        expected_value = increment * idx
+        assert isinstance(element, Number)
+        assert isinstance(expected_value, Number)
+        assert isclose(operand_a=element, operand_b=expected_value)
 
     # Test using "datetime.datetime" column.
 
@@ -136,15 +134,15 @@ def _test_column_partition_metric(
     results, _ = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
     increment = datetime.timedelta(seconds=(seconds_in_week * float(n_bins + 1) / n_bins))
-    assert all(
-        isclose(
-            operand_a=element.to_pydatetime()
-            if isinstance(validator_with_data.execution_engine, PandasExecutionEngine)
-            else element,
+    for idx, element in enumerate(results[desired_metric.id]):
+        comparison_value = element
+        if isinstance(validator_with_data.execution_engine, PandasExecutionEngine):
+            comparison_value = element.to_pydatetime()
+        assert isinstance(comparison_value, datetime.datetime)
+        assert isclose(
+            operand_a=comparison_value,
             operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),  # noqa: DTZ001 # FIXME CoP
         )
-        for idx, element in enumerate(results[desired_metric.id])
-    )
 
 
 @pytest.mark.unit

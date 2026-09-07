@@ -17,7 +17,10 @@ from tests.integration.test_utils.data_source_config.data_source_spec import (
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
-from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
+from tests.integration.test_utils.data_source_config.sql import (
+    DOUBLE_PRECISION_FLOAT_OVERRIDE,
+    SQLBatchTestSetup,
+)
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
 
 
@@ -32,9 +35,16 @@ class SingleStoreDatasourceTestConfig(SqlDatasourceTestConfig):
         fluent_types=frozenset({"sql"}),
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="singlestore"),
         uses_schema=False,
-        tiers=frozenset({SupportTier.CURATED_SQL}),
-        # SingleStore requires a length for VARCHAR, the same requirement MySQL declares.
-        column_type_overrides={str: sqltypes.VARCHAR(255)},
+        tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
+        column_type_overrides={
+            # SingleStore requires a length for VARCHAR, the same requirement MySQL declares.
+            str: sqltypes.VARCHAR(255),
+            # The shared default's `FLOAT(53)` reaches this server with its precision intact, and
+            # unlike MySQL this server does not promote it: `SHOW CREATE TABLE` reports a plain
+            # 4-byte `float`, and 16777217.0 comes back 16777200.0 -- valid DDL, no error. Naming
+            # the 8-byte type round-trips the declared value.
+            **DOUBLE_PRECISION_FLOAT_OVERRIDE,
+        },
         dev_requirements_file="reqs/requirements-dev-singlestore.txt",
         task_runner_marker="singlestore",
         container_service="singlestore",
