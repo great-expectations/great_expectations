@@ -146,9 +146,17 @@ def test_inline_store_backend_saves_non_ascii_variable_under_non_utf8_locale(
 ) -> None:
     """InlineStoreBackend._save_changes() is a separate write path from
     FileDataContext._save_project_config(): it backs DataContextVariables (things like
-    config_variables_file_path), not fluent datasources, which persist through
+    checkpoint_store_name), not fluent datasources, which persist through
     _save_project_config's own to_yaml call instead. Exercise it directly by setting a
     variable to a non-ASCII value and saving.
+
+    Uses checkpoint_store_name rather than config_variables_file_path: the latter is itself
+    a filesystem path, and under a forced non-UTF-8 locale a genuinely non-ASCII path can't
+    be encoded for the open() syscall used to read substitution variables from it -- a real
+    OS/locale limitation, not a bug in the read path this suite covers. expectations_store_name
+    doesn't work either: unlike checkpoint_store_name, a context looks it up unconditionally
+    (not via dict.get) while constructing its data_context_id, so an override that names no
+    real store raises KeyError before the assertion this test cares about ever runs.
     """  # FIXME CoP
     project_root = tmp_path / "project"
     payload_path = tmp_path / "payload.txt"
@@ -165,7 +173,7 @@ def test_inline_store_backend_saves_non_ascii_variable_under_non_utf8_locale(
             non_ascii_value = f.read()
 
         context = gx.get_context(mode="file", context_root_dir={str(project_root)!r})
-        context.variables.config_variables_file_path = non_ascii_value
+        context.variables.checkpoint_store_name = non_ascii_value
         context.variables.save()
     """)
     write_result = _run_under_non_utf8_locale(write_script)
@@ -182,7 +190,7 @@ def test_inline_store_backend_saves_non_ascii_variable_under_non_utf8_locale(
             non_ascii_value = f.read()
 
         context = gx.get_context(mode="file", context_root_dir={str(project_root)!r})
-        assert context.variables.config_variables_file_path == non_ascii_value
+        assert context.variables.checkpoint_store_name == non_ascii_value
         print("OK")
     """)
 
