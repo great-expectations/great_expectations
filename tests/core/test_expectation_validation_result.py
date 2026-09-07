@@ -10,9 +10,12 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultMeta,
 )
+from great_expectations.core.id_dict import BatchSpec, IDDict
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -317,24 +320,26 @@ def test_expectation_suite_validation_asset_name_access(
     # arrange
     svr = ExpectationSuiteValidationResult(
         meta=ExpectationSuiteValidationResultMeta(
-            active_batch_definition={  # type: ignore[typeddict-item]
-                "batch_identifiers": {},
-                "data_asset_name": "taxi_data_1.csv",
-                "data_connector_name": "default_inferred_data_connector_name",
-                "datasource_name": "pandas",
-            },
-            batch_markers={  # type: ignore[typeddict-item]
-                "ge_load_time": "20220727T154327.630107Z",
-                "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612",
-            },
-            batch_spec={"path": "../data/taxi_data_1.csv"},  # type: ignore[typeddict-item]
+            active_batch_definition=LegacyBatchDefinition(
+                batch_identifiers=IDDict({}),
+                data_asset_name="taxi_data_1.csv",
+                data_connector_name="default_inferred_data_connector_name",
+                datasource_name="pandas",
+            ),
+            batch_markers=BatchMarkers(
+                {
+                    "ge_load_time": "20220727T154327.630107Z",
+                    "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612",
+                }
+            ),
+            batch_spec=BatchSpec({"path": "../data/taxi_data_1.csv"}),
             checkpoint_name="single_validation_checkpoint",
             expectation_suite_name="taxi_suite_1",
             great_expectations_version="0.15.15",
-            run_id={  # type: ignore[typeddict-item]
-                "run_name": "20220727-114327-my-run-name-template",
-                "run_time": "2022-07-27T11:43:27.625252+00:00",
-            },
+            run_id=RunIdentifier(
+                run_name="20220727-114327-my-run-name-template",
+                run_time="2022-07-27T11:43:27.625252+00:00",
+            ),
             validation_time="20220727T154327.701100Z",
             batch_parameters=None,
             checkpoint_id=None,

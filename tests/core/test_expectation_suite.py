@@ -14,6 +14,7 @@ import great_expectations.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
 from great_expectations import get_context
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.data_context import AbstractDataContext
@@ -154,14 +155,14 @@ class TestInit:
         The expectations param of ExpectationSuite takes a list of ExpectationConfiguration or dicts and both can be provided at the same time. We need to make sure they both show up as expectation configurations in the instantiated ExpectationSuite.
         """  # noqa: E501 # FIXME CoP
 
-        test_expectations_input = [
+        test_expectations_input: list[dict | ExpectationConfiguration] = [
             expect_column_values_to_be_in_set_col_a_with_meta_dict,
             expect_column_values_to_be_in_set_col_a_with_meta,
         ]
 
         suite = ExpectationSuite(
             name=fake_expectation_suite_name,
-            expectations=test_expectations_input, # FIXME CoP
+            expectations=test_expectations_input,  # FIXME CoP
         )
         assert suite.name == fake_expectation_suite_name
 
@@ -202,7 +203,8 @@ class TestInit:
         """
 
         class NotSerializable:
-            def __dict__(self):  # type: ignore[explicit-override]
+            @override
+            def __dict__(self):
                 raise NotImplementedError
 
         test_meta = {"this_is_not_json_serializable": NotSerializable()}
@@ -210,7 +212,7 @@ class TestInit:
         with pytest.raises(InvalidExpectationConfigurationError) as e:
             ExpectationSuite(
                 name=fake_expectation_suite_name,
-                meta=test_meta, # FIXME CoP
+                meta=test_meta,  # FIXME CoP
             )
         assert "is of type NotSerializable which cannot be serialized to json" in str(e.value)
 

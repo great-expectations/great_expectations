@@ -1,257 +1,257 @@
 {
-    "disable_error_code": [
-        "annotation-unchecked"
-    ],
-    "enable_error_code": [
-        "explicit-override",
-        "ignore-without-code",
-        "possibly-undefined"
-    ],
-    "exclude": [
-        "docs/docusaurus",
-        "docs/expectation_gallery",
-        "docs/readme_assets",
-        "docs/sphinx_api_docs_source",
-        "expectations/core/expect_column_distinct_values_to_be_in_set\\.py",
-        "expectations/core/expect_column_kl_divergence_to_be_less_than\\.py",
-        "expectations/core/expect_column_most_common_value_to_be_in_set\\.py",
-        "expectations/core/expect_column_pair_cramers_phi_value_to_be_less_than\\.py",
-        "expectations/core/expect_column_pair_values_a_to_be_greater_than_b\\.py",
-        "expectations/core/expect_column_pair_values_to_be_equal\\.py",
-        "expectations/core/expect_column_pair_values_to_be_in_set\\.py",
-        "expectations/core/expect_column_proportion_of_unique_values_to_be_between\\.py",
-        "expectations/core/expect_column_quantile_values_to_be_between\\.py",
-        "expectations/core/expect_column_stdev_to_be_between\\.py",
-        "expectations/core/expect_column_unique_value_count_to_be_between\\.py",
-        "expectations/core/expect_column_value_lengths_to_be_between\\.py",
-        "expectations/core/expect_column_value_lengths_to_equal\\.py",
-        "expectations/core/expect_column_values_to_be_dateutil_parseable\\.py",
-        "expectations/core/expect_column_values_to_be_decreasing\\.py",
-        "expectations/core/expect_column_values_to_be_in_set\\.py",
-        "expectations/core/expect_column_values_to_be_in_type_list\\.py",
-        "expectations/core/expect_column_values_to_be_increasing\\.py",
-        "expectations/core/expect_column_values_to_be_json_parseable\\.py",
-        "expectations/core/expect_column_values_to_be_null\\.py",
-        "expectations/core/expect_column_values_to_be_of_type\\.py",
-        "expectations/core/expect_column_values_to_match_json_schema\\.py",
-        "expectations/core/expect_column_values_to_match_like_pattern\\.py",
-        "expectations/core/expect_column_values_to_match_like_pattern_list\\.py",
-        "expectations/core/expect_column_values_to_match_regex\\.py",
-        "expectations/core/expect_column_values_to_match_regex_list\\.py",
-        "expectations/core/expect_column_values_to_match_strftime_format\\.py",
-        "expectations/core/expect_column_values_to_not_be_in_set\\.py",
-        "expectations/core/expect_column_values_to_not_match_like_pattern\\.py",
-        "expectations/core/expect_column_values_to_not_match_like_pattern_list\\.py",
-        "expectations/core/expect_column_values_to_not_match_regex\\.py",
-        "expectations/core/expect_column_values_to_not_match_regex_list\\.py",
-        "expectations/core/expect_compound_columns_to_be_unique\\.py",
-        "expectations/core/expect_multicolumn_sum_to_equal\\.py",
-        "expectations/core/expect_multicolumn_values_to_be_unique\\.py",
-        "expectations/core/expect_select_column_values_to_be_unique_within_record\\.py",
-        "expectations/core/expect_table_column_count_to_equal\\.py",
-        "expectations/core/expect_table_columns_to_match_ordered_list\\.py",
-        "expectations/core/expect_table_columns_to_match_set\\.py",
-        "great_expectations/_version\\.py",
-        "render/renderer/content_block/content_block\\.py",
-        "render/renderer/content_block/exception_list_content_block\\.py",
-        "render/renderer/page_renderer\\.py",
-        "render/renderer/profiling_results_overview_section_renderer\\.py",
-        "render/renderer/site_builder\\.py",
-        "render/renderer/slack_renderer\\.py",
-        "tests/actions/test_core_actions\\.py",
-        "tests/checkpoint/test_checkpoint\\.py",
-        "tests/data_context/abstract_data_context/test_data_docs_config_crud\\.py",
-        "tests/data_context/fixtures/plugins/extended_checkpoint\\.py",
-        "tests/data_context/store/test_configuration_store\\.py",
-        "tests/data_context/store/test_data_asset_store\\.py",
-        "tests/data_context/store/test_store_backends\\.py",
-        "tests/data_context/test_data_context_state_management\\.py",
-        "tests/data_context/test_data_context_variables\\.py",
-        "tests/datasource/data_connector",
-        "tests/datasource/fluent/tasks\\.py",
-        "tests/datasource/test_datasource_dict\\.py",
-        "tests/execution_engine/partition_and_sample",
-        "tests/expectations",
-        "tests/experimental/metric_repository/test_metric_list_metric_retriever\\.py",
-        "tests/integration/common_workflows",
-        "tests/integration/db",
-        "tests/integration/docusaurus/connecting_to_your_data",
-        "tests/integration/docusaurus/deployment_patterns",
-        "tests/integration/docusaurus/expectations",
-        "tests/integration/docusaurus/tutorials",
-        "tests/integration/fixtures/partition_and_sample_data",
-        "tests/integration/fixtures/yellow_tripdata_pandas_fixture",
-        "tests/integration/spark/test_spark_config\\.py",
-        "tests/integration/test_definitions",
-        "tests/integration/test_script_runner\\.py",
-        "tests/performance",
-        "tests/render",
-        "tests/test_utils\\.py",
-        "tests/validator/test_metric_configuration\\.py",
-        "tests/validator/test_metrics_calculator\\.py",
-        "tests/validator/test_validation_graph\\.py"
-    ],
-    "files": [
-        "docs",
-        "great_expectations",
-        "tests"
-    ],
-    "follow_imports": "normal",
-    "overrides": [
-        {
-            "module": "IPython.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "boto3.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "botocore.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "clickhouse_sqlalchemy.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "contrib.experimental.great_expectations_experimental.*",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "databricks.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "google.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "great_expectations.checkpoint.checkpoint",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "great_expectations.compatibility.azure",
-            "setting": "disable_error_code",
-            "value": "[\"assignment\"]"
-        },
-        {
-            "module": "great_expectations.compatibility.docstring_parser",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "great_expectations.compatibility.pydantic.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "great_expectations.data_context.*",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "great_expectations.expectations.core.*",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "great_expectations.expectations.metrics.column_map_metrics.*",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "great_expectations.expectations.metrics.column_pair_map_metrics.*",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "great_expectations.render.renderer.*",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "great_expectations.self_check.*",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "pyarrow.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "pyodbc",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "pypd.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "pytest_timeout.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "ruamel.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "scipy.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "sempy.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "snowflake.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "sqlalchemy_bigquery.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "sqlalchemy_dremio.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "sqlalchemy_redshift.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "teradatasqlalchemy.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        },
-        {
-            "module": "tests.test_utils",
-            "setting": "follow_imports",
-            "value": "\"silent\""
-        },
-        {
-            "module": "trino.*",
-            "setting": "ignore_missing_imports",
-            "value": "true"
-        }
-    ]
+  "disable_error_code": [
+    "annotation-unchecked"
+  ],
+  "enable_error_code": [
+    "explicit-override",
+    "ignore-without-code",
+    "possibly-undefined"
+  ],
+  "exclude": [
+    "docs/docusaurus",
+    "docs/expectation_gallery",
+    "docs/readme_assets",
+    "docs/sphinx_api_docs_source",
+    "expectations/core/expect_column_distinct_values_to_be_in_set\\.py",
+    "expectations/core/expect_column_kl_divergence_to_be_less_than\\.py",
+    "expectations/core/expect_column_most_common_value_to_be_in_set\\.py",
+    "expectations/core/expect_column_pair_cramers_phi_value_to_be_less_than\\.py",
+    "expectations/core/expect_column_pair_values_a_to_be_greater_than_b\\.py",
+    "expectations/core/expect_column_pair_values_to_be_equal\\.py",
+    "expectations/core/expect_column_pair_values_to_be_in_set\\.py",
+    "expectations/core/expect_column_proportion_of_unique_values_to_be_between\\.py",
+    "expectations/core/expect_column_quantile_values_to_be_between\\.py",
+    "expectations/core/expect_column_stdev_to_be_between\\.py",
+    "expectations/core/expect_column_unique_value_count_to_be_between\\.py",
+    "expectations/core/expect_column_value_lengths_to_be_between\\.py",
+    "expectations/core/expect_column_value_lengths_to_equal\\.py",
+    "expectations/core/expect_column_values_to_be_dateutil_parseable\\.py",
+    "expectations/core/expect_column_values_to_be_decreasing\\.py",
+    "expectations/core/expect_column_values_to_be_in_set\\.py",
+    "expectations/core/expect_column_values_to_be_in_type_list\\.py",
+    "expectations/core/expect_column_values_to_be_increasing\\.py",
+    "expectations/core/expect_column_values_to_be_json_parseable\\.py",
+    "expectations/core/expect_column_values_to_be_null\\.py",
+    "expectations/core/expect_column_values_to_be_of_type\\.py",
+    "expectations/core/expect_column_values_to_match_json_schema\\.py",
+    "expectations/core/expect_column_values_to_match_like_pattern\\.py",
+    "expectations/core/expect_column_values_to_match_like_pattern_list\\.py",
+    "expectations/core/expect_column_values_to_match_regex\\.py",
+    "expectations/core/expect_column_values_to_match_regex_list\\.py",
+    "expectations/core/expect_column_values_to_match_strftime_format\\.py",
+    "expectations/core/expect_column_values_to_not_be_in_set\\.py",
+    "expectations/core/expect_column_values_to_not_match_like_pattern\\.py",
+    "expectations/core/expect_column_values_to_not_match_like_pattern_list\\.py",
+    "expectations/core/expect_column_values_to_not_match_regex\\.py",
+    "expectations/core/expect_column_values_to_not_match_regex_list\\.py",
+    "expectations/core/expect_compound_columns_to_be_unique\\.py",
+    "expectations/core/expect_multicolumn_sum_to_equal\\.py",
+    "expectations/core/expect_multicolumn_values_to_be_unique\\.py",
+    "expectations/core/expect_select_column_values_to_be_unique_within_record\\.py",
+    "expectations/core/expect_table_column_count_to_equal\\.py",
+    "expectations/core/expect_table_columns_to_match_ordered_list\\.py",
+    "expectations/core/expect_table_columns_to_match_set\\.py",
+    "great_expectations/_version\\.py",
+    "render/renderer/content_block/content_block\\.py",
+    "render/renderer/content_block/exception_list_content_block\\.py",
+    "render/renderer/page_renderer\\.py",
+    "render/renderer/profiling_results_overview_section_renderer\\.py",
+    "render/renderer/site_builder\\.py",
+    "render/renderer/slack_renderer\\.py",
+    "tests/actions/test_core_actions\\.py",
+    "tests/checkpoint/test_checkpoint\\.py",
+    "tests/data_context/abstract_data_context/test_data_docs_config_crud\\.py",
+    "tests/data_context/fixtures/plugins/extended_checkpoint\\.py",
+    "tests/data_context/store/test_configuration_store\\.py",
+    "tests/data_context/store/test_data_asset_store\\.py",
+    "tests/data_context/store/test_store_backends\\.py",
+    "tests/data_context/test_data_context_state_management\\.py",
+    "tests/data_context/test_data_context_variables\\.py",
+    "tests/datasource/data_connector",
+    "tests/datasource/fluent/tasks\\.py",
+    "tests/datasource/test_datasource_dict\\.py",
+    "tests/execution_engine/partition_and_sample",
+    "tests/expectations",
+    "tests/experimental/metric_repository/test_metric_list_metric_retriever\\.py",
+    "tests/integration/common_workflows",
+    "tests/integration/db",
+    "tests/integration/docusaurus/connecting_to_your_data",
+    "tests/integration/docusaurus/deployment_patterns",
+    "tests/integration/docusaurus/expectations",
+    "tests/integration/docusaurus/tutorials",
+    "tests/integration/fixtures/partition_and_sample_data",
+    "tests/integration/fixtures/yellow_tripdata_pandas_fixture",
+    "tests/integration/spark/test_spark_config\\.py",
+    "tests/integration/test_definitions",
+    "tests/integration/test_script_runner\\.py",
+    "tests/performance",
+    "tests/render",
+    "tests/test_utils\\.py",
+    "tests/validator/test_metric_configuration\\.py",
+    "tests/validator/test_metrics_calculator\\.py",
+    "tests/validator/test_validation_graph\\.py"
+  ],
+  "files": [
+    "docs",
+    "great_expectations",
+    "tests"
+  ],
+  "follow_imports": "normal",
+  "overrides": [
+    {
+      "module": "IPython.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "boto3.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "botocore.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "clickhouse_sqlalchemy.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "contrib.experimental.great_expectations_experimental.*",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "databricks.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "google.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "great_expectations.checkpoint.checkpoint",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "great_expectations.compatibility.azure",
+      "setting": "disable_error_code",
+      "value": "[\"assignment\"]"
+    },
+    {
+      "module": "great_expectations.compatibility.docstring_parser",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "great_expectations.compatibility.pydantic.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "great_expectations.data_context.*",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "great_expectations.expectations.core.*",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "great_expectations.expectations.metrics.column_map_metrics.*",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "great_expectations.expectations.metrics.column_pair_map_metrics.*",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "great_expectations.render.renderer.*",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "great_expectations.self_check.*",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "pyarrow.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "pyodbc",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "pypd.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "pytest_timeout.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "ruamel.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "scipy.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "sempy.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "snowflake.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "sqlalchemy_bigquery.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "sqlalchemy_dremio.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "sqlalchemy_redshift.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "teradatasqlalchemy.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    },
+    {
+      "module": "tests.test_utils",
+      "setting": "follow_imports",
+      "value": "\"silent\""
+    },
+    {
+      "module": "trino.*",
+      "setting": "ignore_missing_imports",
+      "value": "true"
+    }
+  ]
 }

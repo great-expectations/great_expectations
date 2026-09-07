@@ -426,6 +426,9 @@ class TestValidationDefinitionSerialization:
         context: EphemeralDataContext,
     ) -> tuple[PandasDatasource, CSVAsset, BatchDefinition]:
         ds = context.data_sources.add_pandas(self.ds_name)
+        # `filepath_or_buffer` is typed as a FilePath, which requires the file to
+        # exist. This asset is never read in these tests, so a placeholder path is
+        # deliberate and the resulting arg-type mismatch is expected.
         asset = ds.add_csv_asset(self.asset_name, "data.csv")  # type: ignore[arg-type]
         batch_definition = asset.add_batch_definition(self.batch_definition_name)
 

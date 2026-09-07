@@ -168,10 +168,14 @@ def test_get_batch_request_from_acceptable_arguments_fluent_with_options(
 def test_get_batch_request_from_acceptable_arguments_fluent_and_block_args_raises(
     base_fluent: Dict[str, str],
 ):
-    base_fluent["data_connector_query"] = "q"
-
     with pytest.raises(ValueError) as ve:
-        get_batch_request_from_acceptable_arguments(**base_fluent)
+        get_batch_request_from_acceptable_arguments(
+            datasource_name=base_fluent["datasource_name"],
+            data_asset_name=base_fluent["data_asset_name"],
+            # Deliberately the wrong type: passing a block-style arg alongside
+            # fluent args is the condition this test asserts raises.
+            data_connector_query="q",  # type: ignore[arg-type]
+        )
 
     assert "Fluent Batch Requests" in str(ve.value)
 
