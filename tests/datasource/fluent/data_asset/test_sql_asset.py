@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+from importlib import import_module
 from typing import Any
 
 import pytest
@@ -12,6 +13,7 @@ from great_expectations.core.partitioners import (
 )
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.datasource.fluent.sql_datasource import (
+    QueryAsset,
     SqlAddBatchDefinitionError,
     TableAsset,
     _SQLAsset,
@@ -350,3 +352,44 @@ def test_validate_batch_definition(
 # Tests I considered adding for test_validate_batch_definition but have not.
 # 1. Engine dies on connect
 # 2. Connection dies on execute
+
+
+# Every dialect this repo renders SQL for in unit tests, keyed by the alias suffix its
+# compiler emits before a subquery alias. Oracle omits the "AS"; the rest keep it.
+QUERY_ASSET_SUBQUERY_ALIAS_PREFIX_BY_DIALECT = {
+    "sqlite": "AS ",
+    "postgresql": "AS ",
+    "mssql": "AS ",
+    "mysql": "AS ",
+    "oracle": "",
+}
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "dialect_name", sorted(QUERY_ASSET_SUBQUERY_ALIAS_PREFIX_BY_DIALECT), ids=str
+)
+def test_query_asset_as_selectable_wraps_the_whole_statement(dialect_name: str) -> None:
+    """A query asset's selectable must wrap the user's statement unchanged.
+
+    The statement has to reach the compiler whole. Rebuilding it as a select over everything
+    after its "SELECT" produces a select that owns no FROM clause, and the Oracle dialect
+    completes such a select by appending "FROM DUAL" -- so the wrapped query went out with two
+    FROM clauses and no Oracle version accepted it. This is the selectable a batch definition
+    is validated against, so the failure landed on adding one, not on reading a batch.
+
+    Only the Oracle case fails without the fix this pins; the other four are here to pin that
+    the change leaves what they select untouched.
+
+    The newline before the closing parenthesis is deliberate: it keeps that parenthesis and
+    the alias out of reach of a line comment the statement may end in.
+    """
+    query = "SELECT id, created_at FROM my_table"
+    asset = QueryAsset(name="query_asset", query=query)
+
+    selectable = asset.as_selectable()
+
+    dialect = import_module(f"sqlalchemy.dialects.{dialect_name}").dialect()
+    rendered = str(sqlalchemy.select("*").select_from(selectable).compile(dialect=dialect))
+    alias_prefix = QUERY_ASSET_SUBQUERY_ALIAS_PREFIX_BY_DIALECT[dialect_name]
+    assert rendered == f"SELECT * \nFROM ({query}\n) {alias_prefix}anon_1"

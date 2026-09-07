@@ -18,6 +18,7 @@ from dateutil.parser import parse
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
     DatePart,
     SqlAlchemyDataPartitioner,
@@ -41,7 +42,6 @@ from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases
 from tests.test_utils import convert_string_columns_to_datetime
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
     from great_expectations.execution_engine.sqlalchemy_batch_data import (
         SqlAlchemyBatchData,
     )
@@ -876,3 +876,86 @@ def test_sqlite_get_data_for_batch_identifiers_on_hashed_column(sa):
     assert {
         batch_identifiers[column_name] for batch_identifiers in batch_identifiers_list
     } == expected_hash_values
+
+
+# A query asset carrying a daily batch definition: the batch spec has both a `query` and a
+# `partitioner_method`, which is the combination that skips the unwrapped-query shortcut in
+# `_build_selectable_from_batch_spec` and wraps the statement as a subquery instead.
+PARTITIONED_QUERY_ASSET_QUERY = "SELECT id, created_at FROM my_table"
+PARTITIONED_QUERY_ASSET_BATCH_SPEC = SqlAlchemyDatasourceBatchSpec(
+    data_asset_name="query_asset",
+    query=PARTITIONED_QUERY_ASSET_QUERY,
+    partitioner_method="partition_on_year_and_month_and_day",
+    partitioner_kwargs={"column_name": "created_at"},
+    batch_identifiers={"created_at": {"year": 2024, "month": 1, "day": 15}},
+)
+
+# Pinned exact renderings, one per dialect. Only the Oracle case fails without the fix this
+# pins -- it is the dialect that completes a FROM-less SELECT by appending "FROM DUAL", which
+# left the wrapped statement carrying two FROM clauses. The other four are here to pin that
+# wrapping the whole statement rather than rebuilding it from its column list leaves their
+# rendering untouched, so they pass before and after that change by design.
+EXPECTED_PARTITIONED_QUERY_ASSET_SQL_BY_DIALECT = {
+    "sqlite": (
+        "select*from(selectid,created_atfrommy_table)asanon_1"
+        "wherecast(strftime('%y',created_at)asinteger)=2024"
+        "andcast(strftime('%m',created_at)asinteger)=1"
+        "andcast(strftime('%d',created_at)asinteger)=15"
+    ),
+    "postgresql": (
+        "select*from(selectid,created_atfrommy_table)asanon_1"
+        "whereextract(yearfromcreated_at)=2024"
+        "andextract(monthfromcreated_at)=1"
+        "andextract(dayfromcreated_at)=15"
+    ),
+    "mssql": (
+        "select*from(selectid,created_atfrommy_table)asanon_1"
+        "wheredatepart(year,created_at)=2024"
+        "anddatepart(month,created_at)=1"
+        "anddatepart(day,created_at)=15"
+    ),
+    "mysql": (
+        "select*from(selectid,created_atfrommy_table)asanon_1"
+        "whereextract(yearfromcreated_at)=2024"
+        "andextract(monthfromcreated_at)=1"
+        "andextract(dayfromcreated_at)=15"
+    ),
+    # No "as" before the alias: this dialect's compiler omits it, and that is the form it
+    # accepts. The alias is not what made this construct invalid here.
+    "oracle": (
+        "select*from(selectid,created_atfrommy_table)anon_1"
+        "whereextract(yearfromcreated_at)=2024"
+        "andextract(monthfromcreated_at)=1"
+        "andextract(dayfromcreated_at)=15"
+    ),
+}
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "dialect_name", sorted(EXPECTED_PARTITIONED_QUERY_ASSET_SQL_BY_DIALECT), ids=str
+)
+def test_partitioned_query_asset_selectable_wraps_the_whole_statement(dialect_name: str) -> None:
+    """A partitioned query asset's selectable must wrap the user's statement unchanged.
+
+    The statement has to reach the compiler whole. Rebuilding it as a select over everything
+    after its "SELECT" produces a select that owns no FROM clause, and the Oracle dialect
+    completes such a select by appending "FROM DUAL" -- so the wrapped query went out with two
+    FROM clauses and no Oracle version accepted it.
+
+    The engine is built on SQLite because a selectable is dialect-agnostic until it is
+    compiled; compiling against a bare dialect object needs neither a driver nor a live
+    service, so this runs anywhere.
+    """
+    execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy.create_engine("sqlite://"))
+
+    selectable = execution_engine._build_selectable_from_batch_spec(
+        PARTITIONED_QUERY_ASSET_BATCH_SPEC
+    )
+
+    compiled = selectable.compile(
+        dialect=PARTITION_QUERY_DIALECT_MODULES_BY_NAME[dialect_name].dialect(),
+        compile_kwargs={"literal_binds": True},
+    )
+    rendered = str(compiled).replace("\n", "").replace(" ", "").lower()
+    assert rendered == EXPECTED_PARTITIONED_QUERY_ASSET_SQL_BY_DIALECT[dialect_name]
