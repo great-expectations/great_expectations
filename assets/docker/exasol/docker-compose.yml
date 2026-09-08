@@ -7,7 +7,33 @@ services:
     # Pinned by digest rather than by the floating `latest` tag: nano publishes no stable
     # version tag today, so the digest is the only way to keep this lane from silently moving
     # to a different server build. This digest is Exasol 2026.2.0-nano.3 (read out of the
-    # running container's own startup banner).
+    # running container's own startup banner); both architectures below carry that same
+    # `org.opencontainers.image.version`, so that is a claim about the pin as a whole and not
+    # an accidentally amd64-only one.
+    #
+    # This is the *index* digest: it resolves to a Docker v2 manifest list with two children,
+    # `linux/amd64` (d1393db9...) and `linux/arm64` (92f9d55d...), so Docker selects the host's
+    # own architecture and the lane runs a natively built image both on the amd64 CI runner
+    # (`.github/workflows/ci.yml:459`, `exasol` marker at `:487`) and on arm64 hosts, Apple
+    # Silicon included. The children are two real native builds rather than one image labelled
+    # twice: same `org.opencontainers.image.revision`, but different layer digests and sizes
+    # (142,923,127 bytes amd64 against 131,378,387 arm64). Native *resolution* is the whole
+    # claim -- no arm64 hardware has ever run this lane, and CI is amd64 only.
+    #
+    # Pin the index, never a child. A child digest is the same shape and length, and choosing
+    # one fails softly rather than loudly: measured on an amd64 host, `docker pull` of the
+    # arm64 child exits 0 with no platform warning, and `docker run` then only *warns* that
+    # the image's platform "does not match the detected host platform" before booting the
+    # wrong-architecture image under whatever emulation the host has registered. The symptom
+    # is a slow lane and an unexplained timeout, never an error naming the pin as the cause.
+    # Re-verify with `docker buildx imagetools inspect` on this digest whenever it is bumped.
+    #
+    # No `platform:` key, deliberately -- unlike `../oracle/docker-compose.yml`, whose image
+    # publishes an amd64-only manifest and needs the key to request emulation. This image has
+    # a native build for each architecture, so the key could only pin the lane to one of them
+    # and force emulation on the other: an emulated nano was still starting internal services
+    # at a 150s cutoff, against the 11-16s native cold start recorded below, and would eat
+    # into the 210s readiness budget.
     image: exasol/nano@sha256:45993493060711ee600f7dbcaecb80fbb0a3c262d3a0efc43491762d71c45c07
     # Both of the next two values are carried over verbatim from the compose file Exasol
     # publishes for nano, rather than tuned here, and the ten curated cases pass without either:
@@ -35,7 +61,8 @@ services:
   # (which the task runner passes) treats a service with no healthcheck as ready the moment it
   # is merely *running*, so without this gate the lane would start connecting long before the
   # database could answer. This sidecar exists purely to carry the healthcheck that the
-  # database container cannot.
+  # database container cannot. `alpine/openssl:3.5.4` is likewise a manifest list (amd64,
+  # arm64, arm/v6, arm/v7, ppc64le, s390x), so this gate is native wherever the database is.
   exasol_ready:
     image: alpine/openssl:3.5.4
     entrypoint: ["sleep", "infinity"]
