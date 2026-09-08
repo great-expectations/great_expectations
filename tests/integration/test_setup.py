@@ -84,12 +84,17 @@ class TestSetupIntegration:
     def test_oracle_is_a_published_extra(self):
         """`pip install 'great_expectations[oracle]'` installs a driver and SQLAlchemy 2.
 
-        Oracle is a supported install path, not just a tested one. `get_extras_require`
-        derives the extras map by globbing `reqs/`, so the driver arrives from the
-        requirements file, but the SQLAlchemy floor only arrives if `oracle` is a member
-        of `sqla_keys` -- a separate edit that nothing else would catch. Both halves are
-        pinned here so the extra cannot silently degrade into a driver with no
-        SQLAlchemy constraint.
+        Oracle is a supported install path, not just a tested one, and it is the one SQL
+        extra that cannot be installed against SQLAlchemy 1.x: the `oracle+oracledb`
+        dialect arrives in SQLAlchemy 2.0, and 1.4 ships only `cx_oracle`. A 1.4
+        resolution therefore installs a driver the documented connection string cannot
+        reach.
+
+        Membership in `sqla_keys` does not express that. It appends the shared
+        `sqlalchemy>=1.4.0`, which every other SQL extra deliberately keeps so it stays
+        installable for users holding 1.x (see `reqs/requirements-dev-redshift.txt`).
+        The 2.0 floor is a separate constraint carried by the requirements file, so both
+        are asserted here: the driver, and the floor that makes the driver reachable.
         """
         original_cwd = Path.cwd()
         try:
@@ -102,7 +107,9 @@ class TestSetupIntegration:
         assert any(req.startswith("oracledb") for req in extras["oracle"]), (
             f"The oracle extra installs no driver: {extras['oracle']}"
         )
-        assert any(req.startswith("sqlalchemy>=") for req in extras["oracle"]), (
-            "The oracle extra is missing its SQLAlchemy-2 floor, so `oracle` has "
-            f"probably dropped out of setup.py's `sqla_keys`: {extras['oracle']}"
+        assert "sqlalchemy>=2.0" in extras["oracle"], (
+            "The oracle extra does not floor SQLAlchemy at 2.0, so it can resolve "
+            "against 1.4, where the `oracle+oracledb` dialect does not exist. The floor "
+            "comes from reqs/requirements-dev-oracle.txt, not from `sqla_keys`, whose "
+            f"shared constraint is only `sqlalchemy>=1.4.0`: {extras['oracle']}"
         )
