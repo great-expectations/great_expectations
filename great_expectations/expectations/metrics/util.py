@@ -325,13 +325,64 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915 # FIX
     # `ExpectColumnValuesToNotMatchRegex` then reports zero unexpected values -- a silent
     # success -- for a pattern that in fact matches.
     #
-    # Both parts of the wrapping are load-bearing:
-    #   `(?s)`    so `.` matches a newline. Without it a value containing a newline is judged
-    #             unmatched: `.*B.*` selects `Bob` but not `a\nB`, which `re.search("B")` matches.
-    #   `(?:...)` so a top-level alternation in the caller's pattern binds before the surrounding
-    #             `.*`. Without it `a|x1` becomes `.*a|x1.*`, which selects one of seven probe
-    #             values where `re.search` selects five. The group is non-capturing, so the
-    #             caller's own group numbering and backreferences survive.
+    # Three parts of the wrapping are load-bearing. None may be dropped:
+    #   `(*LF)`     pins the engine's newline convention to LF-only, which is Python's. Exasol
+    #               defaults to PCRE's `ANY` convention, under which `\r`, `\v`, `\f`, NEL
+    #               (U+0085), LS (U+2028) and PS (U+2029) are all line breaks, so the caller's
+    #               `.` refuses to cross any of them where Python's `.` excludes only `\n`.
+    #               Without it -- scoped modifier, no verb -- `a.b` rejects each of `a\rb`,
+    #               `a\vb`, `a\fb`, `a\x85b`, `a\u2028b` and `a\u2029b`, all of which
+    #               `re.search` accepts. PCRE honours a newline verb only at the very start of
+    #               the pattern, so this must lead the literal; it cannot move.
+    #   `(?s:.*)`   so `.` matches a newline in the two wildcards this branch adds, and only
+    #               there. The modifier must be scoped and must not be dropped:
+    #                 - a leading global `(?s)` runs to the end of the enclosing group, which at
+    #                   the top level is the end of the pattern, so it silently redefines the
+    #                   caller's own `.`. Measured: under a global `(?s)` the pattern `a.b`
+    #                   selects `a\nb`, which `re.search` rejects.
+    #                 - dropping it stops the *wildcards* crossing a newline, so a value
+    #                   containing one is judged unmatched: `.*B.*` selects `Bob` but not
+    #                   `a\nB`, which `re.search("B")` matches.
+    #   `(?:...)`   so a top-level alternation in the caller's pattern binds before the
+    #               surrounding wildcards. Without it `a|x1` becomes `.*a|x1.*`, which selects
+    #               one of seven probe values where `re.search` selects five. The group is
+    #               non-capturing, so the caller's own group numbering and backreferences
+    #               survive, and it confines any inline flag the caller sets -- a leading
+    #               `(?i)` dies at its closing paren instead of leaking onto the trailing `.*`.
+    #
+    # Scoping the modifier without `(*LF)` is a net regression, not a partial fix: the global
+    # `(?s)` masked the newline-convention divergence by making the caller's `.` match every
+    # line break. Divergences from `re.search` over a 552-cell probe matrix (24 patterns x 23
+    # values) against live Exasol 2026.2.0-nano.3 -- 16 for a global `(?s)`, 29 for `(?s:.*)`
+    # alone, 29 for the equivalent `[\s\S]*` alone, 9 with `(*ANYCRLF)` in place of `(*LF)`,
+    # and 5 for the form above. A seeded 4800-cell fuzz over generated patterns and generated
+    # values, run in the same pass as the global-`(?s)` control, gives 0 for the form above and
+    # 24 for the control. The matrix and fuzz definitions are recorded in the change's
+    # `evidence.md`, because these counts mean nothing without the cells they were taken over.
+    #
+    # Those 5 residual divergences are all one thing, and it is not the wrapping's doing:
+    # Exasol's character classes are ASCII where Python's are Unicode, so `\s` rejects NEL, LS
+    # and PS and `\d` and `\w` reject non-ASCII digits, all of which `re.search` accepts. It
+    # reproduces under a global `(?s)`, under the wrapping above, and with no wrapping at all,
+    # so no wrapping can close it -- do not read it as a defect in this literal. PCRE's `UCP`
+    # verb is the lever, and it is deliberately not pulled here: it redefines `\w`, `\d`, `\s`
+    # and `\b` for every pattern this dialect sees, which is a wider behaviour change than a
+    # newline fix and needs its own fuzz over word-boundary and digit-class patterns. The verb
+    # is named without its parenthesized spelling on purpose, so that grepping this file for
+    # that spelling stays a reliable guard that it has not been added to the wrapping.
+    #
+    # Two further divergences from `re.search` are this dialect's, not the wrapping's, and are
+    # called out so a later reader does not come back to this literal looking for them. Both
+    # were verified to give the identical answer with no wrapping at all:
+    #   - Exasol reads the empty string as NULL (`'' IS NULL` is true, `LENGTH('')` is NULL), so
+    #     a zero-width pattern such as `^`, `$`, `a?` or `z*` selects no row for a value that is
+    #     `''`, where `re.search` matches. That is the dialect's NULL semantics reaching a
+    #     comparison that never happens, and it is why the probe matrix uses only non-NULL
+    #     values -- a `''` cell measures NULL handling, not the wrapping.
+    #   - An inline flag anywhere but the start of the pattern scopes differently: Python applies
+    #     a mid-pattern flag to the whole pattern (and emits a DeprecationWarning for it), while
+    #     PCRE applies it forward from where it appears, so `b+(?i)a` matches `Ba` in Python and
+    #     not here. A *leading* flag agrees, which is the placement `(?:...)` above protects.
     #
     # `REGEXP_INSTR(column, regex) > 0` was rejected. It reads as a search and would leave the
     # pattern untouched, but it returns the *position* of a match and reports `0` when the
@@ -339,7 +390,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915 # FIX
     # `re.search`: against `Alice`, each of `a?`, `z*`, `[0-9]*`, `\d*`, `^`, `$` and `x|`
     # yields `0`, and the empty pattern yields `NULL`.
     if getattr(dialect, "name", None) == GXSqlDialect.EXASOL.value:
-        substring_search = f"(?s).*(?:{regex}).*"
+        substring_search = f"(*LF)(?s:.*)(?:{regex})(?s:.*)"
         if positive:
             return sqlalchemy.BinaryExpression(
                 column,

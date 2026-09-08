@@ -1564,7 +1564,7 @@ def test_get_dialect_regex_expression_resolves_oracle_regex_list_not_match_famil
     [
         pytest.param(
             True,
-            "a REGEXP_LIKE '(?s).*(?:test).*'",
+            "a REGEXP_LIKE '(*LF)(?s:.*)(?:test)(?s:.*)'",
             "a REGEXP_LIKE 'test'",
             id="positive",
         ),
@@ -1574,7 +1574,7 @@ def test_get_dialect_regex_expression_resolves_oracle_regex_list_not_match_famil
         # separately below, because one aggregate caller relies on that instead.
         pytest.param(
             False,
-            "a NOT REGEXP_LIKE '(?s).*(?:test).*'",
+            "a NOT REGEXP_LIKE '(*LF)(?s:.*)(?:test)(?s:.*)'",
             "a NOT REGEXP_LIKE 'test'",
             id="negative",
         ),
@@ -1596,19 +1596,32 @@ def test_get_dialect_regex_expression_renders_exasol_native_predicate(
 
     The pattern is wrapped, not passed through: `REGEXP_LIKE` is a whole-string match on
     this dialect and the metric's contract is a substring search, so the branch emits
-    `(?s).*(?:<regex>).*`. **This test cannot prove that semantics.** The rendered text is
-    byte-identical whichever way the server reads the predicate, so a compile-only
-    assertion is blind to the difference -- which is precisely why the original branch
-    shipped with the wrong reading and two green unit tests. What it can do is pin the
-    literal and fail if the pattern is ever handed over verbatim again, which is what the
-    `verbatim_sql` assertion below is for.
+    `(*LF)(?s:.*)(?:<regex>)(?s:.*)`. **This test cannot prove that semantics.** The
+    rendered text is byte-identical whichever way the server reads the predicate, so a
+    compile-only assertion is blind to the difference -- which is precisely why the
+    original branch shipped with the wrong reading and two green unit tests. What it can do
+    is pin the literal and fail if the pattern is ever handed over verbatim again, which is
+    what the `verbatim_sql` assertion below is for.
 
-    The semantics are pinned by live-backend cases instead:
+    A compile-only assertion is equally blind to whether the DOTALL modifier is *scoped*.
+    A global `(?s)`, the scoped `(?s:...)` above, and no modifier at all each render as a
+    valid quoted literal, so this test would stay green while the caller's own `.` silently
+    changed meaning -- which is what a global `(?s)` does to it, and what the review comment
+    on the branch caught. The same goes for `(*LF)`: dropping it renders fine and changes
+    which line-break characters the caller's `.` will cross.
+
+    Both semantics -- substring-versus-whole-string, and the newline behaviour -- are pinned
+    by live-backend cases instead. For the newline behaviour, in
+    `tests/integration/data_sources_and_expectations/expectations/test_expect_column_values_to_match_regex.py`:
+    `test_exasol_caller_dot_does_not_cross_a_newline`, whose exact `unexpected_list`
+    separates all three candidate wrappings, and
+    `test_exasol_added_wildcards_still_cross_a_newline`, which fails if the modifier is
+    deleted rather than scoped. For substring-versus-whole-string,
     `TestNormalSql::test_failure[exasol-empty_regex]` in
     `tests/integration/data_sources_and_expectations/expectations/test_expect_column_values_to_not_match_regex.py`,
     and `test_regex_match_is_a_substring_search_not_a_whole_string_match` in
-    `tests/integration/data_sources_and_expectations/test_curated_backend_suite.py`. Both
-    are red against a live Exasol without the wrapping and green with it.
+    `tests/integration/data_sources_and_expectations/test_curated_backend_suite.py`. All
+    are red against a live Exasol under the wrong wrapping and green under the right one.
     """
     stub = _DialectDetectionStub(name="exasol")
     column = sa.column("a")
@@ -1660,10 +1673,10 @@ def test_get_dialect_regex_expression_resolves_exasol_aggregate_family() -> None
 
     match_query = sa.select(column).where(regex_expression)
     assert str(match_query.compile(compile_kwargs={"literal_binds": True})) == (
-        "SELECT a \nWHERE a REGEXP_LIKE '(?s).*(?:test).*'"
+        "SELECT a \nWHERE a REGEXP_LIKE '(*LF)(?s:.*)(?:test)(?s:.*)'"
     )
 
     not_match_query = sa.select(column).where(sa.not_(regex_expression))
     assert str(not_match_query.compile(compile_kwargs={"literal_binds": True})) == (
-        "SELECT a \nWHERE NOT (a REGEXP_LIKE '(?s).*(?:test).*')"
+        "SELECT a \nWHERE NOT (a REGEXP_LIKE '(*LF)(?s:.*)(?:test)(?s:.*)')"
     )
