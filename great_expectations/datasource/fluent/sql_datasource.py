@@ -90,6 +90,9 @@ from great_expectations.execution_engine.partition_and_sample.data_partitioner i
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
     SqlAlchemyDataPartitioner,
 )
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    _query_text_as_subquery,
+)
 
 if TYPE_CHECKING:
     # We re-import sqlalchemy here to make type-checking and our compatability layer
@@ -1142,7 +1145,7 @@ class QueryAsset(_SQLAsset):
 
         This can be used in a subselect FROM clause for queries against this data.
         """
-        return sa.select(sa.text(self.query.lstrip()[6:])).subquery()
+        return _query_text_as_subquery(self.query)
 
     @override
     def _create_batch_spec_kwargs(self) -> Dict[str, Any]:
