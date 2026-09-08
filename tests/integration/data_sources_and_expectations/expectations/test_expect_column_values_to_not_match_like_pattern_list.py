@@ -18,17 +18,9 @@ from tests.integration.test_utils.data_source_config import (
 )
 
 COL_NAME = "col_name"
-MATCHES_ONE_PATTERN = "matches_one_pattern"
 
 
-DATA = pd.DataFrame(
-    {
-        COL_NAME: ["aa", "ab", "ac", None],
-        # "ab" matches the first pattern below and not the second, which is what makes it
-        # possible to tell "matches none of them" apart from "matches all of them".
-        MATCHES_ONE_PATTERN: ["ab", "ab", "ab", None],
-    }
-)
+DATA = pd.DataFrame({COL_NAME: ["aa", "ab", "ac", None]})
 
 REGULAR_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
     MySQLDatasourceTestConfig(),
@@ -80,7 +72,7 @@ class TestNormalSql:
                 gxe.ExpectColumnValuesToNotMatchLikePatternList(
                     column=COL_NAME, like_pattern_list=["%a%", "not_this"]
                 ),
-                id="multiple_patterns",
+                id="matches_one_pattern_but_not_all",
             ),
         ],
     )
@@ -90,6 +82,13 @@ class TestNormalSql:
         batch_for_datasource: Batch,
         expectation: gxe.ExpectColumnValuesToNotMatchLikePatternList,
     ) -> None:
+        """A value is expected only when it matches none of the patterns.
+
+        The matches_one_pattern_but_not_all case pins that reading. Every value matches
+        "%a%" and none match "not_this", so an implementation that flagged only values
+        matching every pattern would report success here. Matching none of the patterns
+        is the only semantics this Expectation offers.
+        """
         result = batch_for_datasource.validate(expectation)
         assert not result.success
 
@@ -168,7 +167,7 @@ class TestSQLServer:
                 gxe.ExpectColumnValuesToNotMatchLikePatternList(
                     column=COL_NAME, like_pattern_list=["%[a]%", "not_this"]
                 ),
-                id="multiple_patterns",
+                id="matches_one_pattern_but_not_all",
             ),
         ],
     )
@@ -182,19 +181,3 @@ class TestSQLServer:
     ) -> None:
         result = batch_for_datasource.validate(expectation)
         assert not result.success
-
-
-@parameterize_batch_for_data_sources(data_source_configs=REGULAR_DATA_SOURCES, data=DATA)
-def test_matching_a_single_pattern_is_unexpected(batch_for_datasource: Batch) -> None:
-    """A value must match none of the patterns, not merely fewer than all of them.
-
-    Every value here matches the first pattern and none of the others, so the Expectation
-    must fail. This pins the only semantics the Expectation offers: the metric used to
-    declare a `match_on` value key it never read, which suggested this was configurable
-    when nothing could ever supply it.
-    """
-    expectation = gxe.ExpectColumnValuesToNotMatchLikePatternList(
-        column=MATCHES_ONE_PATTERN, like_pattern_list=["ab", "zz", "%qqq%"]
-    )
-
-    assert not batch_for_datasource.validate(expectation).success
