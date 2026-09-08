@@ -15,9 +15,11 @@ that, and each one fails the cell rather than filing it:
   declared that its expectation returns no payload;
 - the parsed model does not reproduce the raw dict unchanged.
 
-The one legitimate reason for a cell not to run is that the expectation has no meaning on that
-execution engine. A case declares that itself, with a reason, and the runner skips exactly those
-cells; nothing else is skipped.
+The one legitimate reason for a cell not to run is a gap the case declares itself, with a reason:
+either the expectation has no meaning on that execution engine, or the named data source cannot
+evaluate it at all. Both are recorded as ``unsupported`` findings *before* the cell is skipped --
+a cell absent from the artifact is indistinguishable from one that was never collected, so a
+declared hole has to be filed to read as declared. Nothing else is skipped.
 
 Findings file location (relative to the worktree root):
     tests/_artifacts/validation_result_schemas/findings/<run_id>.json
@@ -163,17 +165,7 @@ def test_validation_result_schema_matrix(
     engine_hint: str = execution_engine.value
     datasource_test_id: str = config.test_id
 
-    if engine_hint not in case.engines:
-        pytest.skip(
-            f"[{case.id}][{result_format.value}][{engine_hint}]: {case.engine_restriction_reason}"
-        )
-
     expectation_type: str = case.expectation.expectation_type
-    expectation = resolve_self_references(
-        case.expectation,
-        table_name=getattr(_batch_setup_for_datasource, "table_name", None),
-        data_source_name=batch_for_datasource.datasource.name,
-    )
 
     def _write(status: Status, **extra: object) -> None:
         """Record one finding for this cell, with the coordinates every finding carries."""
@@ -187,6 +179,21 @@ def test_validation_result_schema_matrix(
                 **extra,  # type: ignore[typeddict-item]
             }
         )
+
+    if engine_hint not in case.engines:
+        # A declared per-engine gap.  Recorded before skipping for the same reason the
+        # per-data-source gap below is: an omitted cell is indistinguishable in the artifact
+        # from one that was never collected, so a declared hole would read as missing coverage.
+        _write(Status.UNSUPPORTED, error_summary=case.engine_restriction_reason)
+        pytest.skip(
+            f"[{case.id}][{result_format.value}][{engine_hint}]: {case.engine_restriction_reason}"
+        )
+
+    expectation = resolve_self_references(
+        case.expectation,
+        table_name=getattr(_batch_setup_for_datasource, "table_name", None),
+        data_source_name=batch_for_datasource.datasource.name,
+    )
 
     unsupported_reason = case.unsupported_data_sources.get(datasource_test_id)
     if unsupported_reason is not None:

@@ -398,7 +398,9 @@ class ExpectationValidationResult(SerializableDictDot):
 
         Lazy-imports the dispatcher to avoid an import cycle at module load.
         Reads expectation_type from self.expectation_config.type and returns the
-        parsed model. Raises ParseError on validation failure.
+        parsed model. Raises ParseError on validation failure, and also when
+        ``expectation_config`` is None: the expectation type cannot be recovered
+        without it, so there is no schema family to resolve.
 
         Args:
             result_format: the format the result was rendered at, if known.  When
@@ -413,15 +415,27 @@ class ExpectationValidationResult(SerializableDictDot):
                 engine is unknown; it is never guessed from the result dict.
         """
         from great_expectations.core.validation_result_schemas.dispatcher import (
+            ParseError,
+        )
+        from great_expectations.core.validation_result_schemas.dispatcher import (
             as_typed as dispatch_as_typed,
         )
 
         config = self.expectation_config
+        if config is None:
+            # The expectation type is recoverable only from the config.  Forwarding a synthetic
+            # type instead would surface as "no such expectation is registered", telling the
+            # caller to register an expectation that was never named -- a missing config
+            # reported as a registry problem.
+            raise ParseError(  # noqa: TRY003
+                "Cannot determine a result schema: this result carries no expectation_config, "
+                "so the expectation type cannot be recovered."
+            )
         return dispatch_as_typed(
             self.result or {},
-            expectation_type=config.type if config else "unknown",
+            expectation_type=config.type,
             result_format=result_format,
-            configured_result_format=config.kwargs.get("result_format") if config else None,
+            configured_result_format=config.kwargs.get("result_format"),
             engine_hint=engine_hint,
         )
 

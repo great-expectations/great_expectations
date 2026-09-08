@@ -489,7 +489,14 @@ class TestMissingConfig:
     """Without an expectation_config there is no type, and so no derivable family."""
 
     @pytest.mark.unit
-    def test_none_config_raises_parse_error(self):
+    def test_none_config_raises_parse_error_naming_the_missing_config(self):
+        """The message names the absent config rather than a registry miss.
+
+        Forwarding a synthetic expectation type to the dispatcher instead surfaced as "no such
+        expectation is registered.  Register the expectation", which sends the caller to the
+        registry to add an expectation they never named.  The cause is the missing config, and
+        the message has to say so for the caller to act on it.
+        """
         evr = ExpectationValidationResult(
             success=True,
             expectation_config=None,
@@ -497,7 +504,9 @@ class TestMissingConfig:
         )
         with pytest.raises(ParseError) as exc_info:
             evr.as_typed()
-        assert "unknown" in str(exc_info.value)
+        message = str(exc_info.value)
+        assert "expectation_config" in message
+        assert "registered" not in message
 
     @pytest.mark.unit
     def test_none_config_no_mutation(self):
