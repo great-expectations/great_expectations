@@ -1560,18 +1560,28 @@ def test_get_dialect_regex_expression_resolves_oracle_regex_list_not_match_famil
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "positive,expected_sql",
+    "positive,expected_sql,verbatim_sql",
     [
-        pytest.param(True, "a REGEXP_LIKE 'test'", id="positive"),
+        pytest.param(
+            True,
+            "a REGEXP_LIKE '(?s).*(?:test).*'",
+            "a REGEXP_LIKE 'test'",
+            id="positive",
+        ),
         # Unlike Oracle, the negated form is its own operator token, not `sa.not_()` over
         # the positive one: the branch emits `NOT REGEXP_LIKE` the way the MySQL branch
         # emits `NOT REGEXP`. How `sa.not_()` over the positive form renders is pinned
         # separately below, because one aggregate caller relies on that instead.
-        pytest.param(False, "a NOT REGEXP_LIKE 'test'", id="negative"),
+        pytest.param(
+            False,
+            "a NOT REGEXP_LIKE '(?s).*(?:test).*'",
+            "a NOT REGEXP_LIKE 'test'",
+            id="negative",
+        ),
     ],
 )
 def test_get_dialect_regex_expression_renders_exasol_native_predicate(
-    positive: bool, expected_sql: str
+    positive: bool, expected_sql: str, verbatim_sql: str
 ) -> None:
     """`get_dialect_regex_expression`'s chain has an Exasol entry, detected by the
     dialect instance's `name` rather than by `issubclass` or `hasattr`: the execution
@@ -1583,6 +1593,22 @@ def test_get_dialect_regex_expression_renders_exasol_native_predicate(
     Exasol's `REGEXP_LIKE` is an infix predicate (`<expr> [NOT] REGEXP_LIKE
     <pattern>`); the function form is a parse error on the server. So the branch
     renders the MySQL `custom_op` shape with Exasol's operator tokens.
+
+    The pattern is wrapped, not passed through: `REGEXP_LIKE` is a whole-string match on
+    this dialect and the metric's contract is a substring search, so the branch emits
+    `(?s).*(?:<regex>).*`. **This test cannot prove that semantics.** The rendered text is
+    byte-identical whichever way the server reads the predicate, so a compile-only
+    assertion is blind to the difference -- which is precisely why the original branch
+    shipped with the wrong reading and two green unit tests. What it can do is pin the
+    literal and fail if the pattern is ever handed over verbatim again, which is what the
+    `verbatim_sql` assertion below is for.
+
+    The semantics are pinned by live-backend cases instead:
+    `TestNormalSql::test_failure[exasol-empty_regex]` in
+    `tests/integration/data_sources_and_expectations/expectations/test_expect_column_values_to_not_match_regex.py`,
+    and `test_regex_match_is_a_substring_search_not_a_whole_string_match` in
+    `tests/integration/data_sources_and_expectations/test_curated_backend_suite.py`. Both
+    are red against a live Exasol without the wrapping and green with it.
     """
     stub = _DialectDetectionStub(name="exasol")
     column = sa.column("a")
@@ -1594,6 +1620,11 @@ def test_get_dialect_regex_expression_renders_exasol_native_predicate(
     assert result is not None
     rendered = str(result.compile(compile_kwargs={"literal_binds": True}))
     assert rendered == expected_sql
+    assert rendered != verbatim_sql, (
+        "the branch emitted the caller's pattern as the complete quoted literal, so it is "
+        "asking the server for a whole-string match where the metric's contract is a "
+        "substring search -- see the live-backend cases named in this test's docstring"
+    )
 
 
 @pytest.mark.unit
@@ -1604,8 +1635,10 @@ def test_get_dialect_regex_expression_resolves_exasol_aggregate_family() -> None
     form parenthesises the predicate -- `NOT (a REGEXP_LIKE 'test')` -- rather than
     switching to the `NOT REGEXP_LIKE` operator token that the row-level negative form
     uses and that the test above pins. That is a second rendering path through the same
-    branch, so it is pinned separately. The shape was executed against a live Exasol
-    2026.2.0-nano.3 while this test was written and the server accepts it.
+    branch, so it is pinned separately. The shape below was executed verbatim against a
+    live Exasol 2026.2.0-nano container and the server accepts it; the run is recorded in
+    this change's `evidence.md` (probe 6). Like the test above, it pins a rendering only --
+    the text does not reveal how the server reads the predicate.
 
     It does not establish that the two aggregate modules the Oracle test above names --
     `column_values_match_regex_values.py` and `column_values_not_match_regex_values.py` --
@@ -1627,10 +1660,10 @@ def test_get_dialect_regex_expression_resolves_exasol_aggregate_family() -> None
 
     match_query = sa.select(column).where(regex_expression)
     assert str(match_query.compile(compile_kwargs={"literal_binds": True})) == (
-        "SELECT a \nWHERE a REGEXP_LIKE 'test'"
+        "SELECT a \nWHERE a REGEXP_LIKE '(?s).*(?:test).*'"
     )
 
     not_match_query = sa.select(column).where(sa.not_(regex_expression))
     assert str(not_match_query.compile(compile_kwargs={"literal_binds": True})) == (
-        "SELECT a \nWHERE NOT (a REGEXP_LIKE 'test')"
+        "SELECT a \nWHERE NOT (a REGEXP_LIKE '(?s).*(?:test).*')"
     )

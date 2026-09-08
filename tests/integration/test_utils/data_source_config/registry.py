@@ -98,7 +98,12 @@ _OUTSIDE_SHARED_PARAMETERIZATION: Final[Mapping[str, str]] = {
     ),
     "exasol": (
         "curated tier: its dialect behavior is proven by the curated backend suite, and the "
-        "shared parameterization deliberately omits it"
+        "shared parameterization deliberately omits it -- with the exception of "
+        "test_expect_column_values_to_match_regex.py and "
+        "test_expect_column_values_to_not_match_regex.py, whose hand-written backend lists it "
+        "does join, because Exasol's REGEXP_LIKE is a whole-string match and only a live "
+        "backend can pin that the branch converts it into the substring search the metric "
+        "contract requires"
     ),
     "oracle": (
         "curated tier: its dialect behavior is proven by the curated backend suite, and the "

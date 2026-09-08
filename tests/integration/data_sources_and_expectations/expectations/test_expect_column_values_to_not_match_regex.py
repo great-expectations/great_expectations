@@ -12,6 +12,7 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 from tests.integration.test_utils.data_source_config import (
     DatabricksDatasourceTestConfig,
     DataSourceTestConfig,
+    ExasolDatasourceTestConfig,
     GenericSQLDatasourceTestConfig,
     MySQLDatasourceTestConfig,
     PandasDataFrameDatasourceTestConfig,
@@ -37,6 +38,7 @@ SUPPORTED_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
     PandasDataFrameDatasourceTestConfig(),
     PandasFilesystemCsvDatasourceTestConfig(),
     DatabricksDatasourceTestConfig(),
+    ExasolDatasourceTestConfig(),
     MySQLDatasourceTestConfig(),
     PostgreSQLDatasourceTestConfig(),
     RedshiftDatasourceTestConfig(),

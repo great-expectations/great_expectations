@@ -316,15 +316,40 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915 # FIX
     # "not supported" message reads. `REGEXP_LIKE` is an infix predicate on this dialect
     # (`<expr> [NOT] REGEXP_LIKE <pattern>`); the function form `REGEXP_LIKE(col, pattern)` is
     # a parse error on the server, so this is the MySQL `custom_op` shape, not `sa.func`.
+    #
+    # The caller's pattern is wrapped rather than passed through, because `REGEXP_LIKE` is a
+    # whole-string match on this dialect and the metric's contract is a substring search: the
+    # reference implementation of `column_values.match_regex` is
+    # `column.astype(str).str.contains(regex)`, and pandas' `str.contains` is `re.search`.
+    # Unwrapped, `V REGEXP_LIKE '^[A-Z]'` selects no row where `re.search` selects three, and
+    # `ExpectColumnValuesToNotMatchRegex` then reports zero unexpected values -- a silent
+    # success -- for a pattern that in fact matches.
+    #
+    # Both parts of the wrapping are load-bearing:
+    #   `(?s)`    so `.` matches a newline. Without it a value containing a newline is judged
+    #             unmatched: `.*B.*` selects `Bob` but not `a\nB`, which `re.search("B")` matches.
+    #   `(?:...)` so a top-level alternation in the caller's pattern binds before the surrounding
+    #             `.*`. Without it `a|x1` becomes `.*a|x1.*`, which selects one of seven probe
+    #             values where `re.search` selects five. The group is non-capturing, so the
+    #             caller's own group numbering and backreferences survive.
+    #
+    # `REGEXP_INSTR(column, regex) > 0` was rejected. It reads as a search and would leave the
+    # pattern untouched, but it returns the *position* of a match and reports `0` when the
+    # leftmost match is zero-length, so it answers a whole class of patterns contrary to
+    # `re.search`: against `Alice`, each of `a?`, `z*`, `[0-9]*`, `\d*`, `^`, `$` and `x|`
+    # yields `0`, and the empty pattern yields `NULL`.
     if getattr(dialect, "name", None) == GXSqlDialect.EXASOL.value:
+        substring_search = f"(?s).*(?:{regex}).*"
         if positive:
             return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP_LIKE")
+                column,
+                sqlalchemy.literal(substring_search),
+                sqlalchemy.custom_op("REGEXP_LIKE"),
             )
         else:
             return sqlalchemy.BinaryExpression(
                 column,
-                sqlalchemy.literal(regex),
+                sqlalchemy.literal(substring_search),
                 sqlalchemy.custom_op("NOT REGEXP_LIKE"),
             )
 
