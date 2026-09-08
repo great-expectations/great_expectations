@@ -144,3 +144,37 @@ def test_success_with_suite_param_strict_max_(
         expectation, expectation_parameters={suite_param_key: suite_param_value}
     )
     assert result.success == expected_result
+
+
+SINGLE_VALUE_COL = "single_value"
+ALL_NULL_COL = "all_null"
+
+UNDER_TWO_VALUES = pd.DataFrame(
+    {
+        SINGLE_VALUE_COL: pd.Series([5.0, None], dtype="float64"),
+        ALL_NULL_COL: pd.Series([None, None], dtype="float64"),
+    }
+)
+
+NO_ROWS = pd.DataFrame({SINGLE_VALUE_COL: pd.Series([], dtype="float64")})
+
+
+@pytest.mark.parametrize("column", [SINGLE_VALUE_COL, ALL_NULL_COL])
+@parameterize_batch_for_data_sources(data_source_configs=ALL_DATA_SOURCES, data=UNDER_TWO_VALUES)
+def test_stdev_of_column_with_under_two_values(batch_for_datasource: Batch, column: str) -> None:
+    """A sample standard deviation is undefined for n < 2: report it, do not raise."""
+    expectation = gxe.ExpectColumnStdevToBeBetween(column=column, min_value=0, max_value=10)
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+    assert not result.success
+    assert result.to_json_dict()["result"] == {"observed_value": None}
+
+
+@parameterize_batch_for_data_sources(data_source_configs=ALL_DATA_SOURCES, data=NO_ROWS)
+def test_stdev_of_empty_table(batch_for_datasource: Batch) -> None:
+    """An empty table has no non-null values, so the standard deviation is undefined."""
+    expectation = gxe.ExpectColumnStdevToBeBetween(
+        column=SINGLE_VALUE_COL, min_value=0, max_value=10
+    )
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+    assert not result.success
+    assert result.to_json_dict()["result"] == {"observed_value": None}

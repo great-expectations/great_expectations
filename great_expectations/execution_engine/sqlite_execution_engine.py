@@ -16,6 +16,9 @@ from great_expectations.expectations.metrics.column_aggregate_metrics.column_sta
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+# A sample standard deviation divides by n - 1, so it is undefined below this many values.
+MIN_ROWS_FOR_SAMPLE_STDEV = 2
+
 
 class SqliteExecutionEngine(SqlAlchemyExecutionEngine):
     """SqlAlchemyExecutionEngine for SQLite databases."""
@@ -35,6 +38,15 @@ class ColumnStandardDeviation(BaseColumnStandardDeviation):
         nonnull_row_count = _metrics[
             f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         ]
+        # SQLite has no stddev_samp to return NULL on our behalf when the sample standard
+        # deviation is undefined, and the formula below does not degrade gracefully: with one
+        # non-null value it divides by zero, and with none it hands a NULL numerator to the
+        # sqrt UDF. Both surface as an opaque OperationalError. An empty table resolves
+        # nonnull_row_count to None, which fails in Python before any SQL is built.
+        # max() of nothing but NULLs is NULL; the aggregate is what keeps this a single-value
+        # statistic, which the bundled metric resolver requires.
+        if nonnull_row_count is None or nonnull_row_count < MIN_ROWS_FOR_SAMPLE_STDEV:
+            return sa.func.max(sa.null())
         standard_deviation = sa.func.sqrt(
             sa.func.sum((1.0 * column - mean) * (1.0 * column - mean))
             / ((1.0 * nonnull_row_count) - 1.0)
