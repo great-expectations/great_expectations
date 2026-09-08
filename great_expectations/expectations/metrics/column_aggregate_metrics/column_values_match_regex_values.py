@@ -30,8 +30,8 @@ class ColumnValuesMatchRegexValues(ColumnAggregateMetricProvider):
         metrics: dict[str, Any],
         runtime_configuration: dict,
     ) -> list[str]:
-        # Prefer the dialect module, but fall back to the live dialect: `_setup_dialect` resolves
-        # no module for some backends (Exasol among them) and leaves `dialect_module` None.
+        # Prefer the dialect module, but fall back to the live dialect: some backends (Exasol
+        # among them) resolve no module and leave `dialect_module` None.
         # `SqlAlchemyExecutionEngine.dialect` is the property that returns `self.engine.dialect`.
         _dialect: ModuleType | sa.Dialect | None = execution_engine.dialect_module
         if _dialect is None:

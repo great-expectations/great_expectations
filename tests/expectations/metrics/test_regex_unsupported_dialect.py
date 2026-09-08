@@ -14,9 +14,9 @@ live SQL Server in
 ``tests/integration/data_sources_and_expectations/expectations/test_expect_column_values_to_match_regex.py``.
 
 Those six sites are reachable from two dialect shapes, and both must behave alike.
-``SqlAlchemyExecutionEngine`` resolves a dialect *module* for most backends, but
-``_setup_dialect`` leaves ``dialect_module`` as ``None`` for five of them
-(``awsathena``, ``exasol``, ``hive``, ``vertica``, and the ``other`` fallback), whose
+``SqlAlchemyExecutionEngine`` resolves a dialect *module* for most backends, but leaves
+``dialect_module`` as ``None`` for five of them (``awsathena``, ``exasol``, ``hive``,
+``vertica``, and the ``other`` fallback), whose
 callers hand the helper the live dialect *instance* instead. The message builder reads
 ``name`` off either shape, so both must yield the same named ``NotImplementedError``.
 ``StubSqlAlchemyExecutionEngine`` covers the module shape;
@@ -107,8 +107,8 @@ class NamedDialectStub:
 class ModuleLessStubSqlAlchemyExecutionEngine:
     """The engine shape a module-less backend presents to the aggregate metrics.
 
-    `dialect_module` is None, as `_setup_dialect`'s final `else` leaves it for Exasol and
-    four other backends, and the live dialect instance is offered on `dialect` instead.
+    `dialect_module` is None, as it is left unset for Exasol and four other backends, and
+    the live dialect instance is offered on `dialect` instead.
     Deliberately not a subclass of `StubSqlAlchemyExecutionEngine`: that stub sets
     `dialect_module`, so it never met the assertion this pair of stubs exists to pin, and
     it must keep proving the module path unchanged.

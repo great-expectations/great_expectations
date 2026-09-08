@@ -311,11 +311,11 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915 # FIX
 
     # Exasol
     # Detected by dialect name rather than by module or class: core sets no dialect module for
-    # Exasol (`_setup_dialect` has no Exasol branch), so every caller substitutes the live
-    # dialect instance, and its `name` is the stable handle -- the same value the metrics' own
-    # "not supported" message reads. `REGEXP_LIKE` is an infix predicate on this dialect
-    # (`<expr> [NOT] REGEXP_LIKE <pattern>`); the function form `REGEXP_LIKE(col, pattern)` is
-    # a parse error on the server, so this is the MySQL `custom_op` shape, not `sa.func`.
+    # Exasol, so every caller substitutes the live dialect instance, and its `name` is the
+    # stable handle -- the same value the metrics' own "not supported" message reads.
+    # `REGEXP_LIKE` is an infix predicate on this dialect (`<expr> [NOT] REGEXP_LIKE
+    # <pattern>`); the function form `REGEXP_LIKE(col, pattern)` is a parse error on the
+    # server, so this is the MySQL `custom_op` shape, not `sa.func`.
     #
     # The caller's pattern is wrapped rather than passed through, because `REGEXP_LIKE` is a
     # whole-string match on this dialect and the metric's contract is a substring search: the
