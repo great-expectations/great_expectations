@@ -65,6 +65,7 @@ from tests.integration.conftest import TestConfig as _TestConfig
 from tests.integration.data_sources_and_expectations.gold_expectation_case_table import (
     GOLD_CASE_KEYS,
     GOLD_CASES,
+    _derive_case_keys,
 )
 from tests.integration.data_sources_and_expectations.gold_expectation_cases import (
     EXTRA_TABLE_SELF_REFERENCE,
@@ -710,6 +711,13 @@ def test_gallery_expectation_types_excludes_unregistered_abstract_export() -> No
 # a stale exclusion, an empty tier, or a runaway engine restriction is reported by the fastest
 # feedback available rather than only by a warehouse lane.
 #
+# The case table's own key-derivation guard (`_derive_case_keys`) is not one of those six: it is
+# not a test at all but a check the case table makes as it is imported, so it runs in every lane
+# rather than this one. It sits underneath the completeness guard rather than beside it -- it is
+# what makes `GOLD_CASE_KEYS` a faithful index of the table, without which comparing that key set
+# against the registry means nothing. Only its two failure paths are exercised here, as tests: a
+# repeated key, and a key naming an expectation its own configurations do not execute.
+#
 # The completeness guard runs against the real registry and GOLD_CASE_KEYS -- it is currently
 # vacuous in the sense that both sides already agree (58 published keys, 58 gallery members), but
 # it is not vacuous in the sense that matters: `_completeness_check` is factored out so its failure
@@ -773,6 +781,61 @@ def test_completeness_guard_fails_on_missing_and_unrecognized_keys() -> None:
         _completeness_check(
             frozenset({"expect_kept_case", "expect_missing_case", "extra_key"}), gallery
         )
+
+
+@pytest.mark.project
+def test_case_key_derivation_returns_every_key_of_a_well_formed_table() -> None:
+    """The happy path: a table whose cases each name the expectation they execute derives to
+    exactly that set of keys, so the failure-path tests below are not the whole of this guard."""
+    not_null = gxe.ExpectColumnValuesToNotBeNull(column="increasing_key")
+    be_null = gxe.ExpectColumnValuesToBeNull(column="nullable_value")
+    cases = (
+        GoldCase(key=not_null.expectation_type, passing=not_null, failing=not_null),
+        GoldCase(key=be_null.expectation_type, passing=be_null, failing=be_null),
+    )
+    assert _derive_case_keys(cases) == frozenset(
+        {not_null.expectation_type, be_null.expectation_type}
+    )
+
+
+@pytest.mark.project
+def test_case_key_derivation_rejects_a_repeated_key() -> None:
+    """Two cases for one expectation must fail loudly rather than collapse into one key.
+
+    A plain `frozenset` comprehension absorbs the duplicate silently, and the completeness guard
+    reads only the resulting set -- so without this check the table could carry two cases for one
+    expectation, contradicting its stated one-case-per-expectation contract, and stay green.
+    """
+    expectation = gxe.ExpectColumnValuesToNotBeNull(column="increasing_key")
+    case = GoldCase(key=expectation.expectation_type, passing=expectation, failing=expectation)
+
+    with pytest.raises(ValueError, match=r"more than one case for.*expect_column_values_to_not"):
+        _derive_case_keys((case, case))
+
+
+@pytest.mark.project
+@pytest.mark.parametrize("mismatched_side", ["passing", "failing"])
+def test_case_key_derivation_rejects_a_key_its_configurations_do_not_execute(
+    mismatched_side: str,
+) -> None:
+    """A case whose key names one expectation while a configuration executes another must fail.
+
+    This is the hole the completeness guard cannot see on its own: it reads `case.key`, while the
+    suite runs `case.passing` and `case.failing`. A case copied and re-keyed without its
+    configurations changing with it would report coverage of the newly named expectation while
+    executing the old one -- the named expectation neither run nor reported missing. Both sides are
+    checked, so a guard that only looked at one of them fails this test.
+    """
+    keyed_as = gxe.ExpectColumnValuesToNotBeNull(column="increasing_key")
+    other = gxe.ExpectColumnValuesToBeNull(column="nullable_value")
+    case = GoldCase(
+        key=keyed_as.expectation_type,
+        passing=other if mismatched_side == "passing" else keyed_as,
+        failing=other if mismatched_side == "failing" else keyed_as,
+    )
+
+    with pytest.raises(ValueError, match=rf"{mismatched_side} configuration of"):
+        _derive_case_keys((case,))
 
 
 @pytest.mark.project

@@ -880,13 +880,15 @@ jobs:
           echo "::add-mask::$TOKEN"
           echo "DATABRICKS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
+      # No `--xdist` here, unlike the shared `marker-tests` lane above. `--xdist` implies
+      # `--dist loadfile`, which keeps every test in a module on one worker, and every
+      # gold-marked item lives in the single `test_gold_expectation_suite.py` module -- so four
+      # workers would schedule the whole cell onto one of them and pay three idle process
+      # startups for it. Splitting the suite across modules is what would make `--xdist` worth
+      # adding back; the shared lane spans every expectation module, which is why it benefits.
       - name: Run the gold suite
         run: |
-          FLAGS=""
-          case "${{ matrix.markers }}" in
-            bigquery|databricks) FLAGS="--xdist" ;;
-          esac
-          invoke ci-tests '${{ matrix.markers }}' --up-services --verbose --suite=gold $FLAGS
+          invoke ci-tests '${{ matrix.markers }}' --up-services --verbose --suite=gold
 
   py310-min-versions:
     needs: [unit-tests, static-analysis, check-actor-permissions]

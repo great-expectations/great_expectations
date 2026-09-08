@@ -17,7 +17,7 @@ unreadably long.
 from __future__ import annotations
 
 from datetime import date
-from typing import Final, FrozenSet, Tuple
+from typing import Final, FrozenSet, List, Sequence, Set, Tuple
 
 import great_expectations.expectations as gxe
 from tests.integration.data_sources_and_expectations.gold_expectation_cases import (
@@ -821,8 +821,8 @@ GOLD_CASES: Final[Tuple[GoldCase, ...]] = (
         passing=gxe.UnexpectedRowsExpectation(
             unexpected_rows_query="SELECT * FROM {batch} WHERE increasing_key > 6"
         ),
-        # A near miss: every row but one (`increasing_key` values 2 through 6) is returned as
-        # unexpected.
+        # A near miss: lowering the bound by one returns exactly one row (`increasing_key` 6),
+        # one row more than the empty result the passing query gets.
         failing=gxe.UnexpectedRowsExpectation(
             unexpected_rows_query="SELECT * FROM {batch} WHERE increasing_key > 5"
         ),
@@ -836,5 +836,60 @@ GOLD_CASES: Final[Tuple[GoldCase, ...]] = (
 proves the wiring end to end; the column-map, column-aggregate, column-pair, multicolumn,
 select-column-values, and table-shape families fill out the rest of the gallery."""
 
-GOLD_CASE_KEYS: Final[FrozenSet[str]] = frozenset(case.key for case in GOLD_CASES)
+
+def _derive_case_keys(cases: Sequence[GoldCase]) -> FrozenSet[str]:
+    """The key set `GOLD_CASES` publishes, checked against the two things that make it a faithful
+    index of the table rather than merely a set of strings.
+
+    The gallery completeness check (`test_gold_expectation_suite.py`) compares this key set against
+    the live registry and nothing else. That comparison is only worth what the key set is worth, so
+    both ways the set can misrepresent the table are rejected here rather than collapsed silently:
+
+    - **A repeated key.** Building the set with `frozenset(case.key for case in cases)` on its own
+      absorbs a duplicate without a trace: two cases for one expectation, one key, a completeness
+      check still green, and the table's stated one-case-per-expectation contract quietly broken.
+    - **A key that names an expectation its own configurations do not execute.** The suite runs
+      `case.passing` and `case.failing`; only `case.key` reaches the completeness check. A case
+      copied and re-keyed without its configurations being changed with it would report coverage of
+      the newly named expectation while running the old one -- the named expectation never executed
+      and never missed. Requiring `key` to equal both configurations' `expectation_type` is what
+      ties the claim to what runs.
+
+    Raises `ValueError` rather than asserting: a bare `assert` at module scope is stripped entirely
+    under `python -O`, which would drop the guarantee for every consumer of this module in an
+    optimized run (the same reasoning as `_validate_gold_fixture_data` in
+    `gold_expectation_cases.py`).
+    """
+    seen: Set[str] = set()
+    duplicates: List[str] = []
+    mismatched: List[str] = []
+    for case in cases:
+        if case.key in seen:
+            duplicates.append(case.key)
+        seen.add(case.key)
+        for attribute, configuration in (("passing", case.passing), ("failing", case.failing)):
+            if configuration.expectation_type != case.key:
+                mismatched.append(
+                    f"{case.key!r} declares a {attribute} configuration of "
+                    f"{configuration.expectation_type!r}"
+                )
+    if duplicates:
+        raise ValueError(
+            f"GOLD_CASES declares more than one case for {sorted(set(duplicates))}. The table is "
+            "one case per gallery expectation, and the published key set is what the gallery "
+            "completeness check reads -- a repeated key collapses into one entry there, leaving "
+            "the check green while the table says something else. Merge the duplicates or give "
+            "each the expectation it is actually accountable for."
+        )
+    if mismatched:
+        raise ValueError(
+            "Every gold case's key must equal the expectation type of both its passing and its "
+            "failing configuration, because the key is all the gallery completeness check sees "
+            "while the configurations are what the suite executes. Mismatched: "
+            f"{sorted(mismatched)}."
+        )
+    return frozenset(seen)
+
+
+GOLD_CASE_KEYS: Final[FrozenSet[str]] = _derive_case_keys(GOLD_CASES)
 """The published case keys, derived from `GOLD_CASES` rather than hand-kept in sync with it."""

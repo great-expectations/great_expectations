@@ -105,8 +105,12 @@ class SqlBackendSpec(DataSourceSpec):
     """
 
     integer_column_type_name: str = "INTEGER"
-    """The type name this dialect reports for a plain integer column, defaulting to the ANSI
-    spelling every SQL dialect this suite has measured so far actually reports.
+    """The type name this dialect reports for a plain integer column.
+
+    Defaults to the ANSI spelling, which is what every measured dialect that does not override
+    this field reports -- not what every measured dialect reports: dialects that report an
+    integer column under another name (``INT`` and ``DECIMAL(38, 0)`` are both declared in this
+    package today) override the default with the name they actually use.
 
     Some dialects introspect an integer column under a different name than the one the test
     fixture asked for when creating it -- the name a case checks against is a property of what
