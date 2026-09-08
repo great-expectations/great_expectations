@@ -84,7 +84,12 @@ _RESOLVED: Mapping[str, Mapping[str, str]] = {
         "datetime": "Nullable(DateTime64(3))",
     },
     "databricks": {"dialect": "databricks", "float": "DOUBLE", "datetime": "TIMESTAMP_NTZ"},
-    "exasol": {"dialect": "exa", "float": "FLOAT", "datetime": "TIMESTAMP"},
+    "exasol": {
+        "dialect": "exa",
+        "float": "FLOAT",
+        "datetime": "TIMESTAMP",
+        "int": "DOUBLE PRECISION",
+    },
     "mssql": {"dialect": "mssql", "float": "FLOAT(53)", "datetime": "DATETIME"},
     "mysql": {"dialect": "mysql", "float": "FLOAT(53)", "datetime": "DATETIME"},
     "oracle": {"dialect": "oracle", "float": "DECIMAL(38, 10)", "datetime": "TIMESTAMP"},
@@ -107,10 +112,27 @@ _RESOLVED: Mapping[str, Mapping[str, str]] = {
 """Keyed by the backend's own declared label; `dialect` names the SQLAlchemy dialect it connects
 through, which is spelled differently from the label for three of them.
 
-`float` and `datetime` only, because those two are where a dialect's reading of a type name has
-actually diverged from what the harness meant. `pd.Timestamp` carries no column of its own: it is
-asserted to render as `datetime` does, since a backend overriding one and not the other is a defect
-rather than a fact worth recording.
+`float` and `datetime` for every backend, because those two are where a dialect's reading of a
+type name has actually diverged from what the harness meant -- and `int` for Exasol, a third such
+place reached by a different route. There the divergence is not in a name but in what comes back:
+that driver returns exact numerics as Python `str`, so `int` is declared as a binary float rather
+than left on the shared `INTEGER` default, and the rendering worth recording is the one that trade
+produces. Exasol alone records it. ClickHouse is the only other backend overriding `int`, and the
+package absence that empties its override is the same absence that skips its row, so a value
+recorded there would be one no lane ever checks.
+
+A row is checked over exactly the keys it declares, so recording a rendering and checking it are one
+act: a key added here is asserted from that moment, and a row naming a type nothing compares cannot
+arise. `pd.Timestamp` carries no column of its own: it is asserted to render as `datetime` does,
+since a backend overriding one and not the other is a defect rather than a fact worth recording.
+"""
+
+_PYTHON_TYPE_BY_NAME: Mapping[str, type] = {"float": float, "datetime": datetime, "int": int}
+"""The declared Python type each recorded key names.
+
+Every key any row may declare needs an entry: the lookup below is a plain subscript rather than
+`.get()`, so a recorded key missing from here raises instead of being passed over silently, which
+is the same failure -- a declaration nothing compares -- that this module exists to catch.
 """
 
 
@@ -139,8 +161,8 @@ class TestEveryBackendResolvesTheColumnTypesRecordedHere:
             pytest.skip(f"the {recorded['dialect']} dialect is not installed in this lane")
 
         resolved = sql_module.inferrable_types_for(spec)
-        for name, python_type in (("float", float), ("datetime", datetime)):
-            assert _rendered(resolved[python_type], dialect) == recorded[name], (
+        for name in sorted(recorded.keys() - {"dialect"}):
+            assert _rendered(resolved[_PYTHON_TYPE_BY_NAME[name]], dialect) == recorded[name], (
                 f"{spec.label} resolves `{name}` to a different type than recorded here; confirm "
                 "the new rendering is a type that server has, and that it holds a declared value "
                 "without narrowing it, then update this table in the same change"

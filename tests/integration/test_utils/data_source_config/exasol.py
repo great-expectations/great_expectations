@@ -24,21 +24,43 @@ from tests.integration.test_utils.data_source_config.sql import (
 )
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
 
+try:
+    import sqlalchemy_exasol  # noqa: F401
+except ImportError:
+    _EXASOL_DIALECT_INSTALLED = False
+else:
+    _EXASOL_DIALECT_INSTALLED = True
+
 _BINARY_FLOAT_INT_OVERRIDE: InferrableTypesLookup = (
-    {int: sqltypes.DOUBLE_PRECISION} if hasattr(sqltypes, "DOUBLE_PRECISION") else {}
+    {int: sqltypes.DOUBLE_PRECISION} if _EXASOL_DIALECT_INSTALLED else {}
 )
-"""The `int` override, named only where the type it names exists.
+"""The `int` override, named only where the dialect that needs it is installed.
 
 `DOUBLE_PRECISION` is a SQLAlchemy 2.0 addition. This module is imported under 1.4 all the same:
 the `py310-min-install` and `py311-min-install` lanes pin `sqlalchemy<2.0.0`, and collection
 imports `tests/integration/conftest.py`, which imports this config package. Naming the type
 unconditionally therefore kills collection outright in two lanes that never connect to Exasol.
-Same shape and same reason as `DOUBLE_PRECISION_FLOAT_OVERRIDE` in `sql.py`, which Databricks and
-SingleStore share.
 
-The empty branch is unreachable wherever Exasol actually runs: `sqlalchemy-exasol` requires
-`sqlalchemy>=2.0.0,<3`, so no lane can both install this dialect and be on 1.4. A lane on 1.4 has
-no Exasol to talk to, and every lane that has one gets the override.
+The guard keys on the dialect package, not on the attribute, and that axis is the point. Keyed
+here, the empty branch is unreachable by construction wherever Exasol runs: `sqlalchemy-exasol`
+declares `sqlalchemy>=2.0.0,<3` in its own distribution metadata, so pip cannot resolve an
+environment that holds the dialect and lacks `DOUBLE_PRECISION`. The same absence that empties this
+mapping also makes the `exa` dialect unloadable, so a lane without the override is a lane with no
+Exasol to talk to, and the row recording this rendering skips rather than asserting the wrong type.
+`clickhouse.py` guards its own map on that same axis. Keyed to the attribute, as this was,
+unreachability rested instead on that version pin being argued in prose -- a constraint nothing in
+this repository reads, which a dependency bump could relax with no line here moving.
+
+The dialect-present/attribute-absent combination now fails loudly: it raises `AttributeError` at
+import rather than degrading to the shared `INTEGER` default. pip cannot produce that combination,
+so the difference is theoretical -- but a silent fallback there would reintroduce exactly the
+failure the comment on `int` below describes, and reintroduce it without a line here moving.
+
+`DOUBLE_PRECISION_FLOAT_OVERRIDE` in `sql.py` shares the shape -- a 2.0 type named only behind a
+guard -- but not the axis, and it keeps its `hasattr` form for a reason that does not apply here:
+its degraded branch is caught, because it overrides `float`, which the renderings table records for
+both Databricks and SingleStore, so losing it turns those rows red. This override had no such row
+until `int` was recorded for Exasol alongside it.
 """
 
 
