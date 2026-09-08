@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from types import ModuleType
 from typing import Any
 
 from great_expectations.compatibility.sqlalchemy import (
@@ -29,8 +30,12 @@ class ColumnValuesNotMatchRegexValues(ColumnAggregateMetricProvider):
         metrics: dict[str, Any],
         runtime_configuration: dict,
     ) -> list[str]:
-        _dialect = execution_engine.dialect_module
-        assert _dialect is not None
+        # Prefer the dialect module, but fall back to the live dialect: `_setup_dialect` resolves
+        # no module for some backends (Exasol among them) and leaves `dialect_module` None.
+        # `SqlAlchemyExecutionEngine.dialect` is the property that returns `self.engine.dialect`.
+        _dialect: ModuleType | sa.Dialect | None = execution_engine.dialect_module
+        if _dialect is None:
+            _dialect = execution_engine.dialect
 
         (
             selectable,

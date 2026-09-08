@@ -6,7 +6,10 @@ from great_expectations.metrics.column.values_match_regex_values import (
     ColumnValuesMatchRegexValuesResult,
 )
 from tests.integration.conftest import parameterize_batch_for_data_sources
-from tests.integration.test_utils.data_source_config import SQLServerDatasourceTestConfig
+from tests.integration.test_utils.data_source_config import (
+    ExasolDatasourceTestConfig,
+    SQLServerDatasourceTestConfig,
+)
 from tests.metrics.conftest import SQL_DATA_SOURCES, SnowflakeDatasourceTestConfig
 
 COLUMN_NAME = "whatevs"
@@ -24,6 +27,15 @@ REGEX_CAPABLE_SQL_DATA_SOURCES = [
     datasource
     for datasource in SQL_DATA_SOURCES
     if not isinstance(datasource, SQLServerDatasourceTestConfig)
+] + [
+    # Exasol is the exception to that derivation. It is a curated-tier backend -- it declares
+    # SupportTier.CURATED_SQL and SupportTier.FLUENT_API, not SupportTier.CANONICAL_EXPECTATIONS
+    # -- so the shared-parameterization criterion SQL_DATA_SOURCES derives from excludes it by
+    # declaration. It is hand-added rather than granted that tier, which would enrol Exasol in
+    # every module reading the shared lists: a far wider decision than regex. Without this entry
+    # these two metrics would never exercise Exasol's regex support, which is the only automated
+    # coverage of the aggregate providers' live dialect fallback against a real server.
+    ExasolDatasourceTestConfig(),
 ]
 
 REGEX_CAPABLE_SQL_DATA_SOURCES_EXCEPT_SNOWFLAKE = [

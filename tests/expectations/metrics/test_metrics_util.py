@@ -1653,14 +1653,22 @@ def test_get_dialect_regex_expression_resolves_exasol_aggregate_family() -> None
     this change's `evidence.md` (probe 6). Like the test above, it pins a rendering only --
     the text does not reveal how the server reads the predicate.
 
-    It does not establish that the two aggregate modules the Oracle test above names --
+    The two aggregate modules the Oracle test above names --
     `column_values_match_regex_values.py` and `column_values_not_match_regex_values.py` --
-    work on Exasol. They cannot: each opens with `assert execution_engine.dialect_module
-    is not None` at line 33, and `SqlAlchemyExecutionEngine` resolves no dialect module
-    for Exasol, so on this backend both raise `AssertionError` before reaching the helper.
-    That assertion is a pre-existing gap for every dialect the engine leaves module-less,
-    not an Exasol one, and closing it is out of scope here. The SQL pinned below is what
-    those two modules would emit once it is closed.
+    reach the helper on Exasol, so the SQL pinned below is the SQL they emit. Each prefers
+    `execution_engine.dialect_module` and falls back to `execution_engine.dialect` when it
+    is None, which it is for Exasol; that fallback is what carries the live dialect instance
+    into the branch this test drives directly.
+
+    That makes the pinned SQL theirs. It does not make this test their coverage. It pins a
+    rendering, and the rendering is blind to how the server reads the predicate. Whether
+    those two modules compute the right answer on Exasol is settled by
+    `tests/integration/metrics/column/test_values_match_regex_values.py` and its not-match
+    twin, which run them against a live container -- `test_partial_match_characters[exasol]`
+    in particular, whose expected rows separate a substring reading from a whole-string one.
+    That the fallback resolves at all is pinned without a container by
+    `test_module_less_exasol_dialect_reaches_the_regex_branch` in
+    `tests/expectations/metrics/test_regex_unsupported_dialect.py`.
     """
     stub = _DialectDetectionStub(name="exasol")
     column = sa.column("a")
