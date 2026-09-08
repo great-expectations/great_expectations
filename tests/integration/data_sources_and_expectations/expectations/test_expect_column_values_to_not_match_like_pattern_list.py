@@ -72,7 +72,7 @@ class TestNormalSql:
                 gxe.ExpectColumnValuesToNotMatchLikePatternList(
                     column=COL_NAME, like_pattern_list=["%a%", "not_this"]
                 ),
-                id="multiple_patterns",
+                id="matches_one_pattern_but_not_all",
             ),
         ],
     )
@@ -82,6 +82,13 @@ class TestNormalSql:
         batch_for_datasource: Batch,
         expectation: gxe.ExpectColumnValuesToNotMatchLikePatternList,
     ) -> None:
+        """A value is expected only when it matches none of the patterns.
+
+        The matches_one_pattern_but_not_all case pins that reading. Every value matches
+        "%a%" and none match "not_this", so an implementation that flagged only values
+        matching every pattern would report success here. Matching none of the patterns
+        is the only semantics this Expectation offers.
+        """
         result = batch_for_datasource.validate(expectation)
         assert not result.success
 
@@ -160,7 +167,7 @@ class TestSQLServer:
                 gxe.ExpectColumnValuesToNotMatchLikePatternList(
                     column=COL_NAME, like_pattern_list=["%[a]%", "not_this"]
                 ),
-                id="multiple_patterns",
+                id="matches_one_pattern_but_not_all",
             ),
         ],
     )

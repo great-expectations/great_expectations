@@ -19,7 +19,10 @@ logger = logging.getLogger(__name__)
 
 class ColumnValuesNotMatchLikePatternList(ColumnMapMetricProvider):
     condition_metric_name = "column_values.not_match_like_pattern_list"
-    condition_value_keys = ("like_pattern_list", "match_on")
+    # No "match_on": unlike the positive ColumnValuesMatchLikePatternList, this metric
+    # takes no such option. A value is expected when it matches none of the patterns, and
+    # ExpectColumnValuesToNotMatchLikePatternList exposes no way to ask for anything else.
+    condition_value_keys = ("like_pattern_list",)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, like_pattern_list, _dialect, **kwargs):
