@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -141,6 +142,7 @@ def test_expectation_configuration_to_domain_obj(notes: str | list[str] | None):
         meta=meta,
     )
     expectation = config.to_domain_obj()
+    assert isinstance(expectation, gxe.ExpectColumnValuesToBeInSet)
 
     # Check that the expectation object has the same properties as the config
     assert expectation.expectation_type == expectation_type

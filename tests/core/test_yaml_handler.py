@@ -44,7 +44,9 @@ def test_load_correct_input(simple_yaml: str, simple_dict: dict, yaml_handler: Y
 @pytest.mark.unit
 def test_load_incorrect_input(yaml_handler: YAMLHandler) -> None:
     with pytest.raises((TypeError, YAMLStreamError)):
-        yaml_handler.load(12345)
+        # Deliberately the wrong type: rejecting a non-stream input is what this
+        # test asserts.
+        yaml_handler.load(12345)  # type: ignore[arg-type]
 
 
 @pytest.mark.filesystem
@@ -78,6 +80,8 @@ def test_dump_default_behavior_with_no_stream_specified(
 def test_dump_stdout_specified(capsys, yaml_handler: YAMLHandler) -> None:
     # ruamel documentation recommends that we specify the stream as stdout when we are using YAML to return a string.  # noqa: E501 # FIXME CoP
     simplest_dict: dict = dict(abc=1)
-    yaml_handler.dump(simplest_dict, stream=sys.stdout)
+    # `stream` is typed for a file-like target; sys.stdout is the documented
+    # recommendation here and is intentionally outside that annotation.
+    yaml_handler.dump(simplest_dict, stream=sys.stdout)  # type: ignore[arg-type]
     captured: Any = capsys.readouterr()
     assert captured.out == "abc: 1\n"

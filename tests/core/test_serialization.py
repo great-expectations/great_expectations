@@ -141,16 +141,14 @@ def test_serialization_of_spark_df(spark_session):
 def test_batch_request_deepcopy():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"batch_data": test_df},
-        }
+        datasource_name="my_datasource",
+        data_connector_name="my_runtime_data_connector",
+        data_asset_name="default_data_asset_name",
+        batch_identifiers={
+            "pipeline_stage_name": "core_processing",
+            "airflow_run_id": 1234567890,
+        },
+        runtime_parameters={"batch_data": test_df},
     )
 
     batch_request_copy: RuntimeBatchRequest = copy.deepcopy(batch_request)
