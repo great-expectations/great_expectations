@@ -10,6 +10,7 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 )
 from tests.integration.test_utils.data_source_config import (
     ALL_DATA_SOURCES,
+    SqliteDatasourceTestConfig,
 )
 
 NUM_COL = "all_numbers"
@@ -144,3 +145,40 @@ def test_success_with_suite_param_strict_max_(
         expectation, expectation_parameters={suite_param_key: suite_param_value}
     )
     assert result.success == expected_result
+
+
+SINGLE_VALUE_COL = "single_value"
+ALL_NULL_COL = "all_null"
+
+UNDER_TWO_VALUES = pd.DataFrame(
+    {
+        SINGLE_VALUE_COL: pd.Series([5.0, None], dtype="float64"),
+        ALL_NULL_COL: pd.Series([None, None], dtype="float64"),
+    }
+)
+
+
+@pytest.mark.parametrize(
+    "column",
+    [
+        pytest.param(SINGLE_VALUE_COL, id="single_value"),
+        pytest.param(ALL_NULL_COL, id="all_null"),
+    ],
+)
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SqliteDatasourceTestConfig()], data=UNDER_TWO_VALUES
+)
+def test_under_two_values_returns_success_false_with_null_observed(
+    batch_for_datasource: Batch, column: str
+) -> None:
+    """Columns with fewer than 2 non-null values have undefined stddev.
+
+    SQLite has no native stddev_samp, so the hand-written formula divides by
+    (n - 1) with no guard. Other backends return success=False with
+    observed_value=None; SQLite must match that shape instead of raising
+    an opaque engine exception.
+    """
+    expectation = gxe.ExpectColumnStdevToBeBetween(column=column, min_value=0, max_value=10)
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+    assert not result.success
+    assert result.to_json_dict()["result"]["observed_value"] is None

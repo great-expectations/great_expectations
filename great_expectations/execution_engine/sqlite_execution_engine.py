@@ -35,9 +35,17 @@ class ColumnStandardDeviation(BaseColumnStandardDeviation):
         nonnull_row_count = _metrics[
             f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         ]
-        standard_deviation = sa.func.sqrt(
-            sa.func.sum((1.0 * column - mean) * (1.0 * column - mean))
-            / ((1.0 * nonnull_row_count) - 1.0)
+        standard_deviation = sa.case(
+            [
+                (
+                    (1.0 * nonnull_row_count) - 1.0 > 0,
+                    sa.func.sqrt(
+                        sa.func.sum((1.0 * column - mean) * (1.0 * column - mean))
+                        / ((1.0 * nonnull_row_count) - 1.0)
+                    ),
+                )
+            ],
+            else_=None,
         )
         return standard_deviation
 
