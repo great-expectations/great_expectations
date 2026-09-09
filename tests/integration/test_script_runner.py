@@ -14,7 +14,7 @@ import shutil
 import subprocess
 import sys
 import traceback
-from typing import List
+from typing import Any, Callable, List, TypeVar
 
 import pandas
 import pytest
@@ -85,6 +85,13 @@ logger.setLevel(logging.DEBUG)
 
 
 import time
+
+_F = TypeVar("_F", bound=Callable[..., Any])
+
+# `flaky` ships no py.typed marker, so `@flaky(...)` is an untyped decorator and
+# --disallow-untyped-decorators rejects the test it decorates. Bind it through an
+# explicitly typed alias that states the shape this module relies on.
+flaky_test: Callable[..., Callable[[_F], _F]] = flaky
 
 
 def delay_rerun(*args):
@@ -285,7 +292,7 @@ fluent_datasources = [
     # ),
 ]
 
-failed_rows_tests = [
+failed_rows_tests: List[IntegrationTestFixture] = [
     # IntegrationTestFixture(
     #     name="failed_rows_pandas",
     #     data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
@@ -366,7 +373,7 @@ def prepare_cloud_env_vars(monkeypatch):
     return _prepare_cloud_env_vars_callable
 
 
-@flaky(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
+@flaky_test(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
 def test_docs(
     integration_test_fixture: IntegrationTestFixture,
@@ -453,6 +460,9 @@ def _execute_integration_test(  # noqa: C901, PLR0915 # FIXME CoP
     `user_flow_script` and that all other parameters are optional.
     """
     workdir = pathlib.Path.cwd()
+    # Bound before the try: the except handler below reads it, so an exception raised
+    # earlier in the block would otherwise fail with NameError inside the handler.
+    user_flow_script = integration_test_fixture.user_flow_script
     try:
         base_dir = pathlib.Path(file_relative_path(__file__, "../../"))
         os.chdir(base_dir)
@@ -500,7 +510,6 @@ def _execute_integration_test(  # noqa: C901, PLR0915 # FIXME CoP
                 shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
-        user_flow_script = integration_test_fixture.user_flow_script
         script_source = base_dir / user_flow_script
 
         script_path = tmp_path / "test_script.py"
@@ -528,6 +537,7 @@ def _execute_integration_test(  # noqa: C901, PLR0915 # FIXME CoP
         # Run script as module, using python's importlib machinery (https://docs.python.org/3/library/importlib.htm)
         loader = importlib.machinery.SourceFileLoader("test_script_module", str(script_path))
         spec = importlib.util.spec_from_loader("test_script_module", loader)
+        assert spec is not None, f"could not build a module spec for {script_path}"
         test_script_module = importlib.util.module_from_spec(spec)
         loader.exec_module(test_script_module)
     except Exception as e:
