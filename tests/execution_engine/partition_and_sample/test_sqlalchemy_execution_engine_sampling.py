@@ -11,6 +11,7 @@ from dateutil.parser import parse
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.data_context.util import file_relative_path
@@ -149,7 +150,18 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
         )
 
     # 1. Setup
-    class MockSqlAlchemyExecutionEngine:
+    def _required_dialect(module_name: str) -> sa.engine.Dialect:
+        """The dialect from a driver this dialect's own lane installs.
+
+        import_library_module returns None when the driver is absent, and this test only runs
+        under the pytest flag that installs it -- so None here means a broken lane, not a
+        dialect to skip over.
+        """
+        module = import_library_module(module_name=module_name)
+        assert module is not None, f"{module_name} is required to build this dialect"
+        return module.dialect()
+
+    class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
         def __init__(self, dialect_name: GXSqlDialect):
             self._dialect_name = dialect_name
             self._connection_string = self.dialect_name_to_connection_string(dialect_name)
@@ -172,31 +184,31 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
         }
 
         @property
+        @override
         def dialect_name(self) -> str:
             return self._dialect_name.value
 
         def dialect_name_to_connection_string(self, dialect_name: GXSqlDialect) -> str:
-            return self.DIALECT_TO_CONNECTION_STRING_STUB.get(dialect_name)
+            return self.DIALECT_TO_CONNECTION_STRING_STUB[dialect_name]
 
         _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
         @property
+        @override
         def dialect(self) -> sa.engine.Dialect:
             # TODO: AJB 20220512 move this dialect retrieval to a separate class from the SqlAlchemyExecutionEngine  # noqa: E501 # FIXME CoP
             #  and then use it here.
             dialect_name: GXSqlDialect = self._dialect_name
             if dialect_name == GXSqlDialect.ORACLE:
                 # noinspection PyUnresolvedReferences
-                return import_library_module(module_name="sqlalchemy.dialects.oracle").dialect()
+                return _required_dialect("sqlalchemy.dialects.oracle")
             elif dialect_name == GXSqlDialect.SNOWFLAKE:
                 # noinspection PyUnresolvedReferences
-                return import_library_module(
-                    module_name="snowflake.sqlalchemy.snowdialect"
-                ).dialect()
+                return _required_dialect("snowflake.sqlalchemy.snowdialect")
             elif dialect_name == GXSqlDialect.DREMIO:
                 # WARNING: Dremio Support is experimental, functionality is not fully under test
                 # noinspection PyUnresolvedReferences
-                return import_library_module(module_name="sqlalchemy_dremio.pyodbc").dialect()
+                return _required_dialect("sqlalchemy_dremio.pyodbc")
             # NOTE: AJB 20220512 Redshift dialect is not yet fully supported.
             # The below throws an `AttributeError: type object 'RedshiftDialect_psycopg2' has no attribute 'positional'`  # noqa: E501 # FIXME CoP
             # elif dialect_name == "redshift":
@@ -205,11 +217,11 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
             #     ).RedshiftDialect
             elif dialect_name == GXSqlDialect.BIGQUERY:
                 # noinspection PyUnresolvedReferences
-                return import_library_module(module_name=self._BIGQUERY_MODULE_NAME).dialect()
+                return _required_dialect(self._BIGQUERY_MODULE_NAME)
             elif dialect_name == GXSqlDialect.TERADATASQL:
                 # WARNING: Teradata Support is experimental, functionality is not fully under test
                 # noinspection PyUnresolvedReferences
-                return import_library_module(module_name="teradatasqlalchemy.dialect").dialect()
+                return _required_dialect("teradatasqlalchemy.dialect")
             else:
                 return sa.create_engine(self._connection_string).dialect
 
@@ -231,8 +243,9 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
         execution_engine=mock_execution_engine, batch_spec=batch_spec, where_clause=None
     )
 
+    query_str: str
     if not isinstance(query, str):
-        query_str: str = clean_query_for_comparison(
+        query_str = clean_query_for_comparison(
             str(
                 query.compile(
                     dialect=mock_execution_engine.dialect,
@@ -241,7 +254,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
             )
         )
     else:
-        query_str: str = clean_query_for_comparison(query)
+        query_str = clean_query_for_comparison(query)
 
     expected: str = clean_query_for_comparison(dialect_name_to_sql_statement(dialect_name))
 
