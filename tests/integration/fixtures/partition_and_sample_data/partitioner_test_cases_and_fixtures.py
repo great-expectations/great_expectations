@@ -128,7 +128,7 @@ class TaxiTestData:
         column_values = sorted(
             column_values,
             key=lambda element: (element is None, element),
-            reverse=reverse,
+            reverse=bool(reverse),
         )
 
         column_value: Any

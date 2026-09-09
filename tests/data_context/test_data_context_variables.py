@@ -8,6 +8,7 @@ from unittest.mock import ANY as MOCK_ANY
 
 import pytest
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.context_factory import project_manager
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from great_expectations.data_context.types.resource_identifiers import (
-        ConfigurationIdentifier,
+        DataContextKey,
     )
 
 yaml = YAMLHandler()
@@ -73,6 +74,7 @@ class StubConfigurationProvider(_ConfigurationProvider):
         self._config_values = config_values or {}
         super().__init__()
 
+    @override
     def get_values(self):
         return self._config_values
 
@@ -328,8 +330,9 @@ def test_data_context_variables_save(
 ) -> None:
     # EphemeralDataContextVariables
     ephemeral_data_context_variables.save()
-    key: ConfigurationIdentifier = ephemeral_data_context_variables.get_key()
-    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(key=key)
+    key: DataContextKey = ephemeral_data_context_variables.get_key()
+    persisted_value = ephemeral_data_context_variables.store.get(key=key)
+    assert isinstance(persisted_value, DataContextConfig)
     assert persisted_value.to_json_dict() == ephemeral_data_context_variables.config.to_json_dict()
 
     # FileDataContextVariables

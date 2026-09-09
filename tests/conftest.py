@@ -659,20 +659,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         os.path.join(context_path, "plugins"),  # noqa: PTH118 # FIXME CoP
         exist_ok=True,
     )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            str(
-                pathlib.Path(
-                    "data_context",
-                    "fixtures",
-                    "plugins",
-                    "extended_checkpoint.py",
-                )
-            ),
-        ),
-        pathlib.Path(context_path) / "plugins" / "extended_checkpoint.py",
-    )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118 # FIXME CoP
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103 # FIXME CoP
     shutil.copy(

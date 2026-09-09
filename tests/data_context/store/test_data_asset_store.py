@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from great_expectations.data_context.store.data_asset_store import DataAssetStore
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.store.data_asset_store import (
+        CloudResponsePayloadTD,
+    )
 
 
 @pytest.mark.cloud
@@ -89,7 +96,7 @@ from great_expectations.data_context.store.data_asset_store import DataAssetStor
     ],
 )
 def test_gx_cloud_response_json_to_object_dict(
-    response_json: dict, expected: dict | None, error_type: Exception | None
+    response_json: CloudResponsePayloadTD, expected: dict | None, error_type: type[Exception] | None
 ) -> None:
     if error_type:
         with pytest.raises(error_type):
