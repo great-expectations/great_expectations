@@ -10,6 +10,7 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 )
 from tests.integration.test_utils.data_source_config import (
     ALL_DATA_SOURCES,
+    SPARK_DATA_SOURCES,
 )
 
 NUM_COL = "all_numbers"
@@ -158,9 +159,20 @@ UNDER_TWO_VALUES = pd.DataFrame(
 
 NO_ROWS = pd.DataFrame({SINGLE_VALUE_COL: pd.Series([], dtype="float64")})
 
+UNDER_TWO_VALUE_DATA_SOURCES = [ds for ds in ALL_DATA_SOURCES if ds not in SPARK_DATA_SOURCES]
+"""Every data source except Spark, whose filesystem-CSV fixture cannot express these shapes.
+
+That fixture writes the frame to CSV and lets Spark infer the schema back, so an empty table
+raises CANNOT_INFER_EMPTY_SCHEMA and an all-null column raises CANNOT_DETERMINE_TYPE before the
+expectation is ever evaluated. The limit is the fixture's round trip, not the Spark backend's
+handling of an undefined standard deviation.
+"""
+
 
 @pytest.mark.parametrize("column", [SINGLE_VALUE_COL, ALL_NULL_COL])
-@parameterize_batch_for_data_sources(data_source_configs=ALL_DATA_SOURCES, data=UNDER_TWO_VALUES)
+@parameterize_batch_for_data_sources(
+    data_source_configs=UNDER_TWO_VALUE_DATA_SOURCES, data=UNDER_TWO_VALUES
+)
 def test_stdev_of_column_with_under_two_values(batch_for_datasource: Batch, column: str) -> None:
     """A sample standard deviation is undefined for n < 2: report it, do not raise."""
     expectation = gxe.ExpectColumnStdevToBeBetween(column=column, min_value=0, max_value=10)
@@ -169,7 +181,7 @@ def test_stdev_of_column_with_under_two_values(batch_for_datasource: Batch, colu
     assert result.to_json_dict()["result"] == {"observed_value": None}
 
 
-@parameterize_batch_for_data_sources(data_source_configs=ALL_DATA_SOURCES, data=NO_ROWS)
+@parameterize_batch_for_data_sources(data_source_configs=UNDER_TWO_VALUE_DATA_SOURCES, data=NO_ROWS)
 def test_stdev_of_empty_table(batch_for_datasource: Batch) -> None:
     """An empty table has no non-null values, so the standard deviation is undefined."""
     expectation = gxe.ExpectColumnStdevToBeBetween(
