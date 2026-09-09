@@ -1,54 +1,18 @@
 import logging
-from typing import List, Optional
 
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
 
 
+# `LegacyCheckpoint` no longer exists in `great_expectations.checkpoint` -- `Checkpoint` is now
+# a pydantic model with its own generated `__init__`, so a custom subclass no longer needs (or
+# can accept) the old `data_context`/`expectation_suite_name`/`action_list` constructor args.
 class ExtendedCheckpoint(Checkpoint):
-    def __init__(
-        self,
-        name: str,
-        data_context,
-        expectation_suite_name: Optional[str] = None,
-        action_list: Optional[List[dict]] = None,
-    ):
-        super().__init__(
-            name=name,
-            data_context=data_context,
-            expectation_suite_name=expectation_suite_name,
-            action_list=action_list,
-        )
-
-
-class ExtendedLegacyCheckpoint(LegacyCheckpoint):
-    def __init__(
-        self,
-        name: str,
-        data_context,
-        expectation_suite_name: Optional[str] = None,
-        action_list: Optional[List[dict]] = None,
-    ):
-        super().__init__(
-            name=name,
-            data_context=data_context,
-            expectation_suite_name=expectation_suite_name,
-            action_list=action_list,
-        )
+    pass
 
 
 class ExtendedCheckpointIllegalBaseClass:
-    def __init__(
-        self,
-        name: str,
-        data_context,
-        expectation_suite_name: Optional[str] = None,
-        action_list: Optional[List[dict]] = None,
-    ):
-        super().__init__(
-            name=name,
-            data_context=data_context,
-            expectation_suite_name=expectation_suite_name,
-            action_list=action_list,
-        )
+    def __init__(self, name: str, **kwargs):
+        self.name = name
+        self.kwargs = kwargs
