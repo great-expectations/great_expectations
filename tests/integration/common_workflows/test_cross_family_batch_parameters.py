@@ -75,7 +75,7 @@ def _build_cross_family_checkpoint(
         FILE_DATASOURCE_NAME,
         base_directory=TAXI_DATA_DIR,  # type: ignore [arg-type]
     ).add_csv_asset(name=FILE_ASSET_NAME)
-    file_batch_definition = file_asset.add_batch_definition_monthly(  # type: ignore[attr-defined] # FIXME CoP
+    file_batch_definition = file_asset.add_batch_definition_monthly(
         "monthly files", re.compile(BATCHING_REGEX)
     )
 
@@ -183,7 +183,7 @@ def test_validation_definition_run_accepts_digit_string_batch_parameters(
         FILE_DATASOURCE_NAME,
         base_directory=TAXI_DATA_DIR,  # type: ignore [arg-type]
     ).add_csv_asset(name=FILE_ASSET_NAME)
-    file_batch_definition = file_asset.add_batch_definition_monthly(  # type: ignore[attr-defined] # FIXME CoP
+    file_batch_definition = file_asset.add_batch_definition_monthly(
         "monthly files", re.compile(BATCHING_REGEX)
     )
     suite = context.suites.add(
