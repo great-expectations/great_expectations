@@ -189,20 +189,12 @@ class TaxiPartitioningTestCasesBase(ABC):
         return self._taxi_test_data.test_df
 
     @property
-    def test_column_name(self) -> str:
-        test_column_name = self._taxi_test_data.test_column_name
-        assert test_column_name is not None, (
-            "test_column_name is required for this test case; TaxiTestData was built without it"
-        )
-        return test_column_name
+    def test_column_name(self) -> Optional[str]:
+        return self._taxi_test_data.test_column_name
 
     @property
-    def test_column_names(self) -> List[str]:
-        test_column_names = self._taxi_test_data.test_column_names
-        assert test_column_names is not None, (
-            "test_column_names is required for this test case; TaxiTestData was built without it"
-        )
-        return test_column_names
+    def test_column_names(self) -> Optional[List[str]]:
+        return self._taxi_test_data.test_column_names
 
     @abstractmethod
     def test_cases(self) -> List[TaxiPartitioningTestCase]:
