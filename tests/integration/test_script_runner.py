@@ -285,7 +285,7 @@ fluent_datasources = [
     # ),
 ]
 
-failed_rows_tests = [
+failed_rows_tests: List[IntegrationTestFixture] = [
     # IntegrationTestFixture(
     #     name="failed_rows_pandas",
     #     data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
@@ -528,11 +528,14 @@ def _execute_integration_test(  # noqa: C901, PLR0915 # FIXME CoP
         # Run script as module, using python's importlib machinery (https://docs.python.org/3/library/importlib.htm)
         loader = importlib.machinery.SourceFileLoader("test_script_module", str(script_path))
         spec = importlib.util.spec_from_loader("test_script_module", loader)
+        assert spec is not None
         test_script_module = importlib.util.module_from_spec(spec)
         loader.exec_module(test_script_module)
     except Exception as e:
         logger.error(str(e))  # noqa: TRY400 # FIXME CoP
-        if "JavaPackage" in str(e) and "aws_glue" in user_flow_script:
+        # Read straight from the fixture rather than the local `user_flow_script`, which may
+        # not have been assigned yet if the exception was raised earlier in the try block.
+        if "JavaPackage" in str(e) and "aws_glue" in integration_test_fixture.user_flow_script:
             logger.debug("This is something aws_glue related, so just going to return")
             # Should try to copy aws-glue-libs jar files to Spark jar during pipeline setup
             #   - see https://stackoverflow.com/a/67371827

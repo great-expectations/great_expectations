@@ -128,7 +128,7 @@ class TaxiTestData:
         column_values = sorted(
             column_values,
             key=lambda element: (element is None, element),
-            reverse=reverse,
+            reverse=bool(reverse),
         )
 
         column_value: Any
@@ -150,16 +150,16 @@ class TaxiTestData:
     def get_divided_integer_test_column_values(self, divisor: int) -> List[Optional[Any]]:
         column_values: List[Optional[Any]] = self.get_test_column_values()
 
-        column_value: Any
-        column_values = [column_value // divisor for column_value in column_values]
+        # Dividing an integer column: any null would raise TypeError here anyway, so make
+        # that explicit instead of letting mypy treat it as silently tolerated.
+        column_values = [value // divisor for value in column_values if value is not None]
 
         return list(set(column_values))
 
     def get_mod_integer_test_column_values(self, mod: int) -> List[Optional[Any]]:
         column_values: List[Optional[Any]] = self.get_test_column_values()
 
-        column_value: Any
-        column_values = [column_value % mod for column_value in column_values]
+        column_values = [value % mod for value in column_values if value is not None]
 
         return list(set(column_values))
 
@@ -190,11 +190,19 @@ class TaxiPartitioningTestCasesBase(ABC):
 
     @property
     def test_column_name(self) -> str:
-        return self._taxi_test_data.test_column_name
+        test_column_name = self._taxi_test_data.test_column_name
+        assert test_column_name is not None, (
+            "This test case's taxi_test_data has no test_column_name set"
+        )  # FIXME CoP
+        return test_column_name
 
     @property
     def test_column_names(self) -> List[str]:
-        return self._taxi_test_data.test_column_names
+        test_column_names = self._taxi_test_data.test_column_names
+        assert test_column_names is not None, (
+            "This test case's taxi_test_data has no test_column_names set"
+        )  # FIXME CoP
+        return test_column_names
 
     @abstractmethod
     def test_cases(self) -> List[TaxiPartitioningTestCase]:

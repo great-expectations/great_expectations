@@ -3,7 +3,7 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 redshift_integration_tests = []
 
-connecting_to_your_data = [
+connecting_to_your_data: list[IntegrationTestFixture] = [
     # TODO: <Alex>ALEX: Rename test modules to include "configured" and "inferred_and_runtime" suffixes in names.</Alex>  # noqa: E501 # FIXME CoP
     # IntegrationTestFixture(
     #     name = "redshift_python_example",
@@ -54,7 +54,7 @@ partition_data = [
     ),
 ]
 
-sample_data = []
+sample_data: list[IntegrationTestFixture] = []
 
 deployment_patterns = [
     IntegrationTestFixture(

@@ -36,7 +36,9 @@ expectation.column = "pickup_location_id"
 expectation.save()
 
 # update multiple expectations as a batch
-for expectation in suite.expectations:
+# `expectation` was narrowed to ExpectColumnValuesToNotBeNull by the block above; this loop
+# reuses the name for a new, independent step over the full (unnarrowed) suite.expectations.
+for expectation in suite.expectations:  # type: ignore[assignment]
     expectation.notes = "This Expectation was generated as part of GX Documentation."
 suite.save()
 

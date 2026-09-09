@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 try:
     from great_expectations.execution_engine import SparkDFExecutionEngine
 except ImportError:
-    SparkDFExecutionEngine = None
+    SparkDFExecutionEngine = None  # type: ignore[misc,assignment] # FIXME CoP
     # TODO: review logging more detail here
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes."  # noqa: E501 # FIXME CoP
