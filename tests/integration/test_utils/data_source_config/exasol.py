@@ -25,7 +25,12 @@ from tests.integration.test_utils.data_source_config.sql import (
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
 
 try:
-    import sqlalchemy_exasol  # noqa: F401
+    # No stub and no package to import from in most environments -- this dialect is installed
+    # only in the lane that runs against Exasol, and the type-check environment installs no
+    # backend driver at all. That absence is the condition this block exists to detect, so the
+    # error it raises there is the expected state rather than a missing dependency. The ignore
+    # must come first on the line: mypy reads `# type: ignore` only as the leading comment.
+    import sqlalchemy_exasol  # type: ignore[import-not-found] # noqa: F401
 except ImportError:
     _EXASOL_DIALECT_INSTALLED = False
 else:
