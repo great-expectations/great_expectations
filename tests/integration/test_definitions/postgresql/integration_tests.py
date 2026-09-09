@@ -59,7 +59,7 @@ fluent_datasources = [
     ),
 ]
 
-getting_started = []
+getting_started: List[IntegrationTestFixture] = []
 
 unexpected_row_expectation = [
     IntegrationTestFixture(

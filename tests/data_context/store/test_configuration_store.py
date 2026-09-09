@@ -8,6 +8,7 @@ from marshmallow import INCLUDE, Schema, fields, validates_schema
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -32,10 +33,12 @@ logger = logging.getLogger(__name__)
 
 class SampleConfig(BaseYamlConfig):
     @classmethod
+    @override
     def get_config_class(cls):
         return cls  # SampleConfig
 
     @classmethod
+    @override
     def get_schema_class(cls):
         return SampleConfigSchema
 
@@ -43,7 +46,7 @@ class SampleConfig(BaseYamlConfig):
         self,
         some_param_0: Optional[str] = None,
         some_param_1: Optional[int] = None,
-        commented_map: CommentedMap = None,
+        commented_map: Optional[CommentedMap] = None,
     ):
         if some_param_0 is None:
             some_param_0 = "param_value_0"
@@ -68,8 +71,9 @@ class SampleConfigSchema(Schema):
 
 
 class SampleConfigurationStore(ConfigurationStore):
-    _configuration_class = SampleConfig
+    _configuration_class: type[BaseYamlConfig] = SampleConfig
 
+    @override
     def list_keys(self) -> List[DataContextKey]:
         # Mock values to work with self.self_check
         return [ConfigurationIdentifier(f"key{char}") for char in string.ascii_uppercase]
@@ -316,7 +320,9 @@ def test_init_with_invalid_configuration_class_raises_error() -> None:
         pass
 
     class InvalidConfigurationStore(ConfigurationStore):
-        _configuration_class = InvalidConfigClass
+        # Intentionally not a BaseYamlConfig subclass -- this test exercises the runtime
+        # guard in ConfigurationStore.__init__ that rejects exactly this.
+        _configuration_class = InvalidConfigClass  # type: ignore[assignment]
 
     with pytest.raises(DataContextError) as e:
         InvalidConfigurationStore(store_name="my_configuration_store")
