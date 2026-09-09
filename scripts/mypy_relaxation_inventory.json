@@ -68,7 +68,6 @@
     "tests/datasource/data_connector",
     "tests/datasource/fluent/tasks\\.py",
     "tests/datasource/test_datasource_dict\\.py",
-    "tests/execution_engine/partition_and_sample",
     "tests/expectations",
     "tests/experimental/metric_repository/test_metric_list_metric_retriever\\.py",
     "tests/integration/common_workflows",
