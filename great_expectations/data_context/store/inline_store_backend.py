@@ -219,7 +219,7 @@ class InlineStoreBackend(StoreBackend):
         config_filepath = pathlib.Path(context.root_directory) / context.GX_YML
 
         try:
-            with open(config_filepath, "w") as outfile:
+            with open(config_filepath, "w", encoding="utf-8") as outfile:
                 context.config.to_yaml(outfile)
         # In environments where wrting to disk is not allowed, it is impossible to
         # save changes. As such, we log a warning but do not raise.
