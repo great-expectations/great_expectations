@@ -7,6 +7,7 @@ The following table lists the installation commands used to install GX Core depe
 | AWS Athena | `pip install 'great_expectations[athena]'` |
 | BigQuery | `pip install 'great_expectations[bigquery]'` |
 | Databricks | `pip install 'great_expectations[databricks]'` |
+| Exasol | `pip install 'great_expectations[exasol]'` |
 | Microsoft Fabric | `pip install 'great_expectations[fabric]'` |
 | Microsoft SQL Server | `pip install 'great_expectations[sql-server]'` |
 | PostgreSQL | `pip install 'great_expectations[postgresql]'` |

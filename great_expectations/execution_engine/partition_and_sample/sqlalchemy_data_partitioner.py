@@ -56,6 +56,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         """Extract a date part from a column, using dialect-appropriate function.
 
         For SQL Server, uses DATEPART() instead of EXTRACT() since EXTRACT is not supported.
+        For Exasol, uses the scalar date-part functions, since its driver miscompiles EXTRACT.
         For other dialects, uses SQLAlchemy's extract() function.
 
         Args:
@@ -67,6 +68,20 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         """
         if self._dialect == GXSqlDialect.SQL_SERVER:
             return sa.func.datepart(sa.text(date_part), column)
+        if self._dialect == GXSqlDialect.EXASOL:
+            # `sa.func.extract` cannot reach this dialect at all: sqlalchemy-exasol 7.1.3 builds
+            # `EXACompiler.extract_map` from strftime tokens (`"year": "%Y"`) and never overrides
+            # `visit_extract`, so SQLAlchemy's generic compiler renders `EXTRACT(%Y FROM col)` and
+            # the server rejects it. That is a defect in the driver rather than a gap in the
+            # dialect -- the server executes `EXTRACT(YEAR FROM col)` correctly.
+            #
+            # The scalar function spelling is emitted rather than that corrected `EXTRACT` one
+            # because the two are not interchangeable here: Exasol has no `WEEK` field for
+            # `EXTRACT` while the scalar `WEEK()` exists and returns the ISO week, and
+            # `DatePart.WEEK` is a member of the enum this helper is called with. All seven
+            # members were verified as scalar functions against a live server, so an upstream
+            # `extract_map` fix would not make this branch removable.
+            return getattr(sa.func, date_part)(column)
         return sa.func.extract(date_part, column)
 
     def _cast_date_part_to_string(

@@ -8,6 +8,7 @@
 --requirement requirements-dev-dremio.txt
 --requirement requirements-dev-sql-server.txt
 --requirement requirements-dev-mysql.txt
+--requirement requirements-dev-exasol.txt
 --requirement requirements-dev-oracle.txt
 --requirement requirements-dev-postgresql.txt
 --requirement requirements-dev-redshift.txt

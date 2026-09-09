@@ -1370,15 +1370,16 @@ class TestRelocatedDataSourceListsMatchTheirCapturedMembership:
         assert not retired.exists(), f"the retired module reappeared at {retired}"
 
 
-class TestCuratedSqlDataSourcesEqualsClickHouseOracleSingleStoreAndTrino:
+class TestCuratedSqlDataSourcesEqualsClickHouseExasolOracleSingleStoreAndTrino:
     """Regression pin for the curated tier's members, in label order.
 
     `CURATED_SQL_DATA_SOURCES` was empty until a backend declared curated-tier membership, so
     every assertion involving it was vacuously true (empty equals empty). SingleStore was the
-    first backend to join that tier, Trino was the second, ClickHouse was the third, and Oracle
-    is the fourth — all four are what make this pin non-vacuous: it fails on a curated-tier
-    backend registering without also joining this literal, and fails just as loudly on the
-    reverse — a config landing in this literal without the corresponding registration.
+    first backend to join that tier, Trino was the second, ClickHouse was the third, Oracle was
+    the fourth, and Exasol is the fifth — all five are what make this pin non-vacuous: it fails
+    on a curated-tier backend registering without also joining this literal, and fails just as
+    loudly on the reverse — a config landing in this literal without the corresponding
+    registration.
 
     `CURATED_SQL_DATA_SOURCES` is imported at this module's own import time (see the module
     docstring on `TestStandardDataSourceListsMatchPreChangeMembership` above for why that
@@ -1387,11 +1388,14 @@ class TestCuratedSqlDataSourcesEqualsClickHouseOracleSingleStoreAndTrino:
     empty.
     """
 
-    def test_curated_sql_data_sources_equals_clickhouse_oracle_singlestore_and_trino_in_label_order(
+    def test_curated_sql_data_sources_equals_clickhouse_exasol_oracle_singlestore_and_trino_in_label_order(  # noqa: E501
         self,
     ) -> None:
         from tests.integration.test_utils.data_source_config.clickhouse import (
             ClickHouseDatasourceTestConfig,
+        )
+        from tests.integration.test_utils.data_source_config.exasol import (
+            ExasolDatasourceTestConfig,
         )
         from tests.integration.test_utils.data_source_config.oracle import (
             OracleDatasourceTestConfig,
@@ -1402,6 +1406,7 @@ class TestCuratedSqlDataSourcesEqualsClickHouseOracleSingleStoreAndTrino:
 
         assert [
             ClickHouseDatasourceTestConfig(),
+            ExasolDatasourceTestConfig(),
             OracleDatasourceTestConfig(),
             SingleStoreDatasourceTestConfig(),
             TrinoDatasourceTestConfig(),
@@ -1470,7 +1475,7 @@ _REGISTERED_SPARK_CONFIGS = tuple(data_source_configs_for_engine(ExecutionEngine
 _REGISTERED_CONFIGS: Tuple[type, ...] = tuple(iter_data_source_configs())
 
 
-class TestRegisteredConfigsEqualTheFifteenInLabelOrder:
+class TestRegisteredConfigsEqualTheSixteenInLabelOrder:
     """Pins the registry itself: every registered config class, named individually, in label order.
 
     Not every entry is a SQL backend: a config the harness drives registers here whether or not its
@@ -1479,7 +1484,7 @@ class TestRegisteredConfigsEqualTheFifteenInLabelOrder:
 
     This is an *equality* assertion against an *ordered* literal naming every registered class -
     not a subset check, not a membership check, not a count. That shape is what makes registering
-    a sixteenth config without extending this literal fail immediately: "register the config" and
+    a seventeenth config without extending this literal fail immediately: "register the config" and
     "extend this literal" become one change with a single, same-change failure signal, rather than
     a widening nobody notices until something downstream quietly starts seeing one more backend
     than it expected. A subset or count check would let a new registration pass silently here,
@@ -1488,13 +1493,13 @@ class TestRegisteredConfigsEqualTheFifteenInLabelOrder:
     This module runs in a lane that installs no SQL dialect driver at all, and importing this
     module imports the whole harness package first, which in turn imports every backend module -
     each one registering itself as a side effect of being imported. An equality assertion over all
-    twelve registered classes therefore runs only in a process where every backend module imported
+    sixteen registered classes therefore runs only in a process where every backend module imported
     successfully with every dialect driver absent.
 
     Be precise about which half of that each mechanism carries. A backend module that fails to
     import takes the whole package down with it, so every test here dies at collection - the
     import statement is what proves importability, not this assertion. What this assertion adds
-    is that all fifteen modules actually *registered*: importing a module and registering from it
+    is that all sixteen modules actually *registered*: importing a module and registering from it
     are separate events, and only the second is observable here. Weakening this to a subset or
     count check would discard exactly that, letting a backend that imported but never enrolled
     itself pass unnoticed.
@@ -1507,9 +1512,12 @@ class TestRegisteredConfigsEqualTheFifteenInLabelOrder:
     registered without a matching update here.
     """
 
-    def test_registered_configs_equal_the_fifteen_in_label_order(self) -> None:
+    def test_registered_configs_equal_the_sixteen_in_label_order(self) -> None:
         from tests.integration.test_utils.data_source_config.clickhouse import (
             ClickHouseDatasourceTestConfig,
+        )
+        from tests.integration.test_utils.data_source_config.exasol import (
+            ExasolDatasourceTestConfig,
         )
         from tests.integration.test_utils.data_source_config.mysql import (
             MySQLDatasourceTestConfig,
@@ -1531,6 +1539,7 @@ class TestRegisteredConfigsEqualTheFifteenInLabelOrder:
             BigQueryDatasourceTestConfig,  # big-query
             ClickHouseDatasourceTestConfig,  # clickhouse
             DatabricksDatasourceTestConfig,  # databricks
+            ExasolDatasourceTestConfig,  # exasol
             SQLServerDatasourceTestConfig,  # mssql
             MySQLDatasourceTestConfig,  # mysql
             OracleDatasourceTestConfig,  # oracle
@@ -2200,7 +2209,7 @@ class TestDeclarationOnlyRecordsJoinTheRegistryWithoutConfigs:
         assert _CONFIG_BOUND_LABELS.isdisjoint(_EXPECTED_DECLARATION_ONLY_SPECS)
 
     def test_the_record_accessor_is_wider_than_the_config_accessor_by_exactly_eight(self) -> None:
-        assert (len(_REGISTERED_DATA_SOURCE_SPECS), len(_REGISTERED_CONFIGS)) == (23, 15)
+        assert (len(_REGISTERED_DATA_SOURCE_SPECS), len(_REGISTERED_CONFIGS)) == (24, 16)
 
     @pytest.mark.parametrize("label", sorted(_EXPECTED_DECLARATION_ONLY_SPECS))
     def test_every_declared_field_matches_the_reviewed_declaration(self, label: str) -> None:
@@ -2293,13 +2302,13 @@ def _the_real_registry_survives_this_module() -> Iterator[None]:
     )
 
 
-class TestRegisteredRecordsEqualTheTwentyThreeInLabelOrder:
+class TestRegisteredRecordsEqualTheTwentyFourInLabelOrder:
     """The second half of the registered-set pin: every registered *record*, in label order.
 
-    Its neighbour `TestRegisteredConfigsEqualTheFifteenInLabelOrder` pins the registered *config
+    Its neighbour `TestRegisteredConfigsEqualTheSixteenInLabelOrder` pins the registered *config
     classes*, and keeps its exact shape and teeth. That set is strictly narrower than the registry:
     a record registered without a config class reaches no config accessor at all, so eight of the
-    twenty-three declarations this repository makes are invisible to that pin. They are not
+    twenty-four declarations this repository makes are invisible to that pin. They are not
     invisible to the consumers that matter — the wiring drift check and the generated compatibility
     reference both walk records, not configs — so a record dropped, relabelled, or never registered
     would change what those produce while the config pin stayed green.
@@ -2307,8 +2316,8 @@ class TestRegisteredRecordsEqualTheTwentyThreeInLabelOrder:
     Both pins are ordered whole-set equalities, and neither may be weakened into a subset, a
     membership check, or a count. That shape is the entire point: adding a data source has to fail
     in the same change that adds it. `test_the_record_accessor_is_wider_than_the_config_accessor_by
-    _exactly_eight` is a count and is not a substitute — a count passes for any twenty-three labels,
-    including twenty-two correct ones and a typo.
+    _exactly_eight` is a count and is not a substitute — a count passes for any twenty-four labels,
+    including twenty-three correct ones and a typo.
 
     Labels rather than record objects, deliberately: the record objects' every field is pinned
     elsewhere — the eight declaration-only records by whole-record equality against a reviewed
@@ -2316,7 +2325,7 @@ class TestRegisteredRecordsEqualTheTwentyThreeInLabelOrder:
     which data sources are enrolled and in what order.
     """
 
-    def test_registered_record_labels_equal_the_twenty_three_in_label_order(self) -> None:
+    def test_registered_record_labels_equal_the_twenty_four_in_label_order(self) -> None:
         assert tuple(spec.label for spec in _REGISTERED_DATA_SOURCE_SPECS) == (
             "alloydb",
             "amazon-s3",
@@ -2326,6 +2335,7 @@ class TestRegisteredRecordsEqualTheTwentyThreeInLabelOrder:
             "citus",
             "clickhouse",
             "databricks",
+            "exasol",
             "fabric",
             "google-cloud-storage",
             "mssql",
@@ -2361,6 +2371,8 @@ _BASELINE_EQ_AND_HASH_RESOLUTION: Mapping[str, Tuple[str, str]] = {
     "BigQueryDatasourceTestConfig": ("DataSourceTestConfig", "DataSourceTestConfig"),
     "ClickHouseDatasourceTestConfig": ("DataSourceTestConfig", "DataSourceTestConfig"),
     "DatabricksDatasourceTestConfig": ("DataSourceTestConfig", "DataSourceTestConfig"),
+    # Registered after that capture; resolved the same way, against the tree that registers it.
+    "ExasolDatasourceTestConfig": ("DataSourceTestConfig", "DataSourceTestConfig"),
     "MySQLDatasourceTestConfig": ("DataSourceTestConfig", "DataSourceTestConfig"),
     "OracleDatasourceTestConfig": ("DataSourceTestConfig", "DataSourceTestConfig"),
     "PandasDataFrameDatasourceTestConfig": ("DataSourceTestConfig", "DataSourceTestConfig"),
@@ -2408,7 +2420,7 @@ class TestEveryRegisteredConfigResolvesTheSameEqualityAndHashAsBeforeThisWork:
     retrofit was additive — it added a class attribute and deleted two hand-written properties, and
     touched no `@dataclass` decoration — and it fails if a future change re-decorates any config in
     either direction: opting one of the two filesystem configs out of generated equality reddens it
-    just as surely as regenerating equality on one of the inherited thirteen would.
+    just as surely as regenerating equality on one of the inherited fourteen would.
 
     No hash *value* is pinned, only the resolution and (elsewhere, against a control) the behavior.
     `test_id` is a `str` and `PYTHONHASHSEED` is randomized, so a hash value is not reproducible
@@ -3104,9 +3116,10 @@ class TestTheExemptionLiteralIsKeptLive:
     the same function a literal extended with exactly the entry it is meant to catch.
     """
 
-    def test_the_literal_names_exactly_the_four_curated_backends_with_a_reason_each(self) -> None:
+    def test_the_literal_names_exactly_the_five_curated_backends_with_a_reason_each(self) -> None:
         assert sorted(_OUTSIDE_SHARED_PARAMETERIZATION) == [
             "clickhouse",
+            "exasol",
             "oracle",
             "singlestore",
             "trino",
@@ -3170,6 +3183,7 @@ _PUBLIC_NAMES_WITH_NO_CORE_MEMBER: Tuple[str, ...] = (
     "Amazon S3",
     "Azure Blob Storage",
     "ClickHouse",
+    "Exasol",
     "Google Cloud Storage",
     "Microsoft Fabric",
     "Oracle",
@@ -3253,15 +3267,15 @@ class TestCoreVocabularyAlignment:
     """The registry's public names and the shipped `SupportedDataSources` vocabulary agree.
 
     The check is one-directional on purpose: every *member* must reach a record, but a record need
-    not have a member. The reverse direction would fail immediately for eight data sources this
-    work declares — the three object stores, Microsoft Fabric, Trino, ClickHouse, Oracle and
-    SingleStore — and closing that gap is not this work's to close: `SupportedDataSources` is a
-    public metadata surface in the shipped package, so adding a member to it is a product decision
-    about what Core Expectations advertise, with user-visible consequences. A test harness does not
-    get to force one.
+    not have a member. The reverse direction would fail immediately for nine data sources this
+    work declares — the three object stores, Microsoft Fabric, Trino, ClickHouse, Oracle,
+    SingleStore and Exasol — and closing that gap is not this work's to close:
+    `SupportedDataSources` is a public metadata surface in the shipped package, so adding a
+    member to it is a product decision about what Core Expectations advertise, with user-visible
+    consequences. A test harness does not get to force one.
 
     What stops the one direction from being a silent ratchet is the second assertion below: the
-    eight names with no member are pinned as a literal, so a member added upstream for any of them
+    nine names with no member are pinned as a literal, so a member added upstream for any of them
     fails here and prompts the record to adopt that member's exact value.
     """
 
@@ -3306,7 +3320,7 @@ class TestCoreVocabularyAlignment:
     ) -> None:
         """The known-absent half is able to fail.
 
-        Simulates upstream adding a `SupportedDataSources` member for Trino — one of the eight —
+        Simulates upstream adding a `SupportedDataSources` member for Trino — one of the nine —
         by passing an extended vocabulary in. Trino must then leave the known-absent set, so the
         literal no longer matches and the message says how to reconcile it.
         """

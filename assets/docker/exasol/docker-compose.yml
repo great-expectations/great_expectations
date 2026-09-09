@@ -1,0 +1,75 @@
+services:
+  exasol_db:
+    # `exasol/nano`, not `exasol/docker-db`. The docker-db image requires `privileged: true`
+    # and is measured in gigabytes; nano is ~140 MB, runs unprivileged, and needs no special
+    # capabilities, which is what makes it usable on a stock GitHub-hosted runner.
+    #
+    # Pinned by digest rather than by the floating `latest` tag: nano publishes no stable
+    # version tag today, so the digest is the only way to keep this lane from silently moving
+    # to a different server build. This digest is Exasol 2026.2.0-nano.3 (read out of the
+    # running container's own startup banner).
+    image: exasol/nano@sha256:45993493060711ee600f7dbcaecb80fbb0a3c262d3a0efc43491762d71c45c07
+    # Both of the next two values are carried over verbatim from the compose file Exasol
+    # publishes for nano, rather than tuned here, and the ten curated cases pass without either:
+    # this dataset is nowhere near large enough to reach Docker's defaults. They are here to match
+    # the vendor's documented configuration, not to fix an observed failure.
+    #
+    # `shm_size` does take effect -- it raises `/dev/shm` from Docker's 64 MB default to 512 MB,
+    # where the database places its shared memory segments (verified: `HostConfig.ShmSize` reads
+    # 536870912 with this line and 67108864 without it). `pids_limit: -1` means "no cap", which is
+    # already the daemon default, so on a stock runner it is declarative -- `HostConfig.PidsLimit`
+    # is unset either way. It earns its place only on a daemon configured with a default pids
+    # ceiling, where the server's process-per-service model could otherwise hit it.
+    shm_size: 512mb
+    pids_limit: -1
+    # No `privileged`, no `ulimits`, no volumes: nano needs none of them, and leaving out a
+    # volume means every run starts from the image's own freshly initialized database.
+    ports:
+      - "8563:8563"
+    networks:
+      - dbnet
+
+  # A readiness gate, not a second database. `exasol/nano` is distroless -- it contains no
+  # shell and no binaries at all beyond its `/controller` entrypoint -- so it cannot carry a
+  # healthcheck of its own the way every other backend's compose file does. Compose's `--wait`
+  # (which the task runner passes) treats a service with no healthcheck as ready the moment it
+  # is merely *running*, so without this gate the lane would start connecting long before the
+  # database could answer. This sidecar exists purely to carry the healthcheck that the
+  # database container cannot.
+  exasol_ready:
+    image: alpine/openssl:3.5.4
+    entrypoint: ["sleep", "infinity"]
+    depends_on:
+      - exasol_db
+    healthcheck:
+      # A TLS handshake, deliberately -- not a TCP port probe. Measured on a cold start, the
+      # port accepts connections at t=3s but the database does not answer a query until t=16s,
+      # so `nc -z` style probes report ready ~13 seconds too early and hand the lane a
+      # connection that then fails. The TLS handshake, by contrast, first succeeds at t=16s --
+      # the same second the first real query succeeds -- because the server completes the
+      # handshake only once the database behind it is actually up. That makes it a faithful
+      # readiness signal using nothing but an OpenSSL client.
+      #
+      # `-brief` keeps the output small; the grep is what turns "handshake completed" into the
+      # exit status, since `s_client` exits 0 on some partial failures. `</dev/null` is
+      # required -- `s_client` otherwise holds the connection open reading stdin and the probe
+      # hits its timeout instead of returning.
+      test:
+        [
+          "CMD-SHELL",
+          "openssl s_client -brief -connect exasol_db:8563 </dev/null 2>&1 | grep -q 'Verification'",
+        ]
+      # Budget: start_period + retries * interval = 10s + 40 * 5s = 210s, inside the task
+      # runner's 300-second `--wait-timeout`. Measured cold start to first answered query was
+      # 11-16s across runs, so this carries wide margin while still failing well inside 300s
+      # if the container never becomes ready.
+      interval: 5s
+      timeout: 10s
+      start_period: 10s
+      retries: 40
+    networks:
+      - dbnet
+
+networks:
+  dbnet:
+    driver: bridge

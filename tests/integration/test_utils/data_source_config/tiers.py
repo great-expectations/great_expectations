@@ -105,7 +105,7 @@ CURATED_SQL_DATA_SOURCES: Final[List[DataSourceTestConfig]] = [
     for config_class in data_source_configs_for_tier(SupportTier.CURATED_SQL)
 ]
 """Every registered config declaring `SupportTier.CURATED_SQL` membership, instantiated with no
-arguments, in label order. Four SQL backends declare that tier today."""
+arguments, in label order. Five SQL backends declare that tier today."""
 
 ALL_DATA_SOURCES: Final[List[DataSourceTestConfig]] = [
     cast("DataSourceTestConfig", config_class())

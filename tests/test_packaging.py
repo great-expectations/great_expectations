@@ -109,6 +109,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-dremio.txt"]
         | req_set_dict["requirements-dev-sql-server.txt"]
         | req_set_dict["requirements-dev-mysql.txt"]
+        | req_set_dict["requirements-dev-exasol.txt"]
         | req_set_dict["requirements-dev-oracle.txt"]
         | req_set_dict["requirements-dev-postgresql.txt"]
         | req_set_dict["requirements-dev-redshift.txt"]

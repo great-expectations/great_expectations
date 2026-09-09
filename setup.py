@@ -62,6 +62,7 @@ def get_extras_require():
         "athena",  # https://github.com/laughingman7743/PyAthena/blob/master/pyproject.toml
         "bigquery",  # https://github.com/googleapis/python-bigquery-sqlalchemy/blob/main/setup.py
         "dremio",  # https://github.com/narendrans/sqlalchemy_dremio/blob/master/setup.py
+        "exasol",  # https://github.com/exasol/sqlalchemy-exasol
         "hive",  # https://github.com/dropbox/PyHive/blob/master/setup.py
         "sql-server",  # https://github.com/mkleehammer/pyodbc/blob/master/setup.py
         "mysql",  # https://github.com/PyMySQL/PyMySQL/blob/main/pyproject.toml

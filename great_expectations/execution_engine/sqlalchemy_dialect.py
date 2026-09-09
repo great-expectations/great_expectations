@@ -16,6 +16,7 @@ class GXSqlDialect(Enum):
     BIGQUERY = "bigquery"
     DATABRICKS = "databricks"
     DREMIO = "dremio"
+    EXASOL = "exasol"
     HIVE = "hive"
     SQL_SERVER = "mssql"
     MYSQL = "mysql"

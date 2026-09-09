@@ -25,6 +25,7 @@ from .declaration_only import (
     MICROSOFT_FABRIC,
     NEON,
 )
+from .exasol import ExasolDatasourceTestConfig
 from .generic_sql import GenericSQLDatasourceTestConfig
 from .mysql import MySQLDatasourceTestConfig
 from .oracle import OracleDatasourceTestConfig

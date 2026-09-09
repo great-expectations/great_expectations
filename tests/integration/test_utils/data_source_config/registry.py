@@ -96,6 +96,10 @@ _OUTSIDE_SHARED_PARAMETERIZATION: Final[Mapping[str, str]] = {
         "curated tier: its dialect behavior is proven by the curated backend suite, and the "
         "shared parameterization deliberately omits it"
     ),
+    "exasol": (
+        "curated tier: its dialect behavior is proven by the curated backend suite, and the "
+        "shared parameterization deliberately omits it"
+    ),
     "oracle": (
         "curated tier: its dialect behavior is proven by the curated backend suite, and the "
         "shared parameterization deliberately omits it"

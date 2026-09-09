@@ -283,7 +283,7 @@ two fluent types.
 
 The public compatibility reference at
 [`docs/docusaurus/docs/help/compatibility_reference.md`](../../../docs/docusaurus/docs/help/compatibility_reference.md)
-lists eighteen data sources in the "Data sources" row of its support table. Every one of them
+lists nineteen data sources in the "Data sources" row of its support table. Every one of them
 resolves to a registered record. Four registered data sources are absent from that list, and two
 more resolve only by reading past a spelling difference. Both kinds are recorded here so that the
 effort which regenerates that page sees them rather than rediscovering them.
@@ -361,9 +361,9 @@ Expectations advertise, with user-visible consequences, and is not the harness's
 The alignment check in `tests/test_data_source_registry.py` is one-directional for that reason:
 every vocabulary member must reach a registered record, but a record need not have a member. What
 keeps that from being a silent ratchet is the literal `_PUBLIC_NAMES_WITH_NO_CORE_MEMBER` in the
-same module, which pins the eight registered public names with no member — the three object stores,
-Microsoft Fabric, ClickHouse, Oracle, SingleStore and Trino. A member added upstream for any of them
-fails that check and prompts the record to adopt the member's exact value.
+same module, which pins the nine registered public names with no member — the three object stores,
+Microsoft Fabric, ClickHouse, Exasol, Oracle, SingleStore and Trino. A member added upstream for any
+of them fails that check and prompts the record to adopt the member's exact value.
 
 **The fluent datasource type stubs have no overloads for four flavors.**
 `great_expectations/datasource/fluent/sources.pyi` declares no `add_alloy`, `add_aurora`,

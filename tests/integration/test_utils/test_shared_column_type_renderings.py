@@ -61,7 +61,7 @@ def _sql_backend_specs() -> List[SqlBackendSpec]:
 def _backend_params() -> List[ParameterSet]:
     """One parameter per registered SQL backend, carrying that backend's own pytest marker.
 
-    The marker is what puts a backend's case in the lane that installs its dialect. Seven of these
+    The marker is what puts a backend's case in the lane that installs its dialect. Eight of these
     backends have a third-party dialect that only their own lane installs, so without it their
     recorded rows would be checked in no lane at all.
 
@@ -84,6 +84,7 @@ _RESOLVED: Mapping[str, Mapping[str, str]] = {
         "datetime": "Nullable(DateTime64(3))",
     },
     "databricks": {"dialect": "databricks", "float": "DOUBLE", "datetime": "TIMESTAMP_NTZ"},
+    "exasol": {"dialect": "exa", "float": "FLOAT", "datetime": "TIMESTAMP"},
     "mssql": {"dialect": "mssql", "float": "FLOAT(53)", "datetime": "DATETIME"},
     "mysql": {"dialect": "mysql", "float": "FLOAT(53)", "datetime": "DATETIME"},
     "oracle": {"dialect": "oracle", "float": "DECIMAL(38, 10)", "datetime": "TIMESTAMP"},
@@ -104,7 +105,7 @@ _RESOLVED: Mapping[str, Mapping[str, str]] = {
     "trino": {"dialect": "trino", "float": "DOUBLE", "datetime": "TIMESTAMP"},
 }
 """Keyed by the backend's own declared label; `dialect` names the SQLAlchemy dialect it connects
-through, which is spelled differently from the label for two of them.
+through, which is spelled differently from the label for three of them.
 
 `float` and `datetime` only, because those two are where a dialect's reading of a type name has
 actually diverged from what the harness meant. `pd.Timestamp` carries no column of its own: it is
