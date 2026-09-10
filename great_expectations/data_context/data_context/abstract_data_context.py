@@ -2335,10 +2335,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113 # FIXME CoP
             logger.info(f"Creating new substitution_variables file at {config_variables_filepath}")
-            with open(config_variables_filepath, "w") as template:
+            with open(config_variables_filepath, "w", encoding="utf-8") as template:
                 template.write(CONFIG_VARIABLES_TEMPLATE)
 
-        with open(config_variables_filepath, "w") as config_variables_file:
+        with open(config_variables_filepath, "w", encoding="utf-8") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
     def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:

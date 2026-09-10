@@ -198,3 +198,61 @@ def test_inline_store_backend_saves_non_ascii_variable_under_non_utf8_locale(
 
     assert reload_result.returncode == 0, reload_result.stderr
     assert "OK" in reload_result.stdout
+
+
+@pytest.mark.filesystem
+def test_config_variables_round_trip_non_ascii_value_under_non_utf8_locale(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A non-ASCII config variable saved by AbstractDataContext.save_config_variable()
+    must read back through the config-variables provider regardless of what encoding
+    the process's ambient locale resolves to.
+
+    See https://github.com/fivetran/great_expectations/issues/12181. Sibling of the
+    tuple-store and great_expectations.yml cases above (#12120): the provider read
+    (FileConfigurationProvider.get_values) and both save_config_variables writes
+    opened config_variables.yml with a bare open().
+
+    Both the save and the reload run under a forced non-UTF-8 locale: either side
+    under the ambient (UTF-8) locale would resolve to UTF-8 regardless of whether
+    the encoding is pinned, leaving nothing for the assertions to catch.
+    """  # FIXME CoP
+    project_root = tmp_path / "project"
+    payload_path = tmp_path / "payload.txt"
+    payload_path.write_text(NON_ASCII_VALUE, encoding="utf-8")
+
+    write_script = textwrap.dedent(f"""
+        import great_expectations as gx
+
+        import os
+
+        assert open(os.devnull).encoding != "utf-8"  # locale override did not take effect
+
+        with open({str(payload_path)!r}, encoding="utf-8") as f:
+            non_ascii_value = f.read()
+
+        context = gx.get_context(mode="file", context_root_dir={str(project_root)!r})
+        context.save_config_variable("db_password", non_ascii_value)
+    """)
+    write_result = _run_under_non_utf8_locale(write_script)
+    assert write_result.returncode == 0, write_result.stderr
+
+    reload_script = textwrap.dedent(f"""
+        import great_expectations as gx
+
+        import os
+
+        assert open(os.devnull).encoding != "utf-8"  # locale override did not take effect
+
+        with open({str(payload_path)!r}, encoding="utf-8") as f:
+            non_ascii_value = f.read()
+
+        context = gx.get_context(mode="file", context_root_dir={str(project_root)!r})
+        assert context.config_variables["db_password"] == non_ascii_value
+        print("OK")
+    """)
+
+    reload_result = _run_under_non_utf8_locale(reload_script)
+
+    assert reload_result.returncode == 0, reload_result.stderr
+    assert "OK" in reload_result.stdout
