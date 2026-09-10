@@ -267,9 +267,14 @@ def test_zero_standard_deviation_is_consistent_across_data_sources(
     assert result.result["unexpected_list"] == []
 
 
-# SQLite is excluded: its `stddev` user-defined function raises outright on fewer than two
-# non-null values, so it never reaches the z-score metric at all. That is a pre-existing
-# defect in `column.standard_deviation`, unrelated to this change and recorded separately.
+# SQLite sits out the parameterization below: its `stddev` user-defined function raises outright
+# on fewer than two non-null values, so it never reaches the z-score metric at all. That is a
+# pre-existing defect in `column.standard_deviation`, upstream of anything this change touches.
+#
+# The exclusion is paired with `test_undefined_standard_deviation_on_sqlite` rather than left to
+# stand on its own. A list that simply omits a backend keeps omitting it forever, including after
+# the reason has gone away and nobody has any prompt to notice; running the case as a strict xfail
+# keeps the gap visible in the test report and makes the exclusion expire by itself.
 UNDEFINED_VARIANCE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
     config for config in ALL_DATA_SOURCES if not isinstance(config, SqliteDatasourceTestConfig)
 ]
@@ -288,6 +293,34 @@ def test_undefined_standard_deviation_is_consistent_across_data_sources(
     resolves it in `_pandas_condition` rather than in the guard.
 
     A column that cannot have outliers must not report any, whichever of those paths runs.
+    """
+    expectation = gxe.ExpectColumnValueZScoresToBeLessThan(
+        column=SINGLE_NON_NULL_VALUE, threshold=1.96, double_sided=True
+    )
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    _assert_no_metric_exceptions(result)
+    assert result.success
+    assert result.result["unexpected_count"] == 0
+    assert result.result["unexpected_list"] == []
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "SQLite's `stddev` user-defined function raises on fewer than two non-null values, so "
+        "`column.standard_deviation` fails before the z-score metric is reached. Pre-existing, "
+        "and upstream of the guards this module covers."
+    ),
+)
+@parameterize_batch_for_data_sources(data_source_configs=[SqliteDatasourceTestConfig()], data=DATA)
+def test_undefined_standard_deviation_on_sqlite(batch_for_datasource: Batch) -> None:
+    """The one case SQLite sits out above, kept executable rather than dropped.
+
+    The assertions are the ones the shared test makes, so this states what SQLite would have to
+    do to rejoin that parameterization. It is strict on purpose: the day the aggregate stops
+    raising, this passes, pytest fails the run for passing, and whoever fixed it is told that
+    the exclusion above is no longer earned. An omission from a list reports nothing at all.
     """
     expectation = gxe.ExpectColumnValueZScoresToBeLessThan(
         column=SINGLE_NON_NULL_VALUE, threshold=1.96, double_sided=True
