@@ -30,6 +30,7 @@ DISTRIBUTION_WITH_NULLS = "lotta_nulls"
 CONSTANT_COL = "constant"
 CONSTANT_COL_WITH_NULLS = "constant_with_nulls"
 SINGLE_NON_NULL_VALUE = "single_non_null_value"
+INFINITY_COL = "with_infinity"
 
 DATA = pd.DataFrame(
     {
@@ -45,6 +46,18 @@ DATA = pd.DataFrame(
     },
     dtype="object",
 )
+
+# Deliberately separate frames rather than more columns on DATA.
+#
+# NUMERIC_DTYPE_DATA exists because DATA is built with dtype="object", and the dtype
+# decides which path a constant column takes on pandas: object raises ZeroDivisionError
+# from (column - mean) / 0.0, while a numeric dtype yields NaN. Only the first is covered
+# by the tests above.
+NUMERIC_DTYPE_DATA = pd.DataFrame({CONSTANT_COL: [5.0, 5.0, 5.0, 5.0, 5.0]})
+
+# INFINITY_DATA is separate because not every backend can store a floating-point infinity,
+# and a column here would break every other test on those.
+INFINITY_DATA = pd.DataFrame({INFINITY_COL: [1.0, 2.0, 3.0, float("inf")]})
 
 
 def _assert_no_metric_exceptions(result: ExpectationValidationResult) -> None:
@@ -285,3 +298,54 @@ def test_undefined_standard_deviation_is_consistent_across_data_sources(
     assert result.success
     assert result.result["unexpected_count"] == 0
     assert result.result["unexpected_list"] == []
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=JUST_PANDAS_DATA_SOURCES, data=NUMERIC_DTYPE_DATA
+)
+def test_zero_standard_deviation_on_a_numeric_dtype_column(batch_for_datasource: Batch) -> None:
+    """A constant column reaches the same verdict whatever its pandas dtype.
+
+    The two dtypes take different paths: on an object-dtype column
+    (column - mean) / 0.0 raises ZeroDivisionError, and on a numeric one it yields NaN
+    that the isna() limb in _pandas_condition accepts. Every column in DATA is object
+    dtype, so without this the numeric path is untested.
+    """
+    expectation = gxe.ExpectColumnValueZScoresToBeLessThan(
+        column=CONSTANT_COL, threshold=1.96, double_sided=True
+    )
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    _assert_no_metric_exceptions(result)
+    assert result.success
+    assert result.result["unexpected_count"] == 0
+
+
+# pandas only. The SQL engines cannot reach this metric at all with an infinite value:
+# `column.mean` raises decimal.InvalidOperation on PostgreSQL, from convert_decimal_to_float
+# handling a Decimal("Infinity"). That divergence is upstream of the z-score metric, in the
+# aggregate metrics, and is not something this change reaches.
+@pytest.mark.filterwarnings("ignore:invalid value encountered in subtract:RuntimeWarning")
+@parameterize_batch_for_data_sources(
+    data_source_configs=JUST_PANDAS_DATA_SOURCES, data=INFINITY_DATA
+)
+def test_infinite_value_has_no_defined_z_score(batch_for_datasource: Batch) -> None:
+    """An infinite value makes the variance undefined, so no row can be an outlier.
+
+    Series.std() returns NaN for a column containing inf -- not zero, and not None -- so
+    this input clears the guard in _pandas_function entirely and is resolved by the isna()
+    limb in _pandas_condition instead. Before this fix every row was reported as an
+    outlier, because NaN compares False against any threshold.
+
+    The warning filter is needed because numpy emits "invalid value encountered in
+    subtract" computing the variance, and this suite promotes warnings to errors, which
+    would otherwise fail inside column.standard_deviation before the z-score metric ran.
+    """
+    expectation = gxe.ExpectColumnValueZScoresToBeLessThan(
+        column=INFINITY_COL, threshold=1.96, double_sided=True
+    )
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    _assert_no_metric_exceptions(result)
+    assert result.success
+    assert result.result["unexpected_count"] == 0
