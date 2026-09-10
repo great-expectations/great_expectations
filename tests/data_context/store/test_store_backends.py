@@ -491,7 +491,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     assert "InlineStoreBackend does not support moving of keys" in str(e.value)
 
     # test invalid .remove_key
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+    inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,
         resource_type=DataContextVariableSchema.PROGRESS_BARS,
     )
@@ -510,7 +510,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     assert "InlineStoreBackend does not support the deletion of top level keys" in str(e.value)
 
     # test valid .remove_key
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+    inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,
         resource_type=DataContextVariableSchema.STORES,
     )

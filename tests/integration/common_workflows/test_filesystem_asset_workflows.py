@@ -70,7 +70,7 @@ def pandas_filesystem_whole_table_batch_definition(
 def pandas_filesystem_monthly_batch_definition(
     pandas_file_system_asset: PandasCSVAsset,
 ) -> BatchDefinition:
-    return pandas_file_system_asset.add_batch_definition_monthly(  # type: ignore[attr-defined] # FIXME CoP
+    return pandas_file_system_asset.add_batch_definition_monthly(
         "monthly",
         re.compile(BATCHING_REGEX),
     )
@@ -80,7 +80,7 @@ def pandas_filesystem_monthly_batch_definition(
 def pandas_filesystem_monthly_batch_definition_descending(
     pandas_file_system_asset: PandasCSVAsset,
 ) -> BatchDefinition:
-    return pandas_file_system_asset.add_batch_definition_monthly(  # type: ignore[attr-defined] # FIXME CoP
+    return pandas_file_system_asset.add_batch_definition_monthly(
         "monthly",
         re.compile(BATCHING_REGEX),
         sort_ascending=False,

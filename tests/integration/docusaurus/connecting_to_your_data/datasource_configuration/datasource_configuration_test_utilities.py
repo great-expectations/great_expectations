@@ -8,18 +8,19 @@ from typing import List, Tuple
 # remains the same in all the configuration tests.  Users may disregard it.
 
 
-def _get_items_by_path(root_dictionary: dict, keys: Tuple[str]) -> Tuple:
+def _get_items_by_path(root_dictionary: dict, keys: Tuple[str, ...]) -> Tuple | None:
     try:
         return "/".join(keys), reduce(operator.getitem, keys, root_dictionary)
     except Exception:
         print(root_dictionary, keys)
+        return None
 
 
 def _gather_key_paths_from_dict(
     target_dict: dict, current_path: List[str] | None = None
-) -> Tuple[List[Tuple[str]], List[str]]:
-    key_paths: List[Tuple[str]] = []
-    full_paths: List[Tuple[str]] = []
+) -> Tuple[List[Tuple[str, ...]], List[Tuple[str, ...]]]:
+    key_paths: List[Tuple[str, ...]] = []
+    full_paths: List[Tuple[str, ...]] = []
     for key, value in target_dict.items():
         if isinstance(value, dict):
             if current_path:

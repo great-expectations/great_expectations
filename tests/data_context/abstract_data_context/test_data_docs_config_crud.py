@@ -5,10 +5,11 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context import EphemeralDataContext
+from great_expectations.data_context.store.store import DataDocsSiteConfigTypedDict
 
 
 @pytest.fixture
-def new_site_config() -> dict:
+def new_site_config() -> DataDocsSiteConfigTypedDict:
     return {
         "class_name": "SiteBuilder",
         "module_name": "great_expectations.render.renderer.site_builder",
@@ -26,7 +27,7 @@ class TestAddDataDocsSite:
     def test_add_data_docs_site(
         self,
         ephemeral_context_with_defaults: EphemeralDataContext,
-        new_site_config: dict,
+        new_site_config: DataDocsSiteConfigTypedDict,
     ):
         # Add a new site
         new_site_name = "my_new_site"
@@ -41,7 +42,7 @@ class TestAddDataDocsSite:
     def test_add_data_docs_site_persists(
         self,
         ephemeral_context_with_defaults: EphemeralDataContext,
-        new_site_config: dict,
+        new_site_config: DataDocsSiteConfigTypedDict,
     ):
         new_site_name = "my_new_site"
         with mock.patch(
@@ -57,7 +58,7 @@ class TestAddDataDocsSite:
     def test_add_data_docs_site_already_existing_site_raises_exception(
         self,
         ephemeral_context_with_defaults: EphemeralDataContext,
-        new_site_config: dict,
+        new_site_config: DataDocsSiteConfigTypedDict,
     ):
         # Check fixture configuration
         existing_site_name = "local_site"
@@ -84,7 +85,7 @@ class TestUpdateDataDocsSite:
     def test_update_data_docs_site(
         self,
         ephemeral_context_with_defaults: EphemeralDataContext,
-        new_site_config: dict,
+        new_site_config: DataDocsSiteConfigTypedDict,
     ):
         # Add a new site
         new_site_name = "my_new_site"
@@ -100,13 +101,14 @@ class TestUpdateDataDocsSite:
 
         # Check the updated site config
         sites = ephemeral_context_with_defaults.variables.data_docs_sites
+        assert sites is not None
         assert sites[new_site_name]["store_backend"]["base_directory"] == "/my_updated_site/"
 
     @pytest.mark.unit
     def test_update_data_docs_site_persists(
         self,
         ephemeral_context_with_defaults: EphemeralDataContext,
-        new_site_config: dict,
+        new_site_config: DataDocsSiteConfigTypedDict,
     ):
         # Add a new site
         new_site_name = "my_new_site"
@@ -131,7 +133,7 @@ class TestUpdateDataDocsSite:
     def test_update_data_docs_site_missing_site_raises_exception(
         self,
         ephemeral_context_with_defaults: EphemeralDataContext,
-        new_site_config: dict,
+        new_site_config: DataDocsSiteConfigTypedDict,
     ):
         # Check fixture configuration
         assert "missing" not in ephemeral_context_with_defaults.get_site_names()

@@ -36,8 +36,8 @@ expectation.column = "pickup_location_id"
 expectation.save()
 
 # update multiple expectations as a batch
-for expectation in suite.expectations:
-    expectation.notes = "This Expectation was generated as part of GX Documentation."
+for suite_expectation in suite.expectations:
+    suite_expectation.notes = "This Expectation was generated as part of GX Documentation."
 suite.save()
 
 # delete an expectation

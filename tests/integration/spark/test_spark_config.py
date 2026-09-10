@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 from packaging.version import Version
@@ -10,14 +10,17 @@ from great_expectations.datasource.fluent import SparkDatasource
 
 logger = logging.getLogger(__name__)
 
-try:
+if TYPE_CHECKING:
     from great_expectations.execution_engine import SparkDFExecutionEngine
-except ImportError:
-    SparkDFExecutionEngine = None
-    # TODO: review logging more detail here
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes."  # noqa: E501 # FIXME CoP
-    )
+else:
+    try:
+        from great_expectations.execution_engine import SparkDFExecutionEngine
+    except ImportError:
+        SparkDFExecutionEngine = None
+        # TODO: review logging more detail here
+        logger.debug(
+            "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes."  # noqa: E501 # FIXME CoP
+        )
 
 # module level markers
 pytestmark = pytest.mark.spark

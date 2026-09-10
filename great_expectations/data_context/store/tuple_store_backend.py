@@ -315,7 +315,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
         try:
-            with open(filepath) as infile:
+            with open(filepath, encoding="utf-8") as infile:
                 contents: str = infile.read().rstrip("\n")
         except FileNotFoundError as e:
             raise InvalidKeyError(  # noqa: TRY003 # FIXME CoP
