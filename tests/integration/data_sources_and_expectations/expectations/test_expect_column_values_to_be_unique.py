@@ -424,6 +424,67 @@ def test_column_named_like_internal_count_label_sql(
     assert sorted(entry[ROW_ID] for entry in result.result["unexpected_index_list"]) == [1, 2]
 
 
+# Some backends report the names in "table.columns" as case-insensitive strings, whose
+# hash is derived from the case-folded name. A plain string carrying the same mixed-case
+# name is an equal but differently-hashed key, so a projection built from one and read
+# back with the other only agrees when the name is already lower case.
+MIXED_CASE_ROW_ID = "Row_Id"
+MIXED_CASE_COLUMN = "Rndrng_NPI"
+
+MIXED_CASE_DATA = pd.DataFrame(
+    {
+        MIXED_CASE_ROW_ID: [1, 2, 3],
+        MIXED_CASE_COLUMN: ["1000000001", "1000000002", "1000000002"],
+    }
+)
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=RESULT_FORMAT_GUARD_DATA_SOURCES, data=MIXED_CASE_DATA
+)
+def test_complete_with_mixed_case_column_sql(batch_for_datasource: Batch) -> None:
+    """Row retrieval must work for a column whose name is not lower case.
+
+    Mixed-case identifiers are ordinary in data warehouses fed from external extracts.
+    The row-retrieval paths index an intermediate projection by column name, and the
+    expectation must evaluate normally rather than fail with an exception from that
+    lookup.
+    """
+    expectation = gxe.ExpectColumnValuesToBeUnique(column=MIXED_CASE_COLUMN)
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    _assert_no_metric_exceptions(result)
+    assert not result.success
+    # Only the second value repeats, so both of its rows are unexpected.
+    assert result.result["unexpected_count"] == 2
+    assert sorted(result.result["unexpected_list"]) == ["1000000002", "1000000002"]
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=RESULT_FORMAT_GUARD_DATA_SOURCES, data=MIXED_CASE_DATA
+)
+def test_complete_with_mixed_case_unexpected_index_column_names_sql(
+    batch_for_datasource: Batch,
+) -> None:
+    """The index columns are indexed by name too, so they carry the same requirement."""
+    expectation = gxe.ExpectColumnValuesToBeUnique(column=MIXED_CASE_COLUMN)
+    result = batch_for_datasource.validate(
+        expectation,
+        result_format={
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": [MIXED_CASE_ROW_ID],
+        },
+    )
+
+    _assert_no_metric_exceptions(result)
+    assert not result.success
+    assert result.result["unexpected_count"] == 2
+    assert sorted(entry[MIXED_CASE_ROW_ID] for entry in result.result["unexpected_index_list"]) == [
+        2,
+        3,
+    ]
+
+
 @pytest.mark.timeout(30)  # the subprocess pays full library import cost
 @pytest.mark.unit
 def test_import_does_not_emit_metric_reregistration_warnings() -> None:
