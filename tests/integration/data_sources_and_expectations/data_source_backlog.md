@@ -504,3 +504,160 @@ and would reinstate the violation of the config's own documented rule. The two l
 generic-SQL entry may still legitimately appear in are the module-local ones and
 `DATA_SOURCES_THAT_SUPPORT_DATE_COMPARISONS` in
 [`data_source_lists.py`](./data_source_lists.py), none of which is derived or CI-gating.
+
+## The gallery self-test path resolves to a deleted directory
+
+Every shipped core expectation's `examples` class attribute — the field a maintainer fills in with
+test cases so the expectation's own diagnostics and the public gallery build can run against them —
+is empty: `Expectation.examples` defaults to `[]`, and no core module under
+`great_expectations/expectations/core/` overrides it.
+
+`ExpectationDoctor._get_examples` (in
+`great_expectations/core/expectation_diagnostics/expectation_doctor.py`) knows this, and falls back:
+when `self._expectation.examples` is empty it reads from a JSON corpus instead, resolved as
+`pathlib.Path(__file__, "..", "..", "..", "..", "tests", "test_definitions").resolve()` —
+i.e. `tests/test_definitions/` at the repository root. That directory does not exist in this tree.
+
+The combined effect: `run_diagnostics()` and the gallery-facing checklist it drives (`for_gallery=True`
+and the "at least one test case with `include_in_gallery=True`" check described in the same module's
+docstring) has no examples to read for any core expectation, from either source. Anything that depends
+on a core expectation supplying real diagnostic examples — the self-test checklist output, and the
+community gallery build that reads it — cannot produce a meaningful result for a core expectation
+today; both paths are dead ends, one to an empty list and the other to a missing directory. This is
+independent of the tier work in this document, which does not touch `examples` or the diagnostics
+module; it is recorded here because building the suite above required reading how those examples are
+supposed to be found, and confirming that they currently are not.
+
+## Per-expectation published support claims diverge from measured results
+
+Roughly fifty shipped expectation modules under `great_expectations/expectations/core/` carry a
+hand-written module-level `SUPPORTED_DATA_SOURCES` list, populated with members of the
+`SupportedDataSources` enum, declaring which data sources that expectation's authors believe it
+supports. Measuring every `(expectation, data source)` pair this suite's case table
+publishes against that declared list, across 870 rows, gives:
+
+| comparison to the published list | rows |
+| --- | --- |
+| the case is not applicable to that data source's engine (no claim evaluated) | 99 |
+| declares support ("claims") | 525 |
+| does not declare support ("does not claim") | 232 |
+| the expectation publishes no `SUPPORTED_DATA_SOURCES` list at all | 14 |
+
+The 525/232 split is not a defect count — a module can reasonably support less than every case in the
+suite, or the suite's case coverage can exceed what a module's authors ever measured against. It is
+recorded because a maintainer reconciling the two surfaces (the hand-written list and the suite's
+measured result) needs the starting distribution, not just the total.
+
+**One asymmetry in that surface looks like a gap rather than a design choice.**
+`expect_column_values_to_be_dateutil_parseable`'s metric provider
+(`great_expectations/expectations/metrics/column_map_metrics/column_values_dateutil_parseable.py`)
+registers only a `PandasExecutionEngine` implementation. Its closest siblings by shape —
+`expect_column_values_to_be_json_parseable`, `expect_column_values_to_match_strftime_format`,
+`expect_column_values_to_be_increasing`, and `expect_column_values_to_be_decreasing` — each register
+both a `PandasExecutionEngine` and a `SparkDFExecutionEngine` implementation in the corresponding
+module under the same `column_map_metrics/` directory. Nothing about parsing a value with `dateutil`
+is pandas-specific the way, say, a pandas-only accessor would be; the missing Spark provider reads as
+an omission next to four siblings that all made the opposite choice, not as an intentional restriction
+of the expectation to one engine.
+
+**The data sources with no tier claim at all still appear in these hand-written lists.** Four
+`SupportedDataSources` members that per-expectation lists reference —
+`SupportedDataSources.ALLOY`, `.AURORA`, `.CITUS`, and `.NEON` — belong to the registered records
+documented above under
+["Data sources declared but not tested"](#data-sources-declared-but-not-tested), each of which
+declares no tier because no suite in this repository runs against it. A per-expectation list naming
+one of them is therefore a claim this repository has no way to check, the same gap that section
+already describes from the registry side.
+
+## Fifteen candidates were measured for the top tier; nine joined
+
+Fifteen data sources were run against the full expectation-gallery case table to decide membership in
+the `SupportTier.GOLD` tier (a tier declared on `tests/integration/test_utils/data_source_config/data_source_spec.py`'s
+`SupportTier` enum, asserting that a data source passes every applicable case in that suite). Nine
+joined, each clearing every applicable case with nothing excluded: `big-query`, `redshift`, `sqlite`,
+`pandas-data-frame`, `pandas-filesystem-csv`, `mysql`, `postgresql`, `trino`, and `databricks`.
+
+The other six did not join, and the six divide into two kinds that should not be read as the same
+finding.
+
+**Three are held out by a defect in the `great_expectations` package itself, not by any property of
+the data source:**
+
+- **Oracle** fails two cases that assert on an observed type name, plus four cases built around a
+  `LIKE`-pattern match — and both are package defects, not data-source properties. The type-name
+  cases fail even though the reported and expected values agree: the case reports
+  `observed_value='INTEGER'` and asks `type_="INTEGER"`, and the expectation still fails, with
+  `raised_exception: false`. The expected type name is resolved by attribute lookup on the dialect
+  module (`great_expectations/expectations/type_comparison.py`, around the `getattr(type_module,
+  expected_type)` call): `sqlalchemy.dialects.oracle` exports no `INTEGER`, the resulting
+  `AttributeError` is swallowed and logged only at DEBUG, the candidate-type list comes back empty,
+  and `isinstance(value, ())` is unconditionally `False`. No type name declared for Oracle can pass
+  under this lookup, because the one it reports itself is unresolvable. The four `LIKE`-pattern
+  cases are a separate defect: they all crash rather than merely returning an unexpected result —
+  the pattern-matching code path the package uses for this dialect raises rather than evaluating the
+  expectation.
+- **SingleStore** fails exactly the same four `LIKE`-pattern cases as Oracle, and nothing else. Every
+  other applicable case in the suite passes.
+- **Snowflake**: all four regex cases behave consistently with whole-value matching, three failing
+  and one passing. On this dialect the regex metric matches the whole value rather than a substring,
+  which every other dialect in the suite does — so a pattern that is meant to match part of a value
+  silently reports the wrong verdict for the cases where that distinction matters (it reports success
+  for rows that do in fact match), rather than raising.
+
+A membership tier records exclusions as facts about a data source — a genuine, stateable property such
+as "this dialect has no boolean type." A crash or a silently-wrong result coming from how the package's
+own pattern-matching code handles a dialect is neither: it is a statement about the package, not the
+data source, and recording it as a per-case exclusion would misrepresent it as something inherent to
+Oracle, SingleStore, or Snowflake that a fix could never change. None of the three is excluded on that
+basis for exactly this reason. Once the relevant defects are corrected in the package, each should be
+re-measured by re-running this suite against it — no re-derivation of the case table or the exclusion
+logic is needed. What "re-measured" requires differs by candidate: **SingleStore** joins once the
+`LIKE`-pattern crash alone is fixed, and has no other failure standing between it and membership.
+**Snowflake** joins once the regex-anchoring behavior alone is fixed. **Oracle** needs both the
+`LIKE`-pattern fix and the type-resolution fix described above — the regex-anchoring defect is not
+one of its failures — before it clears the suite.
+
+**Three were already out before this work; what changed is that there is now per-case evidence for
+why, where before there was only a standing.** ClickHouse, Spark, and SQL Server were measured
+against the full case table along with the other twelve candidates, and each has real, recorded
+per-case failures. All three fail more cases than the per-tier exclusion ceiling permits, so all
+three are settled by count alone, independent of cause: ClickHouse fails six cases, Spark fails four,
+and SQL Server fails five, and the ceiling is two per tier. None is a candidate for
+membership-by-exclusion.
+
+- **ClickHouse fails six cases.** Two are a genuine case-vocabulary mismatch — unlike
+  Oracle's two, which fail on a name that does match. `expect_column_values_to_be_of_type` and `expect_column_values_to_be_in_type_list` declare their
+  passing configuration using `INTEGER`/`VARCHAR`, and ClickHouse spells its integer and string types
+  differently, so the declared type name never matches and the case reports a clean, non-raising
+  failure. The other four are the regex family —
+  `expect_column_values_to_match_regex`, `expect_column_values_to_match_regex_list`,
+  `expect_column_values_to_not_match_regex`, and `expect_column_values_to_not_match_regex_list` — and
+  these are the one disposition here that genuinely is a data-source property: this backend's own
+  configuration already carries a curated-tier exclusion for the same case family, with the reason on
+  record that ClickHouse has no `regexp_like` SQL function and the dialect's regex-matching path calls
+  it, so the server rejects the query. The crash observed here matches that documented cause exactly.
+  Six exceeds the ceiling of two regardless of how the four regex cases are classified, so the count
+  alone would have excluded ClickHouse from this tier even before that subsidiary note about the regex
+  family's cause.
+- **Spark fails four cases, and all four are root-caused**, not merely observed:
+  `expect_column_values_to_be_increasing` and `expect_column_values_to_be_decreasing` fail from
+  nondeterministic row order in Spark's parallel CSV read — repeated runs of the same case produced
+  differing unexpected-value lists — which is a genuine property of this candidate rather than a
+  package defect: these expectations are inherently row-order-dependent, and the candidate's
+  reader offers no ordering guarantee. `expect_column_values_to_match_regex_list` is a confirmed
+  package defect, isolated to this engine by the same case passing on SQLite, pandas, MySQL,
+  PostgreSQL, Trino and Oracle. `expect_column_values_to_match_strftime_format` is a fixture-setup
+  gap, not a package defect: the shared fixture declares no explicit schema for this column, so the
+  reader infers a date type instead of a string, and the metric then raises a `TypeError` demanding
+  string values — correctable by declaring a schema, which this effort did not do.
+- **SQL Server fails five cases.** Four are the regex family —
+  `expect_column_values_to_match_regex`, `expect_column_values_to_match_regex_list`,
+  `expect_column_values_to_not_match_regex`, and `expect_column_values_to_not_match_regex_list` —
+  each raising cleanly with `NotImplementedError: Regex is not supported for dialect mssql`: a genuine,
+  cleanly-raised dialect limitation, not the Snowflake class recorded above. Snowflake's regex failure
+  is a silently-wrong result from whole-value anchoring, with no exception at all; this dialect's is a
+  clean, explicit raise stating the dialect has no regex support, a different mechanism entirely. The
+  fifth, `expect_query_results_to_match_comparison`, fails with a driver error reporting that the
+  comparison table reference does not resolve, and is the one SQL Server failure not root-caused here:
+  it was time-boxed rather than resolved, and is left for a future pass to determine whether it is a
+  dialect gap in how the comparison-shape case identifies its second table or something else.

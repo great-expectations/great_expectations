@@ -63,7 +63,6 @@ from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
     DataSourceSpec,
-    ExecutionEngineKind,
     MarkerScope,
     SupportTier,
 )
@@ -80,6 +79,7 @@ from tests.integration.test_utils.data_source_config.registry import (
     register_sql_config,
 )
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -219,7 +219,7 @@ class TestDataSourceConfigsForTier:
 class TestDataSourcesForTierCase:
     """`data_sources_for_tier_case` is the one place a backend's `tier_case_exclusions` entry
     takes effect: it returns a tier's members, instantiated in label order, omitting only those
-    declaring an exclusion for the given case key.
+    declaring an exclusion for the given case key under the given tier.
     """
 
     def test_omits_only_the_backend_excluding_the_case_and_keeps_the_rest_for_other_keys(
@@ -233,7 +233,11 @@ class TestDataSourcesForTierCase:
                 label="zebra",
                 marker="zebra_marker",
                 tiers=frozenset({SupportTier.CURATED_SQL}),
-                tier_case_exclusions={"flaky_case": "observed non-determinism, see issue #1"},
+                tier_case_exclusions={
+                    SupportTier.CURATED_SQL: {
+                        "flaky_case": "observed non-determinism, see issue #1"
+                    }
+                },
             ),
         )
         apple = _make_config_class(
@@ -315,7 +319,11 @@ class TestDataSourcesForTierCase:
                 label="standard-only",
                 marker="standard_only_marker",
                 tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS}),
-                tier_case_exclusions={"skipped_case": "not meaningful for this dialect"},
+                tier_case_exclusions={
+                    SupportTier.CANONICAL_EXPECTATIONS: {
+                        "skipped_case": "not meaningful for this dialect"
+                    }
+                },
             ),
         )
         register_sql_config(curated)
@@ -458,7 +466,11 @@ class TestRegisterSqlConfigEmptyFields:
 class TestRegisterSqlConfigTierCaseExclusionReasons:
     def test_empty_case_key_raises(self) -> None:
         config_class = _make_config_class(
-            "BlankKey", _make_spec(tier_case_exclusions={"": "a reason"})
+            "BlankKey",
+            _make_spec(
+                tiers=frozenset({SupportTier.CURATED_SQL}),
+                tier_case_exclusions={SupportTier.CURATED_SQL: {"": "a reason"}},
+            ),
         )
 
         with pytest.raises(ValueError, match="BlankKey"):
@@ -466,7 +478,11 @@ class TestRegisterSqlConfigTierCaseExclusionReasons:
 
     def test_empty_reason_raises_naming_class_and_case_key(self) -> None:
         config_class = _make_config_class(
-            "BlankReason", _make_spec(tier_case_exclusions={"some_case": ""})
+            "BlankReason",
+            _make_spec(
+                tiers=frozenset({SupportTier.CURATED_SQL}),
+                tier_case_exclusions={SupportTier.CURATED_SQL: {"some_case": ""}},
+            ),
         )
 
         with pytest.raises(ValueError) as excinfo:
@@ -478,7 +494,11 @@ class TestRegisterSqlConfigTierCaseExclusionReasons:
 
     def test_whitespace_only_reason_raises_naming_class_and_case_key(self) -> None:
         config_class = _make_config_class(
-            "WhitespaceReason", _make_spec(tier_case_exclusions={"some_case": "   "})
+            "WhitespaceReason",
+            _make_spec(
+                tiers=frozenset({SupportTier.CURATED_SQL}),
+                tier_case_exclusions={SupportTier.CURATED_SQL: {"some_case": "   "}},
+            ),
         )
 
         with pytest.raises(ValueError) as excinfo:
@@ -489,15 +509,55 @@ class TestRegisterSqlConfigTierCaseExclusionReasons:
         assert "some_case" in message
 
 
+class TestRegisterSqlConfigTierCaseExclusionMembership:
+    """An exclusion is attributed to a tier.
+
+    It is meaningless unless the record also claims membership in that tier.
+    """
+
+    def test_exclusion_for_an_unjoined_tier_raises_naming_class_and_tier(self) -> None:
+        config_class = _make_config_class(
+            "UnjoinedTier",
+            _make_spec(
+                # Deliberately does not claim SupportTier.CURATED_SQL.
+                tiers=frozenset(),
+                tier_case_exclusions={SupportTier.CURATED_SQL: {"some_case": "a reason"}},
+            ),
+        )
+
+        with pytest.raises(ValueError) as excinfo:
+            register_sql_config(config_class)
+
+        message = str(excinfo.value)
+        assert "UnjoinedTier" in message
+        assert SupportTier.CURATED_SQL.value in message
+
+    def test_exclusion_for_a_joined_tier_registers_cleanly(self) -> None:
+        config_class = _make_config_class(
+            "JoinedTier",
+            _make_spec(
+                tiers=frozenset({SupportTier.CURATED_SQL}),
+                tier_case_exclusions={SupportTier.CURATED_SQL: {"some_case": "a reason"}},
+            ),
+        )
+
+        register_sql_config(config_class)
+
+        assert config_class in iter_data_source_configs()
+
+
 class TestRegisterSqlConfigTierCaseExclusionCeiling:
     def test_exactly_two_exclusions_registers_cleanly(self) -> None:
         config_class = _make_config_class(
             "TwoExclusions",
             _make_spec(
+                tiers=frozenset({SupportTier.CURATED_SQL}),
                 tier_case_exclusions={
-                    "case_one": "dialect gap, see issue #1",
-                    "case_two": "dialect gap, see issue #2",
-                }
+                    SupportTier.CURATED_SQL: {
+                        "case_one": "dialect gap, see issue #1",
+                        "case_two": "dialect gap, see issue #2",
+                    }
+                },
             ),
         )
 
@@ -509,11 +569,14 @@ class TestRegisterSqlConfigTierCaseExclusionCeiling:
         config_class = _make_config_class(
             "ThreeExclusions",
             _make_spec(
+                tiers=frozenset({SupportTier.CURATED_SQL}),
                 tier_case_exclusions={
-                    "case_one": "dialect gap, see issue #1",
-                    "case_two": "dialect gap, see issue #2",
-                    "case_three": "observed non-determinism, see issue #3",
-                }
+                    SupportTier.CURATED_SQL: {
+                        "case_one": "dialect gap, see issue #1",
+                        "case_two": "dialect gap, see issue #2",
+                        "case_three": "observed non-determinism, see issue #3",
+                    }
+                },
             ),
         )
 
@@ -526,6 +589,69 @@ class TestRegisterSqlConfigTierCaseExclusionCeiling:
         assert "case_one" in message
         assert "case_two" in message
         assert "case_three" in message
+        assert SupportTier.CURATED_SQL.value in message
+
+    def test_ceiling_is_counted_per_tier_not_across_the_whole_declaration(self) -> None:
+        """The ceiling's worth of exclusions declared in *each* of two tiers registers
+
+        successfully, even though the total across both tiers is four -- two more than the old,
+        whole-declaration count would have permitted. This is the case the per-tier count exists
+        to make possible.
+        """
+        config_class = _make_config_class(
+            "TwoTiersAtCeiling",
+            _make_spec(
+                tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.CURATED_SQL}),
+                tier_case_exclusions={
+                    SupportTier.CANONICAL_EXPECTATIONS: {
+                        "case_one": "dialect gap, see issue #1",
+                        "case_two": "dialect gap, see issue #2",
+                    },
+                    SupportTier.CURATED_SQL: {
+                        "case_three": "dialect gap, see issue #3",
+                        "case_four": "dialect gap, see issue #4",
+                    },
+                },
+            ),
+        )
+
+        register_sql_config(config_class)
+
+        assert config_class in iter_data_source_configs()
+
+    def test_one_over_ceiling_in_a_single_tier_raises_naming_that_tier(self) -> None:
+        """One tier at the ceiling plus one more in a *second* tier is fine; one tier one *over*
+
+        the ceiling is rejected, naming that tier specifically -- proving the count is scoped to
+        the tier rather than to the whole declaration.
+        """
+        config_class = _make_config_class(
+            "OneTierOverCeiling",
+            _make_spec(
+                tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.CURATED_SQL}),
+                tier_case_exclusions={
+                    SupportTier.CANONICAL_EXPECTATIONS: {
+                        "case_one": "dialect gap, see issue #1",
+                    },
+                    SupportTier.CURATED_SQL: {
+                        "case_two": "dialect gap, see issue #2",
+                        "case_three": "dialect gap, see issue #3",
+                        "case_four": "dialect gap, see issue #4",
+                    },
+                },
+            ),
+        )
+
+        with pytest.raises(ValueError) as excinfo:
+            register_sql_config(config_class)
+
+        message = str(excinfo.value)
+        assert "OneTierOverCeiling" in message
+        assert SupportTier.CURATED_SQL.value in message
+        assert SupportTier.CANONICAL_EXPECTATIONS.value not in message
+        assert "case_two" in message
+        assert "case_three" in message
+        assert "case_four" in message
 
 
 class TestRegisterSqlConfigTableSchemaItems:
@@ -2544,7 +2670,9 @@ _RETROFITTED_CONTROLS: Mapping[str, _RetrofitControl] = {
             marker="unit",
             marker_scope=MarkerScope.SHARED,
             ci_lane=CiLaneRef(workflow_job="unit-tests", marker_token="unit"),
-            tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
+            tiers=frozenset(
+                {SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API, SupportTier.GOLD}
+            ),
         ),
     ),
     "pandas-filesystem-csv": (
@@ -2559,7 +2687,9 @@ _RETROFITTED_CONTROLS: Mapping[str, _RetrofitControl] = {
             marker="filesystem",
             marker_scope=MarkerScope.SHARED,
             ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="filesystem"),
-            tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
+            tiers=frozenset(
+                {SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API, SupportTier.GOLD}
+            ),
         ),
     ),
     "spark-filesystem-csv": (
@@ -2951,6 +3081,57 @@ class TestTierClaimsScaleTheObligationsProvenInBothDirections:
         )
 
         assert [spec.label for spec in iter_data_source_specs()] == ["throwaway-core"]
+
+
+class TestVocabularyMembership:
+    def test_the_tier_vocabulary_is_exactly_these_members(self) -> None:
+        """Spelled out rather than counted. Each member is a claim a data source can make, so a
+        member appearing or disappearing is a change to what this repository promises about a
+        backend -- which should be read in a diff, not absorbed by a number that still matches.
+        """
+        assert [tier.value for tier in SupportTier] == [
+            "canonical_expectations",
+            "curated_sql",
+            "fluent_api",
+            "gold",
+        ]
+
+
+class TestGoldTierClaimInheritsTheScaledObligations:
+    """The new tier member is not special-cased: `_validate_tier_claims` scales its obligations to
+    whatever is in `spec.tiers`, so a `GOLD` claim must be rejected on exactly the same terms as a
+    `CANONICAL_EXPECTATIONS` claim already is, above. Proven directly rather than assumed: a
+    docstring describing what a tier means is not evidence that the validator sees this member.
+    """
+
+    _CLAIM = frozenset({SupportTier.GOLD})
+
+    def test_a_gold_claim_with_no_marker_is_rejected_naming_the_record_and_the_tier(self) -> None:
+        with pytest.raises(ValueError) as excinfo:
+            register_data_source(
+                _make_core_spec(label="throwaway-claimant", marker=None, tiers=self._CLAIM)
+            )
+
+        message = str(excinfo.value)
+        assert "throwaway-claimant" in message
+        assert "tier membership (gold)" in message
+        assert "declares no data source marker" in message
+
+    def test_a_gold_claim_with_no_ci_lane_is_rejected_naming_the_record_and_the_tier(self) -> None:
+        with pytest.raises(ValueError) as excinfo:
+            register_data_source(
+                _make_core_spec(
+                    label="throwaway-claimant",
+                    marker="throwaway",
+                    ci_lane=None,
+                    tiers=self._CLAIM,
+                )
+            )
+
+        message = str(excinfo.value)
+        assert "throwaway-claimant" in message
+        assert "tier membership (gold)" in message
+        assert "declares no CI lane" in message
 
 
 # --- The shared canonical expectation parameterization is mandatory -------------------------

@@ -139,7 +139,7 @@ Core record (`DataSourceSpec`) — every data source, whatever kind:
 | `marker` | no | The pytest marker name that selects this data source's tests; may differ from `label` (SQL Server's label is `mssql`, its marker is `sql_server`). `None` means no marker selects it. |
 | `marker_scope` | no | `DEDICATED` or `SHARED` — see "Dedicated and shared markers" below. An undeclared scope reads as dedicated. |
 | `tiers` | no | The named suites this data source participates in. Empty is a valid declaration. |
-| `tier_case_exclusions` | no | Case key → reason, letting a tier member sit out one named case within that tier's suite. |
+| `tier_case_exclusions` | no | Tier → (case key → reason), letting a tier member sit out one named case within that tier's own suite. Keyed by tier because a case key is only meaningful within the suite that published it. |
 | `ci_lane` | no | `CiLaneRef(workflow_job=..., marker_token=...)`: the workflow job that runs this data source's lane and the marker token it selects on. |
 | `dev_requirements_file` | no | Repo-relative path, e.g. `"reqs/requirements-dev-mysql.txt"`. |
 | `task_runner_marker` | no | Key into the task runner's dependency map; `None` means no entry is needed. |
@@ -420,6 +420,13 @@ constructed items because the construct binds to the first table it is attached 
   curated-tier member inherits without editing that module. It keeps saying SQL because the suite
   it gates exists to prove dialect behavior, and so has no meaning for a data source that speaks
   no dialect.
+- **`SupportTier.GOLD`** — the gallery-wide suite
+  (`tests/integration/data_sources_and_expectations/test_gold_expectation_suite.py`): one case per
+  expectation the shipped package registers from its own core package, currently 58 cases. Nine
+  data sources have earned it today — big-query, redshift, sqlite, pandas-data-frame,
+  pandas-filesystem-csv, mysql, postgresql, trino, and databricks — and none of them currently
+  declares a case exclusion; see "Measuring a candidate before it claims gold" below for what
+  membership asserts and how it is earned.
 
 Always write the declaration form, never a bare set literal:
 
@@ -470,11 +477,15 @@ no execution engine is one the derived engine lists cannot place either.
 #### Excluding one case within a tier
 
 If a tier member is a member but one specific case in that tier's suite is not meaningful for it,
-the supported way to record that is a per-case entry in `tier_case_exclusions`, keyed by the
-suite's published case key, with a required reason:
+the supported way to record that is a per-case entry in `tier_case_exclusions`, attributed to the
+tier whose suite published the case key, with a required reason:
 
 ```python
-tier_case_exclusions={"quoted_identifiers": "this dialect has no reserved-word column names"}
+tier_case_exclusions={
+    SupportTier.CURATED_SQL: {
+        "quoted_identifiers": "this dialect has no reserved-word column names",
+    },
+}
 ```
 
 The wrong shapes are withdrawing from the tier entirely (that throws away every case the data
@@ -485,15 +496,27 @@ the curated suite is parameterized through it rather than over the raw tier list
 downstream exclusion is honored no matter which case asks.
 
 **The per-case exclusion ceiling.** A record may declare at most two entries in
-`tier_case_exclusions`, counted over the whole mapping — not per tier. Every exclusion counts
-toward the ceiling regardless of what its reason records: an exclusion for observed
-non-determinism costs exactly as much coverage as one for a genuine dialect gap. Registering a
-declaration carrying a third exclusion raises `ValueError` at decoration time, naming the record,
-the count, and every declared key. The remedy the error states is to escalate that data source's
-tier participation — for example, dropping it from the tier rather than papering over three unmet
-cases — not to raise the ceiling. The count is a property of one declaration in isolation (it needs
-no other record's state and no published key set), which is why it is enforced at registration
-rather than by a suite-level check.
+`tier_case_exclusions` for any one tier, counted within that tier rather than across the whole
+mapping — a data source can sit out its ceiling's worth of cases in more than one tier without
+either tier's coverage being hollowed out past what a single-tier declaration already permits.
+This per-tier counting had to be true before a second suite could publish case keys at all: a
+single whole-declaration count could not distinguish "this data source sits out two cases in the
+curated suite" from "this data source sits out two cases in gold", so the moment two tiers exist, a
+per-declaration ceiling either double-taxes a data source that has earned its full allowance in one
+tier by charging it again against a second tier's suite, or it has to stop counting altogether.
+When a data source would need one more exclusion than the ceiling permits in a tier, it does not
+join that tier — the ceiling is not raised; raising it to admit one more member would restate, at a
+higher number, the exact failure this budget exists to prevent: a membership list that reads as
+uniform support while individual members quietly do not support several cases each.
+Every exclusion counts toward its tier's ceiling regardless of what its reason records: an
+exclusion for observed non-determinism costs exactly as much coverage as one for a genuine dialect
+gap. Registering a declaration carrying a third exclusion for one tier raises `ValueError` at
+decoration time, naming the record, the tier, the count, and every key declared for that tier. The
+remedy the error states is to escalate that data source's participation in that tier — for
+example, dropping it from the tier rather than papering over three unmet cases — not to raise the
+ceiling. The count is a property of one declaration in isolation (it needs no other record's state
+and no published key set), which is why it is enforced at registration rather than by a
+suite-level check.
 
 The reasoning matters as much as the number. A single exclusion's reason makes *that* exclusion
 answerable — a reviewer can read the string and judge it. But a set of exclusions is not
@@ -503,12 +526,76 @@ source. Only a count does that. A documented limit whose purpose isn't understoo
 first inconvenienced maintainer raises instead of respecting — hence writing the reasoning down
 here, not just the number.
 
-Two caveats on "not per tier": today `tier_case_exclusions` carries no tier attribution at all —
-a key is just a case key, and the ceiling counts however many are declared, full stop. This is
-exact only because `SupportTier.CURATED_SQL` is currently the only tier that publishes case keys
-a record can exclude by name. If a second tier ever grows its own per-case exclusion mechanism,
-the ceiling as implemented today would count across both tiers combined rather than per tier, and
-that must be made per-tier before a second publishing tier arrives, not after.
+`tier_case_exclusions` is keyed by tier — a mapping's shape is tier → (case key → reason) — and an
+exclusion is attributed to the tier whose suite published the excluded case key. That attribution
+is what makes a bare case key unambiguous once more than one tier publishes case keys, and it is
+what the per-tier ceiling above is counted against. It also makes a further rule expressible: an
+exclusion attributed to a tier the record does not claim raises `ValueError` at registration,
+naming the record and the tier — an exclusion from a suite that does not run for that data source
+is meaningless, and this catches a real class of stale declaration, a data source dropped from a
+tier whose exclusions were left behind.
+
+#### Measuring a candidate before it claims gold
+
+`SupportTier.GOLD` asserts a test result, not an intention: a data source that declares it has
+already passed every case in the gallery-wide suite that applies to it. Because that is a claim
+about a *result*, a candidate has to be measured before it can honestly make it — declaring the
+tier first and finding out whether it holds after the fact would publish a claim as a way of
+finding out whether it is true.
+
+The suite has a permanent measurement mode for exactly this: `--gold-measurement`, a pytest flag
+that substitutes every registered data source that has a configuration class and a recognized
+execution engine for the tier's declared membership, unfiltered by tier and by exclusion (a
+candidate has made no claim yet, so there is nothing to filter against). It is not a one-time
+migration switch — evaluating the *next* candidate for gold needs it exactly as evaluating the
+first ones did, so it stays in the suite rather than being removed once the current membership was
+established. To measure a candidate, run its own marker against the gold suite with the flag set,
+for example:
+
+```
+pytest tests/integration/data_sources_and_expectations/test_gold_expectation_suite.py -m sqlite --gold-measurement -q
+```
+
+A candidate that passes every applicable case earns the tier; declare `SupportTier.GOLD` in its
+`tiers` field (step 2, above) and add its own cell to the `gold` CI job in
+`.github/workflows/ci.yml`, alongside the existing members. A candidate that fails some cases has a
+choice to record, not a declaration to make: either the failure is real and the data source does
+not join yet, or the case reveals a defect in the harness fixtures or the case table itself, worth
+fixing before measuring again — but a failing case is never grounds to declare the tier and then
+sit the failing case out through `tier_case_exclusions`. That mechanism is described next, and it
+is not for retrofitting a claim the measurement refused to support.
+
+#### An engine restriction and a per-case exclusion answer different questions
+
+Two mechanisms can keep a `(case, data source)` pair from running, and they are easy to conflate
+because both result in the pair not being tested. They are not interchangeable, and only one of
+them spends the per-tier exclusion ceiling described above.
+
+- **An engine restriction is a property of the case.** A `GoldCase` declares the execution engines
+  its expectation can run under at all — for example, a case whose fixtures assert a SQL batch
+  setup restricts itself to the SQL engine, and a case asserting a dialect-specific type name does
+  the same. This is a fact about what the *expectation* can do, independent of which data sources
+  exist; it is decided once, when the case is written, and it applies identically to every data
+  source that speaks a different engine, present or future.
+- **A per-case exclusion is a property of the data source.** `tier_case_exclusions` lets one
+  specific member sit out one specific case *it would otherwise run* — the case is applicable to
+  its engine, but this particular data source does not pass it, for a reason the declaration must
+  state.
+
+Only the exclusion spends the ceiling, and the reason is what each mechanism is answerable for.
+An engine restriction never grows unnoticed: it is declared once on the case and applies to a
+whole class of data sources at once, so nothing about it can quietly erode one data source's
+coverage without erasing the same case for every sibling on that engine — a change that broad is
+conspicuous by construction. A per-case exclusion is the opposite: it is scoped to exactly one
+data source, so nothing but a count stops it from being reached for quietly, case by case, until a
+data source that no longer meaningfully belongs to the tier is still counted as a member. Charging
+an engine restriction against the ceiling would tax every SQL data source for a fact that has
+nothing to do with any of them individually; not charging a real per-case exclusion would let the
+one mechanism this budget exists to bound run unbounded. Getting the two swapped — treating a
+data-source-specific failure as if it were an engine fact, or restricting a case's engines to paper
+over one member's failure — has happened once already in this suite's history; if a case is
+failing for a data source whose engine the case allows, the fix is an exclusion (spending budget,
+and demanding a reason) or non-membership, never a rewritten engine set.
 
 ### 3. Add the wiring entries
 
@@ -591,7 +678,8 @@ Well-formedness of one record, checked for every record:
 | `container_service` declared without `LOCAL_CONTAINER` provisioning | Remove the field, or set `provisioning=DataSourceProvisioning.LOCAL_CONTAINER` if the data source really is locally containerized. |
 | A `tier_case_exclusions` entry has an empty case key | Name the case being excluded. |
 | A `tier_case_exclusions` entry has an empty or whitespace-only reason | Record why the case is excluded — an unexplained exclusion is exactly the silent narrowing the mechanism exists to prevent. |
-| More than two `tier_case_exclusions` entries | See "The per-case exclusion ceiling" above — escalate this data source's tier participation rather than raising the limit. |
+| More than two `tier_case_exclusions` entries for one tier | See "The per-case exclusion ceiling" above — escalate this data source's participation in that tier rather than raising the limit. |
+| A `tier_case_exclusions` entry is attributed to a tier the record does not claim | Join the tier, or remove the exclusion — an exclusion from a suite this data source does not run is meaningless. This check fires for every record regardless of what it claims, which is why it lives here rather than among the claim-scaled obligations below. |
 
 Obligations scaled to what the record claims:
 
@@ -718,6 +806,39 @@ The check is one-directional on purpose: every *member* must reach a record, but
 have a member. Adding a member is a product decision about what the shipped package advertises,
 and a test harness does not get to force one. The reviewed literal is what stops the single
 direction from becoming a silent ratchet.
+
+## Adding an expectation to the gold gallery
+
+The gold-tier suite is closed in both directions against the shipped package's own expectation
+registry: every expectation the shipped core package registers must have exactly one case in
+`tests/integration/data_sources_and_expectations/gold_expectation_case_table.py`, and every case in
+that table must name an expectation the shipped core package actually registers. A completeness
+guard (`test_gold_case_keys_match_the_gallery_set_exactly` in
+`tests/integration/data_sources_and_expectations/test_gold_expectation_suite.py`) fails, naming
+each offending key, whenever either direction drifts — a new expectation with no case, or a case
+whose expectation was renamed or removed.
+
+That means adding a new expectation to the shipped core package is not complete on its own: the
+gold suite fails the moment that expectation registers until a case exists for it. To add one:
+
+1. Open `gold_expectation_case_table.py` and add one `GoldCase` to the `GOLD_CASES` tuple, keyed
+   by the new expectation's `expectation_type`. Follow an existing case of the same shape as a
+   template — a `passing` configuration that should validate cleanly against the suite's shared
+   fixture data, and a `failing` configuration that should fail discriminatingly (the assertion is
+   that the case actually distinguishes a passing run from a failing one, not merely that the
+   expectation runs).
+2. If the expectation can only run under a subset of execution engines — for instance, because the
+   shipped package registers no metric provider for it on some engine — restrict `engines` on the
+   `GoldCase` to that proper, non-empty subset and state why in `engine_restriction_reason`. This
+   is the engine-restriction mechanism described above; it is a fact about the expectation, decided
+   once here, not something declared per data source.
+3. If the case needs a fixture shape other than the default single-table comparison
+   (`CaseFixtureShape.STANDARD`), such as a second table or a comparison batch, see
+   `gold_expectation_cases.py` for the other declared shapes.
+
+Once the case is added, `test_gold_case_keys_match_the_gallery_set_exactly` passes again, and the
+gallery-wide suite runs the new case against every current gold-tier member the moment it is
+collected — no per-member edit is needed for an existing member to pick it up.
 
 ## The ad-hoc escape hatch's autocommit mechanism
 

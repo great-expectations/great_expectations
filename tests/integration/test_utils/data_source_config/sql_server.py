@@ -17,12 +17,12 @@ from tests.integration.test_utils.data_source_config.base import BatchTestSetup
 from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
-    ExecutionEngineKind,
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 from tests.test_utils import (
     SQL_SERVER_DATABASE,
     SQL_SERVER_DRIVER,

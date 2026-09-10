@@ -1,3 +1,5 @@
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
+
 from .backend_spec import (
     SqlBackendSpec,
     TableSchemaItemFactory,
@@ -10,7 +12,6 @@ from .data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
     DataSourceSpec,
-    ExecutionEngineKind,
     MarkerScope,
     SupportTier,
 )

@@ -298,6 +298,43 @@ def test_daily_and_monthly_batch_definitions(asset_for_datasource: TableAsset) -
 
 
 @pytest.mark.project
+def test_case_accessor_results_match_the_pinned_pre_attribution_values() -> None:
+    """Pins the per-case-key accessor result for every published case key to a literal value
+    captured before exclusions were attributed to a tier, so a change to how exclusions are
+    declared and read cannot silently change which backends run which case.
+
+    Each expected list is a hard-coded set of labels, not something derived from the current
+    declarations, so this test can actually fail: a declaration or accessor change that alters who
+    is excluded from any of these nine cases turns this red, where an equivalence check computed
+    from the same declarations it is meant to guard would stay green through the same defect.
+    """
+    expected_labels_by_case_key = {
+        BATCH_DEFINITION: ["clickhouse", "oracle", "singlestore", "trino"],
+        NUMERIC_AGGREGATION: ["clickhouse", "oracle", "singlestore", "trino"],
+        QUOTED_IDENTIFIERS: ["oracle", "singlestore", "trino"],
+        REGEX_MATCH: ["oracle", "singlestore", "trino"],
+        ROW_CONDITION: ["clickhouse", "oracle", "singlestore", "trino"],
+        ROW_COUNT: ["clickhouse", "oracle", "singlestore", "trino"],
+        UNEXPECTED_ROWS_QUERY: ["clickhouse", "oracle", "singlestore", "trino"],
+        UNIQUENESS: ["clickhouse", "oracle", "singlestore", "trino"],
+        VALUE_SET_VALIDATION: ["clickhouse", "oracle", "singlestore", "trino"],
+    }
+    assert set(expected_labels_by_case_key) == CURATED_CASE_KEYS, (
+        "this pin must cover exactly the suite's published case keys"
+    )
+
+    for case_key, expected_labels in expected_labels_by_case_key.items():
+        actual_labels = [
+            config.DATA_SOURCE_SPEC.label
+            for config in data_sources_for_tier_case(SupportTier.CURATED_SQL, case_key)
+        ]
+        assert actual_labels == expected_labels, (
+            f"data_sources_for_tier_case(CURATED_SQL, {case_key!r}) returned {actual_labels!r}, "
+            f"expected {expected_labels!r}"
+        )
+
+
+@pytest.mark.project
 def test_every_declared_exclusion_key_is_a_published_case_key() -> None:
     """Every case key any registered backend excludes must be one this module actually defines.
 
@@ -308,7 +345,10 @@ def test_every_declared_exclusion_key_is_a_published_case_key() -> None:
     assert CURATED_CASE_KEYS, "the curated suite must publish at least one case key"
 
     for config_class in iter_data_source_configs():
-        for excluded_key in config_class.DATA_SOURCE_SPEC.tier_case_exclusions:
+        curated_exclusions = config_class.DATA_SOURCE_SPEC.tier_case_exclusions.get(
+            SupportTier.CURATED_SQL, {}
+        )
+        for excluded_key in curated_exclusions:
             assert excluded_key in CURATED_CASE_KEYS, (
                 f"{config_class.__name__} declares a tier case exclusion for "
                 f"{excluded_key!r}, which is not one of this suite's published case keys "
@@ -339,7 +379,9 @@ def test_case_accessor_matches_the_curated_list_minus_declared_exclusions() -> N
             config
             for config in CURATED_SQL_DATA_SOURCES
             if case_key
-            not in cast("SqlDatasourceTestConfig", config).DATA_SOURCE_SPEC.tier_case_exclusions
+            not in cast(
+                "SqlDatasourceTestConfig", config
+            ).DATA_SOURCE_SPEC.tier_case_exclusions.get(SupportTier.CURATED_SQL, {})
         ]
         assert data_sources_for_tier_case(SupportTier.CURATED_SQL, case_key) == expected
 

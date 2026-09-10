@@ -13,7 +13,6 @@ from tests.integration.test_utils.data_source_config.backend_spec import (
 from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
-    ExecutionEngineKind,
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
@@ -22,6 +21,7 @@ from tests.integration.test_utils.data_source_config.sql import (
     SQLBatchTestSetup,
 )
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -55,8 +55,13 @@ class DatabricksDatasourceTestConfig(SqlDatasourceTestConfig):
         uses_schema=True,
         transaction_mode=TransactionMode.AUTOCOMMIT,
         column_type_overrides=_COLUMN_TYPE_OVERRIDES,
+        # This dialect reports its integer column's type under this name rather than the ANSI
+        # spelling the default assumes, as observed against a live server.
+        integer_column_type_name="INT",
         insert_parameter_limit=250,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
+        tiers=frozenset(
+            {SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API, SupportTier.GOLD}
+        ),
         dev_requirements_file="reqs/requirements-dev-databricks.txt",
         task_runner_marker="databricks",
     )

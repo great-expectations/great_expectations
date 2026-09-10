@@ -251,15 +251,32 @@ class SQLBatchTestSetup(BatchTestSetup[_SqlConfigT, TableAsset], ABC, Generic[_S
 
     @staticmethod
     def _sanitize_null_values(values: list[dict]) -> list[dict]:
-        """Replace pandas/numpy null sentinels with Python None.
+        """Replace pandas/numpy null sentinels with Python None, and convert
+        ``pd.Timestamp`` values to plain ``datetime`` objects.
 
         ``df.where(pd.notna(df), None)`` does **not** work for numeric columns
         because ``None`` is silently cast back to ``np.nan`` in float dtypes.
         Post-processing the dict representation guarantees every null-like
         scalar (``np.nan``, ``pd.NA``, ``pd.NaT``) becomes a real ``None``
         that SQL drivers can bind as NULL.
+
+        ``pd.Timestamp`` is a subclass of ``datetime.datetime``, but some SQL
+        drivers bind parameters on the exact type rather than accepting any
+        subclass, and reject a ``Timestamp`` outright. Converting it to a
+        plain ``datetime`` avoids that. The null check runs first so every
+        null-like scalar resolves to ``None`` before any type-based
+        conversion is considered; ``pd.isna`` already covers ``pd.NaT``,
+        which is a ``datetime`` but not a ``Timestamp``.
         """
-        return [{k: None if pd.isna(v) else v for k, v in row.items()} for row in values]
+
+        def _clean(v: Any) -> Any:
+            if pd.isna(v):
+                return None
+            if isinstance(v, pd.Timestamp):
+                return v.to_pydatetime()
+            return v
+
+        return [{k: _clean(v) for k, v in row.items()} for row in values]
 
     @staticmethod
     def _safe_bulk_insert(

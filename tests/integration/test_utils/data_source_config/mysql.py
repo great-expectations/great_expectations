@@ -13,12 +13,12 @@ from tests.integration.test_utils.data_source_config.base import BatchTestSetup
 from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
-    ExecutionEngineKind,
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 
 
 @register_sql_config
@@ -32,7 +32,9 @@ class MySQLDatasourceTestConfig(SqlDatasourceTestConfig):
         fluent_types=frozenset({"sql"}),
         ci_lane=CiLaneRef(workflow_job="marker-tests", marker_token="mysql"),
         uses_schema=True,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
+        tiers=frozenset(
+            {SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API, SupportTier.GOLD}
+        ),
         # MySQL requires a length for VARCHAR.
         column_type_overrides={str: sqltypes.VARCHAR(255)},
         dev_requirements_file="reqs/requirements-dev-mysql.txt",

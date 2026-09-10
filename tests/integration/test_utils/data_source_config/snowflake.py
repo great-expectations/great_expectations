@@ -16,7 +16,6 @@ from tests.integration.test_utils.data_source_config.base import (
 from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
-    ExecutionEngineKind,
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
@@ -25,6 +24,7 @@ from tests.integration.test_utils.data_source_config.sql import (
     SQLBatchTestSetup,
 )
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 
 if TYPE_CHECKING:
     from great_expectations.types.connect_args import ConnectArgs
@@ -44,6 +44,9 @@ class SnowflakeDatasourceTestConfig(SqlDatasourceTestConfig):
         # selected as one matrix cell among many markers.
         ci_lane=CiLaneRef(workflow_job="marker-tests-snowflake", marker_token="snowflake"),
         uses_schema=True,
+        # This dialect reports its integer column's type under this name rather than the ANSI
+        # spelling the default assumes, as observed against a live server.
+        integer_column_type_name="DECIMAL(38, 0)",
         tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
         dev_requirements_file="reqs/requirements-dev-snowflake.txt",
         task_runner_marker="snowflake",

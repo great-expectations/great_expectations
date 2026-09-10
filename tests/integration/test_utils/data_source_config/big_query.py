@@ -9,12 +9,12 @@ from tests.integration.test_utils.data_source_config.backend_spec import SqlBack
 from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
-    ExecutionEngineKind,
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -52,7 +52,9 @@ class BigQueryDatasourceTestConfig(SqlDatasourceTestConfig):
         # while this is False raises, so that need surfaces as a clear error rather
         # than silently doing the wrong thing.
         uses_schema=False,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
+        tiers=frozenset(
+            {SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API, SupportTier.GOLD}
+        ),
         dev_requirements_file="reqs/requirements-dev-bigquery.txt",
         task_runner_marker="bigquery",
     )

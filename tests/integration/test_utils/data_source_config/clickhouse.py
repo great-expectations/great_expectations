@@ -18,12 +18,12 @@ from tests.integration.test_utils.data_source_config.base import BatchTestSetup
 from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
-    ExecutionEngineKind,
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 
 if TYPE_CHECKING:
     import sqlalchemy as sa  # type-only, exactly as `sql.py` and `backend_spec.py` do it
@@ -108,31 +108,34 @@ class ClickHouseDatasourceTestConfig(SqlDatasourceTestConfig):
         container_service="clickhouse",
         tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
         tier_case_exclusions={
-            # Same root cause already recorded on this backend's scoped module's
-            # `test_match_regex`/`test_not_match_regex`: the dialect's regex-matching path calls
-            # a SQL function this dialect does not have. ClickHouse has no `regexp_like` function;
-            # the server rejects the query with
-            # `DB::Exception: Function with name 'regexp_like' does not exist`. An issue still
-            # needs to be filed for this defect; this reason will be updated with its link once
-            # one exists.
-            "regex_match": (
-                "ClickHouse has no `regexp_like` SQL function; the dialect's regex-matching path "
-                "calls it and the server rejects the query with `DB::Exception: Function with "
-                "name 'regexp_like' does not exist`. An issue still needs to be filed for this "
-                "defect."
-            ),
-            # A driver defect, not a dialect gap: this dialect's SQLAlchemy layer inserts rows
-            # through an executemany path that keys each row by the sanitized bind-parameter
-            # name (for example `user_name`) rather than the real column name (`user name`) for
-            # any identifier that needs quoting, so the insert raises a `KeyError` at insert time
-            # and the table this case needs ends up with zero rows. An issue still needs to be
-            # filed for this defect; this reason will be updated with its link once one exists.
-            "quoted_identifiers": (
-                "This dialect's SQLAlchemy/driver insert path keys each row by the sanitized "
-                "bind-parameter name instead of the real column name for identifiers requiring "
-                "quoting, raising a `KeyError` at insert time and leaving the table empty. An "
-                "issue still needs to be filed for this defect."
-            ),
+            SupportTier.CURATED_SQL: {
+                # Same root cause already recorded on this backend's scoped module's
+                # `test_match_regex`/`test_not_match_regex`: the dialect's regex-matching path
+                # calls a SQL function this dialect does not have. ClickHouse has no
+                # `regexp_like` function; the server rejects the query with
+                # `DB::Exception: Function with name 'regexp_like' does not exist`. An issue
+                # still needs to be filed for this defect; this reason will be updated with its
+                # link once one exists.
+                "regex_match": (
+                    "ClickHouse has no `regexp_like` SQL function; the dialect's regex-matching "
+                    "path calls it and the server rejects the query with `DB::Exception: "
+                    "Function with name 'regexp_like' does not exist`. An issue still needs to "
+                    "be filed for this defect."
+                ),
+                # A driver defect, not a dialect gap: this dialect's SQLAlchemy layer inserts
+                # rows through an executemany path that keys each row by the sanitized
+                # bind-parameter name (for example `user_name`) rather than the real column name
+                # (`user name`) for any identifier that needs quoting, so the insert raises a
+                # `KeyError` at insert time and the table this case needs ends up with zero rows.
+                # An issue still needs to be filed for this defect; this reason will be updated
+                # with its link once one exists.
+                "quoted_identifiers": (
+                    "This dialect's SQLAlchemy/driver insert path keys each row by the "
+                    "sanitized bind-parameter name instead of the real column name for "
+                    "identifiers requiring quoting, raising a `KeyError` at insert time and "
+                    "leaving the table empty. An issue still needs to be filed for this defect."
+                ),
+            },
         },
     )
 

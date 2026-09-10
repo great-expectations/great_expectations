@@ -726,6 +726,120 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
 
+  # Runs the gold-tier expectation suite (see `tests/integration/data_sources_and_expectations/
+  # test_gold_expectation_suite.py`) -- one cell per data source that has joined the tier, named
+  # by that data source's own marker (`CiLaneRef.marker_token` in
+  # `tests/integration/test_utils/data_source_config/`), reusing `MARKER_DEPENDENCY_MAP` for
+  # install/services exactly as `marker-tests` does. Each cell's wall-clock, measured unsharded,
+  # is well inside the 20-minute per-cell budget stated below, so no cell is split across shards.
+  gold:
+    needs: [unit-tests, static-analysis, check-actor-permissions]
+    if: github.event.pull_request.draft == false
+    env:
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.13+
+      # google
+      GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
+      GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
+      GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
+      GOOGLE_APPLICATION_CREDENTIALS: "gcp-credentials.json"
+      # DATABRICKS_TOKEN is minted at runtime from the service principal's OAuth
+      # credentials in the "Mint Databricks OAuth access token" step below.
+      DATABRICKS_HOST: ${{secrets.DATABRICKS_HOST}}
+      DATABRICKS_HTTP_PATH: ${{secrets.DATABRICKS_HTTP_PATH}}
+      DATABRICKS_CATALOG: ${{ vars.DATABRICKS_CATALOG }}
+      # aws-redshift
+      REDSHIFT_USERNAME: ${{secrets.REDSHIFT_USERNAME}}
+      REDSHIFT_PASSWORD: ${{secrets.REDSHIFT_PASSWORD}}
+      REDSHIFT_HOST: ${{secrets.REDSHIFT_HOST}}
+      REDSHIFT_PORT: ${{secrets.REDSHIFT_PORT}}
+      REDSHIFT_DATABASE: ${{secrets.REDSHIFT_DATABASE}}
+      REDSHIFT_SSLMODE: ${{secrets.REDSHIFT_SSLMODE}}
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    # Per-cell budget: 20 minutes at P90. The shared marker lane's stated headroom is a
+    # 30-minute timeout against a worst observed case under 17 minutes; this lane keeps the
+    # same shape of headroom while leaving room for the suite to grow with the gallery.
+    #
+    # Job timeout (below): same reasoning as `marker-tests` -- these cells talk to external
+    # warehouses (or spin up local services), so a hang must fail in minutes, not at the
+    # repository-wide default.
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # One cell per data source that has joined the tier, named by that data source's own CI
+        # marker token (`CiLaneRef.marker_token` in
+        # `tests/integration/test_utils/data_source_config/`). Single Python version: this lane
+        # measures backend behavior, not interpreter behavior; the per-expectation modules
+        # already span the interpreter matrix; and this follows the existing precedent of a
+        # credential-gated lane pinned to one version. No cell is sharded: measured unsharded
+        # wall-clock (bigquery 7m07s, databricks 5m26s, trino 4m23s, mysql 3m13s,
+        # postgresql 2m12s, redshift 2m04s, sqlite 1m28s, unit 1m23s, filesystem 1m17s) is
+        # comfortably under the 20-minute per-cell budget for every cell.
+        markers:
+          - unit
+          - sqlite
+          - mysql
+          - postgresql
+          - trino
+          - filesystem
+          - bigquery
+          - databricks
+          - redshift
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.3.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Upgrade Docker Compose
+        uses: docker/setup-compose-action@v1
+        with:
+          version: latest
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+            setup.py
+
+      - name: Copy GCP credentials to file
+        run: |
+          echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
+
+      - name: Install dependencies
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m '${{ matrix.markers }}' -r test
+
+      # See the identical step in `marker-tests` -- same OAuth M2M mint, same masked
+      # DATABRICKS_TOKEN export.
+      - name: Mint Databricks OAuth access token
+        if: matrix.markers == 'databricks'
+        env:
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+        run: |
+          TOKEN="$(python ./scripts/mint_databricks_token.py)"
+          echo "::add-mask::$TOKEN"
+          echo "DATABRICKS_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
+      # No `--xdist` here, unlike the shared `marker-tests` lane above. `--xdist` implies
+      # `--dist loadfile`, which keeps every test in a module on one worker, and every
+      # gold-marked item lives in the single `test_gold_expectation_suite.py` module -- so four
+      # workers would schedule the whole cell onto one of them and pay three idle process
+      # startups for it. Splitting the suite across modules is what would make `--xdist` worth
+      # adding back; the shared lane spans every expectation module, which is why it benefits.
+      - name: Run the gold suite
+        run: |
+          invoke ci-tests '${{ matrix.markers }}' --up-services --verbose --suite=gold
+
   py310-min-versions:
     needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
@@ -970,6 +1084,7 @@ jobs:
       - pyspark4-marker-tests
       - marker-tests-snowflake
       - redshift
+      - gold
       - py310-min-versions
       - py311-min-versions
       - py312-min-versions

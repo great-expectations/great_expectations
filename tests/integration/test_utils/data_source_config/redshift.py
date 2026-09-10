@@ -10,12 +10,12 @@ from tests.integration.test_utils.data_source_config.backend_spec import SqlBack
 from tests.integration.test_utils.data_source_config.data_source_spec import (
     CiLaneRef,
     DataSourceProvisioning,
-    ExecutionEngineKind,
     SupportTier,
 )
 from tests.integration.test_utils.data_source_config.registry import register_sql_config
 from tests.integration.test_utils.data_source_config.sql import SQLBatchTestSetup
 from tests.integration.test_utils.data_source_config.sql_config import SqlDatasourceTestConfig
+from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -59,7 +59,9 @@ class RedshiftDatasourceTestConfig(SqlDatasourceTestConfig):
         # the job is named explicitly here rather than being the shared matrix job.
         ci_lane=CiLaneRef(workflow_job="redshift", marker_token="redshift"),
         uses_schema=True,
-        tiers=frozenset({SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API}),
+        tiers=frozenset(
+            {SupportTier.CANONICAL_EXPECTATIONS, SupportTier.FLUENT_API, SupportTier.GOLD}
+        ),
         dev_requirements_file="reqs/requirements-dev-redshift.txt",
         task_runner_marker="redshift",
     )

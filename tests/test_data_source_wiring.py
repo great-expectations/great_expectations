@@ -32,7 +32,7 @@ from __future__ import annotations
 import pathlib
 import re
 from functools import cache
-from typing import Any, Callable, Dict, Final, Iterator, Optional, Tuple, TypeVar
+from typing import Any, Callable, Dict, Final, FrozenSet, Iterator, Optional, Tuple, TypeVar
 
 import pytest
 import tomli
@@ -341,6 +341,86 @@ def _assert_tier_claim_carries_evidence(name: str, spec: DataSourceSpec) -> None
 
 
 # --------------------------------------------------------------------------------------------
+# The gold-lane drift check. Every other assertion above verifies a coordinate a record declares
+# about its *own* lane. A gold-tier record is additionally restated as a cell in the gold job's
+# matrix - a second lane the record's own schema has no field for - and nothing else in this
+# module reads that restatement, so a record could join the tier and never get a cell, or a cell
+# could run for a data source that never joined, and neither would be caught above. This is the
+# one place that reads the gold job's matrix and compares it against tier membership directly,
+# rather than through any per-record coordinate.
+# --------------------------------------------------------------------------------------------
+
+
+def _gold_tier_marker_tokens(records: Tuple[DataSourceSpec, ...]) -> FrozenSet[str]:
+    """The marker token each gold-tier record's own CI lane runs under.
+
+    The gold job's matrix cell is keyed by that same token (see the gold job's matrix comment in
+    the workflow file), so this is the coordinate to compare against, not the record's label or
+    public name.
+    """
+    tokens = set()
+    for spec in records:
+        if SupportTier.GOLD not in spec.tiers:
+            continue
+        assert spec.ci_lane is not None, (
+            f"{_record_label(spec)!r} claims the gold tier but declares no CI lane, so it has no "
+            f"marker token to compare against the gold job's matrix"
+        )
+        tokens.add(spec.ci_lane.marker_token)
+    return frozenset(tokens)
+
+
+def _gold_job_matrix_markers(jobs: Dict[str, Any]) -> FrozenSet[str]:
+    """The set of marker tokens the gold job's matrix runs a cell for.
+
+    Looks for the named job and the named matrix key rather than matching the file's structure, so
+    an unrelated edit elsewhere in the workflow does not break this - the same rule the other
+    wiring assertions in this module follow. Fails naming the workflow file when the job is
+    missing, malformed, or empty, rather than reporting an empty set as if it were a real absence
+    of gold data sources.
+    """
+    job = jobs.get("gold")
+    assert job is not None, (
+        f"expected a job named 'gold' under 'jobs' in {CI_WORKFLOW.resolve()}, but none exists"
+    )
+    markers = job.get("strategy", {}).get("matrix", {}).get("markers")
+    assert isinstance(markers, list) and markers, (
+        f"expected job 'gold' in {CI_WORKFLOW.resolve()} to declare a non-empty "
+        f"'strategy.matrix.markers' list, but found {markers!r}"
+    )
+    return frozenset(markers)
+
+
+def _assert_gold_lane_matches_tier_membership(
+    tier_tokens: FrozenSet[str], lane_tokens: FrozenSet[str]
+) -> None:
+    """Both directions, and the vacuous-pass guard, in one place.
+
+    Comparing by set equality alone would report a drift without saying which side moved; the two
+    difference assertions below each name the data sources on the side that is wrong, so the
+    failure reads the same way the other wiring assertions in this module do.
+    """
+    assert tier_tokens, (
+        "no registered record claims the gold tier - the comparison would be vacuous"
+    )
+    assert lane_tokens, (
+        f"the gold job's matrix in {CI_WORKFLOW.resolve()} runs no data source - the comparison "
+        f"would be vacuous"
+    )
+    unclaimed_cells = lane_tokens - tier_tokens
+    assert not unclaimed_cells, (
+        f"the gold job's matrix in {CI_WORKFLOW.resolve()} runs a cell for "
+        f"{sorted(unclaimed_cells)}, but no registered record claims the gold tier for "
+        f"{sorted(unclaimed_cells)}"
+    )
+    uncelled_members = tier_tokens - lane_tokens
+    assert not uncelled_members, (
+        f"{sorted(uncelled_members)} claim the gold tier, but the gold job's matrix in "
+        f"{CI_WORKFLOW.resolve()} runs no cell for {sorted(uncelled_members)}"
+    )
+
+
+# --------------------------------------------------------------------------------------------
 # One pytest test per assertion, parametrized over the registry so each record is its own case
 # and each failure names exactly one record. A skip is reported as SKIPPED, not folded silently
 # into a pass, so an undeclared coordinate stays visible in the test run - which is what keeps
@@ -407,6 +487,17 @@ def test_tier_claim_carries_evidence(spec: DataSourceSpec) -> None:
     if not spec.tiers:
         pytest.skip(f"{_registered_name(spec)} claims no tier")
     _assert_tier_claim_carries_evidence(_registered_name(spec), spec)
+
+
+def test_gold_lane_matches_tier_membership() -> None:
+    """The one test that is not parametrized per record: it compares the whole tier's membership
+    against the whole lane's matrix in a single pass, because that is what a drift between the two
+    sets actually looks like - no single record's declaration is wrong on its own.
+    """
+    _assert_gold_lane_matches_tier_membership(
+        _gold_tier_marker_tokens(_REGISTERED_RECORDS),
+        _gold_job_matrix_markers(_ci_workflow_jobs()),
+    )
 
 
 # --------------------------------------------------------------------------------------------
@@ -575,6 +666,90 @@ class TestWiringDriftFailurePaths:
             assert "not-a-real-container-service" in message
             assert str(expected_path.resolve()) in message
         assert iter_data_sources() == before
+
+    def test_gold_tier_marker_tokens_reads_a_member_s_own_ci_lane(self) -> None:
+        """`_gold_tier_marker_tokens` is exercised through a real registration, inside the
+        isolation seam, so the token it collects for a gold-tier record is proven to come from a
+        real registry read rather than from a hand-built token set.
+        """
+        before = iter_data_sources()
+        with isolated_registry():
+            spec = _make_spec(
+                label="ghost-gold-uncelled",
+                marker="ghost_gold_uncelled",
+                ci_lane=CiLaneRef(
+                    workflow_job="marker-tests", marker_token="ghost_gold_uncelled_token"
+                ),
+                tiers=frozenset({SupportTier.GOLD}),
+            )
+            register_data_source(spec)
+
+            current_specs = tuple(entry.spec for entry in iter_data_sources())
+            assert _gold_tier_marker_tokens(current_specs) == frozenset(
+                {"ghost_gold_uncelled_token"}
+            )
+        assert iter_data_sources() == before
+
+    def test_gold_member_with_no_matrix_cell_names_the_data_source(self) -> None:
+        """A record joining the gold tier under a marker token the gold job's matrix has no cell
+        for - the exact shape a data source that claims the tier and is never given a lane takes.
+        The tier side is the real registry's tier tokens widened by the one token the matrix
+        cannot possibly have, so the failure is attributable to the added member alone.
+        """
+        lane_tokens = _gold_job_matrix_markers(_ci_workflow_jobs())
+        assert "ghost_gold_uncelled_token" not in lane_tokens
+        tier_tokens = _gold_tier_marker_tokens(_REGISTERED_RECORDS) | {"ghost_gold_uncelled_token"}
+
+        with pytest.raises(AssertionError) as excinfo:
+            _assert_gold_lane_matches_tier_membership(tier_tokens, lane_tokens)
+
+        message = str(excinfo.value)
+        assert "ghost_gold_uncelled_token" in message
+        assert str(CI_WORKFLOW.resolve()) in message
+
+    def test_gold_matrix_cell_with_no_member_names_the_data_source(self) -> None:
+        """A cell in the gold job's matrix that no registered record claims the tier for - the
+        shape a lane running a data source the tier never claimed takes. The matrix side is
+        synthetic here because the workflow file is not something this test mutates; the real
+        tier-token side still comes from the live registry.
+        """
+        lane_tokens = _gold_job_matrix_markers(_ci_workflow_jobs()) | {"ghost_gold_extra_cell"}
+
+        with pytest.raises(AssertionError) as excinfo:
+            _assert_gold_lane_matches_tier_membership(
+                _gold_tier_marker_tokens(_REGISTERED_RECORDS), lane_tokens
+            )
+
+        message = str(excinfo.value)
+        assert "ghost_gold_extra_cell" in message
+        assert str(CI_WORKFLOW.resolve()) in message
+
+    def test_gold_drift_check_rejects_an_empty_tier_side(self) -> None:
+        """Neither side may be empty once the tier has members - a comparison of nothing against
+        nothing is not evidence that the lane matches the tier."""
+        with pytest.raises(AssertionError, match="vacuous"):
+            _assert_gold_lane_matches_tier_membership(frozenset(), frozenset({"sqlite"}))
+
+    def test_gold_drift_check_rejects_an_empty_lane_side(self) -> None:
+        with pytest.raises(AssertionError, match="vacuous"):
+            _assert_gold_lane_matches_tier_membership(frozenset({"sqlite"}), frozenset())
+
+    def test_missing_gold_job_names_the_workflow_file(self) -> None:
+        """The workflow-unreadable-for-this-purpose path: the file parses fine but has no job
+        named 'gold', which is the shape a renamed or removed job would take."""
+        with pytest.raises(AssertionError) as excinfo:
+            _gold_job_matrix_markers({"some-other-job": {}})
+
+        message = str(excinfo.value)
+        assert str(CI_WORKFLOW.resolve()) in message
+        assert "gold" in message
+
+    def test_gold_job_with_no_matrix_markers_names_the_workflow_file(self) -> None:
+        with pytest.raises(AssertionError) as excinfo:
+            _gold_job_matrix_markers({"gold": {"strategy": {"matrix": {}}}})
+
+        message = str(excinfo.value)
+        assert str(CI_WORKFLOW.resolve()) in message
 
     def test_tier_claimed_with_no_lane_names_the_record(self) -> None:
         """The tier-evidence assertion, proven to fire.

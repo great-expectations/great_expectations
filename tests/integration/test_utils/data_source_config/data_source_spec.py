@@ -24,9 +24,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import FrozenSet, Mapping, Optional
+from typing import TYPE_CHECKING, FrozenSet, Mapping, Optional
 
 import pytest
+
+if TYPE_CHECKING:
+    # ``ExecutionEngineKind`` lives in a leaf module outside this package (see
+    # ``tests/integration/test_utils/execution_engine_kind.py`` for why) so this module can keep
+    # its own guarantee -- standard library and ``pytest`` only, checked mechanically by
+    # ``TestDataSourceSpecStandsAlone`` in ``tests/test_data_source_registry.py`` -- of importing
+    # with no dependency on this repository's own ``tests`` package. With
+    # ``from __future__ import annotations`` active, this annotation-only import never runs at
+    # module-import time; the package's ``__init__.py`` re-exports the real value directly from
+    # the leaf module for every runtime consumer.
+    from tests.integration.test_utils.execution_engine_kind import ExecutionEngineKind
 
 
 class DataSourceProvisioning(Enum):
@@ -73,6 +84,14 @@ class SupportTier(Enum):
     unreachable.
     """
 
+    GOLD = "gold"
+    """Passes the full-gallery expectation suite.
+
+    Membership asserts a test result, not an intention: every expectation the shipped package
+    registers has a case in that suite, and this data source passes each case it participates in.
+    A data source declining more cases than the per-tier ceiling permits does not join.
+    """
+
 
 class MarkerScope(Enum):
     """Whether a declared marker names this data source alone or a class of them."""
@@ -82,14 +101,6 @@ class MarkerScope(Enum):
 
     SHARED = "shared"
     """The marker names a dependency class that more than one data source belongs to."""
-
-
-class ExecutionEngineKind(Enum):
-    """The engine that executes a data source's tests."""
-
-    PANDAS = "pandas"
-    SPARK = "spark"
-    SQL = "sql"
 
 
 @dataclass(frozen=True)
@@ -173,9 +184,12 @@ class DataSourceSpec:
     no tier's suite proves it".
     """
 
-    tier_case_exclusions: Mapping[str, str] = field(default_factory=dict)
-    """Case key to reason string, defaulting to empty. Lets a tier member sit out one named case
-    within that tier's suite, with a required reason recorded next to the declaration."""
+    tier_case_exclusions: Mapping[SupportTier, Mapping[str, str]] = field(default_factory=dict)
+    """Tier to (case key to reason string), defaulting to empty. Lets a tier member sit out one
+    named case within that tier's own suite, with a required reason recorded next to the
+    declaration. Keyed by tier because a case key is only meaningful within the suite that
+    published it: a second tier publishing its own case keys must not be able to consume, or be
+    confused with, the exclusions another tier's suite already declared."""
 
     # wiring coordinates
     ci_lane: Optional[CiLaneRef] = None

@@ -292,6 +292,16 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run performance tests (which might also require additional arguments like --bigquery)",  # noqa: E501 # FIXME CoP
     )
+    parser.addoption(
+        "--gold-measurement",
+        action="store_true",
+        help=(
+            "If set, the gold-tier expectation suite runs against every registered data source "
+            "that has a configuration and an execution engine, instead of only declared gold-tier "
+            "members. Off by default; a measurement run does not edit any data source's "
+            "declaration."
+        ),
+    )
 
 
 def build_test_backends_list_v2_api(metafunc):

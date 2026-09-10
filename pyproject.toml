@@ -611,6 +611,7 @@ markers = [
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
     "filesystem: mark tests using the filesystem as the storage backend.",
     "gcs_deps: mark tests that need google cloud storage dependencies but no credentials",
+    "gold: mark a test as part of the gallery-wide gold-tier expectation suite.",
     "integration: mark test as an integration test.",
     "sql_server: mark a test as SQL Server-dependent.",
     "mysql: mark a test as mysql-dependent.",

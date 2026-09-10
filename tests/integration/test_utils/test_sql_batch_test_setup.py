@@ -9,6 +9,7 @@ involved, so the whole module runs against a file-backed SQLite database and nee
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import json
 import os
 import pathlib
@@ -266,6 +267,37 @@ class TestSchemaNameConflictsWithNoSchemaDeclarationRaises:
             str(excinfo.value)
             == "Schema name provided but use_schema is False for this datasource type."
         )
+
+
+class TestSanitizeNullValuesConvertsTimestampsToPlainDatetimes:
+    """`SQLBatchTestSetup.setup()` builds insert parameters from
+    `DataFrame.to_dict("index")`, which hands back `pd.Timestamp` for any datetime column.
+    Some SQL drivers bind parameters on the exact Python type rather than accepting any
+    subclass, so a `pd.Timestamp` reaching the driver unconverted is rejected outright, while
+    a plain `datetime.datetime` carrying the identical value is accepted.
+    """
+
+    def test_a_timestamp_value_becomes_a_plain_datetime(self) -> None:
+        ts = pd.Timestamp("2024-01-02 03:04:05")
+        [row] = SQLBatchTestSetup._sanitize_null_values([{"col_a": ts}])
+
+        cleaned = row["col_a"]
+
+        assert type(cleaned) is datetime.datetime, (
+            f"expected a plain datetime, got {type(cleaned)!r}: a driver that binds on exact "
+            "type rather than accepting any subclass rejects a pd.Timestamp here"
+        )
+        assert cleaned == datetime.datetime(2024, 1, 2, 3, 4, 5)  # noqa: DTZ001
+
+    def test_a_null_timestamp_becomes_none(self) -> None:
+        [row] = SQLBatchTestSetup._sanitize_null_values([{"col_a": pd.NaT}])
+
+        assert row["col_a"] is None
+
+    def test_non_timestamp_values_pass_through_unchanged(self) -> None:
+        [row] = SQLBatchTestSetup._sanitize_null_values([{"col_a": 1, "col_b": "x"}])
+
+        assert row == {"col_a": 1, "col_b": "x"}
 
 
 class TestSharedDefaultTypesSayWhatTheyMean:
