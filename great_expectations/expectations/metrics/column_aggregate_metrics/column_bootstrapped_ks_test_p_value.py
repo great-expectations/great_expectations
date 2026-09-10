@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Final
 
+from great_expectations.compatibility.scipy import stats
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
@@ -16,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 import numpy as np
-from scipy import stats
 
 NP_RANDOM_GENERATOR: Final = np.random.default_rng()
 

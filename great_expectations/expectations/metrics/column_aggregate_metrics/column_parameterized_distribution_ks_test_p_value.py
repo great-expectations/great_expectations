@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from scipy import stats
-
+from great_expectations.compatibility.scipy import stats
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
