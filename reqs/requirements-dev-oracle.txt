@@ -1,1 +1,13 @@
+# This extra does not stay installable on SQLAlchemy 1.x, and that is deliberate.
+# The `oracle+oracledb` dialect arrives in SQLAlchemy 2.0; 1.4 ships only
+# `cx_oracle`. A 1.4 resolution would install the driver and leave the documented
+# `oracle+oracledb://` connection string unable to load a dialect at all, so the
+# floor belongs on the extra rather than in the user's traceback.
+#
+# `oracle` is a member of setup.py's `sqla_keys`, which appends the shared
+# `sqlalchemy>=1.4.0` that keeps the other SQL extras installable for anyone
+# holding 1.x (see requirements-dev-redshift.txt for why that floor stays low).
+# That shared constraint cannot express a per-dialect floor, so this file carries
+# it. The published extra ends up with both; they intersect at 2.0.
 oracledb>=2.4.0
+sqlalchemy>=2.0

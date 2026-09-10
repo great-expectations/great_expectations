@@ -65,6 +65,7 @@ def get_extras_require():
         "hive",  # https://github.com/dropbox/PyHive/blob/master/setup.py
         "sql-server",  # https://github.com/mkleehammer/pyodbc/blob/master/setup.py
         "mysql",  # https://github.com/PyMySQL/PyMySQL/blob/main/pyproject.toml
+        "oracle",  # https://github.com/oracle/python-oracledb/blob/main/pyproject.toml
         "postgresql",  # https://github.com/psycopg/psycopg2/blob/master/setup.py
         "trino",  # https://github.com/trinodb/trino-python-client/blob/master/setup.py
         "vertica",  # https://github.com/bluelabsio/sqlalchemy-vertica-python/blob/master/setup.py
@@ -79,13 +80,6 @@ def get_extras_require():
         "test",
         "tools",
         "all-contrib-expectations",
-        # Test-only for now. The extras map is derived by globbing this directory, so a
-        # requirements file is enough on its own to publish `pip install
-        # 'great_expectations[oracle]'` as a supported install path. The driver is
-        # installed here for the CI lane, but the dialect still fails parts of the suite,
-        # so it is not yet something to offer users. Move this key into `sqla_keys` to
-        # publish the extra.
-        "oracle",
     )
 
     requirements_dir = "reqs"
