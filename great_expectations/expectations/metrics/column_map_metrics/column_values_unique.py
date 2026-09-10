@@ -82,15 +82,25 @@ def _column_by_name(selectable: Any, column_name: str) -> Any:
     unless that name is already lower case -- ".c" lookup raises "KeyError" instead.
 
     Try the hash lookup first so the common path stays O(1), and fall back to matching
-    by equality, which both spellings agree on. A name that matches nothing still raises
-    the original "KeyError".
+    by equality, which both spellings agree on. Two columns that differ only by case are
+    physically distinct (e.g. via quoted identifiers), so an exact-spelling match is
+    preferred over a merely case-folded one -- the loop keeps scanning past a folded
+    match in case a later entry matches exactly, and only settles for the folded match
+    if no exact one turns up. A name that matches nothing still raises the original
+    "KeyError".
     """
     try:
         return selectable.c[column_name]
     except KeyError:
+        case_insensitive_match = None
         for key, column in selectable.c.items():
             if key == column_name:
-                return column
+                if str(key) == column_name:
+                    return column
+                if case_insensitive_match is None:
+                    case_insensitive_match = column
+        if case_insensitive_match is not None:
+            return case_insensitive_match
         raise
 
 

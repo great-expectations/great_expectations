@@ -485,6 +485,34 @@ def test_complete_with_mixed_case_unexpected_index_column_names_sql(
     ]
 
 
+@parameterize_batch_for_data_sources(
+    data_source_configs=RESULT_FORMAT_GUARD_DATA_SOURCES, data=MIXED_CASE_DATA
+)
+def test_include_unexpected_rows_with_mixed_case_column_sql(
+    batch_for_datasource: Batch,
+) -> None:
+    """include_unexpected_rows drives a distinct row-retrieval path from the other
+    mixed-case tests above: it indexes the projection by every table column name
+    (`duplicates.column(c) for c in table_columns`), not just the target and index
+    columns, so it must be exercised with a mixed-case column too.
+    """
+    expectation = gxe.ExpectColumnValuesToBeUnique(column=MIXED_CASE_COLUMN)
+    result = batch_for_datasource.validate(
+        expectation,
+        result_format={"result_format": "COMPLETE", "include_unexpected_rows": True},
+    )
+
+    _assert_no_metric_exceptions(result)
+    assert not result.success
+    unexpected_rows = sorted(
+        result.result["unexpected_rows"], key=lambda row: row[MIXED_CASE_ROW_ID]
+    )
+    assert unexpected_rows == [
+        {MIXED_CASE_ROW_ID: 2, MIXED_CASE_COLUMN: "1000000002"},
+        {MIXED_CASE_ROW_ID: 3, MIXED_CASE_COLUMN: "1000000002"},
+    ]
+
+
 @pytest.mark.timeout(30)  # the subprocess pays full library import cost
 @pytest.mark.unit
 def test_import_does_not_emit_metric_reregistration_warnings() -> None:
