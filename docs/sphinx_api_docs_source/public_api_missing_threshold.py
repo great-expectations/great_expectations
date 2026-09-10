@@ -622,6 +622,12 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     ),
     PrintableDefinition(
         file=pathlib.Path(
+            "great_expectations/expectations/metrics/column_map_metrics/column_values_unique.py"
+        ),
+        name="column",
+    ),
+    PrintableDefinition(
+        file=pathlib.Path(
             "great_expectations/expectations/metrics/map_metric_provider/column_condition_partial.py"
         ),
         name="column_condition_partial",
