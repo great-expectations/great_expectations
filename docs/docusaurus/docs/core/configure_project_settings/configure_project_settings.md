@@ -30,6 +30,13 @@ import OverviewCard from '@site/src/components/OverviewCard';
   />
   <LinkCard 
       topIcon 
+      label="Cloud Store Backend Sync"
+      description="Store Expectations, Validation Results, and Data Docs in GCS, S3, or Azure Blob Storage using a sync-based workflow."
+      to="/core/configure_project_settings/cloud_store_backend_sync" 
+      icon="/img/expectation_icon.svg" 
+  />
+  <LinkCard 
+      topIcon 
       label="Credentials"
       description="Securely store and access credentials for database connection strings and tokens for Checkpoint Actions."
       to="/core/configure_project_settings/configure_credentials" 

@@ -544,6 +544,33 @@ docs_examples_configure_data_docs = [
     ),
 ]
 
+docs_examples_cloud_store_backend_sync = [
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --bigquery -k "docs_example_cloud_store_backend_gcs" tests/integration/test_script_runner.py
+        name="docs_example_cloud_store_backend_gcs",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/cloud_store_backend_sync/_examples/cloud_store_backend_gcs.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --aws -k "docs_example_cloud_store_backend_aws" tests/integration/test_script_runner.py
+        name="docs_example_cloud_store_backend_aws",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/cloud_store_backend_sync/_examples/cloud_store_backend_aws.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --azure -k "docs_example_cloud_store_backend_azure" tests/integration/test_script_runner.py
+        name="docs_example_cloud_store_backend_azure",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/cloud_store_backend_sync/_examples/cloud_store_backend_azure.py",
+        data_dir="docs/docusaurus/docs/components/_testing/test_data_sets/single_test_file",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+]
+
 learn_data_quality_use_cases = [
     # Distribution.
     IntegrationTestFixture(
@@ -677,4 +704,5 @@ docs_tests.extend(docs_examples_customize_expectations)
 docs_tests.extend(docs_examples_trigger_actions_based_on_validation_results)
 docs_tests.extend(docs_example_configure_project_settings)
 docs_tests.extend(docs_examples_configure_data_docs)
+docs_tests.extend(docs_examples_cloud_store_backend_sync)
 docs_tests.extend(learn_data_quality_use_cases)
