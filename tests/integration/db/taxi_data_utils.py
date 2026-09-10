@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Iterator, List, Optional
 
 import sqlalchemy as sa
 
@@ -36,7 +36,7 @@ def _load_data(
     random_table_suffix: bool = True,
 ) -> LoadedTable:
     dialects_supporting_multiple_values_in_single_insert_clause: List[str] = ["redshift"]
-    to_sql_method: str = (
+    to_sql_method: str | None = (
         "multi" if dialect in dialects_supporting_multiple_values_in_single_insert_clause else None
     )
 
@@ -60,7 +60,7 @@ def _is_dialect_athena(dialect: str) -> bool:
 
 
 @contextmanager
-def loaded_table(dialect: str, connection_string: str) -> LoadedTable:
+def loaded_table(dialect: str, connection_string: str) -> Iterator[LoadedTable]:
     test_df: pd.DataFrame
     table_name: str
     loaded_table: LoadedTable
@@ -110,8 +110,10 @@ def _execute_taxi_partitioning_test_cases(
         batch_definition_name: str = "test_batch_definition"
         data_asset_name: str = table_name  # Read from generated table name
 
-        column_name: str = taxi_partitioning_test_cases.test_column_name
-        column_names: List[str] = taxi_partitioning_test_cases.test_column_names
+        # Exactly one of these is populated per test case; the dispatch below raises if
+        # neither applies, so both are read before that decision is made.
+        column_name: Optional[str] = taxi_partitioning_test_cases.test_column_name
+        column_names: Optional[List[str]] = taxi_partitioning_test_cases.test_column_names
 
         # 2. Set partitioner in DataConnector config
         datasource = add_datasource(
@@ -160,7 +162,7 @@ def _execute_taxi_partitioning_test_cases(
             batch_spec=batch.batch_spec
         )
 
-        num_rows: int = execution_engine.execute_query(
+        num_rows: int | None = execution_engine.execute_query(
             sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition

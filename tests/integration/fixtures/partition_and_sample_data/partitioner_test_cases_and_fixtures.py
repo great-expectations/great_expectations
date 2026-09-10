@@ -119,8 +119,8 @@ class TaxiTestData:
 
     def get_unique_sorted_test_column_values(
         self,
-        reverse: Optional[bool] = False,
-        move_null_to_front: Optional[bool] = False,
+        reverse: bool = False,
+        move_null_to_front: bool = False,
         limit: Optional[int] = None,
     ) -> List[Optional[Any]]:
         column_values: List[Optional[Any]] = self.get_test_column_values()
@@ -128,7 +128,7 @@ class TaxiTestData:
         column_values = sorted(
             column_values,
             key=lambda element: (element is None, element),
-            reverse=reverse,
+            reverse=bool(reverse),
         )
 
         column_value: Any
@@ -148,7 +148,7 @@ class TaxiTestData:
         return column_values[:limit]
 
     def get_divided_integer_test_column_values(self, divisor: int) -> List[Optional[Any]]:
-        column_values: List[Optional[Any]] = self.get_test_column_values()
+        column_values: List[Any] = self.get_test_column_values()
 
         column_value: Any
         column_values = [column_value // divisor for column_value in column_values]
@@ -156,7 +156,7 @@ class TaxiTestData:
         return list(set(column_values))
 
     def get_mod_integer_test_column_values(self, mod: int) -> List[Optional[Any]]:
-        column_values: List[Optional[Any]] = self.get_test_column_values()
+        column_values: List[Any] = self.get_test_column_values()
 
         column_value: Any
         column_values = [column_value % mod for column_value in column_values]
@@ -189,11 +189,11 @@ class TaxiPartitioningTestCasesBase(ABC):
         return self._taxi_test_data.test_df
 
     @property
-    def test_column_name(self) -> str:
+    def test_column_name(self) -> Optional[str]:
         return self._taxi_test_data.test_column_name
 
     @property
-    def test_column_names(self) -> List[str]:
+    def test_column_names(self) -> Optional[List[str]]:
         return self._taxi_test_data.test_column_names
 
     @abstractmethod

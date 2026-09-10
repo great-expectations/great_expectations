@@ -7,7 +7,7 @@ gcs_integration_tests = []
 
 connecting_to_your_data: List[IntegrationTestFixture] = []
 
-how_to_configure_metadata_store = [
+how_to_configure_metadata_store: List[IntegrationTestFixture] = [
     # Chetan - 20231117 - These have been commented out due to their reliance on the CLI (which has been deleted).  # noqa: E501 # FIXME CoP
     #                     They should be re-enabled once they have been updated.
     # IntegrationTestFixture(

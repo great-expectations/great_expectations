@@ -197,10 +197,9 @@ def test_get_data_for_batch_identifiers_year(
 ):
     """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""  # noqa: E501 # FIXME CoP
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(dialect="sqlite")
-    # selectable should be a sa.Selectable object but since we are mocking out
-    # get_data_for_batch_identifiers_for_partition_on_date_parts
-    # and just verifying its getting passed through, we ignore the type here.
-    selectable: str = "mock_selectable"
+    # get_data_for_batch_identifiers_for_partition_on_date_parts is mocked out, so this is only
+    # ever passed through -- but it is passed as the Selectable the signature declares.
+    selectable: sqlalchemy.TableClause = sqlalchemy.table("mock_selectable")
     column_name: str = "column_name"
 
     data_partitioner.get_data_for_batch_identifiers_year(
@@ -228,7 +227,7 @@ def test_get_data_for_batch_identifiers_year_and_month(
 ):
     """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""  # noqa: E501 # FIXME CoP
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(dialect="sqlite")
-    selectable: str = "mock_selectable"
+    selectable: sqlalchemy.TableClause = sqlalchemy.table("mock_selectable")
     column_name: str = "column_name"
 
     data_partitioner.get_data_for_batch_identifiers_year_and_month(
@@ -256,7 +255,7 @@ def test_get_data_for_batch_identifiers_year_and_month_and_day(
 ):
     """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""  # noqa: E501 # FIXME CoP
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(dialect="sqlite")
-    selectable: str = "mock_selectable"
+    selectable: sqlalchemy.TableClause = sqlalchemy.table("mock_selectable")
     column_name: str = "column_name"
 
     data_partitioner.get_data_for_batch_identifiers_year_and_month_and_day(
@@ -392,7 +391,7 @@ def _render_partition_query_for_date_parts(dialect_name: str, date_parts: List[D
     a driver nor a live service, so this is safe to run in any environment.
     """
     data_partitioner = SqlAlchemyDataPartitioner(dialect=dialect_name)
-    selectable = sqlalchemy.text("table_name")
+    selectable = sqlalchemy.table("table_name")
     query = data_partitioner.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(  # noqa: E501 # FIXME CoP
         selectable=selectable,
         column_name="column_name",
