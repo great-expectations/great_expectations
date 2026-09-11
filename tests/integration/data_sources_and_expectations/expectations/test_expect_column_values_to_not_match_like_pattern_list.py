@@ -18,9 +18,16 @@ from tests.integration.test_utils.data_source_config import (
 )
 
 COL_NAME = "col_name"
+NO_LITERAL_UNDERSCORE = "no_literal_underscore"
 
 
-DATA = pd.DataFrame({COL_NAME: ["aa", "ab", "ac", None]})
+DATA = pd.DataFrame(
+    {
+        COL_NAME: ["aa", "ab", "ac", None],
+        # No row holds a literal underscore, so an escaped pattern must match nothing.
+        NO_LITERAL_UNDERSCORE: ["axb", "ayb", "a%b", None],
+    }
+)
 
 REGULAR_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
     MySQLDatasourceTestConfig(),
@@ -181,3 +188,21 @@ class TestSQLServer:
     ) -> None:
         result = batch_for_datasource.validate(expectation)
         assert not result.success
+
+
+@parameterize_batch_for_data_sources(data_source_configs=REGULAR_DATA_SOURCES, data=DATA)
+def test_escape_makes_underscore_literal(batch_for_datasource: Batch) -> None:
+    """The escape character must reach every pattern of a NOT LIKE list.
+
+    Unescaped, 'a_b' matches every row and the expectation fails; escaped, it means a
+    literal underscore that no row contains, so it succeeds.
+    """
+    unescaped = gxe.ExpectColumnValuesToNotMatchLikePatternList(
+        column=NO_LITERAL_UNDERSCORE, like_pattern_list=["a_b"]
+    )
+    assert not batch_for_datasource.validate(unescaped).success
+
+    escaped = gxe.ExpectColumnValuesToNotMatchLikePatternList(
+        column=NO_LITERAL_UNDERSCORE, like_pattern_list=["a!_b"], escape="!"
+    )
+    assert batch_for_datasource.validate(escaped).success

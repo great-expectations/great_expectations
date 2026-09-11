@@ -25,6 +25,7 @@ PREFIXED_PATTERNS = "prefixed_patterns"
 SUFFIXED_PATTERNS = "suffixed_patterns"
 COMMON_PATTERN = "suffixed_patterns"
 WITH_NULL = "with_null"
+WILDCARD_LITERALS = "wildcard_literals"
 
 DATA = pd.DataFrame(
     {
@@ -33,6 +34,8 @@ DATA = pd.DataFrame(
         SUFFIXED_PATTERNS: ["abc_foo", "def_foo", "ghi_foo"],
         COMMON_PATTERN: ["abc_foo", "def_foo", "ghi_foo"],
         WITH_NULL: ["ba", None, "ab"],
+        # One row holds a literal underscore, one a literal percent, one neither.
+        WILDCARD_LITERALS: ["a_b", "axb", "a%b"],
     }
 )
 
@@ -299,3 +302,32 @@ def test_include_unexpected_rows_postgres(batch_for_datasource: Batch) -> None:
     assert "abc" in unexpected_rows_str
     assert "def" in unexpected_rows_str
     assert "ghi" in unexpected_rows_str
+
+
+# BigQuery is excluded: GoogleSQL has no ESCAPE clause, asserted separately as a unit test.
+ESCAPE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
+    config
+    for config in SUPPORTED_DATA_SOURCES
+    if not isinstance(config, BigQueryDatasourceTestConfig)
+]
+
+
+@parameterize_batch_for_data_sources(data_source_configs=ESCAPE_DATA_SOURCES, data=DATA)
+def test_escape_applies_to_every_pattern_in_the_list(batch_for_datasource: Batch) -> None:
+    """One escape character governs the whole list, not just the first pattern.
+
+    Both patterns name a literal wildcard character, so together they match the two rows
+    that contain one, leaving only the row with neither as unexpected. Were the escape
+    dropped for the trailing patterns, 'axb' would match as well and nothing would be
+    reported.
+    """
+    expectation = gxe.ExpectColumnValuesToMatchLikePatternList(
+        column=WILDCARD_LITERALS,
+        like_pattern_list=["a!_b", "a!%b"],
+        match_on="any",
+        escape="!",
+    )
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    assert not result.success
+    assert result.result["unexpected_list"] == ["axb"]

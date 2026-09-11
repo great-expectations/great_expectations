@@ -24,6 +24,7 @@ BASIC_PATTERNS = "basic_patterns"
 PREFIXED_PATTERNS = "prefixed_patterns"
 SUFFIXED_PATTERNS = "suffixed_patterns"
 WITH_NULL = "with_null"
+WILDCARD_LITERALS = "wildcard_literals"
 
 DATA = pd.DataFrame(
     {
@@ -31,6 +32,10 @@ DATA = pd.DataFrame(
         PREFIXED_PATTERNS: ["foo_abc", "foo_def", "foo_ghi"],
         SUFFIXED_PATTERNS: ["abc_foo", "def_foo", "ghi_foo"],
         WITH_NULL: ["ba", None, "ab"],
+        # Exactly one row contains a literal underscore and one a literal percent; the
+        # third contains neither. Both are LIKE wildcards, so telling them apart is only
+        # possible with an escape character.
+        WILDCARD_LITERALS: ["a_b", "axb", "a%b"],
     }
 )
 
@@ -230,3 +235,63 @@ def test_include_unexpected_rows_sql(batch_for_datasource: Batch) -> None:
     unexpected_rows_str = str(unexpected_rows_data)
     assert "def" in unexpected_rows_str
     assert "ghi" in unexpected_rows_str
+
+
+# BigQuery is excluded: GoogleSQL has no ESCAPE clause, which is asserted separately as a
+# unit test over the dialect helper.
+ESCAPE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
+    config
+    for config in SUPPORTED_DATA_SOURCES
+    if not isinstance(config, BigQueryDatasourceTestConfig)
+]
+
+
+@parameterize_batch_for_data_sources(data_source_configs=ESCAPE_DATA_SOURCES, data=DATA)
+def test_unescaped_wildcards_still_match_anything(batch_for_datasource: Batch) -> None:
+    """Baseline: without an escape, '_' matches any character, so all three rows match.
+
+    This is the behavior that makes a literal underscore impossible to express, and it is
+    unchanged by adding the escape parameter.
+    """
+    expectation = gxe.ExpectColumnValuesToMatchLikePattern(
+        column=WILDCARD_LITERALS, like_pattern="a_b"
+    )
+    assert batch_for_datasource.validate(expectation).success
+
+
+@pytest.mark.parametrize(
+    ("like_pattern", "escape", "expected_unexpected"),
+    [
+        pytest.param("a!_b", "!", ["a%b", "axb"], id="literal_underscore"),
+        pytest.param("a!%b", "!", ["a_b", "axb"], id="literal_percent"),
+        pytest.param("a#_b", "#", ["a%b", "axb"], id="a_different_escape_character"),
+    ],
+)
+@parameterize_batch_for_data_sources(data_source_configs=ESCAPE_DATA_SOURCES, data=DATA)
+def test_escape_matches_wildcard_characters_literally(
+    batch_for_datasource: Batch,
+    like_pattern: str,
+    escape: str,
+    expected_unexpected: list[str],
+) -> None:
+    """An escape character makes '_' and '%' match themselves rather than any character.
+
+    Only the single row holding the literal character may match; the other two must be
+    reported as unexpected. Which character does the escaping is the caller's choice, so
+    two different ones must produce the same result.
+
+    Backslash is deliberately not one of them. Several dialects also treat it specially
+    inside string literals, before LIKE ever sees the pattern -- Redshift rejects
+    ``ESCAPE '\\'`` outright -- which is the reason this parameter lets callers pick a
+    character that does not collide with their dialect or their data.
+    """
+    expectation = gxe.ExpectColumnValuesToMatchLikePattern(
+        column=WILDCARD_LITERALS, like_pattern=like_pattern, escape=escape
+    )
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    # A metric that raised leaves `result` empty, so read the failure out of
+    # exception_info rather than reporting a bare KeyError three frames later.
+    assert "unexpected_list" in result.result, f"metric did not resolve: {result.exception_info}"
+    assert not result.success
+    assert sorted(result.result["unexpected_list"]) == expected_unexpected

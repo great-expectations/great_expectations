@@ -20,12 +20,17 @@ from tests.integration.test_utils.data_source_config import (
 
 COL_A = "col_a"
 COL_B = "col_b"
+NO_LITERAL_UNDERSCORE = "no_literal_underscore"
 
 
 DATA = pd.DataFrame(
     {
         COL_A: ["aa", "ab", "ac", None],
         COL_B: ["aa", "bb", "cc", None],
+        # No row holds a literal underscore, so a pattern meaning "literal a_b" must match
+        # nothing -- while the same pattern unescaped matches all three, because '_' is a
+        # wildcard.
+        NO_LITERAL_UNDERSCORE: ["axb", "ayb", "a%b", None],
     }
 )
 
@@ -168,3 +173,22 @@ class TestSQLServer:
     ) -> None:
         result = batch_for_datasource.validate(expectation)
         assert not result.success
+
+
+@parameterize_batch_for_data_sources(data_source_configs=SUPPORTED_DATA_SOURCES, data=DATA)
+def test_escape_makes_underscore_literal(batch_for_datasource: Batch) -> None:
+    """The escape character must reach the NOT LIKE expression too.
+
+    Unescaped, 'a_b' matches every row and the expectation fails. Escaped, it means a
+    literal underscore, which no row contains, so the expectation succeeds. The two
+    verdicts differing is what proves the escape was applied.
+    """
+    unescaped = gxe.ExpectColumnValuesToNotMatchLikePattern(
+        column=NO_LITERAL_UNDERSCORE, like_pattern="a_b"
+    )
+    assert not batch_for_datasource.validate(unescaped).success
+
+    escaped = gxe.ExpectColumnValuesToNotMatchLikePattern(
+        column=NO_LITERAL_UNDERSCORE, like_pattern="a!_b", escape="!"
+    )
+    assert batch_for_datasource.validate(escaped).success

@@ -47,6 +47,18 @@ MATCH_ON_DESCRIPTION = (
     "Use 'any' if the value should match at least one like pattern in the list. "
     "Use 'all' if it should match each like pattern in the list."
 )
+ESCAPE_DESCRIPTION = (
+    "A single character that removes the special meaning of the `_` and `%` wildcards "
+    "that follow it in the like pattern, emitted as a SQL `ESCAPE` clause. Required to "
+    "match those characters literally: dialects disagree about an unannounced backslash "
+    "(PostgreSQL treats it as an escape, SQLite treats it as an ordinary character, and "
+    "Snowflake requires the clause to be stated), so a pattern relying on the default is "
+    "not portable. Prefer a character other than a backslash: several dialects also treat "
+    "a backslash specially inside string literals, before the pattern reaches LIKE, and "
+    "Redshift rejects `ESCAPE '\\'` outright. Omit it to emit no `ESCAPE` clause. Not "
+    "supported on BigQuery, whose GoogleSQL has no `ESCAPE` clause: escape wildcards "
+    "inside the pattern there instead."
+)
 DATA_QUALITY_ISSUES = [DataQualityIssues.VALIDITY.value]
 SUPPORTED_DATA_SOURCES = [
     SupportedDataSources.SQLITE.value,
@@ -83,6 +95,8 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
             {MATCH_ON_DESCRIPTION}
 
     Other Parameters:
+        escape (str or None): \
+            {ESCAPE_DESCRIPTION}
         mostly (None or a float between 0 and 1): \
             {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
@@ -204,6 +218,20 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
     match_on: Union[Literal["any", "all"], SuiteParameterDict] = pydantic.Field(
         default="any", description=MATCH_ON_DESCRIPTION
     )
+    escape: Union[str, SuiteParameterDict, None] = pydantic.Field(
+        default=None, description=ESCAPE_DESCRIPTION
+    )
+
+    @pydantic.validator("escape")
+    def validate_escape(
+        cls, escape: str | SuiteParameterDict | None
+    ) -> str | SuiteParameterDict | None:
+        # SQL permits exactly one escape character; a longer string would render an
+        # ESCAPE clause the database rejects, so fail here with a usable message instead.
+        if isinstance(escape, str) and len(escape) != 1:
+            raise ValueError("escape must be a single character.")  # noqa: TRY003 # FIXME CoP
+
+        return escape
 
     @pydantic.validator("like_pattern_list")
     def validate_like_pattern_list(
@@ -227,7 +255,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
     _library_metadata = library_metadata
 
     map_metric = "column_values.match_like_pattern_list"
-    success_keys = ("mostly", "like_pattern_list", "match_on")
+    success_keys = ("mostly", "like_pattern_list", "match_on", "escape")
     args_keys = (
         "column",
         "like_pattern_list",
