@@ -1,6 +1,8 @@
-from typing import Dict, List
+import logging
+from typing import TYPE_CHECKING, Dict, List
 
 import pytest
+from pytest_mock import MockerFixture
 
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import BatchRequest
@@ -15,16 +17,16 @@ from great_expectations.experimental.metric_repository.metrics import (
     TableMetric,
 )
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfigurationID
-from great_expectations.validator.validation_graph import MetricsCalculatorErrorResultValue
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.validator.computed_metric import MetricValue
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
+    from great_expectations.validator.validation_graph import (
+        MetricsCalculatorErrorResultValue,
+    )
+
 pytestmark = pytest.mark.unit
-
-import logging
-
-from pytest_mock import MockerFixture
 
 LOGGER = logging.getLogger(__name__)
 
@@ -724,9 +726,11 @@ def test_get_metrics_only_gets_new_validator_on_asset_change(
 def test_get_metrics_with_no_metrics(
     mock_context, mock_validator, mock_batch_request, metric_retriever
 ):
-    computed_metrics = {}
+    computed_metrics: Dict[MetricConfigurationID, MetricValue] = {}
     metrics_list: List[MetricTypes] = []
-    aborted_metrics = {}
+    aborted_metrics: Dict[
+        MetricConfigurationID, MetricsCalculatorErrorResultValue
+    ] = {}
     mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
