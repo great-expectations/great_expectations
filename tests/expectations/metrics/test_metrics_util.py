@@ -1649,9 +1649,8 @@ def test_get_dialect_regex_expression_resolves_exasol_aggregate_family() -> None
     switching to the `NOT REGEXP_LIKE` operator token that the row-level negative form
     uses and that the test above pins. That is a second rendering path through the same
     branch, so it is pinned separately. The shape below was executed verbatim against a
-    live Exasol 2026.2.0-nano container and the server accepts it; the run is recorded in
-    this change's `evidence.md` (probe 6). Like the test above, it pins a rendering only --
-    the text does not reveal how the server reads the predicate.
+    live Exasol 2026.2.0-nano container and the server accepts it. Like the test above, it
+    pins a rendering only -- the text does not reveal how the server reads the predicate.
 
     The two aggregate modules the Oracle test above names --
     `column_values_match_regex_values.py` and `column_values_not_match_regex_values.py` --

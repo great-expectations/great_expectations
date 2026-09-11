@@ -357,8 +357,14 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915 # FIX
     # alone, 29 for the equivalent `[\s\S]*` alone, 9 with `(*ANYCRLF)` in place of `(*LF)`,
     # and 5 for the form above. A seeded 4800-cell fuzz over generated patterns and generated
     # values, run in the same pass as the global-`(?s)` control, gives 0 for the form above and
-    # 24 for the control. The matrix and fuzz definitions are recorded in the change's
-    # `evidence.md`, because these counts mean nothing without the cells they were taken over.
+    # 24 for the control. Neither probe is committed, so read these counts as the ordering they
+    # establish and not as figures to reproduce -- a different cell set moves every one of them,
+    # and the ordering is the part that chose this literal. What holds it in place instead are
+    # two live-backend cases in the expectation module for `match_regex`:
+    # `test_exasol_caller_dot_does_not_cross_a_newline` fails under a global `(?s)` and under a
+    # scoped modifier with no `(*LF)`, and `test_exasol_added_wildcards_still_cross_a_newline`
+    # fails if the modifier is deleted rather than scoped. Both are named in full in the
+    # docstring of `test_get_dialect_regex_expression_renders_exasol_native_predicate`.
     #
     # Those 5 residual divergences are all one thing, and it is not the wrapping's doing:
     # Exasol's character classes are ASCII where Python's are Unicode, so `\s` rejects NEL, LS

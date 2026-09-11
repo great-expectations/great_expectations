@@ -98,12 +98,16 @@ _OUTSIDE_SHARED_PARAMETERIZATION: Final[Mapping[str, str]] = {
     ),
     "exasol": (
         "curated tier: its dialect behavior is proven by the curated backend suite, and the "
-        "shared parameterization deliberately omits it -- with the exception of "
-        "test_expect_column_values_to_match_regex.py and "
-        "test_expect_column_values_to_not_match_regex.py, whose hand-written backend lists it "
-        "does join, because Exasol's REGEXP_LIKE is a whole-string match and only a live "
-        "backend can pin that the branch converts it into the substring search the metric "
-        "contract requires"
+        "shared parameterization deliberately omits it -- with the exception of four modules "
+        "whose hand-written backend lists it does join: "
+        "test_expect_column_values_to_match_regex.py, "
+        "test_expect_column_values_to_not_match_regex.py, "
+        "test_values_match_regex_values.py and test_values_not_match_regex_values.py. "
+        "Exasol's REGEXP_LIKE is a whole-string match, and only a live backend can pin that "
+        "the branch converts it into the substring search the metric contract requires. The "
+        "last two carry a second duty: Exasol is the only dialect that is both module-less "
+        "and owns a branch in get_dialect_regex_expression, so they are the only automated "
+        "coverage of the aggregate providers' live-dialect fallback against a real server"
     ),
     "oracle": (
         "curated tier: its dialect behavior is proven by the curated backend suite, and the "
