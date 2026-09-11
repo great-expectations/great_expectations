@@ -32,6 +32,8 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core.result_format import ResultFormatUnion
+    from great_expectations.core.validation_result_schemas.dispatcher import Result
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
@@ -385,6 +387,57 @@ class ExpectationValidationResult(SerializableDictDot):
     def describe(self) -> str:
         """JSON string description of this ExpectationValidationResult"""
         return json.dumps(self.describe_dict(), indent=4)
+
+    def as_typed(
+        self,
+        *,
+        result_format: Optional[ResultFormatUnion] = None,
+        engine_hint: Optional[str] = None,
+    ) -> Result:
+        """Return a typed view of self.result without mutating anything.
+
+        Lazy-imports the dispatcher to avoid an import cycle at module load.
+        Reads expectation_type from self.expectation_config.type and returns the
+        parsed model. Raises ParseError on validation failure, and also when
+        ``expectation_config`` is None: the expectation type cannot be recovered
+        without it, so there is no schema family to resolve.
+
+        Args:
+            result_format: the format the result was rendered at, if known.  When
+                omitted, the dispatcher recovers it from the shape of the result
+                dict, and only falls back to the configured value in
+                ``expectation_config.kwargs`` when the shape does not discriminate.
+                Configuration is a weak signal here: ``result_format`` passed to
+                ``Batch.validate(...)`` is not persisted into kwargs, so a
+                configured value is often absent and can disagree with what the
+                engine actually rendered.
+            engine_hint: optional 'pandas' | 'spark' | 'sql'.  ``None`` means the
+                engine is unknown; it is never guessed from the result dict.
+        """
+        from great_expectations.core.validation_result_schemas.dispatcher import (
+            ParseError,
+        )
+        from great_expectations.core.validation_result_schemas.dispatcher import (
+            as_typed as dispatch_as_typed,
+        )
+
+        config = self.expectation_config
+        if config is None:
+            # The expectation type is recoverable only from the config.  Forwarding a synthetic
+            # type instead would surface as "no such expectation is registered", telling the
+            # caller to register an expectation that was never named -- a missing config
+            # reported as a registry problem.
+            raise ParseError(  # noqa: TRY003
+                "Cannot determine a result schema: this result carries no expectation_config, "
+                "so the expectation type cannot be recovered."
+            )
+        return dispatch_as_typed(
+            self.result or {},
+            expectation_type=config.type,
+            result_format=result_format,
+            configured_result_format=config.kwargs.get("result_format"),
+            engine_hint=engine_hint,
+        )
 
 
 class ExpectationValidationResultSchema(Schema):

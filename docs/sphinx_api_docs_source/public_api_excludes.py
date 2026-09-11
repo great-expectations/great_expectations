@@ -237,6 +237,13 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
+        reason="Internal test-findings writer; false match on the generic name `close`.",
+        name="close",
+        filepath=pathlib.Path(
+            "great_expectations/core/validation_result_schemas/findings_emitter.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
         reason="False match for Python `dict`",
         name="dict",
         filepath=pathlib.Path("great_expectations/render/renderer_configuration.py"),

@@ -305,6 +305,14 @@ jobs:
         # TODO: revert the timeout back to 1.5 or lower after resolving arc issues
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=2.0
 
+      # The in-memory pandas data source carries the `unit` marker, so this lane is where the
+      # validation-result-schema matrix's pandas cells actually run.
+      - name: Upload validation result schema findings
+        if: always()
+        uses: ./.github/actions/upload-validation-result-schemas-findings
+        with:
+          suffix: unit-${{ matrix.python-version }}
+
   doc-checks:
     needs: [check-actor-permissions]
     if: github.event.pull_request.draft == false
@@ -554,6 +562,26 @@ jobs:
           esac
           invoke ci-tests '${{ matrix.markers }}' --up-services --verbose $FLAGS
 
+      # The marker selection is a pytest expression, not an identifier: it carries spaces and
+      # the word `or`, neither of which belongs in an artifact name. Collapsing them here keeps
+      # the sanitising in one shell step rather than spread across an expression.
+      - name: Compute findings artifact suffix
+        if: always()
+        id: findings-suffix
+        env:
+          MARKERS: ${{ matrix.markers }}
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          SUFFIX=$(printf '%s-%s' "$MARKERS" "$PYTHON_VERSION" \
+            | sed -E 's/[[:space:]]+or[[:space:]]+/-/g; s/[[:space:]]+/-/g')
+          echo "value=$SUFFIX" >> "$GITHUB_OUTPUT"
+
+      - name: Upload validation result schema findings
+        if: always()
+        uses: ./.github/actions/upload-validation-result-schemas-findings
+        with:
+          suffix: ${{ steps.findings-suffix.outputs.value }}
+
   pyspark4-marker-tests:
     needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
@@ -681,6 +709,22 @@ jobs:
         env:
           SHARD: ${{ matrix.shard }}
 
+      # The shard is written "1/3"; a slash is not allowed in an artifact name.
+      - name: Compute findings artifact suffix
+        if: always()
+        id: findings-suffix
+        env:
+          SHARD: ${{ matrix.shard }}
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          echo "value=snowflake-${PYTHON_VERSION}-shard-${SHARD//\//of}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload validation result schema findings
+        if: always()
+        uses: ./.github/actions/upload-validation-result-schemas-findings
+        with:
+          suffix: ${{ steps.findings-suffix.outputs.value }}
+
   redshift:
     needs: [unit-tests, static-analysis, check-actor-permissions]
     if: github.event.pull_request.draft == false
@@ -725,6 +769,12 @@ jobs:
 
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
+
+      - name: Upload validation result schema findings
+        if: always()
+        uses: ./.github/actions/upload-validation-result-schemas-findings
+        with:
+          suffix: ${{ matrix.markers }}-${{ matrix.python-version }}
 
   py310-min-versions:
     needs: [unit-tests, static-analysis, check-actor-permissions]

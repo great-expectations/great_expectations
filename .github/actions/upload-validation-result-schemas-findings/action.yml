@@ -1,0 +1,22 @@
+name: Upload VRS Findings
+description: Upload the validation result schema findings this job produced
+inputs:
+  suffix:
+    description: >-
+      Identifies this job among every other caller in the same workflow run. Artifact names must be
+      unique within a run: a second upload under a name already claimed fails outright, so a fixed
+      name would break every job after whichever one happened to finish first. Each caller passes
+      something that names its own leg (its marker selection, its Python version, its shard).
+    required: true
+runs:
+  using: composite
+  steps:
+    # always(): the findings are most valuable for a run that failed, since a failing cell is
+    # exactly the one whose finding records why.
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: validation-result-schemas-findings-${{ inputs.suffix }}
+        path: tests/_artifacts/validation_result_schemas/findings/
+        # Most jobs run no cell of this matrix and so produce no findings directory at all.
+        if-no-files-found: ignore

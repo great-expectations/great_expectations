@@ -292,6 +292,12 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run performance tests (which might also require additional arguments like --bigquery)",  # noqa: E501 # FIXME CoP
     )
+    parser.addoption(
+        "--vrs-run-id",
+        action="store",
+        default=None,
+        help="Run ID for validation result schema matrix findings file (optional; auto-generated if not set).",  # noqa: E501
+    )
 
 
 def build_test_backends_list_v2_api(metafunc):

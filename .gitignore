@@ -163,3 +163,6 @@ tests/integration/cloud/rest_contracts/pacts
 
 # mise
 mise.toml
+
+# Test artifact output (validation result schemas findings, etc.)
+/tests/_artifacts/
