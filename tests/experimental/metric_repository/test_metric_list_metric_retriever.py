@@ -728,9 +728,7 @@ def test_get_metrics_with_no_metrics(
 ):
     computed_metrics: Dict[MetricConfigurationID, MetricValue] = {}
     metrics_list: List[MetricTypes] = []
-    aborted_metrics: Dict[
-        MetricConfigurationID, MetricsCalculatorErrorResultValue
-    ] = {}
+    aborted_metrics: Dict[MetricConfigurationID, MetricsCalculatorErrorResultValue] = {}
     mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
