@@ -9,6 +9,7 @@ import mistune
 import pytest
 
 from great_expectations.checkpoint import UpdateDataDocsAction
+from great_expectations.compatibility.pydantic import AnyUrl, parse_obj_as
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -567,7 +568,7 @@ def _normalize_graph_blocks(obj: dict | list) -> None:
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
-    titanic_profiled_evrs_1: ExpectationValidationResult,
+    titanic_profiled_evrs_1: ExpectationSuiteValidationResult,
     ValidationResultsPageRenderer_render_with_run_info_at_end,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
@@ -585,7 +586,7 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
-    titanic_profiled_evrs_1: ExpectationValidationResult,
+    titanic_profiled_evrs_1: ExpectationSuiteValidationResult,
     ValidationResultsPageRenderer_render_with_run_info_at_start,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=False)
@@ -622,7 +623,10 @@ def test_asset_name_is_part_of_resource_info_index(mocker: MockerFixture):
 
     data_asset = context.data_sources.pandas_default.add_csv_asset(
         "my_asset",
-        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+        parse_obj_as(
+            AnyUrl,
+            "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+        ),
     )
 
     batch_definition = data_asset.add_batch_definition_whole_dataframe("my_batch")

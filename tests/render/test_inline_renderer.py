@@ -39,7 +39,7 @@ def test_inline_renderer_instantiation_error_message(
 ):
     expectation_suite: ExpectationSuite = basic_expectation_suite
     with pytest.raises(InlineRendererError) as e:
-        InlineRenderer(render_object=expectation_suite)  # type: ignore # FIXME CoP
+        InlineRenderer(render_object=expectation_suite)  # type: ignore[arg-type] # FIXME CoP
     assert (
         str(e.value)
         == "InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."  # noqa: E501 # FIXME CoP

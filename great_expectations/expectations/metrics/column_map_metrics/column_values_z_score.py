@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+import numpy as np
+import pandas as pd
+
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
@@ -22,8 +25,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    import pandas as pd
-
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
@@ -45,6 +46,20 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         # return the z_score values
         mean = _metrics.get("column.mean")
         std_dev = _metrics.get("column.standard_deviation")
+
+        # Only the divide-by-zero (constant column) case is decided here. std_dev comes
+        # from column.std(), which is ddof=1 and returns NaN -- never None -- for a column
+        # with fewer than two non-null values, so the None limb is unreachable on this
+        # engine. It is kept because the shared guard reads the same on all three, and
+        # because on SQL the aggregate passes through convert_to_json_serializable, which
+        # maps NaN to None; there the limb catches both n<2 and a NaN aggregate.
+        #
+        # The guard is still load-bearing here: on an object-dtype column
+        # (column - mean) / 0.0 raises ZeroDivisionError rather than producing NaN.
+        # Undefined variance that does reach the division falls through to
+        # _pandas_condition, which accepts a NaN z-score rather than flagging every row.
+        if std_dev is None or std_dev == 0:
+            return pd.Series(np.nan, index=column.index)
         try:
             return (column - mean) / std_dev
         except TypeError:
@@ -61,7 +76,15 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
                 under_threshold = z_score.abs() < abs(threshold)
             else:
                 under_threshold = z_score < threshold
-            return under_threshold
+            # An undefined z-score compares False against any threshold, which would flag
+            # every row as an outlier. Treat it as meeting the expectation instead,
+            # matching the NULL comparison semantics of the SQL implementation. This is
+            # where undefined variance is resolved on pandas whenever the guard above did
+            # not catch it -- a NaN std_dev from fewer than two non-null values, or from a
+            # column containing inf -- as well as a constant column of numeric dtype.
+            # Required regardless of how wide that guard is, since _pandas_function
+            # returns an all-NaN series and NaN < threshold is False.
+            return under_threshold | z_score.isna()
         except TypeError:
             raise (TypeError("Cannot check if a string lies under a numerical threshold"))  # noqa: TRY003 # FIXME CoP
 
@@ -69,6 +92,16 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     def _sqlalchemy_function(cls, column, _metrics, _dialect, **kwargs):
         mean = _metrics["column.mean"]
         standard_deviation = _metrics["column.standard_deviation"]
+
+        # standard_deviation is an already-resolved Python scalar, so the divide-by-zero
+        # (constant column) and undefined (None) cases can be decided here rather than
+        # delegated to the database. Dialects disagree on division by zero -- Postgres,
+        # SQL Server and friends raise, while SQLite and MySQL return NULL -- so decide
+        # it here to keep every data source consistent. The NULL is cast to a numeric
+        # type because dialects such as Postgres cannot resolve abs() over an untyped
+        # NULL.
+        if standard_deviation is None or standard_deviation == 0:
+            return sa.cast(sa.null(), sa.Float)
         return (column - mean) / standard_deviation
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)

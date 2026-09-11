@@ -1,35 +1,19 @@
 from __future__ import annotations
 
 import json
-import os
 from typing import TYPE_CHECKING
 
 import pytest
 
-import great_expectations as gx
 from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
 from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResult
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.self_check.util import expectationSuiteValidationResultSchema
 
 if TYPE_CHECKING:
     import pytest_mock
-
-
-@pytest.fixture(scope="module")
-def empty_data_context_module_scoped(tmp_path_factory) -> FileDataContext:
-    # Re-enable GE_USAGE_STATS
-    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118 # FIXME CoP
-    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118 # FIXME CoP
-    os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103 # FIXME CoP
-    return context
 
 
 @pytest.fixture

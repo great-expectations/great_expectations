@@ -72,6 +72,38 @@ def _count_label(table_columns: Sequence[Any]) -> str:
     return label
 
 
+def _column_by_name(selectable: Any, column_name: str) -> Any:
+    """Return the column named "column_name" from a projection built on "table.columns".
+
+    On the dialects GX treats as case-insensitive, the "table.columns" metric reports
+    names as "CaseInsensitiveString", which hashes by its case-folded value. A plain
+    "str" holding the same name is then an equal key that hashes differently, so a
+    projection built from "table.columns" cannot be indexed by a raw domain column name
+    unless that name is already lower case -- ".c" lookup raises "KeyError" instead.
+
+    Try the hash lookup first so the common path stays O(1), and fall back to matching
+    by equality, which both spellings agree on. Two columns that differ only by case are
+    physically distinct (e.g. via quoted identifiers), so an exact-spelling match is
+    preferred over a merely case-folded one -- the loop keeps scanning past a folded
+    match in case a later entry matches exactly, and only settles for the folded match
+    if no exact one turns up. A name that matches nothing still raises the original
+    "KeyError".
+    """
+    try:
+        return selectable.c[column_name]
+    except KeyError:
+        case_insensitive_match = None
+        for key, column in selectable.c.items():
+            if key == column_name:
+                if str(key) == column_name:
+                    return column
+                if case_insensitive_match is None:
+                    case_insensitive_match = column
+        if case_insensitive_match is not None:
+            return case_insensitive_match
+        raise
+
+
 class _DuplicateRowsSource(NamedTuple):
     """The pieces of a query that returns the source rows whose target value repeats.
 
@@ -82,6 +114,10 @@ class _DuplicateRowsSource(NamedTuple):
     columns: Any
     from_clause: Any
     whereclause: Any
+
+    def column(self, column_name: str) -> Any:
+        """Return the source column named "column_name"."""
+        return _column_by_name(self.columns, column_name)
 
 
 def _build_duplicate_rows_source(
@@ -146,7 +182,7 @@ def _build_duplicate_rows_source(
         columns=source,
         from_clause=source.join(
             dup_keys,
-            source.c[column_name] == dup_keys.c[column_name],
+            _column_by_name(source, column_name) == dup_keys.c[column_name],
         ),
         whereclause=None,
     )
@@ -174,7 +210,7 @@ def _sqlalchemy_unique_unexpected_rows(
         column_name=column_name,
         table_columns=table_columns,
     )
-    column_selector = [duplicates.columns.c[c] for c in table_columns]
+    column_selector = [duplicates.column(c) for c in table_columns]
     query = sa.select(*column_selector).select_from(duplicates.from_clause)
     if duplicates.whereclause is not None:
         query = query.where(duplicates.whereclause)
@@ -224,8 +260,8 @@ def _sqlalchemy_unique_unexpected_index_list(
         column_name=column_name,
         table_columns=all_table_columns,
     )
-    column_selector = [duplicates.columns.c[c] for c in unexpected_index_column_names]
-    column_selector.append(duplicates.columns.c[column_name])
+    column_selector = [duplicates.column(c) for c in unexpected_index_column_names]
+    column_selector.append(duplicates.column(column_name))
     query = sa.select(*column_selector).select_from(duplicates.from_clause)
     if duplicates.whereclause is not None:
         query = query.where(duplicates.whereclause)
@@ -287,8 +323,8 @@ def _sqlalchemy_unique_unexpected_index_query(
         column_name=column_name,
         table_columns=all_table_columns,
     )
-    column_selector = [duplicates.columns.c[c] for c in unexpected_index_column_names]
-    column_selector.append(duplicates.columns.c[column_name])
+    column_selector = [duplicates.column(c) for c in unexpected_index_column_names]
+    column_selector.append(duplicates.column(column_name))
     query = sa.select(*column_selector).select_from(duplicates.from_clause)
     if duplicates.whereclause is not None:
         query = query.where(duplicates.whereclause)
