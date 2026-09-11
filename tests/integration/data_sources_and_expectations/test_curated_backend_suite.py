@@ -177,6 +177,36 @@ def test_regex_match(batch_for_datasource: Batch) -> None:
     assert result.success
 
 
+@parameterize_batch_for_data_sources(data_source_configs=_sources(REGEX_MATCH), data=DATA)
+def test_regex_match_is_a_substring_search_not_a_whole_string_match(
+    batch_for_datasource: Batch,
+) -> None:
+    """`column_values.match_regex` looks for the pattern anywhere in the value.
+
+    Its reference implementation is `column.astype(str).str.contains(regex)`
+    (`column_values_match_regex.py`), and pandas' `str.contains` is `re.search`. So the
+    pattern below -- "every name begins with a capital letter" -- must pass, exactly as
+    `test_regex_match` above does with the trailing `.*` present.
+
+    The *missing* trailing `.*` is the whole point of this case. With it -- as in
+    `test_regex_match` -- the pattern matches each fixture value in full, so the case
+    passes even on a backend whose regex predicate is a whole-string match. Without it,
+    only a real substring search passes. That is what makes this case able to distinguish
+    the two readings and `test_regex_match` unable to.
+
+    Registered under the same `REGEX_MATCH` key, so the tier's key count and the
+    `CURATED_CASE_KEYS` guards below are unmoved, and a backend excluding regex coverage
+    still excludes both cases with one declaration.
+    """
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToMatchRegex(
+            column="name",
+            regex="^[A-Z]",
+        )
+    )
+    assert result.success
+
+
 @parameterize_batch_for_data_sources(data_source_configs=_sources(UNIQUENESS), data=DATA)
 def test_uniqueness(batch_for_datasource: Batch) -> None:
     result = batch_for_datasource.validate(

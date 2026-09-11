@@ -80,6 +80,14 @@ def get_extras_require():
         "test",
         "tools",
         "all-contrib-expectations",
+        # Test-only for now. The extras map is derived by globbing this directory, so a
+        # requirements file is enough on its own to publish `pip install
+        # 'great_expectations[exasol]'` as a supported install path. The driver
+        # (https://github.com/exasol/sqlalchemy-exasol) is installed here for the curated
+        # CI lane; publishing the install path and adding its row to the SQL dialect
+        # installation-commands table are one user-facing change, and the follow-up PR
+        # makes them together. Move this key into `sqla_keys` to publish the extra.
+        "exasol",
     )
 
     requirements_dir = "reqs"

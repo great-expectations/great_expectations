@@ -113,3 +113,32 @@ class TestSetupIntegration:
             "comes from reqs/requirements-dev-oracle.txt, not from `sqla_keys`, whose "
             f"shared constraint is only `sqlalchemy>=1.4.0`: {extras['oracle']}"
         )
+
+    @pytest.mark.filesystem
+    def test_exasol_is_not_a_published_extra(self):
+        """Exasol's driver is installed for the curated lane, not offered to users.
+
+        `get_extras_require` derives the extras map by globbing `reqs/`, so
+        `requirements-dev-exasol.txt` — which exists so the curated Exasol test lane
+        can install a driver — is on its own enough to publish
+        `pip install 'great_expectations[exasol]'`. Publishing that install path and
+        adding its row to the SQL dialect installation-commands table are one
+        user-facing change, and the follow-up PR makes them together; until then the
+        key is held in `ignore_keys`, and this is what keeps the hold from being
+        reverted by accident.
+        """
+        original_cwd = Path.cwd()
+        try:
+            os.chdir(project_root)
+            extras = get_extras_require()
+        finally:
+            os.chdir(original_cwd)
+
+        assert (project_root / "reqs" / "requirements-dev-exasol.txt").exists(), (
+            "The Exasol dev requirements file is what makes this hold necessary; "
+            "if it is gone, remove this test with it."
+        )
+        assert "exasol" not in extras, (
+            "`exasol` is now a published extra. If that is intended, delete this test "
+            "and add the install row to the SQL dialect installation-commands table."
+        )

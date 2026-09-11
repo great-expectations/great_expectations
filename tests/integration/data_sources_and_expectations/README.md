@@ -460,7 +460,7 @@ out. Registration rejects anything else.
 The reason: a config the harness drives against a named engine runs that suite unless someone
 decided otherwise, and that decision has to be written down. Silent omission is how three SQL
 backends came to be missing from the suite — opting out required nothing, so nobody noticed it had
-happened. The four curated-tier backends that sit out today each carry an entry stating that their
+happened. The five curated-tier backends that sit out today each carry an entry stating that their
 dialect behavior is proven by the curated suite instead.
 
 The rule is keyed on those two facts together for a reason. A declaration-only record has no config

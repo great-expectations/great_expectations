@@ -123,6 +123,7 @@ REQUIRED_MARKERS: Final[set[str]] = {
     "cloud",
     "databricks",
     "docs",
+    "exasol",
     "filesystem",
     "gcs_deps",
     "generic_sql",

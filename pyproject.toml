@@ -608,6 +608,7 @@ markers = [
     "docs-creds-needed: mark a test as a docs test that needs additional cloud credentials (these will not run on public forks).",
     "docs-spark: temporarily mark a test as a docs test that depends on spark.",
     "docs: mark a test as a docs test.",
+    "exasol: mark a test as Exasol-dependent.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
     "filesystem: mark tests using the filesystem as the storage backend.",
     "gcs_deps: mark tests that need google cloud storage dependencies but no credentials",

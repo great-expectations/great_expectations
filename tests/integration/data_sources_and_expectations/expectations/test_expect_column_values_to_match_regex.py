@@ -13,6 +13,7 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 )
 from tests.integration.test_utils.data_source_config import (
     BigQueryDatasourceTestConfig,
+    ExasolDatasourceTestConfig,
     GenericSQLDatasourceTestConfig,
     MySQLDatasourceTestConfig,
     PostgreSQLDatasourceTestConfig,
@@ -25,6 +26,7 @@ from tests.integration.test_utils.data_source_config.sqlite import SqliteDatasou
 
 SUPPORTED_SQL_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
     BigQueryDatasourceTestConfig(),
+    ExasolDatasourceTestConfig(),
     MySQLDatasourceTestConfig(),
     PostgreSQLDatasourceTestConfig(),
     RedshiftDatasourceTestConfig(),
@@ -50,6 +52,15 @@ DATA = pd.DataFrame(
         WITH_NULL: ["abc", None, "ghi"],
     }
 )
+
+# Kept out of DATA on purpose. `test_basic_success` and the other shared cases run over DATA for
+# six other backends, and the two cases below assert an answer that is specific to Exasol's regex
+# engine -- newline handling in a regex predicate is legitimately dialect-specific (POSIX regex on
+# PostgreSQL and Redshift lets `.` cross a newline by default, MySQL 8's ICU engine does not), so
+# these values and cases stay on their own.
+NEWLINE_STRINGS = "newline_strings"
+
+NEWLINE_DATA = pd.DataFrame({NEWLINE_STRINGS: ["a\nb", "a\rb", "axb"]})
 
 
 @parameterize_batch_for_data_sources(data_source_configs=SUPPORTED_SQL_DATA_SOURCES, data=DATA)
@@ -273,4 +284,73 @@ def test_unsupported_dialect_states_the_reason(batch_for_datasource: Batch) -> N
     assert messages, "expected the result to record an exception"
     assert all("Regex is not supported for dialect mssql" in message for message in messages), (
         f"exception_message does not state the cause: {messages!r}"
+    )
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[ExasolDatasourceTestConfig()],
+    data=NEWLINE_DATA,
+)
+def test_exasol_caller_dot_does_not_cross_a_newline(batch_for_datasource: Batch) -> None:
+    """The caller's own `.` must mean on Exasol what it means to `re.search`.
+
+    Exasol's `REGEXP_LIKE` is a whole-string predicate, so the Exasol branch of
+    `get_dialect_regex_expression` wraps the caller's pattern in `.*` on both sides to make
+    it the substring search the metric contracts for. Those added wildcards need DOTALL --
+    and the modifier that grants it must reach *only* them, which is why the branch emits the
+    scoped `(?s:.*)` behind a `(*LF)` newline verb rather than a leading global `(?s)`.
+
+    Asserted against `ResultFormat.COMPLETE` rather than `result.success` because the exact
+    `unexpected_list` separates all three candidate wrappings at once, over the values
+    `["a\\nb", "a\\rb", "axb"]` with `regex="a.b"`:
+
+    - `(*LF)(?s:.*)(?:a.b)(?s:.*)` -- correct, `["a\\nb"]`, which is what `re.search` says.
+    - `(?s).*(?:a.b).*` -- a *global* `(?s)`, which runs to the end of the pattern and so
+      redefines the caller's `.` too. Gives `[]`: every value matches and the expectation
+      wrongly succeeds. This is the defect the review comment on the branch caught.
+    - `(?s:.*)(?:a.b)(?s:.*)` -- scoped but without `(*LF)`. Gives `["a\\nb", "a\\rb"]`:
+      Exasol defaults to PCRE's `ANY` newline convention, so the caller's `.` also refuses to
+      cross `\\r`, which `re.search` accepts. Scoping alone is a net regression, not a partial
+      fix, which is why `(*LF)` is part of the same change.
+
+    `test_exasol_added_wildcards_still_cross_a_newline` is the other half: this case alone
+    would also be satisfied by deleting the modifier altogether, which is the wrong fix.
+    """
+    expectation = gxe.ExpectColumnValuesToMatchRegex(column=NEWLINE_STRINGS, regex="a.b")
+
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    assert not result.success
+    result_dict = result["result"]
+    assert result_dict["unexpected_list"] == ["a\nb"], (
+        "Exasol's answer for the caller's `.` diverged from re.search -- `[]` means the DOTALL "
+        "modifier is global and reached the caller's pattern, and an extra 'a\\rb' means the "
+        "modifier is scoped but the `(*LF)` newline verb is missing"
+    )
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[ExasolDatasourceTestConfig()],
+    data=NEWLINE_DATA,
+)
+def test_exasol_added_wildcards_still_cross_a_newline(batch_for_datasource: Batch) -> None:
+    """The wildcards the Exasol branch adds must keep crossing a newline.
+
+    This is the guard against answering the scoping problem by deleting the modifier instead
+    of scoping it. With the branch emitting `.*(?:b).*` -- no modifier at all -- the added
+    wildcards stop crossing a newline, so `a\\nb` and `a\\rb` are judged unmatched and this
+    case fails, even though `re.search("b")` matches all three values.
+
+    Without this case, `test_exasol_caller_dot_does_not_cross_a_newline` would be satisfied by
+    that wrong fix too: dropping the modifier also stops the caller's `.` crossing `\\n`. The
+    two cases together admit only the scoped form.
+    """
+    expectation = gxe.ExpectColumnValuesToMatchRegex(column=NEWLINE_STRINGS, regex="b")
+
+    result = batch_for_datasource.validate(expectation)
+
+    assert result.success, (
+        "a plain substring pattern failed to match a value containing a newline -- the `.*` "
+        "wildcards the Exasol branch adds have stopped crossing one, which is what removing "
+        "the DOTALL modifier does instead of scoping it"
     )
