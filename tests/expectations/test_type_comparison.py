@@ -10,6 +10,7 @@ from __future__ import annotations
 import pytest
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.metrics.util import CaseInsensitiveString
 from great_expectations.expectations.type_comparison import (
@@ -100,6 +101,7 @@ class _StubEngine:
 class _NonStringType:
     """Stub for a non-string column type."""
 
+    @override
     def __str__(self):
         return "INTEGER"
 

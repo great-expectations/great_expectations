@@ -15,6 +15,23 @@ from great_expectations.expectations.metrics.column_aggregate_metrics.column_out
     validate_method,
 )
 from great_expectations.expectations.registry import get_renderer_impl
+from great_expectations.render import RenderedAtomicContent
+
+
+def _render_outliers_prescriptive_value(configuration: ExpectationConfiguration) -> dict:
+    """Render the atomic prescriptive summary and return its ``value`` dict."""
+    renderer_impl = get_renderer_impl(
+        object_name="expect_column_values_to_not_be_outliers",
+        renderer_type="atomic.prescriptive.summary",
+    )
+    assert renderer_impl is not None
+    rendered = renderer_impl.renderer(configuration=configuration)
+    assert isinstance(rendered, RenderedAtomicContent)
+    json_dict = rendered.to_json_dict()
+    assert isinstance(json_dict, dict)
+    value = json_dict["value"]
+    assert isinstance(value, dict)
+    return value
 
 
 @pytest.mark.unit
@@ -25,7 +42,8 @@ from great_expectations.expectations.registry import get_renderer_impl
 def test_unsupported_method_is_rejected_at_configuration_time(method: str) -> None:
     """An unsupported method must not survive into a stored suite to fail on every run."""
     with pytest.raises(pydantic.ValidationError, match="permitted: 'iqr', 'std'"):
-        gxe.ExpectColumnValuesToNotBeOutliers(column="amount", method=method)
+        # deliberately passing an unsupported method value; that rejection is the point
+        gxe.ExpectColumnValuesToNotBeOutliers(column="amount", method=method)  # type: ignore[arg-type]
 
 
 @pytest.mark.unit
@@ -72,14 +90,11 @@ def test_prescriptive_renderer_substitutes_defaults() -> None:
         type="expect_column_values_to_not_be_outliers",
         kwargs={"column": "amount"},
     )
-    renderer = get_renderer_impl(
-        object_name="expect_column_values_to_not_be_outliers",
-        renderer_type="atomic.prescriptive.summary",
-    )[1]
-
-    rendered = renderer(configuration=configuration).to_json_dict()["value"]
-    substituted = Template(rendered["template"]).safe_substitute(
-        {name: param["value"] for name, param in rendered["params"].items()}
+    rendered = _render_outliers_prescriptive_value(configuration)
+    params = rendered["params"]
+    assert isinstance(params, dict)
+    substituted = Template(str(rendered["template"])).safe_substitute(
+        {name: param["value"] for name, param in params.items()}
     )
 
     assert substituted == (
@@ -116,14 +131,9 @@ def test_prescriptive_renderer(mostly: float, expected_template: str) -> None:
             "mostly": mostly,
         },
     )
-    renderer = get_renderer_impl(
-        object_name="expect_column_values_to_not_be_outliers",
-        renderer_type="atomic.prescriptive.summary",
-    )[1]
+    rendered = _render_outliers_prescriptive_value(configuration)
 
-    rendered_content = renderer(configuration=configuration).to_json_dict()
-
-    assert rendered_content["value"]["template"] == expected_template
+    assert rendered["template"] == expected_template
 
 
 @pytest.mark.unit

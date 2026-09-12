@@ -182,17 +182,15 @@ def test_unexpected_rows_expectation_render(
         unexpected_rows_query=unexpected_rows_query,
     )
     expectation.render()
-    assert (
-        expectation.rendered_content[0].value.params.get("unexpected_rows_query").get("value")
-        == unexpected_rows_query
-    )
+    assert expectation.rendered_content is not None
+    value = expectation.rendered_content[0].value
+    assert value.params is not None
+    assert value.code_block is not None
 
-    assert expectation.rendered_content[0].value.template == description
-    assert (
-        expectation.rendered_content[0].value.code_block.get("code_template_str")
-        == "$unexpected_rows_query"
-    )
-    assert expectation.rendered_content[0].value.code_block.get("language") == "sql"
+    assert value.params["unexpected_rows_query"].get("value") == unexpected_rows_query
+    assert value.template == description
+    assert value.code_block.get("code_template_str") == "$unexpected_rows_query"
+    assert value.code_block.get("language") == "sql"
 
 
 @pytest.mark.unit

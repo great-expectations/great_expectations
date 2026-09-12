@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
 from unittest import mock
 
 import pytest
@@ -63,14 +63,11 @@ def mock_registry(monkeypatch: pytest.MonkeyPatch):
     yield registry
 
 
-def test__base_metric_provider__registration(mock_registry):
-    """This tests whether the MetricProvider class registers the correct metrics."""
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
-    for key in registered_metric_keys:
-        assert "custom_metric" not in key
-
-    prev_registered_metric_key_count = len(registered_metric_keys)
-
+def _make_custom_metric_provider() -> Type[MetricProvider]:
+    # A module-level, fully-typed factory rather than a class nested directly in the test:
+    # mypy's disallow-untyped-decorators can't resolve `metric_value`'s ParamSpec for a class
+    # defined inside an (intentionally unannotated) test function, and reports the decorated
+    # methods below as untyped even though `metric_value` itself is fully typed.
     class CustomMetricProvider(MetricProvider):
         metric_name = "custom_metric"
         value_keys = ()
@@ -108,20 +105,27 @@ def test__base_metric_provider__registration(mock_registry):
         ):
             raise NotImplementedError
 
+    return CustomMetricProvider
+
+
+def test__base_metric_provider__registration(mock_registry):
+    """This tests whether the MetricProvider class registers the correct metrics."""
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    for key in registered_metric_keys:
+        assert "custom_metric" not in key
+
+    prev_registered_metric_key_count = len(registered_metric_keys)
+
+    CustomMetricProvider = _make_custom_metric_provider()
     CustomMetricProvider()
 
     assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
     assert "custom_metric" in mock_registry._registered_metrics
 
 
-def test__table_metric_provider__registration(mock_registry):
-    """This tests whether the TableMetricProvider class registers the correct metrics."""
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
-    for key in registered_metric_keys:
-        assert "table.custom_metric" not in key
-
-    prev_registered_metric_key_count = len(registered_metric_keys)
-
+def _make_custom_table_metric_provider() -> Type[TableMetricProvider]:
+    # See _make_custom_metric_provider's comment: kept out of the test function's body so
+    # mypy can resolve metric_value's ParamSpec against the decorated methods below.
     class CustomTableMetricProvider(TableMetricProvider):
         metric_name = "table.custom_metric"
 
@@ -158,6 +162,18 @@ def test__table_metric_provider__registration(mock_registry):
         ):
             raise NotImplementedError
 
+    return CustomTableMetricProvider
+
+
+def test__table_metric_provider__registration(mock_registry):
+    """This tests whether the TableMetricProvider class registers the correct metrics."""
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    for key in registered_metric_keys:
+        assert "table.custom_metric" not in key
+
+    prev_registered_metric_key_count = len(registered_metric_keys)
+
+    CustomTableMetricProvider = _make_custom_table_metric_provider()
     CustomTableMetricProvider()
 
     assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
@@ -389,14 +405,9 @@ def test__multicolumn_map_metric__registration(mock_registry):
         assert key in mock_registry._registered_metrics
 
 
-def test__query_metric_provider__registration(mock_registry):
-    """This tests whether the QueryMetricProvider class registers the correct metrics."""
-    registered_metric_keys = list(mock_registry._registered_metrics.keys())
-    for key in registered_metric_keys:
-        assert "query.custom_metric" not in key
-
-    prev_registered_metric_key_count = len(registered_metric_keys)
-
+def _make_custom_query_metric_provider() -> Type[QueryMetricProvider]:
+    # See _make_custom_metric_provider's comment: kept out of the test function's body so
+    # mypy can resolve metric_value's ParamSpec against the decorated methods below.
     class CustomQueryMetricProvider(QueryMetricProvider):
         metric_name = "query.custom_metric"
 
@@ -422,6 +433,18 @@ def test__query_metric_provider__registration(mock_registry):
         ) -> List[dict]:
             raise NotImplementedError
 
+    return CustomQueryMetricProvider
+
+
+def test__query_metric_provider__registration(mock_registry):
+    """This tests whether the QueryMetricProvider class registers the correct metrics."""
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
+    for key in registered_metric_keys:
+        assert "query.custom_metric" not in key
+
+    prev_registered_metric_key_count = len(registered_metric_keys)
+
+    CustomQueryMetricProvider = _make_custom_query_metric_provider()
     CustomQueryMetricProvider()
 
     assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1

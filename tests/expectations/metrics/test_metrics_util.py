@@ -3,11 +3,11 @@ from __future__ import annotations
 import contextlib
 import random
 from types import ModuleType, SimpleNamespace
-from typing import TYPE_CHECKING, Callable, Final, List, Union
+from typing import TYPE_CHECKING, Any, Callable, Final, List, Union
 from unittest.mock import create_autospec, patch
 
 import pytest
-import sqlalchemy.dialects.mysql
+import sqlalchemy.dialects.mysql  # ensure the submodule is importable for _MySQLSub
 import sqlalchemy.dialects.oracle
 from _pytest import monkeypatch
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy  # type: ignore[no-redef]
 from great_expectations.compatibility.sqlalchemy import (
     Dialect,
     Engine,
@@ -55,7 +55,7 @@ if TYPE_CHECKING:
 # The following class allows for declarative instantiation of base class for SqlAlchemy. Adopted from  # noqa: E501 # FIXME CoP
 # https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
 
-Base = sqlalchemy.declarative_base()
+Base: Any = sqlalchemy.declarative_base()  # type: ignore[attr-defined]  # compat re-exports it from sqlalchemy.orm
 
 
 class A(Base):
@@ -1207,7 +1207,7 @@ class _FakeDatabricksDialect:
     """
 
 
-class _OracleSub(sa.dialects.oracle.dialect):
+class _OracleSub(sa.dialects.oracle.dialect):  # type: ignore[misc,valid-type]
     """A concrete subclass of SQLAlchemy's bundled Oracle dialect.
 
     The chain detects Oracle with ``issubclass`` against the bundled
@@ -1219,7 +1219,7 @@ class _OracleSub(sa.dialects.oracle.dialect):
     """
 
 
-class _PGSub(sa.dialects.postgresql.dialect):
+class _PGSub(sa.dialects.postgresql.dialect):  # type: ignore[misc,valid-type]
     pass
 
 
@@ -1227,7 +1227,7 @@ class _MySQLSub(sqlalchemy.dialects.mysql.base.MySQLDialect):
     pass
 
 
-class _SQLiteSub(sa.dialects.sqlite.dialect):
+class _SQLiteSub(sa.dialects.sqlite.dialect):  # type: ignore[misc,valid-type]
     pass
 
 
@@ -1314,12 +1314,14 @@ _REGEX_DIALECT_CASES: Final = {
 
 
 def _render_regex_expression(case_id: str, positive: bool) -> str | None:
+    stub: Any
     stub, patches = _REGEX_DIALECT_CASES[case_id]
-    column = sa.column("a")
+    column: Any = sa.column("a")
     with contextlib.ExitStack() as stack:
         for name, value in patches.items():
             stack.enter_context(patch.object(metrics_util, name, value))
-        expr = get_dialect_regex_expression(
+        # SQLColumnExpression alias doesn't expose .compile(); the runtime ColumnElement does
+        expr: Any = get_dialect_regex_expression(
             column=column, regex="test", dialect=stub, positive=positive
         )
     if expr is None:
@@ -1434,10 +1436,10 @@ def test_get_dialect_regex_expression_renders_oracle_native_predicate(
     value survives both direct use as a predicate and the one caller that
     wraps it in `sa.not_()` itself.
     """
-    stub = _DialectDetectionStub(dialect=_OracleSub)
-    column = sa.column("a")
+    stub: Any = _DialectDetectionStub(dialect=_OracleSub)
+    column: Any = sa.column("a")
 
-    result = get_dialect_regex_expression(
+    result: Any = get_dialect_regex_expression(
         column=column, regex="test", dialect=stub, positive=positive
     )
 
@@ -1472,8 +1474,8 @@ def test_get_dialect_regex_expression_resolves_oracle_aggregate_family() -> None
     the branch is reached (a `None` return would raise `NotImplementedError` in production
     before a query is ever built).
     """
-    stub = _DialectDetectionStub(dialect=_OracleSub)
-    column = sa.column("a")
+    stub: Any = _DialectDetectionStub(dialect=_OracleSub)
+    column: Any = sa.column("a")
 
     regex_expression = get_dialect_regex_expression(column=column, regex="test", dialect=stub)
     assert regex_expression is not None, (
@@ -1503,11 +1505,11 @@ def test_get_dialect_regex_expression_resolves_oracle_regex_list_match_family() 
     reproduces that exact resolution shape against an Oracle dialect and pins both combined
     forms, proving the branch is reached for every call in the list -- not just the first.
     """
-    stub = _DialectDetectionStub(dialect=_OracleSub)
-    column = sa.column("a")
+    stub: Any = _DialectDetectionStub(dialect=_OracleSub)
+    column: Any = sa.column("a")
     regex_list = ["foo", "bar"]
 
-    conditions = [
+    conditions: List[Any] = [
         get_dialect_regex_expression(column=column, regex=regex, dialect=stub)
         for regex in regex_list
     ]
@@ -1538,11 +1540,11 @@ def test_get_dialect_regex_expression_resolves_oracle_regex_list_not_match_famil
     resolution shape against an Oracle dialect and pins the combined SQL, proving the negative
     branch is reached for every call in the list.
     """
-    stub = _DialectDetectionStub(dialect=_OracleSub)
-    column = sa.column("a")
+    stub: Any = _DialectDetectionStub(dialect=_OracleSub)
+    column: Any = sa.column("a")
     regex_list = ["foo", "bar"]
 
-    conditions = [
+    conditions: List[Any] = [
         get_dialect_regex_expression(column=column, regex=regex, dialect=stub, positive=False)
         for regex in regex_list
     ]

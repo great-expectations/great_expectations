@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional
+from typing import Any, ClassVar, Optional
 from unittest import mock
 from unittest.mock import create_autospec
 
@@ -25,6 +25,16 @@ from great_expectations.expectations.metrics.query_metrics import (
     QueryTemplateValues,
 )
 from tests.expectations.metrics.conftest import MockSqlAlchemyExecutionEngine
+
+
+def _call_sqlalchemy_metric(metric_cls: Any, **kwargs: Any) -> Any:
+    """Invoke a query metric provider's ``_sqlalchemy`` value function directly.
+
+    ``_sqlalchemy`` names its first parameter ``cls`` but is a plain function, not a
+    classmethod, so mypy types it (and the ``cls`` argument) as an instance. At runtime
+    the metric machinery passes the class, which is what these tests reproduce.
+    """
+    return metric_cls._sqlalchemy(cls=metric_cls, **kwargs)
 
 
 @pytest.mark.unit
@@ -77,21 +87,24 @@ def test_query_template_get_query_function_with_float():
 
 class MyQueryColumn(QueryColumn):
     metric_name = "my_query.column"
-    value_keys = ("my_query",)
+    # The Query* base classes narrow value_keys to a fixed-length tuple by unannotated
+    # assignment, though MetricProvider declares it Tuple[str, ...]; these test metrics
+    # only need one key.
+    value_keys = ("my_query",)  # type: ignore[assignment]
 
     query_param_name: ClassVar[str] = "my_query"
 
 
 class MyQueryColumnPair(QueryColumnPair):
     metric_name = "my_query.column_pair"
-    value_keys = ("my_query",)
+    value_keys = ("my_query",)  # type: ignore[assignment]
 
     query_param_name: ClassVar[str] = "my_query"
 
 
 class MyQueryMultipleColumns(QueryMultipleColumns):
     metric_name = "my_query.multiple_columns"
-    value_keys = ("my_query",)
+    value_keys = ("my_query",)  # type: ignore[assignment]
 
     query_param_name: ClassVar[str] = "my_query"
 
@@ -139,7 +152,7 @@ def test_sqlalchemy_query_metrics_that_return_records(
     mock_get_substituted_batch_subquery_from_query_and_batch_selectable,
     mock_sqlalchemy_text,
     mock_sqlalchemy_execution_engine: MockSqlAlchemyExecutionEngine,
-    metric_class: QueryMetricProvider,
+    metric_class: type[QueryMetricProvider],
     class_metric_value_kwargs: dict,
     query_parameters: Optional[QueryParameters],
     batch_selectable: sa.Table,
@@ -156,8 +169,8 @@ def test_sqlalchemy_query_metrics_that_return_records(
     )
     mock_sqlalchemy_text.return_value = "*"
     with mock.patch.object(mock_sqlalchemy_execution_engine, "execute_query"):
-        metric_class._sqlalchemy(
-            cls=metric_class,
+        _call_sqlalchemy_metric(
+            metric_class,
             execution_engine=mock_sqlalchemy_execution_engine,
             metric_domain_kwargs={},
             metric_value_kwargs=metric_value_kwargs,
@@ -217,8 +230,8 @@ def test_sqlalchemy_query_row_count(
     )
     mock_sqlalchemy_text.return_value = "*"
     with mock.patch.object(mock_sqlalchemy_execution_engine, "execute_query"):
-        MyQueryRowCount._sqlalchemy(
-            cls=MyQueryRowCount,
+        _call_sqlalchemy_metric(
+            MyQueryRowCount,
             execution_engine=mock_sqlalchemy_execution_engine,
             metric_domain_kwargs={},
             metric_value_kwargs=metric_value_kwargs,
@@ -527,7 +540,7 @@ class TestStripTopLevelOrderBy:
 class MockSQLServerSqlAlchemyExecutionEngine(MockSqlAlchemyExecutionEngine):
     """Mock engine that reports dialect_name as 'mssql' (SQL Server)."""
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         from tests.expectations.metrics.conftest import MockSaEngine
 
@@ -539,14 +552,14 @@ def mock_sql_server_execution_engine() -> MockSQLServerSqlAlchemyExecutionEngine
     from tests.expectations.metrics.conftest import MockBatchManager
 
     engine = MockSQLServerSqlAlchemyExecutionEngine()
-    engine._batch_manager = MockBatchManager()
+    engine._batch_manager = MockBatchManager()  # type: ignore[assignment]
     return engine
 
 
 class MockOracleSqlAlchemyExecutionEngine(MockSqlAlchemyExecutionEngine):
     """Mock engine that reports dialect_name as 'oracle'."""
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         from tests.expectations.metrics.conftest import MockSaEngine
 
@@ -558,7 +571,7 @@ def mock_oracle_execution_engine() -> MockOracleSqlAlchemyExecutionEngine:
     from tests.expectations.metrics.conftest import MockBatchManager
 
     engine = MockOracleSqlAlchemyExecutionEngine()
-    engine._batch_manager = MockBatchManager()
+    engine._batch_manager = MockBatchManager()  # type: ignore[assignment]
     return engine
 
 
@@ -622,8 +635,8 @@ class TestQueryRowCountSQLServerOrderByStripping:
         with mock.patch.object(
             mock_sql_server_execution_engine, "execute_query", return_value=mock_result
         ):
-            MyQueryRowCount._sqlalchemy(
-                cls=MyQueryRowCount,
+            _call_sqlalchemy_metric(
+                MyQueryRowCount,
                 execution_engine=mock_sql_server_execution_engine,
                 metric_domain_kwargs={},
                 metric_value_kwargs={
@@ -662,8 +675,8 @@ class TestQueryRowCountSQLServerOrderByStripping:
         with mock.patch.object(
             mock_sqlalchemy_execution_engine, "execute_query", return_value=mock_result
         ):
-            MyQueryRowCount._sqlalchemy(
-                cls=MyQueryRowCount,
+            _call_sqlalchemy_metric(
+                MyQueryRowCount,
                 execution_engine=mock_sqlalchemy_execution_engine,
                 metric_domain_kwargs={},
                 metric_value_kwargs={
@@ -862,8 +875,8 @@ class TestRowCountDerivedTableAliasDialectInvariance:
         with mock.patch.object(
             mock_sqlalchemy_execution_engine, "execute_query", return_value=mock_result
         ):
-            MyQueryRowCount._sqlalchemy(
-                cls=MyQueryRowCount,
+            _call_sqlalchemy_metric(
+                MyQueryRowCount,
                 execution_engine=mock_sqlalchemy_execution_engine,
                 metric_domain_kwargs={},
                 metric_value_kwargs={
@@ -907,8 +920,8 @@ class TestRowCountDerivedTableAliasDialectInvariance:
         with mock.patch.object(
             mock_sql_server_execution_engine, "execute_query", return_value=mock_result
         ):
-            MyQueryRowCount._sqlalchemy(
-                cls=MyQueryRowCount,
+            _call_sqlalchemy_metric(
+                MyQueryRowCount,
                 execution_engine=mock_sql_server_execution_engine,
                 metric_domain_kwargs={},
                 metric_value_kwargs={
@@ -964,8 +977,8 @@ class TestRowCountDerivedTableAliasDialectInvariance:
         with mock.patch.object(
             mock_oracle_execution_engine, "execute_query", return_value=mock_result
         ):
-            MyQueryRowCount._sqlalchemy(
-                cls=MyQueryRowCount,
+            _call_sqlalchemy_metric(
+                MyQueryRowCount,
                 execution_engine=mock_oracle_execution_engine,
                 metric_domain_kwargs={},
                 metric_value_kwargs={
@@ -1020,8 +1033,8 @@ class TestQueryTemplateValuesDerivedTableAliasDialectInvariance:
             ) as mock_execute_query,
             mock.patch.object(sa, "text", side_effect=lambda x: x),
         ):
-            QueryTemplateValues._sqlalchemy(
-                cls=QueryTemplateValues,
+            _call_sqlalchemy_metric(
+                QueryTemplateValues,
                 execution_engine=mock_sqlalchemy_execution_engine,
                 metric_domain_kwargs={},
                 metric_value_kwargs={
@@ -1057,8 +1070,8 @@ class TestQueryTemplateValuesDerivedTableAliasDialectInvariance:
             ) as mock_execute_query,
             mock.patch.object(sa, "text", side_effect=lambda x: x),
         ):
-            QueryTemplateValues._sqlalchemy(
-                cls=QueryTemplateValues,
+            _call_sqlalchemy_metric(
+                QueryTemplateValues,
                 execution_engine=mock_sql_server_execution_engine,
                 metric_domain_kwargs={},
                 metric_value_kwargs={
@@ -1099,8 +1112,8 @@ class TestQueryTemplateValuesDerivedTableAliasDialectInvariance:
             ) as mock_execute_query,
             mock.patch.object(sa, "text", side_effect=lambda x: x),
         ):
-            QueryTemplateValues._sqlalchemy(
-                cls=QueryTemplateValues,
+            _call_sqlalchemy_metric(
+                QueryTemplateValues,
                 execution_engine=mock_oracle_execution_engine,
                 metric_domain_kwargs={},
                 metric_value_kwargs={
