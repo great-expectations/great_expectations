@@ -19,6 +19,7 @@ from .core import (
     ExpectColumnStdevToBeBetween,
     ExpectColumnSumToBeBetween,
     ExpectColumnToExist,
+    ExpectColumnTypeToBe,
     ExpectColumnUniqueValueCountToBeBetween,
     ExpectColumnValueLengthsToBeBetween,
     ExpectColumnValueLengthsToEqual,
