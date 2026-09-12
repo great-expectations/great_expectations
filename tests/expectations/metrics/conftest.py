@@ -5,6 +5,7 @@ import pytest
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -41,10 +42,11 @@ class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
     def __init__(self, create_temp_table: bool = True, *args, **kwargs):
         self.engine = MockSaEngine(dialect=sa.dialects.sqlite.dialect())  # type: ignore[assignment] # FIXME CoP
         self._create_temp_table = create_temp_table
-        self._connection = MockConnection()
+        self._connection = MockConnection()  # type: ignore[assignment] # FIXME CoP
 
-        self._batch_manager = None
+        self._batch_manager = None  # type: ignore[assignment] # FIXME CoP
 
+    @override
     def get_compute_domain(
         self,
         domain_kwargs: dict,

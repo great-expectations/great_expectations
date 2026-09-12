@@ -9,7 +9,8 @@ try:
     import sqlalchemy
     from sqlalchemy.dialects import mysql, postgresql, sqlite
 except ImportError:
-    sqlalchemy = None
+    sqlalchemy = None  # type: ignore[assignment]
+    mysql = postgresql = sqlite = None  # type: ignore[assignment]
 
 try:
     import sqlalchemy_bigquery
@@ -25,7 +26,7 @@ except ImportError:
 @pytest.mark.parametrize("value_set", [[False, True], [False, True, None], [True], [False], [None]])
 def test_sqlalchemy_impl_bigquery_bool(value_set: List[Optional[bool]]):
     column_name = "my_bool_col"
-    column = sqlalchemy.column(column_name)
+    column: sqlalchemy.ColumnClause = sqlalchemy.column(column_name)
     kwargs = _make_sqlalchemy_kwargs(column_name, sqlalchemy_bigquery)
     predicate = ColumnValuesInSet._sqlalchemy_impl(column, value_set, **kwargs)
     # If a value in value_set is None we expect "column_name is null" otherwise we expect
@@ -43,7 +44,7 @@ def test_sqlalchemy_impl_bigquery_bool(value_set: List[Optional[bool]]):
 @pytest.mark.parametrize("value_set", [[False, True], [False, True, None], [True], [False], [None]])
 def test_sqlalchemy_impl_not_bigquery_bool(dialect: ModuleType, value_set: List[Optional[bool]]):
     column_name = "my_bool_col"
-    column = sqlalchemy.column(column_name)
+    column: sqlalchemy.ColumnClause = sqlalchemy.column(column_name)
     kwargs = _make_sqlalchemy_kwargs(column_name, dialect)
     predicate = ColumnValuesInSet._sqlalchemy_impl(column, value_set, **kwargs)
     expected_predicates = ", ".join(

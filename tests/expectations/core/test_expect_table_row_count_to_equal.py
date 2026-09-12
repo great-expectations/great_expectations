@@ -58,7 +58,7 @@ def test_expect_table_row_count_to_equal_with_row_condition(
         context=context,
     )
 
-    result = validator.expect_table_row_count_to_equal(  # type: ignore[union-attr] # validator cannot be None here
+    result = validator.expect_table_row_count_to_equal(
         value=value,
         row_condition=row_condition,
         condition_parser="pandas",

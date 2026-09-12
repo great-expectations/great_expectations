@@ -111,7 +111,9 @@ def sqlite_table_for_unexpected_rows_with_index(
                 except Exception:
                     pass
         except ImportError:
-            sa = None
+            # unreachable in practice: the compatibility shim never raises ImportError
+            # itself, but keep the fallback for defense-in-depth
+            sa = None  # type: ignore[assignment] # FIXME CoP
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
 
@@ -178,7 +180,10 @@ def _expecation_configuration_to_validation_result_pandas(
         batch_spec_passthrough=None,
     )
     batch = Batch(
-        data=dataframe,
+        # BatchDataType is declared as Union[Type[BatchData], Type[pd.DataFrame],
+        # Type[pyspark.DataFrame]] (core/batch.py) -- types, not instances -- but the
+        # docstring and every real caller pass an actual data instance, matching this call.
+        data=dataframe,  # type: ignore[arg-type] # FIXME CoP
         batch_definition=batch_definition,
     )
     engine = PandasExecutionEngine()

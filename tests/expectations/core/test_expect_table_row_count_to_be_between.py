@@ -142,7 +142,7 @@ def test_expect_table_row_count_to_be_between_with_row_condition(
         context=context,
     )
 
-    result = validator.expect_table_row_count_to_be_between(  # type: ignore[union-attr] # validator cannot be None here
+    result = validator.expect_table_row_count_to_be_between(
         min_value=min_value,
         max_value=max_value,
         row_condition=row_condition,

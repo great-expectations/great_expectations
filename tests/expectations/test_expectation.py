@@ -129,44 +129,41 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
     )
 
 
+_VALID_MOSTLY_CASES: List[List[tuple[type[Expectation], ExpectationConfiguration]]] = [
+    [
+        (
+            FakeMulticolumnExpectation,
+            fake_expectation_config(
+                "fake_multicolumn_expectation",
+                {"column_list": ["column_1", "column_2"], "mostly": x},
+            ),
+        )
+        for x in [0, 0.5, 1]
+    ],
+    [
+        (
+            FakeColumnMapExpectation,
+            fake_expectation_config("fake_column_map_expectation", {"column": "col", "mostly": x}),
+        )
+        for x in [0, 0.5, 1]
+    ],
+    [
+        (
+            FakeColumnPairMapExpectation,
+            fake_expectation_config(
+                "fake_column_pair_map_expectation",
+                {"column_A": "colA", "column_B": "colB", "mostly": x},
+            ),
+        )
+        for x in [0, 0.5, 1]
+    ],
+]
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "fake_expectation_cls, config",
-    list(
-        itertools.chain(
-            *[
-                [
-                    (
-                        FakeMulticolumnExpectation,
-                        fake_expectation_config(
-                            "fake_multicolumn_expectation",
-                            {"column_list": ["column_1", "column_2"], "mostly": x},
-                        ),
-                    )
-                    for x in [0, 0.5, 1]
-                ],
-                [
-                    (
-                        FakeColumnMapExpectation,
-                        fake_expectation_config(
-                            "fake_column_map_expectation", {"column": "col", "mostly": x}
-                        ),
-                    )
-                    for x in [0, 0.5, 1]
-                ],
-                [
-                    (
-                        FakeColumnPairMapExpectation,
-                        fake_expectation_config(
-                            "fake_column_pair_map_expectation",
-                            {"column_A": "colA", "column_B": "colB", "mostly": x},
-                        ),
-                    )
-                    for x in [0, 0.5, 1]
-                ],
-            ]
-        )
-    ),
+    list(itertools.chain(*_VALID_MOSTLY_CASES)),
 )
 def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
     fake_expectation = fake_expectation_cls(**config.kwargs)
@@ -614,7 +611,9 @@ class TestCustomAnnotatedFields:
     )
     @pytest.mark.unit
     def test_valid_value_set_values(self, value_set: Union[Sequence, set], expected_value: Any):
-        expectation = _SampleExpectation(mostly=1, value_set=value_set)
+        # ValueSetField declares list | dict, but its validator also normalizes other
+        # iterables (set, tuple) to a list -- which is exactly what this test exercises.
+        expectation = _SampleExpectation(mostly=1, value_set=value_set)  # type: ignore[arg-type]
         assert expectation.value_set == expected_value
 
     @pytest.mark.parametrize(

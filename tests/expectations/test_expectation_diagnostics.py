@@ -13,8 +13,10 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticCheckMessage,
     ExpectationDiagnosticMaturityMessages,
+    ExpectationExecutionEngineDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
+    Maturity,
     RendererTestDiagnostics,
 )
 
@@ -70,20 +72,18 @@ edr = ExpectationDiagnostics(
         }
     ),
     library_metadata=AugmentedLibraryMetadata(
-        **{
-            "maturity": "PRODUCTION",
-            # "package": "great_expectations",
-            "tags": [
-                "arrows",
-                "design",
-                "flows",
-            ],
-            "contributors": ["@shinnyshinshin", "@abegong"],
-            "requirements": [],
-            "library_metadata_passed_checks": True,
-            "has_full_test_suite": False,
-            "manually_reviewed_code": False,
-        }
+        maturity=Maturity.PRODUCTION,
+        # package="great_expectations",
+        tags=[
+            "arrows",
+            "design",
+            "flows",
+        ],
+        contributors=["@shinnyshinshin", "@abegong"],
+        requirements=[],
+        library_metadata_passed_checks=True,
+        has_full_test_suite=False,
+        manually_reviewed_code=False,
     ),
     renderers=[
         ExpectationRendererDiagnostics(
@@ -102,11 +102,11 @@ edr = ExpectationDiagnostics(
     examples=[expectation_test_data_case],
     gallery_examples=[expectation_test_data_case],
     metrics=[],
-    execution_engines={
-        "PandasExecutionEngine": True,
-        "SqlAlchemyExecutionEngine": True,
-        "SparkDFExecutionEngine": True,
-    },
+    execution_engines=ExpectationExecutionEngineDiagnostics(
+        PandasExecutionEngine=True,
+        SqlAlchemyExecutionEngine=True,
+        SparkDFExecutionEngine=True,
+    ),
     tests=[],
     backend_test_result_counts=[],
     errors=[],

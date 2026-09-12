@@ -1,6 +1,6 @@
 from datetime import datetime
 from pprint import pprint
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import pytest
 
@@ -33,18 +33,19 @@ def get_prescriptive_rendered_content(
     ) -> RenderedAtomicContent:
         # Overwrite any fields passed in from test and instantiate ExpectationConfiguration
         expectation_configuration_kwargs.update(update_dict)
-        config = ExpectationConfiguration(**expectation_configuration_kwargs)
-        expectation_type = expectation_configuration_kwargs["type"]
+        config = ExpectationConfiguration(**expectation_configuration_kwargs)  # type: ignore[arg-type]
+        expectation_type = str(expectation_configuration_kwargs["type"])
 
         # Programatically determine the renderer implementations
         renderer_impl = get_renderer_impl(
             object_name=expectation_type,
             renderer_type="atomic.prescriptive.summary",
-        )[1]
+        )
+        assert renderer_impl is not None
 
         # Determine RenderedAtomicContent output
-        source_obj = {"configuration": config}
-        res = renderer_impl(**source_obj)
+        res = renderer_impl.renderer(configuration=config)
+        assert isinstance(res, RenderedAtomicContent)
         return res
 
     return _get_prescriptive_rendered_content
@@ -68,19 +69,20 @@ def get_diagnostic_rendered_content(
     ) -> RenderedAtomicContent:
         # Overwrite any fields passed in from test and instantiate ExpectationValidationResult
         evr_kwargs.update(update_dict)
-        evr = ExpectationValidationResult(**evr_kwargs)
+        evr = ExpectationValidationResult(**evr_kwargs)  # type: ignore[arg-type]
         expectation_config = evr_kwargs["expectation_config"]
-        expectation_type = expectation_config["type"]
+        expectation_type = str(expectation_config["type"])
 
         # Programatically determine the renderer implementations
         renderer_impl = get_renderer_impl(
             object_name=expectation_type,
             renderer_type="atomic.diagnostic.observed_value",
-        )[1]
+        )
+        assert renderer_impl is not None
 
         # Determine RenderedAtomicContent output
-        source_obj = {"result": evr}
-        res = renderer_impl(**source_obj)
+        res = renderer_impl.renderer(result=evr)
+        assert isinstance(res, RenderedAtomicContent)
         return res
 
     return _get_diagnostic_rendered_content
@@ -2749,10 +2751,10 @@ def test_expect_column_distinct_values_to_contain_set_atomic_diagnostic_observed
 
 
 def _create_result_details_from_expected_result(
-    expected_result: Tuple[str, str, str],
+    expected_result: List[Tuple[str, str, str]],
 ) -> Optional[Dict[str, Any]]:
-    unexpected = []
-    missing = []
+    unexpected: List[str] = []
+    missing: List[str] = []
     for _, col, state in expected_result:
         if state == "unexpected":
             unexpected.append(col)
@@ -2760,7 +2762,7 @@ def _create_result_details_from_expected_result(
             missing.append(col)
     if not unexpected and not missing:
         return None
-    details = {"mismatched": {}}
+    details: Dict[str, Any] = {"mismatched": {}}
     if unexpected:
         details["mismatched"]["unexpected"] = unexpected
     if missing:

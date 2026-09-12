@@ -1,5 +1,6 @@
 from typing import Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationValidationResult,
 )
@@ -37,7 +38,10 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     map_metric = "column_values.equal_three"
     success_keys = ("mostly",)
 
-    def validate_configuration(self, configuration) -> None:
+    @override
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         pass  # no-op to make test setup easier
 
 
@@ -131,6 +135,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -141,6 +146,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
+        assert configuration is not None
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
