@@ -1,0 +1,249 @@
+{
+    "title": "Expect column to be of type",
+    "description": "Expect a column to be of a specified data type.\n\nExpectColumnTypeToBe is a     Batch Expectation.\n\nBatchExpectations are one of the most common types of Expectation. They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.\n\nArgs:\n    column (str): The column name.\n    type\\_ (str): \nA string representing the data type of the column.     Valid types are defined by the current backend implementation and are dynamically loaded.\n\n        For example, valid types for Pandas Datasources include any numpy dtype values             (such as 'int64') or native python types (such as 'int'), whereas valid types             for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER'             in most SQL dialects and 'TEXT' in dialects such as postgresql.             Valid types for Spark Datasources include 'StringType', 'BooleanType' and other             pyspark-defined type names.\n\nOther Parameters:\n    result_format (str or None, optional):             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY.             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).\n    catch_exceptions (boolean or None, optional):             If True, then catch exceptions and include them as part of the result object.             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).\n    meta (dict or None, optional):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).\n    severity (str or None):             The impact of this Expectation failing: critical, warning, or info. Defaults to critical if not set. Severity levels can be used to trigger different alerting patterns and actions.             For more detail, see [failure severity](https://docs.greatexpectations.io/docs/cloud/expectations/expectations_overview/#failure-severity).\n\nReturns:\n    An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)\n\n    Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.\n\nSupported Data Sources:\n    [Pandas](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Spark](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [SQLite](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Amazon Aurora PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Citus](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [AlloyDB](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Neon](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [MySQL](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [SQL Server](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [BigQuery](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)\n    [Databricks (SQL)](https://docs.greatexpectations.io/docs/application_integration_support/)\n\nData Quality Issues:\n    Schema\n\nExample Data:\n            test    test2\n        0   1.00    2\n        1   2.30    5\n        2   4.33    0\n\nCode Examples:\n    Passing Case:\n        Input:\n            ExpectColumnTypeToBe(\n                column=\"test2\",\n                type_=\"INTEGER\"\n        )\n\n        Output:\n            {\n              \"exception_info\": {\n                \"raised_exception\": false,\n                \"exception_traceback\": null,\n                \"exception_message\": null\n              },\n              \"result\": {\n                \"observed_value\": \"INTEGER\"\n              },\n              \"meta\": {},\n              \"success\": true\n            }\n\n    Failing Case:\n        Input:\n            ExpectColumnTypeToBe(\n                column=\"test\",\n                type_=\"INTEGER\"\n        )\n\n        Output:\n            {\n              \"exception_info\": {\n                \"raised_exception\": false,\n                \"exception_traceback\": null,\n                \"exception_message\": null\n              },\n              \"result\": {\n                \"observed_value\": \"FLOAT\"\n              },\n              \"meta\": {},\n              \"success\": false\n            }",
+    "type": "object",
+    "properties": {
+        "id": {
+            "title": "Id",
+            "type": "string"
+        },
+        "meta": {
+            "title": "Meta",
+            "type": "object"
+        },
+        "notes": {
+            "title": "Notes",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "result_format": {
+            "title": "Result Format",
+            "default": "BASIC",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/ResultFormat"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short description of your Expectation",
+            "type": "string"
+        },
+        "catch_exceptions": {
+            "title": "Catch Exceptions",
+            "default": false,
+            "type": "boolean"
+        },
+        "rendered_content": {
+            "title": "Rendered Content",
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        },
+        "severity": {
+            "description": "Indicate the impact of this Expectation failing. Severity levels can be used to trigger different alerting patterns and actions.",
+            "default": "critical",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/FailureSeverity"
+                }
+            ]
+        },
+        "windows": {
+            "title": "Windows",
+            "description": "Definition(s) for evaluation of temporal windows",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Window"
+            }
+        },
+        "batch_id": {
+            "title": "Batch Id",
+            "type": "string"
+        },
+        "column": {
+            "title": "Column",
+            "description": "The column name.",
+            "minLength": 1,
+            "type": "string"
+        },
+        "type_": {
+            "title": "Type ",
+            "description": "\n    A string representing the data type of the column.     Valid types are defined by the current backend implementation and are dynamically loaded.\n    ",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "expectation_class": {
+                    "title": "Expectation Class",
+                    "type": "string",
+                    "const": "ExpectColumnTypeToBe"
+                },
+                "expectation_type": {
+                    "title": "Expectation Type",
+                    "type": "string",
+                    "const": "expect_column_type_to_be"
+                },
+                "domain_type": {
+                    "title": "Domain Type",
+                    "type": "string",
+                    "const": "table",
+                    "description": "Batch"
+                },
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": [
+                        "Schema"
+                    ]
+                },
+                "library_metadata": {
+                    "title": "Library Metadata",
+                    "type": "object",
+                    "const": {
+                        "maturity": "experimental",
+                        "tags": [
+                            "core expectation",
+                            "table expectation"
+                        ],
+                        "contributors": [
+                            "@great_expectations"
+                        ],
+                        "requirements": [],
+                        "has_full_test_suite": true,
+                        "manually_reviewed_code": true
+                    }
+                },
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "Expect a column to be of a specified data type."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "Pandas",
+                        "Spark",
+                        "SQLite",
+                        "PostgreSQL",
+                        "Amazon Aurora PostgreSQL",
+                        "Citus",
+                        "AlloyDB",
+                        "Neon",
+                        "MySQL",
+                        "SQL Server",
+                        "BigQuery",
+                        "Snowflake",
+                        "Databricks (SQL)",
+                        "Redshift"
+                    ]
+                }
+            }
+        }
+    },
+    "required": [
+        "column",
+        "type_"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "ResultFormat": {
+            "title": "ResultFormat",
+            "description": "An enumeration.",
+            "enum": [
+                "BOOLEAN_ONLY",
+                "BASIC",
+                "COMPLETE",
+                "SUMMARY"
+            ],
+            "type": "string"
+        },
+        "FailureSeverity": {
+            "title": "FailureSeverity",
+            "description": "Severity levels for Expectation failures.",
+            "enum": [
+                "critical",
+                "warning",
+                "info"
+            ],
+            "type": "string"
+        },
+        "Offset": {
+            "title": "Offset",
+            "description": "A threshold in which a metric will be considered passable",
+            "type": "object",
+            "properties": {
+                "positive": {
+                    "title": "Positive",
+                    "type": "number"
+                },
+                "negative": {
+                    "title": "Negative",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "positive",
+                "negative"
+            ],
+            "additionalProperties": false
+        },
+        "Window": {
+            "title": "Window",
+            "description": "A definition for a temporal window across <`range`> number of previous invocations",
+            "type": "object",
+            "properties": {
+                "constraint_fn": {
+                    "title": "Constraint Fn",
+                    "type": "string"
+                },
+                "parameter_name": {
+                    "title": "Parameter Name",
+                    "type": "string"
+                },
+                "range": {
+                    "title": "Range",
+                    "type": "integer"
+                },
+                "offset": {
+                    "$ref": "#/definitions/Offset"
+                },
+                "strict": {
+                    "title": "Strict",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "constraint_fn",
+                "parameter_name",
+                "range",
+                "offset"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
