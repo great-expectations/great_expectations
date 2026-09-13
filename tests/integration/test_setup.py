@@ -81,16 +81,20 @@ class TestSetupIntegration:
             os.chdir(original_cwd)
 
     @pytest.mark.filesystem
-    def test_oracle_is_not_a_published_extra(self):
-        """Oracle's driver is installed for its test lane, not offered to users.
+    def test_oracle_is_a_published_extra(self):
+        """`pip install 'great_expectations[oracle]'` installs a driver and SQLAlchemy 2.
 
-        `get_extras_require` derives the extras map by globbing `reqs/`, so
-        `requirements-dev-oracle.txt` — which exists so the Oracle test lane can
-        install a driver — is on its own enough to publish
-        `pip install 'great_expectations[oracle]'`. Oracle does not yet pass the
-        curated suite, so that install path would promise support that isn't there.
-        The key is held in `ignore_keys` until it does, and this is what keeps the
-        hold from being reverted by accident.
+        Oracle is a supported install path, not just a tested one, and it is the one SQL
+        extra that cannot be installed against SQLAlchemy 1.x: the `oracle+oracledb`
+        dialect arrives in SQLAlchemy 2.0, and 1.4 ships only `cx_oracle`. A 1.4
+        resolution therefore installs a driver the documented connection string cannot
+        reach.
+
+        Membership in `sqla_keys` does not express that. It appends the shared
+        `sqlalchemy>=1.4.0`, which every other SQL extra deliberately keeps so it stays
+        installable for users holding 1.x (see `reqs/requirements-dev-redshift.txt`).
+        The 2.0 floor is a separate constraint carried by the requirements file, so both
+        are asserted here: the driver, and the floor that makes the driver reachable.
         """
         original_cwd = Path.cwd()
         try:
@@ -99,11 +103,13 @@ class TestSetupIntegration:
         finally:
             os.chdir(original_cwd)
 
-        assert (project_root / "reqs" / "requirements-dev-oracle.txt").exists(), (
-            "The Oracle dev requirements file is what makes this hold necessary; "
-            "if it is gone, remove this test with it."
+        assert "oracle" in extras
+        assert any(req.startswith("oracledb") for req in extras["oracle"]), (
+            f"The oracle extra installs no driver: {extras['oracle']}"
         )
-        assert "oracle" not in extras, (
-            "`oracle` is now a published extra. If that is intended, delete this test "
-            "and add the install row to the SQL dialect installation-commands table."
+        assert "sqlalchemy>=2.0" in extras["oracle"], (
+            "The oracle extra does not floor SQLAlchemy at 2.0, so it can resolve "
+            "against 1.4, where the `oracle+oracledb` dialect does not exist. The floor "
+            "comes from reqs/requirements-dev-oracle.txt, not from `sqla_keys`, whose "
+            f"shared constraint is only `sqlalchemy>=1.4.0`: {extras['oracle']}"
         )

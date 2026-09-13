@@ -4,6 +4,7 @@ from typing import Mapping
 
 import pytest
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.data_context.context_factory import set_context
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -25,6 +26,7 @@ class DatasourceStoreSpy(DatasourceStore):
         self.save_count = 0
         super().__init__()
 
+    @override
     def set(self, key, value, **kwargs):
         ret = super().set(key=key, value=value, **kwargs)
         self.save_count += 1
@@ -36,16 +38,19 @@ class ExpectationsStoreSpy(ExpectationsStore):
         self.save_count = 0
         super().__init__()
 
+    @override
     def add(self, key, value, **kwargs):
         ret = super().add(key=key, value=value, **kwargs)
         self.save_count += 1
         return ret
 
+    @override
     def update(self, key, value, **kwargs):
         ret = super().update(key=key, value=value, **kwargs)
         self.save_count += 1
         return ret
 
+    @override
     def add_or_update(self, key, value, **kwargs):
         ret = super().add_or_update(key=key, value=value, **kwargs)
         self.save_count += 1
@@ -59,16 +64,19 @@ class CheckpointStoreSpy(CheckpointStore):
         self.save_count = 0
         super().__init__(store_name=CheckpointStoreSpy.STORE_NAME)
 
+    @override
     def add(self, key, value, **kwargs):
         ret = super().add(key=key, value=value, **kwargs)
         self.save_count += 1
         return ret
 
+    @override
     def update(self, key, value, **kwargs):
         ret = super().update(key=key, value=value, **kwargs)
         self.save_count += 1
         return ret
 
+    @override
     def add_or_update(self, key, value, **kwargs):
         ret = super().add_or_update(key=key, value=value, **kwargs)
         self.save_count += 1
@@ -92,17 +100,21 @@ class EphemeralDataContextSpy(EphemeralDataContext):
         self._datasource_store = DatasourceStoreSpy()
 
     @property
+    @override
     def datasource_store(self):
         return self._datasource_store
 
     @property
+    @override
     def expectations_store(self):
         return self._expectations_store
 
     @property
+    @override
     def checkpoint_store(self):
         return self._checkpoint_store
 
+    @override
     def _save_project_config(self):
         """
         No-op our persistence mechanism but increment an internal counter to ensure it was used.
@@ -142,6 +154,7 @@ def test_add_store(in_memory_data_context: EphemeralDataContextSpy):
         config={
             "module_name": "great_expectations.data_context.store",
             "class_name": "ExpectationsStore",
+            "store_backend": {"class_name": "InMemoryStoreBackend"},
         },
     )
 
@@ -208,4 +221,5 @@ def test_update_project_config(
 
     context.update_project_config(config)
 
+    assert context.progress_bars is not None
     assert context.progress_bars["globally"] is True

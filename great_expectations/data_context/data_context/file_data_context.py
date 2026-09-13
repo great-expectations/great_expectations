@@ -182,7 +182,7 @@ class FileDataContext(SerializableDataContext):
         config_to_write = self.config.to_yaml_str()
 
         try:
-            with open(config_filepath, "w") as outfile:
+            with open(config_filepath, "w", encoding="utf-8") as outfile:
                 outfile.write(config_to_write)
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
@@ -194,7 +194,7 @@ class FileDataContext(SerializableDataContext):
     ) -> DataContextConfig:
         path_to_yml = pathlib.Path(context_root_directory, cls.GX_YML)
         try:
-            with open(path_to_yml) as data:
+            with open(path_to_yml, encoding="utf-8") as data:
                 config_commented_map_from_yaml = yaml.load(data)
 
         except DuplicateKeyError:

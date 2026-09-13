@@ -15,6 +15,36 @@ When we deprecate public functionality, we will
 
 Before we completely remove the functionality in a new major release, there will be at least one minor release that contains the deprecation so that you can smoothly transition.
 
+### 1.23.0
+* [BUGFIX] Cache the SQL execution engine across calls instead of rebuilding it every time ([#12148](https://github.com/great-expectations/great_expectations/pull/12148))
+* [BUGFIX] query asset SQL ending in a comment fails validation ([#12124](https://github.com/great-expectations/great_expectations/pull/12124)) (thanks @nanjeshramesh)
+* [BUGFIX] Wrap a query asset's SQL whole so Oracle does not add FROM DUAL ([#12162](https://github.com/great-expectations/great_expectations/pull/12162))
+* [BUGFIX] TupleFilesystemStoreBackend reads with ambient locale encoding ([#12125](https://github.com/great-expectations/great_expectations/pull/12125)) (thanks @nanjeshramesh)
+* [BUGFIX] Make ExpectColumnValueZScoresToBeLessThan pass rather than fail or raise on zero or undefined variance ([#12145](https://github.com/great-expectations/great_expectations/pull/12145)) (thanks @Star-cloud626, Claude Opus 5 (1M context))
+* [BUGFIX] expect_column_values_to_be_unique raises KeyError on mixed-case column names ([#12180](https://github.com/great-expectations/great_expectations/pull/12180))
+* [BUGFIX] Report an undefined SQLite standard deviation as None instead of raising ([#12168](https://github.com/great-expectations/great_expectations/pull/12168)) (thanks @siddharthgaur1, Claude Opus 5)
+* [DOCS] Update repository links to the fivetran org ([#12126](https://github.com/great-expectations/great_expectations/pull/12126)) (thanks @iamfeldman)
+* [MAINTENANCE] Declare metric values, render-content payloads, and metric keys as what they actually are ([#12116](https://github.com/great-expectations/great_expectations/pull/12116))
+* [MAINTENANCE] Generalize the data source declaration record beyond SQL backends ([#12110](https://github.com/great-expectations/great_expectations/pull/12110))
+* [MAINTENANCE] Pin the fluent datasource management API with a per-type CRUD contract suite ([#12141](https://github.com/great-expectations/great_expectations/pull/12141))
+* [MAINTENANCE] Say what the shared fixture column types mean ([#12147](https://github.com/great-expectations/great_expectations/pull/12147))
+* [MAINTENANCE] Type-check tests/test_utils.py, tests/actions/ and tests/checkpoint/ ([#12146](https://github.com/great-expectations/great_expectations/pull/12146)) (thanks @MannXo)
+* [MAINTENANCE] Clean up check-actor-permissions and dead CI workflow code ([#12159](https://github.com/great-expectations/great_expectations/pull/12159))
+* [MAINTENANCE] Bump browserslist from 4.28.1 to 4.28.8 in /docs/docusaurus ([#12155](https://github.com/great-expectations/great_expectations/pull/12155))
+* [MAINTENANCE] Bump fast-uri from 3.1.5 to 3.1.7 in /docs/docusaurus ([#12151](https://github.com/great-expectations/great_expectations/pull/12151))
+* [MAINTENANCE] Type-check tests/render ([#12152](https://github.com/great-expectations/great_expectations/pull/12152)) (thanks @Ryota-Di)
+* [MAINTENANCE] Type-check tests/core/ #12130 ([#12140](https://github.com/great-expectations/great_expectations/pull/12140)) (thanks @AnandkumarMall)
+* [MAINTENANCE] Type-check tests/execution_engine/partition_and_sample/ ([#12169](https://github.com/great-expectations/great_expectations/pull/12169)) (thanks @siddharthgaur1, Claude Opus 5)
+* [MAINTENANCE] Bump colord from 2.9.3 to 2.10.0 in /docs/docusaurus ([#12170](https://github.com/great-expectations/great_expectations/pull/12170))
+* [MAINTENANCE] Type-check tests/data_context/ ([#12171](https://github.com/great-expectations/great_expectations/pull/12171)) (thanks @nanjeshramesh)
+* [MAINTENANCE] Remove unused checkpoint test fixtures ([#12174](https://github.com/great-expectations/great_expectations/pull/12174))
+* [MAINTENANCE] Bump svgo from 3.3.4 to 3.3.5 in /docs/docusaurus ([#12175](https://github.com/great-expectations/great_expectations/pull/12175))
+* [MAINTENANCE] Bump joi from 17.13.4 to 17.13.7 in /docs/docusaurus ([#12176](https://github.com/great-expectations/great_expectations/pull/12176))
+* [MAINTENANCE] Publish the oracle extra ([#12091](https://github.com/great-expectations/great_expectations/pull/12091))
+* [CONTRIB] Type-check validator tests ([#12149](https://github.com/great-expectations/great_expectations/pull/12149)) (thanks @yigitcan-ozturk)
+* [CONTRIB] Remove the dead match_on value key from the not-match-like-pattern-list metric ([#12157](https://github.com/great-expectations/great_expectations/pull/12157)) (thanks @Star-cloud626, Claude Opus 5)
+* [CONTRIB] [MAINTENANCE] Type-check the excluded modules under tests/integration/ ([#12173](https://github.com/great-expectations/great_expectations/pull/12173)) (thanks @adimalkar)
+
 ### 1.22.0
 * [BUGFIX] Give the date-part string cast a length Oracle accepts ([#12102](https://github.com/great-expectations/great_expectations/pull/12102))
 * [BUGFIX] Add an Oracle branch to the dialect-regex helper ([#12103](https://github.com/great-expectations/great_expectations/pull/12103))

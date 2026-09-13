@@ -266,6 +266,23 @@ def _wrap_raw_sql_as_subquery(selectable: sqlalchemy.TextClause) -> Subquery:
     return sa.text(text).columns().subquery()
 
 
+def _query_text_as_subquery(query: str) -> Subquery:
+    """Wrap a query asset's raw SQL statement as a subquery.
+
+    The statement is handed to SQLAlchemy whole. Rebuilding it as
+    "sa.select(sa.text(<everything after SELECT>))" instead yields a SELECT that owns no
+    FROM clause, which the Oracle dialect completes by appending "FROM DUAL" -- the
+    wrapped query then carries two FROM clauses and no Oracle version accepts it.
+
+    Args:
+        query: The raw SQL statement backing a query asset.
+
+    Returns:
+        A Subquery that selects the statement's result.
+    """
+    return _wrap_raw_sql_as_subquery(sa.text(query.strip().rstrip(";").rstrip()))
+
+
 class SqlAlchemyExecutionEngine(ExecutionEngine[SQLAColumnClause]):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
 
@@ -1399,10 +1416,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine[SQLAColumnClause]):
             if not isinstance(query, str):
                 raise ValueError(f"SQL query should be a str but got {query}")  # noqa: TRY003 # FIXME CoP
             # Query is a valid SELECT query that begins with r"\w+select\w"
-            stripped_query = query.lstrip()[6:].strip().rstrip(";").rstrip()
-            selectable = sa.select(
-                sa.text(_ensure_sql_text_ends_with_newline(stripped_query))
-            ).subquery()
+            selectable = _query_text_as_subquery(query)
 
         return selectable
 
