@@ -52,7 +52,7 @@ Advantages of subclassing an Expectation and providing customized attributes rat
 
 3. Override the Expectation's attributes with new default values.
 
-   The attributes that can be overriden correspond to the parameters required by the base Expectation.  These can be referenced from the [Expectation Gallery](https://greatexpectations.io/expectations).
+   The attributes that can be overridden correspond to the parameters required by the base Expectation.  These can be referenced from the [Expectation Gallery](https://greatexpectations.io/expectations).
 
    In this example, the default column for `ExpectValidPassengerCount` is set to `passenger_count` and the default value range for the column is defined as between `1` and `6`:
 
@@ -63,7 +63,7 @@ Advantages of subclassing an Expectation and providing customized attributes rat
 
    The `description` attribute of a customized Expectation class contains the text describing the customized Expectation when its results are rendered into Data Docs.  You can format the `description` string with Markdown syntax:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define description attribute for a cusom Expectation"
+   ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/define_a_custom_expectation_class.py - define description attribute for a custom Expectation"
    ```
 
 5. Use the customized subclass as an Expectation.

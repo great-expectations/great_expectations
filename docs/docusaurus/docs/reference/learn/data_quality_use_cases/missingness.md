@@ -88,7 +88,7 @@ The examples given in this section provide insight into how and when to apply mi
 
 **Context**: Intermittent missing values can be introduced by different causes in the data pipeline, such as data provider outages or incorrect data entry. When some degree of intermittent missing values are expected, checking that column values are fully populated a certain percentage of the time can help maintain the reliability of data analyses.
 
-**GX solution**: Ensure values are populated a certain percentage of of the time by using `ExpectColumnValuesToNotBeNull` with the `mostly` parameter.
+**GX solution**: Ensure values are populated a certain percentage of the time by using `ExpectColumnValuesToNotBeNull` with the `mostly` parameter.
 
 ```python title="Python" name="docs/docusaurus/docs/reference/learn/data_quality_use_cases/missingness_resources/missingness_expectations.py intermittent_missing_values"
 ```

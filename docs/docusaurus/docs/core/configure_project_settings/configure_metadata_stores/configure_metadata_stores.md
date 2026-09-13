@@ -51,7 +51,7 @@ By default, Store files are created in folders within the `base_folder` of the F
 
    GX utilizes 5 Stores for different types of data and metadata.  These Stores are the Expectations Store, Validation Definitions Store, Checkpoint Store, Validation Results Store, and the Suite Parameter Store.  All Stores can be accessed by passing a corresponding key to a Data Context's `variables.config.stores` attribute.  
 
-   The `variables.config.stores` attribute gives access to the configuration values prior to any string substitution that may take palce, which also allows you to include string substitution references in your configuration.  To view the resolved path after string substitution takes place, use `variables.stores`.  For more information on how to configure string substitution references and values see [Configure credentials](/core/configure_project_settings/configure_credentials/configure_credentials.md).
+   The `variables.config.stores` attribute gives access to the configuration values prior to any string substitution that may take place, which also allows you to include string substitution references in your configuration.  To view the resolved path after string substitution takes place, use `variables.stores`.  For more information on how to configure string substitution references and values see [Configure credentials](/core/configure_project_settings/configure_credentials/configure_credentials.md).
 
    The following code shows how to print the configuration for each of these stores:
 
@@ -64,7 +64,7 @@ By default, Store files are created in folders within the `base_folder` of the F
 
    Each Store has a `store_backend` configuration that determines how and where the Store accesses and saves information.  To change the location of a Store, you will update the `store_backend` configuration's `base_directory` value.  For instance, to change the location of an Expectation Store, you would update the `expectation_store_directory` variable in the following code and execute it:
 
-   ```pyhton title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - example update Expectations Store base directory"
+   ```python title="Python" name="docs/docusaurus/docs/core/configure_project_settings/_examples/configure_metadata_stores.py - example update Expectations Store base directory"
    ```
 
    The path provided for the `base_directory` should be either be an absolute path, or a path relative to the File Data Context's `project_root_dir`.

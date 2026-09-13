@@ -55,7 +55,7 @@ Data can be validated against individual Expectations.  This workflow is general
 
    - `expectation_config`: Provides a dictionary that describes the Expectation that was run and what its parameters are.
    - `success`: The value of this key indicates if the data that was validated met the criteria described in the Expectation.
-   - `result`: Contains a dictionary with additional information that shows why the Expectation succeded or failed. 
+   - `result`: Contains a dictionary with additional information that shows why the Expectation succeeded or failed. 
 
    In the following example you can see the Validation Results for an Expectation that failed because the `observed_value` reported in the `result` dictionary is outside of the `min_value` and `max_value` range described in the `expectation_config`:
 
@@ -106,7 +106,7 @@ Data can be validated against individual Expectations.  This workflow is general
    ```python title="Python input" name="docs/docusaurus/docs/core/define_expectations/_examples/test_an_expectation.py - test and review a modified Expectation"
    ```
 
-   This time, the updated Expectation accurately describes the data and the validation succeds:
+   This time, the updated Expectation accurately describes the data and the validation succeeds:
 
    ```python title="Python output"
    {

@@ -198,7 +198,7 @@ The format for an unstructured profile is below:
     * `sample_size` - number of input data samples used to generate this profile
     * `null_count` - the number of null entries in the sample
     * `null_types` - a list of the different null types present within this sample
-    * `null_types_index` - a dict containing each null type and a respective list of the indicies that it is present within this sample
+    * `null_types_index` - a dict containing each null type and a respective list of the indices that it is present within this sample
     * `data_type_representation` - the percentage of samples used identifying as each data_type
     * `min` - minimum value in the sample
     * `max` - maximum value in the sample

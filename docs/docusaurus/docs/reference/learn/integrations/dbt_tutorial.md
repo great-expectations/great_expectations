@@ -20,7 +20,7 @@ Finally, to interact with our data, you will be using pgAdmin to query/view it (
 
 ## Prerequisites
 :::note Note
-In addition to the prerequisites below, you are recommneded to use an IDE like VSCode to organize your project.
+In addition to the prerequisites below, you are recommended to use an IDE like VSCode to organize your project.
 :::
 
 - Basic knowledge of Python, SQL, Docker.
@@ -349,7 +349,7 @@ write_data >> gx_run_audit >> dbt_publish_model
 ```
 This DAG file contains the process above, however executing the GX Checkpoint is as simple as loading the previously created Data Context and running the stored Checkpoint.
 
-After a few minutes, the new pipleline will appear in Airflow. Next, you will receive the following error:
+After a few minutes, the new pipeline will appear in Airflow. Next, you will receive the following error:
 
 ```python title="Error"
 Broken DAG: [/opt/airflow/dags/customers_dag.py] Traceback (most recent call last):

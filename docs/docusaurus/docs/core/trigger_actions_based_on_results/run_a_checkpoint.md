@@ -51,7 +51,7 @@ In this procedure your Data Context is assumed to be stored in the variable `con
 
    To pass parameters to Expectations at runtime the Expectation must be configured to find parameter values through a dictionary lookup.  This is done when the Expectation is created.
 
-   You then pass a dictionary to the `expectation_parameters` argument of a Checkpoint's `run` method.  The contents of this dictionary consist of keys that were defined for parameters when the Checkpoint's Expectations were created, paired with the values that should be used for the corresponding parmeters when the Checkpoint runs.
+   You then pass a dictionary to the `expectation_parameters` argument of a Checkpoint's `run` method.  The contents of this dictionary consist of keys that were defined for parameters when the Checkpoint's Expectations were created, paired with the values that should be used for the corresponding parameters when the Checkpoint runs.
 
    Below is an example of an `ExpectColumnMaxToBeBetween` Expectation that is set to accept parameters at runtime:
 

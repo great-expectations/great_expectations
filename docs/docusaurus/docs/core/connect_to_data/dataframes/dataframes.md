@@ -231,7 +231,7 @@ This means that Batch Definitions for dataframe Data Assets don't work to subdiv
 
 ## Provide a dataframe through Batch Parameters
 
-Because dataframes exist in memory and cease to exist when a Python session ends the dataframe itself is not saved as part of a Data Assset or Batch Definition.  Instead, a dataframe created in the current Python session is passed in at runtime as a Batch Parameter dictionary.
+Because dataframes exist in memory and cease to exist when a Python session ends the dataframe itself is not saved as part of a Data Asset or Batch Definition.  Instead, a dataframe created in the current Python session is passed in at runtime as a Batch Parameter dictionary.
 
 ### Prerequisites {#prerequisites-dataframes}
 
