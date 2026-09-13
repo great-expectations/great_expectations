@@ -157,7 +157,7 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
                 root_directory = ""
 
             var_path = os.path.join(root_directory, defined_path)  # noqa: PTH118 # FIXME CoP
-            with open(var_path) as config_variables_file:
+            with open(var_path, encoding="utf-8") as config_variables_file:
                 contents = config_variables_file.read()
 
             variables = dict(yaml.load(contents)) or {}
