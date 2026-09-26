@@ -43,7 +43,7 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Standard Deviation implementation"""
-        convert_pandas_series_decimal_to_float_dtype(data=column, inplace=True)
+        column = convert_pandas_series_decimal_to_float_dtype(data=column)
         return column.std()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
