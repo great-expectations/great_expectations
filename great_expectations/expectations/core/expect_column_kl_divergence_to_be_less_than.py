@@ -457,6 +457,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                     MetricsCalculator,
                 )
 
+                assert execution_engine, "An execution_engine is required to compute the partition."
                 metrics_calculator = MetricsCalculator(
                     execution_engine=execution_engine,
                     show_progress_bars=True,
@@ -541,7 +542,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
             if (
                 bins is None
             ):  # if the user did not supply a partition_object, so we just computed it
-                if not is_valid_partition_object(partition_object):
+                if partition_object is None or not is_valid_partition_object(partition_object):
                     raise ValueError("Invalid partition_object provided")  # noqa: TRY003 # FIXME CoP
                 bins = partition_object["bins"]
 
@@ -662,14 +663,14 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
             observed_weights = (
                 metrics["column.value_counts"] / metrics["column_values.nonnull.count"]
             )
-            expected_weights = pd.Series(
+            expected_series = pd.Series(
                 partition_object["weights"],
                 index=partition_object["values"],
                 name="expected",
             )
             # Sort not available before pandas 0.23.0
-            # test_df = pd.concat([expected_weights, observed_weights], axis=1, sort=True)
-            test_df = pd.concat([expected_weights, observed_weights], axis=1)
+            # test_df = pd.concat([expected_series, observed_weights], axis=1, sort=True)
+            test_df = pd.concat([expected_series, observed_weights], axis=1)
 
             na_counts = test_df.isnull().sum()
 
@@ -1291,7 +1292,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -1359,7 +1360,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         include_column_name = runtime_configuration.get("include_column_name") is not False
         _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column",
                 "partition_object",
@@ -1411,13 +1412,13 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        assert result, "Must pass in result."
         observed_partition_object = result.result.get("details", {}).get("observed_partition", {})
         weights = observed_partition_object.get("weights", [])
 
+        raw_observed_value = result.result.get("observed_value")
         observed_value = (
-            num_to_str(result.result.get("observed_value"))
-            if result.result.get("observed_value")
-            else result.result.get("observed_value")
+            num_to_str(raw_observed_value) if raw_observed_value else raw_observed_value
         )
         header_template_str = "KL Divergence: $observed_value"
         header_params_with_json_schema = {
@@ -1464,6 +1465,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        assert result, "Must pass in result."
         if not result.result.get("details"):
             value_obj = renderedAtomicValueSchema.load(
                 {
@@ -1539,16 +1541,16 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
+        assert result, "Must pass in result."
         if not result.result.get("details"):
             return "--"
 
         observed_partition_object = result.result["details"]["observed_partition"]
         observed_distribution = cls._get_kl_divergence_chart(observed_partition_object)
 
+        raw_observed_value = result.result.get("observed_value")
         observed_value = (
-            num_to_str(result.result.get("observed_value"))
-            if result.result.get("observed_value")
-            else result.result.get("observed_value")
+            num_to_str(raw_observed_value) if raw_observed_value else raw_observed_value
         )
 
         observed_value_content_block = RenderedStringTemplateContent(

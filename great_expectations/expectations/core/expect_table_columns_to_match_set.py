@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Set, Type, Union
+from collections.abc import Set as AbstractSet
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Set, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -314,7 +315,9 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["column_set", "exact_match"])
+        params = substitute_none_for_missing(
+            configuration.kwargs if configuration else {}, ["column_set", "exact_match"]
+        )
 
         if params["column_set"] is None:
             template_str = "Must specify a set or list of columns."
@@ -357,6 +360,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
+        assert result, "Must pass in result."
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -399,7 +403,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             for name, sch in renderer_configuration.params
             if name.startswith(expected_param_prefix)
         )
-        mismatched_columns = {"unexpected": [], "missing": []}
+        mismatched_columns: Dict[str, List[str]] = {"unexpected": [], "missing": []}
         if (
             "details" in result["result"]
             and "mismatched" in result["result"]["details"]
@@ -457,7 +461,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         expected_column_set = (
             set(expected_column_list) if expected_column_list is not None else set()
         )
-        actual_column_list = metrics.get("table.columns")
+        actual_column_list = metrics["table.columns"]
         actual_column_set = set(actual_column_list)
 
         unmatched_actual_column_set = actual_column_set - expected_column_set
@@ -467,14 +471,14 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             expected_column_set,
             unmatched_actual_column_set,
             unmatched_expected_column_set,
-            self._get_success_kwargs().get("exact_match"),
+            self._get_success_kwargs()["exact_match"],
         )
 
     def _validate_sqlalchemy(self, metrics: Dict):
         # We want to match the expected columns with the actual columns. We first break up the
         # expected columns into 2 sets, the quoted columns which must match exactly and the unquoted
         # columns, which we case insensitive match.
-        expected_column_set = set(self._get_success_kwargs().get("column_set"))
+        expected_column_set = set(self._get_success_kwargs()["column_set"])
         quoted_expected_column_set = set()
         unquoted_expected_column_set = set()
         for col in expected_column_set:
@@ -486,7 +490,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         # The actual columns from the db will be unquoted and may be strs or CaseInsensitiveStrings.
         # We normalize the actual_column_list to CaseInsensitiveStrings so we can use set operations
         # going forward.
-        actual_column_list = metrics.get("table.columns")
+        actual_column_list = metrics["table.columns"]
         actual_column_set = _make_case_insensitive_set(actual_column_list)
 
         # We make copies of the expected and actual column sets and remove items from them as we
@@ -517,7 +521,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             expected_column_set,
             unmatched_actual_column_set,
             unmatched_expected_column_set,
-            self._get_success_kwargs().get("exact_match"),
+            self._get_success_kwargs()["exact_match"],
         )
 
 
@@ -554,13 +558,13 @@ def _make_case_insensitive_set(
 
 
 def _validate_result(
-    actual_column_set: Set[Union[str, CaseInsensitiveString]],
-    expected_column_set: Set[str],
-    unmatched_actual_column_set: Set[Union[str, CaseInsensitiveString]],
-    unmatched_expected_column_set: Set[Union[str, CaseInsensitiveString]],
+    actual_column_set: AbstractSet[Union[str, CaseInsensitiveString]],
+    expected_column_set: AbstractSet[str],
+    unmatched_actual_column_set: AbstractSet[Union[str, CaseInsensitiveString]],
+    unmatched_expected_column_set: AbstractSet[Union[str, CaseInsensitiveString]],
     exact_match: bool,
 ) -> Dict[str, Any]:
-    empty_set = set()
+    empty_set: Set[Any] = set()
     observed_value = sorted([str(col) for col in actual_column_set])
 
     if ((expected_column_set is None) and (exact_match is not True)) or (
