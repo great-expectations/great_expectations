@@ -551,8 +551,9 @@ filterwarnings = [
     "ignore: The load_credentials_from_file method is deprecated because of a potential security risk.:DeprecationWarning",
     # google.* libraries
     # Example Actual Warning:
-    # FutureWarning: You are using a Python version (3.10.19) which Google will stop supporting in new releases of google.* once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates past that date.
-    "ignore: You are using a Python version \\(3\\.10.*\\) which Google will stop supporting in new releases of google:FutureWarning",
+    # FutureWarning: You are using a non-supported Python version (3.10.20). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.api_core.
+    # The message text changes by date relative to the Python version's end of life, so match on the emitting module instead.
+    "ignore::FutureWarning:google.api_core._python_version_support",
     # db_dtypes (google-cloud-bigquery dependency) calls numpy.datetime64("NaT") at class-definition
     # time; NumPy 2.x emits a DeprecationWarning about the 'generic' unit in Python 3.13+ environments.
     # This crashes pytest collection (exit 4) before test-skip shims can fire.
