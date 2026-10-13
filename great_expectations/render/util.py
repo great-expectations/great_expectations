@@ -88,14 +88,20 @@ SUFFIXES = {1: "st", 2: "nd", 3: "rd"}
 
 
 def ordinal(num):
-    """Convert a number to ordinal"""
+    """Convert a number to ordinal.
+
+    The suffix is chosen from the number's magnitude, so negative numbers get the
+    same suffix as their positive counterparts (e.g. -1 renders as "-1st").
+    """
     # Taken from https://codereview.stackexchange.com/questions/41298/producing-ordinal-numbers/41301
     # Consider a library like num2word when internationalization comes
-    if 10 <= num % 100 <= 20:  # noqa: PLR2004 # FIXME CoP
+    # Python's % takes the sign of the divisor, so -1 % 10 == 9; use the magnitude instead.
+    magnitude = abs(num)
+    if 10 <= magnitude % 100 <= 20:  # noqa: PLR2004 # FIXME CoP
         suffix = "th"
     else:
         # the second parameter is a default.
-        suffix = SUFFIXES.get(num % 10, "th")
+        suffix = SUFFIXES.get(magnitude % 10, "th")
     return str(num) + suffix
 
 
