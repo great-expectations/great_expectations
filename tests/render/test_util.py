@@ -13,12 +13,29 @@ from great_expectations.render.util import (
     build_count_and_index_table,
     build_count_table,
     num_to_str,
+    ordinal,
     resource_key_passes_run_name_filter,
     truncate_list_of_indices,
 )
 
 # module level markers
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    "num, expected",
+    [
+        (1, "1st"),
+        (2, "2nd"),
+        (3, "3rd"),
+        (4, "4th"),
+        (-1, "-1st"),
+        (-2, "-2nd"),
+        (-3, "-3rd"),
+    ],
+)
+def test_ordinal(num: int, expected: str):
+    assert ordinal(num) == expected
 
 
 def test_num_to_str():
