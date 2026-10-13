@@ -408,3 +408,69 @@ def test_infinite_decimal_is_unexpected_and_serializes(batch_for_datasource: Bat
     json_result = result.to_json_dict()["result"]
     assert isinstance(json_result, dict)
     assert json_result["unexpected_list"] == [float("inf")]
+
+
+# ── Regression: datetime64 column with datetime.date bounds (GH #12313) ──────
+# On pandas 2.3+ (and pandas 3 with datetime64[us]), comparing a pd.Timestamp
+# column value against a datetime.date bound raised:
+#   TypeError: Cannot compare Timestamp with datetime.date
+# The fix coerces plain date bounds to pd.Timestamp before the vectorised comparison.
+
+DATETIME_COLUMN = "timestamps"
+
+_DATETIME_DATA = pd.DataFrame(
+    {
+        DATETIME_COLUMN: pd.Series(
+            [
+                pd.Timestamp("2024-01-01"),
+                pd.Timestamp("2024-01-02 12:00:00"),
+                pd.Timestamp("2024-01-03"),
+                pd.Timestamp("2024-01-04"),
+                pd.Timestamp("2024-01-06"),
+                pd.NaT,
+            ]
+        ),
+    }
+)
+
+
+import datetime as _dt  # noqa: E402
+
+
+@parameterize_batch_for_data_sources(data_source_configs=JUST_PANDAS_DATA_SOURCES, data=_DATETIME_DATA)
+def test_datetime64_column_with_date_bounds_does_not_raise(batch_for_datasource: Batch) -> None:
+    """datetime64 column + datetime.date bounds must not raise TypeError on pandas 2.3+."""
+    expectation = gxe.ExpectColumnValuesToBeBetween(
+        column=DATETIME_COLUMN,
+        min_value=_dt.date(2024, 1, 2),
+        max_value=_dt.date(2024, 1, 4),
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success is False  # 2024-01-01 and 2024-01-06 are out-of-range
+    assert result.exception_info.get("raised_exception") is False
+
+
+@parameterize_batch_for_data_sources(data_source_configs=JUST_PANDAS_DATA_SOURCES, data=_DATETIME_DATA)
+def test_datetime64_column_with_string_date_bounds_does_not_raise(batch_for_datasource: Batch) -> None:
+    """datetime64 column + ISO string bounds coerced to date must not raise on pandas 2.3+."""
+    expectation = gxe.ExpectColumnValuesToBeBetween(
+        column=DATETIME_COLUMN,
+        min_value="2024-01-02",
+        max_value="2024-01-04",
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success is False
+    assert result.exception_info.get("raised_exception") is False
+
+
+@parameterize_batch_for_data_sources(data_source_configs=JUST_PANDAS_DATA_SOURCES, data=_DATETIME_DATA)
+def test_datetime64_column_with_date_bounds_in_range(batch_for_datasource: Batch) -> None:
+    """All non-null values within range should succeed."""
+    expectation = gxe.ExpectColumnValuesToBeBetween(
+        column=DATETIME_COLUMN,
+        min_value=_dt.date(2024, 1, 1),
+        max_value=_dt.date(2024, 1, 6),
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success is True
+    assert result.exception_info.get("raised_exception") is False
