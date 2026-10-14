@@ -32,6 +32,9 @@ pytestmark = pytest.mark.unit
         (-1, "-1st"),
         (-2, "-2nd"),
         (-3, "-3rd"),
+        (-11, "-11th"),
+        (-12, "-12th"),
+        (-13, "-13th"),
     ],
 )
 def test_ordinal(num: int, expected: str):
