@@ -912,9 +912,25 @@ class TestPartialDialectModuleFallback:
 
     def test_generic_alias_does_not_resolve(self):
         """``sa.INT`` is ``INTEGER``; only a type's own class name resolves generically."""
-        success, observed = compare_column_type(self.engine, sa.types.INTEGER(), "INT")
+        success, observed = compare_column_type(self.engine, sa.types.INTEGER(), "INT", strict=True)
         assert success is False
         assert observed == "INTEGER"
+
+    @pytest.mark.parametrize("actual_type", [sa.types.BIGINT(), sa.types.SMALLINT()])
+    def test_base_type_does_not_match_a_subtype(self, actual_type):
+        """``Integer`` is a base class of every integer type, so it is not a candidate."""
+        success, _obs = compare_column_type(self.engine, actual_type, "Integer", strict=True)
+        assert success is False
+
+    def test_base_type_in_a_list_does_not_match_a_subtype(self):
+        success, _obs = compare_column_type_list(self.engine, sa.types.BIGINT(), ["Integer"])
+        assert success is False
+
+    @pytest.mark.parametrize("name", ["Column", "Table", "MetaData"])
+    def test_class_that_is_not_a_type_raises(self, name):
+        """A sqlalchemy class that is not a ``TypeEngine`` is not a candidate."""
+        with pytest.raises(InvalidExpectationConfigurationError, match=name):
+            compare_column_type(self.engine, sa.types.INTEGER(), name, strict=True)
 
 
 # ===========================================================================
@@ -985,7 +1001,9 @@ class TestBigQueryGeographyWithoutExtra:
         monkeypatch.setattr(type_comparison, "BIGQUERY_GEO_SUPPORT", False)
 
     def test_scalar_fails_without_raising(self):
-        success, _obs = compare_column_type(self.engine, sa.types.INTEGER(), "GEOGRAPHY")
+        success, _obs = compare_column_type(
+            self.engine, sa.types.INTEGER(), "GEOGRAPHY", strict=True
+        )
         assert success is False
 
     def test_list_fails_without_raising(self):
@@ -1069,10 +1087,10 @@ class TestClickHouseUnrecognizedSpec:
 
 
 class TestNoDialectModule:
-    """Athena, Hive and Vertica get no dialect module and fall back to generic types.
+    """Athena, Hive and Vertica get no dialect module and resolve against sqlalchemy.
 
-    There is no dialect vocabulary to check a name against, so an unresolvable name
-    cannot be called a misspelling and keeps reporting an ordinary mismatch.
+    That namespace is their whole vocabulary, aliases included, so a name it does not
+    define can never match and is reported like a misspelling on any other dialect.
     """
 
     engine = _StubEngine("awsathena", dialect_module=None)
@@ -1082,21 +1100,27 @@ class TestNoDialectModule:
         assert success is True
         assert observed == "INTEGER"
 
-    def test_unresolvable_name_does_not_raise(self):
-        success, _obs = compare_column_type(self.engine, sa.types.INTEGER(), "__NO_SUCH_TYPE__")
-        assert success is False
+    def test_alias_still_resolves(self):
+        """Vertica reflects an INT column as ``sqlalchemy.INTEGER``, which ``INT`` names."""
+        success, _obs = compare_column_type(self.engine, sa.types.INTEGER(), "INT", strict=True)
+        assert success is True
 
-    def test_unresolvable_name_in_a_list_does_not_raise(self):
-        success, _obs = compare_column_type_list(
-            self.engine,
-            sa.types.INTEGER(),
-            ["__NO_SUCH_TYPE__", "__ALSO_NO_SUCH_TYPE__"],
-        )
-        assert success is False
+    def test_unresolvable_name_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="awsathena"):
+            compare_column_type(self.engine, sa.types.INTEGER(), "__NO_SUCH_TYPE__", strict=True)
 
-    def test_non_type_name_does_not_raise_type_error(self):
-        success, _obs = compare_column_type(self.engine, sa.types.INTEGER(), "text")
-        assert success is False
+    def test_unresolvable_names_in_a_list_raise(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="__NO_SUCH_TYPE__"):
+            compare_column_type_list(
+                self.engine,
+                sa.types.INTEGER(),
+                ["__NO_SUCH_TYPE__", "__ALSO_NO_SUCH_TYPE__"],
+            )
+
+    @pytest.mark.parametrize("name", ["text", "Column"])
+    def test_non_type_name_raises_rather_than_type_error(self, name):
+        with pytest.raises(InvalidExpectationConfigurationError, match=name):
+            compare_column_type(self.engine, sa.types.INTEGER(), name, strict=True)
 
 
 # ===========================================================================

@@ -203,9 +203,9 @@ def _unresolvable_type_error(
     quoted = ", ".join(repr(name) for name in names)
     noun = "type" if len(names) == 1 else "types"
     return InvalidExpectationConfigurationError(
-        f"Unrecognized {noun}: {quoted} could not be resolved against the "
-        f"{execution_engine.dialect_name} dialect module or the generic sqlalchemy "
-        f"namespace. Check the spelling, or use a type name the dialect supports."
+        f"Unrecognized {noun}: {quoted} is not a type name the "
+        f"{execution_engine.dialect_name} dialect or sqlalchemy defines. Check the "
+        f"spelling, or use a type name the dialect supports."
     )
 
 
@@ -223,8 +223,9 @@ def _compare_type_string(actual_column_type: Any, expected_type: str) -> bool:
 class _Resolution(NamedTuple):
     """The outcome of resolving one type name against a dialect.
 
-    ``conclusive`` is False where the dialect cannot tell an unknown name from a name
-    it simply does not carry, so an empty ``types`` there is not evidence of a typo.
+    ``conclusive`` is False where an empty ``types`` is not evidence of a typo: the name
+    is a real sqlalchemy type the dialect does not compare against, or support for it
+    is missing.
     """
 
     types: list
@@ -249,23 +250,28 @@ def _resolve_type_name(
         return _INCONCLUSIVE
 
     type_module = _get_dialect_type_module(execution_engine=execution_engine)
-    # Without a dialect module there is no dialect vocabulary to check the name
-    # against, only the generic namespace that _get_dialect_type_module has just
-    # fallen back to. Athena, Hive and Vertica reach the comparison this way.
-    conclusive = execution_engine.dialect_module is not None
-
-    types = _dialect_candidates(type_module, expected_type) if conclusive else []
-    # A dialect module also exports submodules and functions (sqlite and mysql export a `json`
-    # module); only classes can be compared with isinstance.
-    types = [potential_type for potential_type in types if inspect.isclass(potential_type)]
-    if not types:
-        # A dialect module re-exports only the subset of generic types it chooses to.
-        # Oracle exports NUMBER and VARCHAR2 but not INTEGER, yet reflects an INTEGER
-        # column as a generic sqlalchemy.INTEGER.
-        types = _generic_candidates(expected_type)
+    if execution_engine.dialect_module is None:
+        # Athena, Hive and Vertica have no dialect module, so the sqlalchemy namespace
+        # _get_dialect_type_module has just fallen back to is their whole vocabulary,
+        # aliases such as INT included.
+        types = _sqlalchemy_types(expected_type)
+    else:
+        types = _dialect_candidates(type_module, expected_type)
+        # A dialect module also exports submodules and functions (sqlite and mysql export a
+        # `json` module); only classes can be compared with isinstance.
+        types = [potential_type for potential_type in types if inspect.isclass(potential_type)]
+        if not types:
+            # A dialect module re-exports only the subset of generic types it chooses to.
+            # Oracle exports NUMBER and VARCHAR2 but not INTEGER, yet reflects an INTEGER
+            # column as a generic sqlalchemy.INTEGER.
+            types = _generic_candidates(expected_type)
+        if not types and _sqlalchemy_types(expected_type):
+            # A real sqlalchemy type this dialect does not compare against, such as the
+            # Integer base class or the INT alias, is not a misspelling.
+            return _INCONCLUSIVE
     if not types:
         logger.debug(f"Unrecognized type: {expected_type}")
-    return _Resolution(types=_include_floating_point_in_numeric(types), conclusive=conclusive)
+    return _Resolution(types=_include_floating_point_in_numeric(types))
 
 
 def _is_bigquery_geography_without_support(
@@ -308,22 +314,31 @@ def _dialect_candidates(type_module: ModuleType, expected_type: str) -> list:
     return [potential_type]
 
 
-def _generic_candidates(expected_type: str) -> list:
-    """Resolve a type name against the top-level sqlalchemy namespace.
+def _sqlalchemy_types(expected_type: str) -> list:
+    """Resolve a type name against the top-level sqlalchemy namespace, aliases included.
 
     That namespace is far wider than its types, so a name colliding with one of its
-    functions (``text``, ``cast``, ``select``) must not become a candidate. Only a type's
-    own class name resolves here, not an alias: ``INT`` is ``INTEGER`` in this namespace,
-    and a dialect that does not export ``INT`` does not use that name.
+    functions (``text``, ``cast``, ``select``) or non-type classes (``Column``) must not
+    become a candidate.
     """
     generic_type = getattr(sa, expected_type, None)
-    if (
-        isinstance(generic_type, type)
-        and issubclass(generic_type, sa.types.TypeEngine)
-        and generic_type.__name__ == expected_type
-    ):
+    if isinstance(generic_type, type) and issubclass(generic_type, sa.types.TypeEngine):
         return [generic_type]
     return []
+
+
+def _generic_candidates(expected_type: str) -> list:
+    """Resolve a name a dialect module lacks to an uppercase SQL type under its own name.
+
+    A CamelCase base type such as ``Integer`` would match every subtype (``BIGINT``,
+    ``SMALLINT``) through isinstance, and an alias such as ``INT`` is ``INTEGER`` in this
+    namespace although a dialect that does not export ``INT`` does not use that name.
+    """
+    return [
+        generic_type
+        for generic_type in _sqlalchemy_types(expected_type)
+        if generic_type.__name__ == expected_type and expected_type.isupper()
+    ]
 
 
 def _include_floating_point_in_numeric(types: list) -> list:
