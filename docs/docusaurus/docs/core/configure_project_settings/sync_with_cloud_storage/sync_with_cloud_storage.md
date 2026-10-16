@@ -16,9 +16,9 @@ import ConnectS3 from './_backends/_s3.md';
 import ConnectAbs from './_backends/_abs.md';
 import ConnectGcs from './_backends/_gcs.md';
 
-Serverless functions and short-lived containers start from an image and can lose their local disk whenever they shut down. A `gx/` folder that one run creates might therefore not be there for the next. To validate data from workers like these, keep the project in a cloud storage bucket. Each worker downloads the project's configuration, runs a Checkpoint, and uploads the Validation Results from that run. A separate step builds Data Docs from every stored result. The examples cover Amazon S3, Azure Blob Storage, and Google Cloud Storage. On this page, "bucket" also means an Azure Blob Storage container.
+Serverless functions and short-lived containers start from an image and can lose their local disk whenever they shut down. A `gx/` folder that one run creates might therefore not be there for the next. To validate data from workers like these, keep the project in a cloud storage bucket. Each worker downloads the project's configuration, runs a Checkpoint, and uploads the Validation Results from that run. A separate process builds Data Docs from every stored result. The examples cover Amazon S3, Azure Blob Storage, and Google Cloud Storage. On this page, "bucket" also means an Azure Blob Storage container.
 
-A File Data Context keeps its configuration and its Validation Results in a local `gx/` folder. The code on this page copies files between that folder and the bucket with your storage service's Python client. It divides the work between three kinds of process: one configuration publisher, any number of workers, and one Data Docs publisher. Every location in the bucket has a single kind of writer, so workers that run at the same time don't overwrite each other's results or the configuration.
+A File Data Context keeps its configuration and its Validation Results in a local `gx/` folder. The code on this page copies files between that folder and the bucket with your storage service's Python client. It divides the work between three kinds of process: one configuration publisher, any number of workers, and one Data Docs publisher. Every location in the bucket has a single kind of writer, so workers that run at the same time don't overwrite the configuration. [Choose a run name](#choose-a-run-name) explains how to keep them from overwriting each other's results.
 
 ## Prerequisites
 
@@ -26,11 +26,12 @@ A File Data Context keeps its configuration and its Validation Results in a loca
 - GX Core with the Python client for your storage service: [Amazon S3](/core/set_up_a_gx_environment/install_additional_dependencies.md?dependencies=amazon), [Azure Blob Storage](/core/set_up_a_gx_environment/install_additional_dependencies.md?dependencies=azure), or [Google Cloud Storage](/core/set_up_a_gx_environment/install_additional_dependencies.md?dependencies=gcs).
 - <PrereqFileDataContext/>.
 - <PrereqCheckpoint/> in that File Data Context.
+- A Validation Results Store whose folder is inside `gx/uncommitted/`, which is the default. The functions on this page work only with a folder there.
 - A bucket or container, and credentials for each process. [How the work is divided](#how-the-work-is-divided) lists the access each process needs.
 
 ## How the work is divided
 
-Each location in the bucket has one kind of writer:
+The following table lists who writes and who reads each location in the bucket:
 
 | Location in the bucket | Written by | Read by |
 | --- | --- | --- |
@@ -38,7 +39,7 @@ Each location in the bucket has one kind of writer:
 | `gx/uncommitted/validations/` | Workers, one new file per Validation Result | The Data Docs publisher |
 | `data_docs/` | The Data Docs publisher | People who view Data Docs |
 
-The examples use the prefixes `gx/` and `data_docs/`, and you can change either one. Keep the trailing `/` on each prefix, because the functions add file paths directly after it.
+The examples use the prefixes `gx/` and `data_docs/`. You can change either one, as long as neither is inside the other. If the site were inside `gx/`, every worker would download the whole site with the configuration. If `gx/` were inside the site, anyone who can read the site could also read the configuration and every Validation Result. Keep the trailing `/` on each prefix, because the functions add file paths directly after it.
 
 Give each process only the access its role needs, so that a worker can't change the configuration or the site, even by mistake:
 
@@ -56,34 +57,38 @@ Each file uploads separately, so a worker that downloads the configuration while
 
 The configuration publisher skips `uncommitted/`, which holds `config_variables.yml`. Give workers their credentials through environment variables or a secrets manager instead. See [Configure credentials](/core/configure_project_settings/configure_credentials/configure_credentials.md) and [Access secrets managers](/core/configure_project_settings/access_secrets_managers/access_secrets_managers.md).
 
-Workers use the Data Sources in the published configuration, so each worker must be able to reach the data they point to. A filesystem Data Source whose `base_directory` is a folder on the publisher's machine fails in a worker that doesn't have that folder.
+Workers use the Data Sources in the published configuration, so each worker must be able to reach the data that those Data Sources point to. A filesystem Data Source whose `base_directory` is a local folder, such as one on the machine where you created the Data Source, fails in a worker that doesn't have that folder.
 
 ### Each run adds its own Validation Results
 
-A worker uploads only the files its own run added to the Validation Results folder. GX saves a Validation Result at `uncommitted/validations/<suite name>/<run name>/<run time>/<batch identifier>.json`. Each dot in the suite name starts a new folder, so results for a suite named `orders.daily` are saved below `orders/daily/`. Workers upload each result to the same path below the bucket's `gx/` prefix. The object's name therefore identifies the Expectation Suite, the run, and the Data Asset it validated.
+A worker uploads only the files its own run added to the Validation Results folder. GX saves a Validation Result at `uncommitted/validations/<suite name>/<run name>/<run time>/<batch identifier>.json`. Each dot in the suite name starts a new folder, so results for a suite named `orders.daily` are saved below `orders/daily/`. Workers upload each result to the same path below the bucket's `gx/` prefix. The object's name identifies the Expectation Suite, the run, and the Data Asset it validated.
 
-The batch identifier joins the Data Source name, the Data Asset name, and the options of the Batch that GX read, such as `year` and `month`. It leaves out a file path and a dataframe. Batches read by path through one Data Asset, or from different dataframes, therefore all get the same batch identifier. A monthly Batch Definition run without Batch parameters still records the year and month of the Batch it picked.
+The batch identifier joins the Data Source name, the Data Asset name, and the options of the Batch that GX read, such as `year` and `month`. It leaves out a file path and a dataframe. Batches read by path through one Data Asset, or from different dataframes, all get the same batch identifier. When a monthly Batch Definition runs without Batch parameters, it still records the year and month of the Batch it picked.
 
-The run time is the current UTC time, to the microsecond, when the run starts. Two runs with the same run name therefore still get separate results. If you don't pass a run name, the path has `__none__` in its place. `run_checkpoint()` requires one: pass a name that identifies what started the run, so that you can trace a stored result back to the job that produced it.
+### Choose a run name
 
-GX tries to read every run name as a date, and it uses the run name as a folder name. Choose run names that follow these rules:
+The run time is the current UTC time, to the microsecond, when the run starts. Two runs with the same run name still get separate results, because their run times differ. The exception is two runs that validate the same Expectation Suite against Batches with the same batch identifier and start in the same microsecond. That becomes likely when many workers start together under one run name, such as one worker per file. Among 1,000 such workers started within the same second, the chance that two share a run time is about 39%. Give each of them its own run name, for example by adding its task index to the scheduler's run ID.
 
-- **Don't use a run name that GX can read as a date.** That includes a full date such as `2026-10-16`, a short number such as `12`, and a month or weekday name such as `march`. GX completes a partial date from the current date and uses the result as the run time, because `run_checkpoint()` passes no run time of its own. Runs with that name then share a run time and write to the same path, each one replacing the last. For a full date that is every run, and for a partial date at least every run on the same day.
-- Don't use a run name that is only digits. A long number, such as a GitHub Actions run ID, makes GX raise `OverflowError` before the Checkpoint runs. Passing a run time to `RunIdentifier` doesn't avoid this: the Checkpoint then runs, but Data Docs leave its result out. Put a word in front of the ID instead, for example `gh-38891203107`.
+Every result of one Checkpoint run shares that run's name and run time. If one Checkpoint validates two Batches with the same batch identifier against the same Expectation Suite, such as two files read by path through one Data Asset, both results get the same path and GX keeps only the last one. The other result isn't saved, and `result.success` doesn't include it. Give each such Batch its own Checkpoint so that each one runs separately.
+
+If you don't pass a run name, the path has `__none__` in its place. `run_checkpoint()` requires one: pass a name that identifies what started the run, so that you can trace a stored result back to the job that produced it. GX tries to read every run name as a date, and it uses the run name as a folder name. Follow these rules:
+
+- **Don't use a run name that GX can read as a date.** That includes a full date such as `2026-10-16`, a short number such as `12`, and a month or weekday name such as `march`. Because `run_checkpoint()` passes no run time of its own, GX uses that date as the run time. For a partial date, it fills in the missing parts from the current date. Runs with that name then share a run time and write to the same path, each one replacing the last. For a full date, that is every run. For a partial date, it is at least every run on the same day. GX reads the date in each worker's local time zone, so this holds among workers that share one.
+- Don't use a run name that is only digits. GX reads many numbers as dates, such as `2026` or `20261016`, and many large numbers, such as a GitHub Actions run ID, make it raise `OverflowError` before the Checkpoint runs. For such a number, passing a run time to `RunIdentifier` doesn't help. The Checkpoint then runs, but Data Docs leave its result out. Put a word in front of the ID instead, for example `gh-38891203107`. The word can't be a month or weekday name, or `at`, `on`, `of`, `and`, or `t`, because GX reads those as part of a date.
 - Don't put `/` or `\` in a run name. GX raises `ValueError` when it saves the result.
 - Don't put `profiling` in a run name. Data Docs leave out every result whose run name contains it.
 
 ### Data Docs have one writer
 
-Workers don't build or upload Data Docs. A worker's copy of the project holds only the Validation Results from its own run, so a site built there covers that one run. Instead, the Data Docs publisher downloads the configuration and every stored Validation Result, builds the site, and uploads it. Run the Data Docs publisher on a schedule, after a group of validation runs finishes, or by hand. Each run downloads every stored result, rebuilds every page, and uploads the whole site again. Its download, build time, and uploads all grow with the number of stored results.
+Workers don't build or upload Data Docs. A worker's copy of the project holds only the Validation Results from its own run, so a site built there covers that one run. Instead, the Data Docs publisher downloads the configuration and every stored Validation Result, builds the site, and uploads it. Run the Data Docs publisher on a schedule, after a group of validation runs finishes, or by hand. Each time the Data Docs publisher runs, it downloads every stored result, rebuilds every page, and uploads the whole site again. Its download, build time, and uploads all grow with the number of stored results. If soft delete or object versioning keeps the objects that an upload replaces, every rebuild also leaves a billed copy of the whole site. Google Cloud Storage turns soft delete on by default, for 7 days.
 
 Leave `UpdateDataDocsAction` out of the Checkpoints that workers run. In a worker, the Action builds pages in a temporary folder that the worker deletes without uploading.
 
 ## Avoid sync commands that delete
 
-Command-line sync tools can delete objects in the destination that aren't in the source. `aws s3 sync --delete`, `gcloud storage rsync --delete-unmatched-destination-objects`, and `azcopy sync --delete-destination=true` all do this. Don't use them to copy files into the bucket. No process in this pattern has a copy that stays complete. The configuration publisher has no Validation Results, a worker has only the results from its own run, and the Data Docs publisher's copy lacks every result uploaded after its download. A deleting sync from any of them removes results that other runs uploaded.
+Command-line sync tools can delete objects in the destination that aren't in the source. `aws s3 sync --delete`, `gcloud storage rsync --delete-unmatched-destination-objects`, and `azcopy sync --delete-destination=true` all do this. Don't use them to copy files into the bucket. No process in this pattern has a copy that stays complete. The configuration publisher has none of the workers' Validation Results, a worker has only the results from its own run, and the Data Docs publisher's copy lacks every result uploaded after its download. A deleting sync from any of them removes results that other runs uploaded.
 
-The functions on this page only upload, so they never remove configuration that you delete from your project. When you delete an Expectation Suite, Validation Definition, or Checkpoint, delete its file from the bucket too. Dots in an Expectation Suite's name start new folders here as well, so a suite named `orders.daily` is saved as `expectations/orders/daily.json`.
+The functions on this page only upload, so they never remove configuration that you delete from your project. When you delete an Expectation Suite, Validation Definition, or Checkpoint, delete its file from the bucket too. That needs permission to delete objects, which the access list in [How the work is divided](#how-the-work-is-divided) doesn't include. Dots in an Expectation Suite's name start new folders in its file path too, so a suite named `orders.daily` is saved as `expectations/orders/daily.json`.
 
 ## Procedure
 
@@ -158,9 +163,9 @@ The functions on this page only upload, so they never remove configuration that 
 
 3. Run Checkpoints in workers.
 
-   `run_checkpoint()` downloads the configuration, without `uncommitted/`, into a new temporary folder and loads a File Data Context from it. To find the configuration it lists every object below `project_prefix`, including the stored Validation Results it skips, so a worker's listing grows with the number of stored results. It runs the Checkpoint with the run name and the Batch parameters you pass, then uploads the files that appeared in the Validation Results folder during the run. GX writes a store identifier file into that folder when it loads the project. That is why the function compares the folder before and after the run instead of uploading all of it. The temporary folder is deleted when the function returns.
+   `run_checkpoint()` downloads the configuration, without `uncommitted/`, into a new temporary folder and loads a File Data Context from it. To find the configuration, it lists every object below `project_prefix`, including the stored Validation Results that it skips. That listing grows with the number of stored results. It runs the Checkpoint with the run name and the Batch parameters you pass, then uploads the files that appeared in the Validation Results folder during the run. GX writes a store identifier file into that folder when it loads the project. That is why the function compares the folder before and after the run instead of uploading all of it. The temporary folder is deleted when the function returns.
 
-   Call it in each worker with the Checkpoint's name and a run name. Pass `batch_parameters` when the Checkpoint's Batch Definition needs them to choose a Batch, such as the `year` and `month` of a monthly Batch Definition:
+   Call it in each worker with the Checkpoint's name and a run name that follows [Choose a run name](#choose-a-run-name). Pass `batch_parameters` only when the Checkpoint's Batch Definition takes Batch parameters. The example passes the `year` and `month` of a monthly Batch Definition, which without them validates the most recent month. A dataframe Data Asset requires `{"dataframe": df}`. GX raises `InvalidBatchRequestError` if you pass Batch parameters to a Batch Definition that takes none, such as one for a whole table or a single file:
 
    <Tabs queryString="environment" groupId="environment" defaultValue="s3" values={[{label: 'Amazon S3', value: 's3'}, {label: 'Azure Blob Storage', value: 'abs'}, {label: 'Google Cloud Storage', value: 'gcs'}]}>
 
@@ -198,7 +203,7 @@ The functions on this page only upload, so they never remove configuration that 
 
    The function returns the Checkpoint's result, so the worker can act on it, for example by failing when `result.success` is `False`.
 
-   If you moved the Validation Results Store's `base_directory` to another folder inside `uncommitted/`, change the `results_dir` assignment in `run_checkpoint()` to that folder. The functions on this page work only when that folder is inside `uncommitted/`. Anywhere else in `gx/`, `publish_configuration()` uploads Validation Results as configuration and every worker downloads them. Outside `gx/`, `upload_files()` raises `ValueError`. See [Configure project Stores](/core/configure_project_settings/configure_metadata_stores/configure_metadata_stores.md).
+   If you moved the Validation Results Store's `base_directory` to another folder inside `uncommitted/`, change the `results_dir` assignment in `run_checkpoint()` to that folder. Anywhere else in `gx/`, `publish_configuration()` uploads Validation Results as configuration and every worker downloads them. Outside `gx/`, `upload_files()` raises `ValueError`. See [Configure project Stores](/core/configure_project_settings/configure_metadata_stores/configure_metadata_stores.md).
 
 4. Publish Data Docs.
 

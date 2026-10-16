@@ -42,6 +42,8 @@ def download_project(gx_dir: pathlib.Path, include_results: bool) -> None:
         if blob.name.endswith("/"):
             continue  # A folder placeholder, not a file
         relative_path = blob.name.removeprefix(project_prefix)
+        if ".." in pathlib.PurePath(relative_path).parts:
+            continue  # A name that points outside its folder
         if relative_path.startswith("uncommitted/") and not include_results:
             continue
         local_path = gx_dir / relative_path
@@ -219,6 +221,9 @@ try:
     # <snippet name="docs/docusaurus/docs/core/configure_project_settings/sync_with_cloud_storage/_examples/sync_with_cloud_storage_gcs.py - call publish_data_docs">
     publish_data_docs()
     # </snippet>
+
+    # Every Data Docs publish after the first replaces the pages already there.
+    publish_data_docs()
 
     bucket_after = list_bucket()
 

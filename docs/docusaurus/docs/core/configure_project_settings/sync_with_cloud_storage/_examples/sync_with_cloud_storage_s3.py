@@ -46,6 +46,8 @@ def download_project(gx_dir: pathlib.Path, include_results: bool) -> None:
             if item["Key"].endswith("/"):
                 continue  # A folder placeholder, not a file
             relative_path = item["Key"].removeprefix(project_prefix)
+            if ".." in pathlib.PurePath(relative_path).parts:
+                continue  # A name that points outside its folder
             if relative_path.startswith("uncommitted/") and not include_results:
                 continue
             local_path = gx_dir / relative_path
@@ -224,9 +226,20 @@ try:
         Bucket=bucket_name, Key=project_prefix + "uncommitted/config_variables.yml"
     )
 
+    # A result name that climbs out of its folder. Downloaded as named, it would
+    # replace the Data Docs publisher's configuration file.
+    climbing_key = (
+        project_prefix + "uncommitted/validations/../../great_expectations.yml"
+    )
+    s3.put_object(Bucket=bucket_name, Key=climbing_key, Body=b"a: [")
+
     # <snippet name="docs/docusaurus/docs/core/configure_project_settings/sync_with_cloud_storage/_examples/sync_with_cloud_storage_s3.py - call publish_data_docs">
     publish_data_docs()
     # </snippet>
+
+    # Every Data Docs publish after the first replaces the pages already there.
+    publish_data_docs()
+    s3.delete_object(Bucket=bucket_name, Key=climbing_key)
 
     bucket_after = list_bucket()
 
