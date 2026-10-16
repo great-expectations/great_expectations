@@ -1,7 +1,10 @@
+from typing import Union
+
 import pandas as pd
 import pytest
 
 import great_expectations.expectations as gxe
+from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
 from tests.integration.data_sources_and_expectations.data_source_lists import (
@@ -59,3 +62,44 @@ def test_failure(
 ) -> None:
     result = batch_for_datasource.validate(expectation)
     assert not result.success
+
+
+# `None` is not a valid `column_list`, and an empty one is meaningless, so
+# both are rejected with a validation error when the expectation is created,
+# and again at validation time if a suite parameter resolves to one of them.
+# (Sibling of the `column_set` fix for
+# https://github.com/fivetran/great_expectations/issues/12288.)
+@pytest.mark.unit
+@pytest.mark.parametrize("column_list", [None, [], set()])
+def test_invalid_column_list(column_list: Union[list, set, None]) -> None:
+    with pytest.raises(pydantic.ValidationError):
+        gxe.ExpectTableColumnsToMatchOrderedList(column_list=column_list)
+
+
+@pytest.mark.parametrize("suite_param_value", [None, []])
+@parameterize_batch_for_data_sources(data_source_configs=JUST_PANDAS_DATA_SOURCES, data=DATA)
+def test_column_list_suite_parameter_resolving_to_invalid_value(
+    batch_for_datasource: Batch, suite_param_value: Union[list, None]
+) -> None:
+    suite_param_key = "column_list"
+    expectation = gxe.ExpectTableColumnsToMatchOrderedList(
+        column_list={"$PARAMETER": suite_param_key}
+    )
+    with pytest.raises(pydantic.ValidationError):
+        batch_for_datasource.validate(
+            expectation, expectation_parameters={suite_param_key: suite_param_value}
+        )
+
+
+@parameterize_batch_for_data_sources(data_source_configs=JUST_PANDAS_DATA_SOURCES, data=DATA)
+def test_column_list_suite_parameter_resolving_to_valid_value(
+    batch_for_datasource: Batch,
+) -> None:
+    suite_param_key = "column_list"
+    expectation = gxe.ExpectTableColumnsToMatchOrderedList(
+        column_list={"$PARAMETER": suite_param_key}
+    )
+    result = batch_for_datasource.validate(
+        expectation, expectation_parameters={suite_param_key: [COL_A, COL_B, COL_C]}
+    )
+    assert result.success

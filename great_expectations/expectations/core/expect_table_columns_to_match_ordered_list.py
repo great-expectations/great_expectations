@@ -186,7 +186,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
                 }}
     """  # noqa: E501 # FIXME CoP
 
-    column_list: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
+    column_list: Union[list, set, SuiteParameterDict] = pydantic.Field(
         description=COLUMN_LIST_DESCRIPTION
     )
 
@@ -241,6 +241,14 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
                     },
                 }
             )
+
+    @pydantic.validator("column_list")
+    def _validate_column_list(
+        cls, column_list: Union[list, set, SuiteParameterDict]
+    ) -> Union[list, set, SuiteParameterDict]:
+        if not column_list:
+            raise ValueError("column_list must not be empty")  # noqa: TRY003 # Error message gets swallowed by Pydantic
+        return column_list
 
     @classmethod
     @override
@@ -327,7 +335,14 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         expected_column_list = self._get_success_kwargs().get("column_list")
         actual_column_list = metrics.get("table.columns")
 
-        if expected_column_list is None or list(actual_column_list) == list(expected_column_list):
+        # `column_list` is validated as non-empty when the expectation is
+        # constructed, but suite parameters are only resolved into concrete
+        # values at validation time, so the resolved value is validated here
+        # as well.
+        if not expected_column_list:
+            raise ValueError("column_list must not be empty")  # noqa: TRY003 # FIXME CoP
+
+        if list(actual_column_list) == list(expected_column_list):
             return {
                 "success": True,
                 "result": {"observed_value": list(actual_column_list)},

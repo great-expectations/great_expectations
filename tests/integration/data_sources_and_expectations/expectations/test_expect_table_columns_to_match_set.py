@@ -1,10 +1,11 @@
 from enum import Enum
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Union
 
 import pandas as pd
 import pytest
 
 import great_expectations.expectations as gxe
+from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_validation_result import ExpectationValidationResult
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.interfaces import Batch
@@ -392,3 +393,51 @@ def test_unquoted_and_quoted_with_quoted_failure(batch_for_datasource: Batch) ->
     )
     result = batch_for_datasource.validate(expectation)
     assert not result.success
+
+
+# Regression tests for https://github.com/fivetran/great_expectations/issues/12288:
+# `None` is not a valid `column_set`, and an empty one is meaningless, so both
+# are rejected with a validation error when the expectation is created, and
+# again at validation time if a suite parameter resolves to one of them.
+PANDAS_AND_SQLITE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
+    *JUST_PANDAS_DATA_SOURCES,
+    SqliteDatasourceTestConfig(),
+]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("column_set", [None, [], set()])
+def test_invalid_column_set(column_set: Union[list, set, None]) -> None:
+    with pytest.raises(pydantic.ValidationError):
+        gxe.ExpectTableColumnsToMatchSet(column_set=column_set)
+
+
+@pytest.mark.parametrize("suite_param_value", [None, []])
+@parameterize_batch_for_data_sources(
+    data_source_configs=PANDAS_AND_SQLITE_DATA_SOURCES,
+    data=DATA,
+)
+def test_column_set_suite_parameter_resolving_to_invalid_value(
+    batch_for_datasource: Batch, suite_param_value: Union[list, None]
+) -> None:
+    suite_param_key = "column_set"
+    expectation = gxe.ExpectTableColumnsToMatchSet(column_set={"$PARAMETER": suite_param_key})
+    with pytest.raises(pydantic.ValidationError):
+        batch_for_datasource.validate(
+            expectation, expectation_parameters={suite_param_key: suite_param_value}
+        )
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=PANDAS_AND_SQLITE_DATA_SOURCES,
+    data=DATA,
+)
+def test_column_set_suite_parameter_resolving_to_valid_value(
+    batch_for_datasource: Batch,
+) -> None:
+    suite_param_key = "column_set"
+    expectation = gxe.ExpectTableColumnsToMatchSet(column_set={"$PARAMETER": suite_param_key})
+    result = batch_for_datasource.validate(
+        expectation, expectation_parameters={suite_param_key: [COL_A, COL_B, COL_C]}
+    )
+    assert result.success

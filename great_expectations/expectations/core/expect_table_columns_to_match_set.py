@@ -196,7 +196,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                 }}
     """  # noqa: E501 # FIXME CoP
 
-    column_set: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
+    column_set: Union[list, set, SuiteParameterDict] = pydantic.Field(
         description=COLUMN_SET_DESCRIPTION
     )
     exact_match: Union[bool, SuiteParameterDict, None] = pydantic.Field(
@@ -255,6 +255,14 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                     },
                 }
             )
+
+    @pydantic.validator("column_set")
+    def _validate_column_set(
+        cls, column_set: Union[list, set, SuiteParameterDict]
+    ) -> Union[list, set, SuiteParameterDict]:
+        if not column_set:
+            raise ValueError("column_set must not be empty")  # noqa: TRY003 # Error message gets swallowed by Pydantic
+        return column_set
 
     @classmethod
     @override
@@ -447,16 +455,22 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        # `column_set` is validated as non-empty when the expectation is
+        # constructed, but suite parameters are only resolved into concrete
+        # values at validation time, so the resolved value is validated here
+        # as well.
+        column_set = self._get_success_kwargs().get("column_set")
+        if not column_set:
+            raise ValueError("column_set must not be empty")  # noqa: TRY003 # FIXME CoP
+
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             return self._validate_sqlalchemy(metrics)
 
         # Retrieve expected and observed column names
-        expected_column_list = self._get_success_kwargs().get("column_set")
-        expected_column_set = (
-            set(expected_column_list) if expected_column_list is not None else set()
-        )
+        expected_column_list = column_set
+        expected_column_set = set(expected_column_list)
         actual_column_list = metrics.get("table.columns")
         actual_column_set = set(actual_column_list)
 
