@@ -64,7 +64,7 @@ def publish_configuration(gx_dir: pathlib.Path) -> None:
 # </snippet>
 # <snippet name="docs/docusaurus/docs/core/configure_project_settings/sync_with_cloud_storage/_examples/sync_with_cloud_storage_gcs.py - define run_checkpoint">
 def run_checkpoint(
-    checkpoint_name: str, run_name: str
+    checkpoint_name: str, run_name: str, batch_parameters: dict | None = None
 ) -> gx.checkpoint.CheckpointResult:
     """Run a Checkpoint from a fresh copy of the configuration and upload its results."""
     with tempfile.TemporaryDirectory() as work_dir:
@@ -75,7 +75,9 @@ def run_checkpoint(
         results_dir = gx_dir / "uncommitted" / "validations"
         files_before_run = set(results_dir.rglob("*"))
         checkpoint = context.checkpoints.get(checkpoint_name)
-        result = checkpoint.run(run_id=RunIdentifier(run_name=run_name))
+        result = checkpoint.run(
+            batch_parameters=batch_parameters, run_id=RunIdentifier(run_name=run_name)
+        )
 
         new_files = [
             path
@@ -112,12 +114,13 @@ import shutil
 import uuid
 
 suite_name = "my_expectation_suite"
-batch_id = "my_data_source-my_data_asset"  # Data Source name - Data Asset name
+batch_id = "my_data_source-my_data_asset-year_2024-month_01"  # Source-Asset-options
 run_time_format = "%Y%m%dT%H%M%S.%fZ"  # How GX writes a run time into a result key
 
 # Write only below a prefix unique to this run, so concurrent runs never meet and the
 # cleanup below can't touch anything else in the bucket.
-run_prefix = f"docs-tests/artifact-sync/{uuid.uuid4()}/"
+test_root = "docs-tests/artifact-sync/"
+run_prefix = f"{test_root}{uuid.uuid4()}/"
 other_run = re.compile(r"docs-tests/artifact-sync/[0-9a-f-]{36}/.*")
 bucket_name = os.environ["GX_GCS_TEST_BUCKET"]
 project_prefix = run_prefix + "gx/"
@@ -128,14 +131,18 @@ def build_example_project() -> None:
     """Create ./gx with one Checkpoint, as a project kept under version control would."""
     data_dir = pathlib.Path("data").resolve()
     data_dir.mkdir(exist_ok=True)
-    (data_dir / "trips.csv").write_text("passenger_count\n1\n2\n3\n")
+    (data_dir / "trips_2024-01.csv").write_text("passenger_count\n1\n2\n3\n")
+    (data_dir / "trips_2024-02.csv").write_text("passenger_count\n4\n5\n")
     context = gx.get_context(mode="file", project_root_dir=".")
     batch_definition = (
         context.data_sources.add_pandas_filesystem(
             name="my_data_source", base_directory=data_dir
         )
         .add_csv_asset(name="my_data_asset")
-        .add_batch_definition_path(name="my_batch_definition", path="trips.csv")
+        .add_batch_definition_monthly(
+            name="my_batch_definition",
+            regex=r"trips_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        )
     )
     suite = context.suites.add(gx.ExpectationSuite(name=suite_name))
     suite.add_expectation(
@@ -154,10 +161,10 @@ def build_example_project() -> None:
 
 
 def list_bucket() -> dict[str, tuple]:
-    """Map every object in the bucket to values that change whenever it is written."""
+    """Map every object below docs-tests/artifact-sync/ to values that change on a write."""
     return {
         blob.name: (blob.generation, blob.updated)
-        for blob in client.list_blobs(bucket_name)
+        for blob in client.list_blobs(bucket_name, prefix=test_root)
     }
 
 
@@ -188,10 +195,26 @@ try:
     # folder.
     client.bucket(bucket_name).blob(project_prefix).upload_from_string(b"")
 
+    # A worker that downloads uncommitted/ fails to load this file.
+    client.bucket(bucket_name).blob(
+        project_prefix + "uncommitted/config_variables.yml"
+    ).upload_from_string(b"a: [")
+
     # <snippet name="docs/docusaurus/docs/core/configure_project_settings/sync_with_cloud_storage/_examples/sync_with_cloud_storage_gcs.py - call run_checkpoint">
-    result = run_checkpoint("my_checkpoint", run_name="my_run_name")
+    result = run_checkpoint(
+        "my_checkpoint",
+        run_name="my_run_name",
+        batch_parameters={"year": 2024, "month": 1},
+    )
     # </snippet>
-    second_result = run_checkpoint("my_checkpoint", run_name="my_run_name")
+    second_result = run_checkpoint(
+        "my_checkpoint",
+        run_name="my_run_name",
+        batch_parameters={"year": 2024, "month": 1},
+    )
+    client.bucket(bucket_name).delete_blob(
+        project_prefix + "uncommitted/config_variables.yml"
+    )
 
     # <snippet name="docs/docusaurus/docs/core/configure_project_settings/sync_with_cloud_storage/_examples/sync_with_cloud_storage_gcs.py - call publish_data_docs">
     publish_data_docs()
@@ -226,7 +249,9 @@ try:
     index = client.bucket(bucket_name).get_blob(data_docs_prefix + "index.html")
     assert index.content_type == "text/html", index.content_type
 
-    # Nothing outside this run's prefix changed, apart from other runs of this test.
+    # Nothing else under docs-tests/artifact-sync/ changed, apart from other runs of
+    # this test. CI's identity can't write outside that prefix, so a stray write
+    # fails there.
     changed = {
         key
         for key in bucket_before.keys() | bucket_after.keys()

@@ -30,7 +30,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
   />
   <LinkCard 
       topIcon 
-      label="Cloud storage sync"
+      label="Cloud Storage Sync"
       description="Keep a project in Amazon S3, Azure Blob Storage, or Google Cloud Storage, and run validations from workers that download it."
       to="/core/configure_project_settings/sync_with_cloud_storage" 
       icon="/img/expectation_icon.svg" 
