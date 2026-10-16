@@ -274,8 +274,8 @@ try:
     assert content_type == "text/html", content_type
 
     # Nothing else under docs-tests/artifact-sync/ changed, apart from other runs of
-    # this test. CI's identity can't write outside that prefix, so a stray write
-    # fails there.
+    # this test. The CI SAS covers the whole container, so a stray write elsewhere in
+    # the container isn't caught here or by CI.
     changed = {
         key
         for key in container_before.keys() | container_after.keys()
