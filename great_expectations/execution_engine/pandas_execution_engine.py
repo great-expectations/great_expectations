@@ -720,8 +720,15 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501 # FIXME CoP
         if op in (Operator.IN, Operator.NOT_IN):
             values = ", ".join(map(repr, val))
             connector = "in" if op == Operator.IN else "not in"
-            return f"{col} {connector} [{values}]"
-        return f"{col} {op} {val!r}"
+            clause = f"{col} {connector} [{values}]"
+        else:
+            clause = f"{col} {op} {val!r}"
+        if op in (Operator.NOT_EQUAL, Operator.NOT_IN):
+            # A null is neither equal nor unequal to a value in SQL and Spark, so "!=" and
+            # "not in" drop rows where the column is null there. pandas evaluates NaN != x as
+            # True, so the null check keeps those rows out here too.
+            return f"({clause} and ~{col}.isnull())"
+        return clause
 
     @override
     def _nullity_condition_to_filter_clause(self, condition: NullityCondition) -> str:
