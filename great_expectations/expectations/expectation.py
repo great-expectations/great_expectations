@@ -1902,10 +1902,18 @@ representation."""  # noqa: E501 # FIXME CoP
 # substituted by the `str.format` renderer in `QueryMetricProvider`, yet neither survives the split.
 # A placeholder that appears only inside a comment or a string literal, on the other hand, is never
 # the asset being read but does survive it. Blank the non-code regions first, then split on any run
-# of whitespace or SQL punctuation. The blanking pattern is one left-to-right pass, so that
-# `-- don't` stays a comment and `'a--b'` stays a string.
+# of whitespace or SQL punctuation. The blanking pattern is one left-to-right pass across ANSI and
+# dialect-specific non-code tokens (single/double quotes with doubled or backslash escapes, Postgres
+# dollar quotes, block comments, and line comments), so that `-- don't` stays a comment and `'a--b'`
+# stays a string.
 _SQL_NON_CODE_PATTERN = re.compile(
-    r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"|--[^\n]*|/\*.*?\*/",
+    r"/\*.*?\*/"
+    r"|\$\$.*?\$\$"
+    r"|\$([A-Za-z_][A-Za-z0-9_]*)\$.*?\$\1\$"
+    r"|'(?:[^'\\]|''|\\.)*'"
+    r'|"(?:[^"\\]|""|\\.)*"'
+    r"|--(?:[ \t\r\n]|$)[^\n]*"
+    r"|#[^\n]*",
     re.DOTALL,
 )
 _SQL_TOKEN_SEPARATORS = re.compile(r"[\s(),;/]+")

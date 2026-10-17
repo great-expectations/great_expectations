@@ -942,6 +942,25 @@ def _warns(warning_texts: List[str], expected: str) -> bool:
         pytest.param("SELECT\tCOUNT(*)\n\tFROM\t{batch}", id="tab_indentation"),
         pytest.param("SELECT COUNT(*) FROM {batch}\r\nWHERE x = 1", id="crlf_line_ending"),
         pytest.param("SELECT COUNT(*)\nFROM\n(\n{batch}\n)", id="newline_delimited_parens"),
+        pytest.param("SELECT * FROM ({batch})", id="delimited_by_parens"),
+        pytest.param("SELECT * FROM ({batch}), other", id="parens_and_comma"),
+        pytest.param("SELECT * FROM {batch},other", id="comma_without_space"),
+        pytest.param("SELECT * FROM {batch}/other", id="slash_delimiter"),
+        pytest.param(
+            r"SELECT 'it\'s' AS n FROM {batch} WHERE b = 'x'", id="mysql_backslash_escaped_quote"
+        ),
+        pytest.param(
+            "SELECT COUNT(*) # don't count nulls\nFROM {batch}\nWHERE note = 'x'",
+            id="mysql_hash_comment",
+        ),
+        pytest.param("SELECT a--1 AS b FROM {batch}", id="mysql_double_dash_arithmetic"),
+        pytest.param(
+            "SELECT $$it's$$ AS n, COUNT(*) FROM {batch} WHERE y = 'z'", id="postgres_dollar_quote"
+        ),
+        pytest.param("SELECT 'a--b' FROM {batch}", id="comment_syntax_inside_string_literal"),
+        pytest.param(
+            "-- don't\nSELECT * FROM {batch} WHERE a = 'x'", id="apostrophe_inside_line_comment"
+        ),
     ],
 )
 def test_validate_configuration_recognizes_a_parameterized_query_whatever_delimits_it(
@@ -969,6 +988,15 @@ def test_validate_configuration_recognizes_a_parameterized_query_whatever_delimi
             id="placeholder_only_in_string_literal",
         ),
         pytest.param(
+            "SELECT COUNT(*) FROM my_table WHERE name = 'x {batch} y'",
+            id="whitespace_delimited_single_quote_string",
+        ),
+        pytest.param(
+            'SELECT COUNT(*) FROM my_table WHERE name = "x {batch} y"',
+            id="whitespace_delimited_double_quote_string",
+        ),
+        pytest.param("/* line1\n {batch}\n line2 */", id="multiline_block_comment"),
+        pytest.param(
             "SELECT COUNT(*) FROM my_table /* don't {batch} */", id="apostrophe_in_block_comment"
         ),
         pytest.param("SELECT COUNT(*) FROM {{batch}}", id="escaped_braces_are_a_literal"),
@@ -987,3 +1015,9 @@ def test_a_recognized_data_asset_reference_does_not_silence_the_other_query_chec
 
     assert not _warns(warning_texts, _MISSING_DATA_ASSET_WARNING)
     assert _warns(warning_texts, _HARD_CODED_REFERENCES_WARNING)
+
+
+@pytest.mark.unit
+def test_fully_parameterized_query_emits_no_warnings() -> None:
+    """A query whose non-keyword tokens are all placeholders emits no warnings."""
+    assert _warnings_for_query("SELECT {col} FROM {batch};") == []
