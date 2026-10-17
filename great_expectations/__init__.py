@@ -13,6 +13,7 @@ from . import core
 from . import exceptions
 from . import expectations
 from . import checkpoint
+from . import contracts
 
 # Top-level functions/classes promoted to the gx namespace
 from great_expectations.data_context.data_context.context_factory import get_context
@@ -28,6 +29,7 @@ __all__ = [
     "ResultFormat",
     "RunIdentifier",
     "ValidationDefinition",
+    "contracts",
     "get_context",
 ]
 
