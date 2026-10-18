@@ -929,6 +929,18 @@ def _warns(warning_texts: List[str], expected: str) -> bool:
     return any(expected in text for text in warning_texts)
 
 
+def _warning_kinds(query: str) -> Tuple[str, ...]:
+    """The warnings the query emits, by kind, so that a test pins what the user sees."""
+    return tuple(
+        "missing-data-asset"
+        if _MISSING_DATA_ASSET_WARNING in text
+        else "hard-coded-references"
+        if _HARD_CODED_REFERENCES_WARNING in text
+        else text
+        for text in _warnings_for_query(query)
+    )
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "query",
@@ -959,6 +971,14 @@ def _warns(warning_texts: List[str], expected: str) -> bool:
         ),
         pytest.param("SELECT 'a--b' FROM {batch}", id="comment_syntax_inside_string_literal"),
         pytest.param(
+            "SELECT 'a-- b' AS n FROM {batch} WHERE b = 'x'",
+            id="comment_syntax_inside_string_literal_after_whitespace",
+        ),
+        pytest.param(
+            "SELECT $tag$it's$tag$ AS n, COUNT(*) FROM {batch} WHERE y = 'z'",
+            id="postgres_tagged_dollar_quote",
+        ),
+        pytest.param(
             "-- don't\nSELECT * FROM {batch} WHERE a = 'x'", id="apostrophe_inside_line_comment"
         ),
     ],
@@ -967,7 +987,8 @@ def test_validate_configuration_recognizes_a_parameterized_query_whatever_delimi
     query: str,
 ) -> None:
     """The renderer substitutes `{batch}` with `str.format`, whatever character follows it."""
-    assert not _warns(_warnings_for_query(query), _MISSING_DATA_ASSET_WARNING)
+    # Only the untouched second check reports, so the query is not called unparameterized.
+    assert _warning_kinds(query) == ("hard-coded-references",)
 
 
 @pytest.mark.unit
@@ -1005,7 +1026,8 @@ def test_validate_configuration_recognizes_a_parameterized_query_whatever_delimi
 def test_validate_configuration_warns_when_the_placeholder_is_not_a_data_asset_reference(
     query: str,
 ) -> None:
-    assert _warns(_warnings_for_query(query), _MISSING_DATA_ASSET_WARNING)
+    """A placeholder that no code path reads is reported as a missing data asset."""
+    assert _warning_kinds(query) == ("missing-data-asset",)
 
 
 @pytest.mark.unit
@@ -1021,3 +1043,14 @@ def test_a_recognized_data_asset_reference_does_not_silence_the_other_query_chec
 def test_fully_parameterized_query_emits_no_warnings() -> None:
     """A query whose non-keyword tokens are all placeholders emits no warnings."""
     assert _warnings_for_query("SELECT {col} FROM {batch};") == []
+
+
+@pytest.mark.unit
+def test_a_wildcard_selection_still_reports_hard_coded_references() -> None:
+    """Recognizing `{batch}` stops one warning, not both: `*` keeps the other one.
+
+    `SELECT * FROM {batch};` is the query the PR body calls silent. It is not: the "not
+    parameterized for a data asset" warning is gone, but the untouched "hard-coded references"
+    check still reports, because `*` is neither a keyword nor a placeholder.
+    """
+    assert _warning_kinds("SELECT * FROM {batch};") == ("hard-coded-references",)
