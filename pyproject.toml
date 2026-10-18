@@ -535,17 +535,6 @@ filterwarnings = [
     # Example Actual Warning:
     # pytest.PytestCollectionWarning: cannot collect test class 'TestConnectionError' because it has a __init__ constructor (from: tests/datasource/fluent/test_pandas_azure_blob_storage_datasource.py)
     "ignore: cannot collect test class 'TestConnectionError' because it has a __init__ constructor:UserWarning",
-    # Example Actual Warning:
-    # pytest.PytestUnraisableExceptionWarning: Exception ignored in: <socket.socket fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6>
-    "ignore: Exception ignored in:UserWarning",
-    # CPython's sqlite3 emits a ResourceWarning, from Python 3.13, when a connection is finalized
-    # while still open; before 3.13 the leak is silent. The cause is in GX and its tests, not in a
-    # dependency: the SQLAlchemy engines they create are not disposed. Python 3.14 rewords the
-    # unraisable-exception message, so the "Exception ignored in" entry above (which hides this on
-    # 3.13) no longer matches it. Disposing the engines removes the need for this entry and that one.
-    # Example Actual Warning:
-    # pytest.PytestUnraisableExceptionWarning: Exception ignored while finalizing database connection <sqlite3.Connection object at 0x10c2a1d20>: None
-    "ignore: Exception ignored while finalizing database connection:pytest.PytestUnraisableExceptionWarning",
     # jsonschema (altair dependency)
     # Example Actual Warning:
     # DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the
@@ -562,8 +551,9 @@ filterwarnings = [
     "ignore: The load_credentials_from_file method is deprecated because of a potential security risk.:DeprecationWarning",
     # google.* libraries
     # Example Actual Warning:
-    # FutureWarning: You are using a Python version (3.10.19) which Google will stop supporting in new releases of google.* once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates past that date.
-    "ignore: You are using a Python version \\(3\\.10.*\\) which Google will stop supporting in new releases of google:FutureWarning",
+    # FutureWarning: You are using a non-supported Python version (3.10.20). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.api_core.
+    # The message text changes by date relative to the Python version's end of life, so match on the emitting module instead.
+    "ignore::FutureWarning:google.api_core._python_version_support",
     # db_dtypes (google-cloud-bigquery dependency) calls numpy.datetime64("NaT") at class-definition
     # time; NumPy 2.x emits a DeprecationWarning about the 'generic' unit in Python 3.13+ environments.
     # This crashes pytest collection (exit 4) before test-skip shims can fire.

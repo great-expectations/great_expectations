@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
+import pandas as pd
+
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.pyspark import functions as F
@@ -34,13 +36,18 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         temp_column = column
 
         series_diff = temp_column.diff()
-        # The first element is null, so it gets a bye and is always treated as True
-        series_diff[series_diff.isnull()] = 1
+        # A datetime column's diff is a timedelta, which compares against a zero timedelta
+        # rather than the int 0, so take the zero from the diff's own dtype.
+        zero = pd.Timedelta(0) if pd.api.types.is_timedelta64_dtype(series_diff.dtype) else 0
 
         strictly: bool = kwargs.get("strictly") or False
         if strictly:
-            return series_diff > 0
-        return series_diff >= 0
+            in_order = series_diff > zero
+        else:
+            in_order = series_diff >= zero
+
+        # The first element's diff is null, so it gets a bye and is always treated as True
+        return in_order | series_diff.isnull()
 
     @metric_partial(
         engine=SparkDFExecutionEngine,

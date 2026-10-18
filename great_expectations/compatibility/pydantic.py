@@ -24,6 +24,7 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
         schema,
         typing,
     )
+    from pydantic.v1.error_wrappers import ErrorWrapper
     from pydantic.v1.generics import GenericModel
     from pydantic.v1.main import ModelMetaclass
 
@@ -45,12 +46,14 @@ else:
         schema,
         typing,
     )
+    from pydantic.error_wrappers import ErrorWrapper  # type: ignore[no-redef] # FIXME CoP
     from pydantic.generics import GenericModel  # type: ignore[no-redef] # FIXME CoP
     from pydantic.main import ModelMetaclass  # type: ignore[no-redef] # FIXME CoP
 
 __all__ = [
     "AnyUrl",
     "BaseSettings",
+    "ErrorWrapper",
     "GenericModel",
     "HttpUrl",
     "ModelMetaclass",

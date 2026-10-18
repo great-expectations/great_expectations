@@ -155,6 +155,7 @@ class TestPartitioning:
 def test_cached_execution_engine_sees_schema_changes(
     ephemeral_context_with_defaults: AbstractDataContext,
     tmp_path: pathlib.Path,
+    request: pytest.FixtureRequest,
 ) -> None:
     """Reusing the execution engine must not reuse stale table metadata.
 
@@ -165,6 +166,7 @@ def test_cached_execution_engine_sees_schema_changes(
     """
     db_path = tmp_path / "schema_changes.db"
     raw_engine = sa.create_engine(f"sqlite:///{db_path}")
+    request.addfinalizer(raw_engine.dispose)
     with raw_engine.begin() as conn:
         conn.execute(sa.text("CREATE TABLE t (a INTEGER, b INTEGER)"))
         conn.execute(sa.text("INSERT INTO t VALUES (1, 2)"))

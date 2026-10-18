@@ -1,5 +1,6 @@
 import datetime
 import decimal
+import json
 import platform
 import sys
 
@@ -8,6 +9,7 @@ import pytest
 from numpy.lib.npyio import DataSource
 
 from great_expectations import validator
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 
 
 @pytest.mark.big
@@ -76,3 +78,31 @@ def test_recursively_convert_to_json_serializable(tmp_path):
     with pytest.raises(TypeError):
         y = {"p": DataSource(tmp_path)}
         validator.util.recursively_convert_to_json_serializable(y)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "row_condition",
+    [
+        pytest.param("name == 'Smith'", id="single_quotes"),
+        pytest.param('name == "Smith"', id="double_quotes"),
+        pytest.param('name == "O\'Brien"', id="apostrophe_inside_double_quotes"),
+    ],
+)
+def test_recursively_convert_to_json_serializable_accepts_quoted_row_condition(
+    row_condition: str,
+):
+    config = {"column": "name", "row_condition": row_condition}
+
+    converted = validator.util.recursively_convert_to_json_serializable(config)
+
+    assert converted["row_condition"] == row_condition
+    assert json.loads(json.dumps(converted))["row_condition"] == row_condition
+
+
+@pytest.mark.unit
+def test_recursively_convert_to_json_serializable_rejects_row_condition_with_newline():
+    config = {"column": "name", "row_condition": "name == 'Smith'\nand age > 3"}
+
+    with pytest.raises(InvalidExpectationConfigurationError, match="contains a newline"):
+        validator.util.recursively_convert_to_json_serializable(config)

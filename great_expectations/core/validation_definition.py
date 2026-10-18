@@ -1,7 +1,15 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    AbstractSet,
+    Any,
+    Callable,
+    Mapping,
+    Optional,
+    Union,
+)
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
@@ -11,6 +19,7 @@ from great_expectations.compatibility.pydantic import (
     ValidationError,
     validator,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.constants import DATAFRAME_REPLACEMENT_STR
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
@@ -18,6 +27,13 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.freshness_diagnostics import (
     ValidationDefinitionFreshnessDiagnostics,
+)
+from great_expectations.core.owner_resolution import (
+    ResolvedContext,
+    consulted_context_note,
+    owner_from_batch_definition,
+    resolve_context,
+    unbound_resolution_note,
 )
 from great_expectations.core.result_format import DEFAULT_RESULT_FORMAT
 from great_expectations.core.run_identifier import RunIdentifier
@@ -53,12 +69,26 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.result_format import ResultFormatUnion
     from great_expectations.core.suite_parameters import SuiteParameterDict
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
     from great_expectations.data_context.store.validation_results_store import (
         ValidationResultsStore,
     )
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
     from great_expectations.expectations.expectation import Expectation
+
+
+def _ambient_note(*, ends_sentence: bool = True) -> str:
+    """The note for a miss on the ambient branch, where the lookup read the current context.
+
+    Call it only after that read has succeeded and only on a miss. ``ends_sentence`` is False
+    when the message being extended has no closing period. It does not say the object is
+    unbound: the record being parsed may have been read from any context's store.
+    """
+    note = consulted_context_note(resolve_context(None).context)
+    return note if ends_sentence else "." + note
 
 
 @public_api
@@ -139,14 +169,28 @@ class ValidationDefinition(BaseModel):
     def data_source(self) -> Datasource:
         return self.asset.datasource
 
+    def _resolve_context(self) -> ResolvedContext:
+        owner = owner_from_batch_definition(self.data)
+        self._record_suite_owner(owner)
+        return resolve_context(owner)
+
+    def _record_suite_owner(self, owner: AbstractDataContext | None) -> None:
+        if owner is not None and getattr(self.suite, "_owner", False) is None:
+            # A suite held by a validation definition that belongs to a context belongs to
+            # that context too, unless a store has already said otherwise (GX issue #12209).
+            self.suite._owner = owner
+
     @property
     def _validation_results_store(self) -> ValidationResultsStore:
-        return project_manager.get_validation_results_store()
+        return self._resolve_context().context.validation_results_store
 
     def is_fresh(self) -> ValidationDefinitionFreshnessDiagnostics:
         validation_definition_diagnostics = ValidationDefinitionFreshnessDiagnostics(
             errors=[] if self.id else [ValidationDefinitionNotAddedError(name=self.name)]
         )
+        # Record the held suite's owner before checking the suite, so that the check below
+        # and every later one resolve the suite through the same Data Context.
+        self._record_suite_owner(owner_from_batch_definition(self.data))
         suite_diagnostics = self.suite.is_fresh()
         data_diagnostics = self.data.is_fresh()
         validation_definition_diagnostics.update_with_children(suite_diagnostics, data_diagnostics)
@@ -154,7 +198,8 @@ class ValidationDefinition(BaseModel):
         if not validation_definition_diagnostics.success:
             return validation_definition_diagnostics
 
-        store = project_manager.get_validation_definition_store()
+        resolved = self._resolve_context()
+        store = resolved.context.validation_definition_store
         key = store.get_key(name=self.name, id=self.id)
 
         try:
@@ -163,8 +208,9 @@ class ValidationDefinition(BaseModel):
             StoreBackendError,  # Generic error from stores
             InvalidKeyError,  # Ephemeral context error
         ):
+            note = None if resolved.bound else unbound_resolution_note(resolved.context)
             return ValidationDefinitionFreshnessDiagnostics(
-                errors=[ValidationDefinitionNotFoundError(name=self.name)]
+                errors=[ValidationDefinitionNotFoundError(name=self.name, note=note)]
             )
 
         return ValidationDefinitionFreshnessDiagnostics(
@@ -196,8 +242,13 @@ class ValidationDefinition(BaseModel):
         )
 
     @classmethod
-    def _decode_suite(cls, suite_dict: dict) -> ExpectationSuite:
+    def _decode_suite(
+        cls, suite_dict: dict, context: AbstractDataContext | None = None
+    ) -> ExpectationSuite:
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.  # noqa: E501 # FIXME CoP
+        # An explicit context is the one the caller already resolved: the lookup goes through it,
+        # a miss states the plain message, and the suite is built by its store so it is
+        # stamped. Without one, the current context is read and a miss names that fact (#12209).
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
         except ValidationError as e:
@@ -206,13 +257,23 @@ class ValidationDefinition(BaseModel):
         name = suite_identifiers.name
         id = suite_identifiers.id
 
-        expectation_store = project_manager.get_expectations_store()
+        expectation_store = (
+            context.expectations_store
+            if context is not None
+            else project_manager.get_expectations_store()
+        )
         key = expectation_store.get_key(name=name, id=id)
 
         try:
             config: dict = expectation_store.get(key)
         except gx_exceptions.InvalidKeyError as e:
-            raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e  # noqa: TRY003 # FIXME CoP
+            note = "" if context is not None else _ambient_note(ends_sentence=False)
+            raise ValueError(  # noqa: TRY003 # FIXME CoP
+                f"Could not find suite with name: {name} and id: {id}{note}"
+            ) from e
+
+        if context is not None:
+            return expectation_store.deserialize_suite_dict(config)
 
         suite = ExpectationSuite(**config)
         if suite._include_rendered_content:
@@ -220,7 +281,9 @@ class ValidationDefinition(BaseModel):
         return suite
 
     @classmethod
-    def _decode_data(cls, data_dict: dict) -> BatchDefinition:
+    def _decode_data(
+        cls, data_dict: dict, context: AbstractDataContext | None = None
+    ) -> BatchDefinition:
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.  # noqa: E501 # FIXME CoP
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
@@ -231,17 +294,24 @@ class ValidationDefinition(BaseModel):
         asset_name = data_identifiers.asset.name
         batch_definition_name = data_identifiers.batch_definition.name
 
-        datasource_dict = project_manager.get_datasources()
+        # As in _decode_suite: an explicit context is searched and its misses carry no note.
+        datasource_dict = (
+            context.data_sources.all() if context is not None else project_manager.get_datasources()
+        )
         try:
             ds = datasource_dict[ds_name]
         except KeyError as e:
-            raise ValueError(f"Could not find datasource named '{ds_name}'.") from e  # noqa: TRY003 # FIXME CoP
+            note = "" if context is not None else _ambient_note()
+            raise ValueError(  # noqa: TRY003 # FIXME CoP
+                f"Could not find datasource named '{ds_name}'.{note}"
+            ) from e
 
         try:
             asset = ds.get_asset(asset_name)
         except LookupError as e:
             raise ValueError(  # noqa: TRY003 # FIXME CoP
                 f"Could not find asset named '{asset_name}' within '{ds_name}' datasource."
+                f"{'' if context is not None else _ambient_note()}"
             ) from e
 
         try:
@@ -249,6 +319,7 @@ class ValidationDefinition(BaseModel):
         except KeyError as e:
             raise ValueError(  # noqa: TRY003 # FIXME CoP
                 f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."  # noqa: E501 # FIXME CoP
+                f"{'' if context is not None else _ambient_note()}"
             ) from e
 
         return batch_definition
@@ -370,6 +441,40 @@ class ValidationDefinition(BaseModel):
             )
             return expectation_suite_identifier, validation_result_id
 
+    @override
+    def json(  # noqa: PLR0913
+        self,
+        *,
+        include: AbstractSet[int | str] | Mapping[int | str, Any] | None = None,
+        exclude: AbstractSet[int | str] | Mapping[int | str, Any] | None = None,
+        by_alias: bool = False,
+        skip_defaults: bool | None = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Callable[[Any], Any] | None = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs: Any,
+    ) -> str:
+        """Serialize as the base model does, after recording the held suite's owner.
+
+        Encoding the suite as an identifier bundle reads the suite's store, so a suite held
+        without an owner must take this validation definition's context before that read.
+        """
+        self._record_suite_owner(owner_from_batch_definition(self.data))
+        return super().json(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+            **dumps_kwargs,
+        )
+
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         diagnostics = self.is_fresh()
@@ -380,7 +485,7 @@ class ValidationDefinition(BaseModel):
     @public_api
     def save(self) -> None:
         """Save the current state of this ValidationDefinition."""
-        store = project_manager.get_validation_definition_store()
+        store = self._resolve_context().context.validation_definition_store
         key = store.get_key(name=self.name, id=self.id)
 
         store.update(key=key, value=self)
@@ -453,7 +558,7 @@ class ValidationDefinition(BaseModel):
 
         We need to persist a validation_definition before it can be run. If user calls runs but
         hasn't persisted it we add it for them."""
-        store = project_manager.get_validation_definition_store()
+        store = self._resolve_context().context.validation_definition_store
         key = store.get_key(name=self.name, id=self.id)
 
         store.add(key=key, value=self)
