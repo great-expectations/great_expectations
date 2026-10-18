@@ -210,12 +210,18 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             KeyError: Expectation not found in suite.
         """
+        original_expectations = self.expectations
+        matching_expectations = [
+            exp
+            for exp in original_expectations
+            if self._expectations_are_equalish(exp, expectation)
+        ]
         remaining_expectations = [
             exp
-            for exp in self.expectations
+            for exp in original_expectations
             if not self._expectations_are_equalish(exp, expectation)
         ]
-        if len(remaining_expectations) != len(self.expectations) - 1:
+        if len(remaining_expectations) != len(original_expectations) - 1:
             raise KeyError("No matching expectation was found.")  # noqa: TRY003 # FIXME CoP
 
         self.expectations = remaining_expectations
@@ -223,11 +229,12 @@ class ExpectationSuite(SerializableDictDot):
         if self._has_been_saved():
             # only persist on delete if the suite has already been saved
             try:
-                self._store.delete_expectation(suite=self, expectation=expectation)
+                # The store matches on id, and the argument may be an equivalent Expectation
+                # without one, so hand it the Expectation that actually belongs to this suite.
+                self._store.delete_expectation(suite=self, expectation=matching_expectations[0])
             except Exception as exc:
-                # rollback this change
-                # expectation suite is set-like so order of expectations doesn't matter
-                self.expectations.append(expectation)
+                # rollback this change by restoring exactly what was in the suite before
+                self.expectations = original_expectations
                 raise exc  # noqa: TRY201 # FIXME CoP
 
         return expectation

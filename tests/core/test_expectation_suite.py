@@ -509,6 +509,49 @@ class TestCRUDMethods:
         assert len(suite.expectations) == 1, "Expectation must still be in Suite."
 
     @pytest.mark.unit
+    def test_delete_restores_original_expectations_when_save_fails(self):
+        context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = True
+        context.expectations_store.delete_expectation.side_effect = KeyError()
+        set_context(project=context)
+        saved_expectation = gxe.ExpectColumnValuesToBeInSet(column="a", value_set=[1, 2, 3])
+        other_expectation = gxe.ExpectColumnValuesToBeUnique(column="b")
+        suite = ExpectationSuite(
+            name="test-suite",
+            expectations=[saved_expectation, other_expectation],
+        )
+        # the store assigns ids when a suite is saved; mimic that here
+        saved_expectation.id = str(uuid.uuid4())
+        other_expectation.id = str(uuid.uuid4())
+        equivalent_expectation = gxe.ExpectColumnValuesToBeInSet(column="a", value_set=[1, 2, 3])
+
+        with pytest.raises(KeyError):
+            suite.delete_expectation(expectation=equivalent_expectation)
+
+        # the suite must be unchanged: same objects, same order, ids intact
+        assert suite.expectations == [saved_expectation, other_expectation]
+        assert all(exp.id for exp in suite.expectations)
+
+    @pytest.mark.unit
+    def test_delete_passes_the_suites_own_expectation_to_the_store(self):
+        context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = True
+        set_context(project=context)
+        saved_expectation = gxe.ExpectColumnValuesToBeInSet(column="a", value_set=[1, 2, 3])
+        suite = ExpectationSuite(name="test-suite", expectations=[saved_expectation])
+        saved_expectation.id = str(uuid.uuid4())  # the store assigns ids when a suite is saved
+
+        # an equivalent Expectation that has no id, i.e. it was never added to the suite
+        suite.delete_expectation(
+            expectation=gxe.ExpectColumnValuesToBeInSet(column="a", value_set=[1, 2, 3])
+        )
+
+        assert suite.expectations == []
+        context.expectations_store.delete_expectation.assert_called_once_with(
+            suite=suite, expectation=saved_expectation
+        )
+
+    @pytest.mark.unit
     def test_save_success(self):
         context = Mock(spec=AbstractDataContext)
         context.expectations_store.has_key.return_value = True
