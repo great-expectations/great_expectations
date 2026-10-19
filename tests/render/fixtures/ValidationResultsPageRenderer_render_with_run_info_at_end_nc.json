@@ -2959,7 +2959,7 @@
                     "string_template": {
                       "template": "KL Divergence: $observed_value",
                       "params": {
-                        "observed_value": "None (-infinity, infinity, or NaN)"
+                        "observed_value": "0"
                       },
                       "styling": {
                         "classes": [

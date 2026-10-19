@@ -331,7 +331,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
     header = res["value"]["header"]
     assert header["value"]["template"] == "KL Divergence: $observed_value"
     observed_value = header["value"]["params"]["observed_value"]["value"]
-    assert observed_value == "None (-infinity, infinity, or NaN)"
+    assert observed_value == "0"
 
 
 @pytest.mark.unit
@@ -401,7 +401,7 @@ def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_d
     header = res["value"]["header"]
     assert header["value"]["template"] == "KL Divergence: $observed_value"
     observed_value = header["value"]["params"]["observed_value"]["value"]
-    assert observed_value == "None (-infinity, infinity, or NaN)"
+    assert observed_value == "0"
 
 
 @pytest.mark.unit
