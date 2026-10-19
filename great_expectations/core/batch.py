@@ -1075,8 +1075,11 @@ def _get_runtime_batch_request(  # noqa: PLR0913 # FIXME CoP
     **kwargs,
 ) -> RuntimeBatchRequest | None:
     """Returns a `RuntimeBatchRequest`, or `None` if the arguments don't support it."""
+    # batch_data is a data object (a DataFrame, for example), which has no truth value --
+    # asking for one raises. Presence is an identity test, as it already is for the
+    # exclusive-argument check below.
     if any(
-        [batch_data, query, path, runtime_parameters]
+        [batch_data is not None, query, path, runtime_parameters]
     ):  # one of these must be specified for runtime batch requests
         # parameter checking
         if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
@@ -1084,7 +1087,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913 # FIXME CoP
 
         if runtime_parameters and any(
             [
-                batch_data and "batch_data" in runtime_parameters,
+                batch_data is not None and "batch_data" in runtime_parameters,
                 query and "query" in runtime_parameters,
                 path and "path" in runtime_parameters,
             ]
@@ -1096,7 +1099,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913 # FIXME CoP
 
         # build runtime parameters
         runtime_parameters = runtime_parameters or {}
-        if batch_data:
+        if batch_data is not None:
             runtime_parameters["batch_data"] = batch_data
         elif query:
             runtime_parameters["query"] = query
