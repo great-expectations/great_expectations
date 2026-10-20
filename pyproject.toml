@@ -532,6 +532,11 @@ filterwarnings = [
     # pyOpenSSL 26.3.0 deprecated X509.get_subject/X509Name in favor of the cryptography.x509 APIs.
     # snowflake-connector-python's ssl_wrap_socket still calls the deprecated API during the TLS handshake.
     "ignore: X509.get_subject is deprecated. You should use cryptography's X.509 APIs instead.:DeprecationWarning",
+    # snowflake-sqlalchemy 2.x still calls names that snowflake-connector-python 5.x keeps only for
+    # backward compatibility (e.g. compat.IS_STR) and warns on the first call in each process.
+    # Example Actual Warning:
+    # DeprecationWarning: 'snowflake.connector.compat.IS_UNICODE' is retained only for backward compatibility and is not used by the new driver; it may be removed in a future release.
+    "ignore: 'snowflake\\.connector\\.compat\\.[A-Za-z_]+' is retained only for backward compatibility:DeprecationWarning",
     "ignore: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.:pytest_benchmark.logger.PytestBenchmarkWarning",
     "ignore: No data was collected\\. \\(no-data-collected\\):coverage.exceptions.CoverageWarning",
 
