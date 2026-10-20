@@ -317,6 +317,19 @@ def _extract_expected_state(result: ExpectationValidationResult) -> Dict[str, Op
     return expected_state
 
 
+@parameterize_batch_for_data_sources(data_source_configs=ALL_DATA_SOURCES, data=DATA)
+def test_column_set_none_returns_failure_not_exception(batch_for_datasource: Batch) -> None:
+    """column_set=None should behave consistently across pandas and SQL backends.
+
+    SQL backends previously raised 'NoneType' object is not iterable instead of
+    returning success=False with exception_info empty like the pandas path does.
+    """
+    expectation = gxe.ExpectTableColumnsToMatchSet(column_set=None)
+    result = batch_for_datasource.validate(expectation)
+    assert not result.success
+    assert result.exception_info["raised_exception"] is False
+
+
 @parameterize_batch_for_data_sources(
     data_source_configs=SQL_DATA_SOURCES_WITHOUT_SNOWFLAKE_REDSHIFT,
     data=CASE_INSENSITIVE_DATA,
