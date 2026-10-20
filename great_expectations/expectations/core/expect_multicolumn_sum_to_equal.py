@@ -204,7 +204,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     ignore_row_if: Union[
         Literal["all_values_are_missing", "any_value_is_missing", "never"],
         SuiteParameterDict,
-    ] = pydantic.Field(
+    ] = pydantic.Field(  # type: ignore[assignment] # wider than the base Literal to allow suite parameters
         default="all_values_are_missing",
         description=IGNORE_ROW_IF_DESCRIPTION,
     )
@@ -318,7 +318,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column_list", "sum_total", "mostly"],
         )
         if params["mostly"] is not None:

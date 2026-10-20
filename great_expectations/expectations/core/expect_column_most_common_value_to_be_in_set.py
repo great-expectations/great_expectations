@@ -314,7 +314,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "value_set", "ties_okay", "row_condition", "condition_parser"],
         )
 
@@ -366,7 +366,8 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        renderer_configuration = RendererConfiguration(
+        assert result, "Must pass in result."
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -423,7 +424,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         configuration = self.configuration
-        most_common_value = metrics.get("column.most_common_value")
+        most_common_value = metrics["column.most_common_value"]
         value_set = configuration.kwargs.get("value_set") or []
         expected_value_set = set(value_set)
         ties_okay = configuration.kwargs.get("ties_okay")
