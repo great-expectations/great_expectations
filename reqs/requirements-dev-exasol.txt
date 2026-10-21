@@ -1,1 +1,2 @@
-sqlalchemy-exasol>=7.1.3
+sqlalchemy-exasol>=7.2.0
+pyexasol>=3.0.0

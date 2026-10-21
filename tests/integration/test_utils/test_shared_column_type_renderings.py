@@ -84,12 +84,7 @@ _RESOLVED: Mapping[str, Mapping[str, str]] = {
         "datetime": "Nullable(DateTime64(3))",
     },
     "databricks": {"dialect": "databricks", "float": "DOUBLE", "datetime": "TIMESTAMP_NTZ"},
-    "exasol": {
-        "dialect": "exa",
-        "float": "FLOAT",
-        "datetime": "TIMESTAMP",
-        "int": "DOUBLE PRECISION",
-    },
+    "exasol": {"dialect": "exa", "float": "FLOAT", "datetime": "TIMESTAMP"},
     "mssql": {"dialect": "mssql", "float": "FLOAT(53)", "datetime": "DATETIME"},
     "mysql": {"dialect": "mysql", "float": "FLOAT(53)", "datetime": "DATETIME"},
     "oracle": {"dialect": "oracle", "float": "DECIMAL(38, 10)", "datetime": "TIMESTAMP"},
@@ -113,13 +108,7 @@ _RESOLVED: Mapping[str, Mapping[str, str]] = {
 through, which is spelled differently from the label for three of them.
 
 `float` and `datetime` for every backend, because those two are where a dialect's reading of a
-type name has actually diverged from what the harness meant -- and `int` for Exasol, a third such
-place reached by a different route. There the divergence is not in a name but in what comes back:
-that driver returns exact numerics as Python `str`, so `int` is declared as a binary float rather
-than left on the shared `INTEGER` default, and the rendering worth recording is the one that trade
-produces. Exasol alone records it. ClickHouse is the only other backend overriding `int`, and the
-package absence that empties its override is the same absence that skips its row, so a value
-recorded there would be one no lane ever checks.
+type name has actually diverged from what the harness meant.
 
 A row is checked over exactly the keys it declares, so recording a rendering and checking it are one
 act: a key added here is asserted from that moment, and a row naming a type nothing compares cannot
@@ -127,7 +116,7 @@ arise. `pd.Timestamp` carries no column of its own: it is asserted to render as 
 since a backend overriding one and not the other is a defect rather than a fact worth recording.
 """
 
-_PYTHON_TYPE_BY_NAME: Mapping[str, type] = {"float": float, "datetime": datetime, "int": int}
+_PYTHON_TYPE_BY_NAME: Mapping[str, type] = {"float": float, "datetime": datetime}
 """The declared Python type each recorded key names.
 
 Every key any row may declare needs an entry: the lookup below is a plain subscript rather than
