@@ -3,6 +3,9 @@ import pytest
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
+)
 
 
 @pytest.mark.spark
@@ -58,7 +61,7 @@ def test_spark_null_filters(spark_session):
 def test_sa_null_filters(sa):
     import pandas as pd
 
-    eng = sa.create_engine("sqlite://")
+    eng = close_connections_when_collected(sa.create_engine("sqlite://"))
     # Demonstrate that spark's max aggregate function can tolerate null values
     df = pd.DataFrame({"a": [1, 2, 3, None, None, 4]})
     add_dataframe_to_db(df=df, name="test", con=eng, index=False)

@@ -131,24 +131,17 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912 #
 
 
 def ensure_row_condition_is_correct(row_condition_string) -> None:
-    """Ensure no quote nor \\\\n are introduced in row_condition string.
+    """Ensure no newline character is introduced in row_condition string.
 
-    Otherwise it may cause an issue at the reload of the expectation.
-    An error is raised at the declaration of the expectations to ensure
-    the user is not doing a mistake. He can use double quotes for example.
+    An error is raised at the declaration of the expectation if the string
+    contains a newline. Single and double quotes are both accepted.
 
     Parameters
     ----------
     row_condition_string : str
         the pandas query string
     """
-    if "'" in row_condition_string:
-        raise InvalidExpectationConfigurationError(  # noqa: TRY003 # FIXME CoP
-            f"{row_condition_string} cannot be serialized to json. "
-            "Do not introduce simple quotes in configuration."
-            "Use double quotes instead."
-        )
     if "\n" in row_condition_string:
         raise InvalidExpectationConfigurationError(  # noqa: TRY003 # FIXME CoP
-            f"{row_condition_string!r} cannot be serialized to json. Do not introduce \\n in configuration."  # noqa: E501 # FIXME CoP
+            f"{row_condition_string!r} contains a newline, which is not allowed in a row_condition. Remove the newline and write the condition on a single line."  # noqa: E501 # FIXME CoP
         )
