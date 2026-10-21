@@ -904,6 +904,105 @@ class TestConditionToFilterClause:
         assert list(result_df["name"]) == ["C", "D", "E"]
 
     @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "column_name,expected_reference",
+        [
+            pytest.param("age", "age", id="plain-identifier-unchanged"),
+            pytest.param("Total Amount", "`Total Amount`", id="space"),
+            pytest.param("a.b", "`a.b`", id="dot"),
+            pytest.param("x-y", "`x-y`", id="hyphen"),
+            pytest.param("from", "`from`", id="python-keyword"),
+        ],
+    )
+    def test_comparison_condition_escapes_column_name_pandas_cannot_parse(
+        self, column_name: str, expected_reference: str
+    ) -> None:
+        engine = PandasExecutionEngine()
+        condition = ComparisonCondition(
+            column=Column(column_name), operator=Operator.GREATER_THAN, parameter=15
+        )
+
+        result = engine.condition_to_filter_clause(condition)
+        assert result == f"{expected_reference} > 15"
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "column_name,expected_reference",
+        [
+            pytest.param("email", "email", id="plain-identifier-unchanged"),
+            pytest.param("Total Amount", "`Total Amount`", id="space"),
+            pytest.param("a.b", "`a.b`", id="dot"),
+            pytest.param("x-y", "`x-y`", id="hyphen"),
+            pytest.param("from", "`from`", id="python-keyword"),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "is_null,expected_template",
+        [
+            pytest.param(True, "{}.isnull()", id="is_null"),
+            pytest.param(False, "~{}.isnull()", id="is_not_null"),
+        ],
+    )
+    def test_nullity_condition_escapes_column_name_pandas_cannot_parse(
+        self,
+        column_name: str,
+        expected_reference: str,
+        is_null: bool,
+        expected_template: str,
+    ) -> None:
+        engine = PandasExecutionEngine()
+        condition = NullityCondition(column=Column(column_name), is_null=is_null)
+
+        result = engine.condition_to_filter_clause(condition)
+        assert result == expected_template.format(expected_reference)
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "column_name",
+        [
+            pytest.param("Total Amount", id="space"),
+            pytest.param("a.b", id="dot"),
+            pytest.param("x-y", id="hyphen"),
+            pytest.param("from", id="python-keyword"),
+        ],
+    )
+    def test_every_condition_kind_filters_a_dataframe_by_escaped_column_name(
+        self, column_name: str
+    ) -> None:
+        """Whatever is rendered has to be what pandas can actually execute."""
+        engine = PandasExecutionEngine()
+        df = pd.DataFrame({column_name: [10, 20, 30], "id": [1, 2, 3]})
+        row_id = Column("id")
+
+        cases = {
+            "greater_than": (Column(column_name) > 15, [2, 3]),
+            "equal": (Column(column_name) == 20, [2]),
+            "in": (Column(column_name).is_in([20, 30]), [2, 3]),
+            "not_in": (Column(column_name).is_not_in([20, 30]), [1]),
+            "is_null": (Column(column_name).is_null(), []),
+            "is_not_null": (Column(column_name).is_not_null(), [1, 2, 3]),
+            "and": ((Column(column_name) > 15) & (row_id < 3), [2]),
+            "or": ((Column(column_name) == 10) | (row_id == 3), [1, 3]),
+        }
+        for name, (condition, expected_ids) in cases.items():
+            filter_clause = engine.condition_to_filter_clause(condition)
+            result_df = df.query(filter_clause)
+            assert list(result_df["id"]) == expected_ids, f"{column_name} / {name}"
+
+    @pytest.mark.unit
+    def test_column_name_containing_a_backtick_is_a_known_limitation(self) -> None:
+        """pandas offers no escape for a backtick inside a quoted name, so this still fails.
+
+        Pinned as the shape of what GE emits rather than pretending it is executable.
+        """
+        engine = PandasExecutionEngine()
+        condition = ComparisonCondition(
+            column=Column("a`b"), operator=Operator.GREATER_THAN, parameter=15
+        )
+
+        assert engine.condition_to_filter_clause(condition) == "`a`b` > 15"
+
+    @pytest.mark.unit
     def test_in_filter_clause_filters_dataframe(self) -> None:
         engine = PandasExecutionEngine()
         df = pd.DataFrame(

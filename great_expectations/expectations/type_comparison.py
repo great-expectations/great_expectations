@@ -230,6 +230,9 @@ def _get_potential_sqlalchemy_types(
             types.append(potential_type)
     except AttributeError:
         logger.debug(f"Unrecognized type: {expected_type}")
+    # A dialect module also exports submodules and functions (sqlite and mysql export a `json`
+    # module); only classes can be compared with isinstance.
+    types = [potential_type for potential_type in types if inspect.isclass(potential_type)]
     if len(types) == 0:
         logger.debug("No recognized sqlalchemy types in type_list for current dialect.")
 

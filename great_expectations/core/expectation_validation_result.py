@@ -65,6 +65,31 @@ def get_metric_kwargs_id(metric_kwargs: dict) -> str | None:
     return None
 
 
+def _expectation_configs_are_equivalent(
+    config: Optional[Union[dict, ExpectationConfiguration]],
+    other_config: Optional[Union[dict, ExpectationConfiguration]],
+    match_type: str = "success",
+) -> bool:
+    """Whether two results' expectation configs are equivalent, in either operand order.
+
+    A result stores its `expectation_config` as given, so either side may be a plain dict rather
+    than an ExpectationConfiguration. A dict has no `isEquivalentTo`, so the comparison is asked
+    of whichever side is a configuration; `isEquivalentTo` loads a dict operand itself. Two
+    dicts are compared directly.
+    """
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+
+    if config is None or other_config is None:
+        return config is other_config
+    if isinstance(config, ExpectationConfiguration):
+        return config.isEquivalentTo(other_config, match_type=match_type)
+    if isinstance(other_config, ExpectationConfiguration):
+        return other_config.isEquivalentTo(config, match_type=match_type)
+    return config == other_config
+
+
 @public_api
 class ExpectationValidationResult(SerializableDictDot):
     """An Expectation validation result.
@@ -148,12 +173,8 @@ class ExpectationValidationResult(SerializableDictDot):
             return all(
                 (
                     self.success == other.success,
-                    (self.expectation_config is None and other.expectation_config is None)
-                    or (
-                        self.expectation_config is not None
-                        and self.expectation_config.isEquivalentTo(
-                            other=other.expectation_config, match_type="success"
-                        )
+                    _expectation_configs_are_equivalent(
+                        self.expectation_config, other.expectation_config, match_type="success"
                     ),
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.  # noqa: E501 # FIXME CoP
                     # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is  # noqa: E501 # FIXME CoP
@@ -203,10 +224,8 @@ class ExpectationValidationResult(SerializableDictDot):
             return any(
                 (
                     self.success != other.success,
-                    (self.expectation_config is None and other.expectation_config is not None)
-                    or (
-                        self.expectation_config is not None
-                        and not self.expectation_config.isEquivalentTo(other.expectation_config)
+                    not _expectation_configs_are_equivalent(
+                        self.expectation_config, other.expectation_config
                     ),
                     # TODO should it be wrapped in all()/any()? Since it is the only difference to __eq__:  # noqa: E501 # FIXME CoP
                     (self.result is None and other.result is not None)

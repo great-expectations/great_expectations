@@ -14,7 +14,7 @@ This article assumes basic familiarity with GX components and workflows. If you'
 
 ## Prerequisites
 
-- [Python version 3.10 to 3.13](https://www.python.org/downloads/)
+- [Python version 3.10 to 3.14](https://www.python.org/downloads/)
 
 ## Install dependencies
 

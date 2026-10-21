@@ -417,6 +417,29 @@
                 "Redshift"
             ]
         },
+        "expect_column_type_to_be": {
+            "data_quality_issues": [
+                "Schema"
+            ],
+            "schema_file": "ExpectColumnTypeToBe.json",
+            "short_description": "Expect a column to be of a specified data type.",
+            "supported_data_sources": [
+                "Pandas",
+                "Spark",
+                "SQLite",
+                "PostgreSQL",
+                "Amazon Aurora PostgreSQL",
+                "Citus",
+                "AlloyDB",
+                "Neon",
+                "MySQL",
+                "SQL Server",
+                "BigQuery",
+                "Snowflake",
+                "Databricks (SQL)",
+                "Redshift"
+            ]
+        },
         "expect_column_unique_value_count_to_be_between": {
             "data_quality_issues": [
                 "Uniqueness"

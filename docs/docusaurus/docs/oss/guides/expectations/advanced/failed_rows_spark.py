@@ -93,7 +93,7 @@ assert (evrs[0]["results"][0]["result"]) == {
         {"event_id": 4, "event_type": "purchase"},
         {"event_id": 5, "event_type": "download"},
     ],
-    "unexpected_index_query": "df.filter(F.expr((event_type IS NOT NULL) AND (NOT (event_type IN (page_load, page_view)))))",
+    "unexpected_index_query": "df.filter(F.expr(\"(event_type IS NOT NULL) AND (NOT (event_type IN ('page_load', 'page_view')))\"))",
 }
 
 # Example 3 - 2 unexpected_index_column_names defined. Output will contain unexpected_index_list and unexpected_index_query.
@@ -129,5 +129,5 @@ assert (evrs[0]["results"][0]["result"]) == {
         {"event_id": 4, "visit_id": 1470438716, "event_type": "purchase"},
         {"event_id": 5, "visit_id": 1470420524, "event_type": "download"},
     ],
-    "unexpected_index_query": "df.filter(F.expr((event_type IS NOT NULL) AND (NOT (event_type IN (page_load, page_view)))))",
+    "unexpected_index_query": "df.filter(F.expr(\"(event_type IS NOT NULL) AND (NOT (event_type IN ('page_load', 'page_view')))\"))",
 }

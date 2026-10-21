@@ -7,6 +7,9 @@ that they share an implementation.
 
 from __future__ import annotations
 
+import importlib
+import inspect
+
 import pytest
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -675,6 +678,26 @@ class TestSQLiteList:
             ["__WRONG__", "__ALSO_WRONG__"],
         )
         assert success is False
+
+
+class TestNonClassDialectModuleAttribute:
+    """A dialect module also exports submodules and functions; naming one is a mismatch."""
+
+    @pytest.mark.parametrize("dialect_name", ["sqlite", "mysql"])
+    def test_scalar(self, dialect_name):
+        dialect_module = importlib.import_module(f"sqlalchemy.dialects.{dialect_name}")
+        assert inspect.ismodule(dialect_module.json)
+        engine = _StubEngine(dialect_name, dialect_module=dialect_module)
+        success, observed = compare_column_type(engine, dialect_module.JSON(), "json")
+        assert success is False
+        assert observed == "JSON"
+
+    @pytest.mark.parametrize("dialect_name", ["sqlite", "mysql"])
+    def test_list(self, dialect_name):
+        dialect_module = importlib.import_module(f"sqlalchemy.dialects.{dialect_name}")
+        engine = _StubEngine(dialect_name, dialect_module=dialect_module)
+        success, _obs = compare_column_type_list(engine, dialect_module.JSON(), ["json", "JSON"])
+        assert success is True
 
 
 # ===========================================================================

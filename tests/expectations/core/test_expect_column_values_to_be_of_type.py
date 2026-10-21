@@ -39,7 +39,7 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
     assert result == ExpectationValidationResult(
         success=True,
         expectation_config={
-            "expectation_type": "expect_column_values_to_be_of_type",
+            "type": "expect_column_values_to_be_of_type",
             "kwargs": {
                 "column": "col",
                 "type_": "string",
@@ -80,7 +80,7 @@ def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
     assert result == ExpectationValidationResult(
         success=True,
         expectation_config={
-            "expectation_type": "expect_column_values_to_be_of_type",
+            "type": "expect_column_values_to_be_of_type",
             "kwargs": {
                 "column": "col",
                 "type_": "TEXT",

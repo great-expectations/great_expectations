@@ -556,7 +556,11 @@ def test_convert_ndarray_float_to_datetime_tuple(
         _ = convert_ndarray_float_to_datetime_tuple(data=datetime_array)
 
     # Error message varies based on version but mainly looking to validate type error by not using integer  # noqa: E501 # FIXME CoP
-    assert all(string in str(e.value) for string in ("datetime.datetime", "integer"))
+    # ("... cannot be interpreted as an integer" before Python 3.14, "argument must be int or
+    # float, not ..." from 3.14).
+    message = str(e.value)
+    assert "datetime.datetime" in message
+    assert "integer" in message or "int or float" in message
 
 
 @pytest.mark.unit

@@ -71,9 +71,10 @@ class NoDataDocsError(DataContextError):
 
 
 class ValidationDefinitionNotFoundError(ValidationDefinitionError):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, note: str | None = None) -> None:
         super().__init__(
             f"ValidationDefinition '{name}' not found. Please check the name and try again."
+            + (note or "")
         )
 
 
@@ -82,8 +83,10 @@ class CheckpointError(DataContextError):
 
 
 class CheckpointNotFoundError(CheckpointError):
-    def __init__(self, name: str) -> None:
-        super().__init__(f"Checkpoint '{name}' not found. Please check the name and try again.")
+    def __init__(self, name: str, note: str | None = None) -> None:
+        super().__init__(
+            f"Checkpoint '{name}' not found. Please check the name and try again." + (note or "")
+        )
 
 
 class CheckpointRunWithoutValidationDefinitionError(CheckpointError):
@@ -341,9 +344,10 @@ properly defined inside its intended module and declared correctly by the callin
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, note: str | None = None) -> None:
         super().__init__(
             f"ExpectationSuite '{name}' not found. Please check the name and try again."
+            + (note or "")
         )
 
 
@@ -354,9 +358,10 @@ class BatchDefinitionError(DataContextError):
 
 
 class BatchDefinitionNotFoundError(BatchDefinitionError):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, note: str | None = None) -> None:
         super().__init__(
             f"BatchDefinition '{name}' not found. Please check the name and try again."
+            + (note or "")
         )
 
 

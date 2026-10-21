@@ -357,8 +357,11 @@ class CaseInsensitiveString(str):
 
         # Handle mock ANY or similar objects that would claim equality with anything
         # Only for non-CaseInsensitiveString objects to avoid recursion
-        if hasattr(other, "__eq__") and not isinstance(other, str) and other.__eq__(self):
-            return True
+        # `NotImplemented` (an ordinary object declining the comparison) is not a claim of equality.
+        if hasattr(other, "__eq__") and not isinstance(other, str):
+            reflected = other.__eq__(self)
+            if reflected is not NotImplemented and reflected:
+                return True
 
         if self.is_quoted():
             return self._original == str(other)
@@ -960,14 +963,40 @@ def parse_value_set(value_set: Iterable) -> list:
 
 
 def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
-    column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
+    column: sa.Column,
+    dialect: ModuleType,
+    like_pattern: str,
+    positive: bool = True,
+    escape: str | None = None,
 ) -> sa.BinaryExpression | None:
+    """Build a LIKE expression for the dialects that support one.
+
+    ``escape`` names the character that removes the special meaning of the ``_`` and ``%``
+    wildcards in ``like_pattern``, and is emitted as a SQL ``ESCAPE '<char>'`` clause. It is
+    required to match those characters literally: dialects disagree about what an
+    unannounced backslash means -- PostgreSQL treats it as an escape by default, SQLite
+    treats it as an ordinary character, and Snowflake requires the clause to be stated --
+    so a pattern relying on the default is not portable. ``None`` emits no clause, which is
+    the behavior of every caller that does not ask for one.
+
+    Prefer a character other than a backslash. Several dialects also treat a backslash
+    specially inside string literals, before the pattern reaches LIKE at all -- Redshift
+    rejects ``ESCAPE '\\'`` outright -- which is why the character is the caller's to choose
+    rather than fixed.
+
+    BigQuery and ClickHouse are the exceptions: neither has an ``ESCAPE`` clause, and both
+    escape wildcards with a backslash inside the pattern, so passing ``escape`` for either
+    dialect raises.
+    """
     dialect_supported: bool = False
+    # The name of the matched dialect when it has no ESCAPE clause, for the error message.
+    escape_unsupported_by: str | None = None
 
     try:
         # Bigquery
         if hasattr(dialect, "BigQueryDialect"):
             dialect_supported = True
+            escape_unsupported_by = "BigQuery"
     except (
         AttributeError,
         TypeError,
@@ -1026,6 +1055,7 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
             dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
         ):
             dialect_supported = True
+            escape_unsupported_by = "ClickHouse"
     except (AttributeError, TypeError):
         pass
     try:
@@ -1046,12 +1076,21 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
     except (AttributeError, TypeError):
         pass
 
+    if escape is not None and escape_unsupported_by is not None:
+        # Neither dialect has an ESCAPE clause; both escape wildcards with a backslash inside
+        # the pattern itself. Emitting one would be a syntax error, so say so plainly rather
+        # than letting the database reject generated SQL the user never wrote.
+        raise ValueError(  # noqa: TRY003 # FIXME CoP
+            f"{escape_unsupported_by} does not support an ESCAPE clause. Escape the '_' and "
+            "'%' wildcards with a backslash inside like_pattern instead (for example 'a\\_b')."
+        )
+
     if dialect_supported:
         try:
             if positive:
-                return column.like(sqlalchemy.literal(like_pattern))
+                return column.like(sqlalchemy.literal(like_pattern), escape=escape)
             else:
-                return sa.not_(column.like(sqlalchemy.literal(like_pattern)))
+                return sa.not_(column.like(sqlalchemy.literal(like_pattern), escape=escape))
         except AttributeError:
             pass
 

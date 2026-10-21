@@ -15,6 +15,7 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 from tests.integration.test_utils.data_source_config import (
     SQL_DATA_SOURCES,
     PostgreSQLDatasourceTestConfig,
+    SqliteDatasourceTestConfig,
 )
 
 NUMBERS_COLUMN = "numbers"
@@ -204,3 +205,32 @@ def test_include_unexpected_rows_sql(batch_for_datasource: Batch) -> None:
     assert isinstance(unexpected_row, dict)
     assert unexpected_row[NUMBERS_COLUMN] == 3
     assert unexpected_row[STRINGS_COLUMN] == "c"
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SqliteDatasourceTestConfig()],
+    data=pd.DataFrame({STRINGS_COLUMN: ["a", "b", "c", "a"]}),
+)
+def test_none_in_value_set_still_flags_values_outside_the_set(
+    batch_for_datasource: Batch,
+) -> None:
+    """A None in value_set must not stop SQL engines from flagging values outside the set."""
+    expectation = gxe.ExpectColumnValuesToBeInSet(column=STRINGS_COLUMN, value_set=["a", None])
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    assert result.result["unexpected_list"] == ["b", "c"]
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SqliteDatasourceTestConfig()],
+    data=pd.DataFrame({STRINGS_COLUMN: ["a", "b", None]}),
+)
+def test_none_only_value_set_flags_all_non_null_values(
+    batch_for_datasource: Batch,
+) -> None:
+    """A value_set of only None must flag every non-NULL value, matching pandas."""
+    expectation = gxe.ExpectColumnValuesToBeInSet(column=STRINGS_COLUMN, value_set=[None])
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    assert not result.success
+    assert result.result["unexpected_list"] == ["a", "b"]

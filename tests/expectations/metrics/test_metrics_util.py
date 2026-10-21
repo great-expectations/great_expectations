@@ -5,6 +5,7 @@ import importlib
 import random
 from types import ModuleType, SimpleNamespace
 from typing import TYPE_CHECKING, Any, Callable, Final, List, Union
+from unittest import mock
 from unittest.mock import create_autospec, patch
 
 import pytest
@@ -642,6 +643,30 @@ class TestCaseInsensitiveString:
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "other", [None, 5, 1.5, object(), b"a"], ids=["none", "int", "float", "object", "bytes"]
+)
+def test_case_insensitive_string_is_not_equal_to_a_non_string(other: object) -> None:
+    """Comparing with a non-string is a plain inequality on every supported Python.
+
+    `NotImplemented` from the other operand's reflected `__eq__` must not be read as a truth
+    value: through Python 3.13 that made the string equal to anything, and Python 3.14 raises.
+    """
+    name = CaseInsensitiveString("a")
+
+    assert (name == other) is False
+    assert name != other
+    assert name not in [other]
+    assert name in [other, "A"]
+
+
+@pytest.mark.unit
+def test_case_insensitive_string_is_equal_to_an_object_that_claims_equality_with_anything() -> None:
+    assert CaseInsensitiveString("a") == mock.ANY
+    assert CaseInsensitiveString('"a"') == mock.ANY
+
+
+@pytest.mark.unit
 def test_get_sqlalchemy_column_metadata_includes_primary_key_field(
     sql_data_connector_test_db_execution_engine,
 ):
@@ -798,6 +823,142 @@ def test_get_dialect_like_pattern_expression_is_resilient_to_missing_dialects(mo
 
     # assert
     assert expression is None
+
+
+def _like_column() -> sa.Column:
+    return sa.Column("col")
+
+
+def _dialect_stub(dialect_attribute: str) -> ModuleType:
+    """A dialect module carrying only the attribute the helper detects the dialect by."""
+    dialect = ModuleType(f"stub_{dialect_attribute}")
+    setattr(dialect, dialect_attribute, object)
+    return dialect
+
+
+def _compiled_like_expression(**kwargs: Any) -> str:
+    """Render a LIKE expression against a real dialect so the SQL text can be asserted on."""
+    expression = get_dialect_like_pattern_expression(
+        column=_like_column(), dialect=sqlalchemy.dialects.postgresql, **kwargs
+    )
+    assert expression is not None
+    return str(
+        expression.compile(
+            dialect=sqlalchemy.dialects.postgresql.dialect(),
+            compile_kwargs={"literal_binds": True},
+        )
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "positive,expected",
+    [
+        pytest.param(True, "col LIKE 'a!_b' ESCAPE '!'", id="positive"),
+        pytest.param(False, "col NOT LIKE 'a!_b' ESCAPE '!'", id="negative"),
+    ],
+)
+def test_get_dialect_like_pattern_expression_emits_escape_clause(positive: bool, expected: str):
+    """An escape character must reach the SQL as an ESCAPE clause.
+
+    Without it there is no way to match a literal '_' or '%', because both are wildcards.
+    """
+    assert _compiled_like_expression(like_pattern="a!_b", positive=positive, escape="!") == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("positive", [True, False])
+def test_get_dialect_like_pattern_expression_omits_escape_clause_by_default(positive: bool):
+    """Callers that do not ask for an escape must get exactly the SQL they got before."""
+    assert "ESCAPE" not in _compiled_like_expression(like_pattern="a_b", positive=positive)
+
+
+# The supported dialects with no SQL ESCAPE clause on LIKE, by the attribute that selects
+# each one's branch in get_dialect_like_pattern_expression. Both escape wildcards with a
+# backslash inside the pattern instead: GoogleSQL
+# (https://cloud.google.com/bigquery/docs/reference/standard-sql/operators#like_operator) and
+# ClickHouse, whose server rejects `LIKE 'a!_c' ESCAPE '!'` as a syntax error even though its
+# documentation describes the clause.
+ESCAPE_UNSUPPORTING_DIALECTS = [
+    pytest.param("BigQueryDialect", "BigQuery", id="bigquery"),
+    pytest.param("ClickHouseDialect", "ClickHouse", id="clickhouse"),
+]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("dialect_attribute,dialect_name", ESCAPE_UNSUPPORTING_DIALECTS)
+@pytest.mark.parametrize("positive", [True, False], ids=["positive", "negative"])
+def test_get_dialect_like_pattern_expression_rejects_escape_without_escape_clause(
+    dialect_attribute: str, dialect_name: str, positive: bool
+):
+    """A dialect with no ESCAPE clause must refuse an escape with a usable message.
+
+    Emitting the clause anyway would hand the user a database syntax error about SQL they
+    never wrote.
+    """
+    with pytest.raises(ValueError, match=f"^{dialect_name} does not support an ESCAPE clause"):
+        get_dialect_like_pattern_expression(
+            column=_like_column(),
+            dialect=_dialect_stub(dialect_attribute),
+            like_pattern="a!_b",
+            positive=positive,
+            escape="!",
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("dialect_attribute,dialect_name", ESCAPE_UNSUPPORTING_DIALECTS)
+def test_get_dialect_like_pattern_expression_allows_no_escape_without_escape_clause(
+    dialect_attribute: str, dialect_name: str
+):
+    """The guard must only fire when an escape was actually requested."""
+    expression = get_dialect_like_pattern_expression(
+        column=_like_column(), dialect=_dialect_stub(dialect_attribute), like_pattern="a_b"
+    )
+
+    assert expression is not None
+    assert "ESCAPE" not in str(expression.compile(compile_kwargs={"literal_binds": True}))
+
+
+# The dialects whose branch in get_dialect_like_pattern_expression is selected by a plain
+# hasattr check, so a stub is enough to reach it. Teradata is left out because its branch
+# tests issubclass against the real teradatasqlalchemy dialect, which is not installed here.
+#
+# Every one of these documents a SQL ESCAPE clause on LIKE: Trino
+# (https://trino.io/docs/current/functions/comparison.html), Dremio
+# (https://docs.dremio.com/cloud/reference/sql/sql-functions/functions/LIKE/) and Snowflake.
+ESCAPE_SUPPORTING_DIALECT_ATTRIBUTES = [
+    "TrinoDialect",
+    "DremioDialect",
+    "SnowflakeDialect",
+]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("dialect_attribute", ESCAPE_SUPPORTING_DIALECT_ATTRIBUTES)
+@pytest.mark.parametrize("positive", [True, False], ids=["positive", "negative"])
+def test_get_dialect_like_pattern_expression_emits_escape_for_supported_dialects(
+    dialect_attribute: str, positive: bool
+):
+    """Every dialect the helper lets through must receive the ESCAPE clause it asked for.
+
+    These three reach the same `column.like(..., escape=escape)` call as the dialects the
+    integration suite covers, but none of them appears in any data-source list there --
+    Dremio and Teradata have no test config at all, and Trino's is unused -- so this is
+    what pins the claim that BigQuery and ClickHouse are the only dialects needing a guard.
+    """
+    expression = get_dialect_like_pattern_expression(
+        column=_like_column(),
+        dialect=_dialect_stub(dialect_attribute),
+        like_pattern="a!_b",
+        positive=positive,
+        escape="!",
+    )
+
+    assert expression is not None
+    compiled = str(expression.compile(compile_kwargs={"literal_binds": True}))
+    assert compiled.endswith("LIKE 'a!_b' ESCAPE '!'")
+    assert ("NOT LIKE" in compiled) is not positive
 
 
 @pytest.mark.unit

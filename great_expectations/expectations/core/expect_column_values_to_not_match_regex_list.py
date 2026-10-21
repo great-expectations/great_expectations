@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TC001 # FIXME CoP
 )
@@ -257,6 +258,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
         return regex_list
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -281,7 +283,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
                 param_prefix=param_prefix,
                 renderer_configuration=renderer_configuration,
             )
-            values_string: str = cls._get_array_string(
+            values_string = cls._get_array_string(
                 array_param_name=array_param_name,
                 param_prefix=param_prefix,
                 renderer_configuration=renderer_configuration,
@@ -309,6 +311,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -320,11 +323,11 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "regex_list", "mostly", "row_condition", "condition_parser"],
         )
 
-        if not params.get("regex_list") or len(params.get("regex_list")) == 0:
+        if not params.get("regex_list"):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["regex_list"]):

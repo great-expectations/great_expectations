@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TC001 # FIXME CoP
 )
@@ -262,6 +263,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -299,6 +301,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -310,7 +313,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -363,7 +366,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     ):
         assert result, "Must pass in result."
         expectation_config = configuration or result.expectation_config
-        expectation_kwargs = expectation_config.kwargs
+        expectation_kwargs = expectation_config.kwargs if expectation_config else {}
         regex = expectation_kwargs.get("regex")
         unexpected_count = result.result.get("unexpected_count", "--")
         if regex == "^\\s+|\\s+$":

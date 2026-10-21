@@ -352,3 +352,22 @@ def test_expectation_configurations_with_same_kwargs_meta_and_ids_are_equal():
     # Note: Current implementation doesn't include severity in equality comparison
     assert config1 == config2  # Same type and kwargs, different severity
     assert not config1 != config2  # Same type and kwargs, different severity
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "other",
+    [
+        None,
+        "expect_column_to_exist",
+        {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "a"}},
+    ],
+    ids=["none", "str", "unloadable-dict"],
+)
+@pytest.mark.parametrize("match_type", ["domain", "success", "runtime"])
+def test_is_equivalent_to_is_false_for_an_operand_that_is_not_a_configuration(
+    config1: ExpectationConfiguration, other: object, match_type: str
+) -> None:
+    """The answer is a bool, never `NotImplemented`, whose truth value is `True` through
+    Python 3.13 and raises on 3.14."""
+    assert config1.isEquivalentTo(other, match_type=match_type) is False  # type: ignore[arg-type]

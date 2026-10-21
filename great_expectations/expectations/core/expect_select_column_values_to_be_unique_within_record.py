@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TC001 # FIXME CoP
 )
@@ -195,8 +196,8 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501 # FIXME CoP
 
-    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
-    ignore_row_if: Union[str, SuiteParameterDict] = pydantic.Field(
+    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)  # type: ignore[assignment] # wider than the base List so tuples stay accepted
+    ignore_row_if: Union[str, SuiteParameterDict] = pydantic.Field(  # type: ignore[assignment] # wider than the base Literal to allow suite parameters
         default="all_values_are_missing", description=IGNORE_ROW_IF_DESCRIPTION
     )
 
@@ -252,6 +253,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -297,6 +299,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -309,7 +312,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column_list",
                 "ignore_row_if",

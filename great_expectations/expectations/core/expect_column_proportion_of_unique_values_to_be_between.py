@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TC001 # pydantic isinstance
 )
@@ -279,6 +280,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
             )
 
     @classmethod
+    @override
     def _prescriptive_template(  # noqa: C901 #  too complex
         cls,
         renderer_configuration: RendererConfiguration,
@@ -328,6 +330,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -339,7 +342,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column",
                 "min_value",
@@ -414,6 +417,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         else:
             return [template_string_object, f"{100 * observed_value:.1f}%"]
 
+    @override
     def _validate(
         self,
         metrics: Dict,

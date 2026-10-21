@@ -65,7 +65,7 @@ class QueryTable(QueryMetricProvider):
         )
 
         df.createOrReplaceTempView("tmp_view")
-        query = query.format(batch="tmp_view")
+        query = cls._format_query(query, batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
         fetch_all = metric_value_kwargs.get("fetch_all", False)

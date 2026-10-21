@@ -57,6 +57,9 @@ from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_pa
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
+)
 from great_expectations.expectations.model_field_types import (
     CONDITION_PARSER_GREAT_EXPECTATIONS,
     CONDITION_PARSER_GREAT_EXPECTATIONS_DEPRECATED,
@@ -350,7 +353,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine[SQLAColumnClause]):
         # Use a single instance of SQLAlchemy engine to avoid creating multiple engine instances
         # for the same SQLAlchemy engine. This allows us to take advantage of SQLAlchemy's
         # built-in caching.
-        self._inspector = None
+        self._inspector: sqlalchemy.engine.reflection.Inspector | None = None
 
         if engine is not None:
             if credentials is not None:
@@ -366,6 +369,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine[SQLAColumnClause]):
                 credentials=credentials,
                 url=url,
             )
+            close_connections_when_collected(self.engine)
 
         # these are two backends where temp_table_creation is not supported we set the default value to False.  # noqa: E501 # FIXME CoP
         if (
@@ -1500,11 +1504,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine[SQLAColumnClause]):
         if self._inspector is None:
             if version.parse(sa.__version__) < version.parse("1.4"):
                 # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-                self._inspector = sqlalchemy.reflection.Inspector.from_engine(self.engine)  # type: ignore[assignment] # FIXME CoP
+                self._inspector = sqlalchemy.reflection.Inspector.from_engine(self.engine)
             else:
-                self._inspector = sa.inspect(self.engine)  # type: ignore[assignment] # FIXME CoP
+                self._inspector = sa.inspect(self.engine)
 
-        return self._inspector  # type: ignore[return-value] # FIXME CoP
+        return self._inspector
 
     @contextmanager
     def get_connection(self) -> Generator[sqlalchemy.Connection, None, None]:

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Literal
 
 import pytest
 
+from great_expectations.compatibility import pydantic
 from great_expectations.constants import MAX_RESULT_RECORDS
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations import UnexpectedRowsExpectation
@@ -58,6 +59,24 @@ def test_unexpected_rows_expectation_invalid_query_info_message(query: str, capl
     # stdout is printed to console
     out, _ = capfd.readouterr()
     assert "{batch}" in out
+
+
+@pytest.mark.unit
+def test_unexpected_rows_expectation_unbalanced_brace_is_rejected_with_the_escaping_rule():
+    """A query's own braces must be doubled to survive `{batch}` substitution; one that never
+    pairs is rejected at construction, and the message must say how to fix it.
+    """
+    query = "SELECT * FROM {batch} WHERE name LIKE '{%'"
+
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        UnexpectedRowsExpectation(unexpected_rows_query=query)
+
+    message = str(exc_info.value)
+    assert "unpaired or malformed brace" in message
+    assert "double it: `{{` and `}}`" in message
+    assert query in message
+    # Still the plain validator error pydantic reported before the message was reworded.
+    assert [error["type"] for error in exc_info.value.errors()] == ["value_error"]
 
 
 @pytest.mark.sqlite

@@ -357,12 +357,7 @@ from a.b.c import some_method as sm
 
 def test__get_import_names(various_imports: str):
     """Make sure the actual class and module names are returned."""
-    tree = ast.parse(various_imports)
-    import_names = []
-
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
-            import_names.extend(_get_import_names(node))  # type: ignore[arg-type] # FIXME CoP
+    import_names = _get_import_names(various_imports)
 
     assert import_names == [
         "some_module",

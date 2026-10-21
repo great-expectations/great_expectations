@@ -118,9 +118,11 @@ class DataSourceTestConfig(ABC, Generic[_ColumnTypes]):
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, DataSourceTestConfig):
             return False
+        # `object.__eq__` is not consulted: for distinct instances it returns `NotImplemented`,
+        # whose truth value is `True` only through a coercion that Python 3.14 turned into a
+        # `TypeError`, so it never narrowed the comparison.
         return all(
             [
-                super().__eq__(value),
                 self.label == value.label,
                 self.pytest_mark == value.pytest_mark,
             ]

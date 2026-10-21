@@ -203,24 +203,27 @@ _TYPE_LIST_CASE_KEY: Final[str] = gxe.ExpectColumnValuesToBeInTypeList(
 _TYPE_CASE_KEY: Final[str] = gxe.ExpectColumnValuesToBeOfType(
     column="increasing_key", type_="INTEGER"
 ).expectation_type
-# The two case keys whose passing/failing configurations assert a SQL dialect type name rather
+_TYPE_TO_BE_CASE_KEY: Final[str] = gxe.ExpectColumnTypeToBe(
+    column="increasing_key", type_="INTEGER"
+).expectation_type
+# The three case keys whose passing/failing configurations assert a SQL dialect type name rather
 # than a fixture-shape-independent fact. A type name is a property of the dialect the data source
 # under test speaks, not something the case table can hardcode once for every backend, so these
-# two are rebuilt per data source from that data source's own declaration below rather than taken
-# verbatim from the case table.
+# three are rebuilt per data source from that data source's own declaration below rather than
+# taken verbatim from the case table.
 
 
 def _resolve_case_for_config(case: GalleryCase, config: DataSourceTestConfig) -> GalleryCase:
     """Rebuild `case`'s passing/failing configurations from `config`'s declared type names, for
-    the two cases that assert against a SQL dialect type name.
+    the three cases that assert against a SQL dialect type name.
 
-    Every other case is returned unchanged. For the two type-name cases, `config`'s spec is always
+    Every other case is returned unchanged. For the three type-name cases, `config`'s spec is always
     a `SqlBackendSpec` -- both cases restrict `engines` to SQL -- so its declared
     `integer_column_type_name`/`non_integer_column_type_name` are read directly rather than
     branched on which data source this is. A spec that declares nothing still resolves here,
     to the same names the case table's own literals spell, so this rebuild is a no-op for it.
     """
-    if case.key not in (_TYPE_LIST_CASE_KEY, _TYPE_CASE_KEY):
+    if case.key not in (_TYPE_LIST_CASE_KEY, _TYPE_CASE_KEY, _TYPE_TO_BE_CASE_KEY):
         return case
     spec = config.DATA_SOURCE_SPEC
     assert isinstance(spec, SqlBackendSpec), (
@@ -242,10 +245,18 @@ def _resolve_case_for_config(case: GalleryCase, config: DataSourceTestConfig) ->
                 column="increasing_key", type_list=[non_integer_name]
             ),
         )
+    if case.key == _TYPE_CASE_KEY:
+        return replace(
+            case,
+            passing=gxe.ExpectColumnValuesToBeOfType(column="increasing_key", type_=integer_name),
+            failing=gxe.ExpectColumnValuesToBeOfType(
+                column="increasing_key", type_=non_integer_name
+            ),
+        )
     return replace(
         case,
-        passing=gxe.ExpectColumnValuesToBeOfType(column="increasing_key", type_=integer_name),
-        failing=gxe.ExpectColumnValuesToBeOfType(column="increasing_key", type_=non_integer_name),
+        passing=gxe.ExpectColumnTypeToBe(column="increasing_key", type_=integer_name),
+        failing=gxe.ExpectColumnTypeToBe(column="increasing_key", type_=non_integer_name),
     )
 
 
@@ -1218,12 +1229,14 @@ class TestBuildGalleryCaseParams:
         with pytest.raises(ValueError, match="empty engine set"):
             _make_throwaway_case("empty_engines_case", engines=frozenset())
 
-    @pytest.mark.parametrize("case_key", [_TYPE_LIST_CASE_KEY, _TYPE_CASE_KEY])
+    @pytest.mark.parametrize(
+        "case_key", [_TYPE_LIST_CASE_KEY, _TYPE_CASE_KEY, _TYPE_TO_BE_CASE_KEY]
+    )
     def test_default_spec_resolves_type_name_case_byte_identical_to_the_case_table(
         self, case_key: str
     ) -> None:
         # A backend spec that declares nothing for the two type-name fields must produce the
-        # exact configurations the case table already carries for these two cases -- the
+        # exact configurations the case table already carries for these three cases -- the
         # rebuild in `_resolve_case_for_config` is required to be a no-op for a default spec,
         # not merely equivalent in effect.
         [table_case] = [case for case in GALLERY_CASES if case.key == case_key]
@@ -1273,6 +1286,25 @@ class TestBuildGalleryCaseParams:
         assert isinstance(resolved.passing, gxe.ExpectColumnValuesToBeOfType)
         assert resolved.passing.type_ == "NUMBER"
         assert isinstance(resolved.failing, gxe.ExpectColumnValuesToBeOfType)
+        assert resolved.failing.type_ == "STRING"
+        assert resolved.passing != table_case.passing
+        assert resolved.failing != table_case.failing
+
+    def test_declared_type_names_flow_into_the_type_to_be_case(self) -> None:
+        [table_case] = [case for case in GALLERY_CASES if case.key == _TYPE_TO_BE_CASE_KEY]
+        declaring_spec = _make_gallery_backend_spec(
+            integer_column_type_name="NUMBER",
+            non_integer_column_type_name="STRING",
+        )
+        config_class = _make_config_class("DeclaringSpecBackend-typetobe", declaring_spec)
+
+        resolved = _resolve_case_for_config(
+            table_case, cast("DataSourceTestConfig", config_class())
+        )
+
+        assert isinstance(resolved.passing, gxe.ExpectColumnTypeToBe)
+        assert resolved.passing.type_ == "NUMBER"
+        assert isinstance(resolved.failing, gxe.ExpectColumnTypeToBe)
         assert resolved.failing.type_ == "STRING"
         assert resolved.passing != table_case.passing
         assert resolved.failing != table_case.failing

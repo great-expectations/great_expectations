@@ -532,6 +532,7 @@ SUPPORTED_EXPECTATIONS: Final[tuple[str, ...]] = (
     "ExpectSelectColumnValuesToBeUniqueWithinRecord",
     "ExpectColumnPairValuesAToBeGreaterThanB",
     "ExpectColumnToExist",
+    "ExpectColumnTypeToBe",
     "ExpectTableColumnCountToEqual",
     "ExpectTableColumnsToMatchSet",
     "ExpectTableColumnCountToBeBetween",

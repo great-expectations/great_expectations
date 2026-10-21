@@ -78,3 +78,18 @@ def test_exception_list_content_block_renderer():
         },
         "header": 'Failed expectations <span class="mr-3 triangle"></span>',
     }
+
+
+@pytest.mark.unit
+def test_missing_content_block_fn_without_a_result_renders_nothing():
+    config = ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "a"})
+    assert ExceptionListContentBlockRenderer._missing_content_block_fn(configuration=config) == []
+
+
+@pytest.mark.unit
+def test_missing_content_block_fn_with_a_configless_result_renders_nothing():
+    result = ExpectationValidationResult(
+        success=False,
+        exception_info={"raised_exception": True, "exception_message": "boom"},
+    )
+    assert ExceptionListContentBlockRenderer._missing_content_block_fn(result=result) == []

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _style_row_condition,
@@ -247,6 +248,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -295,13 +297,14 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -370,7 +373,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):
-        from great_expectations.execution_engine import PandasExecutionEngine
+        from great_expectations.expectations.metrics.util import parse_value_set
 
         value_set = metric_value_kwargs["value_set"]
 
@@ -378,7 +381,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             # Vacuously true
             return np.ones(len(series), dtype=np.bool_)
         if pd.api.types.is_datetime64_any_dtype(series):
-            parsed_value_set = PandasExecutionEngine.parse_value_set(value_set=value_set)
+            parsed_value_set = parse_value_set(value_set=value_set)
         else:
             parsed_value_set = value_set
 

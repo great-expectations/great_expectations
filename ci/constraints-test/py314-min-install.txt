@@ -1,0 +1,4 @@
+numpy==2.3.2
+pandas==2.3.3
+sqlalchemy==2.0.47
+pydantic==2.13.0

@@ -360,8 +360,29 @@ class SQLBatchTestSetup(BatchTestSetup[_SqlConfigT, TableAsset], ABC, Generic[_S
             self._safe_commit(conn)
         cleanup()
 
+    def dispose_data_source_engines(self) -> None:
+        """Close the connections GX opened for the data sources added to this setup's context.
+
+        A data source creates its own SQLAlchemy engines (its own, and one inside its execution
+        engine), separate from the engine this setup uses, and nothing disposes them. Their pooled
+        connections then stay open until garbage collection, which closes them in whatever order
+        it finalizes the objects. A driver that does I/O on that path leaks: the Databricks
+        connector's `Connection.__del__` sends CloseSession over a new TLS socket that nothing
+        closes, which Python reports as an unclosed-socket ResourceWarning against whichever test
+        happens to trigger the collection. Disposing the engines here closes the connections while
+        the objects are still alive.
+        """
+        for datasource in self.context.data_sources.all().values():
+            execution_engine = datasource.execution_engine
+            if execution_engine:
+                execution_engine.close()
+            if datasource._engine:
+                datasource._engine.dispose()
+                datasource._engine = None
+
     @override
     def teardown(self) -> None:
+        self.dispose_data_source_engines()
         engine, cleanup = self._get_engine()
         with engine.connect() as conn:
             for table in self.tables:

@@ -238,6 +238,16 @@ GALLERY_CASES: Final[Tuple[GalleryCase, ...]] = (
         ),
     ),
     GalleryCase(
+        key=gxe.ExpectColumnTypeToBe(column="increasing_key", type_="INTEGER").expectation_type,
+        passing=gxe.ExpectColumnTypeToBe(column="increasing_key", type_="INTEGER"),
+        failing=gxe.ExpectColumnTypeToBe(column="increasing_key", type_="VARCHAR"),
+        engines=_SQL_ONLY,
+        engine_restriction_reason=(
+            "the type name this case checks against is a SQL dialect type name, which has no "
+            "meaning on a non-SQL engine"
+        ),
+    ),
+    GalleryCase(
         key=gxe.ExpectColumnValuesToBeUnique(column="increasing_key").expectation_type,
         passing=gxe.ExpectColumnValuesToBeUnique(column="increasing_key"),
         # `category` repeats "red", "green", and "blue" across six rows.

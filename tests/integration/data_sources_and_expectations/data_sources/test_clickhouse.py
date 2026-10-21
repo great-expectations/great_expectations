@@ -153,6 +153,47 @@ class TestClickHouseRegexAndLikePatterns:
             )
         assert result.success
 
+    def _wildcard_literal_batch_setup(self) -> ClickHouseBatchTestSetup:
+        """Only `a_c` contains a literal underscore, unlike `DATA`, which holds none and so
+        cannot tell a literally matched `_` from a wildcard one."""
+        return ClickHouseBatchTestSetup(
+            config=ClickHouseDatasourceTestConfig(
+                column_types={self.COL: clickhouse_types.Nullable(clickhouse_types.String)}
+            ),
+            data=pd.DataFrame({self.COL: ["a_c", "abc"]}),
+            extra_data={},
+            context=get_context(mode="ephemeral"),
+        )
+
+    def test_match_like_pattern_with_escape_is_refused(self) -> None:
+        """ClickHouse has no ESCAPE clause, so asking for one must fail with a usable message.
+
+        The server rejects `LIKE 'a!_c' ESCAPE '!'` as a syntax error, so emitting the clause
+        would surface a database error about SQL the user never wrote.
+        """
+        with self._wildcard_literal_batch_setup().batch_test_context() as batch:
+            result = batch.validate(
+                gxe.ExpectColumnValuesToMatchLikePattern(
+                    column=self.COL, like_pattern="a!_c", escape="!"
+                )
+            )
+        assert not result.success
+        assert "ClickHouse does not support an ESCAPE clause" in str(result.exception_info)
+
+    def test_match_like_pattern_with_backslash_in_pattern(self) -> None:
+        """A backslash inside the pattern escapes a wildcard, as the refusal above advises.
+
+        With the backslash honored `abc` is the one unexpected value; were it taken as an
+        ordinary character neither value would match, and both would be unexpected.
+        """
+        with self._wildcard_literal_batch_setup().batch_test_context() as batch:
+            result = batch.validate(
+                gxe.ExpectColumnValuesToMatchLikePattern(column=self.COL, like_pattern="a\\_c"),
+                result_format=ResultFormat.COMPLETE,
+            )
+        assert result.exception_info.get("raised_exception") is False, result.exception_info
+        assert result.result["unexpected_list"] == ["abc"]
+
 
 class TestClickHouseNullBearingData:
     """Insert real nulls into a string, an integer, a float and a date column -- each column

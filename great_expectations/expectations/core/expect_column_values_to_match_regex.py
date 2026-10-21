@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TC001 # FIXME CoP
 )
@@ -272,6 +273,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'  # noqa: E501 # FIXME CoP
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -308,6 +310,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -319,7 +322,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
 

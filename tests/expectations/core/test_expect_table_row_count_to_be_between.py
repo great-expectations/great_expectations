@@ -41,7 +41,7 @@ def test_expect_table_row_count_to_be_between_runtime_custom_query_no_temp_table
             },
             "id": None,
             "meta": {},
-            "expectation_type": "expect_table_row_count_to_be_between",
+            "type": "expect_table_row_count_to_be_between",
         },
         exception_info={
             "raised_exception": False,
@@ -80,7 +80,7 @@ def test_expect_table_row_count_to_be_between_runtime_custom_query_with_where_no
             },
             "id": None,
             "meta": {},
-            "expectation_type": "expect_table_row_count_to_be_between",
+            "type": "expect_table_row_count_to_be_between",
         },
         exception_info={
             "raised_exception": False,

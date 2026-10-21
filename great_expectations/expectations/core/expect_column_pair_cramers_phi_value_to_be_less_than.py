@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_suite_parameter_string,
@@ -69,6 +70,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
     )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -94,6 +96,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -104,7 +107,9 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["column_A", "column_B"])
+        params = substitute_none_for_missing(
+            configuration.kwargs if configuration else {}, ["column_A", "column_B"]
+        )
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."  # noqa: E501 # FIXME CoP
         else:
@@ -123,6 +128,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
+    @override
     def _diagnostic_observed_value_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -130,6 +136,8 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
+        assert result, "Must pass in result."
+        assert result.expectation_config, "Must pass in expectation_config."
         observed_value = result.result.get("observed_value")
         column_A = result.expectation_config.kwargs["column_A"]
         column_B = result.expectation_config.kwargs["column_B"]

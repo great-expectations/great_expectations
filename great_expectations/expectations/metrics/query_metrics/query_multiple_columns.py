@@ -80,7 +80,8 @@ class QueryMultipleColumns(QueryMetricProvider):
         if not isinstance(columns, list):
             raise TypeError("Columns must be supplied as a list")  # noqa: TRY003 # FIXME CoP
 
-        query = query.format(
+        query = cls._format_query(
+            query,
             **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
             batch="tmp_view",
         )

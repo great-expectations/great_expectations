@@ -13,3 +13,16 @@ FAILURE_SEVERITY_DESCRIPTION = (
     "Defaults to critical if not set. "
     "Severity levels can be used to trigger different alerting patterns and actions."
 )
+
+LIKE_PATTERN_ESCAPE_DESCRIPTION = (
+    "A single character that removes the special meaning of the `_` and `%` wildcards "
+    "that follow it in the like pattern, emitted as a SQL `ESCAPE` clause. Required to "
+    "match those characters literally: dialects disagree about an unannounced backslash "
+    "(PostgreSQL treats it as an escape, SQLite treats it as an ordinary character, and "
+    "Snowflake requires the clause to be stated), so a pattern relying on the default is "
+    "not portable. Prefer a character other than a backslash: several dialects also treat "
+    "a backslash specially inside string literals, before the pattern reaches LIKE, and "
+    "Redshift rejects `ESCAPE '\\'` outright. Omit it to emit no `ESCAPE` clause. Not "
+    "supported on BigQuery or ClickHouse, neither of which has an `ESCAPE` clause: escape "
+    "wildcards with a backslash inside the pattern there instead."
+)

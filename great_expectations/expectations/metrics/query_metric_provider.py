@@ -118,6 +118,14 @@ class InvalidParameterTypeError(TypeError):
         super().__init__(f"`{parameter_name}` must be provided as type `{expected_type}`.")
 
 
+LITERAL_BRACE_HINT = "To include a literal brace in the query, double it: `{{` and `}}`."
+
+
+class UnsubstitutableQueryBraceError(ValueError):
+    def __init__(self, query: str, reason: str):
+        super().__init__(f"{reason} {LITERAL_BRACE_HINT} Query: {query}")
+
+
 class QueryParameters(TypedDict):
     column: NotRequired[str]
     column_A: NotRequired[str]
@@ -200,6 +208,37 @@ class QueryMetricProvider(MetricProvider):
             return {**query_parameters}
 
     @classmethod
+    def _format_query(cls, query: str, /, **kwargs: Any) -> str:
+        """Substitute `{batch}` and the declared query parameters into a user-authored query.
+
+        `str.format` reads every brace in the query as a field name, so SQL that carries braces
+        for its own reasons -- a Postgres array or JSON literal, a `LIKE '{%'` pattern -- raises
+        here. The stdlib error names neither the query nor the doubling rule that escapes it, so
+        it is replaced with one that does; a query that formatted before still formats the same.
+
+        `query` is positional-only so a substitution keyword named `query` (a `template_dict` key,
+        for instance) reaches `str.format` instead of colliding with this parameter.
+        """
+        try:
+            return query.format(**kwargs)
+        except KeyError as exc:
+            raise UnsubstitutableQueryBraceError(
+                query, f"`{exc.args[0]}` is not a placeholder this metric accepts."
+            ) from exc
+        except IndexError as exc:
+            # `{}` and `{3}` are positional fields; this metric only fills named ones. The braces
+            # close, so the usual cause is a regex quantifier such as `x{3}`, not a typo.
+            raise UnsubstitutableQueryBraceError(
+                query,
+                "The query contains a positional placeholder such as `{}` or `{3}` that this "
+                "metric does not fill; a regex quantifier like `x{3}` is the usual cause.",
+            ) from exc
+        except ValueError as exc:
+            raise UnsubstitutableQueryBraceError(
+                query, f"The query contains an unpaired or malformed brace: {exc}."
+            ) from exc
+
+    @classmethod
     def _get_substituted_batch_subquery_from_query_and_batch_selectable(
         cls,
         query: str,
@@ -210,7 +249,7 @@ class QueryMetricProvider(MetricProvider):
         parameters = cls._get_parameters_dict_from_query_parameters(query_parameters)
 
         if isinstance(batch_selectable, sa.Table):
-            query = query.format(batch=batch_selectable, **parameters)
+            query = cls._format_query(query, batch=batch_selectable, **parameters)
         elif isinstance(
             batch_selectable, (sa.sql.Select, get_sqlalchemy_subquery_type())
         ):  # specifying a row_condition returns the active batch as a Select
@@ -221,9 +260,10 @@ class QueryMetricProvider(MetricProvider):
             )
             # all join queries require the user to have taken care of aliasing themselves
             if _query_has_join_clause(query):
-                query = query.format(batch=f"({batch})", **parameters)
+                query = cls._format_query(query, batch=f"({batch})", **parameters)
             else:
-                query = query.format(
+                query = cls._format_query(
+                    query,
                     batch=render_derived_table_alias(
                         subquery=str(batch),
                         alias="subselect",
@@ -232,7 +272,7 @@ class QueryMetricProvider(MetricProvider):
                     **parameters,
                 )
         else:
-            query = query.format(batch=f"({batch_selectable})", **parameters)
+            query = cls._format_query(query, batch=f"({batch_selectable})", **parameters)
 
         # SQL Server has no boolean literal, and Oracle rejects a bare `true` as a
         # WHERE-clause predicate with ORA-00920 before it gained a SQL boolean type in 23ai.

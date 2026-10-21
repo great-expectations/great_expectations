@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from typing import Any, cast
 
 import pandas as pd
 import pytest
@@ -1011,3 +1012,104 @@ class TestGetMaxSeverityFailure:
 
         # Test that the method returns None when all severities are invalid
         assert result.get_max_severity_failure() is None
+
+
+def _dict_config(config: dict[str, Any]) -> ExpectationConfiguration:
+    """A plain dict where a configuration is expected, as a result built from serialized data
+    can carry: `ExpectationValidationResult` stores `expectation_config` as given."""
+    return cast("ExpectationConfiguration", config)
+
+
+@pytest.mark.unit
+def test_results_with_an_unloadable_expectation_config_are_not_equal_to_a_loadable_one():
+    """A dict config that cannot be loaded as an ExpectationConfiguration is not equivalent to
+    one that can, in either operand order. Comparing them must not read `NotImplemented` as a
+    truth value (which made them equal through Python 3.13), and a result whose own config is a
+    dict must not raise because a dict has no `isEquivalentTo`."""
+    loadable = ExpectationValidationResult(
+        success=True,
+        expectation_config=ExpectationConfiguration(
+            type="expect_column_to_exist", kwargs={"column": "a"}
+        ),
+    )
+    unloadable = ExpectationValidationResult(
+        success=True,
+        expectation_config=_dict_config(
+            {
+                "expectation_type": "expect_column_values_to_be_unique",
+                "kwargs": {"column": "b"},
+                "meta": {},
+            }
+        ),
+    )
+
+    assert (loadable == unloadable) is False
+    assert loadable != unloadable
+    assert (unloadable == loadable) is False
+    assert unloadable != loadable
+
+
+@pytest.mark.unit
+def test_a_result_with_a_config_is_not_equal_to_one_without() -> None:
+    """Through Python 3.13 the configured side's `isEquivalentTo(None)` answered `NotImplemented`,
+    which is truthy, so `configured == unconfigured` held in that direction only."""
+    configured = ExpectationValidationResult(
+        success=True,
+        expectation_config=ExpectationConfiguration(
+            type="expect_column_to_exist", kwargs={"column": "a"}
+        ),
+    )
+    unconfigured = ExpectationValidationResult(success=True, expectation_config=None)
+
+    assert (configured == unconfigured) is False
+    assert (unconfigured == configured) is False
+    assert configured != unconfigured
+    assert unconfigured != configured
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("other_column", "expected_equal"),
+    [pytest.param("b", True, id="same-dict"), pytest.param("c", False, id="different-dict")],
+)
+def test_results_whose_configs_are_both_dicts_compare_the_dicts(
+    other_column: str, expected_equal: bool
+) -> None:
+    """Neither side has `isEquivalentTo`, so the dicts themselves decide."""
+
+    def result(column: str) -> ExpectationValidationResult:
+        return ExpectationValidationResult(
+            success=True,
+            expectation_config=_dict_config(
+                {
+                    "expectation_type": "expect_column_values_to_be_unique",
+                    "kwargs": {"column": column},
+                }
+            ),
+        )
+
+    first, second = result("b"), result(other_column)
+
+    assert (first == second) is expected_equal
+    assert (first != second) is not expected_equal
+
+
+@pytest.mark.unit
+def test_a_dict_config_that_loads_is_equivalent_to_its_configuration_in_either_order() -> None:
+    configured = ExpectationValidationResult(
+        success=True,
+        expectation_config=ExpectationConfiguration(
+            type="expect_column_to_exist", kwargs={"column": "a"}
+        ),
+    )
+    as_dict = ExpectationValidationResult(
+        success=True,
+        expectation_config=_dict_config(
+            {"type": "expect_column_to_exist", "kwargs": {"column": "a"}}
+        ),
+    )
+
+    assert configured == as_dict
+    assert as_dict == configured
+    assert not (configured != as_dict)
+    assert not (as_dict != configured)

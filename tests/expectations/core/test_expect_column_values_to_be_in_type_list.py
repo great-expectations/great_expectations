@@ -37,7 +37,7 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     assert result == ExpectationValidationResult(
         success=True,
         expectation_config={
-            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "col",
                 "type_list": ["string", "boolean"],
@@ -87,7 +87,7 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
     assert result == ExpectationValidationResult(
         success=True,
         expectation_config={
-            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "col",
                 "type_list": ["string", "boolean"],
@@ -136,7 +136,7 @@ def test_expect_column_values_to_be_in_type_list_nullable_int():
     assert result == ExpectationValidationResult(
         success=True,
         expectation_config={
-            "expectation_type": "expect_column_values_to_be_in_type_list",
+            "type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "col",
                 "type_list": ["Int32Dtype"],

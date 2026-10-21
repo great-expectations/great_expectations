@@ -18,12 +18,15 @@ logger = logging.getLogger(__name__)
 
 class ColumnValuesMatchLikePattern(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_like_pattern"
-    condition_value_keys = ("like_pattern",)
+    condition_value_keys = (
+        "like_pattern",
+        "escape",
+    )
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, like_pattern, _dialect, **kwargs):
+    def _sqlalchemy(cls, column, like_pattern, _dialect, escape=None, **kwargs):
         like_pattern_expression = get_dialect_like_pattern_expression(
-            column, _dialect, like_pattern
+            column, _dialect, like_pattern, escape=escape
         )
         if like_pattern_expression is None:
             logger.warning(f"Like patterns are not supported for dialect {_dialect.name!s}")

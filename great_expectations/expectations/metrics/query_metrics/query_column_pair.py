@@ -79,7 +79,7 @@ class QueryColumnPair(QueryMetricProvider):
         df.createOrReplaceTempView("tmp_view")
         column_A: Optional[str] = metric_value_kwargs.get("column_A")
         column_B: Optional[str] = metric_value_kwargs.get("column_B")
-        query = query.format(column_A=column_A, column_B=column_B, batch="tmp_view")
+        query = cls._format_query(query, column_A=column_A, column_B=column_B, batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
         result: List[pyspark.Row] = engine.sql(query).collect()

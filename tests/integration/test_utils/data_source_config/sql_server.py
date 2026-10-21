@@ -106,13 +106,7 @@ class SQLServerBatchTestSetup(SQLBatchTestSetup[SQLServerDatasourceTestConfig]):
 
     def dispose_connections_for_teardown(self) -> None:
         """Close/dispose SQL Server engines before schema teardown."""
-        for datasource in self.context.data_sources.all().values():
-            execution_engine = datasource.execution_engine
-            if execution_engine:
-                execution_engine.close()
-            if datasource._engine:
-                datasource._engine.dispose()
-                datasource._engine = None
+        self.dispose_data_source_engines()
 
         if self.engine_manager:
             self.engine_manager.dispose_engine(
