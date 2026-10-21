@@ -100,7 +100,12 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
             validation: ValidationDefinition to add or update
         """
         # Always add or update underlying suite to avoid freshness issues
-        suite_factory = project_manager.get_suite_factory()
+        # A store built by a Data Context reaches the suite through that context; a store built
+        # on its own has no context, so the suite is reached through the current one.
+        context = self._store.data_context
+        suite_factory = (
+            context.suites if context is not None else project_manager.get_suite_factory()
+        )
         validation.suite = suite_factory.add_or_update(suite=validation.suite)
         validation.data.save()
 

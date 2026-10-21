@@ -25,7 +25,6 @@ from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.context_factory import (
-    ProjectManager,
     set_context,
 )
 from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
@@ -188,8 +187,8 @@ def test_validation_definition_data_properties(validation_definition: Validation
 class TestValidationRun:
     @pytest.fixture
     def mock_validator(self, mocker: MockerFixture):
-        """Set up our ProjectManager to return a mock Validator"""
-        with mock.patch.object(ProjectManager, "get_validator") as mock_get_validator:
+        """Set up the Data Context to return a mock Validator"""
+        with mock.patch.object(AbstractDataContext, "get_validator") as mock_get_validator:
             with mock.patch.object(OldValidator, "graph_validate"):
                 gx.get_context(mode="ephemeral")
                 mock_execution_engine = mocker.MagicMock(spec=ExecutionEngine)
@@ -765,16 +764,22 @@ def test_identifier_bundle_no_id_raises_error(validation_definition: ValidationD
 
 
 @pytest.mark.unit
-def test_save_success(mocker: MockerFixture, validation_definition: ValidationDefinition):
+def test_save_success(
+    mocker: MockerFixture,
+    validation_definition: ValidationDefinition,
+    ephemeral_context: EphemeralDataContext,
+):
     context = mocker.Mock(spec=AbstractDataContext)
     set_context(project=context)
 
-    store_key = context.validation_definition_store.get_key.return_value
+    # The validation definition belongs to the ephemeral context, so it saves there.
+    owner_store = ephemeral_context.validation_definition_store
+    update = mocker.patch.object(owner_store, "update")
+    store_key = owner_store.get_key(name=validation_definition.name, id=validation_definition.id)
     validation_definition.save()
 
-    context.validation_definition_store.update.assert_called_once_with(
-        key=store_key, value=validation_definition
-    )
+    update.assert_called_once_with(key=store_key, value=validation_definition)
+    context.validation_definition_store.update.assert_not_called()
 
 
 @pytest.mark.parametrize(

@@ -262,7 +262,9 @@ def _test_validation_definition_factory_delete_success(
         validation_definition = context.validation_definitions.add(validation=validation_definition)
 
     # Act
-    with mocker.patch.object(ValidationDefinition, "parse_raw", return_value=validation_definition):
+    with mocker.patch.object(
+        ValidationDefinitionStore, "deserialize", return_value=validation_definition
+    ):
         context.validation_definitions.delete(name=name)
 
     # Assert

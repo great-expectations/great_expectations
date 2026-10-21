@@ -813,6 +813,7 @@ class SnowflakeDatasource(SQLDatasource):
         connect_args: dict[str, Any] | None = None,
         **kwargs,
     ) -> sqlalchemy.Engine:
+        url_private_key: str | bool | None = None
         if not url:
             url_args = self._get_url_args()
             url_args.update(kwargs)
@@ -820,6 +821,11 @@ class SnowflakeDatasource(SQLDatasource):
             password = url_args.get("password")
             if isinstance(password, str):
                 url_args["password"] = quote(password)
+
+            # The private key is credential material, so it goes to the connector via
+            # `connect_args` rather than the URL query string. snowflake-sqlalchemy 2.x also
+            # fails to type-cast a `private_key` query parameter when it builds the engine.
+            url_private_key = url_args.pop("private_key", None)
 
             url = SnowflakeURL(**url_args)
         else:
@@ -839,6 +845,13 @@ class SnowflakeDatasource(SQLDatasource):
                 connect_args["private_key"] = base64.standard_b64decode(private_key)
 
             engine_kwargs["connect_args"] = connect_args
+
+        if url_private_key is not None:
+            # a key the user already supplied via `connect_args` takes precedence
+            engine_kwargs["connect_args"] = {
+                "private_key": url_private_key,
+                **engine_kwargs.get("connect_args", {}),
+            }
 
         engine_kwargs["url"] = url
 

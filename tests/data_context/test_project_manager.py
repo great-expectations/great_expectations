@@ -58,3 +58,18 @@ class TestProjectManagerStores:
 
         with pytest.raises(DataContextRequiredError):
             project_manager.get_validation_results_store()
+
+    @pytest.mark.unit
+    def test_get_current_project_success(self) -> None:
+        context = Mock(spec=AbstractDataContext)
+        project_manager = ProjectManager()
+        project_manager.set_project(project=context)
+
+        assert project_manager.get_current_project() is context
+
+    @pytest.mark.unit
+    def test_get_current_project_fails_without_context(self) -> None:
+        project_manager = ProjectManager()
+
+        with pytest.raises(DataContextRequiredError):
+            project_manager.get_current_project()
