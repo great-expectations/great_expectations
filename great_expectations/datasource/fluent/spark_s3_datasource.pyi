@@ -30,7 +30,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,
-        s3_recursive_file_discovery: bool = False,
+        s3_recursive_file_discovery: Optional[bool] = None,
         header: bool = ...,
         infer_schema: bool = ...,
     ) -> CSVAsset: ...
