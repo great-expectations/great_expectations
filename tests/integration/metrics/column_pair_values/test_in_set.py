@@ -120,14 +120,7 @@ class TestColumnPairValuesInSetUnexpectedValues:
         [
             pytest.param("either_value_is_missing", 1),
             pytest.param("both_values_are_missing", 3),
-            pytest.param(
-                "neither",
-                6,
-                marks=pytest.mark.xfail(
-                    reason=("returns 3 - pairs where both are null are dropped"),
-                    strict=True,
-                ),
-            ),
+            pytest.param("neither", 6),
         ],
     )
     @parameterize_batch_for_data_sources(
@@ -137,8 +130,8 @@ class TestColumnPairValuesInSetUnexpectedValues:
     def test_ignore_row_if__sql(
         self, batch_for_datasource: Batch, ignore_row_if, unexpected_count
     ) -> None:
-        """This test captures a bug with SQL data sources and the ignore_row_if condition,
-        where column pairs are dropped if both values are null.
+        """SQL data sources count the same rows as pandas and Spark: pairs where both values
+        are null are no longer dropped when ignore_row_if is "neither" (#12252).
         """
         batch = batch_for_datasource
         metric = ColumnPairValuesInSetUnexpectedCount(
