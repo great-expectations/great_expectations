@@ -58,24 +58,6 @@ class ExasolDatasourceTestConfig(SqlDatasourceTestConfig):
         task_runner_marker="exasol",
         container_service="exasol",
         tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
-        tier_case_exclusions={
-            # A driver defect, not a dialect gap -- the same category as ClickHouse's
-            # `quoted_identifiers` entry. sqlalchemy-exasol 7.1.3's `EXACompiler.extract_map`
-            # maps `year`, `month` and `day` to the strftime tokens `%Y`, `%m` and `%d`, so
-            # SQLAlchemy's generic `visit_extract` renders the date partitioner's
-            # `sa.func.extract("year", col)` as `EXTRACT(%Y FROM col)`, which the server rejects
-            # with `syntax error, unexpected invalid token`. The server itself accepts
-            # `EXTRACT(YEAR FROM col)` (verified live), so the fix belongs in the driver's
-            # compiler, not in this harness and not in core. An issue still needs to be filed
-            # for this defect; this reason will be updated with its link once one exists.
-            "batch_definition": (
-                "sqlalchemy-exasol 7.1.3 compiles every EXTRACT as `EXTRACT(%Y FROM col)` -- its "
-                "compiler's extract_map holds strftime tokens -- so the date partitioner's query "
-                "is rejected with `syntax error, unexpected invalid token`. The server accepts "
-                "`EXTRACT(YEAR FROM col)`, so this is a driver defect. An issue still needs to be "
-                "filed for this defect."
-            ),
-        },
     )
 
     @override
