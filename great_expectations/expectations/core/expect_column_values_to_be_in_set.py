@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _style_row_condition,
@@ -262,6 +263,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -310,6 +312,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -397,7 +400,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         if any(len(value) > 80 for value in values):  # noqa: PLR2004 # FIXME CoP
             content_block_type = "bullet_list"
-            content_block_class = RenderedBulletListContent
+            content_block_class: Type[RenderedBulletListContent] | Type[ValueListContent] = (
+                RenderedBulletListContent
+            )
         else:
             content_block_type = "value_list"
             content_block_class = ValueListContent

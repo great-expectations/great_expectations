@@ -22,15 +22,18 @@ class ColumnValuesNotMatchLikePatternList(ColumnMapMetricProvider):
     # No "match_on": unlike the positive ColumnValuesMatchLikePatternList, this metric
     # takes no such option. A value is expected when it matches none of the patterns, and
     # ExpectColumnValuesToNotMatchLikePatternList exposes no way to ask for anything else.
-    condition_value_keys = ("like_pattern_list",)
+    condition_value_keys = (
+        "like_pattern_list",
+        "escape",
+    )
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, like_pattern_list, _dialect, **kwargs):
+    def _sqlalchemy(cls, column, like_pattern_list, _dialect, escape=None, **kwargs):
         if len(like_pattern_list) == 0:
             raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")  # noqa: TRY003 # FIXME CoP
 
         like_pattern_expression = get_dialect_like_pattern_expression(
-            column, _dialect, like_pattern_list[0], positive=False
+            column, _dialect, like_pattern_list[0], positive=False, escape=escape
         )
         if like_pattern_expression is None:
             logger.warning(f"Like patterns are not supported for dialect {_dialect.name!s}")
@@ -38,7 +41,9 @@ class ColumnValuesNotMatchLikePatternList(ColumnMapMetricProvider):
 
         return sa.and_(
             *(
-                get_dialect_like_pattern_expression(column, _dialect, like_pattern, positive=False)
+                get_dialect_like_pattern_expression(
+                    column, _dialect, like_pattern, positive=False, escape=escape
+                )
                 for like_pattern in like_pattern_list
             )
         )

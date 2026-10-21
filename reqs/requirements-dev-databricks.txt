@@ -1,1 +1,5 @@
 databricks-sqlalchemy>=1.0.0
+# SQLAlchemy 2.1 rejects result rows that subclass tuple ("Expected tuple, got Row"),
+# and databricks-sql-connector returns exactly that, so every query fails. Lift this
+# once either project handles tuple-subclass rows.
+sqlalchemy<2.1

@@ -52,6 +52,12 @@ except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None  # type: ignore[assignment] # FIXME CoP
 
 try:
+    # The dialect module for psycopg (3); importing it does not import psycopg itself.
+    import sqlalchemy.dialects.postgresql.psycopg as sqlalchemy_psycopg  # noqa: TID251 # dialect only
+except (ImportError, KeyError):
+    sqlalchemy_psycopg = None  # type: ignore[assignment] # absent before SQLAlchemy 2.0
+
+try:
     import snowflake
 except ImportError:
     snowflake = None
@@ -193,16 +199,11 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915 # FIX
             dialect.dialect,  # type: ignore[union-attr] # FIXME CoP
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
+            match_count = sa.func.REGEXP_COUNT(column, sqlalchemy.literal(regex))
             if positive:
-                return sqlalchemy.BinaryExpression(
-                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
-                )
+                return match_count > 0
             else:
-                return sqlalchemy.BinaryExpression(
-                    column,
-                    sqlalchemy.literal(regex),
-                    sqlalchemy.custom_op("NOT REGEXP"),
-                )
+                return match_count == 0
     except (
         AttributeError,
         TypeError,
@@ -323,7 +324,13 @@ def attempt_allowing_relative_error(dialect):
         actual_sql_engine_dialect=dialect,
         candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
     )
-    return detected_redshift or detected_psycopg2
+    # psycopg (3) is what a driverless postgresql:// URL selects from SQLAlchemy 2.1 on, so it
+    # has to behave like psycopg2 here for that URL to behave the same across versions.
+    detected_psycopg: bool = sqlalchemy_psycopg is not None and check_sql_engine_dialect(
+        actual_sql_engine_dialect=dialect,
+        candidate_sql_engine_dialect=sqlalchemy_psycopg.PGDialect_psycopg,
+    )
+    return detected_redshift or detected_psycopg2 or detected_psycopg
 
 
 class CaseInsensitiveString(str):
@@ -350,8 +357,11 @@ class CaseInsensitiveString(str):
 
         # Handle mock ANY or similar objects that would claim equality with anything
         # Only for non-CaseInsensitiveString objects to avoid recursion
-        if hasattr(other, "__eq__") and not isinstance(other, str) and other.__eq__(self):
-            return True
+        # `NotImplemented` (an ordinary object declining the comparison) is not a claim of equality.
+        if hasattr(other, "__eq__") and not isinstance(other, str):
+            reflected = other.__eq__(self)
+            if reflected is not NotImplemented and reflected:
+                return True
 
         if self.is_quoted():
             return self._original == str(other)
@@ -470,10 +480,15 @@ def _get_columns_from_selectable(
         if not is_quoted_name:
             logger.warning("unexpected table_selectable type")
 
-        return inspector.get_columns(
-            table_name=table_selectable if is_quoted_name else str(table_selectable),
-            schema=schema_name,
-        )
+        table_name = table_selectable if is_quoted_name else str(table_selectable)
+        if inspector.dialect.name == GXSqlDialect.SQL_SERVER:
+            # SQL Server matches object names by the database collation, not by quoting, so
+            # quoting adds nothing to reflection there. It does break it on SQLAlchemy 2.1,
+            # which maps the server's spelling of a table name back to the caller's with
+            # `.lower()`: a quoted name does not lower-case, so one whose case differs from
+            # the stored name is reported as missing.
+            table_name = str(table_name)
+        return inspector.get_columns(table_name=table_name, schema=schema_name)
     except (KeyError, AttributeError, sa.exc.NoSuchTableError, sa.exc.ProgrammingError) as exc:
         logger.debug(f"{type(exc).__name__} while introspecting columns", exc_info=exc)
         logger.info(f"While introspecting columns {exc!r}; attempting reflection fallback")
@@ -948,14 +963,40 @@ def parse_value_set(value_set: Iterable) -> list:
 
 
 def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
-    column: sa.Column, dialect: ModuleType, like_pattern: str, positive: bool = True
+    column: sa.Column,
+    dialect: ModuleType,
+    like_pattern: str,
+    positive: bool = True,
+    escape: str | None = None,
 ) -> sa.BinaryExpression | None:
+    """Build a LIKE expression for the dialects that support one.
+
+    ``escape`` names the character that removes the special meaning of the ``_`` and ``%``
+    wildcards in ``like_pattern``, and is emitted as a SQL ``ESCAPE '<char>'`` clause. It is
+    required to match those characters literally: dialects disagree about what an
+    unannounced backslash means -- PostgreSQL treats it as an escape by default, SQLite
+    treats it as an ordinary character, and Snowflake requires the clause to be stated --
+    so a pattern relying on the default is not portable. ``None`` emits no clause, which is
+    the behavior of every caller that does not ask for one.
+
+    Prefer a character other than a backslash. Several dialects also treat a backslash
+    specially inside string literals, before the pattern reaches LIKE at all -- Redshift
+    rejects ``ESCAPE '\\'`` outright -- which is why the character is the caller's to choose
+    rather than fixed.
+
+    BigQuery and ClickHouse are the exceptions: neither has an ``ESCAPE`` clause, and both
+    escape wildcards with a backslash inside the pattern, so passing ``escape`` for either
+    dialect raises.
+    """
     dialect_supported: bool = False
+    # The name of the matched dialect when it has no ESCAPE clause, for the error message.
+    escape_unsupported_by: str | None = None
 
     try:
         # Bigquery
         if hasattr(dialect, "BigQueryDialect"):
             dialect_supported = True
+            escape_unsupported_by = "BigQuery"
     except (
         AttributeError,
         TypeError,
@@ -1014,6 +1055,7 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
             dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
         ):
             dialect_supported = True
+            escape_unsupported_by = "ClickHouse"
     except (AttributeError, TypeError):
         pass
     try:
@@ -1034,12 +1076,21 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
     except (AttributeError, TypeError):
         pass
 
+    if escape is not None and escape_unsupported_by is not None:
+        # Neither dialect has an ESCAPE clause; both escape wildcards with a backslash inside
+        # the pattern itself. Emitting one would be a syntax error, so say so plainly rather
+        # than letting the database reject generated SQL the user never wrote.
+        raise ValueError(  # noqa: TRY003 # FIXME CoP
+            f"{escape_unsupported_by} does not support an ESCAPE clause. Escape the '_' and "
+            "'%' wildcards with a backslash inside like_pattern instead (for example 'a\\_b')."
+        )
+
     if dialect_supported:
         try:
             if positive:
-                return column.like(sqlalchemy.literal(like_pattern))
+                return column.like(sqlalchemy.literal(like_pattern), escape=escape)
             else:
-                return sa.not_(column.like(sqlalchemy.literal(like_pattern)))
+                return sa.not_(column.like(sqlalchemy.literal(like_pattern), escape=escape))
         except AttributeError:
             pass
 

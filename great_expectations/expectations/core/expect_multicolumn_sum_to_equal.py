@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Literal, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TC001 # FIXME CoP
 )
@@ -203,7 +204,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     ignore_row_if: Union[
         Literal["all_values_are_missing", "any_value_is_missing", "never"],
         SuiteParameterDict,
-    ] = pydantic.Field(
+    ] = pydantic.Field(  # type: ignore[assignment] # wider than the base Literal to allow suite parameters
         default="all_values_are_missing",
         description=IGNORE_ROW_IF_DESCRIPTION,
     )
@@ -261,6 +262,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
             )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -305,6 +307,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -315,7 +318,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column_list", "sum_total", "mostly"],
         )
         if params["mostly"] is not None:

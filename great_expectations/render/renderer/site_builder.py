@@ -6,17 +6,20 @@ import pathlib
 import traceback
 import urllib
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, cast
 
 from great_expectations import exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.cloud_data_context import SHUTDOWN_MESSAGE
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
-from great_expectations.data_context.store.json_site_store import JsonSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -26,9 +29,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter
 
 if TYPE_CHECKING:
-    from great_expectations.core.expectation_validation_result import (
-        ExpectationValidationResult,
-    )
     from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
@@ -136,10 +136,10 @@ class SiteBuilder:
         self.data_context = data_context
         self.store_backend = store_backend
         self.show_how_to_buttons = show_how_to_buttons
-        if ge_cloud_mode:
-            cloud_mode = ge_cloud_mode
-        self.cloud_mode = cloud_mode
-        self.ge_cloud_mode = cloud_mode
+        if cloud_mode or ge_cloud_mode:
+            raise exceptions.GreatExpectationsError(SHUTDOWN_MESSAGE)
+        self.cloud_mode = False
+        self.ge_cloud_mode = False
 
         self.data_context_id = data_context.variables.data_context_id
 
@@ -171,14 +171,9 @@ class SiteBuilder:
         # three types of backends using the base
         # type of the configuration defined in the store_backend section
 
-        if cloud_mode:
-            self.target_store = JsonSiteStore(
-                store_backend=store_backend, runtime_environment=runtime_environment
-            )
-        else:
-            self.target_store = HtmlSiteStore(
-                store_backend=store_backend, runtime_environment=runtime_environment
-            )
+        self.target_store = HtmlSiteStore(
+            store_backend=store_backend, runtime_environment=runtime_environment
+        )
 
         default_site_section_builders_config = {
             "expectations": {
@@ -306,11 +301,6 @@ class SiteBuilder:
         # copy static assets
         for site_section_builder in self.site_section_builders.values():
             site_section_builder.build(resource_identifiers=resource_identifiers)
-
-        # GX Cloud supports JSON Site Data Docs
-        # Skip static assets, indexing
-        if self.cloud_mode:
-            return
 
         self.target_store.copy_static_assets()
 
@@ -851,6 +841,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 )
             ]
             for profiling_result_key in profiling_result_site_keys:
+                error_msg = (
+                    f"Profiling result not found: {profiling_result_key.to_tuple()!s:s} - skipping"
+                )
                 try:
                     validation = self.data_context.get_validation_result(
                         batch_identifier=profiling_result_key.batch_identifier,
@@ -858,6 +851,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         run_id=profiling_result_key.run_id,
                         validation_results_store_name=self.source_stores.get("profiling"),
                     )
+
+                    # get_validation_result() returns {} when no result matches the key
+                    if not isinstance(validation, ExpectationSuiteValidationResult):
+                        logger.warning(error_msg)
+                        continue
 
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
                     batch_spec = validation.meta.get("batch_spec", {})
@@ -875,7 +873,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = f"Profiling result not found: {profiling_result_key.to_tuple()!s:s} - skipping"  # noqa: E501 # FIXME CoP
                     logger.warning(error_msg)
 
     def _add_validations_to_index_links(
@@ -905,6 +902,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     : self.validation_results_limit
                 ]
             for validation_result_key in validation_result_site_keys:
+                key_tuple = validation_result_key.to_tuple()
+                error_msg = f"Validation result not found: {key_tuple!s:s} - skipping"
                 try:
                     validation = self.data_context.get_validation_result(
                         batch_identifier=validation_result_key.batch_identifier,
@@ -912,6 +911,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         run_id=validation_result_key.run_id,
                         validation_results_store_name=self.source_stores.get("validations"),
                     )
+
+                    # get_validation_result() returns {} when no result matches the key
+                    if not isinstance(validation, ExpectationSuiteValidationResult):
+                        logger.warning(error_msg)
+                        continue
 
                     validation_success = validation.success
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
@@ -931,25 +935,23 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = f"Validation result not found: {validation_result_key.to_tuple()!s:s} - skipping"  # noqa: E501 # FIXME CoP
                     logger.warning(error_msg)
 
 
-def _resolve_asset_name(validation_results: ExpectationValidationResult) -> str | None:
+def _resolve_asset_name(validation_results: ExpectationSuiteValidationResult) -> str | None:
     """
     Resolve the asset name from the validation results meta data.
     FDS does not store data_asset_name in batch_kwargs or batch_spec and it must be
     pulled from the active batch definition.
     """
-    batch_kwargs = validation_results.meta.get("batch_kwargs", {})
-    batch_spec = validation_results.meta.get("batch_spec", {})
+    batch_kwargs = cast("dict", validation_results.meta.get("batch_kwargs", {}))
+    batch_spec = cast("dict", validation_results.meta.get("batch_spec", {}))
 
     asset_name = batch_kwargs.get("data_asset_name") or batch_spec.get("data_asset_name")
     if asset_name:
         return asset_name
     # FDS does not store data_asset_name in batch_kwargs or batch_spec
-    active_batch = validation_results.meta.get("active_batch_definition", {})
-    return active_batch.get("data_asset_name")
+    return validation_results.asset_name
 
 
 class CallToActionButton:

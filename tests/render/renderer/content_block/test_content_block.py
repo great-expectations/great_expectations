@@ -5,6 +5,13 @@ from typing import TYPE_CHECKING
 import pytest
 
 import great_expectations.expectations as gxe
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
@@ -61,6 +68,7 @@ if TYPE_CHECKING:
 def test__render_expectation_notes_with_notes(expectation: Expectation, expected: list[dict]):
     config = expectation.configuration
     content = ContentBlockRenderer._render_expectation_notes(config)
+    assert content is not None
     assert isinstance(content.collapse, list)
     notes_block = content.collapse[0]
     actual = notes_block.to_json_dict()["text"]
@@ -72,3 +80,48 @@ def test__render_expectation_notes_without_notes():
     expectation = gxe.ExpectColumnValuesToBeBetween(column="foo", min_value=1, max_value=10)
     config = expectation.configuration
     assert ContentBlockRenderer._render_expectation_notes(config) is None
+
+
+@pytest.mark.unit
+def test__get_missing_evr_content_block_fn_falls_back_to_missing_content_block_fn():
+    fn = ContentBlockRenderer._get_missing_evr_content_block_fn()
+    assert fn == ContentBlockRenderer._missing_content_block_fn
+
+
+def _raising_content_block_fn(**kwargs):
+    raise ValueError("renderer failed")
+
+
+class _RaisingContentBlockRenderer(ContentBlockRenderer):
+    _content_block_type = "bullet_list"
+
+    @classmethod
+    @override
+    def _get_content_block_fn_from_render_object(cls, obj_):
+        return _raising_content_block_fn
+
+
+class _UnrenderableContentBlockRenderer(ContentBlockRenderer):
+    _content_block_type = "bullet_list"
+
+    @classmethod
+    @override
+    def _get_content_block_fn_from_render_object(cls, obj_):
+        return None
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "renderer", [_RaisingContentBlockRenderer, _UnrenderableContentBlockRenderer]
+)
+@pytest.mark.parametrize("as_list", [True, False], ids=["list", "single"])
+def test_render_falls_back_to_missing_content_block_fn_for_an_evr(renderer, as_list):
+    evr = ExpectationValidationResult(
+        success=True,
+        expectation_config=ExpectationConfiguration(
+            type="expect_column_to_exist", kwargs={"column": "a"}
+        ),
+    )
+    # The fallback returns no content, so a list renders nothing and a single object renders [].
+    expected = None if as_list else []
+    assert renderer.render([evr] if as_list else evr) == expected

@@ -19,6 +19,7 @@ from tests.integration.test_utils.data_source_config import (
     MySQLDatasourceTestConfig,
     PostgreSQLDatasourceTestConfig,
     RedshiftDatasourceTestConfig,
+    SnowflakeDatasourceTestConfig,
     SparkFilesystemCsvDatasourceTestConfig,
 )
 from tests.integration.test_utils.data_source_config.base import DataSourceTestConfig
@@ -54,6 +55,17 @@ DATA = pd.DataFrame(
 )
 PATTERN_CODES = "pattern_codes"
 CODES_DATA = pd.DataFrame({PATTERN_CODES: ["A100", "A200", "B300"]})
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SnowflakeDatasourceTestConfig()], data=DATA
+)
+def test_unanchored_regex_matches_substring_snowflake(batch_for_datasource: Batch) -> None:
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToMatchRegexList(column=BASIC_STRINGS, regex_list=["b"])
+    )
+    assert result.result["unexpected_count"] == 2
+    assert not result.success
 
 
 @parameterize_batch_for_data_sources(data_source_configs=SUPPORTED_SQL_DATA_SOURCES, data=DATA)

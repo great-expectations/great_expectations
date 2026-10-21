@@ -8,7 +8,12 @@
 'use strict';
 
 var assert = require('assert');
-var decide = require('./decide.js').decide;
+var decideModule = require('./decide.js');
+var decide = decideModule.decide;
+var MAX_ATTEMPTS = decideModule.MAX_ATTEMPTS;
+
+// A no-op backoff so retry tests run instantly instead of waiting in real time.
+function noopSleep() { return Promise.resolve(); }
 
 var failures = 0;
 var passed = 0;
@@ -122,9 +127,11 @@ async function run() {
     check('unidentified is still echoed back (informational)', function () { assert.deepStrictEqual(result.unidentified, ['deadbeef']); });
   })();
 
-  console.log('endpoint returns non-OK for a login -> throws (job fails, no status posted)');
+  console.log('endpoint returns non-OK for every attempt -> throws after exhausting retries (job fails, no status posted)');
   await (async function () {
     var threw = false;
+    var calls = 0;
+    var fetchImpl = function (url) { calls++; return nonOkEndpoint(503)(url); };
     try {
       await decide({
         logins: ['alice'],
@@ -132,15 +139,19 @@ async function run() {
         unidentified: [],
         unidentifiedPolicy: 'fail',
         endpoint: ENDPOINT,
-        fetchImpl: nonOkEndpoint(503),
+        fetchImpl: fetchImpl,
+        sleepImpl: noopSleep,
       });
     } catch (e) { threw = true; }
     check('decide() rejects rather than returning a status', function () { assert.strictEqual(threw, true); });
+    check('the endpoint was retried MAX_ATTEMPTS times before giving up', function () { assert.strictEqual(calls, MAX_ATTEMPTS); });
   })();
 
-  console.log('endpoint fetch rejects (unreachable) -> throws (job fails, no status posted)');
+  console.log('endpoint fetch rejects on every attempt (unreachable) -> throws after exhausting retries (job fails, no status posted)');
   await (async function () {
     var threw = false;
+    var calls = 0;
+    var fetchImpl = function (url) { calls++; return rejectingEndpoint()(url); };
     try {
       await decide({
         logins: ['alice'],
@@ -148,10 +159,64 @@ async function run() {
         unidentified: [],
         unidentifiedPolicy: 'fail',
         endpoint: ENDPOINT,
-        fetchImpl: rejectingEndpoint(),
+        fetchImpl: fetchImpl,
+        sleepImpl: noopSleep,
       });
     } catch (e) { threw = true; }
     check('decide() rejects rather than returning a status', function () { assert.strictEqual(threw, true); });
+    check('the endpoint was retried MAX_ATTEMPTS times before giving up', function () { assert.strictEqual(calls, MAX_ATTEMPTS); });
+  })();
+
+  console.log('endpoint returns a transient 404 for a signed login, then succeeds on retry -> success (regression for the 404-with-no-retry bug)');
+  await (async function () {
+    var calls = 0;
+    var fetchImpl = function (url) {
+      calls++;
+      if (calls === 1) {
+        return Promise.resolve({ ok: false, status: 404, json: function () { return Promise.resolve({}); } });
+      }
+      return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ isContributor: true }); } });
+    };
+    var result = await decide({
+      logins: ['signed-user'],
+      enumerationComplete: true,
+      unidentified: [],
+      unidentifiedPolicy: 'fail',
+      endpoint: ENDPOINT,
+      fetchImpl: fetchImpl,
+      sleepImpl: noopSleep,
+    });
+    check('state is success once the retry succeeds', function () { assert.strictEqual(result.state, 'success'); });
+    check('the endpoint was queried twice (one 404, one success)', function () { assert.strictEqual(calls, 2); });
+  })();
+
+  console.log('a later login in the same call also gets retried independently of an earlier login\'s outcome');
+  await (async function () {
+    var aliceCalls = 0;
+    var bobCalls = 0;
+    var fetchImpl = function (url) {
+      if (url.indexOf('alice') !== -1) {
+        aliceCalls++;
+        return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ isContributor: true }); } });
+      }
+      bobCalls++;
+      if (bobCalls === 1) {
+        return Promise.resolve({ ok: false, status: 404, json: function () { return Promise.resolve({}); } });
+      }
+      return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ isContributor: true }); } });
+    };
+    var result = await decide({
+      logins: ['alice', 'bob'],
+      enumerationComplete: true,
+      unidentified: [],
+      unidentifiedPolicy: 'fail',
+      endpoint: ENDPOINT,
+      fetchImpl: fetchImpl,
+      sleepImpl: noopSleep,
+    });
+    check('state is success', function () { assert.strictEqual(result.state, 'success'); });
+    check('alice was queried once (no retry needed)', function () { assert.strictEqual(aliceCalls, 1); });
+    check('bob was retried once after the transient 404', function () { assert.strictEqual(bobCalls, 2); });
   })();
 
   console.log('posted state is only ever success or error, never pending/neutral/failure');
@@ -217,6 +282,7 @@ async function run() {
         unidentifiedPolicy: 'fail',
         endpoint: ENDPOINT,
         fetchImpl: fetchImpl,
+        sleepImpl: noopSleep,
       });
     } catch (e) { threw = true; }
     check('decide() rejects when any queried login is non-OK, not only the first', function () { assert.strictEqual(threw, true); });

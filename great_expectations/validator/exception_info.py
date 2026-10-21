@@ -62,7 +62,11 @@ class ExceptionInfo(SerializableDotDict):
         return self.id == other.id
 
     def __ne__(self, other):  # type: ignore[explicit-override] # FIXME
-        return not self.__eq__(other=other)
+        equal = self.__eq__(other=other)
+        if equal is NotImplemented:
+            # Let Python try the other operand's reflected comparison, then fall back to identity.
+            return NotImplemented
+        return not equal
 
     @override
     def __str__(self):

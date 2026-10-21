@@ -11,6 +11,7 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.postgresql import resolve_postgresql_driver
 from great_expectations.compatibility.sqlalchemy import Engine, inspect
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -580,7 +581,9 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
     )
     connection = None
     if sa:
-        engine = sa.create_engine(connection_string, **_engine_kwargs_for(connection_string))
+        engine = sa.create_engine(
+            resolve_postgresql_driver(connection_string), **_engine_kwargs_for(connection_string)
+        )
     else:
         logger.debug(
             "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "  # noqa: E501 # FIXME CoP
@@ -769,7 +772,7 @@ def check_athena_table_count(
     Helper function used by awsathena integration test. Checks whether expected number of tables exist in database
     """  # noqa: E501 # FIXME CoP
     if sa:
-        engine = sa.create_engine(connection_string)
+        engine = sa.create_engine(resolve_postgresql_driver(connection_string))
     else:
         logger.debug(
             "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "  # noqa: E501 # FIXME CoP
@@ -799,7 +802,7 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     Helper function used by awsathena integration test. Cleans up "temp" tables that were created.
     """
     if sa:
-        engine = sa.create_engine(connection_string)
+        engine = sa.create_engine(resolve_postgresql_driver(connection_string))
     else:
         logger.debug(
             "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "  # noqa: E501 # FIXME CoP

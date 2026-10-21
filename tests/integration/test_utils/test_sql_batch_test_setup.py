@@ -339,7 +339,8 @@ class TestSharedDefaultTypesSayWhatTheyMean:
         default_float = sql_module.inferrable_types_for(_BASE_SPEC)[float]
         instance = default_float() if isinstance(default_float, type) else default_float
 
-        assert isinstance(instance, sa.Numeric), (
+        # Float is a subclass of Numeric before SQLAlchemy 2.1 and a sibling of it from 2.1 on.
+        assert isinstance(instance, (sa.Numeric, sa.Float)), (
             f"the shared default for `float` is {instance!r}, which is not a numeric type at all"
         )
         states_its_own_width = (

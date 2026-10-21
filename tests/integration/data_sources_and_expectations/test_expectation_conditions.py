@@ -12,6 +12,7 @@ from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.expectations.row_conditions import (
     Column,
     PassThroughCondition,
+    RowConditionType,
 )
 from tests.integration.conftest import parameterize_batch_for_data_sources
 from tests.integration.test_utils.data_source_config import (
@@ -176,6 +177,51 @@ def test_expect_column_min_to_be_between__pandas_row_condition(
         column="amount",
         min_value=0.5,
         max_value=1.5,
+        row_condition=row_condition,
+        condition_parser="pandas",
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success
+
+
+COLUMN_NAME_NEEDS_ESCAPING_DATA = pd.DataFrame(
+    {
+        "Total Amount": [1.0, 2.0, 3.0],
+        "name": ["albert", "issac", "galileo"],
+    }
+)
+
+
+@pytest.mark.parametrize(
+    "row_condition,expected_min",
+    [
+        pytest.param(Column("Total Amount") > 1.5, 2.0, id="greater-than"),
+        pytest.param(Column("Total Amount") < 2.5, 1.0, id="less-than"),
+        pytest.param(Column("Total Amount").is_in([2.0, 3.0]), 2.0, id="in"),
+        pytest.param(Column("Total Amount").is_not_in([1.0]), 2.0, id="not-in"),
+        pytest.param(Column("Total Amount").is_not_null(), 1.0, id="not-null"),
+        pytest.param((Column("Total Amount") > 1.5) & (Column("name") == "issac"), 2.0, id="and"),
+        pytest.param(
+            (Column("Total Amount") == 1.0) | (Column("Total Amount") == 3.0), 1.0, id="or"
+        ),
+    ],
+)
+@parameterize_batch_for_data_sources(
+    data_source_configs=[PandasDataFrameDatasourceTestConfig()],
+    data=COLUMN_NAME_NEEDS_ESCAPING_DATA,
+)
+def test_pandas_row_condition_on_column_name_needing_escaping(
+    batch_for_datasource: Batch, row_condition: RowConditionType, expected_min: float
+) -> None:
+    """``DataFrame.query`` parses its expression, so a spaced column name needs backticks.
+
+    The expected minimum is what makes these cases discriminating: it holds only if the condition
+    filtered the rows it should have, so an unparsed or dropped filter fails the same assertion.
+    """
+    expectation = gxe.ExpectColumnMinToBeBetween(
+        column="Total Amount",
+        min_value=expected_min,
+        max_value=expected_min,
         row_condition=row_condition,
         condition_parser="pandas",
     )

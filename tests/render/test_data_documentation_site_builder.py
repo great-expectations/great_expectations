@@ -1,4 +1,6 @@
+import logging
 import os
+import re
 import shutil
 
 import pytest
@@ -107,3 +109,34 @@ def test_site_builder_renders_a_page_per_validation_result(tmp_path):
 
     pages = list(tmp_path.glob("**/data_docs/local_site/validations/**/*.html"))
     assert len(pages) == len(results)
+
+
+@pytest.mark.parametrize("flag", ["cloud_mode", "ge_cloud_mode"])
+def test_site_builder_refuses_cloud_mode(flag):
+    from great_expectations.data_context.data_context.cloud_data_context import SHUTDOWN_MESSAGE
+    from great_expectations.exceptions import GreatExpectationsError
+    from great_expectations.render.renderer.site_builder import SiteBuilder
+
+    with pytest.raises(GreatExpectationsError, match=re.escape(SHUTDOWN_MESSAGE)):
+        SiteBuilder(data_context=None, store_backend={}, **{flag: True})
+
+
+def test_site_index_skips_a_validation_result_the_context_cannot_find(
+    tmp_path, monkeypatch, caplog
+):
+    suite_name = "my_suite"
+    context = get_context(mode="file", project_root_dir=str(tmp_path))
+    context.suites.add(ExpectationSuite(name=suite_name))
+    key = ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier(name=suite_name),
+        run_id=RunIdentifier(run_name="a_run", run_time="2026-01-01T00:00:00Z"),
+        batch_identifier="my_batch",
+    )
+    context.validation_results_store.add(key, _validation_result(suite_name, {}))
+    # get_validation_result() returns {} when no result matches the key
+    monkeypatch.setattr(context, "get_validation_result", lambda **kwargs: {})
+
+    with caplog.at_level(logging.WARNING):
+        context.build_data_docs()
+
+    assert f"Validation result not found: {key.to_tuple()!s:s} - skipping" in caplog.messages

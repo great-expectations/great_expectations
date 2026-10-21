@@ -9,6 +9,7 @@ import great_expectations.expectations as gxe
 from great_expectations import ExpectationSuite
 from great_expectations.compatibility import pydantic, pyspark
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
+from great_expectations.compatibility.sqlalchemy import sqltypes
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
@@ -389,3 +390,21 @@ def test_include_unexpected_rows_sql(batch_for_datasource: Batch) -> None:
     unexpected_rows_str = str(unexpected_rows_data)
     assert "1" in unexpected_rows_str
     assert "5" in unexpected_rows_str
+
+
+# NUMERIC, so PostgreSQL returns the unexpected value as Decimal("Infinity"). Serializing
+# the result is the step a checkpoint run takes, and it used to raise here.
+@parameterize_batch_for_data_sources(
+    data_source_configs=[
+        PostgreSQLDatasourceTestConfig(column_types={NUMERIC_COLUMN: sqltypes.NUMERIC})
+    ],
+    data=pd.DataFrame({NUMERIC_COLUMN: [1.5, 2.5, float("inf")]}),
+)
+def test_infinite_decimal_is_unexpected_and_serializes(batch_for_datasource: Batch) -> None:
+    expectation = gxe.ExpectColumnValuesToBeBetween(column=NUMERIC_COLUMN, max_value=10)
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+    assert not result.success
+    assert result.result["unexpected_count"] == 1
+    json_result = result.to_json_dict()["result"]
+    assert isinstance(json_result, dict)
+    assert json_result["unexpected_list"] == [float("inf")]

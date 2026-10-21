@@ -34,6 +34,7 @@ from .expect_column_quantile_values_to_be_between import (
 from .expect_column_stdev_to_be_between import ExpectColumnStdevToBeBetween
 from .expect_column_sum_to_be_between import ExpectColumnSumToBeBetween
 from .expect_column_to_exist import ExpectColumnToExist
+from .expect_column_type_to_be import ExpectColumnTypeToBe
 from .expect_column_unique_value_count_to_be_between import (
     ExpectColumnUniqueValueCountToBeBetween,
 )

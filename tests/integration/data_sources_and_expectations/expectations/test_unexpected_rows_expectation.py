@@ -262,6 +262,41 @@ def test_unexpected_rows_expectation_join_keyword_success(
 
 
 @parameterize_batch_for_data_sources(
+    data_source_configs=[MySQLDatasourceTestConfig(), SQLServerDatasourceTestConfig()],
+    data=pd.DataFrame({"status": ["active", "active"]}),
+)
+def test_unexpected_rows_expectation_substring_join_without_join_keyword(
+    batch_for_datasource: Batch,
+) -> None:
+    """A query with no JOIN at all, where "join" only appears inside a string literal,
+    must be substituted and validated the same way any other non-join query is."""
+    expectation = gxe.UnexpectedRowsExpectation(
+        description="No JOIN keyword anywhere in this query; 'joined' is a string literal",
+        unexpected_rows_query="SELECT * FROM {batch} WHERE status = 'joined'",
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success
+    assert result.exception_info.get("raised_exception") is False
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[MySQLDatasourceTestConfig()],
+    data=pd.DataFrame({"status": ["active", "active"]}),
+)
+def test_unexpected_rows_expectation_backslash_escaped_join_without_join_keyword(
+    batch_for_datasource: Batch,
+) -> None:
+    """MySQL treats a backslash as an escape, so this is one string literal containing "join"."""
+    expectation = gxe.UnexpectedRowsExpectation(
+        description="No JOIN keyword in this query; 'join' is inside an escaped literal",
+        unexpected_rows_query="SELECT * FROM {batch} WHERE status = 'it\\'s a join'",
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success
+    assert result.exception_info.get("raised_exception") is False
+
+
+@parameterize_batch_for_data_sources(
     data_source_configs=DATA_SOURCES_THAT_DO_NOT_REQUIRE_TOP_EXPRESSION,
     data=TABLE_1,
 )

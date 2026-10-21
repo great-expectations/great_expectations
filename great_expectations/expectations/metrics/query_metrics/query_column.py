@@ -74,7 +74,7 @@ class QueryColumn(QueryMetricProvider):
 
         df.createOrReplaceTempView("tmp_view")
         column: Optional[str] = metric_value_kwargs.get("column")
-        query = query.format(col=column, batch="tmp_view")
+        query = cls._format_query(query, col=column, batch="tmp_view")
 
         engine: pyspark.SparkSession = execution_engine.spark
         result: List[pyspark.Row] = engine.sql(query).limit(MAX_RESULT_RECORDS).collect()

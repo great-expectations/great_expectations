@@ -162,10 +162,20 @@ def _cleanup(
 ) -> Generator[None, None, None]:
     """Fixture to do all teardown at the end of the test session."""
     yield
-    for batch_setup in _cached_test_configs.values():
-        batch_setup.teardown()
-    for batch_setup in _cached_secondary_test_configs.values():
-        batch_setup.teardown()
+    # Attempt every teardown even when one fails: stopping at the first failure would leave
+    # every remaining setup's resources (e.g. schemas) behind on the backend.
+    failures: list[BaseException] = []
+    for batch_setup in [
+        *_cached_test_configs.values(),
+        *_cached_secondary_test_configs.values(),
+    ]:
+        try:
+            batch_setup.teardown()
+        except Exception as e:
+            logger.exception(f"Teardown failed for {type(batch_setup).__name__}")
+            failures.append(e)
+    if failures:
+        raise RuntimeError(f"{len(failures)} batch setup teardown(s) failed") from failures[0]
 
 
 @pytest.fixture

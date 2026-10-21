@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from great_expectations.compatibility.not_imported import NotImported
 
 SQLALCHEMY_BIGQUERY_NOT_IMPORTED = NotImported(
@@ -111,3 +113,32 @@ try:
     from sqlalchemy_bigquery import parse_url
 except (ImportError, AttributeError):
     parse_url = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
+
+
+def _render_double_as_float64() -> None:
+    """Render SQLAlchemy's generic `Double` type as BigQuery's `FLOAT64`.
+
+    BigQuery has no `DOUBLE` type; `FLOAT64` is its only binary floating-point type.
+    sqlalchemy-bigquery renders `Float` as `FLOAT64` but has no rule for `Double`, which
+    therefore falls through to the generic `DOUBLE`: invalid in a CAST or a column
+    definition, and rejected as the declared type of a query parameter. SQLAlchemy 2.1
+    types every Python `float` bind parameter as `Double` (2.0 used `Float`), so without
+    this rule any query comparing against a float literal fails on BigQuery with
+    "The given parameter type, DOUBLE, ... is not a valid BigQuery scalar type".
+
+    The rule applies only when compiling for the BigQuery dialect.
+    """
+    try:
+        from sqlalchemy.ext.compiler import compiles
+        from sqlalchemy.types import Double
+    except ImportError:
+        # SQLAlchemy 1.4 has no generic `Double`, and binds Python floats as `Float`.
+        return
+
+    @compiles(Double, "bigquery")
+    def _compile_double(type_: Double, compiler: Any, **kw: Any) -> str:
+        return compiler.visit_FLOAT(type_, **kw)
+
+
+if sqlalchemy_bigquery:
+    _render_double_as_float64()

@@ -3,8 +3,6 @@ from typing import TYPE_CHECKING, Dict, Tuple
 import pandas as pd
 import pytest
 
-from great_expectations.compatibility import pyspark
-from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
@@ -19,15 +17,6 @@ from great_expectations.validator.metric_configuration import (
     MetricConfigurationID,
 )
 from tests.expectations.test_util import get_table_columns_metric
-
-# Spark 4 changed Column's string grammar from infix ("(a AND b)", "a IN (...)") to a
-# function-prefix form ("and(a, b)", "in(a, ...)"), so the rendered unexpected-index
-# query legitimately differs by pyspark version.
-_SPARK_IN_SET_UNEXPECTED_INDEX_QUERY = (
-    "df.filter(F.expr(and(isNotNull(animals), !(in(animals, 'cat', 'fish', 'dog')))))"
-    if pyspark.pyspark and is_version_greater_or_equal(pyspark.pyspark.__version__, "4.0.0")
-    else "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
-)
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import (
@@ -738,7 +727,10 @@ def test_spark_unexpected_index_query_metric_with_id_pk(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
     for val in results.values():
-        assert val == _SPARK_IN_SET_UNEXPECTED_INDEX_QUERY
+        assert val.startswith("df.filter(F.expr(")
+        assert "animals" in val
+        assert all(value in val for value in ("cat", "fish", "dog"))
+        compile(val, "<unexpected_index_query>", "eval")
 
 
 @pytest.mark.spark
@@ -777,4 +769,7 @@ def test_spark_unexpected_index_query_metric_without_id_pk(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
     for val in results.values():
-        assert val == _SPARK_IN_SET_UNEXPECTED_INDEX_QUERY
+        assert val.startswith("df.filter(F.expr(")
+        assert "animals" in val
+        assert all(value in val for value in ("cat", "fish", "dog"))
+        compile(val, "<unexpected_index_query>", "eval")

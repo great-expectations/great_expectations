@@ -9,6 +9,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.owner_resolution import owner_from_batch_definition
 from great_expectations.core.result_format import (
     DEFAULT_RESULT_FORMAT,
     ResultFormat,
@@ -46,7 +47,13 @@ class Validator:
         self._batch_parameters = batch_parameters
         self.result_format = result_format
 
-        self._get_validator = project_manager.get_validator
+        # A batch definition that belongs to a Data Context builds its validator through that
+        # context, so its data source is looked up among that context's own data sources.
+        # One that belongs to no context builds it through the current one (GX issue #12209).
+        owner = owner_from_batch_definition(batch_definition)
+        self._get_validator = (
+            owner.get_validator if owner is not None else project_manager.get_validator
+        )
         self._wrapped_validator_cache: Optional[OldValidator] = None
         self._wrapped_validator_lock = threading.RLock()
 

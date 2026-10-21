@@ -1394,9 +1394,12 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
             },
         }
         if init_temp_docs_sites:
-            temp_dir = tempfile.TemporaryDirectory()
-            path = temp_dir.name
-            logger.info(f"Created temporary directory '{path}' for ephemeral docs site")
+            # Only the unique path is needed here; the docs site creates its directory when it is
+            # first built. Removing the directory explicitly, rather than letting the
+            # TemporaryDirectory be garbage collected, avoids the ResourceWarning that an
+            # implicit cleanup emits.
+            with tempfile.TemporaryDirectory() as path:
+                logger.info(f"Created temporary directory '{path}' for ephemeral docs site")
             self.data_docs_sites[DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value][  # type: ignore[index] # FIXME CoP
                 "store_backend"
             ]["base_directory"] = path

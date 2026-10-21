@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 import versioneer
 
-SUPPORTED_PYTHON = ">=3.10,<3.14"
+SUPPORTED_PYTHON = ">=3.10,<3.15"
 
 
 def parse_requirements(file_path: Path) -> List[str]:
@@ -37,7 +37,8 @@ def parse_requirements(file_path: Path) -> List[str]:
 
 def get_python_requires() -> str:
     """
-    If the GX_PYTHON_EXPERIMENTAL environment variable is set,
+    Python 3.15 and later are experimental: they are refused unless the
+    GX_PYTHON_EXPERIMENTAL environment variable is set. If it is set,
     return a version with no upper-bound.
     """
     if os.getenv("GX_PYTHON_EXPERIMENTAL"):
@@ -195,6 +196,7 @@ config = {
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ],
 }
 

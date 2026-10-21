@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 from dateutil.parser import parse
 
+from great_expectations.compatibility.postgresql import resolve_postgresql_driver
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -223,7 +224,8 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
                 # noinspection PyUnresolvedReferences
                 return _required_dialect("teradatasqlalchemy.dialect")
             else:
-                return sa.create_engine(self._connection_string).dialect
+                assert self._connection_string is not None
+                return sa.create_engine(resolve_postgresql_driver(self._connection_string)).dialect
 
     mock_execution_engine: MockSqlAlchemyExecutionEngine = MockSqlAlchemyExecutionEngine(
         dialect_name=dialect_name

@@ -34,6 +34,7 @@ from typing_extensions import Annotated, Never, Self
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import deprecated_argument, public_api
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.postgresql import resolve_postgresql_driver
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
@@ -89,6 +90,9 @@ from great_expectations.execution_engine.partition_and_sample.data_partitioner i
 )
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
     SqlAlchemyDataPartitioner,
+)
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     _query_text_as_subquery,
@@ -1493,7 +1497,7 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                self._engine = self._create_engine()
+                self._engine = close_connections_when_collected(self._create_engine())
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501 # FIXME CoP
                 # one possible case is a missing plugin (e.g. psycopg2)
@@ -1514,7 +1518,7 @@ class SQLDatasource(Datasource):
         if self.__class__.__name__ == "SQLDatasource":
             _warn_for_more_specific_datasource_type(connection_string)
         kwargs = model_dict.pop("kwargs", {})
-        return sa.create_engine(connection_string, **kwargs)
+        return sa.create_engine(resolve_postgresql_driver(connection_string), **kwargs)
 
     @override
     def get_execution_engine(self) -> SqlAlchemyExecutionEngine:

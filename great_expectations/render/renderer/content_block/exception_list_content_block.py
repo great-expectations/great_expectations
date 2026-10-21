@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.render import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
@@ -60,10 +61,12 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     }
 
     @classmethod
+    @override
     def render(cls, render_object, **kwargs):
         return super().render(render_object=render_object, exception_list_content_block=True)
 
     @classmethod
+    @override
     def _missing_content_block_fn(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -74,6 +77,8 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
+        if result is None or result.expectation_config is None:
+            return []
         # Only render EVR objects for which an exception was raised
         if result.exception_info["raised_exception"] is True:
             template_str = "$expectation_type raised an exception: $exception_message"

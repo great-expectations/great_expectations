@@ -18,7 +18,7 @@ def generate_asset_files(
     ctx: invoke.Context,
     source_csv_dir: Optional[str | pathlib.Path] = None,
     limit: int = 12,
-    year: str = 2019,
+    year: str = "2019",
 ):
     """Generate or re-generate various test asset files."""
     if not source_csv_dir:

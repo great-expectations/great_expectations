@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.expectations as gxe
+from great_expectations.compatibility.sqlalchemy import sqltypes
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
@@ -13,6 +14,7 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 )
 from tests.integration.test_utils.data_source_config import (
     ALL_DATA_SOURCES,
+    PostgreSQLDatasourceTestConfig,
 )
 
 COL_NAME = "my_col"
@@ -271,3 +273,15 @@ def test_expect_column_max_to_be_between__date(batch_for_datasource: Batch) -> N
     )
     result = batch_for_datasource.validate(expectation)
     assert result.success
+
+
+# NUMERIC, so PostgreSQL returns the maximum as Decimal("Infinity") rather than a float.
+@parameterize_batch_for_data_sources(
+    data_source_configs=[PostgreSQLDatasourceTestConfig(column_types={COL_NAME: sqltypes.NUMERIC})],
+    data=pd.DataFrame({COL_NAME: [1.5, 2.5, float("inf")]}),
+)
+def test_infinite_decimal_max(batch_for_datasource: Batch) -> None:
+    expectation = gxe.ExpectColumnMaxToBeBetween(column=COL_NAME, min_value=1)
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+    assert result.success
+    assert result.to_json_dict()["result"] == {"observed_value": float("inf")}

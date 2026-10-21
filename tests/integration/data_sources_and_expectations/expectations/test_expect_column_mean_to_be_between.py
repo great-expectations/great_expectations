@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.expectations as gxe
+from great_expectations.compatibility.sqlalchemy import sqltypes
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
@@ -10,6 +11,7 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 )
 from tests.integration.test_utils.data_source_config import (
     ALL_DATA_SOURCES,
+    PostgreSQLDatasourceTestConfig,
 )
 
 COL_NAME = "my_col"
@@ -156,3 +158,15 @@ def test_success_with_suite_param_strict_max_(
         expectation, expectation_parameters={suite_param_key: suite_param_value}
     )
     assert result.success == expected_result
+
+
+# NUMERIC, so PostgreSQL returns the mean as Decimal("Infinity") rather than a float.
+@parameterize_batch_for_data_sources(
+    data_source_configs=[PostgreSQLDatasourceTestConfig(column_types={COL_NAME: sqltypes.NUMERIC})],
+    data=pd.DataFrame({COL_NAME: [1.5, 2.5, float("inf")]}),
+)
+def test_infinite_decimal_mean(batch_for_datasource: Batch) -> None:
+    expectation = gxe.ExpectColumnMeanToBeBetween(column=COL_NAME, min_value=1)
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+    assert result.success
+    assert result.to_json_dict()["result"] == {"observed_value": float("inf")}

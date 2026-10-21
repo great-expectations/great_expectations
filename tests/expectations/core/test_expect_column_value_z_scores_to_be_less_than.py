@@ -13,7 +13,7 @@ def z_score_validation_result():
     return ExpectationValidationResult(
         success=True,
         expectation_config={
-            "expectation_type": "expect_column_value_z_scores_to_be_less_than",
+            "type": "expect_column_value_z_scores_to_be_less_than",
             "kwargs": {
                 "column": "a",
                 "mostly": 0.9,

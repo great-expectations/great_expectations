@@ -658,6 +658,10 @@ def requires_lossy_conversion(d: decimal.Decimal) -> bool:
     """
     This method determines whether or not conversion from "decimal.Decimal" to standard "float" type cannot be lossless.
     """  # noqa: E501 # FIXME CoP
+    # An infinity converts exactly to float("inf"), but the subtraction below would be
+    # Infinity - Infinity, which signals decimal.InvalidOperation instead of returning a bool.
+    if d.is_infinite():
+        return False
     return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
 
 

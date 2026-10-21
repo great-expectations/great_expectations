@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     _style_row_condition,
@@ -186,7 +187,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501 # FIXME CoP
 
-    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
+    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)  # type: ignore[assignment] # wider than the base List so tuples stay accepted
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
@@ -241,6 +242,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
             )
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -284,6 +286,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_suite_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -295,7 +298,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column_list",
                 "ignore_row_if",

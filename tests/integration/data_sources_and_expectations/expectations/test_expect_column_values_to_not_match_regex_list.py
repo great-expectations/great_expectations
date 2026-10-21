@@ -51,6 +51,17 @@ SUPPORTED_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
 ]
 
 
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SnowflakeDatasourceTestConfig()], data=DATA
+)
+def test_unanchored_regex_matches_substring_snowflake(batch_for_datasource: Batch) -> None:
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToNotMatchRegexList(column=COL_B, regex_list=["a"])
+    )
+    assert result.result["unexpected_count"] == 1
+    assert not result.success
+
+
 @parameterize_batch_for_data_sources(data_source_configs=SUPPORTED_DATA_SOURCES, data=DATA)
 def test_golden_path(batch_for_datasource: Batch) -> None:
     expectation = gxe.ExpectColumnValuesToNotMatchRegexList(column=COL_A, regex_list=["x.", "a.."])

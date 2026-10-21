@@ -230,9 +230,25 @@ def _get_potential_sqlalchemy_types(
             types.append(potential_type)
     except AttributeError:
         logger.debug(f"Unrecognized type: {expected_type}")
+    # A dialect module also exports submodules and functions (sqlite and mysql export a `json`
+    # module); only classes can be compared with isinstance.
+    types = [potential_type for potential_type in types if inspect.isclass(potential_type)]
     if len(types) == 0:
         logger.debug("No recognized sqlalchemy types in type_list for current dialect.")
 
+    return _include_floating_point_in_numeric(types)
+
+
+def _include_floating_point_in_numeric(types: list) -> list:
+    """Let an expected "Numeric" match floating-point columns on every SQLAlchemy version.
+
+    SQLAlchemy 2.1 moved Float, and with it every dialect's floating-point type, out from
+    under Numeric. Before 2.1 a floating-point column is an instance of Numeric, so an
+    expectation naming "Numeric" matched it; adding Float keeps that result on 2.1 and
+    changes nothing earlier, where Float is already a Numeric.
+    """
+    if sa.Numeric in types and sa.Float not in types:
+        return [*types, sa.Float]
     return types
 
 

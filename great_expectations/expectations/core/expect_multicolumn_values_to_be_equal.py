@@ -211,7 +211,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
     _library_metadata = library_metadata
 
     map_metric = "multicolumn_values.equal"
-    success_keys = (  # type: ignore[assignment] # FIXME CoP
+    success_keys = (
         "column_list",
         "ignore_row_if",
         "mostly",

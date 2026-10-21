@@ -107,6 +107,71 @@ def apply_dateutil_parse(column):
     return column.withColumn(col_name, _udf(col_name))
 
 
+def _end_of_backticked_segment(identifier: str, start: int) -> Optional[int]:
+    """Return the index just past the backtick that closes the segment opened at ``start``.
+
+    Doubled backticks inside the segment are escapes, not the close. Returns
+    None when the segment is never closed.
+    """
+    j = start + 1
+    while True:
+        j = identifier.find("`", j)
+        if j == -1:
+            return None
+        if identifier[j + 1 : j + 2] != "`":
+            return j + 1
+        j += 2
+
+
+def _split_spark_identifier_path(identifier: str) -> Optional[List[str]]:
+    """Split a column reference into its dot-separated path segments.
+
+    A segment wrapped in backticks is kept whole, dots and doubled backticks
+    included. Returns None when the reference is not a well-formed path (an
+    unterminated backtick segment, or an empty segment).
+    """
+    segments: List[str] = []
+    i, n = 0, len(identifier)
+    while True:
+        if identifier.startswith("`", i):
+            end = _end_of_backticked_segment(identifier, i)
+            if end is None or (end < n and identifier[end] != "."):
+                return None
+        else:
+            dot = identifier.find(".", i)
+            end = n if dot == -1 else dot
+        if end == i:
+            return None
+        segments.append(identifier[i:end])
+        if end == n:
+            return segments
+        i = end + 1  # skip the separating dot
+        if i == n:
+            return None
+
+
+def _quote_spark_identifier(identifier: str) -> str:
+    """Quote a column reference for use inside a Spark SQL expression.
+
+    The reference is read as a dot-separated path, the same way Spark reads an
+    unquoted name, and each segment is backticked on its own. A nested struct
+    field like ``address.city`` therefore still resolves as struct access, while
+    a segment containing spaces, hyphens or other non-identifier characters
+    parses as a single identifier. Segments arriving already backticked (a flat
+    name containing a dot is backticked upstream) pass through untouched;
+    embedded backticks in any other segment are doubled.
+    """
+    segments = _split_spark_identifier_path(identifier)
+    if segments is None:
+        return "`" + identifier.replace("`", "``") + "`"
+    return ".".join(
+        segment
+        if segment.startswith("`") and segment.endswith("`") and len(segment) >= 2  # noqa: PLR2004
+        else "`" + segment.replace("`", "``") + "`"
+        for segment in segments
+    )
+
+
 @deprecated_argument(
     argument_name="force_reuse_spark_context",
     version="1.0",
@@ -876,14 +941,14 @@ illegal.  Please check your config."""  # noqa: E501 # FIXME CoP
         if filter_null:
             filter_conditions.append(
                 RowCondition(
-                    condition=f"{column} IS NOT NULL",
+                    condition=f"{_quote_spark_identifier(column)} IS NOT NULL",
                     condition_type=RowConditionParserType.SPARK_SQL,
                 )
             )
         if filter_nan:
             filter_conditions.append(
                 RowCondition(
-                    condition=f"NOT isnan({column})",
+                    condition=f"NOT isnan({_quote_spark_identifier(column)})",
                     condition_type=RowConditionParserType.SPARK_SQL,
                 )
             )
@@ -982,13 +1047,14 @@ illegal.  Please check your config."""  # noqa: E501 # FIXME CoP
         if op in (Operator.IN, Operator.NOT_IN):
             values = ", ".join(map(repr, val))
             connector = "IN" if op == Operator.IN else "NOT IN"
-            return f"{col} {connector} ({values})"
-        return f"{col} {op} {val!r}"
+            return f"{_quote_spark_identifier(col)} {connector} ({values})"
+        return f"{_quote_spark_identifier(col)} {op} {val!r}"
 
     @override
     def _nullity_condition_to_filter_clause(self, condition: NullityCondition) -> str:
         col = condition.column.name
-        return f"{col} IS NULL" if condition.is_null else f"{col} IS NOT NULL"
+        quoted_col = _quote_spark_identifier(col)
+        return f"{quoted_col} IS NULL" if condition.is_null else f"{quoted_col} IS NOT NULL"
 
     @override
     def _and_condition_to_filter_clause(self, condition: AndCondition) -> str:

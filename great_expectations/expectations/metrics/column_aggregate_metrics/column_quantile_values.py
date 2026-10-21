@@ -482,7 +482,7 @@ def _get_column_quantiles_generic_sqlalchemy(
             quantiles_query_approx: sqlalchemy.Select = sa.select(*selects_approx).select_from(
                 selectable
             )
-            if allow_relative_error or execution_engine.engine.driver == "psycopg2":
+            if allow_relative_error or execution_engine.engine.driver in ("psycopg2", "psycopg"):
                 try:
                     quantiles_results = execution_engine.execute_query(
                         quantiles_query_approx

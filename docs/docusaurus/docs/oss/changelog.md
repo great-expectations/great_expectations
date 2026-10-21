@@ -45,7 +45,163 @@ This table lists every deprecated item, the version that deprecated it, and the 
 | `gx-redshift` install extra (alias of `redshift`) | 1.21.0 | 2.0.0 | `great_expectations[redshift]` |
 | `CloudDataContext` and cloud mode of `get_context(...)` | 1.18.0 | 2.0.0 | `gx.get_context(mode="file")` or `mode="ephemeral"` |
 
+### 1.24.0 (2026-10-07)
+
+Compatibility: Python `<3.14,>=3.10` → `<3.15,>=3.10`; `numpy` added (`python_version >= "3.14"`); `pandas` added (`python_version >= "3.14"`); `pydantic` added (`python_version >= "3.14"`)
+
+#### Highlights
+
+- **Python 3.14 support** — Great Expectations now installs and runs on Python 3.14, and the supported range is Python 3.10 through 3.14. On Python 3.14 installs resolve numpy 2.3.2 or later, pandas 2.3.3 or later, and pydantic 2.13.0 or later. The `clickhouse` and `teradata` extras are not supported on 3.14, and Python 3.15 and later still require `GX_PYTHON_EXPERIMENTAL`. ([#12280](https://github.com/fivetran/great_expectations/pull/12280))
+
+  ```python
+  pip install great_expectations  # now works on Python 3.14
+  ```
+
+- **New Expectation: ExpectColumnTypeToBe** — A schema-level Expectation that checks a column's declared type, separate from the row-level `ExpectColumnValuesToBeOfType`. It works on pandas, SQLAlchemy and Spark, returns only `observed_value` in its result, and reports `success=False` with `observed_value=None` for a missing column. Note that pandas 3 infers different default dtypes than pandas 2 for string and datetime columns, so re-check `type_` when upgrading pandas. ([#12186](https://github.com/fivetran/great_expectations/pull/12186))
+
+  ```python
+  import great_expectations.expectations as gxe
+
+  batch.validate(gxe.ExpectColumnTypeToBe(column="order_id", type_="int64"))
+  ```
+
+- **Escape character for the LIKE pattern Expectations** — The four LIKE pattern Expectations accept an optional single-character `escape`, which emits an `ESCAPE` clause so `_` and `%` can be matched literally and identically across backends. Omitting it produces exactly the SQL generated before. BigQuery and ClickHouse raise a clear error naming the dialect, because neither supports a usable ESCAPE clause; escape wildcards with a backslash inside the pattern there instead. Both renderers now disclose the escape character. ([#12154](https://github.com/fivetran/great_expectations/pull/12154))
+
+  ```python
+  import great_expectations.expectations as gxe
+
+  gxe.ExpectColumnValuesToMatchLikePattern(column="c", like_pattern="a!_b", escape="!")
+  ```
+
+- **Objects now resolve through the Data Context that owns them** — With more than one Data Context in a process, expectation suites, validation definitions, checkpoints, batch definitions, the validator and a checkpoint's actions now read, write and run against the context they came from rather than whichever context happens to be current. Data Docs are built into the owning context's site, `${VARIABLE}` references in Slack, Teams and Email settings resolve from the owning context's configuration, and a "not found" error for an object that belongs to no context now names the context the lookup consulted. An object that belongs to no context still resolves through the current one. ([#12297](https://github.com/fivetran/great_expectations/pull/12297), [#12298](https://github.com/fivetran/great_expectations/pull/12298), [#12302](https://github.com/fivetran/great_expectations/pull/12302), [#12303](https://github.com/fivetran/great_expectations/pull/12303))
+
+  ```python
+  c1 = gx.get_context(mode="ephemeral")
+  suite = c1.suites.add(gx.ExpectationSuite(name="my_suite"))
+  c2 = gx.get_context(mode="ephemeral")  # c2 is now current
+  suite.add_expectation(...)  # still lands in c1
+  ```
+
+- **Database URLs are masked without being mangled** — `PasswordMasker.mask_db_url` keeps every part of a database URL except the secrets: query strings, fragments, IPv6 brackets and empty authorities survive, absent usernames and hosts are no longer printed as `None`, and passwords containing `/`, `?` or `#` no longer raise. Credentials passed as query parameters (`password=`, `odbc_connect=`, `private_key_file_pwd=`) are now masked on both code paths, with an allowlist of safe-to-display parameter names, and any value that is not a `<scheme>://...` URL is masked whole. ([#12242](https://github.com/fivetran/great_expectations/pull/12242))
+
+- **Column names with spaces, hyphens, dots or keywords work in row conditions** — On pandas and on Spark, a `row_condition` referring to a column whose name is not a bare identifier is now escaped before it reaches the query engine, so names such as `"Total Amount"`, `"a.b"`, `"x-y"`, `"from"` and `"Incident Number"` filter the rows they name instead of raising a syntax error or silently validating the wrong rows. ([#12238](https://github.com/fivetran/great_expectations/pull/12238), [#12285](https://github.com/fivetran/great_expectations/pull/12285))
+
+  ```python
+  gxe.ExpectColumnValuesToNotBeNull(
+      column="status",
+      row_condition=Column("Total Amount") > 15,
+  )
+  ```
+
+#### Changes
+
+##### Features
+
+- The four LIKE pattern Expectations accept an optional single-character `escape` that emits an `ESCAPE` clause so `_` and `%` can be matched literally and portably; BigQuery and ClickHouse raise a clear error naming the dialect, and omitting `escape` produces exactly the SQL generated before. ([#12154](https://github.com/fivetran/great_expectations/pull/12154))
+- Added `ExpectColumnTypeToBe`, a batch-level Expectation that checks a column's declared type on pandas, SQLAlchemy and Spark, reporting only `observed_value` and returning `success=False` with `observed_value=None` for a missing column. ([#12186](https://github.com/fivetran/great_expectations/pull/12186))
+- Added support for Python 3.14: the supported range is now 3.10 to 3.14 with dependency floors for numpy, pandas and pydantic on 3.14, and four comparison fixes also change behavior on 3.10 to 3.13 — `CaseInsensitiveString` no longer compares equal to arbitrary non-string objects, `ExceptionInfo` inequality defers to the other operand, `ExpectationConfiguration.isEquivalentTo` returns `False` for non-configurations, and `ExpectationValidationResult` equality no longer raises when its expectation config is a plain dict. The `clickhouse` and `teradata` extras are not supported on 3.14. ([#12280](https://github.com/fivetran/great_expectations/pull/12280))
+
+##### Bug fixes
+
+- On Spark, column names that are not bare SQL identifiers are quoted in generated filter strings, so a hyphenated name such as `id-n` no longer silently validates the wrong rows and a spaced name such as `Incident Number` no longer raises a parse error. ([#12285](https://github.com/fivetran/great_expectations/pull/12285))
+- A checkpoint's actions now run against the Data Context that owns the checkpoint: Data Docs are built into that context's site, Data Docs URLs are looked up there, and `${VARIABLE}` references in Slack, Teams and Email settings resolve from its configuration. An action run directly, outside a checkpoint, still resolves through the current context. ([#12303](https://github.com/fivetran/great_expectations/pull/12303))
+- Validation definitions, checkpoints, batch definitions and the validator now run, save and check freshness against the Data Context that owns them, so with two contexts in one process an object no longer reports "has changed since it has last been saved", writes results to the wrong project, or validates another context's data source of the same name. ([#12302](https://github.com/fivetran/great_expectations/pull/12302))
+- Masked database URLs keep their query string, fragment, IPv6 brackets and empty authority, no longer invent `None` usernames or hosts, no longer raise on passwords containing `/`, `?` or `#`, and now mask credentials passed as query parameters on both masking paths; values that are not URLs are masked whole. ([#12242](https://github.com/fivetran/great_expectations/pull/12242))
+- An Expectation Suite obtained from a Data Context now reads and writes through that context, so `add_expectation`, `delete_expectation` and `save` change the context the suite came from even while another is current, and `suites.add_or_update` of an existing name writes to the context whose factory was called. ([#12298](https://github.com/fivetran/great_expectations/pull/12298))
+- A "not found" error for an expectation suite, validation definition, checkpoint or batch definition that belongs to no Data Context now names the context the lookup consulted, and the batch definition miss message no longer nests a whole sentence inside the name. ([#12297](https://github.com/fivetran/great_expectations/pull/12297))
+- SQLite engines that GX creates now close their pooled database connections once the engine is collected, so on Python 3.13 and later users no longer see `ResourceWarning: unclosed database` from a GX SQL datasource or execution engine going out of scope. ([#12301](https://github.com/fivetran/great_expectations/pull/12301))
+- A `row_condition` may now contain single quotes, so conditions such as `col == 'value'` are accepted instead of raising an invalid-configuration error; the newline restriction is unchanged. ([#12258](https://github.com/fivetran/great_expectations/pull/12258))
+- `ExpectColumnValuesToBeInSet` on SQL backends ignores `None` entries in `value_set`, so values outside the set are flagged as unexpected instead of every row passing, matching pandas behavior; the unexpected-index query no longer renders a NULL literal. ([#12277](https://github.com/fivetran/great_expectations/pull/12277))
+- `ExpectColumnValuesToBeIncreasing` and `ExpectColumnValuesToBeDecreasing` on pandas now compare a datetime column's differences against a zero of the matching dtype, so a correctly ordered datetime column succeeds instead of reporting every row as unexpected. ([#12270](https://github.com/fivetran/great_expectations/pull/12270))
+- `column.standard_deviation` and `ExpectColumnStdevToBeBetween` now work on a SQLite database added with `add_sql`, returning the sample standard deviation instead of raising `no such function: stddev_samp`; `add_sqlite` behavior is unchanged. ([#12212](https://github.com/fivetran/great_expectations/pull/12212))
+- The `unexpected_index_query` produced for Spark results is now a valid Python expression with the condition rendered as a quoted SQL string, so it parses and evaluates, including for in-set and regex conditions; where Spark cannot resolve the condition the quoted display string is used as a fallback. ([#12220](https://github.com/fivetran/great_expectations/pull/12220))
+- On pandas, a `row_condition` referring to a column whose name is not a valid Python identifier — a space, dot or hyphen in the name, or a Python keyword — is now escaped with backticks, so the condition filters the intended rows instead of producing a syntax error reported as a failed validation. ([#12238](https://github.com/fivetran/great_expectations/pull/12238))
+- A query-metric or `UnexpectedRowsExpectation` query containing a literal brace — a JSON or array literal, a regex quantifier, or a LIKE pattern — now reports an error that quotes the query and explains that braces must be doubled, instead of a bare `KeyError` or `ValueError` from string formatting. ([#12236](https://github.com/fivetran/great_expectations/pull/12236))
+
+<details>
+<summary>Maintenance</summary>
+
+- Bumped the docs site's proxy-addr dependency from 2.0.7 to 2.0.8. ([#12296](https://github.com/fivetran/great_expectations/pull/12296))
+- Bumped the docs site's source-map-js dependency from 1.2.1 to 1.2.2. ([#12295](https://github.com/fivetran/great_expectations/pull/12295))
+- Bumped the docs site's joi dependency from 17.13.7 to 17.13.8. ([#12294](https://github.com/fivetran/great_expectations/pull/12294))
+- Bumped the docs site's compression dependency from 1.8.1 to 1.8.2. ([#12293](https://github.com/fivetran/great_expectations/pull/12293))
+- Bumped the docs site's dompurify dependency from 3.4.13 to 3.4.16. ([#12284](https://github.com/fivetran/great_expectations/pull/12284))
+- Bumped the docs site's fast-uri dependency from 3.1.7 to 3.1.8. ([#12282](https://github.com/fivetran/great_expectations/pull/12282))
+- Bumped the docs site's brace-expansion dependency from 1.1.18 to 1.1.21. ([#12281](https://github.com/fivetran/great_expectations/pull/12281))
+- Brought the `tests/datasource` suite under the type checker by removing its mypy exclusions and fixing the reported type errors. ([#12259](https://github.com/fivetran/great_expectations/pull/12259))
+- Brought the Data Docs and Slack renderer modules under the type checker and fixed the defects it exposed: a content-block renderer now renders no content for a failed or unrenderable validation result instead of raising, the Data Docs index skips a result the context cannot find with its existing warning, and a Data Docs site configured with `cloud_mode` or `ge_cloud_mode` now raises the GX Cloud shutdown error. ([#12256](https://github.com/fivetran/great_expectations/pull/12256))
+- Added explicit `@override` decorators to the expectation-core and renderer methods mypy's explicit-override check reported, with no behavioral change. ([#12193](https://github.com/fivetran/great_expectations/pull/12193))
+- CI now defines the supported Python versions once and derives every job's interpreter matrix from that single list, with no change to which interpreters run. ([#12278](https://github.com/fivetran/great_expectations/pull/12278))
+- The CLA status check retries a transient failure from the contributor-handle endpoint up to five times before giving up, so a signed contributor's pull request no longer loses its CLA gate to an intermittent blip; the check still fails closed when every attempt fails. ([#12275](https://github.com/fivetran/great_expectations/pull/12275))
+
+</details>
+
+#### Contributors
+
+Thanks to @DhanushPillay (first contribution), @feiiiiii5, @iamdpsingh (first contribution), @ptimizeroracle, @Rodrigo-Palma (first contribution), @kamalesh404 (first contribution), @umanggarg754 (first contribution), @Star-cloud626, @krisnaparahita (first contribution), @LucasLeao18 (first contribution).
+
+### 1.23.2 (2026-09-25)
+
+Compatibility: `sqlalchemy` now `<2.1` (extras `snowflake`, `databricks`)
+
+#### Highlights
+
+- **Fixes GX on SQLAlchemy 2.1** — SQLAlchemy 2.1.0, released 2026-09-24, broke GX 1.23.1 and earlier on Python 3.11+, where every SQL extra resolves it by default. Depending on the backend, `import great_expectations` failed whenever snowflake-sqlalchemy was installed, every Databricks query failed, driverless `postgresql://` URLs could not load a driver, BigQuery queries comparing against a float failed, SQL Server reported mixed-case and upper-case tables as missing, and `expect_column_values_to_be_of_type(type_="Numeric")` failed on float columns. 1.23.2 fixes all of these: the `snowflake` and `databricks` extras stay below SQLAlchemy 2.1 until their dialects support it, and every other SQL extra runs on 2.1. Python 3.10 is unaffected, since SQLAlchemy 2.1 requires Python 3.11. If you can't upgrade yet, pin `sqlalchemy<2.1`; do the same if you install snowflake-sqlalchemy or databricks-sqlalchemy outside GX's extras. ([#12269](https://github.com/fivetran/great_expectations/pull/12269))
+
+  ```python
+  pip install --upgrade 'great_expectations[snowflake]'  # include your extras so the SQLAlchemy cap applies
+  ```
+
+- **Regex Expectations work on ClickHouse** — The four regex Expectations now run on ClickHouse, which does not support `regexp_like()`. ClickHouse is covered by integration tests for these Expectations. ([#12222](https://github.com/fivetran/great_expectations/pull/12222))
+
+  ```python
+  gx.expectations.ExpectColumnValuesToMatchRegex(column="name", regex="^A")
+  ```
+
+- **Correct substring matching for regex Expectations on Snowflake** — Snowflake's `REGEXP` operator anchors patterns to the whole value, so unanchored patterns behaved differently there than on other backends. Regex Expectations on Snowflake now use substring semantics that match every other GX backend, while preserving the user's pattern. ([#12221](https://github.com/fivetran/great_expectations/pull/12221))
+
+  ```python
+  gx.expectations.ExpectColumnValuesToMatchRegex(column="name", regex="ell")
+  ```
+
+- **Nested struct columns supported in Spark value-counts Expectations** — On the Spark engine, Expectations that rely on the `column.value_counts` metric — including `ExpectColumnMostCommonValueToBeInSet` and `ExpectColumnKLDivergenceToBeLessThan` — now work for dotted nested struct paths such as `address.city`, instead of returning an empty result with an unresolved-column error. ([#12231](https://github.com/fivetran/great_expectations/pull/12231))
+
+  ```python
+  gx.expectations.ExpectColumnMostCommonValueToBeInSet(column="address.city", value_set=["Springfield"])
+  ```
+
+#### Changes
+
+##### Bug fixes
+
+- GX works on SQLAlchemy 2.1, which broke 1.23.1 on several backends: the `snowflake` and `databricks` extras are capped below 2.1, a broken snowflake-sqlalchemy install no longer prevents `import great_expectations`, driverless `postgresql://` URLs fall back to psycopg2 when psycopg is unavailable, BigQuery renders `Double` as `FLOAT64`, SQL Server reflects mixed-case tables, the `Numeric` type name matches float columns again, and database URL masking keeps the database and query string verbatim. ([#12269](https://github.com/fivetran/great_expectations/pull/12269))
+- Validation results containing an infinite `Decimal` value — for example the maximum, mean or sum of a PostgreSQL `numeric` column or a pandas column of `Decimal` values — now serialize as float infinity instead of raising `decimal.InvalidOperation`. ([#12254](https://github.com/fivetran/great_expectations/pull/12254))
+- Regex Expectations on Snowflake now match substrings, consistent with other backends, rather than requiring the pattern to match the entire column value. ([#12221](https://github.com/fivetran/great_expectations/pull/12221))
+- `UnexpectedRowsExpectation` no longer misreads a query as containing a JOIN when the letters appear inside a string literal, a column name such as `join_date`, a quoted identifier or a comment; such queries are aliased correctly again and no longer fail with a syntax error on MySQL and SQL Server. ([#12249](https://github.com/fivetran/great_expectations/pull/12249))
+- Building validators on multiple threads no longer serializes or deadlocks on Python 3.10 and 3.11: concurrent validator construction now proceeds independently per instance while still building each validator only once. ([#12232](https://github.com/fivetran/great_expectations/pull/12232))
+- Regex Expectations now work on ClickHouse, which lacks `regexp_like()`; other SQL dialects are unchanged. ([#12222](https://github.com/fivetran/great_expectations/pull/12222))
+- Type Expectations on ClickHouse now compare and report the underlying SQL type for nullable columns instead of the `Nullable(T)` wrapper, so `ExpectColumnValuesToBeOfType` and `ExpectColumnValuesToBeInTypeList` behave as expected. ([#12219](https://github.com/fivetran/great_expectations/pull/12219))
+- The Spark `column.value_counts` metric now resolves nested struct columns such as `address.city`, so Expectations built on it return results instead of an unresolved-column error. ([#12231](https://github.com/fivetran/great_expectations/pull/12231))
+
+##### Docs
+
+- The changelog entries for releases 1.0.0 through 1.17.0 are rewritten in the structured format, and the previously missing 1.13.1 release now has its own entry. ([#12227](https://github.com/fivetran/great_expectations/pull/12227))
+- The changelog entries for releases 1.17.1 through 1.23.0 are rewritten in the structured format, and the deprecation timeline gains rows for the `gx-redshift` extra alias and for `CloudDataContext` / cloud mode of `get_context`. ([#12225](https://github.com/fivetran/great_expectations/pull/12225))
+
+<details>
+<summary>Maintenance</summary>
+
+- Redshift CI jobs are capped to three concurrent runs against the shared cluster, and test teardown now drops every test schema with retries so failed runs no longer leak schemas. No user-visible change. ([#12257](https://github.com/fivetran/great_expectations/pull/12257))
+
+</details>
+
+#### Contributors
+
+Thanks to @adimalkar, @Rayan-and-beyond (first contribution), @nanjeshramesh, @feiiiiii5, @alibro005, @pentaoa (first contribution).
+
 ### 1.23.1 (2026-09-18)
+
+**Known issue:** on Python 3.11+, this release resolves SQLAlchemy 2.1 (released 2026-09-24), which it does not support. Upgrade to 1.23.2, or pin `sqlalchemy<2.1`.
 
 #### Highlights
 

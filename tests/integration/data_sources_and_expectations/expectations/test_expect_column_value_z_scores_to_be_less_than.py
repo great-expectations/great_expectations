@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.expectations as gxe
+from great_expectations.compatibility.sqlalchemy import sqltypes
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -310,13 +311,16 @@ def test_zero_standard_deviation_on_a_numeric_dtype_column(batch_for_datasource:
     assert result.result["unexpected_count"] == 0
 
 
-# pandas only. The SQL engines cannot reach this metric at all with an infinite value:
-# `column.mean` raises decimal.InvalidOperation on PostgreSQL, from convert_decimal_to_float
-# handling a Decimal("Infinity"). That divergence is upstream of the z-score metric, in the
-# aggregate metrics, and is not something this change reaches.
+# The PostgreSQL case stores the column as NUMERIC, so the aggregates come back as
+# Decimal("Infinity"). Converting that to float used to raise decimal.InvalidOperation
+# in `column.mean`, before this metric ran (#12251).
 @pytest.mark.filterwarnings("ignore:invalid value encountered in subtract:RuntimeWarning")
 @parameterize_batch_for_data_sources(
-    data_source_configs=JUST_PANDAS_DATA_SOURCES, data=INFINITY_DATA
+    data_source_configs=[
+        *JUST_PANDAS_DATA_SOURCES,
+        PostgreSQLDatasourceTestConfig(column_types={INFINITY_COL: sqltypes.NUMERIC}),
+    ],
+    data=INFINITY_DATA,
 )
 def test_infinite_value_has_no_defined_z_score(batch_for_datasource: Batch) -> None:
     """An infinite value makes the variance undefined, so no row can be an outlier.

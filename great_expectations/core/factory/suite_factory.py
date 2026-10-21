@@ -137,7 +137,15 @@ class SuiteFactory(Factory[ExpectationSuite]):
                 pass  # expectation is new or updated
 
         suite.id = existing_suite.id
-        suite.save()
+        # Write through this factory's store, not the caller's suite: a suite built by hand
+        # belongs to no Data Context, so ``suite.save()`` would resolve to the current one,
+        # and a suite owned by another context would write back to that one (#12209). The
+        # store stamps the suite with this factory's context once the write succeeds. The steps
+        # are those of ``ExpectationSuite.save()``.
+        if self._include_rendered_content:
+            suite.render()
+        key = self._store.get_key(name=suite.name, id=suite.id)
+        self._store.update(key=key, value=suite)
 
         # Re-fetch so the returned object matches what was persisted.
         return self.get(name=suite.name)

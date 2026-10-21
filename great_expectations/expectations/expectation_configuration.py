@@ -393,10 +393,11 @@ class ExpectationConfiguration(SerializableDictDot):
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "  # noqa: E501 # FIXME CoP
                         "dict other could not be instantiated as an ExpectationConfiguration"
                     )
-                    return NotImplemented
+                    return False
             else:
-                # Delegate comparison to the other instance
-                return NotImplemented
+                # Not comparable; a plain bool, because callers use the result as a truth value
+                # and `NotImplemented` is only meaningful to the comparison operators.
+                return False
 
         if match_type == "domain":
             return all(

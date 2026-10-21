@@ -1,3 +1,7 @@
 pyarrow>=14; python_version >= "3.12"
 snowflake-connector-python>=3.5.0
 snowflake-sqlalchemy>=1.2.3,!=1.7.0
+# No stable snowflake-sqlalchemy release supports SQLAlchemy 2.1 yet: 1.11.1 subclasses
+# an ORM class that 2.1 renamed, so importing the dialect fails. Lift this once a
+# release that supports 2.1 ships.
+sqlalchemy<2.1

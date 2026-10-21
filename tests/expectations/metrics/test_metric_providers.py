@@ -529,6 +529,59 @@ def test_get_sqlalchemy_records_from_query_and_batch_selectable__query(
     mock_sqlalchemy_text.assert_called_with(expected_query)
 
 
+def _substitute_batch_into_query(query: str) -> str:
+    provider = QueryMetricProvider
+    return provider._get_substituted_batch_subquery_from_query_and_batch_selectable(
+        query=query,
+        batch_selectable=sa.select("*").select_from(sa.text("my_table")).subquery(),
+        execution_engine=MockSqlAlchemyExecutionEngine(),
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT * FROM {batch} WHERE status = 'joined'",
+        "SELECT join_date FROM {batch}",
+        "SELECT rejoined_at FROM {batch}",
+        "SELECT * FROM {batch} WHERE note = 'a JOIN b'",
+        "SELECT * FROM {batch} WHERE note = 'it''s a join'",
+        "SELECT * FROM {batch} WHERE note = 'it\\'s a join'",
+        "SELECT * FROM {batch} WHERE note = 'say \\'join\\' twice'",
+        "SELECT * FROM {batch} WHERE path = 'C:\\' AND note = 'join'",
+        'SELECT "join" FROM {batch}',
+        "SELECT `join` FROM {batch}",
+        "SELECT [join] FROM {batch}",
+        "SELECT * FROM {batch} -- join later",
+        "/* join */ SELECT * FROM {batch}",
+    ],
+)
+def test_get_substituted_batch_subquery__no_join_clause_is_aliased(query: str):
+    substituted = _substitute_batch_into_query(query)
+    assert "(SELECT * \nFROM my_table) AS subselect" in substituted
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT * FROM {batch} t1 JOIN t2 ON t1.a = t2.a",
+        "SELECT * FROM {batch} t1 join t2 ON t1.a = t2.a",
+        "SELECT * FROM {batch} t1 LEFT   JOIN t2 ON t1.a = t2.a",
+        "SELECT * FROM {batch} t1\nJOIN\n(SELECT a FROM t2) AS t2 ON t1.a = t2.a",
+        "SELECT 'joined' AS c FROM {batch} t1 JOIN t2 ON t1.a = t2.a",
+        "SELECT * FROM {batch} t1 JOIN t2 ON t1.a = 'x' -- join",
+        "SELECT * FROM {batch} t1 JOIN t2 ON t1.p = 'C:\\'",
+        "SELECT * FROM {batch} t1 JOIN t2 ON t1.a = 'it\\'s'",
+    ],
+)
+def test_get_substituted_batch_subquery__join_clause_is_left_for_user_to_alias(query: str):
+    substituted = _substitute_batch_into_query(query)
+    assert "(SELECT * \nFROM my_table)" in substituted
+    assert "AS subselect" not in substituted
+
+
 @pytest.mark.unit
 @mock.patch.object(MockResult, "fetchmany")
 def test_get_sqlalchemy_records_from_query_and_batch_selectable__record_count(

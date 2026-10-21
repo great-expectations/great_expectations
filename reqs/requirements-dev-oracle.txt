@@ -5,8 +5,9 @@
 # floor belongs on the extra rather than in the user's traceback.
 #
 # `oracle` is a member of setup.py's `sqla_keys`, which appends the shared
-# `sqlalchemy>=1.4.0` that keeps the other SQL extras installable for anyone
-# holding 1.x (see requirements-dev-redshift.txt for why that floor stays low).
+# SQLAlchemy constraint from requirements-dev-lite.txt. Its 1.4.0 floor keeps the
+# other SQL extras installable for anyone holding 1.x (see
+# requirements-dev-redshift.txt for why that floor stays low).
 # That shared constraint cannot express a per-dialect floor, so this file carries
 # it. The published extra ends up with both; they intersect at 2.0.
 oracledb>=2.4.0

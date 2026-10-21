@@ -15,6 +15,8 @@ A Data Context defines the storage location for metadata, such as your configura
 
 All scripts that utilize GX Core should start with the creation of a Data Context.
 
+`get_context()` also selects the process-wide current Data Context. An object that belongs to no Data Context resolves through the current Data Context. A process must obtain at least one Data Context through `get_context()`, or select one through `set_context()`, before it uses objects that belong to a Data Context, because a Data Context that you construct directly, such as `EphemeralDataContext(...)` or `FileDataContext(...)`, does not become the current Data Context and some operations still consult the current Data Context for settings that do not depend on which Data Context owns an object.
+
 The following are the available Data Context types:
 
 - **File Data Context:** A persistent Data Context that stores metadata and configuration information as YAML files within a file system. File Data Contexts allow you to re-use previously configured Expectation Suites, Data Sources, and Checkpoints.

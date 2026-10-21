@@ -40,6 +40,7 @@ from great_expectations.compatibility import aws, pyspark, snowflake, sqlalchemy
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
 )
+from great_expectations.compatibility.postgresql import resolve_postgresql_driver
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -70,6 +71,9 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
 )
 from great_expectations.execution_engine.sqlite_execution_engine import SqliteExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
@@ -752,7 +756,7 @@ def build_pandas_validator_with_data(
 
 
 def drop_table(table_name: str, connection_string: str) -> None:
-    engine = sa.create_engine(connection_string)
+    engine = sa.create_engine(resolve_postgresql_driver(connection_string))
     with engine.connect() as conn:
         conn.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         conn.commit()
@@ -786,7 +790,10 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915 # FIX
         pass
 
     try:
-        dialect_classes["postgresql"] = postgresqltypes.dialect
+        # The driver-neutral base class: `postgresqltypes.dialect` is only the default
+        # driver's dialect (psycopg2 before SQLAlchemy 2.1, psycopg after), so an engine
+        # on the other driver would not be recognised and its schema would be skipped.
+        dialect_classes["postgresql"] = postgresqltypes.base.PGDialect
         dialect_types["postgresql"] = POSTGRESQL_TYPES  # type: ignore[assignment] # FIXME CoP
     except AttributeError:
         pass
@@ -842,7 +849,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915 # FIX
         engine = sa.create_engine(connection_string)
     elif sa_engine_name == "postgresql":
         connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-        engine = sa.create_engine(connection_string)
+        engine = sa.create_engine(resolve_postgresql_driver(connection_string))
     elif sa_engine_name == "mysql":
         connection_string = f"mysql+pymysql://root@{db_hostname}/test_ci"
         engine = sa.create_engine(connection_string)
@@ -1052,7 +1059,9 @@ def build_sa_execution_engine(  # noqa: PLR0913 # FIXME CoP
     table_name: str = "test",
 ) -> SqlAlchemyExecutionEngine:
     # noinspection PyUnresolvedReferences
-    sqlalchemy_engine: sqlalchemy.Engine = sa.create_engine("sqlite://", echo=False)
+    sqlalchemy_engine: sqlalchemy.Engine = close_connections_when_collected(
+        sa.create_engine("sqlite://", echo=False)
+    )
     add_dataframe_to_db(
         df=df,
         name=table_name,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import hashlib
+import keyword
 import logging
 import pickle
 from functools import partial
@@ -79,6 +80,19 @@ logger = logging.getLogger(__name__)
 HASH_THRESHOLD = 1e9
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
+
+
+def query_column_reference(name: str) -> str:
+    """Render *name* so ``DataFrame.query`` reads it as one column rather than as an expression.
+
+    pandas parses the expression it is given, so a column that is not a plain Python identifier
+    (``"Total Amount"``, ``"a.b"``) or that collides with a Python keyword (``"from"``) has to be
+    wrapped in backticks, pandas' own escape for this. Names that already parse as themselves are
+    left untouched.
+    """
+    if name.isidentifier() and not keyword.iskeyword(name):
+        return name
+    return f"`{name}`"
 
 
 class PandasExecutionEngine(ExecutionEngine[str]):
@@ -701,7 +715,8 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501 # FIXME CoP
 
     @override
     def _comparison_condition_to_filter_clause(self, condition: ComparisonCondition) -> str:
-        col, op, val = condition.column.name, condition.operator, condition.parameter
+        col = query_column_reference(condition.column.name)
+        op, val = condition.operator, condition.parameter
         if op in (Operator.IN, Operator.NOT_IN):
             values = ", ".join(map(repr, val))
             connector = "in" if op == Operator.IN else "not in"
@@ -710,7 +725,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501 # FIXME CoP
 
     @override
     def _nullity_condition_to_filter_clause(self, condition: NullityCondition) -> str:
-        col = condition.column.name
+        col = query_column_reference(condition.column.name)
         return f"{col}.isnull()" if condition.is_null else f"~{col}.isnull()"
 
     @override

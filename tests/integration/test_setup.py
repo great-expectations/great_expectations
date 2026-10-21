@@ -91,8 +91,9 @@ class TestSetupIntegration:
         reach.
 
         Membership in `sqla_keys` does not express that. It appends the shared
-        `sqlalchemy>=1.4.0`, which every other SQL extra deliberately keeps so it stays
-        installable for users holding 1.x (see `reqs/requirements-dev-redshift.txt`).
+        SQLAlchemy constraint, whose 1.4.0 floor every other SQL extra deliberately
+        keeps so it stays installable for users holding 1.x (see
+        `reqs/requirements-dev-redshift.txt`).
         The 2.0 floor is a separate constraint carried by the requirements file, so both
         are asserted here: the driver, and the floor that makes the driver reachable.
         """
@@ -111,5 +112,5 @@ class TestSetupIntegration:
             "The oracle extra does not floor SQLAlchemy at 2.0, so it can resolve "
             "against 1.4, where the `oracle+oracledb` dialect does not exist. The floor "
             "comes from reqs/requirements-dev-oracle.txt, not from `sqla_keys`, whose "
-            f"shared constraint is only `sqlalchemy>=1.4.0`: {extras['oracle']}"
+            f"shared constraint floors SQLAlchemy only at 1.4.0: {extras['oracle']}"
         )

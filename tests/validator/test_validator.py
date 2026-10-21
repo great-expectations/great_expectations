@@ -420,7 +420,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource: PandasDatas
     assert result == [
         ExpectationValidationResult(
             success=True,
-            expectation_config=None,
+            expectation_config=expectation_configuration,
             meta={},
             result={
                 "element_count": 6,
