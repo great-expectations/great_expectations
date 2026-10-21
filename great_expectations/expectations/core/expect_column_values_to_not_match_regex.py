@@ -313,7 +313,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -366,7 +366,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     ):
         assert result, "Must pass in result."
         expectation_config = configuration or result.expectation_config
-        expectation_kwargs = expectation_config.kwargs
+        expectation_kwargs = expectation_config.kwargs if expectation_config else {}
         regex = expectation_kwargs.get("regex")
         unexpected_count = result.result.get("unexpected_count", "--")
         if regex == "^\\s+|\\s+$":
