@@ -166,7 +166,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
         # expect_select_column_values_to_be_unique_within_record instead.
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column_list",
                 "ignore_row_if",
