@@ -23,10 +23,7 @@ from great_expectations.expectations.model_field_descriptions import (
 )
 from great_expectations.render import (
     LegacyRendererType,
-    RenderedBulletListContent,
-    RenderedGraphContent,
     RenderedStringTemplateContent,
-    RenderedTableContent,
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -380,22 +377,12 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ) -> List[
-        Union[
-            dict,
-            str,
-            RenderedStringTemplateContent,
-            RenderedTableContent,
-            RenderedBulletListContent,
-            RenderedGraphContent,
-            Any,
-        ]
-    ]:
+    ) -> List[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column",
                 "min_value",
@@ -423,7 +410,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 elif params["min_value"] is None:
                     template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501 # FIXME CoP
 
-                elif params["max_value"] is None:
+                else:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."  # noqa: E501 # FIXME CoP
             else:  # noqa: PLR5501 # FIXME CoP
                 if params["min_value"] is not None and params["max_value"] is not None:
@@ -434,7 +421,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                         f"values must always be {at_most_str} $max_value characters long."
                     )
 
-                elif params["max_value"] is None:
+                else:
                     template_str = (
                         f"values must always be {at_least_str} $min_value characters long."
                     )

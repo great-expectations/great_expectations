@@ -107,7 +107,9 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["column_A", "column_B"])
+        params = substitute_none_for_missing(
+            configuration.kwargs if configuration else {}, ["column_A", "column_B"]
+        )
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."  # noqa: E501 # FIXME CoP
         else:
@@ -134,6 +136,8 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
+        assert result, "Must pass in result."
+        assert result.expectation_config, "Must pass in expectation_config."
         observed_value = result.result.get("observed_value")
         column_A = result.expectation_config.kwargs["column_A"]
         column_B = result.expectation_config.kwargs["column_B"]

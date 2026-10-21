@@ -943,9 +943,30 @@ def test_get_execution_engine_succeeds():
                 },
             },
             {
-                "url": "snowflake://user:@account/db/schema?application=great_expectations_core&private_key=my_key&role=role&warehouse=wh",
+                "connect_args": {"private_key": "my_key"},
+                "url": "snowflake://user:@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
             },
-            id="key pair connection string",
+            id="key pair connection string passes private_key via connect_args, not the url",
+        ),
+        param(
+            {
+                "name": "key pair details with connect_args",
+                "connection_string": {
+                    "user": "user",
+                    "private_key": "my_key",
+                    "account": "account",
+                    "database": "db",
+                    "schema": "schema",
+                    "warehouse": "wh",
+                    "role": "role",
+                },
+                "kwargs": {"connect_args": {"private_key": b"other_key"}},
+            },
+            {
+                "connect_args": {"private_key": b"other_key"},
+                "url": "snowflake://user:@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+            },
+            id="key pair connection string with connect_args keeps the connect_args private_key",
         ),
     ],
 )

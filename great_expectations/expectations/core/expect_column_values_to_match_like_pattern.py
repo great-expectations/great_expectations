@@ -30,11 +30,11 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
-        ExpectationConfiguration,
-    )
     from great_expectations.core.expectation_validation_result import (
         ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
@@ -314,7 +314,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "like_pattern", "escape", "mostly"],
         )
         if params["mostly"] is not None:

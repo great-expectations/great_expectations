@@ -187,7 +187,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501 # FIXME CoP
 
-    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)
+    column_list: Sequence[str] = pydantic.Field(description=COLUMN_LIST_DESCRIPTION)  # type: ignore[assignment] # wider than the base List so tuples stay accepted
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
@@ -298,7 +298,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column_list",
                 "ignore_row_if",

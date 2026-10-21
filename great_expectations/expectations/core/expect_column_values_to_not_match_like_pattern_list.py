@@ -33,11 +33,11 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 if TYPE_CHECKING:
-    from great_expectations.core import (
-        ExpectationConfiguration,
-    )
     from great_expectations.core.expectation_validation_result import (
         ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
@@ -338,13 +338,13 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "like_pattern_list", "escape", "mostly"],
         )
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
 
-        if not params.get("like_pattern_list") or len(params.get("like_pattern_list")) == 0:
+        if not params.get("like_pattern_list"):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["like_pattern_list"]):

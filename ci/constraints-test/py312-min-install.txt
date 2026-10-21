@@ -1,3 +1,4 @@
 numpy==1.26.0
 pandas<2.2.0
 sqlalchemy==2.0.0 # pandas 2 requires sqlalchemy2
+pyarrow<26  # pyarrow 26 requires numpy>=2
