@@ -43,8 +43,8 @@
     },
     {
       "module": "contrib.experimental.great_expectations_experimental.*",
-      "setting": "follow_imports",
-      "value": "\"silent\""
+      "setting": "ignore_errors",
+      "value": "true"
     },
     {
       "module": "databricks.*",
@@ -62,54 +62,14 @@
       "value": "true"
     },
     {
-      "module": "great_expectations.checkpoint.checkpoint",
-      "setting": "follow_imports",
-      "value": "\"silent\""
-    },
-    {
       "module": "great_expectations.compatibility.azure",
       "setting": "disable_error_code",
       "value": "[\"assignment\"]"
     },
     {
-      "module": "great_expectations.compatibility.docstring_parser",
-      "setting": "follow_imports",
-      "value": "\"silent\""
-    },
-    {
       "module": "great_expectations.compatibility.pydantic.*",
       "setting": "ignore_missing_imports",
       "value": "true"
-    },
-    {
-      "module": "great_expectations.data_context.*",
-      "setting": "follow_imports",
-      "value": "\"silent\""
-    },
-    {
-      "module": "great_expectations.expectations.core.*",
-      "setting": "follow_imports",
-      "value": "\"silent\""
-    },
-    {
-      "module": "great_expectations.expectations.metrics.column_map_metrics.*",
-      "setting": "follow_imports",
-      "value": "\"silent\""
-    },
-    {
-      "module": "great_expectations.expectations.metrics.column_pair_map_metrics.*",
-      "setting": "follow_imports",
-      "value": "\"silent\""
-    },
-    {
-      "module": "great_expectations.render.renderer.*",
-      "setting": "follow_imports",
-      "value": "\"silent\""
-    },
-    {
-      "module": "great_expectations.self_check.*",
-      "setting": "follow_imports",
-      "value": "\"silent\""
     },
     {
       "module": "pyarrow.*",
@@ -170,11 +130,6 @@
       "module": "teradatasqlalchemy.*",
       "setting": "ignore_missing_imports",
       "value": "true"
-    },
-    {
-      "module": "tests.test_utils",
-      "setting": "follow_imports",
-      "value": "\"silent\""
     },
     {
       "module": "trino.*",
