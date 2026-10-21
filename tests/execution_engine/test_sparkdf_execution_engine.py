@@ -13,6 +13,9 @@ from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSp
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import SparkDFExecutionEngine
+from great_expectations.execution_engine.sparkdf_execution_engine import (
+    _quote_spark_identifier,
+)
 from great_expectations.expectations.legacy_row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -569,7 +572,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
         domain_kwargs, filter_null=True, filter_nan=False
     )
     assert new_domain_kwargs["filter_conditions"] == [
-        RowCondition(condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL)
+        RowCondition(condition="`foo` IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL)
     ]
     df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
@@ -579,8 +582,10 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
         domain_kwargs, filter_null=True, filter_nan=True
     )
     assert new_domain_kwargs["filter_conditions"] == [
-        RowCondition(condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL),
-        RowCondition(condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL),
+        RowCondition(
+            condition="`foo` IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
+        ),
+        RowCondition(condition="NOT isnan(`foo`)", condition_type=RowConditionParserType.SPARK_SQL),
     ]
     df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
@@ -590,7 +595,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
         domain_kwargs, filter_null=False, filter_nan=True
     )
     assert new_domain_kwargs["filter_conditions"] == [
-        RowCondition(condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL)
+        RowCondition(condition="NOT isnan(`foo`)", condition_type=RowConditionParserType.SPARK_SQL)
     ]
     df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
@@ -606,7 +611,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
         domain_kwargs, filter_null=False, filter_nan=True
     )
     assert new_domain_kwargs["filter_conditions"] == [
-        RowCondition(condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL)
+        RowCondition(condition="NOT isnan(`foo`)", condition_type=RowConditionParserType.SPARK_SQL)
     ]
     df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
@@ -616,13 +621,41 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
         domain_kwargs, filter_null=True, filter_nan=False
     )
     assert new_domain_kwargs["filter_conditions"] == [
-        RowCondition(condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL),
+        RowCondition(
+            condition="`foo` IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
+        ),
     ]
     df, _cd, _ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     expected = [(1,), (2,), (3,), (3,), (np.nan,), (2,), (3,), (4,), (5,), (6,)]
     # since nan != nan by default
     assert np.allclose(res, expected, rtol=0, atol=0, equal_nan=True)
+
+
+def test_quote_spark_identifier():
+    assert _quote_spark_identifier("foo") == "`foo`"
+    assert _quote_spark_identifier("id-n") == "`id-n`"
+    assert _quote_spark_identifier("Incident Number") == "`Incident Number`"
+    assert _quote_spark_identifier("we`ird") == "`we``ird`"
+    assert _quote_spark_identifier("`a.b`") == "`a.b`"
+    assert _quote_spark_identifier("`") == "````"
+
+
+@pytest.mark.parametrize(
+    "identifier,expected",
+    [
+        pytest.param("address.city", "`address`.`city`", id="nested_struct_path"),
+        pytest.param("Data.evt.retry", "`Data`.`evt`.`retry`", id="deeply_nested_path"),
+        pytest.param("home address.zip-code", "`home address`.`zip-code`", id="nested_odd_chars"),
+        pytest.param("parent.`child.x`", "`parent`.`child.x`", id="backticked_leaf"),
+        pytest.param("`a``b`.c", "`a``b`.`c`", id="escaped_backtick_segment"),
+        pytest.param("a.", "`a.`", id="trailing_dot_quoted_whole"),
+        pytest.param("a..b", "`a..b`", id="empty_segment_quoted_whole"),
+        pytest.param("`a`b", "```a``b`", id="malformed_backtick_quoted_whole"),
+    ],
+)
+def test_quote_spark_identifier_quotes_each_path_segment(identifier, expected):
+    assert _quote_spark_identifier(identifier) == expected
 
 
 # Function to test for spark dataframe equality
@@ -1141,56 +1174,56 @@ class TestConditionToFilterClause:
         [
             pytest.param(
                 ComparisonCondition(column=Column("age"), operator=Operator.EQUAL, parameter=5),
-                "age == 5",
+                "`age` == 5",
                 id="equal",
             ),
             pytest.param(
                 ComparisonCondition(
                     column=Column("age"), operator=Operator.NOT_EQUAL, parameter=10
                 ),
-                "age != 10",
+                "`age` != 10",
                 id="not_equal",
             ),
             pytest.param(
                 ComparisonCondition(
                     column=Column("age"), operator=Operator.LESS_THAN, parameter=18
                 ),
-                "age < 18",
+                "`age` < 18",
                 id="less_than",
             ),
             pytest.param(
                 ComparisonCondition(
                     column=Column("age"), operator=Operator.GREATER_THAN, parameter=65
                 ),
-                "age > 65",
+                "`age` > 65",
                 id="greater_than",
             ),
             pytest.param(
                 ComparisonCondition(
                     column=Column("age"), operator=Operator.LESS_THAN_OR_EQUAL, parameter=100
                 ),
-                "age <= 100",
+                "`age` <= 100",
                 id="less_or_equal",
             ),
             pytest.param(
                 ComparisonCondition(
                     column=Column("age"), operator=Operator.GREATER_THAN_OR_EQUAL, parameter=0
                 ),
-                "age >= 0",
+                "`age` >= 0",
                 id="greater_or_equal",
             ),
             pytest.param(
                 ComparisonCondition(
                     column=Column("name"), operator=Operator.EQUAL, parameter="John"
                 ),
-                "name == 'John'",
+                "`name` == 'John'",
                 id="equal_string",
             ),
             pytest.param(
                 ComparisonCondition(
                     column=Column("name"), operator=Operator.NOT_EQUAL, parameter="Jane"
                 ),
-                "name != 'Jane'",
+                "`name` != 'Jane'",
                 id="not_equal_string",
             ),
         ],
@@ -1210,7 +1243,7 @@ class TestConditionToFilterClause:
                 ComparisonCondition(
                     column=Column("status"), operator=Operator.IN, parameter=[1, 2, 3]
                 ),
-                "status IN (1, 2, 3)",
+                "`status` IN (1, 2, 3)",
                 id="integers",
             ),
             pytest.param(
@@ -1219,14 +1252,14 @@ class TestConditionToFilterClause:
                     operator=Operator.IN,
                     parameter=["active", "pending"],
                 ),
-                "status IN ('active', 'pending')",
+                "`status` IN ('active', 'pending')",
                 id="strings",
             ),
             pytest.param(
                 ComparisonCondition(
                     column=Column("status"), operator=Operator.NOT_IN, parameter=[1, 2, 3]
                 ),
-                "status NOT IN (1, 2, 3)",
+                "`status` NOT IN (1, 2, 3)",
                 id="not_in",
             ),
         ],
@@ -1244,12 +1277,12 @@ class TestConditionToFilterClause:
         [
             pytest.param(
                 NullityCondition(column=Column("email"), is_null=True),
-                "email IS NULL",
+                "`email` IS NULL",
                 id="is_null",
             ),
             pytest.param(
                 NullityCondition(column=Column("email"), is_null=False),
-                "email IS NOT NULL",
+                "`email` IS NOT NULL",
                 id="is_not_null",
             ),
         ],
@@ -1277,7 +1310,7 @@ class TestConditionToFilterClause:
         )
 
         result = engine.condition_to_filter_clause(and_condition)
-        assert result == "(age > 18 AND age < 65)"
+        assert result == "(`age` > 18 AND `age` < 65)"
 
     def test_or_condition_to_filter_clause_simple(self) -> None:
         """Test that OR conditions generate correct Spark SQL query strings."""
@@ -1295,7 +1328,7 @@ class TestConditionToFilterClause:
         )
 
         result = engine.condition_to_filter_clause(or_condition)
-        assert result == "(status == 'active' OR status == 'pending')"
+        assert result == "(`status` == 'active' OR `status` == 'pending')"
 
     def test_nested_conditions(self) -> None:
         engine = SparkDFExecutionEngine()
@@ -1323,7 +1356,7 @@ class TestConditionToFilterClause:
         )
 
         result = engine.condition_to_filter_clause(or_condition)
-        assert result == "((age >= 18 AND age <= 65) OR status == 'exempt')"
+        assert result == "((`age` >= 18 AND `age` <= 65) OR `status` == 'exempt')"
 
     def test_comparison_filter_clause_filters_dataframe(
         self, spark_session, spark_df_from_pandas_df

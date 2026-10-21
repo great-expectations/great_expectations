@@ -84,3 +84,5 @@ assert batch.data.dataframe.shape == (10000, 18)
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py print_batch_spec">
 print(batch.batch_spec)
 # </snippet>
+
+temp_dir.cleanup()

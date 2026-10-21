@@ -57,6 +57,9 @@ from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_pa
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
+)
 from great_expectations.expectations.model_field_types import (
     CONDITION_PARSER_GREAT_EXPECTATIONS,
     CONDITION_PARSER_GREAT_EXPECTATIONS_DEPRECATED,
@@ -366,6 +369,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine[SQLAColumnClause]):
                 credentials=credentials,
                 url=url,
             )
+            close_connections_when_collected(self.engine)
 
         # these are two backends where temp_table_creation is not supported we set the default value to False.  # noqa: E501 # FIXME CoP
         if (

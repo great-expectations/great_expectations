@@ -142,7 +142,14 @@ class CheckpointFactory(Factory[Checkpoint]):
         val_def_ids_by_name = {
             val_def.name: val_def.id for val_def in existing_validation_definitions
         }
-        val_def_factory = project_manager.get_validation_definitions_factory()
+        # A store built by a Data Context reaches the definitions through that context; a store
+        # built on its own has no context, so they are reached through the current one.
+        context = self._store.data_context
+        val_def_factory = (
+            context.validation_definitions
+            if context is not None
+            else project_manager.get_validation_definitions_factory()
+        )
         for val_def in validation_definitions:
             if val_def.name in val_def_ids_by_name:
                 val_def.id = val_def_ids_by_name[val_def.name]

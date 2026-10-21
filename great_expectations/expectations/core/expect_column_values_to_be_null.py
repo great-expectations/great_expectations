@@ -275,13 +275,15 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
         params = substitute_none_for_missing(
-            renderer_configuration.configuration.kwargs,
+            renderer_configuration.configuration.kwargs
+            if renderer_configuration.configuration
+            else {},
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -329,6 +331,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
+        assert result, "Must pass in result."
         result_dict = result.result
 
         try:

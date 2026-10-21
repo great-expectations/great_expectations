@@ -1896,6 +1896,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             module_name=module_name,
             runtime_environment={
                 "root_directory": self.root_directory,
+                "data_context": self,
             },
         )
         self._stores[name] = new_store

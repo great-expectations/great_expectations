@@ -283,7 +283,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
                 param_prefix=param_prefix,
                 renderer_configuration=renderer_configuration,
             )
-            values_string: str = cls._get_array_string(
+            values_string = cls._get_array_string(
                 array_param_name=array_param_name,
                 param_prefix=param_prefix,
                 renderer_configuration=renderer_configuration,
@@ -323,11 +323,11 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
         include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             ["column", "regex_list", "mostly", "row_condition", "condition_parser"],
         )
 
-        if not params.get("regex_list") or len(params.get("regex_list")) == 0:
+        if not params.get("regex_list"):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["regex_list"]):

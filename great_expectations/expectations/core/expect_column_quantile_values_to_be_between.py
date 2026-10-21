@@ -481,7 +481,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         include_column_name = runtime_configuration.get("include_column_name") is not False
         _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration["kwargs"],
+            configuration.kwargs if configuration else {},
             ["column", "quantile_ranges", "row_condition", "condition_parser"],
         )
         template_str = "quantiles must be within the following value ranges."
@@ -554,6 +554,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
+        assert result, "Must pass in result."
         if result.result is None or result.result.get("observed_value") is None:
             return "--"
 
@@ -590,6 +591,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ):
+        assert renderer_configuration.result, "Must pass in result."
         if (
             renderer_configuration.result.result is None
             or renderer_configuration.result.result.get("observed_value") is None
@@ -744,9 +746,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         )
         configuration = self.configuration
         # column.quantile_values expects a "quantiles" key
-        validation_dependencies.get_metric_configuration(
+        quantile_values_metric_configuration = validation_dependencies.get_metric_configuration(
             metric_name="column.quantile_values"
-        ).metric_value_kwargs["quantiles"] = configuration.kwargs["quantile_ranges"]["quantiles"]
+        )
+        assert quantile_values_metric_configuration, "column.quantile_values should not be None"
+        quantile_values_metric_configuration.metric_value_kwargs["quantiles"] = (
+            configuration.kwargs["quantile_ranges"]["quantiles"]
+        )
         return validation_dependencies
 
     @override
@@ -756,8 +762,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        quantile_vals = metrics.get("column.quantile_values")
-        quantile_ranges = self.configuration.kwargs.get("quantile_ranges")
+        quantile_vals = metrics["column.quantile_values"]
+        quantile_ranges = self.configuration.kwargs["quantile_ranges"]
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
 

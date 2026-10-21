@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 import pytest
 
@@ -179,3 +181,44 @@ def test_success_with_suite_param_bucketize_data_(
         expectation, expectation_parameters={suite_param_key: suite_param_value}
     )
     assert result.success == expected_result
+
+
+CONTINUOUS_DATA = pd.DataFrame({COL_NAME: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]})
+
+
+@parameterize_batch_for_data_sources(data_source_configs=JUST_PANDAS_DATA_SOURCES, data=DATA)
+def test_success_is_a_plain_json_serializable_bool_categorical(
+    batch_for_datasource: Batch,
+) -> None:
+    """`success` must be a plain Python bool for a categorical partition object.
+
+    The KL divergence is a numpy float, so the `kl_divergence <= threshold`
+    comparison yields a numpy.bool_. Leaked into the validation result, it makes
+    str(result), json.dumps(result.to_json_dict()), and any JSON persistence of
+    results raise "TypeError: Object of type bool is not JSON serializable".
+    """
+    expectation = gxe.ExpectColumnKLDivergenceToBeLessThan(
+        column=COL_NAME,
+        partition_object={"weights": [0.5, 0.3, 0.2], "values": ["A", "B", "C"]},
+        threshold=0.01,
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert type(result.success) is bool
+    json.dumps(result.to_json_dict())
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=JUST_PANDAS_DATA_SOURCES, data=CONTINUOUS_DATA
+)
+def test_success_is_a_plain_json_serializable_bool_continuous(
+    batch_for_datasource: Batch,
+) -> None:
+    """Same guarantee for the continuous (bucketized) branch of the metric."""
+    expectation = gxe.ExpectColumnKLDivergenceToBeLessThan(
+        column=COL_NAME,
+        partition_object={"bins": [0.0, 3.0, 7.0], "weights": [0.5, 0.5]},
+        threshold=10.0,
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert type(result.success) is bool
+    json.dumps(result.to_json_dict())
