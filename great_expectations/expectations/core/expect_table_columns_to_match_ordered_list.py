@@ -288,7 +288,9 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
+        params = substitute_none_for_missing(
+            configuration.kwargs if configuration else {}, ["column_list"]
+        )
 
         if params["column_list"] is None:
             template_str = (
@@ -325,7 +327,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     ):
         # Obtaining columns and ordered list for sake of comparison
         expected_column_list = self._get_success_kwargs().get("column_list")
-        actual_column_list = metrics.get("table.columns")
+        actual_column_list = metrics["table.columns"]
 
         if expected_column_list is None or list(actual_column_list) == list(expected_column_list):
             return {
@@ -364,7 +366,9 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        renderer_configuration = RendererConfiguration(
+        assert result, "Must pass in result."
+        assert result.expectation_config, "Must pass in expectation_config."
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -377,7 +381,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         renderer_configuration.add_param(
             name=expected_param_name,
             param_type=RendererValueType.ARRAY,
-            value=renderer_configuration.result.expectation_config.kwargs.get("column_list", []),
+            value=result.expectation_config.kwargs.get("column_list", []),
         )
         renderer_configuration = cls._add_array_params(
             array_param_name=expected_param_name,

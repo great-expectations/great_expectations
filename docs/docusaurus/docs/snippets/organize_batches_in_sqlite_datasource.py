@@ -65,3 +65,5 @@ assert my_batch_request.options == {}
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py print_batch_spec">
 print(batch.batch_spec)
 # </snippet>
+
+temp_dir.cleanup()

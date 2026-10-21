@@ -91,6 +91,9 @@ from great_expectations.execution_engine.partition_and_sample.data_partitioner i
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
     SqlAlchemyDataPartitioner,
 )
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     _query_text_as_subquery,
 )
@@ -1494,7 +1497,7 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                self._engine = self._create_engine()
+                self._engine = close_connections_when_collected(self._create_engine())
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501 # FIXME CoP
                 # one possible case is a missing plugin (e.g. psycopg2)

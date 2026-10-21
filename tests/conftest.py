@@ -64,6 +64,9 @@ from great_expectations.datasource.fluent.batch_parameter_normalization import (
     _reset_warned_call_sites_for_tests,
 )
 from great_expectations.execution_engine import SparkDFExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -1168,7 +1171,9 @@ def empty_sqlite_db(sa):
         import sqlalchemy as sa
         from sqlalchemy import create_engine
 
-        engine = create_engine("sqlite://")
+        # Tests hand this engine to execution engines that can keep a connection checked out
+        # past teardown, so it is closed once collected rather than disposed from under them.
+        engine = close_connections_when_collected(create_engine("sqlite://"))
         with engine.begin() as connection:
             assert connection.execute(sa.text("select 1")).fetchall()[0] == (1,)
         return engine
@@ -1280,7 +1285,8 @@ def sqlite_view_engine(test_backends) -> Engine:  # type: ignore[return] # FIXME
         try:
             import sqlalchemy as sa
 
-            sqlite_engine = sa.create_engine("sqlite://")
+            # Closed once collected, not disposed: see empty_sqlite_db.
+            sqlite_engine = close_connections_when_collected(sa.create_engine("sqlite://"))
             df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
             add_dataframe_to_db(
                 df=df,
@@ -1332,6 +1338,7 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         engine = sa.create_engine("sqlite:///" + str(path))
         add_dataframe_to_db(df=df1, name="table_1", con=engine, index=True)
         add_dataframe_to_db(df=df2, name="table_2", con=engine, index=True, schema="main")
+        engine.dispose()
 
         # Return a connection string to this newly-created db
         return "sqlite:///" + str(path)

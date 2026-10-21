@@ -28,6 +28,9 @@ from great_expectations.data_context import (
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
+)
 from great_expectations.expectations import ExpectColumnValuesToNotBeNull
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 
@@ -96,7 +99,8 @@ def pandas_sql_data(
             "passenger_count": passenger_count,
         }
     )
-    con = sa.create_engine("sqlite://")
+    # The asset reads through this engine for as long as the datasource lives.
+    con = close_connections_when_collected(sa.create_engine("sqlite://"))
     add_dataframe_to_db(df=df, name="my_table", con=con)
     pandas_ds = context.data_sources.add_pandas("my_pandas")
     pandas_ds.read_sql(

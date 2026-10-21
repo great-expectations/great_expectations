@@ -23,6 +23,7 @@ from tests.integration.test_utils.data_source_config import (
     SQL_DATA_SOURCES,
     MySQLDatasourceTestConfig,
     PostgreSQLDatasourceTestConfig,
+    SparkFilesystemCsvDatasourceTestConfig,
     SqliteDatasourceTestConfig,
 )
 
@@ -511,6 +512,86 @@ def test_include_unexpected_rows_with_mixed_case_column_sql(
         {MIXED_CASE_ROW_ID: 2, MIXED_CASE_COLUMN: "1000000002"},
         {MIXED_CASE_ROW_ID: 3, MIXED_CASE_COLUMN: "1000000002"},
     ]
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SparkFilesystemCsvDatasourceTestConfig()],
+    data=pd.DataFrame(
+        {
+            # The column under test holds a duplicate (5, 5) and no nulls.
+            "id-n": [5, 5, 7],
+            # Two other columns whose names make "id-n" parse as `id - n`.
+            # `id - n` is NULL on exactly the rows holding the duplicate.
+            "id": [None, None, 1],
+            "n": [1, 1, 1],
+        },
+        dtype="object",
+    ),
+)
+def test_spark_column_name_that_is_not_a_sql_identifier(
+    batch_for_datasource: Batch,
+) -> None:
+    result = batch_for_datasource.validate(gxe.ExpectColumnValuesToBeUnique(column="id-n"))
+
+    _assert_no_metric_exceptions(result)
+    assert result.success is False
+    assert result.result["unexpected_count"] == 2
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SparkFilesystemCsvDatasourceTestConfig()],
+    data=pd.DataFrame(
+        {
+            "Incident Number": ["A100", "A100", "A200"],
+        },
+        dtype="object",
+    ),
+)
+def test_spark_column_name_with_space_returns_populated_result(
+    batch_for_datasource: Batch,
+) -> None:
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToBeUnique(column="Incident Number")
+    )
+
+    _assert_no_metric_exceptions(result)
+    assert result.success is False
+    assert result.result["unexpected_count"] == 2
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SparkFilesystemCsvDatasourceTestConfig()],
+    data=pd.DataFrame(
+        {
+            "Incident Number": [1, 2, 2],
+        },
+        dtype="object",
+    ),
+)
+def test_spark_typed_row_condition_on_column_name_with_space(
+    batch_for_datasource: Batch,
+) -> None:
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToBeUnique(
+            column="Incident Number",
+            row_condition=Column("Incident Number") > 1,
+        )
+    )
+
+    _assert_no_metric_exceptions(result)
+    assert result.success is False
+    assert result.result["unexpected_count"] == 2
+
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToBeUnique(
+            column="Incident Number",
+            row_condition=Column("Incident Number").is_not_null(),
+        )
+    )
+
+    _assert_no_metric_exceptions(result)
+    assert result.success is False
+    assert result.result["unexpected_count"] == 2
 
 
 @pytest.mark.timeout(30)  # the subprocess pays full library import cost

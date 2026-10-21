@@ -72,6 +72,9 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
+)
 from great_expectations.execution_engine.sqlite_execution_engine import SqliteExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfigurationSchema,
@@ -1056,7 +1059,9 @@ def build_sa_execution_engine(  # noqa: PLR0913 # FIXME CoP
     table_name: str = "test",
 ) -> SqlAlchemyExecutionEngine:
     # noinspection PyUnresolvedReferences
-    sqlalchemy_engine: sqlalchemy.Engine = sa.create_engine("sqlite://", echo=False)
+    sqlalchemy_engine: sqlalchemy.Engine = close_connections_when_collected(
+        sa.create_engine("sqlite://", echo=False)
+    )
     add_dataframe_to_db(
         df=df,
         name=table_name,
