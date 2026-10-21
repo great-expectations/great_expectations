@@ -10,6 +10,7 @@ from great_expectations.datasource.fluent.interfaces import Batch
 from tests.integration.conftest import parameterize_batch_for_data_sources
 from tests.integration.test_utils.data_source_config import (
     BigQueryDatasourceTestConfig,
+    ClickHouseDatasourceTestConfig,
     DataSourceTestConfig,
     GenericSQLDatasourceTestConfig,
     MySQLDatasourceTestConfig,
@@ -285,4 +286,47 @@ def test_escape_matches_wildcard_characters_literally(
     # exception_info rather than reporting a bare KeyError three frames later.
     assert "unexpected_list" in result.result, f"metric did not resolve: {result.exception_info}"
     assert not result.success
+    assert sorted(result.result["unexpected_list"]) == expected_unexpected
+
+
+# Neither dialect has an ESCAPE clause, so `escape` is translated to backslash escapes, and
+# both also read backslashes as escapes in string literals.
+BACKSLASH_ESCAPE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
+    BigQueryDatasourceTestConfig(),
+    ClickHouseDatasourceTestConfig(),
+]
+
+
+@pytest.mark.parametrize(
+    ("like_pattern", "expected_unexpected"),
+    [
+        pytest.param("a\\c", ["a\\_c", "a\\xc", "ac"], id="literal_backslash"),
+        pytest.param("a\\!_c", ["a\\c", "a\\xc", "ac"], id="literal_backslash_then_escape"),
+    ],
+)
+@parameterize_batch_for_data_sources(
+    data_source_configs=BACKSLASH_ESCAPE_DATA_SOURCES,
+    data=pd.DataFrame({WILDCARD_LITERALS: ["a\\c", "ac", "a\\_c", "a\\xc"]}),
+)
+def test_escape_keeps_backslashes_literal(
+    batch_for_datasource: Batch,
+    like_pattern: str,
+    expected_unexpected: list[str],
+) -> None:
+    """With `escape`, a backslash in the pattern is an ordinary character, as it is under
+    an ESCAPE clause elsewhere.
+
+    The pattern's backslash must survive both the string literal and LIKE to match only
+    itself. Were it passed through undoubled, `a\\!_c` would become `a\\\\_c`, whose
+    backslash escapes the backslash before `_`, leaving `_` a wildcard that also matches
+    `a\\xc`. ClickHouse takes a backslash before an ordinary character literally, so
+    `a\\c` matches only itself there either way; it pins that the plain backslash case
+    still matches.
+    """
+    expectation = gxe.ExpectColumnValuesToMatchLikePattern(
+        column=WILDCARD_LITERALS, like_pattern=like_pattern, escape="!"
+    )
+    result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
+
+    assert "unexpected_list" in result.result, f"metric did not resolve: {result.exception_info}"
     assert sorted(result.result["unexpected_list"]) == expected_unexpected
