@@ -32,6 +32,15 @@ if TYPE_CHECKING:
     )
 
 
+def _dialect_name(dialect) -> str:
+    """Return the name of a SQLAlchemy dialect or engine, or "" if it has none."""
+    for candidate in (getattr(dialect, "dialect", None), dialect):
+        name = getattr(candidate, "name", None)
+        if isinstance(name, str):
+            return name
+    return ""
+
+
 class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     """
     While the support for "PandasExecutionEngine" and "SparkDFExecutionEngine" is accomplished using a compact
@@ -88,12 +97,38 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             "_table"
         )  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
 
-        # Count each key with a window function instead of joining GROUP BY counts back to the
-        # table. PARTITION BY treats NULLs as equal, so keys with NULLs in the same columns count
-        # as duplicates, as in pandas' duplicated(); an equality join drops every key containing
-        # a NULL. It also reads the table only once, which MySQL requires for temporary tables
-        # (#6286).
         table_columns_selector = [sa.column(column_name) for column_name in table_columns]
+
+        # BigQuery cannot PARTITION BY a FLOAT64 expression (an integer column holding NULLs is
+        # FLOAT64 there), but it can GROUP BY one. Join the per-key GROUP BY counts back to the
+        # table with IS NOT DISTINCT FROM, so keys with NULLs in the same columns still match and
+        # count as duplicates; an equality join would drop every key containing a NULL.
+        if _dialect_name(kwargs.get("_dialect")) == "bigquery":
+            original_table_clause = (
+                sa.select(*table_columns_selector).select_from(table).alias("original_table_clause")
+            )
+            key_columns = [original_table_clause.c[name] for name in column_names]
+            group_count_query = (
+                sa.select(*key_columns, sa.func.count().label("_num_rows"))
+                .group_by(*key_columns)
+                .alias("group_counts_subquery")
+            )
+            conditions = sa.and_(
+                *(
+                    group_count_query.c[name].is_not_distinct_from(original_table_clause.c[name])
+                    for name in column_names
+                )
+            )
+            return (
+                sa.select(original_table_clause, group_count_query.c._num_rows)
+                .select_from(original_table_clause.join(group_count_query, onclause=conditions))
+                .alias("records_with_grouped_column_counts_subquery")
+            )
+
+        # Elsewhere, count each key with a window function instead of joining GROUP BY counts back
+        # to the table. PARTITION BY treats NULLs as equal, so keys with NULLs in the same columns
+        # count as duplicates, as in pandas' duplicated(). It also reads the table only once, which
+        # MySQL requires for temporary tables (#6286).
         num_rows = (
             sa.func.count()
             .over(partition_by=[sa.column(column_name) for column_name in column_names])
