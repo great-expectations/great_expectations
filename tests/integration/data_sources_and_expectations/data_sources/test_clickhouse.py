@@ -182,6 +182,44 @@ class TestClickHouseRegexAndLikePatterns:
         assert result.exception_info.get("raised_exception") is False, result.exception_info
         assert result.result["unexpected_list"] == ["abc"]
 
+    @pytest.mark.parametrize(
+        ("like_pattern", "expected_unexpected"),
+        [
+            pytest.param("a\\c", ["a\\_c", "a\\xc", "ac"], id="literal_backslash"),
+            pytest.param("a\\!_c", ["a\\c", "a\\xc", "ac"], id="literal_backslash_then_escape"),
+        ],
+    )
+    def test_match_like_pattern_with_escape_and_backslash(
+        self, like_pattern: str, expected_unexpected: list[str]
+    ) -> None:
+        """With `escape`, a backslash in the pattern is an ordinary character, as it is under
+        an ESCAPE clause elsewhere.
+
+        ClickHouse reads a backslash as an escape both in string literals and in LIKE, so the
+        pattern's backslash must survive both layers to match only itself. Were it passed
+        through undoubled, `a\\!_c` would become `a\\\\_c`, whose backslash escapes the
+        backslash before `_`, leaving `_` a wildcard that also matches `a\\xc`. `a\\c` matches
+        only itself either way, since ClickHouse takes a backslash before an ordinary
+        character literally; it pins that the plain backslash case still matches.
+        """
+        batch_setup = ClickHouseBatchTestSetup(
+            config=ClickHouseDatasourceTestConfig(
+                column_types={self.COL: clickhouse_types.Nullable(clickhouse_types.String)}
+            ),
+            data=pd.DataFrame({self.COL: ["a\\c", "ac", "a\\_c", "a\\xc"]}),
+            extra_data={},
+            context=get_context(mode="ephemeral"),
+        )
+        with batch_setup.batch_test_context() as batch:
+            result = batch.validate(
+                gxe.ExpectColumnValuesToMatchLikePattern(
+                    column=self.COL, like_pattern=like_pattern, escape="!"
+                ),
+                result_format=ResultFormat.COMPLETE,
+            )
+        assert result.exception_info.get("raised_exception") is False, result.exception_info
+        assert sorted(result.result["unexpected_list"]) == expected_unexpected
+
     def test_match_like_pattern_with_backslash_in_pattern(self) -> None:
         """A backslash inside the pattern escapes a wildcard, which is the form `escape` is
         translated to on ClickHouse.
