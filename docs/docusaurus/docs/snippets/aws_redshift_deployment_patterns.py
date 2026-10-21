@@ -107,3 +107,5 @@ validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
 # </snippet>
+
+temp_dir.cleanup()

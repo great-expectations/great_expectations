@@ -24,6 +24,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.sqlalchemy_engine_lifecycle import (
+    close_connections_when_collected,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
@@ -1928,7 +1931,7 @@ def test_map_value_set_sa(sa):
 
 @pytest.mark.sqlite
 def test_map_of_type_sa(sa):
-    eng = sa.create_engine("sqlite://")
+    eng = close_connections_when_collected(sa.create_engine("sqlite://"))
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     add_dataframe_to_db(df=df, name="test", con=eng, index=False)
     batch_data = SqlAlchemyBatchData(

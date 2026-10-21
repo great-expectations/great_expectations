@@ -48,3 +48,5 @@ print(options)
 # </snippet>
 
 assert set(options) == {"path"}
+
+temp_dir.cleanup()

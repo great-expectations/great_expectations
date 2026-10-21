@@ -9,7 +9,6 @@ from great_expectations.core.suite_parameters import (
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.expectations.metadata_types import DataQualityIssues, SupportedDataSources
@@ -175,7 +174,9 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         title = "Expect table column count to equal"
 
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectTableColumnCountToEqual]
+        ) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
             schema["properties"]["metadata"]["properties"].update(
                 {
@@ -226,7 +227,9 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["value"])
+        params = substitute_none_for_missing(
+            configuration.kwargs if configuration else {}, ["value"]
+        )
         template_str = "Must have exactly $value columns."
         return [
             RenderedStringTemplateContent(
