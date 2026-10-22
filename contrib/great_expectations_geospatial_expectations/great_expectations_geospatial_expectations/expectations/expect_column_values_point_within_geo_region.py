@@ -44,7 +44,7 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
         elif country_iso_a3 is not None:
             country_shapes = cls.world[["geometry", "iso_a3"]]
             country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
-            country_shapes.reset_index(drop=True, inplace=True)
+            country_shapes = country_shapes.reset_index(drop=True)
 
             if country_shapes.empty:
                 raise Exception("This ISO country code is not supported.")  # noqa: TRY002, TRY003
