@@ -1153,7 +1153,7 @@ class Batch:
             domain_kwargs={"batch_id": self.id},
             fetch_all=fetch_all,
         )
-        return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
+        return HeadData(data=table_head_df.reset_index(drop=True))
 
     @overload
     def validate(
