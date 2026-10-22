@@ -14,8 +14,10 @@ from tests.integration.test_utils.data_source_config import (
     DataSourceTestConfig,
     GenericSQLDatasourceTestConfig,
     MySQLDatasourceTestConfig,
+    OracleDatasourceTestConfig,
     PostgreSQLDatasourceTestConfig,
     RedshiftDatasourceTestConfig,
+    SingleStoreDatasourceTestConfig,
     SnowflakeDatasourceTestConfig,
     SqliteDatasourceTestConfig,
     SQLServerDatasourceTestConfig,
@@ -48,6 +50,8 @@ SUPPORTED_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
     RedshiftDatasourceTestConfig(),
     GenericSQLDatasourceTestConfig(),
     SnowflakeDatasourceTestConfig(),
+    OracleDatasourceTestConfig(),
+    SingleStoreDatasourceTestConfig(),
     SqliteDatasourceTestConfig(),
 ]
 
@@ -289,11 +293,12 @@ def test_escape_matches_wildcard_characters_literally(
     assert sorted(result.result["unexpected_list"]) == expected_unexpected
 
 
-# Neither dialect has an ESCAPE clause, so `escape` is translated to backslash escapes, and
-# both also read backslashes as escapes in string literals.
+# None of these dialects has an ESCAPE clause, so `escape` is translated to backslash
+# escapes, and all of them also read backslashes as escapes in string literals.
 BACKSLASH_ESCAPE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
     BigQueryDatasourceTestConfig(),
     ClickHouseDatasourceTestConfig(),
+    SingleStoreDatasourceTestConfig(),
 ]
 
 

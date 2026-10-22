@@ -40,8 +40,10 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
             column, _dialect, like_pattern_list[0], escape=escape
         )
         if like_pattern_expression is None:
-            logger.warning(f"Like patterns are not supported for dialect {_dialect.dialect.name!s}")
-            raise NotImplementedError
+            dialect = getattr(_dialect, "dialect", _dialect)
+            message = f"Like patterns are not supported for dialect {dialect.name!s}"
+            logger.warning(message)
+            raise NotImplementedError(message)
 
         if match_on == "any":
             condition = sa.or_(

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy  # type: ignore[no-redef]
+from great_expectations.compatibility import sqlalchemy  # type: ignore[no-redef] # Shim alias.
 from great_expectations.compatibility.sqlalchemy import (
     Dialect,
     Engine,
@@ -982,7 +982,7 @@ def test_get_dialect_like_pattern_expression_emits_escape_for_supported_dialects
     These three reach the same `column.like(..., escape=escape)` call as the dialects the
     integration suite covers, but none of them appears in any data-source list there --
     Dremio and Teradata have no test config at all, and Trino's is unused -- so this is
-    what pins the claim that BigQuery and ClickHouse are the only dialects needing a guard.
+    why these tests pin ESCAPE support on the less-covered dialects.
     """
     expression = get_dialect_like_pattern_expression(
         column=_like_column(),
@@ -1311,7 +1311,7 @@ def test_column_reflection_fallback_redshift_schema_qualified(
 
     # Call the function
     result = column_reflection_fallback(
-        selectable="my_table",  # type: ignore[arg-type]
+        selectable="my_table",  # type: ignore[arg-type] # Exercise string-to-TextClause conversion.
         dialect=mock_dialect,
         sqlalchemy_engine=mock_engine,
         schema_name=schema_name,
@@ -1407,7 +1407,7 @@ class _FakeDatabricksDialect:
     """
 
 
-class _OracleSub(sa.dialects.oracle.dialect):  # type: ignore[misc,valid-type]
+class _OracleSub(sa.dialects.oracle.dialect):  # type: ignore[misc,valid-type] # Dynamic dialect alias.
     """A concrete subclass of SQLAlchemy's bundled Oracle dialect.
 
     The chain detects Oracle with ``issubclass`` against the bundled
@@ -1419,7 +1419,7 @@ class _OracleSub(sa.dialects.oracle.dialect):  # type: ignore[misc,valid-type]
     """
 
 
-class _PGSub(sa.dialects.postgresql.dialect):  # type: ignore[misc,valid-type]
+class _PGSub(sa.dialects.postgresql.dialect):  # type: ignore[misc,valid-type] # Dynamic dialect alias.
     pass
 
 
@@ -1427,7 +1427,7 @@ class _MySQLSub(sqlalchemy.dialects.mysql.base.MySQLDialect):
     pass
 
 
-class _SQLiteSub(sa.dialects.sqlite.dialect):  # type: ignore[misc,valid-type]
+class _SQLiteSub(sa.dialects.sqlite.dialect):  # type: ignore[misc,valid-type] # Dynamic dialect alias.
     pass
 
 

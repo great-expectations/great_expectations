@@ -22,7 +22,7 @@ LIKE_PATTERN_ESCAPE_DESCRIPTION = (
     "Snowflake requires the clause to be stated), so a pattern relying on the default is "
     "not portable. Prefer a character other than a backslash: several dialects also treat "
     "a backslash specially inside string literals, before the pattern reaches LIKE, and "
-    "Redshift rejects `ESCAPE '\\'` outright. Omit it to emit no `ESCAPE` clause. Not "
-    "supported on BigQuery or ClickHouse, neither of which has an `ESCAPE` clause: escape "
-    "wildcards with a backslash inside the pattern there instead."
+    "Redshift rejects `ESCAPE '\\'` outright. Omit it to emit no `ESCAPE` clause. "
+    "BigQuery, ClickHouse and SingleStore have no `ESCAPE` clause: on these, the pattern is "
+    "rewritten to escape with a backslash instead, so it matches the same rows."
 )
