@@ -165,23 +165,26 @@ class TestClickHouseRegexAndLikePatterns:
             context=get_context(mode="ephemeral"),
         )
 
-    def test_match_like_pattern_with_escape_is_refused(self) -> None:
-        """ClickHouse has no ESCAPE clause, so asking for one must fail with a usable message.
+    def test_match_like_pattern_with_escape(self) -> None:
+        """An escaped `_` matches only itself, even though ClickHouse has no ESCAPE clause.
 
-        The server rejects `LIKE 'a!_c' ESCAPE '!'` as a syntax error, so emitting the clause
-        would surface a database error about SQL the user never wrote.
+        The server rejects `LIKE 'a!_c' ESCAPE '!'` as a syntax error, so the pattern is
+        rewritten to backslash escapes instead of emitting the clause. Were the escape dropped,
+        `_` would stay a wildcard and both values would match.
         """
         with self._wildcard_literal_batch_setup().batch_test_context() as batch:
             result = batch.validate(
                 gxe.ExpectColumnValuesToMatchLikePattern(
                     column=self.COL, like_pattern="a!_c", escape="!"
-                )
+                ),
+                result_format=ResultFormat.COMPLETE,
             )
-        assert not result.success
-        assert "ClickHouse does not support an ESCAPE clause" in str(result.exception_info)
+        assert result.exception_info.get("raised_exception") is False, result.exception_info
+        assert result.result["unexpected_list"] == ["abc"]
 
     def test_match_like_pattern_with_backslash_in_pattern(self) -> None:
-        """A backslash inside the pattern escapes a wildcard, as the refusal above advises.
+        """A backslash inside the pattern escapes a wildcard, which is the form `escape` is
+        translated to on ClickHouse.
 
         With the backslash honored `abc` is the one unexpected value; were it taken as an
         ordinary character neither value would match, and both would be unexpected.
