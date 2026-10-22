@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy  # type: ignore[no-redef]
+from great_expectations.compatibility import sqlalchemy  # type: ignore[no-redef] # Shim alias.
 from great_expectations.compatibility.sqlalchemy import (
     Dialect,
     Engine,
@@ -888,20 +888,55 @@ ESCAPE_UNSUPPORTING_DIALECTS = [
 @pytest.mark.unit
 @pytest.mark.parametrize("dialect_attribute,dialect_name", ESCAPE_UNSUPPORTING_DIALECTS)
 @pytest.mark.parametrize("positive", [True, False], ids=["positive", "negative"])
-def test_get_dialect_like_pattern_expression_rejects_escape_without_escape_clause(
-    dialect_attribute: str, dialect_name: str, positive: bool
+@pytest.mark.parametrize(
+    "like_pattern,escape,expected_pattern",
+    [
+        pytest.param(
+            r"a!_b!%c!!d\e", "!", r"a\_b\%c!d\\e", id="escaped-wildcards-escape-and-backslash"
+        ),
+        pytest.param("a_b%c", "!", "a_b%c", id="unescaped-wildcards-stay-wildcards"),
+        pytest.param("a!bc", "!", "abc", id="escaped-ordinary-character"),
+        pytest.param(r"a\_b\\c", "\\", r"a\_b\\c", id="backslash-as-escape"),
+    ],
+)
+def test_get_dialect_like_pattern_expression_translates_escape_without_escape_clause(
+    dialect_attribute: str,
+    dialect_name: str,
+    positive: bool,
+    like_pattern: str,
+    escape: str,
+    expected_pattern: str,
 ):
-    """A dialect with no ESCAPE clause must refuse an escape with a usable message.
+    """A dialect with no ESCAPE clause must get the pattern rewritten to backslash escapes.
 
-    Emitting the clause anyway would hand the user a database syntax error about SQL they
-    never wrote.
+    Both escape '_', '%' and the backslash with a backslash inside the pattern, so the
+    rewritten pattern matches the same rows the ESCAPE clause would elsewhere, and no clause
+    is emitted for the database to reject.
     """
-    with pytest.raises(ValueError, match=f"^{dialect_name} does not support an ESCAPE clause"):
+    expression = get_dialect_like_pattern_expression(
+        column=_like_column(),
+        dialect=_dialect_stub(dialect_attribute),
+        like_pattern=like_pattern,
+        positive=positive,
+        escape=escape,
+    )
+
+    assert expression is not None
+    assert expression.modifiers.get("escape") is None
+    assert expression.right.value == expected_pattern
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("dialect_attribute,dialect_name", ESCAPE_UNSUPPORTING_DIALECTS)
+def test_get_dialect_like_pattern_expression_rejects_unpaired_escape_without_escape_clause(
+    dialect_attribute: str, dialect_name: str
+):
+    """A trailing escape with nothing to escape must fail before any SQL is sent."""
+    with pytest.raises(ValueError, match=f"unpaired escape character '!'.*{dialect_name}"):
         get_dialect_like_pattern_expression(
             column=_like_column(),
             dialect=_dialect_stub(dialect_attribute),
-            like_pattern="a!_b",
-            positive=positive,
+            like_pattern="a_b!",
             escape="!",
         )
 
@@ -913,11 +948,13 @@ def test_get_dialect_like_pattern_expression_allows_no_escape_without_escape_cla
 ):
     """The guard must only fire when an escape was actually requested."""
     expression = get_dialect_like_pattern_expression(
-        column=_like_column(), dialect=_dialect_stub(dialect_attribute), like_pattern="a_b"
+        column=_like_column(), dialect=_dialect_stub(dialect_attribute), like_pattern=r"a\_b"
     )
 
     assert expression is not None
     assert "ESCAPE" not in str(expression.compile(compile_kwargs={"literal_binds": True}))
+    # Without an escape, the pattern reaches the database verbatim, backslashes and all.
+    assert expression.right.value == r"a\_b"
 
 
 # The dialects whose branch in get_dialect_like_pattern_expression is selected by a plain
@@ -945,7 +982,7 @@ def test_get_dialect_like_pattern_expression_emits_escape_for_supported_dialects
     These three reach the same `column.like(..., escape=escape)` call as the dialects the
     integration suite covers, but none of them appears in any data-source list there --
     Dremio and Teradata have no test config at all, and Trino's is unused -- so this is
-    what pins the claim that BigQuery and ClickHouse are the only dialects needing a guard.
+    why these tests pin ESCAPE support on the less-covered dialects.
     """
     expression = get_dialect_like_pattern_expression(
         column=_like_column(),
@@ -1274,7 +1311,7 @@ def test_column_reflection_fallback_redshift_schema_qualified(
 
     # Call the function
     result = column_reflection_fallback(
-        selectable="my_table",  # type: ignore[arg-type]
+        selectable="my_table",  # type: ignore[arg-type] # Exercise string-to-TextClause conversion.
         dialect=mock_dialect,
         sqlalchemy_engine=mock_engine,
         schema_name=schema_name,
@@ -1370,7 +1407,7 @@ class _FakeDatabricksDialect:
     """
 
 
-class _OracleSub(sa.dialects.oracle.dialect):  # type: ignore[misc,valid-type]
+class _OracleSub(sa.dialects.oracle.dialect):  # type: ignore[misc,valid-type] # Dynamic dialect alias.
     """A concrete subclass of SQLAlchemy's bundled Oracle dialect.
 
     The chain detects Oracle with ``issubclass`` against the bundled
@@ -1382,7 +1419,7 @@ class _OracleSub(sa.dialects.oracle.dialect):  # type: ignore[misc,valid-type]
     """
 
 
-class _PGSub(sa.dialects.postgresql.dialect):  # type: ignore[misc,valid-type]
+class _PGSub(sa.dialects.postgresql.dialect):  # type: ignore[misc,valid-type] # Dynamic dialect alias.
     pass
 
 
@@ -1390,7 +1427,7 @@ class _MySQLSub(sqlalchemy.dialects.mysql.base.MySQLDialect):
     pass
 
 
-class _SQLiteSub(sa.dialects.sqlite.dialect):  # type: ignore[misc,valid-type]
+class _SQLiteSub(sa.dialects.sqlite.dialect):  # type: ignore[misc,valid-type] # Dynamic dialect alias.
     pass
 
 

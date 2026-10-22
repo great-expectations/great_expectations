@@ -406,10 +406,10 @@ def get_sqlalchemy_column_metadata(
         inspector = execution_engine.get_inspector()
 
         # Determine selectable type once
-        is_text_clause = sqlalchemy.TextClause and isinstance(  # type: ignore[truthy-function]
+        is_text_clause = sqlalchemy.TextClause and isinstance(  # type: ignore[truthy-function] # Optional imports can be falsy.
             table_selectable, sqlalchemy.TextClause
         )
-        is_quoted_name = sqlalchemy.quoted_name and isinstance(  # type: ignore[truthy-function]
+        is_quoted_name = sqlalchemy.quoted_name and isinstance(  # type: ignore[truthy-function] # Optional imports can be falsy.
             table_selectable, sqlalchemy.quoted_name
         )
         table_name = str(table_selectable)
@@ -923,7 +923,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
                 isinstance(typed_column_name_cursor, str)
                 and typed_column_name_cursor.startswith("`")
                 and typed_column_name_cursor.endswith("`")
-                and len(typed_column_name_cursor) >= 2  # noqa: PLR2004
+                and len(typed_column_name_cursor) >= 2  # noqa: PLR2004 # Two backticks surround the name.
                 and column_name.casefold() == typed_column_name_cursor[1:-1].casefold()
             ):
                 return column_name, typed_column_name_cursor
@@ -962,6 +962,36 @@ def parse_value_set(value_set: Iterable) -> list:
     return parsed_value_set
 
 
+def _like_pattern_with_backslash_escapes(like_pattern: str, escape: str, dialect_name: str) -> str:
+    """Rewrite a pattern written for ``ESCAPE '<escape>'`` as a backslash-escaped pattern.
+
+    BigQuery, ClickHouse and SingleStore have no ESCAPE clause: all three escape the ``_`` and
+    ``%`` wildcards, and the backslash itself, with a backslash inside the pattern. Translating
+    the pattern keeps it matching the same rows as on the dialects that do have the clause: the
+    character after ``escape`` is literal, and so is every other backslash, since only
+    ``escape`` escapes.
+    """
+    translated: list[str] = []
+    characters = iter(like_pattern)
+    for character in characters:
+        if character == escape:
+            literal = next(characters, None)
+            if literal is None:
+                raise ValueError(  # noqa: TRY003 # FIXME CoP
+                    f"like_pattern {like_pattern!r} ends in an unpaired escape character "
+                    f"{escape!r}, so it cannot be translated for {dialect_name}. Follow the "
+                    "escape character with the character it escapes, or double it to match "
+                    "the escape character itself."
+                )
+        elif character == "\\":
+            literal = character
+        else:
+            translated.append(character)
+            continue
+        translated.append(f"\\{literal}" if literal in ("_", "%", "\\") else literal)
+    return "".join(translated)
+
+
 def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
     column: sa.Column,
     dialect: ModuleType,
@@ -984,12 +1014,13 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
     rejects ``ESCAPE '\\'`` outright -- which is why the character is the caller's to choose
     rather than fixed.
 
-    BigQuery and ClickHouse are the exceptions: neither has an ``ESCAPE`` clause, and both
-    escape wildcards with a backslash inside the pattern, so passing ``escape`` for either
-    dialect raises.
+    BigQuery, ClickHouse and SingleStore are the exceptions: none has an ``ESCAPE`` clause, and
+    all three escape wildcards with a backslash inside the pattern, so for these dialects a
+    pattern given with ``escape`` is translated to backslash escapes and no clause is emitted.
+    A pattern given without ``escape`` is passed through unchanged on every dialect.
     """
     dialect_supported: bool = False
-    # The name of the matched dialect when it has no ESCAPE clause, for the error message.
+    # The name of the matched dialect when it has no ESCAPE clause, so ``escape`` is translated.
     escape_unsupported_by: str | None = None
 
     try:
@@ -1015,8 +1046,18 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
         except AttributeError:
             pass
         try:
-            if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
+            if issubclass(
+                dialect.dialect,
+                sa.dialects.oracle.base.OracleDialect,  # type: ignore[attr-defined] # Dynamic dialect export.
+            ):
                 dialect_supported = True
+        except AttributeError:
+            pass
+        try:
+            if issubclass(dialect.dialect, sa.dialects.mysql.base.MySQLDialect):
+                dialect_supported = True
+                if dialect.dialect.name == "singlestoredb":
+                    escape_unsupported_by = "SingleStore"
         except AttributeError:
             pass
         try:
@@ -1077,13 +1118,13 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912, PLR0915 # FIXME
         pass
 
     if escape is not None and escape_unsupported_by is not None:
-        # Neither dialect has an ESCAPE clause; both escape wildcards with a backslash inside
-        # the pattern itself. Emitting one would be a syntax error, so say so plainly rather
-        # than letting the database reject generated SQL the user never wrote.
-        raise ValueError(  # noqa: TRY003 # FIXME CoP
-            f"{escape_unsupported_by} does not support an ESCAPE clause. Escape the '_' and "
-            "'%' wildcards with a backslash inside like_pattern instead (for example 'a\\_b')."
+        # None of these dialects has an ESCAPE clause, and emitting one would be a syntax error.
+        # All escape wildcards with a backslash inside the pattern itself, so translate the
+        # pattern to that form instead, which matches the same rows.
+        like_pattern = _like_pattern_with_backslash_escapes(
+            like_pattern=like_pattern, escape=escape, dialect_name=escape_unsupported_by
         )
+        escape = None
 
     if dialect_supported:
         try:

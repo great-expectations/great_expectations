@@ -112,7 +112,7 @@ class MetricsCalculator:
             )
         )
 
-        return df.reset_index(drop=True, inplace=False)
+        return df.reset_index(drop=True)
 
     def get_metric(
         self,

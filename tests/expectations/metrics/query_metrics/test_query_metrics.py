@@ -1197,6 +1197,85 @@ class TestLiteralBooleanReplacementDialectInvariance:
         )
         assert result == "SELECT * FROM my_table WHERE true"
 
+    @pytest.mark.unit
+    def test_sql_server_does_not_rewrite_an_identifier_that_starts_with_true(
+        self,
+        mock_sql_server_execution_engine: MockSQLServerSqlAlchemyExecutionEngine,
+        batch_selectable: sa.Table,
+    ) -> None:
+        """``true_positive`` is a column name, not the boolean literal.
+
+        The replacement is a rewrite of the surrounding statement, so matching it inside a
+        longer word produces SQL that no server accepts, and the user's own query text gives
+        no clue why.
+        """
+        result = (
+            QueryMetricProvider._get_substituted_batch_subquery_from_query_and_batch_selectable(
+                query="SELECT * FROM {batch} WHERE true_positive = 1",
+                batch_selectable=batch_selectable,
+                execution_engine=mock_sql_server_execution_engine,
+            )
+        )
+        assert result == "SELECT * FROM my_table WHERE true_positive = 1"
+
+    @pytest.mark.unit
+    def test_oracle_does_not_rewrite_an_identifier_that_starts_with_true(
+        self,
+        mock_oracle_execution_engine: MockOracleSqlAlchemyExecutionEngine,
+        batch_selectable: sa.Table,
+    ) -> None:
+        result = (
+            QueryMetricProvider._get_substituted_batch_subquery_from_query_and_batch_selectable(
+                query="SELECT * FROM {batch} WHERE true_positive = 1",
+                batch_selectable=batch_selectable,
+                execution_engine=mock_oracle_execution_engine,
+            )
+        )
+        assert result == "SELECT * FROM my_table WHERE true_positive = 1"
+
+    @pytest.mark.unit
+    def test_sql_server_replaces_the_literal_but_not_the_word_that_follows_it(
+        self,
+        mock_sql_server_execution_engine: MockSQLServerSqlAlchemyExecutionEngine,
+        batch_selectable: sa.Table,
+    ) -> None:
+        """One statement carrying both forms: only the standalone literal is rewritten."""
+        result = (
+            QueryMetricProvider._get_substituted_batch_subquery_from_query_and_batch_selectable(
+                query="SELECT * FROM {batch} WHERE true AND truthy = 1",
+                batch_selectable=batch_selectable,
+                execution_engine=mock_sql_server_execution_engine,
+            )
+        )
+        assert result == "SELECT * FROM my_table WHERE 1=1 AND truthy = 1"
+
+    @pytest.mark.xfail(
+        strict=True,
+        reason="text-level rewrite also matches 'WHERE true' inside a string literal",
+    )
+    @pytest.mark.unit
+    def test_string_literal_containing_where_true_is_known_limitation(
+        self,
+        mock_sql_server_execution_engine: MockSQLServerSqlAlchemyExecutionEngine,
+        batch_selectable: sa.Table,
+    ) -> None:
+        """Naive rewriting treats string literals as real SQL - known limitation.
+
+        Asserts the correct result (the literal untouched) and is a strict xfail, so it
+        records the limitation without locking in the corrupted output: distinguishing a quoted
+        ``'WHERE true'`` from the predicate needs a SQL parser, and the replacement is
+        deliberately text-level. Widening the match to be case-insensitive would enlarge
+        this surface, so the match stays as case-sensitive as the literal it targets.
+        """
+        result = (
+            QueryMetricProvider._get_substituted_batch_subquery_from_query_and_batch_selectable(
+                query="SELECT * FROM {batch} WHERE note = 'WHERE true'",
+                batch_selectable=batch_selectable,
+                execution_engine=mock_sql_server_execution_engine,
+            )
+        )
+        assert result == "SELECT * FROM my_table WHERE note = 'WHERE true'"
+
 
 class TestUserQueryBraceSubstitution:
     """`{batch}` is substituted through `str.format`, which reads *every* brace in the query as a

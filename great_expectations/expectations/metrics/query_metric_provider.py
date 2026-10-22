@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 _ORDER_BY_TOKEN = "ORDER BY"
 _OFFSET_TOKEN = "OFFSET"
 
+# The SQL boolean literal this module rewrites on the grammars that lack it. Bounded on both
+# sides so it cannot be found inside a longer word.
+_WHERE_TRUE_LITERAL = re.compile(r"\bWHERE true\b")
+
 
 def has_top_level_token(query: str, token: str) -> bool:
     """Return True if *token* appears at parentheses depth 0 (case-insensitive).
@@ -277,9 +281,12 @@ class QueryMetricProvider(MetricProvider):
         # SQL Server has no boolean literal, and Oracle rejects a bare `true` as a
         # WHERE-clause predicate with ORA-00920 before it gained a SQL boolean type in 23ai.
         # A user-authored query carrying that literal is rewritten to `1=1`, which every one
-        # of these grammars accepts.
+        # of these grammars accepts. The match is anchored on word boundaries so an identifier
+        # that merely starts with the literal (`WHERE true_positive = 1`) is left alone: a
+        # plain substring rewrite there emits `WHERE 1=1_positive = 1`, which no server accepts
+        # and which the user's own query text does not explain.
         if getattr(execution_engine, "dialect_name", None) in ("mssql", "oracle"):
-            query = query.replace("WHERE true", "WHERE 1=1")
+            query = _WHERE_TRUE_LITERAL.sub("WHERE 1=1", query)
 
         return query
 
