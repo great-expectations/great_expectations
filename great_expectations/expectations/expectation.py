@@ -2631,7 +2631,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         "ignore_row_if",
     )
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.MULTICOLUMN
-    success_keys = ("mostly",)
+    success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
 
     class Config:
         @staticmethod

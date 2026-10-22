@@ -99,6 +99,11 @@ class ProjectManager:
             raise DataContextRequiredError()
         return self.__project
 
+    def get_current_project(self) -> AbstractDataContext:
+        """The Data Context most recently returned by get_context() or passed to
+        set_context(). Raises DataContextRequiredError when none has been set."""
+        return self._project
+
     def get_expectations_store(self) -> ExpectationsStore:
         return self._project.expectations_store
 
@@ -571,6 +576,8 @@ def get_context(  # noqa: PLR0913 # FIXME CoP
     - runtime_environment: Optionally override specific configuration values.
 
     **CloudDataContext (shut down):** GX Cloud has been shut down. Requesting a cloud-backed context no longer returns a `CloudDataContext` -- it raises a `GreatExpectationsError` immediately. A request resolves to the (removed) cloud branch when `mode="cloud"` or `cloud_mode=True` is passed, when a complete set of ``cloud_*`` parameters is supplied, or when ``GX_CLOUD_*`` environment variables / a great_expectations.conf file provide a complete cloud configuration. The `CloudDataContext` class and the ``cloud_*`` parameters remain importable for source compatibility through the v1 line and are removed in great_expectations 2.0.
+
+    Calling this method also sets the process-wide current Data Context. Objects that belong to no Data Context resolve through the current one.
 
     Args:
         project_config: In-memory configuration for Data Context.

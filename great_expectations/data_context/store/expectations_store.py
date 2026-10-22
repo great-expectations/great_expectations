@@ -97,6 +97,19 @@ class ExpectationsStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+    @property
+    def data_context(self) -> AbstractDataContext | None:
+        """The Data Context that built this store, or None for a directly constructed store."""
+        return self._data_context
+
+    def _bind(self, suite: ExpectationSuite) -> None:
+        """Record this store's Data Context as the suite's owner (GX issue #12209).
+
+        A store built outside a Data Context has none to record, and leaves the suite as it is.
+        """
+        if self._data_context is not None and isinstance(suite, ExpectationSuite):
+            suite._owner = self._data_context
+
     @override
     @classmethod
     def gx_cloud_response_json_to_object_dict(cls, response_json: dict) -> dict:
@@ -230,6 +243,9 @@ class ExpectationsStore(Store):
                     local_suite=value,
                     cloud_suite=cloud_suite,
                 )
+            # Bind only once the write has succeeded: a failed add must not leave the caller's
+            # suite owned by a Data Context it is not in.
+            self._bind(value)
             return result
         except gx_exceptions.StoreBackendError as exc:
             raise gx_exceptions.ExpectationSuiteError(  # noqa: TRY003 # FIXME CoP
@@ -254,6 +270,7 @@ class ExpectationsStore(Store):
                     local_suite=value,
                     cloud_suite=cloud_suite,
                 )
+            self._bind(value)
         except gx_exceptions.StoreBackendError as e:
             # todo: this generic error clobbers more informative errors coming from the store
 
@@ -337,6 +354,7 @@ class ExpectationsStore(Store):
 
     def deserialize_suite_dict(self, suite_dict: dict) -> ExpectationSuite:
         suite = ExpectationSuite(**suite_dict)
+        self._bind(suite)
         if suite._include_rendered_content:
             suite.render()
         return suite

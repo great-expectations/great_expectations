@@ -304,7 +304,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -373,7 +373,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):
-        from great_expectations.execution_engine import PandasExecutionEngine
+        from great_expectations.expectations.metrics.util import parse_value_set
 
         value_set = metric_value_kwargs["value_set"]
 
@@ -381,7 +381,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             # Vacuously true
             return np.ones(len(series), dtype=np.bool_)
         if pd.api.types.is_datetime64_any_dtype(series):
-            parsed_value_set = PandasExecutionEngine.parse_value_set(value_set=value_set)
+            parsed_value_set = parse_value_set(value_set=value_set)
         else:
             parsed_value_set = value_set
 

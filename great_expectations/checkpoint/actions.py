@@ -32,11 +32,13 @@ from great_expectations.compatibility.pydantic import (
     Extra,
     Field,
     ModelMetaclass,
+    PrivateAttr,
     root_validator,
     validator,
 )
 from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.owner_resolution import ResolvedContext, resolve_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.resource_identifiers import (
@@ -62,6 +64,7 @@ from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -208,6 +211,14 @@ class ValidationAction(BaseModel, metaclass=MetaValidationAction):
     type: str
     name: str
 
+    # The Data Context this action runs against. A Checkpoint sets it on each of its actions
+    # before running them; an action no Checkpoint has run has none and resolves through the
+    # current Data Context.
+    _data_context: Any = PrivateAttr(default=None)
+
+    def _resolve_context(self) -> ResolvedContext:
+        return resolve_context(self._data_context)
+
     @property
     def _using_cloud_context(self) -> bool:
         return project_manager.is_using_cloud()
@@ -241,10 +252,12 @@ class ValidationAction(BaseModel, metaclass=MetaValidationAction):
         return None
 
     @staticmethod
-    def _substitute_config_str_if_needed(value: Union[str, ConfigStr, None]) -> Optional[str]:
-        from great_expectations.data_context.data_context.context_factory import project_manager
-
-        config_provider = project_manager.get_config_provider()
+    def _substitute_config_str_if_needed(
+        value: Union[str, ConfigStr, None],
+        config_provider: _ConfigurationProvider | None = None,
+    ) -> Optional[str]:
+        if config_provider is None:
+            config_provider = project_manager.get_config_provider()
         if isinstance(value, ConfigStr):
             return value.get_config_value(config_provider=config_provider)
         else:
@@ -293,8 +306,11 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifiers: list | None = None,
     ) -> dict:
-        return project_manager.build_data_docs(
-            site_names=site_names, resource_identifiers=resource_identifiers
+        return self._resolve_context().context.build_data_docs(
+            site_names=site_names,
+            resource_identifiers=resource_identifiers,
+            dry_run=False,
+            build_index=True,
         )
 
     def _get_docs_sites_urls(
@@ -302,8 +318,11 @@ class DataDocsAction(ValidationAction):
         site_names: list[str] | None = None,
         resource_identifier: Any | None = None,
     ):
-        return project_manager.get_docs_sites_urls(
-            site_names=site_names, resource_identifier=resource_identifier
+        return self._resolve_context().context.get_docs_sites_urls(
+            resource_identifier=resource_identifier,
+            site_name=None,
+            only_if_exists=True,
+            site_names=site_names,
         )
 
 
@@ -456,9 +475,10 @@ class SlackNotificationAction(DataDocsAction):
         )
 
     def _send_slack_notification(self, payload: dict) -> dict:
-        slack_webhook = self._substitute_config_str_if_needed(self.slack_webhook)
-        slack_token = self._substitute_config_str_if_needed(self.slack_token)
-        slack_channel = self._substitute_config_str_if_needed(self.slack_channel)
+        config_provider = self._resolve_context().context.config_provider
+        slack_webhook = self._substitute_config_str_if_needed(self.slack_webhook, config_provider)
+        slack_token = self._substitute_config_str_if_needed(self.slack_token, config_provider)
+        slack_channel = self._substitute_config_str_if_needed(self.slack_channel, config_provider)
 
         session = requests.Session()
         url = slack_webhook
@@ -610,7 +630,8 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         return {"microsoft_teams_notification_result": teams_notif_result}
 
     def _send_microsoft_teams_notifications(self, payload: dict) -> str | None:
-        webhook = self._substitute_config_str_if_needed(self.teams_webhook)
+        config_provider = self._resolve_context().context.config_provider
+        webhook = self._substitute_config_str_if_needed(self.teams_webhook, config_provider)
         if not webhook:  # Necessary to appease mypy; this is guaranteed.
             raise ValueError("No Microsoft Teams webhook URL provided.")  # noqa: TRY003 # FIXME CoP
 
@@ -845,8 +866,9 @@ class EmailAction(ValidationAction):
             return {"email_result": ""}
 
         title, html = self.renderer.render(checkpoint_result=checkpoint_result)
+        config_provider = self._resolve_context().context.config_provider
         substituted_receiver_emails = (
-            self._substitute_config_str_if_needed(self.receiver_emails) or ""
+            self._substitute_config_str_if_needed(self.receiver_emails, config_provider) or ""
         )
 
         receiver_emails_list = list(
@@ -869,11 +891,14 @@ class EmailAction(ValidationAction):
         html,
         receiver_emails_list,
     ):
-        smtp_address = self._substitute_config_str_if_needed(self.smtp_address)
-        smtp_port = self._substitute_config_str_if_needed(self.smtp_port)
-        sender_login = self._substitute_config_str_if_needed(self.sender_login)
-        sender_password = self._substitute_config_str_if_needed(self.sender_password)
-        sender_alias = self._substitute_config_str_if_needed(self.sender_alias)
+        config_provider = self._resolve_context().context.config_provider
+        smtp_address = self._substitute_config_str_if_needed(self.smtp_address, config_provider)
+        smtp_port = self._substitute_config_str_if_needed(self.smtp_port, config_provider)
+        sender_login = self._substitute_config_str_if_needed(self.sender_login, config_provider)
+        sender_password = self._substitute_config_str_if_needed(
+            self.sender_password, config_provider
+        )
+        sender_alias = self._substitute_config_str_if_needed(self.sender_alias, config_provider)
 
         msg = MIMEMultipart()
         msg["From"] = sender_alias
