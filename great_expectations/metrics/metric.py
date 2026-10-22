@@ -38,7 +38,7 @@ class AbstractClassInstantiationError(TypeError):
 
 class EmptyStrError(ValueError):
     def __init__(self, param_name) -> None:
-        super().__init__("{param_name} must be a non-empty string.")
+        super().__init__(f"{param_name} must be a non-empty string.")
 
 
 @dataclass_transform()
