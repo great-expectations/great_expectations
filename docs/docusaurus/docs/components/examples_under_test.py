@@ -544,6 +544,33 @@ docs_examples_configure_data_docs = [
     ),
 ]
 
+docs_examples_sync_with_cloud_storage = [
+    # Each script writes only below docs-tests/artifact-sync/<uuid4>/ in its bucket or
+    # container and deletes that prefix when it finishes, so the CI identities need
+    # write and delete permission there.
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --aws -k "docs_example_sync_with_cloud_storage_s3" tests/integration/test_script_runner.py
+        name="docs_example_sync_with_cloud_storage_s3",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/sync_with_cloud_storage/_examples/sync_with_cloud_storage_s3.py",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --azure -k "docs_example_sync_with_cloud_storage_abs" tests/integration/test_script_runner.py
+        name="docs_example_sync_with_cloud_storage_abs",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/sync_with_cloud_storage/_examples/sync_with_cloud_storage_abs.py",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+    IntegrationTestFixture(
+        # To test, run:
+        # pytest --docs-tests --gcs -k "docs_example_sync_with_cloud_storage_gcs" tests/integration/test_script_runner.py
+        name="docs_example_sync_with_cloud_storage_gcs",
+        user_flow_script="docs/docusaurus/docs/core/configure_project_settings/sync_with_cloud_storage/_examples/sync_with_cloud_storage_gcs.py",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+]
+
 learn_data_quality_use_cases = [
     # Distribution.
     IntegrationTestFixture(
@@ -677,4 +704,5 @@ docs_tests.extend(docs_examples_customize_expectations)
 docs_tests.extend(docs_examples_trigger_actions_based_on_validation_results)
 docs_tests.extend(docs_example_configure_project_settings)
 docs_tests.extend(docs_examples_configure_data_docs)
+docs_tests.extend(docs_examples_sync_with_cloud_storage)
 docs_tests.extend(learn_data_quality_use_cases)

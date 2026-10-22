@@ -19,6 +19,8 @@ Ephemeral Data Contexts store this information in memory. File Data Contexts, ho
 
 By default, Store files are created in folders within the `base_folder` of the File Data Context.  However, you can update your Data Context to specify where these Stores should reside, or to indicate existing Stores to load when the Data Context is initialized.
 
+To share a project's Store files through Amazon S3, Azure Blob Storage, or Google Cloud Storage with workers that start without a local copy, see [Sync a project with cloud storage](/core/configure_project_settings/sync_with_cloud_storage/sync_with_cloud_storage.md).
+
 ### Prerequisites:
 
 - <PrereqPythonInstalled/>.

@@ -456,4 +456,14 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="SNSNotificationAction",
         filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
     ),
+    IncludeExcludeDefinition(
+        reason="Docs examples call google-cloud-storage's Bucket.blob(), which string matching mistakes for these URL helper properties.",
+        name="blob",
+        filepath=pathlib.Path("great_expectations/core/util.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="Docs examples call google-cloud-storage's Client.bucket(), which string matching mistakes for these URL helper properties.",
+        name="bucket",
+        filepath=pathlib.Path("great_expectations/core/util.py"),
+    ),
 ]

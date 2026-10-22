@@ -30,6 +30,13 @@ import OverviewCard from '@site/src/components/OverviewCard';
   />
   <LinkCard 
       topIcon 
+      label="Cloud Storage Sync"
+      description="Keep a project in Amazon S3, Azure Blob Storage, or Google Cloud Storage, and run validations from workers that download it."
+      to="/core/configure_project_settings/sync_with_cloud_storage" 
+      icon="/img/expectation_icon.svg" 
+  />
+  <LinkCard 
+      topIcon 
       label="Credentials"
       description="Securely store and access credentials for database connection strings and tokens for Checkpoint Actions."
       to="/core/configure_project_settings/configure_credentials" 
