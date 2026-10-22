@@ -108,7 +108,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         # Use a vectorized approach for native numpy dtypes
         if column.dtype in [int, float]:
             return cls._pandas_vectorized(temp_column, min_value, max_value, strict_min, strict_max)
-        elif isinstance(column.dtype, pd.DatetimeTZDtype) or pd.api.types.is_datetime64_ns_dtype(
+        elif isinstance(column.dtype, pd.DatetimeTZDtype) or pd.api.types.is_datetime64_any_dtype(
             column.dtype
         ):
             if min_value is not None and isinstance(min_value, str):
@@ -116,6 +116,18 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
 
             if max_value is not None and isinstance(max_value, str):
                 max_value = parse(max_value)
+
+            # Coerce plain datetime.date bounds to pd.Timestamp so the vectorised comparison
+            # does not raise "Cannot compare Timestamp with datetime.date" on pandas 2.3+.
+            if min_value is not None and isinstance(min_value, datetime.date) and not isinstance(
+                min_value, datetime.datetime
+            ):
+                min_value = pd.Timestamp(min_value)
+
+            if max_value is not None and isinstance(max_value, datetime.date) and not isinstance(
+                max_value, datetime.datetime
+            ):
+                max_value = pd.Timestamp(max_value)
 
             return cls._pandas_vectorized(temp_column, min_value, max_value, strict_min, strict_max)
 

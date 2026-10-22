@@ -285,3 +285,37 @@ def test_infinite_decimal_max(batch_for_datasource: Batch) -> None:
     result = batch_for_datasource.validate(expectation, result_format=ResultFormat.COMPLETE)
     assert result.success
     assert result.to_json_dict()["result"] == {"observed_value": float("inf")}
+
+
+# ── Regression: datetime64 column with datetime.date bounds (GH #12313) ──────
+import datetime as _dt  # noqa: E402
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=JUST_PANDAS_DATA_SOURCES,
+    data=pd.DataFrame(
+        {
+            "ts": pd.Series(
+                [
+                    pd.Timestamp("2024-01-01"),
+                    pd.Timestamp("2024-01-02 12:00:00"),
+                    pd.Timestamp("2024-01-03"),
+                    pd.Timestamp("2024-01-04"),
+                    pd.Timestamp("2024-01-06"),
+                    pd.NaT,
+                ]
+            )
+        }
+    ),
+)
+def test_datetime64_column_max_with_date_bounds_does_not_raise(batch_for_datasource: Batch) -> None:
+    """ExpectColumnMaxToBeBetween with datetime64 column and datetime.date bounds must not raise
+    'Cannot compare Timestamp with datetime.date' on pandas 2.3+."""
+    expectation = gxe.ExpectColumnMaxToBeBetween(
+        column="ts",
+        min_value=_dt.date(2024, 1, 6),
+        max_value=_dt.date(2024, 1, 7),
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success is True
+    assert result.exception_info.get("raised_exception") is False

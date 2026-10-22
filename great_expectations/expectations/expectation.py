@@ -1814,7 +1814,7 @@ class BatchExpectation(Expectation, ABC):
 
         return validation_dependencies
 
-    def _validate_metric_value_between(  # noqa: C901, PLR0912 # FIXME CoP
+    def _validate_metric_value_between(  # noqa: C901, PLR0912, PLR0915 # FIXME CoP
         self,
         metric_name,
         metrics: Dict,
@@ -1874,6 +1874,18 @@ representation."""  # noqa: E501 # FIXME CoP
                         f"""Could not parse "metric_value" of {metric_value} (of type "{type(metric_value)!s}) into datetime \
 representation."""  # noqa: E501 # FIXME CoP
                     )
+            # Coerce plain datetime.date bounds to pd.Timestamp when metric_value is a
+            # datetime (e.g. pd.Timestamp from column min/max), so the comparison does not
+            # raise "Cannot compare Timestamp with datetime.date" on pandas 2.3+.
+            if isinstance(metric_value, datetime.datetime):
+                if isinstance(min_value, datetime.date) and not isinstance(
+                    min_value, datetime.datetime
+                ):
+                    min_value = pd.Timestamp(min_value)
+                if isinstance(max_value, datetime.date) and not isinstance(
+                    max_value, datetime.datetime
+                ):
+                    max_value = pd.Timestamp(max_value)
 
         # Checking if mean lies between thresholds
         if min_value is not None:
