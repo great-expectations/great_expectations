@@ -194,15 +194,7 @@ class TestSQLServer:
         assert not result.success
 
 
-# SingleStore supports LIKE, but has no ESCAPE clause.
-ESCAPE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
-    config
-    for config in REGULAR_DATA_SOURCES
-    if not isinstance(config, SingleStoreDatasourceTestConfig)
-]
-
-
-@parameterize_batch_for_data_sources(data_source_configs=ESCAPE_DATA_SOURCES, data=DATA)
+@parameterize_batch_for_data_sources(data_source_configs=REGULAR_DATA_SOURCES, data=DATA)
 def test_escape_makes_underscore_literal(batch_for_datasource: Batch) -> None:
     """The escape character must reach every pattern of a NOT LIKE list.
 

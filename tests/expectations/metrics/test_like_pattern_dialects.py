@@ -123,18 +123,22 @@ def test_unsupported_dialect_raises_not_implemented_error(
 
 @pytest.mark.unit
 @pytest.mark.parametrize("positive", [True, False], ids=["match", "not-match"])
-def test_singlestore_rejects_explicit_escape(positive: bool) -> None:
+def test_singlestore_translates_explicit_escape(positive: bool) -> None:
+    """SingleStore has no ESCAPE clause, so the pattern is rewritten to backslash escapes."""
     dialect = _DialectModule("test_singlestore_dialect")
     dialect.dialect = _SingleStoreDialectSubclass
 
-    with pytest.raises(ValueError, match=r"^SingleStore does not support an ESCAPE clause"):
-        get_dialect_like_pattern_expression(
-            column=sa.Column("value", sa.String()),
-            dialect=dialect,
-            like_pattern="a!_b",
-            positive=positive,
-            escape="!",
-        )
+    expression = get_dialect_like_pattern_expression(
+        column=sa.Column("value", sa.String()),
+        dialect=dialect,
+        like_pattern="a!_b",
+        positive=positive,
+        escape="!",
+    )
+
+    assert expression is not None
+    assert expression.modifiers.get("escape") is None
+    assert expression.right.value == r"a\_b"
 
 
 @pytest.mark.unit

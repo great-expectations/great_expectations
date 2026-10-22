@@ -70,23 +70,25 @@ def test_unsupported_dialect_returns_descriptive_exception(
 @parameterize_batch_for_data_sources(
     data_source_configs=[SingleStoreDatasourceTestConfig()], data=DATA
 )
-def test_singlestore_explicit_escape_returns_descriptive_exception(
+def test_singlestore_explicit_escape_matches_underscore_literally(
     batch_for_datasource: Batch, expectation: Expectation
 ) -> None:
+    """With `escape`, 'a!_b' must match only the literal 'a_b', as an ESCAPE clause would.
+
+    SingleStore has no ESCAPE clause, so the pattern is translated to 'a\\_b'. Were the
+    escape dropped instead, '!' would be an ordinary character and no row would match.
+    """
     expectation = expectation.copy(update={"escape": "!"})
     result = batch_for_datasource.validate(expectation)
 
-    assert not result.success
-    exceptions = []
-    for info in result.exception_info.values():
-        if info["raised_exception"]:
-            exceptions.append(info)
-
-    assert exceptions
-    for info in exceptions:
-        assert info["exception_message"].startswith("SingleStore does not support an ESCAPE clause")
-        assert "ValueError" in info["exception_traceback"]
-        assert "ProgrammingError" not in info["exception_traceback"]
+    assert result.exception_info["raised_exception"] is False
+    if isinstance(
+        expectation,
+        (gxe.ExpectColumnValuesToMatchLikePattern, gxe.ExpectColumnValuesToMatchLikePatternList),
+    ):
+        assert sorted(result.result["partial_unexpected_list"]) == ["a%b", "axb"]
+    else:
+        assert result.result["partial_unexpected_list"] == ["a_b"]
 
 
 @pytest.mark.parametrize(

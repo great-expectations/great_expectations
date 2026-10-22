@@ -308,15 +308,7 @@ def test_include_unexpected_rows_postgres(batch_for_datasource: Batch) -> None:
     assert "ghi" in unexpected_rows_str
 
 
-# BigQuery and SingleStore have no ESCAPE clause; their rejection is tested separately.
-ESCAPE_DATA_SOURCES: Sequence[DataSourceTestConfig] = [
-    config
-    for config in SUPPORTED_DATA_SOURCES
-    if not isinstance(config, (BigQueryDatasourceTestConfig, SingleStoreDatasourceTestConfig))
-]
-
-
-@parameterize_batch_for_data_sources(data_source_configs=ESCAPE_DATA_SOURCES, data=DATA)
+@parameterize_batch_for_data_sources(data_source_configs=SUPPORTED_DATA_SOURCES, data=DATA)
 def test_escape_applies_to_every_pattern_in_the_list(batch_for_datasource: Batch) -> None:
     """One escape character governs the whole list, not just the first pattern.
 
@@ -337,7 +329,7 @@ def test_escape_applies_to_every_pattern_in_the_list(batch_for_datasource: Batch
     assert result.result["unexpected_list"] == ["axb"]
 
 
-@parameterize_batch_for_data_sources(data_source_configs=ESCAPE_DATA_SOURCES, data=DATA)
+@parameterize_batch_for_data_sources(data_source_configs=SUPPORTED_DATA_SOURCES, data=DATA)
 def test_escape_applies_under_match_on_all(batch_for_datasource: Batch) -> None:
     """match_on="all" builds the condition with sa.and_, a different branch from "any".
 
