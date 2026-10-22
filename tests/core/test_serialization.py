@@ -168,6 +168,38 @@ def test_nan_decimal_converts_without_raising(value):
     assert math.isnan(converted[1])
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "index",
+    [
+        pytest.param([10, 11, 12], id="custom"),
+        pytest.param([0, 2, 3], id="gapped"),
+        pytest.param([1, 1, 2], id="duplicated"),
+        pytest.param(["a", "b", "c"], id="labels"),
+    ],
+)
+def test_pandas_series_decimal_conversion_in_place_keeps_values_on_their_rows(index):
+    series = pd.Series([Decimal("5"), Decimal("1"), Decimal("2")], index=index)
+
+    result = convert_pandas_series_decimal_to_float_dtype(data=series, inplace=True)
+
+    assert result is None
+    assert series.tolist() == [5.0, 1.0, 2.0]
+    assert all(isinstance(value, float) for value in series)
+    assert series.index.tolist() == index
+
+
+@pytest.mark.unit
+def test_pandas_series_decimal_conversion_returns_a_series_with_the_original_index():
+    series = pd.Series([Decimal("5"), Decimal("1"), Decimal("2")], index=[10, 11, 12])
+
+    converted = convert_pandas_series_decimal_to_float_dtype(data=series)
+
+    assert converted is not None
+    assert converted.tolist() == [5.0, 1.0, 2.0]
+    assert converted.index.tolist() == [10, 11, 12]
+
+
 # TODO add unittests for convert_to_json_serializable() and ensure_json_serializable()
 @pytest.mark.spark
 def test_serialization_of_spark_df(spark_session):

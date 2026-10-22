@@ -864,10 +864,10 @@ def convert_pandas_series_decimal_to_float_dtype(
     if series_data_has_decimal:
         series_data = convert_ndarray_decimal_to_float_dtype(data=series_data)
         if inplace:
-            data.update(pd.Series(series_data))
+            data.iloc[:] = series_data
             return None
 
-        return pd.Series(series_data)
+        return pd.Series(series_data, index=data.index)
 
     if inplace:
         return None
