@@ -2,6 +2,7 @@ from datetime import datetime
 from pprint import pprint
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
@@ -331,7 +332,49 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
     header = res["value"]["header"]
     assert header["value"]["template"] == "KL Divergence: $observed_value"
     observed_value = header["value"]["params"]["observed_value"]["value"]
-    assert observed_value == "None (-infinity, infinity, or NaN)"
+    assert observed_value == "0"
+
+
+@pytest.mark.unit
+def test_atomic_diagnostic_observed_value_accepts_a_numpy_kl_divergence(
+    get_diagnostic_rendered_content,
+):
+    """A numpy scalar zero is still an observed value and must render as 0."""
+    expectation_config = {
+        "type": "expect_column_kl_divergence_to_be_less_than",
+        "kwargs": {
+            "column": "min_event_time",
+            "partition_object": {
+                "bins": [0, 5, 10, 30, 50],
+                "weights": [0.2, 0.3, 0.1, 0.4],
+            },
+            "threshold": 0.1,
+        },
+        "meta": {},
+        "id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+    }
+    update_dict = {
+        "expectation_config": ExpectationConfiguration(**expectation_config),
+        "result": {
+            "observed_value": np.float64(0.0),
+            "details": {
+                "observed_partition": {
+                    "values": [1, 2, 4],
+                    "weights": [0.3754, 0.615, 0.0096],
+                },
+                "expected_partition": {
+                    "values": [1, 2, 4],
+                    "weights": [0.3754, 0.615, 0.0096],
+                },
+            },
+        },
+    }
+    rendered_content = get_diagnostic_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    assert res["name"] == "atomic.diagnostic.observed_value"
+    observed_value = res["value"]["header"]["value"]["params"]["observed_value"]["value"]
+    assert observed_value == "0"
 
 
 @pytest.mark.unit
@@ -401,7 +444,7 @@ def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_d
     header = res["value"]["header"]
     assert header["value"]["template"] == "KL Divergence: $observed_value"
     observed_value = header["value"]["params"]["observed_value"]["value"]
-    assert observed_value == "None (-infinity, infinity, or NaN)"
+    assert observed_value == "0"
 
 
 @pytest.mark.unit

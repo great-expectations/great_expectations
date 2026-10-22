@@ -1416,16 +1416,20 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         observed_partition_object = result.result.get("details", {}).get("observed_partition", {})
         weights = observed_partition_object.get("weights", [])
 
-        raw_observed_value = result.result.get("observed_value")
-        observed_value = (
-            num_to_str(raw_observed_value) if raw_observed_value else raw_observed_value
-        )
+        observed_value = result.result.get("observed_value")
+        if observed_value is not None:
+            # Metrics can return numpy scalars, which num_to_str does not accept.
+            if isinstance(observed_value, np.number):
+                observed_value = observed_value.item()
+            observed_value = num_to_str(observed_value)
         header_template_str = "KL Divergence: $observed_value"
         header_params_with_json_schema = {
             "observed_value": {
                 "schema": {"type": "string"},
                 "value": (
-                    str(observed_value) if observed_value else "None (-infinity, infinity, or NaN)"
+                    str(observed_value)
+                    if observed_value is not None
+                    else "None (-infinity, infinity, or NaN)"
                 ),
             }
         }
@@ -1548,10 +1552,12 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         observed_partition_object = result.result["details"]["observed_partition"]
         observed_distribution = cls._get_kl_divergence_chart(observed_partition_object)
 
-        raw_observed_value = result.result.get("observed_value")
-        observed_value = (
-            num_to_str(raw_observed_value) if raw_observed_value else raw_observed_value
-        )
+        observed_value = result.result.get("observed_value")
+        if observed_value is not None:
+            # Metrics can return numpy scalars, which num_to_str does not accept.
+            if isinstance(observed_value, np.number):
+                observed_value = observed_value.item()
+            observed_value = num_to_str(observed_value)
 
         observed_value_content_block = RenderedStringTemplateContent(
             content_block_type="string_template",
@@ -1560,7 +1566,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 "params": {
                     "observed_value": (
                         str(observed_value)
-                        if observed_value
+                        if observed_value is not None
                         else "None (-infinity, infinity, or NaN)"
                     ),
                 },
