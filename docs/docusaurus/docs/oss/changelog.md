@@ -49,7 +49,7 @@ This table lists every deprecated item, the version that deprecated it, and the 
 
 #### Highlights
 
-- **Oracle and SingleStore support for LIKE-pattern Expectations** — The four LIKE-pattern Expectations (ExpectColumnValuesToMatchLikePattern, ExpectColumnValuesToMatchLikePatternList, ExpectColumnValuesToNotMatchLikePattern, ExpectColumnValuesToNotMatchLikePatternList) now run on Oracle and SingleStore, where they previously raised NotImplementedError. MySQL support now covers every SQLAlchemy MySQL dialect, SingleStore gets the same backslash translation of `escape` that BigQuery and ClickHouse use, and dialects that genuinely cannot run LIKE patterns now raise a NotImplementedError that names the dialect instead of failing with an AttributeError. ([#12274](https://github.com/fivetran/great_expectations/pull/12274))
+- **Oracle and SingleStore support for LIKE-pattern Expectations** — The four LIKE-pattern Expectations (ExpectColumnValuesToMatchLikePattern, ExpectColumnValuesToMatchLikePatternList, ExpectColumnValuesToNotMatchLikePattern, ExpectColumnValuesToNotMatchLikePatternList) now run on Oracle and SingleStore, where they previously raised NotImplementedError. MySQL support now covers every SQLAlchemy MySQL dialect, SingleStore gets the same backslash translation of `escape` that BigQuery and ClickHouse use, and dialects that cannot run LIKE patterns now raise a NotImplementedError with the dialect name rather than failing with an AttributeError. ([#12274](https://github.com/fivetran/great_expectations/pull/12274))
 
   ```python
   import great_expectations.expectations as gxe
