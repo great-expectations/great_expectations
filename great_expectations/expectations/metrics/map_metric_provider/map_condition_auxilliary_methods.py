@@ -706,6 +706,26 @@ def _collect_spark_nested_column_paths(schema: Any) -> set:
     return paths
 
 
+def _unquote_spark_top_level_column_name(column_name: str, top_level_columns: set[str]) -> str:
+    """Return the plain name for a backtick-quoted top-level Spark column.
+
+    Domain kwargs carry a dotted column name in its backtick-quoted form
+    (e.g. ``"`Data.Entrega`"``) so Spark does not parse the dot as nested
+    field access. Strip the quoting only when the unquoted name is a literal
+    top-level column; any other name is returned unchanged.
+    """
+    if column_name in top_level_columns:
+        return column_name
+    if (
+        len(column_name) >= 2  # noqa: PLR2004
+        and column_name.startswith("`")
+        and column_name.endswith("`")
+        and column_name[1:-1] in top_level_columns
+    ):
+        return column_name[1:-1]
+    return column_name
+
+
 def _spark_map_condition_index(  # noqa: C901 #  too complex
     cls,
     execution_engine: SparkDFExecutionEngine,
@@ -757,6 +777,14 @@ def _spark_map_condition_index(  # noqa: C901 #  too complex
     df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
+    # A dotted domain column arrives backtick-quoted (see
+    # ``get_dbms_compatible_metric_domain_kwargs``). The checks, selection and
+    # result keys below all expect the plain column name.
+    df_columns = set(df.columns)
+    domain_column_name_list = [
+        _unquote_spark_top_level_column_name(column_name, df_columns)
+        for column_name in domain_column_name_list
+    ]
     result_format = metric_value_kwargs["result_format"]
     if not result_format.get("unexpected_index_column_names"):
         raise gx_exceptions.MetricResolutionError(
