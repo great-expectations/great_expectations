@@ -1249,6 +1249,10 @@ class TestLiteralBooleanReplacementDialectInvariance:
         )
         assert result == "SELECT * FROM my_table WHERE 1=1 AND truthy = 1"
 
+    @pytest.mark.xfail(
+        strict=True,
+        reason="text-level rewrite also matches 'WHERE true' inside a string literal",
+    )
     @pytest.mark.unit
     def test_string_literal_containing_where_true_is_known_limitation(
         self,
@@ -1257,7 +1261,8 @@ class TestLiteralBooleanReplacementDialectInvariance:
     ) -> None:
         """Naive rewriting treats string literals as real SQL - known limitation.
 
-        Pinning it here rather than pretending otherwise: distinguishing a quoted
+        Asserts the correct result (the literal untouched) and is a strict xfail, so it
+        records the limitation without locking in the corrupted output: distinguishing a quoted
         ``'WHERE true'`` from the predicate needs a SQL parser, and the replacement is
         deliberately text-level. Widening the match to be case-insensitive would enlarge
         this surface, so the match stays as case-sensitive as the literal it targets.
@@ -1269,7 +1274,7 @@ class TestLiteralBooleanReplacementDialectInvariance:
                 execution_engine=mock_sql_server_execution_engine,
             )
         )
-        assert result == "SELECT * FROM my_table WHERE note = 'WHERE 1=1'"
+        assert result == "SELECT * FROM my_table WHERE note = 'WHERE true'"
 
 
 class TestUserQueryBraceSubstitution:
