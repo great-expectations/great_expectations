@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import itertools
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
+import warnings
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Sequence, Tuple, Union
 
 import pytest
 
@@ -15,6 +16,7 @@ from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     Expectation,
     MulticolumnMapExpectation,
+    QueryExpectation,
     _validate_dependencies_against_available_metrics,
 )
 from great_expectations.expectations.expectation_configuration import (
@@ -896,3 +898,159 @@ class TestGetSuccessKwarg:
         """_get_success_kwarg should return same values as _get_success_kwargs().get()."""
         exp = gxe.ExpectColumnValuesToBeInSet(column="status", value_set=["a", "b"], mostly=0.95)
         assert exp._get_success_kwarg(key) == exp._get_success_kwargs().get(key)
+
+
+_MISSING_DATA_ASSET_WARNING = "not be parameterized for a data asset"
+_HARD_CODED_REFERENCES_WARNING = "hard-coded references"
+
+
+class _QueryExpectationForConfigurationTests(QueryExpectation):
+    """A QueryExpectation that is never run, so only its query configuration is under test."""
+
+    metric_name = "probe.query_expectation"
+    query: str = "SELECT COUNT(*) FROM {batch}"
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
+    success_keys: ClassVar[Tuple[str, ...]] = ("query",)
+    domain_keys: ClassVar[Tuple[str, ...]] = ("batch_id", "row_condition", "condition_parser")
+
+    @override
+    def _validate(self, metrics, runtime_configuration=None, execution_engine=None):
+        return {"success": True, "result": {"observed_value": None}}
+
+
+def _warnings_for_query(query: str) -> List[str]:
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        _QueryExpectationForConfigurationTests(query=query).validate_configuration()
+    return [str(record.message) for record in caught]
+
+
+def _warns(warning_texts: List[str], expected: str) -> bool:
+    return any(expected in text for text in warning_texts)
+
+
+def _warning_kinds(query: str) -> Tuple[str, ...]:
+    """The warnings the query emits, by kind, so that a test pins what the user sees."""
+    return tuple(
+        "missing-data-asset"
+        if _MISSING_DATA_ASSET_WARNING in text
+        else "hard-coded-references"
+        if _HARD_CODED_REFERENCES_WARNING in text
+        else text
+        for text in _warnings_for_query(query)
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query",
+    [
+        pytest.param("SELECT COUNT(*) FROM {batch}", id="space_delimited"),
+        pytest.param("SELECT COUNT(*) FROM {batch};", id="trailing_semicolon"),
+        pytest.param("SELECT COUNT(*) FROM {batch};\n", id="semicolon_and_newline"),
+        pytest.param(
+            "SELECT COUNT(*) FROM {batch}; -- reviewed by data team", id="comment_after_semicolon"
+        ),
+        pytest.param("SELECT\tCOUNT(*)\n\tFROM\t{batch}", id="tab_indentation"),
+        pytest.param("SELECT COUNT(*) FROM {batch}\r\nWHERE x = 1", id="crlf_line_ending"),
+        pytest.param("SELECT COUNT(*)\nFROM\n(\n{batch}\n)", id="newline_delimited_parens"),
+        pytest.param("SELECT * FROM ({batch})", id="delimited_by_parens"),
+        pytest.param("SELECT * FROM ({batch}), other", id="parens_and_comma"),
+        pytest.param("SELECT * FROM {batch},other", id="comma_without_space"),
+        pytest.param("SELECT * FROM {batch}/other", id="slash_delimiter"),
+        pytest.param(
+            r"SELECT 'it\'s' AS n FROM {batch} WHERE b = 'x'", id="mysql_backslash_escaped_quote"
+        ),
+        pytest.param(
+            "SELECT COUNT(*) # don't count nulls\nFROM {batch}\nWHERE note = 'x'",
+            id="mysql_hash_comment",
+        ),
+        pytest.param("SELECT a--1 AS b FROM {batch}", id="mysql_double_dash_arithmetic"),
+        pytest.param(
+            "SELECT $$it's$$ AS n, COUNT(*) FROM {batch} WHERE y = 'z'", id="postgres_dollar_quote"
+        ),
+        pytest.param("SELECT 'a--b' FROM {batch}", id="comment_syntax_inside_string_literal"),
+        pytest.param(
+            "SELECT 'a-- b' AS n FROM {batch} WHERE b = 'x'",
+            id="comment_syntax_inside_string_literal_after_whitespace",
+        ),
+        pytest.param(
+            "SELECT $tag$it's$tag$ AS n, COUNT(*) FROM {batch} WHERE y = 'z'",
+            id="postgres_tagged_dollar_quote",
+        ),
+        pytest.param(
+            "-- don't\nSELECT * FROM {batch} WHERE a = 'x'", id="apostrophe_inside_line_comment"
+        ),
+    ],
+)
+def test_validate_configuration_recognizes_a_parameterized_query_whatever_delimits_it(
+    query: str,
+) -> None:
+    """The renderer substitutes `{batch}` with `str.format`, whatever character follows it."""
+    # Only the untouched second check reports, so the query is not called unparameterized.
+    assert _warning_kinds(query) == ("hard-coded-references",)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query",
+    [
+        pytest.param("SELECT COUNT(*) FROM my_table", id="no_placeholder"),
+        pytest.param(
+            "SELECT COUNT(*) FROM my_table /* placeholder for {batch} added later */",
+            id="placeholder_only_in_block_comment",
+        ),
+        pytest.param(
+            "SELECT COUNT(*) FROM my_table\n-- switch this to {batch}\n",
+            id="placeholder_only_in_line_comment",
+        ),
+        pytest.param(
+            "SELECT COUNT(*) FROM my_table WHERE name = '{batch}'",
+            id="placeholder_only_in_string_literal",
+        ),
+        pytest.param(
+            "SELECT COUNT(*) FROM my_table WHERE name = 'x {batch} y'",
+            id="whitespace_delimited_single_quote_string",
+        ),
+        pytest.param(
+            'SELECT COUNT(*) FROM my_table WHERE name = "x {batch} y"',
+            id="whitespace_delimited_double_quote_string",
+        ),
+        pytest.param("/* line1\n {batch}\n line2 */", id="multiline_block_comment"),
+        pytest.param(
+            "SELECT COUNT(*) FROM my_table /* don't {batch} */", id="apostrophe_in_block_comment"
+        ),
+        pytest.param("SELECT COUNT(*) FROM {{batch}}", id="escaped_braces_are_a_literal"),
+    ],
+)
+def test_validate_configuration_warns_when_the_placeholder_is_not_a_data_asset_reference(
+    query: str,
+) -> None:
+    """A placeholder that no code path reads is reported as a missing data asset."""
+    assert _warning_kinds(query) == ("missing-data-asset",)
+
+
+@pytest.mark.unit
+def test_a_recognized_data_asset_reference_does_not_silence_the_other_query_check() -> None:
+    """Recognizing the data asset reference must not silence the other query check."""
+    warning_texts = _warnings_for_query("SELECT a FROM {batch} WHERE a = 1")
+
+    assert not _warns(warning_texts, _MISSING_DATA_ASSET_WARNING)
+    assert _warns(warning_texts, _HARD_CODED_REFERENCES_WARNING)
+
+
+@pytest.mark.unit
+def test_fully_parameterized_query_emits_no_warnings() -> None:
+    """A query whose non-keyword tokens are all placeholders emits no warnings."""
+    assert _warnings_for_query("SELECT {col} FROM {batch};") == []
+
+
+@pytest.mark.unit
+def test_a_wildcard_selection_still_reports_hard_coded_references() -> None:
+    """Recognizing `{batch}` stops one warning, not both: `*` keeps the other one.
+
+    `SELECT * FROM {batch};` is the query the PR body calls silent. It is not: the "not
+    parameterized for a data asset" warning is gone, but the untouched "hard-coded references"
+    check still reports, because `*` is neither a keyword nor a placeholder.
+    """
+    assert _warning_kinds("SELECT * FROM {batch};") == ("hard-coded-references",)

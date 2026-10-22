@@ -1897,6 +1897,28 @@ representation."""  # noqa: E501 # FIXME CoP
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
+# Whether a query names its data asset is decided by splitting on five separators, so the
+# punctuation written around `{batch}` changes the answer: `{batch};` and `FROM\t{batch}` are both
+# substituted by the `str.format` renderer in `QueryMetricProvider`, yet neither survives the split.
+# A placeholder that appears only inside a comment or a string literal, on the other hand, is never
+# the asset being read but does survive it. Blank the non-code regions first, then split on any run
+# of whitespace or SQL punctuation. The blanking pattern is one left-to-right pass across ANSI and
+# dialect-specific non-code tokens (single/double quotes with doubled or backslash escapes, Postgres
+# dollar quotes, block comments, and line comments), so that `-- don't` stays a comment and `'a--b'`
+# stays a string.
+_SQL_NON_CODE_PATTERN = re.compile(
+    r"/\*.*?\*/"
+    r"|\$\$.*?\$\$"
+    r"|\$([A-Za-z_][A-Za-z0-9_]*)\$.*?\$\1\$"
+    r"|'(?:[^'\\]|''|\\.)*'"
+    r'|"(?:[^"\\]|""|\\.)*"'
+    r"|--(?:[ \t\r\n]|$)[^\n]*"
+    r"|#[^\n]*",
+    re.DOTALL,
+)
+_SQL_TOKEN_SEPARATORS = re.compile(r"[\s(),;/]+")
+
+
 class QueryExpectation(BatchExpectation, ABC):
     """Base class for QueryExpectations.
 
@@ -1959,7 +1981,8 @@ class QueryExpectation(BatchExpectation, ABC):
                 for x in re.split(", |\\(|\n|\\)| |/", query)
                 if x.upper() and x.upper() not in valid_sql_tokens_and_types
             }
-            assert "{batch}" in parsed_query, (
+            query_code: str = _SQL_NON_CODE_PATTERN.sub(" ", query)
+            assert "{batch}" in _SQL_TOKEN_SEPARATORS.split(query_code), (
                 "Your query appears to not be parameterized for a data asset. "
                 "By not parameterizing your query with `{batch}`, "
                 "you may not be validating against your intended data asset, or the expectation may fail."  # noqa: E501 # FIXME CoP
