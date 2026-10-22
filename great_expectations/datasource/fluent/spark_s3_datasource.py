@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Optional, Type, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws, pydantic
@@ -120,7 +120,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,
-        s3_recursive_file_discovery: bool = False,
+        s3_recursive_file_discovery: Optional[bool] = None,
         **kwargs,
     ) -> None:
         """Builds and attaches the `S3DataConnector` to the asset."""
@@ -128,6 +128,11 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             raise TypeError(  # noqa: TRY003 # FIXME CoP
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
+
+        if s3_recursive_file_discovery is None:
+            # Unless discovery is configured explicitly, let the asset's Spark
+            # `recursive_file_lookup` option also drive which S3 keys are discovered.
+            s3_recursive_file_discovery = getattr(data_asset, "recursive_file_lookup", None) is True
 
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
