@@ -8,6 +8,7 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.datasource.fluent import SparkS3Datasource
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -148,3 +149,86 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
         s3_recursive_file_discovery=True,
     )
     assert asset.batch_metadata == asset_specified_metadata
+    assert "subfolder/for_recursive_search.csv" in asset._data_connector.get_data_references()
+
+
+_PARTITIONED_DAY_PREFIX = "my_prefix/yyyy=2025/mm=03/dd=09/"
+
+
+@pytest.fixture
+def partitioned_day_keys(s3_mock: BaseClient, s3_bucket: str) -> List[str]:
+    """Objects that all sit one level below ``_PARTITIONED_DAY_PREFIX``."""
+    keys = [f"{_PARTITIONED_DAY_PREFIX}hh={hh}/part-0.parquet" for hh in ("00", "01")]
+    for key in keys:
+        s3_mock.put_object(Bucket=s3_bucket, Key=key, Body=b"PAR1")
+    return keys
+
+
+@pytest.mark.unit
+def test_recursive_file_lookup_drives_s3_file_discovery(
+    s3_bucket: str, partitioned_day_keys: List[str]
+):
+    """
+    A Spark S3 asset exposes ``recursive_file_lookup`` (Spark's own
+    ``recursiveFileLookup`` reader option). Setting it must make the asset
+    discover objects one level below ``s3_prefix``, not only when the separate
+    ``s3_recursive_file_discovery`` connect option is passed.
+    """
+    datasource = SparkS3Datasource(name="spark_s3_datasource", bucket=s3_bucket)
+
+    asset = datasource.add_parquet_asset(  # type: ignore[attr-defined]
+        name="partitioned_day",
+        s3_prefix=_PARTITIONED_DAY_PREFIX,
+        recursive_file_lookup=True,
+    )
+
+    assert asset.recursive_file_lookup is True
+    assert sorted(asset._data_connector.get_data_references()) == partitioned_day_keys
+
+
+@pytest.mark.unit
+def test_recursive_file_lookup_drives_s3_file_discovery_for_directory_asset(
+    s3_bucket: str, partitioned_day_keys: List[str]
+):
+    datasource = SparkS3Datasource(name="spark_s3_datasource", bucket=s3_bucket)
+
+    asset = datasource.add_directory_parquet_asset(  # type: ignore[attr-defined]
+        name="partitioned_day",
+        data_directory=_PARTITIONED_DAY_PREFIX,
+        s3_prefix=_PARTITIONED_DAY_PREFIX,
+        recursive_file_lookup=True,
+    )
+
+    assert asset.recursive_file_lookup is True
+    assert sorted(asset._data_connector.get_data_references()) == partitioned_day_keys
+
+
+@pytest.mark.unit
+def test_explicit_s3_recursive_file_discovery_overrides_recursive_file_lookup(
+    s3_bucket: str, partitioned_day_keys: List[str]
+):
+    datasource = SparkS3Datasource(name="spark_s3_datasource", bucket=s3_bucket)
+
+    with pytest.raises(TestConnectionError, match='recursive file discovery set to "False"'):
+        datasource.add_parquet_asset(  # type: ignore[attr-defined]
+            name="partitioned_day",
+            s3_prefix=_PARTITIONED_DAY_PREFIX,
+            recursive_file_lookup=True,
+            s3_recursive_file_discovery=False,
+        )
+
+
+@pytest.mark.unit
+def test_recursive_file_lookup_reflected_in_test_connection_error_message(
+    s3_mock: BaseClient, s3_bucket: str
+):
+    # zero-size objects are skipped during discovery, so nothing is found below this prefix
+    s3_mock.put_object(Bucket=s3_bucket, Key="empty_prefix/sub/placeholder", Body=b"")
+    datasource = SparkS3Datasource(name="spark_s3_datasource", bucket=s3_bucket)
+
+    with pytest.raises(TestConnectionError, match='recursive file discovery set to "True"'):
+        datasource.add_parquet_asset(  # type: ignore[attr-defined]
+            name="empty_prefix",
+            s3_prefix="empty_prefix/",
+            recursive_file_lookup=True,
+        )
