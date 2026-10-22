@@ -45,6 +45,83 @@ This table lists every deprecated item, the version that deprecated it, and the 
 | `gx-redshift` install extra (alias of `redshift`) | 1.21.0 | 2.0.0 | `great_expectations[redshift]` |
 | `CloudDataContext` and cloud mode of `get_context(...)` | 1.18.0 | 2.0.0 | `gx.get_context(mode="file")` or `mode="ephemeral"` |
 
+### 1.24.1 (2026-10-22)
+
+#### Highlights
+
+- **Oracle and SingleStore support for LIKE-pattern Expectations** — The four LIKE-pattern Expectations (ExpectColumnValuesToMatchLikePattern, ExpectColumnValuesToMatchLikePatternList, ExpectColumnValuesToNotMatchLikePattern, ExpectColumnValuesToNotMatchLikePatternList) now run on Oracle and SingleStore, where they previously raised NotImplementedError. MySQL support now covers every SQLAlchemy MySQL dialect, SingleStore gets the same backslash translation of `escape` that BigQuery and ClickHouse use, and dialects that cannot run LIKE patterns now raise a NotImplementedError with the dialect name rather than failing with an AttributeError. ([#12274](https://github.com/fivetran/great_expectations/pull/12274))
+
+  ```python
+  import great_expectations.expectations as gxe
+
+  batch.validate(
+      gxe.ExpectColumnValuesToMatchLikePattern(
+          column="name",
+          like_pattern="a!_b",
+          escape="!",
+      )
+  )
+  ```
+
+- **The LIKE `escape` character now works on BigQuery and ClickHouse** — BigQuery and ClickHouse have no ESCAPE clause, so the LIKE-pattern Expectations used to refuse an `escape` argument on those dialects. The pattern is now rewritten into the backslash form both engines understand, matching the same rows as `ESCAPE` does on PostgreSQL. A trailing unpaired escape character raises a ValueError before any SQL is sent, and patterns without `escape` are still passed through verbatim. ([#12291](https://github.com/fivetran/great_expectations/pull/12291))
+
+  ```python
+  import great_expectations.expectations as gxe
+
+  # On BigQuery or ClickHouse: matches only the literal value "a_c"
+  batch.validate(
+      gxe.ExpectColumnValuesToMatchLikePattern(
+          column="col",
+          like_pattern="a!_c",
+          escape="!",
+      )
+  )
+  ```
+
+- **Snowflake key-pair authentication works again on snowflake-sqlalchemy 2.x** — Creating an engine for a Snowflake datasource that uses key-pair authentication failed with a TypeError on snowflake-sqlalchemy 2.x. The private key is now handed to the connector through connect_args rather than the connection URL, so key-pair datasources connect again and credential material no longer appears in a URL. A private key supplied directly via connect_args still takes precedence, and password authentication is unchanged. ([#12326](https://github.com/fivetran/great_expectations/pull/12326))
+
+- **Spark S3 assets honor recursive_file_lookup when discovering files** — A Spark S3 asset configured with `recursive_file_lookup=True` now finds objects in subfolders of its `s3_prefix` instead of failing its connection check. `s3_recursive_file_discovery` falls back to the asset's `recursive_file_lookup` when it is not set explicitly, and the test-connection error message reports the effective value. ([#12292](https://github.com/fivetran/great_expectations/pull/12292))
+
+  ```python
+  asset = datasource.add_directory_parquet_asset(
+      name="my_asset",
+      s3_prefix="data/",
+      recursive_file_lookup=True,
+  )
+  ```
+
+- **No more pandas 3.1 deprecation warnings from internal calls** — On pandas 3.1, internal uses of the deprecated `inplace` keyword caused Pandas4Warning deprecation warnings and, in environments that escalate warnings to errors, outright failures in metric resolution and in `Validator.head()`. Those calls now use the reassignment form pandas recommends, with identical results. ([#12335](https://github.com/fivetran/great_expectations/pull/12335))
+
+#### Changes
+
+##### Features
+
+- The LIKE-pattern Expectations now accept an `escape` character on BigQuery and ClickHouse, rewriting the pattern into the backslash form those engines understand instead of refusing it; an unpaired trailing escape raises a ValueError before any SQL is sent. ([#12291](https://github.com/fivetran/great_expectations/pull/12291))
+
+##### Bug fixes
+
+- The four LIKE-pattern Expectations now work on Oracle and SingleStore instead of raising NotImplementedError, recognize every SQLAlchemy MySQL dialect, translate `escape` into SingleStore's backslash form, and raise a NotImplementedError naming the dialect when LIKE patterns are genuinely unsupported. ([#12274](https://github.com/fivetran/great_expectations/pull/12274))
+- An unexpected_rows_query against SQL Server or Oracle no longer corrupts column names that begin with "true" (such as `true_positive`) when the `WHERE true` literal is rewritten, so valid queries no longer fail with a syntax error. ([#12235](https://github.com/fivetran/great_expectations/pull/12235))
+- Spark S3 file and directory assets now derive S3 file discovery from `recursive_file_lookup` when `s3_recursive_file_discovery` is not set, so assets whose files live in subfolders of their prefix connect and discover those files; an explicit `s3_recursive_file_discovery` still takes precedence and the connection error reports the effective value. ([#12292](https://github.com/fivetran/great_expectations/pull/12292))
+- Snowflake key-pair authentication passes `private_key` to the connector through connect_args instead of the connection URL, so engine creation succeeds again on snowflake-sqlalchemy 2.x and the key is kept out of the URL; a key supplied via connect_args still wins. ([#12326](https://github.com/fivetran/great_expectations/pull/12326))
+- ExpectColumnKLDivergenceToBeLessThan now returns a plain Python bool for `success`, so printing a result or serializing it with json.dumps no longer raises "Object of type bool is not JSON serializable". ([#12248](https://github.com/fivetran/great_expectations/pull/12248))
+
+<details>
+<summary>Maintenance</summary>
+
+- Bump the follow-redirects docs dependency from 1.16.0 to 1.16.1. ([#12327](https://github.com/fivetran/great_expectations/pull/12327))
+- Bump the shell-quote docs dependency from 1.9.0 to 1.12.0. ([#12305](https://github.com/fivetran/great_expectations/pull/12305))
+- Replace internal pandas calls that use the `inplace` keyword deprecated in pandas 3.1, so GX no longer emits deprecation warnings or fails metric resolution and `Validator.head()` in environments that turn warnings into errors. ([#12335](https://github.com/fivetran/great_expectations/pull/12335))
+- Bring the modules under great_expectations/expectations/core/ into the type check, with no public signature or behavior changes. ([#12287](https://github.com/fivetran/great_expectations/pull/12287))
+- Filter the google.api_core Python-version FutureWarning by category and module so test collection no longer errors on Python 3.10, and cap pyarrow below 26 in the NumPy 1 minimum-version lanes. ([#12312](https://github.com/fivetran/great_expectations/pull/12312))
+- Remove the notify_on_release CI job, which failed on every tag push and masked real release failures. No user-visible change. ([#12307](https://github.com/fivetran/great_expectations/pull/12307))
+
+</details>
+
+#### Contributors
+
+Thanks to @KoksalBerkay (first contribution), @feiiiiii5, @LuisFigueroaG (first contribution), @nanjeshramesh.
+
 ### 1.24.0 (2026-10-07)
 
 Compatibility: Python `<3.14,>=3.10` → `<3.15,>=3.10`; `numpy` added (`python_version >= "3.14"`); `pandas` added (`python_version >= "3.14"`); `pydantic` added (`python_version >= "3.14"`)
