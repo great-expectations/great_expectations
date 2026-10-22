@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+import pandas as pd
 import pytest
 
 from great_expectations.core.batch import (
@@ -96,6 +97,49 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(
         runtime_parameters = {param: value}
         base_block["runtime_parameters"] = runtime_parameters
         get_batch_request_from_acceptable_arguments(**base_block)
+
+
+@pytest.mark.unit
+def test_get_batch_request_from_acceptable_arguments_batch_data_dataframe(
+    base_block: Dict[str, Any],
+):
+    """A DataFrame has no truth value, so batch_data must be detected by presence.
+
+    Asking a pandas DataFrame for its truth value raises ValueError, which used to escape
+    from this function instead of a RuntimeBatchRequest being built.
+    """
+    dataframe = pd.DataFrame({"a": [1, 2]})
+    base_block["batch_identifiers"] = {"a": "1"}
+
+    actual = get_batch_request_from_acceptable_arguments(**base_block, batch_data=dataframe)
+
+    assert isinstance(actual, RuntimeBatchRequest)
+    assert actual.runtime_parameters is not None
+    assert actual.runtime_parameters["batch_data"] is dataframe
+
+    # The same data passed via runtime_parameters builds the same request.
+    expected = get_batch_request_from_acceptable_arguments(
+        **base_block, runtime_parameters={"batch_data": dataframe}
+    )
+    assert actual == expected
+
+
+@pytest.mark.unit
+def test_get_batch_request_from_acceptable_arguments_dataframe_conflict_raises(
+    base_block: Dict[str, Any],
+):
+    """The conflict is reported by GX, not by pandas failing to bool() the DataFrame."""
+    dataframe = pd.DataFrame({"a": [1, 2]})
+
+    with pytest.raises(ValueError) as ve:
+        get_batch_request_from_acceptable_arguments(
+            **base_block,
+            batch_data=dataframe,
+            runtime_parameters={"batch_data": dataframe},
+            batch_identifiers={"a": "1"},
+        )
+
+    assert "runtime_parameters" in str(ve.value)
 
 
 @pytest.mark.unit
