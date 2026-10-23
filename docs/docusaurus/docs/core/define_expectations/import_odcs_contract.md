@@ -75,7 +75,7 @@ If the contract has several schema objects and `schema` is omitted, the importer
 
 ## Type checks
 
-GX type names are backend-specific, so the importer never guesses one from an ODCS `logicalType`. If a property has `physicalType`, the importer adds a type check using that value automatically. To override `physicalType`, or to supply a type name when a property has none, pass a mapping from ODCS `logicalType` to the type name your backend expects:
+GX type names are backend-specific, so the importer does not use ODCS `physicalType` automatically. `physicalType` is often a warehouse type such as `INTEGER` or `VARCHAR(2)`, which may not match the names GX expects from pandas, Spark, or a SQL driver. Pass a mapping from ODCS `logicalType` to the exact type name your backend expects:
 
 ```python
 suite = gx.contracts.from_odcs(
@@ -84,13 +84,14 @@ suite = gx.contracts.from_odcs(
 )
 ```
 
-Without `physicalType` or a matching `type_map` entry, the importer skips the type check for that property. A `physicalType` must be the exact name the backend expects, such as `int64` for pandas or `INTEGER` for a SQL backend.
+Only properties whose `logicalType` appears in `type_map` receive a type check. A property with `physicalType` but no matching `type_map` entry is skipped, and its `physicalType` is recorded in `suite.meta["odcs"]["ignored"]`. Without `physicalType` or a matching `type_map` entry, no type check is added.
 
 ## What is imported
 
 | ODCS | Expectation |
 | --- | --- |
 | Schema properties | `ExpectTableColumnsToMatchSet` |
+| `type_map` entry for a property's `logicalType` | `ExpectColumnValuesToBeOfType` |
 | `required`, `primaryKey`, `nullValues` with an exact-zero or percentage threshold | `ExpectColumnValuesToNotBeNull` |
 | `unique`, single-column `primaryKey`, property `duplicateValues` | `ExpectColumnValuesToBeUnique` |
 | Composite `primaryKey` | `ExpectCompoundColumnsToBeUnique`, ordered by `primaryKeyPosition` |
@@ -118,6 +119,7 @@ The importer never silently discards a rule:
 - `sql` rules cannot be translated to an existing Expectation and raise `UnsupportedODCSRuleError`.
 - Rules that use an unsupported operator, unit, or threshold raise `UnsupportedODCSRuleError` with the path of the offending rule.
 - Custom rules for another engine are listed as ignored.
+- A `physicalType` without a matching `type_map` entry is listed as ignored.
 
 Object and array properties, property-level relationships, timezone constraints, and object/array cardinality constraints are valid ODCS but do not have a flat-table Expectation mapping. The importer validates their structure and records them in `suite.meta["odcs"]["ignored"]`. The `ignored` key is always present and is an empty list when nothing was skipped.
 
