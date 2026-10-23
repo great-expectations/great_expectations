@@ -70,6 +70,12 @@ class TestMetricInstantiation:
 
 class TestMetricConfig:
     @pytest.mark.unit
+    def test_empty_batch_id_raises_with_param_name(self):
+        metric = ColumnValuesAbove(column=COLUMN, min_value=42)
+        with pytest.raises(ValueError, match=r"^batch_id must be a non-empty string\.$"):
+            metric.config(batch_id="")
+
+    @pytest.mark.unit
     def test_success(self):
         expected_config = MetricConfiguration(
             metric_name=FULLY_QUALIFIED_METRIC_NAME,
