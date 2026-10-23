@@ -42,4 +42,11 @@ import OverviewCard from '@site/src/components/OverviewCard';
     to="/core/define_expectations/organize_expectation_suites" 
     icon="/img/expectation_icon.svg" 
   />
+  <LinkCard
+    topIcon
+    label="Import an ODCS data contract"
+    description="Build an Expectation Suite from a data contract."
+    to="/core/define_expectations/import_odcs_contract"
+    icon="/img/expectation_icon.svg"
+  />
 </LinkCardGrid>
