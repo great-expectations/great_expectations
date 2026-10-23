@@ -59,7 +59,11 @@ def test_structural_mapping() -> None:
             _schema(
                 [
                     _property(
-                        "order_id", "integer", required=True, primaryKey=True, physicalType="int64"
+                        "order_id",
+                        "integer",
+                        required=True,
+                        primaryKey=True,
+                        physicalType="INTEGER",
                     ),
                     _property(
                         "code",
@@ -81,7 +85,7 @@ def test_structural_mapping() -> None:
         ]
     )
 
-    suite = from_odcs(contract)
+    suite = from_odcs(contract, type_map={"integer": "int64"})
 
     assert suite.name == "orders"
     columns = _single(suite, "expect_table_columns_to_match_set")
@@ -135,6 +139,33 @@ def test_type_check_is_opt_in_without_physical_type_or_type_map() -> None:
         for expectation in suite.expectations
         if expectation.expectation_type == "expect_column_values_to_be_of_type"
     ]
+
+
+def test_physical_type_alone_is_not_used_and_is_recorded() -> None:
+    suite = from_odcs(
+        _contract([_schema([_property("order_id", "integer", physicalType="VARCHAR(2)")])])
+    )
+
+    assert not [
+        expectation
+        for expectation in suite.expectations
+        if expectation.expectation_type == "expect_column_values_to_be_of_type"
+    ]
+    ignored = suite.meta["odcs"]["ignored"]
+    assert len(ignored) == 1
+    assert ignored[0]["path"] == "schema[0].properties[0]"
+    assert "physicalType" in ignored[0]["reason"]
+
+
+def test_type_map_adds_a_type_check_without_physical_type() -> None:
+    suite = from_odcs(
+        _contract([_schema([_property("order_id", "integer")])]),
+        type_map={"integer": "int64"},
+    )
+
+    type_check = _single(suite, "expect_column_values_to_be_of_type")
+    assert type_check.column == "order_id"
+    assert type_check.type_ == "int64"
 
 
 def test_type_map_overrides_physical_type() -> None:
