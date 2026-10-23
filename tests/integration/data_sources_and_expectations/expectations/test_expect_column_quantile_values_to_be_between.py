@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 import pytest
 from sqlalchemy import types as sqlatypes
@@ -298,3 +300,41 @@ def test_success_with_suite_param_allow_relative_error_(
         expectation, expectation_parameters={suite_param_key: suite_param_value}
     )
     assert result.success == expected_result
+
+
+PLAIN_BOOL_DATA_SOURCES = [PandasDataFrameDatasourceTestConfig(), SqliteDatasourceTestConfig()]
+
+IN_RANGE_DATA = pd.DataFrame({COL_NAME: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]})
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=PLAIN_BOOL_DATA_SOURCES, data=IN_RANGE_DATA
+)
+def test_success_is_a_plain_json_serializable_bool(batch_for_datasource: Batch) -> None:
+    """`success` must be a plain Python bool, as for every other Expectation."""
+    expectation = gxe.ExpectColumnQuantileValuesToBeBetween(
+        column=COL_NAME,
+        quantile_ranges={"quantiles": [0.25, 0.5, 0.75], "value_ranges": [[0, 5], [3, 8], [6, 11]]},
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success is True
+    assert type(result.success) is bool
+    json.dumps(result.to_json_dict())
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=PLAIN_BOOL_DATA_SOURCES, data=IN_RANGE_DATA
+)
+def test_failure_is_a_plain_json_serializable_bool(batch_for_datasource: Batch) -> None:
+    """Same guarantee when the Expectation fails."""
+    expectation = gxe.ExpectColumnQuantileValuesToBeBetween(
+        column=COL_NAME,
+        quantile_ranges={
+            "quantiles": [0.25, 0.5, 0.75],
+            "value_ranges": [[0, 5], [3, 8], [20, 30]],
+        },
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success is False
+    assert type(result.success) is bool
+    json.dumps(result.to_json_dict())

@@ -781,7 +781,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         ]
 
         return {
-            "success": np.all(success_details),
+            "success": all(success_details),
             "result": {
                 "observed_value": {"quantiles": quantiles, "values": quantile_vals},
                 "details": {"success_details": success_details},
