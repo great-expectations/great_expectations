@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 import pytest
@@ -15,6 +16,7 @@ from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     Expectation,
     MulticolumnMapExpectation,
+    QueryExpectation,
     _validate_dependencies_against_available_metrics,
 )
 from great_expectations.expectations.expectation_configuration import (
@@ -53,6 +55,67 @@ class FakeColumnMapExpectation(ColumnMapExpectation):
 
 class FakeColumnPairMapExpectation(ColumnPairMapExpectation):
     map_metric = "fake_pair_metric"
+
+
+class FakeQueryExpectation(QueryExpectation):
+    def _validate(
+        self,
+        metrics: dict,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+    ) -> dict:
+        return {}
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "query",
+    [
+        "SELECT COUNT(*) FROM {batch}",
+        "SELECT col1, col2 FROM {batch}",
+        "SELECT SUM(amount) AS total FROM {batch}",
+        "SELECT DATE(created_at) FROM {batch}",
+        "SELECT * FROM {batch} WHERE created_at > '2020-01-01'",
+        "WITH t AS (SELECT * FROM {batch}) SELECT COUNT(*) FROM t",
+        "SELECT COUNT(*) FROM (SELECT * FROM {batch}) sub",
+        "SELECT * FROM {batch} CROSS JOIN UNNEST({batch})",
+        "SELECT * FROM {batch} CROSS JOIN generate_series(1, 10)",
+    ],
+)
+def test_query_expectation_does_not_warn_for_non_table_references(query):
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
+        FakeQueryExpectation().validate_configuration(
+            configuration=ExpectationConfiguration(
+                type="fake_query_expectation", kwargs={"query": query}
+            )
+        )
+
+    assert not caught_warnings
+
+
+def test_query_expectation_warns_with_hard_coded_table_name():
+    with pytest.warns(UserWarning, match="my_table"):
+        FakeQueryExpectation().validate_configuration(
+            configuration=ExpectationConfiguration(
+                type="fake_query_expectation", kwargs={"query": "SELECT COUNT(*) FROM my_table"}
+            )
+        )
+
+
+def test_query_expectation_warns_for_hard_coded_join_table():
+    with pytest.warns(UserWarning, match="other_table"):
+        FakeQueryExpectation().validate_configuration(
+            configuration=ExpectationConfiguration(
+                type="fake_query_expectation",
+                kwargs={
+                    "query": (
+                        "SELECT COUNT(*) FROM {batch} "
+                        "JOIN other_table ON other_table.id = {batch}.id"
+                    )
+                },
+            )
+        )
 
 
 @pytest.fixture

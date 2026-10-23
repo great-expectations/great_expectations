@@ -89,9 +89,6 @@ from great_expectations.expectations.row_conditions import (
     RowConditionType,  # Required for RowConditionType runtime validation
     validate_row_condition,
 )
-from great_expectations.expectations.sql_tokens_and_types import (
-    valid_sql_tokens_and_types,
-)
 from great_expectations.expectations.window import Window
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
@@ -1897,6 +1894,28 @@ representation."""  # noqa: E501 # FIXME CoP
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
+_SQL_RELATION_PATTERN = re.compile(
+    r"\b(?:FROM|JOIN)\s+(?P<relation>\{[^{}]+\}|[A-Za-z_][\w$]*(?:\.[A-Za-z_][\w$]*)*\b)(?!\s*\()",
+    re.IGNORECASE,
+)
+_SQL_CTE_PATTERN = re.compile(r"\b(?P<name>[A-Za-z_][\w$]*)\s+AS\s*\(", re.IGNORECASE)
+_SQL_STRING_OR_COMMENT_PATTERN = re.compile(r"'(?:''|[^'])*'|--[^\n]*|/\*.*?\*/", re.DOTALL)
+
+
+def _get_hard_coded_table_references(query: str) -> Set[str]:
+    query_without_strings_or_comments = _SQL_STRING_OR_COMMENT_PATTERN.sub(" ", query)
+    cte_names = {
+        match.group("name").casefold()
+        for match in _SQL_CTE_PATTERN.finditer(query_without_strings_or_comments)
+    }
+    return {
+        relation
+        for match in _SQL_RELATION_PATTERN.finditer(query_without_strings_or_comments)
+        for relation in (match.group("relation"),)
+        if not relation.startswith("{") and relation.casefold() not in cte_names
+    }
+
+
 class QueryExpectation(BatchExpectation, ABC):
     """Base class for QueryExpectations.
 
@@ -1954,21 +1973,24 @@ class QueryExpectation(BatchExpectation, ABC):
         try:
             if not isinstance(query, str):
                 raise TypeError(f"'query' must be a string, but your query is type: {type(query)}")  # noqa: TRY003, TRY301 # FIXME CoP
-            parsed_query: Set[str] = {
-                x
-                for x in re.split(", |\\(|\n|\\)| |/", query)
-                if x.upper() and x.upper() not in valid_sql_tokens_and_types
-            }
-            assert "{batch}" in parsed_query, (
-                "Your query appears to not be parameterized for a data asset. "
-                "By not parameterizing your query with `{batch}`, "
-                "you may not be validating against your intended data asset, or the expectation may fail."  # noqa: E501 # FIXME CoP
-            )
-            assert all(re.match("{.*?}", x) for x in parsed_query), (
-                "Your query appears to have hard-coded references to your data. "
-                "By not parameterizing your query with `{batch}`, {col}, etc., "
-                "you may not be validating against your intended data asset, or the expectation may fail."  # noqa: E501 # FIXME CoP
-            )
+            hard_coded_table_references = _get_hard_coded_table_references(query)
+            if hard_coded_table_references:
+                warnings.warn(
+                    "Your query appears to have hard-coded references to the "
+                    f"following data assets: {', '.join(sorted(hard_coded_table_references))}. "
+                    "By not parameterizing your query with `{batch}`, you may not be validating "
+                    "against your intended data asset, or the expectation may fail.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+            if "{batch}" not in query:
+                warnings.warn(
+                    "Your query appears to not be parameterized for a data asset. "
+                    "By not parameterizing your query with `{batch}`, "
+                    "you may not be validating against your intended data asset, or the expectation may fail.",  # noqa: E501 # FIXME CoP
+                    UserWarning,
+                    stacklevel=2,
+                )
         except (TypeError, AssertionError) as e:
             warnings.warn(str(e), UserWarning)
 
