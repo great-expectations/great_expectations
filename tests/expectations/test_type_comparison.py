@@ -14,6 +14,7 @@ import pytest
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations import type_comparison
 from great_expectations.expectations.metrics.util import CaseInsensitiveString
@@ -653,8 +654,19 @@ class TestSQLiteScalar:
 
     @pytest.mark.parametrize("actual_type, expected_name", _SQLITE_TYPE_PAIRS)
     def test_mismatch(self, actual_type, expected_name):
-        success, _obs = compare_column_type(self.engine, actual_type, "__NO_SUCH_TYPE__")
+        # JSON resolves but matches none of the types under test, so this stays a
+        # genuine mismatch rather than an unresolvable name.
+        success, _obs = compare_column_type(self.engine, actual_type, "JSON")
         assert success is False
+
+    def test_unresolvable_type_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="__NO_SUCH_TYPE__"):
+            compare_column_type(self.engine, sa.types.INTEGER(), "__NO_SUCH_TYPE__", strict=True)
+
+    def test_unresolvable_type_is_a_mismatch_without_strict(self):
+        success, observed = compare_column_type(self.engine, sa.types.INTEGER(), "__NO_SUCH_TYPE__")
+        assert success is False
+        assert observed == "INTEGER"
 
 
 class TestSQLiteList:
@@ -665,7 +677,7 @@ class TestSQLiteList:
         success, observed = compare_column_type_list(
             self.engine,
             actual_type,
-            ["__WRONG__", expected_name],
+            ["JSON", expected_name],
         )
         assert success is True
         assert observed == type(actual_type).__name__
@@ -675,9 +687,31 @@ class TestSQLiteList:
         success, _obs = compare_column_type_list(
             self.engine,
             actual_type,
-            ["__WRONG__", "__ALSO_WRONG__"],
+            ["JSON", "Interval"],
         )
         assert success is False
+
+    def test_unresolvable_name_beside_a_resolvable_one_is_ignored(self):
+        """A type list may name types belonging to other backends.
+
+        ExpectColumnValuesToBeInTypeList is used with cross-backend lists such as
+        ["INTEGER", "int64", "IntegerType"], so a name this dialect cannot resolve is
+        skipped as long as something in the list resolves.
+        """
+        success, _obs = compare_column_type_list(
+            self.engine,
+            sa.types.INTEGER(),
+            ["int64", "INTEGER"],
+        )
+        assert success is True
+
+    def test_list_resolving_to_nothing_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="__NO_SUCH_TYPE__"):
+            compare_column_type_list(
+                self.engine,
+                sa.types.INTEGER(),
+                ["__NO_SUCH_TYPE__", "__ALSO_NO_SUCH_TYPE__"],
+            )
 
 
 class TestNonClassDialectModuleAttribute:
@@ -774,8 +808,14 @@ class TestMySQLScalar:
 
     @pytest.mark.parametrize("actual_type, expected_name", _MYSQL_TYPE_PAIRS)
     def test_mismatch(self, actual_type, expected_name):
-        success, _obs = compare_column_type(self.engine, actual_type, "__NO_SUCH_TYPE__")
+        # JSON resolves but matches none of the types under test, so this stays a
+        # genuine mismatch rather than an unresolvable name.
+        success, _obs = compare_column_type(self.engine, actual_type, "JSON")
         assert success is False
+
+    def test_unresolvable_type_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="__NO_SUCH_TYPE__"):
+            compare_column_type(self.engine, sa.types.INTEGER(), "__NO_SUCH_TYPE__", strict=True)
 
 
 class TestMySQLList:
@@ -786,7 +826,7 @@ class TestMySQLList:
         success, observed = compare_column_type_list(
             self.engine,
             actual_type,
-            ["__WRONG__", expected_name],
+            ["JSON", expected_name],
         )
         assert success is True
         assert observed == type(actual_type).__name__
@@ -796,9 +836,291 @@ class TestMySQLList:
         success, _obs = compare_column_type_list(
             self.engine,
             actual_type,
-            ["__WRONG__", "__ALSO_WRONG__"],
+            ["JSON", "Interval"],
         )
         assert success is False
+
+    def test_unresolvable_name_beside_a_resolvable_one_is_ignored(self):
+        """A type list may name types belonging to other backends.
+
+        ExpectColumnValuesToBeInTypeList is used with cross-backend lists such as
+        ["INTEGER", "int64", "IntegerType"], so a name this dialect cannot resolve is
+        skipped as long as something in the list resolves.
+        """
+        success, _obs = compare_column_type_list(
+            self.engine,
+            sa.types.INTEGER(),
+            ["int64", "INTEGER"],
+        )
+        assert success is True
+
+    def test_list_resolving_to_nothing_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="__NO_SUCH_TYPE__"):
+            compare_column_type_list(
+                self.engine,
+                sa.types.INTEGER(),
+                ["__NO_SUCH_TYPE__", "__ALSO_NO_SUCH_TYPE__"],
+            )
+
+
+# ===========================================================================
+# Dialect module that re-exports only part of the generic namespace
+# ===========================================================================
+
+
+class _PartialDialectModule:
+    """A dialect module that re-exports only some of the generic sqlalchemy types.
+
+    ``sqlalchemy.dialects.oracle`` is the real instance of this shape: it exports
+    ``NUMBER`` and ``VARCHAR2`` but not ``INTEGER``, while an Oracle ``INTEGER``
+    column is reflected as a generic ``sqlalchemy.INTEGER``. See #12215.
+    """
+
+    __name__ = "stub_partial_dialect"
+    NUMBER = sa.types.NUMERIC
+
+
+class TestPartialDialectModuleFallback:
+    engine = _StubEngine("oracle", dialect_module=_PartialDialectModule())
+
+    def test_generic_type_absent_from_dialect_module_still_resolves(self):
+        """The dialect module has no INTEGER, so the generic namespace supplies it."""
+        success, observed = compare_column_type(self.engine, sa.types.INTEGER(), "INTEGER")
+        assert success is True
+        assert observed == "INTEGER"
+
+    def test_generic_fallback_still_reports_a_real_mismatch(self):
+        success, _obs = compare_column_type(self.engine, sa.types.VARCHAR(), "INTEGER")
+        assert success is False
+
+    def test_dialect_module_export_takes_precedence(self):
+        """A name the dialect module does export is resolved there, not generically."""
+        success, _obs = compare_column_type(self.engine, sa.types.NUMERIC(), "NUMBER")
+        assert success is True
+
+    def test_generic_fallback_applies_inside_a_type_list(self):
+        success, _obs = compare_column_type_list(
+            self.engine,
+            sa.types.INTEGER(),
+            ["JSON", "INTEGER"],
+        )
+        assert success is True
+
+    def test_name_in_neither_namespace_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="oracle"):
+            compare_column_type(self.engine, sa.types.INTEGER(), "__NO_SUCH_TYPE__", strict=True)
+
+    def test_generic_alias_does_not_resolve(self):
+        """``sa.INT`` is ``INTEGER``; only a type's own class name resolves generically."""
+        success, observed = compare_column_type(self.engine, sa.types.INTEGER(), "INT", strict=True)
+        assert success is False
+        assert observed == "INTEGER"
+
+    @pytest.mark.parametrize("actual_type", [sa.types.BIGINT(), sa.types.SMALLINT()])
+    def test_base_type_does_not_match_a_subtype(self, actual_type):
+        """``Integer`` is a base class of every integer type, so it is not a candidate."""
+        success, _obs = compare_column_type(self.engine, actual_type, "Integer", strict=True)
+        assert success is False
+
+    def test_base_type_in_a_list_does_not_match_a_subtype(self):
+        success, _obs = compare_column_type_list(self.engine, sa.types.BIGINT(), ["Integer"])
+        assert success is False
+
+    @pytest.mark.parametrize("name", ["Column", "Table", "MetaData"])
+    def test_class_that_is_not_a_type_raises(self, name):
+        """A sqlalchemy class that is not a ``TypeEngine`` is not a candidate."""
+        with pytest.raises(InvalidExpectationConfigurationError, match=name):
+            compare_column_type(self.engine, sa.types.INTEGER(), name, strict=True)
+
+
+# ===========================================================================
+# Names that collide with non-type members of the sqlalchemy namespace
+# ===========================================================================
+
+
+class TestNonTypeNamesInGenericNamespace:
+    """``sqlalchemy`` exports functions and generators as well as types.
+
+    A candidate that is not a class makes ``isinstance`` raise ``TypeError`` instead
+    of comparing anything, so such a name counts as unresolved.
+    """
+
+    engine = _StubEngine("sqlite", dialect_module=sa)
+
+    @pytest.mark.parametrize("name", ["text", "cast", "func", "select", "table"])
+    def test_scalar_raises_rather_than_type_error(self, name):
+        with pytest.raises(InvalidExpectationConfigurationError, match=name):
+            compare_column_type(self.engine, sa.types.INTEGER(), name, strict=True)
+
+    @pytest.mark.parametrize("name", ["text", "cast", "func", "select", "table"])
+    def test_one_bad_name_does_not_poison_the_list(self, name):
+        success, _obs = compare_column_type_list(
+            self.engine,
+            sa.types.INTEGER(),
+            [name, "INTEGER"],
+        )
+        assert success is True
+
+    def test_list_of_only_non_type_names_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="text"):
+            compare_column_type_list(self.engine, sa.types.INTEGER(), ["text", "cast"])
+
+    def test_empty_list_reports_a_failed_match(self):
+        """An empty list names no type to report as unresolvable."""
+        success, _obs = compare_column_type_list(self.engine, sa.types.INTEGER(), [])
+        assert success is False
+
+
+# ===========================================================================
+# BigQuery GEOGRAPHY without the optional extra
+# ===========================================================================
+
+
+class _StubBigQueryEngine:
+    """A stub carrying the ``engine.dialect.name`` the GEOGRAPHY check reads."""
+
+    dialect_name = GXSqlDialect.BIGQUERY
+    dialect_module = sa
+
+    class engine:  # mirrors the attribute name on the real engine
+        class dialect:
+            name = "bigquery"
+
+
+class TestBigQueryGeographyWithoutExtra:
+    """Missing optional support is not a misspelled name.
+
+    ``sqlalchemy-bigquery[geography]`` being absent is already diagnosed by a warning
+    naming the extra to install, so the comparison must not raise over the spelling.
+    """
+
+    engine = _StubBigQueryEngine()
+
+    @pytest.fixture(autouse=True)
+    def _without_geo_support(self, monkeypatch):
+        monkeypatch.setattr(type_comparison, "BIGQUERY_GEO_SUPPORT", False)
+
+    def test_scalar_fails_without_raising(self):
+        success, _obs = compare_column_type(
+            self.engine, sa.types.INTEGER(), "GEOGRAPHY", strict=True
+        )
+        assert success is False
+
+    def test_list_fails_without_raising(self):
+        success, _obs = compare_column_type_list(self.engine, sa.types.INTEGER(), ["GEOGRAPHY"])
+        assert success is False
+
+    def test_a_resolvable_name_beside_it_still_matches(self):
+        success, _obs = compare_column_type_list(
+            self.engine,
+            sa.types.INTEGER(),
+            ["GEOGRAPHY", "INTEGER"],
+        )
+        assert success is True
+
+    def test_a_misspelling_alongside_it_still_does_not_raise(self):
+        """The list is inconclusive as a whole, so nothing here is called a typo."""
+        success, _obs = compare_column_type_list(
+            self.engine,
+            sa.types.INTEGER(),
+            ["GEOGRAPHY", "__NO_SUCH_TYPE__"],
+        )
+        assert success is False
+
+
+# ===========================================================================
+# ClickHouse — a dialect that answers every name
+# ===========================================================================
+
+
+class _StubClickHouseDialect:
+    ischema_names = {"Int32": sa.types.INTEGER}
+
+    def _get_column_type(self, name, spec):
+        """Mirror ClickHouseDialect, which returns NullType for a spec it rejects."""
+        return self.ischema_names.get(spec, sa.types.NullType)
+
+
+class _StubClickHouseModule:
+    __name__ = "clickhouse_sqlalchemy.drivers.base"
+    ClickHouseDialect = _StubClickHouseDialect
+
+    class types:
+        Decimal = sa.types.DECIMAL
+        String = sa.types.String
+
+
+class TestClickHouseUnrecognizedSpec:
+    """ClickHouse answers an unknown spec with NullType rather than an error.
+
+    Left in place that makes every comparison an isinstance against NullType, so the
+    name has to be treated as unresolved for the dialect to report it at all.
+    """
+
+    engine = _StubEngine(GXSqlDialect.CLICKHOUSE, dialect_module=_StubClickHouseModule())
+
+    def test_known_spec_still_resolves(self):
+        success, _obs = compare_column_type(self.engine, sa.types.INTEGER(), "Int32")
+        assert success is True
+
+    def test_unrecognized_spec_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="__NO_SUCH_TYPE__"):
+            compare_column_type(self.engine, sa.types.INTEGER(), "__NO_SUCH_TYPE__", strict=True)
+
+    def test_unrecognized_spec_in_a_list_raises_when_nothing_resolves(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="__NO_SUCH_TYPE__"):
+            compare_column_type_list(
+                self.engine,
+                sa.types.INTEGER(),
+                ["__NO_SUCH_TYPE__", "__ALSO_NO_SUCH_TYPE__"],
+            )
+
+    def test_generic_fallback_still_applies(self):
+        """A name ClickHouse rejects but the generic namespace carries still resolves."""
+        success, _obs = compare_column_type(self.engine, sa.types.INTEGER(), "INTEGER")
+        assert success is True
+
+
+# ===========================================================================
+# Dialects reaching the comparison with no dialect module
+# ===========================================================================
+
+
+class TestNoDialectModule:
+    """Athena, Hive and Vertica get no dialect module and resolve against sqlalchemy.
+
+    That namespace is their whole vocabulary, aliases included, so a name it does not
+    define can never match and is reported like a misspelling on any other dialect.
+    """
+
+    engine = _StubEngine("awsathena", dialect_module=None)
+
+    def test_generic_name_still_resolves(self):
+        success, observed = compare_column_type(self.engine, sa.types.INTEGER(), "INTEGER")
+        assert success is True
+        assert observed == "INTEGER"
+
+    def test_alias_still_resolves(self):
+        """Vertica reflects an INT column as ``sqlalchemy.INTEGER``, which ``INT`` names."""
+        success, _obs = compare_column_type(self.engine, sa.types.INTEGER(), "INT", strict=True)
+        assert success is True
+
+    def test_unresolvable_name_raises(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="awsathena"):
+            compare_column_type(self.engine, sa.types.INTEGER(), "__NO_SUCH_TYPE__", strict=True)
+
+    def test_unresolvable_names_in_a_list_raise(self):
+        with pytest.raises(InvalidExpectationConfigurationError, match="__NO_SUCH_TYPE__"):
+            compare_column_type_list(
+                self.engine,
+                sa.types.INTEGER(),
+                ["__NO_SUCH_TYPE__", "__ALSO_NO_SUCH_TYPE__"],
+            )
+
+    @pytest.mark.parametrize("name", ["text", "Column"])
+    def test_non_type_name_raises_rather_than_type_error(self, name):
+        with pytest.raises(InvalidExpectationConfigurationError, match=name):
+            compare_column_type(self.engine, sa.types.INTEGER(), name, strict=True)
 
 
 # ===========================================================================

@@ -121,7 +121,9 @@ def test_delegates_to_compare_column_type_success(sa, mocker):
 
     result = validator.expect_column_values_to_be_of_type("str_col", type_="TEXT")
 
-    mock_compare.assert_called_once_with(validator.execution_engine, mocker.ANY, "TEXT")
+    mock_compare.assert_called_once_with(
+        validator.execution_engine, mocker.ANY, "TEXT", strict=True
+    )
     assert result.success is True
     assert result.result["observed_value"] == "SENTINEL_TYPE"
 
@@ -141,7 +143,9 @@ def test_delegates_to_compare_column_type_failure(sa, mocker):
 
     result = validator.expect_column_values_to_be_of_type("str_col", type_="INTEGER")
 
-    mock_compare.assert_called_once_with(validator.execution_engine, mocker.ANY, "INTEGER")
+    mock_compare.assert_called_once_with(
+        validator.execution_engine, mocker.ANY, "INTEGER", strict=True
+    )
     assert result.success is False
     assert result.result["observed_value"] == "WHATEVER"
 

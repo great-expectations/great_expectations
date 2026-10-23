@@ -21,10 +21,12 @@ from tests.integration.test_utils.data_source_config import (
     ALL_DATA_SOURCES,
     ClickHouseDatasourceTestConfig,
     DatabricksDatasourceTestConfig,
+    OracleDatasourceTestConfig,
     PandasDataFrameDatasourceTestConfig,
     PostgreSQLDatasourceTestConfig,
     RedshiftDatasourceTestConfig,
     SnowflakeDatasourceTestConfig,
+    SqliteDatasourceTestConfig,
 )
 
 INTEGER_COLUMN = "integers"
@@ -823,3 +825,57 @@ def test_include_unexpected_rows_pandas(batch_for_datasource: Batch) -> None:
     # The unexpected rows should contain all the string values
     unexpected_values = sorted(unexpected_rows_df[STRING_COLUMN].tolist())
     assert unexpected_values == ["a", "b", "c", "d", "e"]
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[SqliteDatasourceTestConfig()],
+    data=DATA,
+)
+def test_type_list_resolving_to_nothing_raises_rather_than_reporting_a_mismatch(
+    batch_for_datasource: Batch,
+) -> None:
+    """A list where no name resolves is a configuration error, not a data mismatch.
+
+    A single unresolvable name is tolerated, because a type list is routinely written to
+    span backends (``["INTEGER", "int64", "IntegerType"]``). A list that resolves to
+    nothing at all used to make the comparison ``isinstance(value, ())``, which is
+    unconditionally False.
+    """
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToBeInTypeList(column=INTEGER_COLUMN, type_list=["INTGER", "VARCHR"])
+    )
+    assert result.exception_info["raised_exception"] is True
+    assert "INTGER" in result.exception_info["exception_message"]
+    assert "sqlite" in result.exception_info["exception_message"]
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[OracleDatasourceTestConfig()],
+    data=DATA,
+)
+def test_success_for_type_list__INTEGER_oracle(batch_for_datasource: Batch) -> None:
+    """The same generic-namespace fallback, reached through the list expectation.
+
+    ``sqlalchemy.dialects.oracle`` exports ``NUMBER`` and ``VARCHAR2`` but not ``INTEGER``,
+    while the column is reflected as a generic ``sqlalchemy.INTEGER``.
+    """
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToBeInTypeList(column=INTEGER_COLUMN, type_list=["INTEGER"])
+    )
+    assert result.result["observed_value"] == "INTEGER"
+    assert result.success, result.result
+
+
+@pytest.mark.filterwarnings("ignore:Did not recognize type:sqlalchemy.exc.SAWarning")
+@parameterize_batch_for_data_sources(
+    data_source_configs=[ClickHouseDatasourceTestConfig()],
+    data=DATA,
+)
+def test_type_list_resolving_to_nothing_raises_on_clickhouse(batch_for_datasource: Batch) -> None:
+    """ClickHouse answers an unrecognized spec with ``NullType`` instead of failing the lookup."""
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToBeInTypeList(column=INTEGER_COLUMN, type_list=["INTGER", "VARCHR"])
+    )
+    assert result.exception_info["raised_exception"] is True
+    assert "INTGER" in result.exception_info["exception_message"]
+    assert "clickhouse" in result.exception_info["exception_message"]

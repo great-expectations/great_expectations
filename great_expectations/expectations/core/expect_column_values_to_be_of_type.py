@@ -401,7 +401,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             observed = type(actual_column_type).__name__
             return {"success": True, "result": {"observed_value": observed}}
         success, observed_value = compare_column_type(
-            execution_engine, actual_column_type, expected_type
+            execution_engine, actual_column_type, expected_type, strict=True
         )
         return {"success": success, "result": {"observed_value": observed_value}}
 
