@@ -95,6 +95,11 @@ module.exports = {
           type: 'doc',
           id: 'core/define_expectations/organize_expectation_suites',
           label: 'Organize Expectations into an Expectation Suite'
+        },
+        {
+          type: 'doc',
+          id: 'core/define_expectations/import_odcs_contract',
+          label: 'Import an ODCS data contract'
         }
       ]
     },
