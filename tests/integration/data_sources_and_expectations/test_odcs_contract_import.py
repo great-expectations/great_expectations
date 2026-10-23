@@ -15,7 +15,7 @@ from great_expectations.core.validation_definition import ValidationDefinition
 pytestmark = pytest.mark.integration
 
 
-def _contract() -> dict:
+def _contract(*, require_email: bool = True) -> dict:
     return {
         "version": "1.0.0",
         "apiVersion": "v3.1.0",
@@ -28,11 +28,16 @@ def _contract() -> dict:
                 "name": "orders",
                 "logicalType": "object",
                 "properties": [
-                    {"name": "id", "logicalType": "integer", "primaryKey": True},
+                    {
+                        "name": "id",
+                        "logicalType": "integer",
+                        "primaryKey": True,
+                        "physicalType": "INTEGER",
+                    },
                     {
                         "name": "email",
                         "logicalType": "string",
-                        "required": True,
+                        "required": require_email,
                         "logicalTypeOptions": {"format": "email"},
                     },
                     {
@@ -47,11 +52,17 @@ def _contract() -> dict:
     }
 
 
-def _run_checkpoint(context, dataframe: pd.DataFrame):
+def _run_checkpoint(
+    context,
+    dataframe: pd.DataFrame,
+    *,
+    type_map: dict[str, str] | None = None,
+    require_email: bool = True,
+):
     datasource = context.data_sources.add_pandas("contract_pandas")
     asset = datasource.add_dataframe_asset("orders")
     batch_definition = asset.add_batch_definition_whole_dataframe("whole_orders")
-    suite = context.suites.add(from_odcs(_contract()))
+    suite = context.suites.add(from_odcs(_contract(require_email=require_email), type_map=type_map))
     validation_definition = context.validation_definitions.add(
         ValidationDefinition(name="orders_contract", data=batch_definition, suite=suite)
     )
@@ -100,3 +111,54 @@ def test_odcs_contract_fails_and_gate_reports_the_real_batch_id() -> None:
 
     assert run_result.batch_id is not None
     assert exc_info.value.failed_batch_ids == [run_result.batch_id]
+
+
+def test_odcs_type_map_adds_a_backend_type_check() -> None:
+    context = gx.get_context(mode="ephemeral")
+    dataframe = pd.DataFrame(
+        {
+            "id": [1, 2],
+            "email": ["first@example.com", "second@example.com"],
+            "amount": [1.5, 2.5],
+        }
+    )
+
+    result, _ = _run_checkpoint(context, dataframe, type_map={"integer": "int64"})
+
+    assert result.success
+
+
+def test_odcs_type_map_fails_when_values_do_not_match() -> None:
+    context = gx.get_context(mode="ephemeral")
+    dataframe = pd.DataFrame(
+        {
+            "id": ["1", "2"],
+            "email": ["first@example.com", "second@example.com"],
+            "amount": [1.5, 2.5],
+        }
+    )
+
+    result, _ = _run_checkpoint(context, dataframe, type_map={"integer": "int64"})
+
+    assert not result.success
+    run_result = next(iter(result.run_results.values()))
+    with pytest.raises(DataContractValidationError) as exc_info:
+        enforce_contract_gate(result)
+
+    assert run_result.batch_id is not None
+    assert exc_info.value.failed_batch_ids == [run_result.batch_id]
+
+
+def test_optional_email_with_null_passes_the_email_rule() -> None:
+    context = gx.get_context(mode="ephemeral")
+    dataframe = pd.DataFrame(
+        {
+            "id": [1, 2],
+            "email": ["first@example.com", None],
+            "amount": [1.5, 2.5],
+        }
+    )
+
+    result, _ = _run_checkpoint(context, dataframe, require_email=False)
+
+    assert result.success
