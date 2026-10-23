@@ -408,6 +408,53 @@ def test_expect_column_min_to_be_between__spark_row_condition_pass_through(
     assert result.success
 
 
+NULLABLE_CONDITION_DATA = pd.DataFrame(
+    {
+        "quantity": [1, 2, 3, 4, 5, 6],
+        "name": ["albert", "issac", None, "albert", None, "galileo"],
+        "amount": [1.0, None, 3.0, None, 5.0, 6.0],
+    }
+)
+
+
+@pytest.mark.parametrize(
+    "row_condition,expected_row_count",
+    [
+        pytest.param(Column("name") != "albert", 2, id="text-ne"),
+        pytest.param(Column("name").is_not_in(["albert"]), 2, id="text-not-in"),
+        pytest.param(Column("amount") != 3.0, 3, id="number-ne"),
+        pytest.param(Column("amount").is_not_in([1.0, 3.0]), 2, id="number-not-in"),
+        pytest.param((Column("name") != "albert") & (Column("quantity") > 2), 1, id="ne-and"),
+        pytest.param((Column("name") != "albert") | (Column("quantity") == 3), 3, id="ne-or"),
+        pytest.param((Column("name") != "albert") | Column("name").is_null(), 4, id="ne-or-null"),
+    ],
+)
+@parameterize_batch_for_data_sources(
+    data_source_configs=[
+        PandasDataFrameDatasourceTestConfig(),
+        PandasFilesystemCsvDatasourceTestConfig(),
+        PostgreSQLDatasourceTestConfig(),
+        SqliteDatasourceTestConfig(),
+        SparkFilesystemCsvDatasourceTestConfig(),
+    ],
+    data=NULLABLE_CONDITION_DATA,
+)
+def test_negated_row_condition_excludes_null_rows(
+    batch_for_datasource: Batch, row_condition: RowConditionType, expected_row_count: int
+) -> None:
+    """A null is neither equal nor unequal to a value, so "!=" and "not in" never select it.
+
+    SQL and Spark get this from three-valued logic. pandas evaluates NaN != x as True, so
+    without an explicit null check the same condition would keep the null rows there.
+    """
+    expectation = gxe.ExpectTableRowCountToEqual(
+        value=expected_row_count,
+        row_condition=row_condition,
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success, result.result
+
+
 class TestPandasConditionClassAcrossExpectationTypes:
     """Simple tests to ensure that pandas properly utilizes row condition from each
     type of expectation (ColumnMapExpectation, ColumnPairMapExpectation, etc)

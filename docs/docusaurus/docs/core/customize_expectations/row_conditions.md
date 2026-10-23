@@ -63,6 +63,8 @@ To restrict an Expectation to a subset of the data retrieved in a Batch, use the
       ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/row_conditions.py - operators"
       ```
 
+      A null value is neither equal nor unequal to another value, so `!=` and `is_not_in` don't select rows where the column is null. To include those rows, combine the comparison with `is_null`, for example `(Column("department") != "Sales") | Column("department").is_null()`.
+
    2. Configure the Expectation.
 
       ```python title="Python" name="docs/docusaurus/docs/core/customize_expectations/_examples/row_conditions.py - add Expectation"
