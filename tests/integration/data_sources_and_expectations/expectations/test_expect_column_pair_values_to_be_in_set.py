@@ -10,6 +10,8 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 )
 from tests.integration.test_utils.data_source_config import (
     ALL_DATA_SOURCES,
+    PANDAS_DATA_SOURCES,
+    SQL_DATA_SOURCES,
 )
 
 DATA = pd.DataFrame({"foo": [1, 2, 4], "bar": [1, 1, 1]})
@@ -165,3 +167,29 @@ def test_success_with_suite_param_ignore_row_if_(
         expectation, expectation_parameters={suite_param_key: suite_param_value}
     )
     assert result.success == expected_result
+
+
+PARTIAL_NULL_DATA = pd.DataFrame({"a": ["x", "x"], "b": ["y", None]})
+
+
+@pytest.mark.parametrize(
+    "value_pairs_set,unexpected_count",
+    [
+        pytest.param([("x", "y")], 1, id="null_not_in_set"),
+        pytest.param([("x", "y"), ("x", None)], 0, id="null_pair_in_set"),
+    ],
+)
+@parameterize_batch_for_data_sources(
+    data_source_configs=[*PANDAS_DATA_SOURCES, *SQL_DATA_SOURCES], data=PARTIAL_NULL_DATA
+)
+def test_row_with_one_null(
+    batch_for_datasource: Batch, value_pairs_set: list, unexpected_count: int
+) -> None:
+    # On SQL, comparing a NULL to a value is NULL; the row must count as unexpected unless the set
+    # itself holds that NULL, as on pandas, rather than as neither expected nor unexpected.
+    expectation = gxe.ExpectColumnPairValuesToBeInSet(
+        column_A="a", column_B="b", value_pairs_set=value_pairs_set
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert result.success is (unexpected_count == 0)
+    assert result.result["unexpected_count"] == unexpected_count

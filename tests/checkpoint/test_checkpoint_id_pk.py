@@ -324,9 +324,10 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
     ]
 
     unexpected_index_query = evrs[0]["results"][0]["result"]["unexpected_index_query"]
+    # The NULL guards make the query also return rows with a NULL in a summed column (#12252).
     assert (
         unexpected_index_query
-        == "SELECT pk_1, a, b, c \nFROM multi_column_sums \nWHERE 0 + a + b + c != 30.0;"
+        == "SELECT pk_1, a, b, c \nFROM multi_column_sums \nWHERE NOT (0 + a + b + c = 30.0 AND a IS NOT NULL AND b IS NOT NULL AND c IS NOT NULL);"  # noqa: E501
     )
 
 

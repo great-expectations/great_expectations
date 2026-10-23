@@ -10,6 +10,8 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
 )
 from tests.integration.test_utils.data_source_config import (
     ALL_DATA_SOURCES,
+    PANDAS_DATA_SOURCES,
+    SQL_DATA_SOURCES,
 )
 
 COL_A = "COL_A"
@@ -144,3 +146,18 @@ def test_include_unexpected_rows(batch_for_datasource: Batch) -> None:
     # Check that the rows contain the expected columns
     assert COL_A in unexpected_rows_df.columns
     assert COL_B in unexpected_rows_df.columns
+
+
+PARTIAL_NULL_DATA = pd.DataFrame({"a": [1, 1], "b": [6, None], "c": [0, 100]})
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=[*PANDAS_DATA_SOURCES, *SQL_DATA_SOURCES], data=PARTIAL_NULL_DATA
+)
+def test_row_with_one_null_is_unexpected(batch_for_datasource: Batch) -> None:
+    # A sum with a NULL operand is NULL on SQL; the row must still count as unexpected, as it does
+    # on pandas, rather than as neither expected nor unexpected.
+    expectation = gxe.ExpectMulticolumnSumToEqual(column_list=["a", "b", "c"], sum_total=7)
+    result = batch_for_datasource.validate(expectation)
+    assert not result.success
+    assert result.result["unexpected_count"] == 1

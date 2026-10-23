@@ -67,8 +67,18 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         value_pairs_set = [(x, y) for x, y in value_pairs_set]
 
+        def _equals(column, value):
+            # `column == None` compiles to IS NULL, which is never NULL itself. Any other
+            # comparison is NULL on a NULL row, so the row would count as neither expected nor
+            # unexpected; requiring the column makes it FALSE instead, as on pandas.
+            if value is None:
+                return column == None  # noqa: E711 # FIXME CoP
+            return sa.and_(column == value, column.is_not(None))
+
         # or_ implementation was required due to SQL Server issues with in_
-        conditions = [sa.or_(sa.and_(column_A == x, column_B == y)) for x, y in value_pairs_set]
+        conditions = [
+            sa.or_(sa.and_(_equals(column_A, x), _equals(column_B, y))) for x, y in value_pairs_set
+        ]
         row_wise_cond = sa.or_(*conditions)
 
         return row_wise_cond

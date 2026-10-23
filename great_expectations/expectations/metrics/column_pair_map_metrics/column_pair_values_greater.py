@@ -41,13 +41,17 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
         or_equal: bool = kwargs.get("or_equal") or False
+        # A comparison with a NULL operand is NULL, and so is its negation (the unexpected
+        # condition), so the row would count as neither expected nor unexpected. Requiring both
+        # operands makes it FALSE instead, and the row is unexpected, as on pandas.
+        both_present = sa.and_(column_A.is_not(None), column_B.is_not(None))
         if or_equal:
             return sa.or_(
-                column_A >= column_B,
+                sa.and_(column_A >= column_B, both_present),
                 sa.and_(column_A == None, column_B == None),  # noqa: E711 # FIXME CoP
             )
         else:
-            return column_A > column_B
+            return sa.and_(column_A > column_B, both_present)
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)

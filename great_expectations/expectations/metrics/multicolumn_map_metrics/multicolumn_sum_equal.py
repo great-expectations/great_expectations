@@ -3,6 +3,7 @@ from __future__ import annotations
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -37,7 +38,12 @@ class MulticolumnSumEqual(MulticolumnMapMetricProvider):
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_list, **kwargs):
         sum_total = kwargs.get("sum_total")
-        row_wise_cond = sum(column_list) == sum_total
+        # A sum with a NULL operand is NULL, and so are the comparison and its negation (the
+        # unexpected condition), so the row would count as neither expected nor unexpected.
+        # Requiring every column makes it FALSE instead, and the row is unexpected, as on pandas.
+        row_wise_cond = sa.and_(
+            sum(column_list) == sum_total, *[column.is_not(None) for column in column_list]
+        )
         return row_wise_cond
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)

@@ -13,6 +13,7 @@ from tests.integration.data_sources_and_expectations.data_source_lists import (
     NON_SQL_DATA_SOURCES,
 )
 from tests.integration.test_utils.data_source_config import (
+    PANDAS_DATA_SOURCES,
     SQL_DATA_SOURCES,
 )
 
@@ -238,3 +239,21 @@ def test_success_with_suite_param_ignore_row_if_(
         expectation, expectation_parameters={suite_param_key: suite_param_value}
     )
     assert result.success == expected_result
+
+
+PARTIAL_NULL_DATA = pd.DataFrame({"a": [9.0, None], "b": [1.0, 5.0]})
+
+
+@pytest.mark.parametrize("or_equal", [False, True])
+@parameterize_batch_for_data_sources(
+    data_source_configs=[*PANDAS_DATA_SOURCES, *SQL_DATA_SOURCES], data=PARTIAL_NULL_DATA
+)
+def test_row_with_one_null_is_unexpected(batch_for_datasource: Batch, or_equal: bool) -> None:
+    # A comparison with one NULL operand is NULL on SQL; the row must still count as unexpected,
+    # as it does on pandas, rather than as neither expected nor unexpected.
+    expectation = gxe.ExpectColumnPairValuesAToBeGreaterThanB(
+        column_A="a", column_B="b", or_equal=or_equal
+    )
+    result = batch_for_datasource.validate(expectation)
+    assert not result.success
+    assert result.result["unexpected_count"] == 1
