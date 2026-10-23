@@ -872,3 +872,204 @@ declaration when the config is constructed:
 
 Neither route mutates any module-level state or reads the environment at import time; both are
 resolved fresh each time a `GenericSQLBatchTestSetup` is constructed.
+
+## Changing a data source's public tier
+
+The public compatibility reference (`docs/docusaurus/docs/help/compatibility_reference.md`) tells
+users how well each data source is supported. Its table of data sources is not written by hand. It
+is derived from the declarations described in "Choose tiers" above and written to
+`docs/docusaurus/docs/help/_data_source_support_table.md`, which the page includes. The
+declarations are the single source of truth; the published table is a view of them.
+
+### Criteria and public tiers are different things
+
+A declaration is a statement about a suite. The page speaks about support, and what it publishes is
+a set of **criteria**, each satisfied by one or more declarations:
+
+| Criterion printed on a row | Satisfied by declaring |
+| --- | --- |
+| Every shipped expectation | `SupportTier.GALLERY` |
+| Expectation suite | `SupportTier.CANONICAL_EXPECTATIONS` or `SupportTier.CURATED_SQL` |
+| Datasource API contract | `SupportTier.FLUENT_API` |
+
+The page then places each row in one of three **public tiers**, named exactly **Fully supported**,
+**Tested** and **Best effort**, by the combination of criteria it meets:
+
+- **Fully supported**: Every shipped expectation *and* Datasource API contract.
+- **Tested**: Every shipped expectation or Expectation suite, without that combination.
+- **Best effort**: neither. The Datasource API contract alone is shown on the row but never lifts it
+  out of this tier: it is a claim about managing a data source with connection testing neutralized,
+  and says nothing about whether expectations run against it. Treating it as coverage would
+  overstate. The tier asserts nothing about who wrote or maintains a connection path.
+
+The mapping from declarations to criteria and from criteria to tiers lives in one module,
+`tests/compatibility_reference/compatibility_reference_table.py` (`CRITERIA` and `tier_for`). The
+tier a row lands in and the criteria printed beside it both read it, so they cannot disagree.
+
+**Why the public tiers are compositions, not renamed declarations.** The top tier is a conjunction
+of two criteria, and no single declaration names a conjunction. Printing a declaration name as a
+tier name would imply a correspondence that does not exist, and the first time the combination
+changed, the name would be wrong. The page therefore prints tier names and criterion labels and
+never a declaration name. For the same reason a record is not "a Fully supported record": no
+record declares that. A record declares criteria, and the tier follows.
+
+**Why a row meets a criterion only if every record under its name does.** A row is one public name,
+and several records can share it (two records are published as Pandas, for example). One tested
+variant must not advertise coverage for an untested sibling, so a criterion counts as met only when
+every record under the name declares it. Where the records disagree, the row carries a note naming
+the variants that fall short. A declared CI lane is evidence of nothing in this derivation: it means
+dependencies are installed and something runs, whereas a tier means a suite passes.
+
+### What to do when you change a declaration
+
+Changing a record's `tiers`, adding or removing a `tier_case_exclusions` entry, changing its
+`public_name`, `fluent_types`, `provisioning`, `provisioning_note` or `ci_lane`, or changing the
+fluent contract's per-type exclusions or its two record-coverage literals can move a row, change
+its notes, or both. Do the following in the same change:
+
+1. **Make the declaration, with the obligations "A tier claim obliges a marker and a CI lane"
+   describes.** A tier claim you cannot back with a suite and a lane is the thing the page must not
+   publish.
+2. **Regenerate the published table. Never edit it.** Run:
+
+   ```
+   invoke docs-tables --sync
+   ```
+
+   It rewrites only `docs/docusaurus/docs/help/_data_source_support_table.md` and is idempotent.
+   Commit the result with your declaration change. A check in
+   `tests/compatibility_reference/test_compatibility_reference_table.py` regenerates the table in
+   memory, compares it with the committed file, and fails on any difference with a message that
+   names this command. It also runs in the documentation checks, because a change that touches only
+   documentation would otherwise skip the test lane it normally runs in. A hand edit to the table is
+   overwritten by the next regeneration, and the check refuses it before then.
+3. **Add a description if generation asks for one.** Three maps in
+   `tests/compatibility_reference/upstream_declarations.py` hold the user-facing words the
+   declarations lack, because a harness identifier is never printed on a public page:
+   - `CONNECTION_PATH_DESCRIPTIONS` describes every registered fluent datasource type. Adding a
+     fluent type, or naming one on a record, needs an entry here, or generation fails naming the
+     type. Generation fails on a type the map does not describe; a description no type uses is caught
+     by the drift check, not by generation.
+   - `CASE_DESCRIPTIONS` describes every case a declaration excludes. **Adding a per-case exclusion
+     to a record, or to the fluent contract, now also needs an entry here**, or generation fails
+     naming the case. An entry for a case nothing excludes fails too, so removing the last
+     exclusion for a case means removing its entry.
+   - `TESTED_VERSION_NOTES` carries a version a lane runs against; see the Oracle decision below.
+4. **Read the diff of the table.** It is the review surface for what the change does to the public
+   page. If a row moved tier, that movement is a public statement about support, and the change
+   should say so.
+
+Two follow-ons are not checked by anything, so they are yours to remember in the same change:
+
+- The seven data sources named beneath the table (Athena, AWS Glue, Databricks (Spark), Dremio, EMR
+  Spark, Teradata and Vertica) live in a sentence written by hand on the compatibility reference
+  page. When one of them gains a record, remove it from that sentence. Generation never reads the
+  sentence, so a data source can appear both in the table and beneath it without any check failing.
+- The Oracle row's tested-version note is `TESTED_VERSION_NOTES` in
+  `tests/compatibility_reference/upstream_declarations.py`. When the Oracle lane's database image
+  changes, update that note in the same change. Nothing observes the image, so the note goes stale
+  silently otherwise.
+
+Where the declarations live: the data-source records under
+`tests/integration/test_utils/data_source_config/`, the fluent contract in
+`tests/datasource/fluent/crud_contract.py` (its per-type exclusions and the two literals,
+`FLUENT_TYPES_NAMED_BY_NO_RECORD` and `RECORDS_COVERED_BUT_UNABLE_TO_CLAIM`), and the two description
+maps above. The derivation reads all of them through one module,
+`tests/compatibility_reference/upstream_declarations.py`, at call time.
+
+A declaration that no criterion names is legal and silent: it changes no row, and nothing fails to
+tell you so. If you add a `SupportTier` member, decide whether it satisfies an existing criterion
+or none, and say so in `CRITERIA`; the derivation will not ask.
+
+### The long-term goal the criteria build toward
+
+The criteria are steps toward a chain of contract checks. The fluent datasource API produces a
+data source; its output feeds the validation API, which runs canonical expectations against it; and
+the result of that validation is matched into Data Docs rendering. Each criterion proves one link:
+
+- *Datasource API contract* proves the first link exists: a data source can be created, updated
+  and persisted through the fluent API.
+- *Expectation suite* and *Every shipped expectation* prove the second: validation against that
+  data source returns the right results, for a core set, and for one case per shipped expectation,
+  each with a passing and a failing configuration, run only where that case applies to the data
+  source's engine (some expectations have no implementation on an engine, and some cases check
+  something only SQL engines have).
+- A planned criterion would prove the third: that a validation result produced against a live
+  backend renders into Data Docs. No suite, declaration or lane exists for it yet.
+
+The public page describes it as planned, as an additional criterion for the top tier, beyond the two
+it requires today, and says it affects no data source's tier until it exists. The derivation
+likewise places nothing by it, and **no declaration should be added in anticipation of it**. A
+declaration with nothing behind it is exactly the unbacked claim the declarations are meant to
+prevent. Activating it takes four steps: add its declaration, add an entry in `CRITERIA`, add its
+key to the top-tier condition in `tier_for` (today that condition is the every-shipped-expectation
+criterion together with the datasource API criterion), and change the page's description of it from
+planned to active.
+
+Once the new key joins the top-tier condition in `tier_for`, any Fully supported row whose records
+do not all declare the new criterion's member moves down to the Tested tier, and the regenerated table's
+diff shows which rows move. The sentences in this section that describe today's top tier as a
+conjunction of two criteria must be updated in the same change.
+
+### Decisions recorded, and what would make each worth revisiting
+
+Each of the following was a deliberate choice with a cost. Each is recorded with the condition
+under which it should be reconsidered, so a later maintainer inherits a decision with its expiry
+rather than a rule with no reason.
+
+1. **The page prints declared names verbatim.** A row's name is the `public_name` its records
+   declare, with no override map on the page side. A page-side map would be a second vocabulary to
+   keep in step with the records, and where an expectation lists the data sources it supports, it
+   uses the same names as the page (some rows have no such member, so the match is not universal). A
+   reader who knows a data source by another name is told why the page differs. *Revisit when* a
+   declared name reads wrongly to users in a way a prose note cannot fix. The fix then belongs in
+   the declaration, which changes every place the name is used, not in a mapping on the page.
+2. **Records covered by the fluent suite but unable to claim its tier.** The records listed in
+   `RECORDS_COVERED_BUT_UNABLE_TO_CLAIM` are exercised by the datasource API suite, but each declares
+   no marker and no CI lane, and a tier claim obliges both. They are placed by what they declare,
+   and the row carries a note saying that what is missing is a declaration, not test evidence.
+   Inferring the claim for them would publish a tier no lane attests to. *Revisit when* any of them
+   declares a marker and a lane: it can then claim `FLUENT_API` and leave the literal, and its note
+   disappears with it.
+3. **Connection paths no record names.** The fluent types in `FLUENT_TYPES_NAMED_BY_NO_RECORD` ship in
+   the package, but no record is reached through them, so no row can carry them. The page lists them
+   in a footnote rather than letting the table imply they are covered or silently leaving them out.
+   *Revisit when* a record names one of them, which removes it from the footnote and makes it a
+   variant of a row, or when the type stops shipping.
+4. **Oracle's version bound is the one note not derived from a declaration.** Oracle's row says
+   which version its lane runs against, because a reader would otherwise take the tier as a claim
+   about every version. No field on a record carries that version, so it lives in
+   `TESTED_VERSION_NOTES`. Two checks guard the map (a key with no published row fails, and so does a
+   data source with no lane), but neither can notice that the lane's database version changed, so the
+   note can go stale unobserved. *Revisit when* a record gains a field carrying the version its lane
+   runs against, filled in by whoever owns the lane. The note then becomes derivable and the map
+   goes. Until then, whoever changes the Oracle lane's image updates the map in the same change.
+5. **Externally provisioned data sources with no managed-service qualification.** A row says that no
+   CI lane exercises the real service only when its record is both provisioned through external
+   credentials *and* carries a provisioning note. Either alone is wrong: provisioning alone fires
+   for data sources that do have a credential-gated lane, and a note alone fires for a record whose
+   note is about running a local container, because the field is free text, not a managed-service
+   marker. Some externally provisioned records carry no note, and so receive no managed-service
+   qualification although reaching them needs credentials this repository does not hold (AlloyDB,
+   Amazon Aurora PostgreSQL, Azure Blob Storage and Neon at the time of writing; the set follows
+   from the declarations). They still carry the note saying the datasource API contract is verified
+   but not shown as met. Nothing in a declaration supports a claim about them, and the page does not
+   invent one. *Revisit when* each such record carries a provisioning note, or a field that marks a
+   managed service exists. The condition can then key on that field and drop the free-text
+   dependency.
+6. **The seven names beneath the table are an observation, not a claim.** The previous page named
+   Athena, AWS Glue, Databricks (Spark), Dremio, EMR Spark, Teradata and Vertica as seen to work,
+   but none is tested against a running instance in this repository's continuous integration. No
+   record names them, and a record would be a claim this repository has no suite to back, which is
+   why they cannot be rows. They are kept in a sentence written by hand in the page's own prose,
+   beneath the generated table, and marked as an observation. Generation never reads or writes it.
+   *Revisit when* one of them gains a record whose suite can back a claim: it then appears in the
+   table, and its name leaves the sentence in the same change.
+7. **No support-tier member names a public tier.** Every `SupportTier` member names what its suite
+   exercises: `SupportTier.GALLERY` is the declaration that a data source passes each gallery-suite
+   case it participates in (one case per shipped expectation, each with a passing and a failing
+   configuration, run only where the case applies to the data source's engine), and the others are
+   named the same way. None names a public tier, and none
+   should, because the top public tier is a conjunction of criteria and no single declaration can
+   name a conjunction. *Revisit when* someone proposes a member named for a public tier or a level,
+   or the criteria that define the top tier change.

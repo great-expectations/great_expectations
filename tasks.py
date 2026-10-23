@@ -811,6 +811,42 @@ def type_schema(  # noqa: C901 - too complex
     raise invoke.Exit(code=0)
 
 
+@invoke.task(
+    aliases=("docs-table",),
+    help={"sync": "Write the generated data-source support table."},
+)
+def docs_tables(ctx: Context, sync: bool = False) -> None:
+    """
+    Show the generated data-source support table.
+
+    Write it to its partial with `--sync`. The table is derived from the test
+    suite's declarations, so a change to those declarations is reflected in the
+    published page only by regenerating this one file.
+    """
+    # Imported here so that every other invocation of the task runner does not
+    # pay for loading the test harness and the data source registry.
+    from tests.compatibility_reference.compatibility_reference_table import (
+        GENERATED_PARTIAL_PATH,
+        render_table,
+    )
+    from tests.compatibility_reference.upstream_declarations import load_upstream_facts
+
+    partial_path: Final[pathlib.Path] = GX_ROOT_DIR / GENERATED_PARTIAL_PATH
+    rendered = render_table(load_upstream_facts())
+
+    if not sync:
+        print(f"Would write {partial_path.relative_to(GX_ROOT_DIR)}:\n")
+        print(rendered)
+        return
+
+    if partial_path.exists() and partial_path.read_text() == rendered:
+        print(f"✅  {partial_path.name} unchanged")
+        return
+
+    partial_path.write_text(rendered)
+    print(f"🔃  {partial_path.name} updated")
+
+
 def _exit_with_error_if_not_in_repo_root(task_name: str):
     """Exit if the command was not run from the repository root."""
     filedir = os.path.realpath(

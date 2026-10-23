@@ -482,6 +482,14 @@ jobs:
       - name: public_api_report
         run: invoke public-api
 
+      # Also selected by the `project` marker, but that lane is skipped for a change that only
+      # touches documentation, which is exactly what hand-editing the generated file is.
+      # The test harness imports the library, whose runtime dependencies this job does not install.
+      - name: data_source_support_table_drift_checker
+        run: |
+          pip install -r requirements.txt
+          python -m pytest tests/compatibility_reference/test_compatibility_reference_table.py -k drift -m project
+
   docs-build:
     needs: [doc-checks, check-actor-permissions]
     # run on non-draft PRs
