@@ -128,4 +128,12 @@ class SqlBackendSpec(DataSourceSpec):
     is guaranteed not to match.
     """
 
+    integer_column_type_alternatives: tuple[str, ...] = ("BIGINT", "SMALLINT")
+    """Further integer type names a type-list case offers alongside ``integer_column_type_name``.
+
+    Defaults to the ANSI spellings. Some dialects warn on a type name they do not recognize, and
+    the suite escalates warnings to errors, so a dialect that does not know the ANSI names
+    declares the integer names it does know instead (or an empty tuple for none).
+    """
+
     insert_parameter_limit: Optional[int] = None

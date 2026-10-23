@@ -233,9 +233,10 @@ def _resolve_case_for_config(case: GalleryCase, config: DataSourceTestConfig) ->
     integer_name = spec.integer_column_type_name
     non_integer_name = spec.non_integer_column_type_name
     if case.key == _TYPE_LIST_CASE_KEY:
-        # BIGINT/SMALLINT stay as fixed fallback alternatives alongside the declared name;
-        # de-duplicated so a dialect that declares one of them verbatim doesn't repeat it.
-        type_list = list(dict.fromkeys([integer_name, "BIGINT", "SMALLINT"]))
+        # The spec's alternative integer names ride alongside the declared name (the ANSI
+        # BIGINT/SMALLINT unless the dialect declares others); de-duplicated so a dialect that
+        # declares one of them verbatim doesn't repeat it.
+        type_list = list(dict.fromkeys([integer_name, *spec.integer_column_type_alternatives]))
         return replace(
             case,
             passing=gxe.ExpectColumnValuesToBeInTypeList(
@@ -1270,6 +1271,23 @@ class TestBuildGalleryCaseParams:
         # table's own hardcoded literals, not merely by matching some value.
         assert resolved.passing != table_case.passing
         assert resolved.failing != table_case.failing
+
+    def test_declared_integer_alternatives_replace_the_ansi_fallbacks_in_the_type_list(
+        self,
+    ) -> None:
+        [table_case] = [case for case in GALLERY_CASES if case.key == _TYPE_LIST_CASE_KEY]
+        declaring_spec = _make_gallery_backend_spec(
+            integer_column_type_name="Int64",
+            integer_column_type_alternatives=("Int32", "Int16"),
+        )
+        config_class = _make_config_class("DeclaringSpecBackend-alternatives", declaring_spec)
+
+        resolved = _resolve_case_for_config(
+            table_case, cast("DataSourceTestConfig", config_class())
+        )
+
+        assert isinstance(resolved.passing, gxe.ExpectColumnValuesToBeInTypeList)
+        assert resolved.passing.type_list == ["Int64", "Int32", "Int16"]
 
     def test_declared_type_names_flow_into_the_of_type_case(self) -> None:
         [table_case] = [case for case in GALLERY_CASES if case.key == _TYPE_CASE_KEY]

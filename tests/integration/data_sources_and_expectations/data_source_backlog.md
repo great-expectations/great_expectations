@@ -569,15 +569,26 @@ declares no tier because no suite in this repository runs against it. A per-expe
 one of them is therefore a claim this repository has no way to check, the same gap that section
 already describes from the registry side.
 
-## Fifteen candidates were measured for the top tier; nine joined
+## Fifteen candidates were measured for the top tier; ten joined
 
 Fifteen data sources were run against the full expectation-gallery case table to decide membership in
 the `SupportTier.GALLERY` tier (a tier declared on `tests/integration/test_utils/data_source_config/data_source_spec.py`'s
-`SupportTier` enum, asserting that a data source passes every applicable case in that suite). Nine
+`SupportTier` enum, asserting that a data source passes every applicable case in that suite). Ten
 joined, each clearing every applicable case with nothing excluded: `big-query`, `redshift`, `sqlite`,
-`pandas-data-frame`, `pandas-filesystem-csv`, `mysql`, `postgresql`, `trino`, and `databricks`.
+`pandas-data-frame`, `pandas-filesystem-csv`, `mysql`, `postgresql`, `trino`, `databricks`, and
+`clickhouse`.
 
-The other six did not join, and the six divide into two kinds that should not be read as the same
+**ClickHouse joined after two test-side fixes, with no exclusion.** As first declared it failed
+three cases, all in the passing configuration: `expect_column_values_to_be_of_type`,
+`expect_column_type_to_be` and `expect_column_values_to_be_in_type_list`. The cases asked for the
+ANSI names `INTEGER`/`BIGINT`/`SMALLINT`, which the ClickHouse dialect does not recognize; it emits a
+warning for each, and the suite escalates warnings to errors, so the passing configuration raised.
+None of the three is a data-source property. The fixes were to declare the names ClickHouse
+actually reports (`Int64` and `String`) on its record, and to make the ANSI fallbacks in the
+type-list case a per-record declaration instead of a fixed list. It now clears all 53 applicable
+cases.
+
+The other five did not join, and the five divide into two kinds that should not be read as the same
 finding.
 
 **Three are held out by a defect in the `great_expectations` package itself, not by any property of
@@ -617,19 +628,13 @@ logic is needed. What "re-measured" requires differs by candidate: **SingleStore
 `LIKE`-pattern fix and the type-resolution fix described above — the regex-anchoring defect is not
 one of its failures — before it clears the suite.
 
-**Three were already out before this work; what changed is that there is now per-case evidence for
-why, where before there was only a standing.** ClickHouse, Spark, and SQL Server were measured
-against the full case table along with the other twelve candidates, and each has real, recorded
-per-case failures. All three fail more cases than the per-tier exclusion ceiling permits, so all
-three are settled by count alone, independent of cause: ClickHouse fails six cases, Spark fails four,
-and SQL Server fails five, and the ceiling is two per tier. None is a candidate for
-membership-by-exclusion.
+**Two were already out before this work; what changed is that there is now per-case evidence for
+why, where before there was only a standing.** Spark and SQL Server were measured against the full
+case table along with the other thirteen candidates, and each has real, recorded per-case failures.
+Both fail more cases than the per-tier exclusion ceiling permits, so both are settled by count
+alone, independent of cause: Spark fails four and SQL Server fails five, and the ceiling is two per
+tier. Neither is a candidate for membership-by-exclusion.
 
-- **ClickHouse fails two cases.** Both are a genuine case-vocabulary mismatch — unlike
-  Oracle's two, which fail on a name that does match. `expect_column_values_to_be_of_type` and
-  `expect_column_values_to_be_in_type_list` declare their passing configuration using
-  `INTEGER`/`VARCHAR`, and ClickHouse spells its integer and string types differently, so the
-  declared type name never matches and the case reports a clean, non-raising failure.
 - **Spark fails four cases, and all four are root-caused**, not merely observed:
   `expect_column_values_to_be_increasing` and `expect_column_values_to_be_decreasing` fail from
   nondeterministic row order in Spark's parallel CSV read — repeated runs of the same case produced

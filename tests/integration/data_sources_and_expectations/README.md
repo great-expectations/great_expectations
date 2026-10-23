@@ -423,9 +423,9 @@ constructed items because the construct binds to the first table it is attached 
 - **`SupportTier.GALLERY`** — the gallery-tier suite
   (`tests/integration/data_sources_and_expectations/test_gallery_expectation_suite.py`): one case per
   expectation in the gallery — the expectations the shipped package registers from its own core
-  package — currently 58 cases. The tier is named for the claim: a member passes the gallery. Nine
+  package — currently 59 cases. The tier is named for the claim: a member passes the gallery. Ten
   data sources have earned it today — big-query, redshift, sqlite, pandas-data-frame,
-  pandas-filesystem-csv, mysql, postgresql, trino, and databricks — and none of them currently
+  pandas-filesystem-csv, mysql, postgresql, trino, databricks, and clickhouse — and none of them currently
   declares a case exclusion; see "Measuring a candidate before it claims the gallery tier" below for what
   membership asserts and how it is earned.
 

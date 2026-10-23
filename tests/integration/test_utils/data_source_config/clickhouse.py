@@ -106,7 +106,13 @@ class ClickHouseDatasourceTestConfig(SqlDatasourceTestConfig):
         dev_requirements_file="reqs/requirements-dev-clickhouse.txt",
         task_runner_marker="clickhouse",
         container_service="clickhouse",
-        tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API}),
+        # This dialect reports its own type names and warns on ANSI spellings it does not
+        # recognize (`INTEGER`, `BIGINT`, `VARCHAR`); the suite escalates warnings to errors, so
+        # the type-name cases are driven from the names ClickHouse actually uses.
+        integer_column_type_name="Int64",
+        integer_column_type_alternatives=("Int32", "Int16"),
+        non_integer_column_type_name="String",
+        tiers=frozenset({SupportTier.CURATED_SQL, SupportTier.FLUENT_API, SupportTier.GALLERY}),
         tier_case_exclusions={
             SupportTier.CURATED_SQL: {
                 # A driver defect, not a dialect gap: this dialect's SQLAlchemy layer inserts
