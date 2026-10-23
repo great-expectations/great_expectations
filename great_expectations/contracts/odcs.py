@@ -1250,17 +1250,26 @@ def _add_type_constraint(
     spec: _PropertySpec,
     context: _ImportContext,
 ) -> None:
-    backend_type = prop.get("physicalType")
-    if backend_type is not None and (not isinstance(backend_type, str) or not backend_type):
+    physical_type = prop.get("physicalType")
+    if physical_type is not None and (not isinstance(physical_type, str) or not physical_type):
         raise ODCSContractError(f"{spec.path}.physicalType must be a non-empty string")
-    if (
-        context.type_map is not None
-        and spec.logical_type is not None
-        and spec.logical_type in context.type_map
-    ):
-        backend_type = context.type_map[spec.logical_type]
+
+    backend_type = None
+    if context.type_map is not None and spec.logical_type is not None:
+        backend_type = context.type_map.get(spec.logical_type)
     if backend_type is None:
+        if physical_type is not None:
+            context.ignored.append(
+                {
+                    "path": spec.path,
+                    "reason": (
+                        "physicalType is backend-specific and is not used automatically; "
+                        "pass type_map to add a type check"
+                    ),
+                }
+            )
         return
+
     context.builder.add(
         ExpectColumnValuesToBeOfType(column=spec.column, type_=backend_type, meta=spec.meta),
         "type",
@@ -1504,7 +1513,10 @@ def from_odcs(
             schema object's name.
         type_map: Optional mapping from ODCS ``logicalType`` values to
             backend-specific type names for ``ExpectColumnValuesToBeOfType``.
-            A property's ``physicalType`` is used when no mapping is supplied.
+            A property receives a type check only when its ``logicalType``
+            appears in this mapping. ODCS ``physicalType`` values are not used
+            automatically because GX type names are backend-specific; an
+            unused ``physicalType`` is recorded in suite metadata.
 
     Returns:
         An ExpectationSuite containing the imported Expectations. The caller
