@@ -239,3 +239,36 @@ def test_ascending_date_column_is_not_decreasing(batch_for_datasource: Batch) ->
 
     assert not result.success
     assert result.result["unexpected_count"] == 2
+
+
+# Adjacent unsigned integers wrap when subtracted: 2 - 3 on uint8 is 255, so a
+# diff-based implementation accepted a descending column as strictly increasing.
+ASCENDING_UINT8 = pd.DataFrame({COLUMN: pd.Series([1, 2, 3], dtype="uint8")})
+DESCENDING_UINT8 = pd.DataFrame({COLUMN: pd.Series([3, 2, 1], dtype="uint8")})
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=DATA_SOURCES,
+    data=ASCENDING_UINT8,
+)
+def test_strictly_increasing_unsigned_integer_passes(batch_for_datasource: Batch) -> None:
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToBeIncreasing(column=COLUMN, strictly=True)
+    )
+
+    assert result.success
+    assert result.result["unexpected_count"] == 0
+
+
+@parameterize_batch_for_data_sources(
+    data_source_configs=DATA_SOURCES,
+    data=DESCENDING_UINT8,
+)
+def test_descending_unsigned_integer_fails(batch_for_datasource: Batch) -> None:
+    result = batch_for_datasource.validate(
+        gxe.ExpectColumnValuesToBeIncreasing(column=COLUMN, strictly=True),
+        result_format=ResultFormat.COMPLETE,
+    )
+
+    assert not result.success
+    assert result.result["unexpected_count"] == 2
