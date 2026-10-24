@@ -2173,6 +2173,40 @@ def test_map_column_values_increasing_pd():
     assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([4], dtype="int64")
 
 
+@pytest.mark.big
+def test_map_column_values_increasing_pd_unsigned_integer():
+    # ``Series.diff()`` wraps around for unsigned integer dtypes, so 3 - 2 on
+    # uint8 is 255 and a descending column looked strictly increasing.
+    engine = build_pandas_engine(pd.DataFrame({"a": pd.Series([3, 2, 1], dtype="uint8")}))
+
+    metrics: Dict[MetricConfigurationID, MetricValue] = {}
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name=f"column_values.increasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"strictly": True},
+    )
+    condition_metric.metric_dependencies = {"table.columns": table_columns_metric}
+    metrics.update(engine.resolve_metrics(metrics_to_resolve=(condition_metric,), metrics=metrics))
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+    )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
+    metrics.update(
+        engine.resolve_metrics(metrics_to_resolve=(unexpected_count_metric,), metrics=metrics)
+    )
+
+    assert metrics[unexpected_count_metric.id] == 2
+
+
 @pytest.mark.spark
 def test_map_column_values_increasing_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
